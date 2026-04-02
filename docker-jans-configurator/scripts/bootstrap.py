@@ -112,11 +112,11 @@ class CtxManager:
 
     def set_config(self, key, value, reuse_if_exists=True):
         if reuse_if_exists and key in self.remote_config_ctx:
-            logger.info(f"re-using configmap {key!r}")
+            logger.info("re-using configmap %r", key)
             self.ctx["_configmap"][key] = self.remote_config_ctx[key]
             return self.ctx["_configmap"][key]
 
-        logger.info(f"adding configmap {key!r}")
+        logger.info("adding configmap %r", key)
         if callable(value):
             value = value()
 
@@ -128,11 +128,11 @@ class CtxManager:
 
     def set_secret(self, key, value, reuse_if_exists=True):
         if reuse_if_exists and key in self.remote_secret_ctx:
-            logger.info(f"re-using secret {key!r}")
+            logger.info("re-using secret %r", key)
             self.ctx["_secret"][key] = self.remote_secret_ctx[key]
             return self.ctx["_secret"][key]
 
-        logger.info(f"adding secret {key!r}")
+        logger.info("adding secret %r", key)
         if callable(value):
             value = value()
 
@@ -222,7 +222,7 @@ class CtxGenerator:
             enc_keys=self.configmap_params["auth_enc_keys"],
         )
         if retcode != 0:
-            logger.error(f"Unable to generate auth keys; reason={err}")
+            logger.error("Unable to generate auth keys; reason=%s", err)
             raise click.Abort()
 
         self.set_secret(
@@ -253,7 +253,7 @@ class CtxGenerator:
         # 2. from fronted (key file is an empty file)
         # 3. self-generate files
 
-        logger.info(f"Resolving {ssl_cert} and {ssl_key}")
+        logger.info("Resolving %s and %s", ssl_cert, ssl_key)
 
         # check from mounted files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
@@ -276,7 +276,7 @@ class CtxGenerator:
             state = self.get_config("state")
             city = self.get_config("city")
 
-            logger.info(f"Creating self-generated {ssl_ca_cert} and {ssl_ca_key}")
+            logger.info("Creating self-generated %s and %s", ssl_ca_cert, ssl_ca_key)
 
             ca_cert, ca_key = generate_ssl_ca_certkey(
                 "ca",
@@ -289,7 +289,7 @@ class CtxGenerator:
                 base_dir=CERTS_DIR,
             )
 
-            logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
+            logger.info("Creating self-generated %s, %s, and %s", ssl_csr, ssl_cert, ssl_key)
             generate_signed_ssl_certkey(
                 "web_https",
                 ca_key,
@@ -375,7 +375,7 @@ class CtxGenerator:
 
 
 def dump_to_file(manager, filepath):
-    logger.info(f"Saving configuration to {filepath}")
+    logger.info("Saving configuration to %s", filepath)
 
     data = {"_configmap": {}, "_secret": {}}
 
@@ -409,7 +409,7 @@ def cert_from_domain(addr, servername, port, certfile, keyfile, dns):
         is_cert_valid = parse_cert(certfile, dns)
 
         if not is_cert_valid:
-            logger.warning(f"The domain {dns} cannot be found in certificate SubjectAlternativeName or CommonName.")
+            logger.warning("The domain %s cannot be found in certificate SubjectAlternativeName or CommonName.", dns)
             Path(certfile).unlink(missing_ok=True)
         else:
             cert_downloaded = True
@@ -421,8 +421,8 @@ def cert_from_domain(addr, servername, port, certfile, keyfile, dns):
     except known_exceptions as exc:
         # common error message on cert download attempt
         logger.warning(
-            f"Unable to download SSL cert from {addr}. The certificate maybe missing "
-            f"or another issue encountered while trying to download the cert; reason={exc}."
+            "Unable to download SSL cert from %s. The certificate maybe missing "
+            "or another issue encountered while trying to download the cert; reason=%s.", addr, exc
         )
 
     env_name = "CN_SSL_CERT_FROM_DOMAIN"
@@ -535,11 +535,11 @@ def load(configuration_file, dump_file, key_file):
         return
 
     with manager.create_lock("configurator-load"):
-        logger.info(f"Loading configmaps and secrets from {configuration_file}")
+        logger.info("Loading configmaps and secrets from %s", configuration_file)
 
         params, err, code = load_schema_from_file(configuration_file, key_file=key_file)
         if code != 0:
-            logger.error(f"Unable to load configmaps and secrets; reason={err}")
+            logger.error("Unable to load configmaps and secrets; reason=%s", err)
             raise click.Abort()
 
         ctx_generator = CtxGenerator(manager, params)

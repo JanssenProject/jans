@@ -24,7 +24,6 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
       -e APP_MODE='development' \
       -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
       -e SIDECAR_DEBUG_RESPONSE=False \
-      -e DISABLE_HASH_CHECK=False \
       --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
       -p 5000:5000\
       ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -32,7 +31,6 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
 
     - `-d` runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.
     - `SIDECAR_DEBUG_RESPONSE` will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
-    - `DISABLE_HASH_CHECK` will disable checking the hash of the subject and resource IDs. This is useful when the SHA256 checksum of large objects are difficult to compute consistently due to string representation, spacing and other causes that may generate a different hash.
     - Take note of the output of the command. This is the container ID of the sidecar.
     - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
     - To stop the sidecar, run `docker container stop <container ID>`
@@ -50,16 +48,27 @@ Example request to the evaluation endpoint:
 {
   "subject": {
     "type": "JWT",
-    "id": <SHA256 hash of the properties dictionary>,
+    "id": "",
     "properties": {
-      "access_token": "",
-      "id_token": "",
-      "userinfo_token": ""
+      "tokens": [
+        {
+          "mapping": "Jans::Access_Token",
+          "payload": "eyJhbGciOiJIUzI1NiIs..."
+        },
+        {
+          "mapping": "Jans::Id_Token",
+          "payload": "eyJhbGciOiJFZERTQSIs..."
+        },
+        {
+          "mapping": "Acme::DolphinToken",
+          "payload": "ey1b6cfMef21084633a7..."
+        }
+      ]
     }
   },
   "resource": {
     "type": "Application",
-    "id": <SHA256 hash of the properties dictionary>,
+    "id": "",
     "properties": {
       "cedar_entity_mapping": {
         "entity_type": "Jans::Application",
@@ -78,9 +87,15 @@ Example request to the evaluation endpoint:
     "name": "Jans::Action::\"Read\""
   },
   "context": {
-    "device_health": ["Healthy"],
-    "fraud_indicators": ["Allowed"],
-    "geolocation": ["America"],
+    "device_health": [
+      "Healthy"
+    ],
+    "fraud_indicators": [
+      "Allowed"
+    ],
+    "geolocation": [
+      "America"
+    ],
     "network": "127.0.0.1",
     "network_type": "Local",
     "operating_system": "Linux",
@@ -90,7 +105,7 @@ Example request to the evaluation endpoint:
 }
 ```
 
-Cedarling requires OpenID Userinfo, Access, and ID tokens to construct the principal entity, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. Furthermore, the sidecar expects the SHA256 checksum of the subject and resource's `properties` dictionary to be passed as their corresponding IDs, as shown in the example above. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
+Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
 
 Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
 
@@ -108,16 +123,12 @@ Example of `false` case:
 {
   "context": {
     "reason_admin": {
-      "person diagnostics": [],
-      "person error": [],
-      "person evaluation": "DENY",
-      "workload diagnostics": [],
-      "workload evaluation": "DENY",
-      "workload_error": []
+      "authorize_reason": ["DENY"],
+      "authorize_error": []
     }
   },
   "decision": false
 }
 ```
 
-In this example both the person and workload evaluations were `DENY`, so the decision was false. Additional information is returned in the `context` field.
+In this example the evaluation was `DENY`, so the decision was false. Additional information is returned in the `context` field.

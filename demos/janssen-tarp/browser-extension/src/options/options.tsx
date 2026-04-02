@@ -1,8 +1,38 @@
-import React, { useState, useEffect } from 'react'
-import '../static/css/options.css'
-import Header from './header'
-import HomePage from './homePage'
+import React, { useState, useEffect } from 'react';
+import '../static/css/options.css';
+import Header from './header';
+import HomePage from './homePage';
 import Utils from './Utils';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#9c27b0',
+    },
+    background: {
+      default: '#f4f6f8',
+      paper: '#ffffff',
+    },
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  components: {
+    MuiContainer: {
+      defaultProps: {
+        maxWidth: 'lg',
+      },
+    },
+  },
+});
 const Options = () => {
 
   const [optionType, setOptionType] = useState("");
@@ -57,11 +87,34 @@ const Options = () => {
   }
 
   return (
-    <div className="container">
-      <Header />
-      {renderPage({ optionType, data })}
-    </div>
-  )
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          height: 'auto',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.default',
+          alignItems: 'center',
+        }}
+      >
+        <Header />
+        <Container sx={{ py: 3 }}>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              borderRadius: 2,
+              p: { xs: 2, sm: 3 },
+            }}
+          >
+            {renderPage({ optionType, data })}
+          </Box>
+        </Container>
+      </Box>
+    </ThemeProvider>
+  );
 };
 
 export default Options;

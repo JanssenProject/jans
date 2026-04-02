@@ -44,11 +44,6 @@ import org.zkoss.util.resource.Labels;
 @Named
 @ApplicationScoped
 public class OIDCFlowService {
-    
-    /*
-    The list of scopes required to be able to inspect the claims needed. See attributes of User class
-     */
-    public static final List<String> REQUIRED_SCOPES = Arrays.asList("openid", "profile", "user_name", "clientinfo");
 
     @Inject
     private Logger logger;
@@ -60,6 +55,7 @@ public class OIDCFlowService {
     private MainSettings mainSettings;
 
     private OIDCSettings settings;
+    private IDTokenValidator idtValidator;
 
     private String authzEndpoint;
     private String tokenEndpoint;
@@ -79,13 +75,17 @@ public class OIDCFlowService {
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(
                     new ResponseType("code"),
-                    new Scope(REQUIRED_SCOPES.toArray(new String[0])),
+                    new Scope(settings.getScopes().toArray(new String[0])),
                     clientID,
                     callback);
+            
+            if (prompt != null) {
+                builder = builder.prompt(Prompt.parse(prompt));
+            }
 
             State state = new State();
             AuthenticationRequest request = builder.endpointURI(new URI(authzEndpoint))
-                    .state(state)// .nonce(new Nonce())    // .prompt(new Prompt("?"))
+                    .state(state)
                     .acrValues(acrValues.stream().map(ACR::new).collect(Collectors.toList()))
                     .build();
             
@@ -226,18 +226,12 @@ public class OIDCFlowService {
     }
     
     private String validateIDToken(JWT idToken) {
-        
-        try {
-            Issuer iss = new Issuer(persistenceService.getIssuerUrl());
-            ClientID clientID = new ClientID(settings.getClient().getClientId());
-            JWSAlgorithm jwsAlg = JWSAlgorithm.RS256;
 
-            URL jwkSetURL = new URL(persistenceService.getJwksUri());
-            IDTokenValidator validator = new IDTokenValidator(iss, clientID, jwsAlg, jwkSetURL);
-            validator.validate(idToken, null);
+        try {
+            idtValidator.validate(idToken, null);
             
             return null;
-        } catch(MalformedURLException | JOSEException | BadJOSEException e) {
+        } catch(JOSEException | BadJOSEException e) {
             logger.error(e.getMessage(), e);
             return e.getMessage();
         }
@@ -246,14 +240,22 @@ public class OIDCFlowService {
 
     @PostConstruct
     private void init() {
-        settings = mainSettings.getOidcSettings();
         
+        settings = mainSettings.getOidcSettings();
         authzEndpoint = persistenceService.getAuthorizationEndpoint();
         tokenEndpoint = persistenceService.getTokenEndpoint();
         userInfoEndpoint = persistenceService.getUserInfoEndpoint();
         endSessionEndpoint = persistenceService.getEndSessionEndpoint();
-        //TODO: reformat URI: in CN internal url should be fetched differently
-        jwksUri = persistenceService.getJwksUri(); 
+        String jwksUri = persistenceService.getJwksUri();
+
+        Issuer iss = new Issuer(persistenceService.getIssuerUrl());
+        ClientID clientID = new ClientID(settings.getClient().getClientId());
+        try {
+            idtValidator = new IDTokenValidator(iss, clientID, JWSAlgorithm.RS256, new URL(jwksUri));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Unable to create ID token validator", e);
+        }
+
     }
 
 }

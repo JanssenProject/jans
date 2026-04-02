@@ -122,7 +122,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	            boolean authorized = true;
 	            Map<String, String> tokens = getCedarlingTokens(bearerToken);
 	            for (CedarlingPermission requestedPermission : requestedPermissions) {
-	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
+	            	authorized &= authorizationService.authorize(/*tokens*/null, requestedPermission.getAction(),
 	            			getCedarlingResource(requestedPermission), getCedarlingContext());
 	            	if (!authorized) {
 	            		log.error("Insufficient permissions to access '{}'", requestedPermission);

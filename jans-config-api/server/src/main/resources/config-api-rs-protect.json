@@ -1038,7 +1038,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/api/v1/fido2/fido2-config",
+      "path": "/jans-config-api/fido2/fido2-config",
       "conditions": [
         {
           "httpMethods": [
@@ -1096,7 +1096,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/api/v1/fido2/registration",
+      "path": "/jans-config-api/fido2/registration",
       "conditions": [
         {
           "httpMethods": [
@@ -4565,6 +4565,42 @@
             {
               "inum": "1800.03.3",
               "name": "https://jans.io/oauth/config/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/fido2/metrics/",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.100",
+              "name": "https://jans.io/oauth/config/fido2-metrics.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.20",
+              "name": "https://jans.io/oauth/config/fido2.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.05.8",
+              "name": "https://jans.io/oauth/config/fido2.admin"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }

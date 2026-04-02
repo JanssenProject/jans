@@ -3,11 +3,21 @@
 #
 # Copyright (c) 2024, Gluu, Inc.
 
-from cedarling_python import Cedarling
-from config import load_bootstrap_config
+from cedarling_python import Cedarling, EntityData, RequestUnsigned
+from config import load_bootstrap_config, TEST_FILES_PATH
+from os.path import join
+import json
 
-# reuse already defined tokens
-from test_authorize import REQUEST
+POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
+
+RESOURCE = EntityData.from_dict({
+    "cedar_entity_mapping": {
+        "entity_type": "Jans::Issue",
+        "id": "random_id"
+    },
+    "org_id": "some_long_id",
+    "country": "US"
+})
 
 
 # In python unit tests we not cover all possible scenarios, but most common.
@@ -23,16 +33,19 @@ def test_invalid_log_config():
 
 
 def test_memory_logger():
-    # map fixture to variable with shorter name for readability
-    config = load_bootstrap_config(log_type="memory", log_ttl=60)
+    def config_cb(config: dict):
+        config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json.dumps(
+            {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]}
+        )
 
-    # on initialize Cedarling we should have logs
+    config = load_bootstrap_config(
+        POLICY_STORE_LOCATION, config_cb=config_cb, log_type="memory", log_ttl=60
+    )
+
     cedarling = Cedarling(config)
 
-    # check that we have logs in memory
     active_log_ids = cedarling.get_log_ids()
     assert len(active_log_ids) != 0
-    # check if we have access to log entries by id
     for id in active_log_ids:
         log_entry = cedarling.get_log_by_id(id)
         assert log_entry is not None
@@ -45,15 +58,26 @@ def test_memory_logger():
         cedarling.get_logs_by_tag("DEBUG")
     ) != 0, "Logs by tag 'DEBUG' were not found"
 
-    # check that we can pop logs from memory
     assert len(cedarling.pop_logs()) != 0
 
-    # after popping all logs, we should have no more active logs in memory
     assert len(cedarling.get_log_ids()) == 0
     assert len(cedarling.pop_logs()) == 0
 
-    # execute request and get logs from memory logger
-    authorize_result = cedarling.authorize(REQUEST)
+    request = RequestUnsigned(
+        principals=[
+            EntityData.from_dict({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "1"
+                },
+                "is_ok": True
+            })
+        ],
+        action='Jans::Action::"UpdateForTestPrincipals"',
+        context={},
+        resource=RESOURCE,
+    )
+    authorize_result = cedarling.authorize_unsigned(request)
 
     request_id = authorize_result.request_id()
 

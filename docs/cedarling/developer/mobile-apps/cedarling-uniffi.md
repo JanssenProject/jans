@@ -45,22 +45,47 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
   **Usage in Kotlin:**
 
   ```declarative
-  val cedarling: Cedarling = Cedarling.loadFromJson("/path/to/config.json")
+  val cedarling: Cedarling = Cedarling.loadFromFile("/path/to/config.json")
   ```
 
-- **Cedarling::authorize**
+- **Cedarling::load_from_json_with_archive_bytes**
 
-   Handles authorization requests.
+   Loads a Cedarling instance from a bootstrap JSON string plus the raw bytes of a Cedar archive (`.cjar`). Use this when the host cannot pass a policy store path—for example **Android `assets/`** read via `AssetManager`. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are ignored; the archive bytes are the policy source (same idea as WASM `init_from_archive_bytes`).
+
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_json_with_archive_bytes(
+       config: String,
+       archive_bytes: Vec<u8>,
+   ) -> Result<Self, CedarlingError>
+   ```
+
+   **Usage in Swift:**
+
+   ```declarative
+   let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+       config: configJson,
+       archiveBytes: cjarData
+   )
+   ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val cedarling = Cedarling.loadFromJsonWithArchiveBytes(configJson, cjarBytes)
+  ```
+
+- **Cedarling::authorizeUnsigned**
+
+   Handles unsigned authorization requests with directly provided principals.
     
    ```declarative
    #[uniffi::method]
-        pub fn authorize(
+        pub fn authorize_unsigned(
             &self,
-            tokens: HashMap<String, String>,
+            principals: Vec<EntityData>,
             action: String,
-            resource_type: String,
-            resource_id: String,
-            payload: String,
+            resource: EntityData,
             context: String,
         ) -> Result<AuthorizeResult, AuthorizeError> 
    ```
@@ -68,13 +93,13 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    **Usage in Swift:**
 
    ```declarative
-   let result = try cedarling.authorize(tokens: tokenMap, action: "Jans::Action::\"Update\"", resourceType: "Jans::Issue", resourceId: "some_id", payload: "{}", context: "")
+   let result = try cedarling.authorizeUnsigned(principals: principalEntities, action: "Jans::Action::\"Update\"", resource: resourceEntity, context: "{}")
    ```
 
   **Usage in Kotlin:**
 
   ```declarative
-  val authResult: AuthorizeResult = cedarling.authorize(tokenMap, "Jans::Action::\"Update\"", "Jans::Issue", "some_id", "{}", "{}")
+  val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntities, "Jans::Action::\"Update\"", resourceEntity, "{}")
   ```
 
 - **Cedarling::pop_logs**

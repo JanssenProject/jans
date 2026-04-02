@@ -73,7 +73,7 @@ Handled via `EntityBuilder` in the `entity_builder` module. JWTs from untrusted 
 
 JWT claims are mapped to Cedar attributes (1:1 by default).
 
-Mappings are configured via the Token Entity Metadata Schema's `claim mapping` field in the [Policy Store](../../../cedarling/reference/cedarling-policy-store.md#claim-mapping).
+Mappings are configured via the Token Entity Metadata Schema's `claim mapping` field in the [Policy Store](../../../cedarling/reference/cedarling-policy-store.md).
 
 
 !!! Note

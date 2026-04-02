@@ -3,8 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::authorization_config::IdTokenTrustMode;
-use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
+use crate::{AuthorizationConfig, EntityBuilderConfig, JwtConfig};
 pub(crate) use crate::{
     BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource,
@@ -24,17 +23,10 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
-            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
-            principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::Never,
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        authorization_config: AuthorizationConfig::default(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
@@ -42,15 +34,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     }
 }
 
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-pub(crate) async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
-    Cedarling::new(&get_config(policy_source))
-        .await
-        .expect("bootstrap config should initialize correctly")
-}
-
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-/// with a callback function to modify the bootstrap configuration.
+/// create [`Cedarling`] from [`PolicyStoreSource`] with a callback to modify bootstrap config.
 pub(crate) async fn get_cedarling_with_callback<F>(
     policy_source: PolicyStoreSource,
     cb: F,
@@ -64,38 +48,6 @@ where
     Cedarling::new(&config)
         .await
         .expect("bootstrap config should initialize correctly")
-}
-
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-pub(crate) async fn get_cedarling_with_authorization_conf(
-    policy_source: PolicyStoreSource,
-    auth_conf: AuthorizationConfig,
-    entity_builder_conf: EntityBuilderConfig,
-) -> Cedarling {
-    Cedarling::new(&BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::Memory(crate::MemoryLogConfig {
-                log_ttl: 60,
-                max_items: None,
-                max_item_size: None,
-            }),
-            log_level: crate::LogLevel::DEBUG,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: policy_source,
-            validate_checksum: true,
-        },
-        jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: auth_conf,
-        entity_builder_config: entity_builder_conf,
-        lock_config: None,
-        max_default_entities: None,
-        max_base64_size: None,
-        data_store_config: DataStoreConfig::default(),
-    })
-    .await
-    .expect("bootstrap config should initialize correctly")
 }
 
 /// util function for convenient conversion Reason ID to string

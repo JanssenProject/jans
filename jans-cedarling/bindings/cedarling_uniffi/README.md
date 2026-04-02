@@ -2,9 +2,9 @@
 
 This module is designed to build Cedarling UniFFI bindings for iOS and Android apps. The Kotlin bindings can also be used from Java projects to run Cedarling authorization.
 
-## iOS
+Read [this article](./docs/DetailBuildSteps.md) for detail steps.
 
-Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bindings-for-native-apps-90f36982c894) for details.
+## iOS
 
 ### Prerequisites
 
@@ -13,53 +13,22 @@ Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bi
 
 ### Building
 
-1. Build the library:
+1. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
 
 ```bash
-cargo build -r -p cedarling_uniffi
+rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
 ```
 
-In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
-
-- **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
-- **.dylib** (Dynamic Library) – This is the shared library format for macOS.
-- **.dll** (Dynamic Link Library) - The shared library format used in Windows.
-
-2. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
+2. Run below command to build and import binding into iOS project.
 
 ```bash
-cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
+make ios
 ```
+Use `make ios BUILD_TYPE=release` or `make ios BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
 
-3. Building the iOS binaries and adding these targets to Rust.
+3. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
-```bash
-rustup target add aarch64-apple-ios-sim aarch64-apple-ios
-```
-
-4. Build the library for Swift.
-
-```bash
-cargo build --release --target=aarch64-apple-ios-sim
-cargo build --release --target=aarch64-apple-ios
-```
-
-You should have two binaries target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a and target/aarch64-apple-ios/release/libcedarling_uniffi.a.
-
-5. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/cedarling_uniffiFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap.
-
-Then, we can create the XCFramework:
-
-```bash
-xcodebuild -create-xcframework \
-        -library ./target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a -headers ./bindings/cedarling_uniffi/output \
-        -library ./target/aarch64-apple-ios/release/libcedarling_uniffi.a -headers ./bindings/cedarling_uniffi/output \
-        -output "ios/Mobile.xcframework"
-```
-
-6. Open ./jans-cedarling/bindings/cedarling_uniffi/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/cedarling_uniffi.swift files into your project (drag and drop should work).
-
-7. Run iOS project on simulator.
+4. Run iOS project (./bindings/cedarling_uniffi/iOSApp) on simulator.
 
 ## Android
 
@@ -70,56 +39,25 @@ xcodebuild -create-xcframework \
 
 ### Building
 
-1. Build the library:
+1. Ask toolchain manager to install support for compiling Rust code for aarch64-linux, armv7-linux, i686-linux and x86_64-linux.
 
 ```bash
-cargo build -r -p cedarling_uniffi
+	rustup target add \
+		aarch64-linux-android \
+		armv7-linux-androideabi \
+		i686-linux-android \
+		x86_64-linux-android
 ```
 
-In `target/release`, you should find the `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file, depending on the operating system you are using.
+2. Run below command to build and import binding into Android project.
 
-- **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
-- **.dylib** (Dynamic Library) – This is the shared library format for macOS.
-- **.dll** (Dynamic Link Library) - The shared library format used in Windows.
-
-2. Set up cargo-ndk for cross-compiling:
-
-```
-cargo install cargo-ndk
-
+```bash
+make android
 ```
 
-3. Add targets for Android:
+Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
 
-```
-rustup target add \
-        aarch64-linux-android \
-        armv7-linux-androideabi \
-        i686-linux-android \
-        x86_64-linux-android
-```
-
-4. Compile the dynamic libraries in ./app/src/main/jniLibs (next to java and res directories) in the sample `androidApp` project.
-
-```
-cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
-        --manifest-path ./Cargo.toml \
-        -t armeabi-v7a \
-        -t arm64-v8a \
-        -t x86 \
-        -t x86_64 \
-        build \
-        -p cedarling_uniffi --release
-```
-
-5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
-```
-cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
-
-```
-
-6. Open the `androidApp` project on Android Studio and run the project on simulator.
+3. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
 
 ## Kotlin Binding
 
@@ -136,31 +74,19 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 1. Build Cedarling:
 
 ```bash
-cargo build -r -p cedarling_uniffi
+make java
 ```
 
-In `target/release`, you should find the `libcedarling_uniffi.dylib` (if Mac OS), `libcedarling_uniffi.so` (if Linux OS), or `libcedarling_uniffi.dll` (if Windows OS) file, depending on the operating system you are using.
+Use `make java BUILD_TYPE=release` or `make java BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
 
-2. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
-```bash
-cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/javaApp/src/main/kotlin/org/example
-```
-
-3. Copy the generated `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll` file to resource directory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libcedarling_uniffi.dylib`, `libcedarling_uniffi.so`, or `libcedarling_uniffi.dll`, depending on which file is generated in `target/release`.
-
-```bash
-cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources
-```
-
-4. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
+2. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
 
 ```bash
  mvn clean install
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization using `authorizeUnsigned` with sample principals, resource and context inputs, and call the log interface to print authorization logs on the console. The sample `principals`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
 
 ## Configuration
 
@@ -215,16 +141,50 @@ Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribut
 - Works across all platforms
 - Supports integrity validation via manifest
 
-### ID Token Trust Mode
+### Initializing Cedarling (UniFFI)
 
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`) so these constructors match your checkout. Exact method names and argument labels are in the generated `cedarling_uniffi.kt` / `cedarling_uniffi.swift`; the table below is a rough map from the Rust API:
 
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
+| Rust constructor | Kotlin (typical) | Swift (typical) |
+| --- | --- | --- |
+| `load_from_json` | `Cedarling.loadFromJson(...)` | `Cedarling.loadFromJson(config:)` |
+| `load_from_file` | `Cedarling.loadFromFile(...)` | `Cedarling.loadFromFile(path:)` |
+| `load_from_json_with_archive_bytes` | `Cedarling.loadFromJsonWithArchiveBytes(...)` | `Cedarling.loadFromJsonWithArchiveBytes(config:archiveBytes:)` |
+
+- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL`), same as core Cedarling bootstrap rules.
+- **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+
+**Kotlin (Android assets):**
+
+```kotlin
+val bootstrapJson =
+    assets.open("bootstrap.json").bufferedReader().use { it.readText() }
+val archiveBytes = assets.open("policy-store.cjar").readBytes()
+val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, archiveBytes)
+```
+
+**Swift (bundle resources):**
+
+```swift
+let bootstrapUrl = Bundle.main.url(forResource: "bootstrap", withExtension: "json")!
+let cjarUrl = Bundle.main.url(forResource: "policy-store", withExtension: "cjar")!
+let bootstrapJson = try String(contentsOf: bootstrapUrl)
+let archiveBytes = try Data(contentsOf: cjarUrl)
+let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+    config: bootstrapJson,
+    archiveBytes: archiveBytes
+)
+```
+
+### Authorization APIs
+
+The UniFFI binding exposes two authorization methods:
+
+- **`authorizeUnsigned`**: Pass a list of principal entity data, action, resource, and context. Use when you have principal attributes (e.g. from your app or session) and no JWTs.
+- **`authorizeMultiIssuer`**: Pass a list of token inputs (mapping + JWT payload), action, resource, and optional context. Use when you have multiple JWTs from different issuers.
+
+`AuthorizeResult` contains `principals` (per-principal decisions), `decision`, and `requestId` (for log correlation). The legacy token-based `authorize` API has been removed.
 
 ### Testing Configuration
 
@@ -233,8 +193,7 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```json
 {
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
 }
 ```
 
@@ -454,3 +413,16 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+## Trusted Issuer Loading Info
+
+UniFFI `Cedarling` exposes trusted issuer loading status methods:
+
+- `isTrustedIssuerLoadedByName(issuerId: String): Boolean`
+- `isTrustedIssuerLoadedByIss(issClaim: String): Boolean`
+- `totalIssuers(): Long`
+- `loadedTrustedIssuersCount(): Long`
+- `loadedTrustedIssuerIds(): List<String>`
+- `failedTrustedIssuerIds(): List<String>`
+
+Use these APIs to inspect trusted issuer loading outcomes when your policy store contains `trusted-issuers/` definitions.

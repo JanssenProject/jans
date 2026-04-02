@@ -83,7 +83,7 @@ def main():
                     sync_jks()
                     sync_jwks()
             except Exception as exc:
-                logger.warning(f"Got unhandled error; reason={exc}")
+                logger.warning("Got unhandled error; reason=%s", exc)
 
             # sane interval
             time.sleep(sync_interval)

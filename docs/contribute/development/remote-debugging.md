@@ -18,7 +18,7 @@ debugger can be attached. The steps below will show how to configure
    `/etc/default/jans-auth` and add the following JVM parameters to as 
    `JAVA_OPTIONS`
     ```
-    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6001
     ```
    This will open the port `6001` for the remote debugger. Any other port can 
    also be used based on availability.
@@ -52,4 +52,4 @@ debugger can be attached. The steps below will show how to configure
 
    For IntelliJIdea, create a debug configuration as below:
 
-   ![IntelliJ IDEA Remote Debug Configuration](../assets/image-jans-remote-debug-intellij.png)
+   ![IntelliJ IDEA Remote Debug Configuration](../../assets/image-jans-remote-debug-intellij.png)

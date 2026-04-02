@@ -104,8 +104,8 @@ class VaultSecret(BaseSecret):
         for mapping_key, env_name in deprecated_envs.items():
             if env_name in os.environ:
                 logger.warning(
-                    f"Specifying {mapping_key} via {env_name} environment variable is deprecated. "
-                    f"Please specify {mapping_key} as part of CN_SECRET_VAULT_ADDR environment variable instead."
+                    "Specifying %s via %s environment variable is deprecated. "
+                    "Please specify %s as part of CN_SECRET_VAULT_ADDR environment variable instead.", mapping_key, env_name, mapping_key
                 )
                 addr_mapping[mapping_key] = os.environ[env_name]
 

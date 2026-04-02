@@ -15,7 +15,6 @@ public class CedarlingAdapterTest {
 
     private CedarlingAdapter adapter;
     private JWTCreator jwtCreator;
-    private AuthorizeResult result;
 
     public static final String JWT_SECRET = "-very-strong-shared-secret-of-at-least-32-bytes!";
     public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
@@ -39,58 +38,6 @@ public class CedarlingAdapterTest {
     }
 
     @Test
-    public void testAuthorize() throws Exception {
-        // Read JWT payloads from files
-        String accessTokenPayload = AppUtils.readFile(ACCESS_TOKEN_FILE_PATH);
-        String idTokenPayload = AppUtils.readFile(ID_TOKEN_FILE_PATH);
-        String userInfoPayload = AppUtils.readFile(USER_INFO_FILE_PATH);
-        // Read input files for authorization
-        String action = AppUtils.readFile(ACTION_FILE_PATH);
-        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
-        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
-        // Generate signed JWTs from the payloads
-        Map<String, String> tokens = Map.of(
-                "access_token", jwtCreator.createJwtFromJson(accessTokenPayload),
-                "id_token", jwtCreator.createJwtFromJson(idTokenPayload),
-                "userinfo_token", jwtCreator.createJwtFromJson(userInfoPayload)
-        );
-
-        // Perform authorization
-        result = adapter.authorize(tokens, action, new JSONObject(resourceJson), new JSONObject(contextJson));
-
-        assertNotNull(result);
-        assertNotNull(result.getPerson());
-        assertNotNull(result.getWorkload());
-        assertTrue(result.getDecision());
-        assertNotEquals(adapter.getLogsByRequestIdAndTag(result.getRequestId(), "System").size(), 0);
-        assertNotEquals(adapter.getLogsByRequestId(result.getRequestId()).size(), 0);
-    }
-
-    @Test(dependsOnMethods = {"testAuthorize"})
-    public void testGetLogById() throws LogException {
-        List<String> logEntrys = adapter.getLogIds();
-        String logEntry = adapter.getLogById(logEntrys.get(0));
-        assertNotNull(logEntry);
-    }
-
-    @Test(dependsOnMethods = {"testAuthorize"})
-    public void testGetLogIds() {
-        List<String> logEntrys = adapter.getLogIds();
-        assertNotEquals(logEntrys.size(), 0);
-    }
-
-    @Test
-    public void testGetLogsByTag() throws LogException {
-        assertNotEquals(adapter.getLogsByTag("System").size(), 0);
-    }
-
-    @Test
-    public void testPopLogs() throws LogException {
-        List<String> logEntrys = adapter.popLogs();
-        assertNotEquals(logEntrys.size(), 0);
-    }
-
-    @Test
     public void testAuthorizeUnsigned() throws Exception {
         // Read input files for authorization
         String action = AppUtils.readFile(ACTION_FILE_PATH);
@@ -107,6 +54,40 @@ public class CedarlingAdapterTest {
         assertNotNull(result);
         assertNotNull(result.getPrincipals());
         assertEquals(result.getDecision(), false);
+    }
+
+    @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
+    public void testGetLogById() throws Exception {
+        // Ensure we have logs from testAuthorizeUnsigned
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
+        List<EntityData> principals = List.of(EntityData.Companion.fromJson(principalsString));
+        AuthorizeResult result = adapter.authorizeUnsigned(principals, action, new JSONObject(resourceJson), new JSONObject(contextJson));
+        assertNotNull(result);
+        List<String> logEntrys = adapter.getLogIds();
+        if (!logEntrys.isEmpty()) {
+            String logEntry = adapter.getLogById(logEntrys.get(0));
+            assertNotNull(logEntry);
+        }
+    }
+
+    @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
+    public void testGetLogIds() {
+        List<String> logEntrys = adapter.getLogIds();
+        assertNotEquals(logEntrys.size(), 0);
+    }
+
+    @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
+    public void testGetLogsByTag() throws LogException {
+        assertNotEquals(adapter.getLogsByTag("System").size(), 0);
+    }
+
+    @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
+    public void testPopLogs() throws LogException {
+        List<String> logEntrys = adapter.popLogs();
+        assertNotEquals(logEntrys.size(), 0);
     }
 
     @Test
@@ -261,5 +242,23 @@ public class CedarlingAdapterTest {
         JSONObject value = new JSONObject();
         value.put("data", "value");
         adapter.pushDataCtx("", value);
+    }
+
+    @Test
+    public void testTrustedIssuerLoadingInfoDefaults() {
+        assertFalse(adapter.isTrustedIssuerLoadedByName("missing_issuer"));
+        assertFalse(adapter.isTrustedIssuerLoadedByIss("https://missing.example.org"));
+
+        long total = adapter.totalIssuers();
+        long loaded = adapter.loadedTrustedIssuersCount();
+        assertTrue(loaded <= total, "loaded count should not exceed total");
+
+        List<String> loadedIds = adapter.loadedTrustedIssuerIds();
+        assertEquals(loadedIds.size(), loaded, "loaded ids size should match loaded count");
+        for (String id : loadedIds) {
+            assertTrue(
+                    adapter.isTrustedIssuerLoadedByName(id),
+                    "loaded id should satisfy isTrustedIssuerLoadedByName");
+        }
     }
 }

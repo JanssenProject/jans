@@ -83,9 +83,6 @@ def test_authorize_unsigned():
     authorize_result = instance.authorize_unsigned(request)
     assert authorize_result.is_allowed(), "request should be allowed"
 
-    assert authorize_result.workload() is None, "workload should be None"
-    assert authorize_result.person() is None, "person should be None"
-
     # check by principal type
     assert authorize_result.principal(
         "Jans::TestPrincipal1").decision.value == "ALLOW"
@@ -155,9 +152,6 @@ def test_authorize_unsigned_json_rule_by_uid():
 
     authorize_result = instance.authorize_unsigned(request)
     assert authorize_result.is_allowed(), "request should be allowed"
-
-    assert authorize_result.workload() is None, "workload should be None"
-    assert authorize_result.person() is None, "person should be None"
 
     # check by principal type
     assert authorize_result.principal(

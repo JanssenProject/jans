@@ -16,8 +16,9 @@ environments like databases, browser-based applications, mobile apps, API gatewa
 embedded devices. At less than 2M in size, it's small enough to load into your browser or
 mobile application. When embedded, the Cedarling avoids slow cloud policy decisions,
 enabling sub-millisecond performance. The Cedarling never fetches data to make a
-decision--this is a performance killer and would make the PDP unreliable. The application
-must fetch all data and tokens before it makes an authorization request.
+decision--this is a performance killer and would make the PDP unreliable. Much of the
+data needed for Cedarling authorization decisions is contained in the tokens (e.g. JWTs).
+It's also possible to push data into the Cedarling for additional context.
 
 The Cedarling can be:
 
@@ -32,17 +33,16 @@ The Cedarling can be:
 The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP),
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
-hub system to send its audit logs--a record of every decision to allow or deny access to a
-capability. From the hub system, enterprises can perform threat detection and stream the
-logs to a SIEM or ITDR.
+Janssen Lock Server to centralize collection of decision logs--a record of allowed or denied
+access to a capability. Lock Server can enable enterprises to perform threat detection and
+stream the logs to a SIEM or ITDR.
 
-The supports JWT validation and claims mapping through some of its authorization
-interfaces. We call this Token Based Access Control--where developers present a collection
-of tokens to obtain authorization to a capability. JWTs provide trusted contextual
-information to the Cedarling.  The payload of a JWT token is a JSON document, and
-frequently a complex string, like a URI. Through the use of regular expressions,
-developers can parse strings and map them to Cedar entities. This provides a mechanism to
-map data from trusted issuers to Cedar policies.
+The Cedarling supports JWT validation and claims mapping. Validation includes checking the
+signature against a list of trusted issuers, validating the contents of the token (e.g.
+check the `exp` and `nbf`), and checking if the JWT is active or revoked via the
+[OAuth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-19.html)
+specification. Claims mapping provides a mechanism to map data from the JWT payload to Cedar
+entities, making the data available for policy evaluation.
 
 !!! tip "About Cedar"
 
@@ -68,12 +68,11 @@ application.
 
 ### Cedarling Interfaces
 
-At a high level, developers interact with the Cedarling using six core interfaces:
+At a high level, developers interact with the Cedarling using five core interfaces:
 
 * **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
-* **Authorization** (`authorize`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
-* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application asserted principal.
-* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.
+* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application-asserted principal.
+* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on JWT tokens from one or more issuers.
 * **Context Data API** (`data`) – Pushes external data into the evaluation context, making it available in Cedar policies through the `context.data` namespace.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
@@ -82,17 +81,9 @@ Cedarling to read its [bootstrap properties](./reference/cedarling-properties.md
 [policy store](./reference/cedarling-policy-store.md). If configured for JWT validation, the Cedarling
 will fetch the most recent issuer public keys and metadata.
 
-The standard `authorize` method answers the question: "Is this action, on this resource,
-given this context, allowed with these JWTs?". The Cedarling returns the
-decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional
-context to clarify why the decision was not allowed. During `authz`, the Cedarling can
-perform two more important jobs: (1) validate JWT tokens; (2) log the resulting decision.
+The `authorize_unsigned` method is used when the application asserts the principal identity directly. This is useful when JWTs have already been validated by the application, or when working with non-token based principals. It answers the question: "Is this action, on this resource, given this context, allowed for this principal?" The Cedarling returns the decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed.
 
-The `authorize_unsigned` variant is used when JWTs have already been validated by the
-application, or when working with non-token based principals. It follows the same
-evaluation logic but skips JWT validation steps.
-
-The `authorize_multi_issuer` method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
+The `authorize_multi_issuer` method is designed for JWT-based authorization. Applications provide one or more JWT tokens, and the Cedarling validates each token, converts them to Cedar entities, and evaluates policies based on the token entities. This approach is useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
 
 The `data` interface enables developers to push external data into the Cedarling's evaluation context. This data is automatically injected under the `context.data` namespace during policy evaluation, allowing policies to make decisions based on dynamically pushed data. Data can be stored with optional TTL (Time To Live) for automatic expiration. See the Cedarling [interfaces](./reference/cedarling-interfaces.md#context-data-api) documentation for more information.
 
@@ -113,28 +104,17 @@ The following diagram is a high-level picture of the Cedarling components:
 * **Lock Engine** is used for enterprise deployments to load the Policy Store from a 
   trusted source and send logs for central storage. 
 
-## Token Based Access Control (TBAC) v. Application Asserted Identity
-
-The Cedarling has two different authorization interfaces. One requires the developer to
-provide JWTs to prove the identity of the principal: "It's Bob, and here's the token to
-prove it!" The other allows the application to assert the identity of the principal: "It's
-Bob, trust me, I authenticated him."
-
-It's actually more powerful than that. The Cedarling allows the developer to pass not one
-token, but several tokens. This enables the developer to assert not only the human
-identity, but the software identities (or "Workload") that were involved in the issuance
-of the token. Token Based Access Control (TBAC) answers the question: *"Given this bundle
-of tokens, is this action on this resource allowed in this context?"* Or you could say
-more simply, *"Does this bundle of tokens authorize this capability?"* While RBAC
-policies are about roles, ABAC policies are about attributes, TBAC policies are about
-tokens.
+## Proof-based authorization: Token-Based Access Control (TBAC)
 
 TBAC helps developers implement security based on JWTs from trusted issuers like identity
-providers, hardware platforms, and federations. One of the Cedarling authorization
-interfaces automatically creates a User and Workload entity based on the most common OAuth
-and OpenID tokens. A new Cedarling authorization interface will enable reasoning on a
-collection of tokens from different issuers(watch the issue
-[Jans-11834](https://github.com/JanssenProject/jans/issues/11834)).
+providers, hardware platforms, and federations.
+
+The Cedarling `authorize_multi_issuer` interface allows the developer to pass not one
+token, but several tokens--even if they are signed by different issuers. This enables
+the developer to assert not only the human identity, for example an `id_token`, but
+other tokens like access tokens or transaction tokens, or whatever new kind of tokens
+may next evolve. The Cedarling answers this question: *"Given this bundle of tokens, is this action on this resource allowed in this context?"*
+Or you could say more simply, *"Does this bundle of tokens authorize this capability?"*
 
 ## Cedarling and Zero Trust
 

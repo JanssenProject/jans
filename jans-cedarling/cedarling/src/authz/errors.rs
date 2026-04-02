@@ -10,7 +10,7 @@ use serde_json::Error as SerdeJsonError;
 use crate::common::json_rules::ApplyRuleError;
 use crate::entity_builder::MultiIssuerEntityError;
 use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
-use crate::jwt::{JwtProcessingError, TokenClaimTypeError};
+use crate::jwt::JwtProcessingError;
 use cedar_policy::entities_errors::EntitiesError;
 
 /// Error type for multi-issuer validation
@@ -58,6 +58,9 @@ pub enum AuthorizeError {
     /// Error encountered while parsing Action to `EntityUid`
     #[error("could not parse action: {0}")]
     Action(Box<ParseErrors>),
+    /// Error encountered while parsing an entity type name or action identifier
+    #[error("could not parse identifier: {0}")]
+    IdentifierParsing(Box<ParseErrors>),
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] Box<ContextJsonError>),
@@ -76,9 +79,6 @@ pub enum AuthorizeError {
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
-    /// Error encountered while building the context for the request
-    #[error("error while running on strict id token trust mode: {0}")]
-    IdTokenTrustMode(#[from] IdTokenTrustModeError),
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildEntityError),
@@ -106,25 +106,6 @@ impl From<InvalidPrincipalError> for AuthorizeError {
     fn from(err: InvalidPrincipalError) -> Self {
         Self::InvalidPrincipal(Box::new(err))
     }
-}
-
-/// Error type for ID token trust mode validation
-#[derive(Debug, thiserror::Error)]
-pub enum IdTokenTrustModeError {
-    #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    AccessTokenClientIdMismatch,
-    #[error("an access token is required when using strict mode")]
-    MissingAccessToken,
-    #[error("an id token is required when using strict mode")]
-    MissingIdToken,
-    #[error("the id token's `sub` does not match with the userinfo token's `sub`")]
-    SubMismatchIdTokenUserinfo,
-    #[error("the access token's `client_id` does not match with the userinfo token's `aud`")]
-    ClientIdUserinfoAudMismatch,
-    #[error("missing a required claim `{0}` from `{1}` token")]
-    MissingRequiredClaim(String, String),
-    #[error("invalid claim type in {0} token: {1}")]
-    TokenClaimTypeError(String, TokenClaimTypeError),
 }
 
 /// Error type for building context

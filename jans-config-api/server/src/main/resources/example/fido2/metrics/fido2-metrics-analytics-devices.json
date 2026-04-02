@@ -1,0 +1,8 @@
+{
+    "operatingSystems": {},
+    "deviceTypes": {},
+    "authenticatorTypes": {
+        "cross-platform": 1
+    },
+    "browsers": {}
+}

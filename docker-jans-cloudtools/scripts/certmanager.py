@@ -82,7 +82,7 @@ def resolve_sig_keys(keys: str) -> str:
 
     if not sig_keys:
         sig_keys = default_sig_keys
-        logger.warning(f"Signing keys are empty; fallback to default {SIG_KEYS}")
+        logger.warning("Signing keys are empty; fallback to default %s", SIG_KEYS)
     return " ".join(sig_keys)
 
 
@@ -106,7 +106,7 @@ def resolve_enc_keys(keys: str) -> str:
 
     if not enc_keys:
         enc_keys = default_enc_keys
-        logger.warning(f"Encryption keys are empty; fallback to default {ENC_KEYS}")
+        logger.warning("Encryption keys are empty; fallback to default %s", ENC_KEYS)
     return " ".join(enc_keys)
 
 
@@ -233,11 +233,11 @@ class AuthHandler:
         jks_dn = r"{}".format(self.manager.config.get("default_openid_jks_dn_name"))
         jks_fn = "/etc/certs/auth-keys.jks"
         jwks_fn = "/etc/certs/auth-keys.json"
-        logger.info(f"Generating new {jwks_fn} and {jks_fn}")
+        logger.info("Generating new %s and %s", jwks_fn, jks_fn)
 
         # a counter to determine value of `key_ops_type` to be passed to `KeyGenerator`
         ops_type_cnt = Counter(key_ops_from_jwk(jwk) for jwk in old_jwks)
-        logger.info(f"Detected key_ops_type={dict(ops_type_cnt)}")
+        logger.info("Detected key_ops_type=%s", dict(ops_type_cnt))
 
         # if we have ssa key, use `connect` keys
         if ops_type_cnt["ssa"]:
@@ -254,7 +254,7 @@ class AuthHandler:
         )
 
         if retcode != 0:
-            logger.error(f"Unable to generate keys; reason={err.decode()}")
+            logger.error("Unable to generate keys; reason=%s", err.decode())
             return "", ""
 
         new_jwks = deque(json.loads(out).get("keys", []))
@@ -321,11 +321,11 @@ class AuthHandler:
         strategies = ", ".join(KEY_STRATEGIES)
 
         if self.key_strategy not in KEY_STRATEGIES:
-            logger.error(f"Key strategy must be one of {strategies}")
+            logger.error("Key strategy must be one of %s", strategies)
             sys.exit(1)
 
         if self.privkey_push_strategy not in KEY_STRATEGIES:
-            logger.error(f"Private key push strategy must be one of {strategies}")
+            logger.error("Private key push strategy must be one of %s", strategies)
             sys.exit(1)
 
         push_delay_invalid = False
@@ -381,7 +381,7 @@ class AuthHandler:
             web_keys = config["jansConfWebKeys"]
         except json.decoder.JSONDecodeError as exc:
             # probably corrupted JSON
-            logger.warning(f"Unable to load existing JWKS; reason={exc}. New JWKS will be created.")
+            logger.warning("Unable to load existing JWKS; reason=%s. New JWKS will be created.", exc)
             web_keys = {"keys": []}
 
         with open("/etc/certs/auth-keys.old.json", "w") as f:
@@ -409,18 +409,18 @@ class AuthHandler:
         for container in auth_containers:
             name = self.meta_client.get_container_name(container)
 
-            logger.info(f"creating backup of {name}:{jwks_fn}")
+            logger.info("creating backup of %s:%s", name, jwks_fn)
             self.meta_client.exec_cmd(container, f"cp {jwks_fn} {jwks_fn}.backup")
-            logger.info(f"creating new {name}:{jwks_fn}")
+            logger.info("creating new %s:%s", name, jwks_fn)
             self.meta_client.copy_to_container(container, jwks_fn)
 
             if self.privkey_push_delay > 0:
                 # delayed jks push
                 continue
 
-            logger.info(f"creating backup of {name}:{jks_fn}")
+            logger.info("creating backup of %s:%s", name, jks_fn)
             self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-            logger.info(f"creating new {name}:{jks_fn}")
+            logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
 
         try:
@@ -428,7 +428,7 @@ class AuthHandler:
                 keys = json.loads(f.read())
 
             logger.info("modifying jans-auth configuration")
-            logger.info(f"using keySelectionStrategy {self.key_strategy}")
+            logger.info("using keySelectionStrategy %s", self.key_strategy)
             rev = int(config["jansRevision"]) + 1
             modified = self.backend.modify_auth_config(
                 config["id"],
@@ -441,15 +441,15 @@ class AuthHandler:
                 # restore jks and jwks
                 logger.warning("failed to modify jans-auth configuration")
                 for container in auth_containers:
-                    logger.info(f"restoring backup of {name}:{jwks_fn}")
+                    name = self.meta_client.get_container_name(container)
+                    logger.info("restoring backup of %s:%s", name, jwks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
 
                     if self.privkey_push_delay > 0:
                         # delayed jks revert
                         continue
 
-                    name = self.meta_client.get_container_name(container)
-                    logger.info(f"restoring backup of {name}:{jks_fn}")
+                    logger.info("restoring backup of %s:%s", name, jks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
 
             else:
@@ -466,13 +466,14 @@ class AuthHandler:
 
                 # publish delayed jks
                 if self.push_keys and self.privkey_push_delay > 0 and auth_containers:
-                    logger.info(f"Waiting for private key push delay ({self.privkey_push_delay} seconds) ...")
+                    logger.info("Waiting for private key push delay (%s seconds) ...", self.privkey_push_delay)
                     time.sleep(self.privkey_push_delay)
 
                     for container in auth_containers:
-                        logger.info(f"creating backup of {name}:{jks_fn}")
+                        name = self.meta_client.get_container_name(container)
+                        logger.info("creating backup of %s:%s", name, jks_fn)
                         self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-                        logger.info(f"creating new {name}:{jks_fn}")
+                        logger.info("creating new %s:%s", name, jks_fn)
                         self.meta_client.copy_to_container(container, jks_fn)
 
                     # as new JKS pushed to container, we need to tell auth-server to reload the private keys
@@ -484,7 +485,7 @@ class AuthHandler:
                         "keySelectionStrategy": self.privkey_push_strategy,
                     })
 
-                    logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
+                    logger.info("using keySelectionStrategy %s", self.privkey_push_strategy)
 
                     self.backend.modify_auth_config(
                         config["id"],
@@ -493,7 +494,7 @@ class AuthHandler:
                         keys,
                     )
         except (TypeError, ValueError,) as exc:
-            logger.warning(f"Unable to get public keys; reason={exc}")
+            logger.warning("Unable to get public keys; reason=%s", exc)
 
     def prune(self):
         config = self.backend.get_auth_config()
@@ -536,7 +537,7 @@ class AuthHandler:
             web_keys = config["jansConfWebKeys"]
         except json.decoder.JSONDecodeError as exc:
             # probably corrupted JSON
-            logger.warning(f"Unable to load existing JWKS; reason={exc}. Existing JWKS will be deleted.")
+            logger.warning("Unable to load existing JWKS; reason=%s. Existing JWKS will be deleted.", exc)
             web_keys = {"keys": []}
 
         logger.info("Cleaning up keys (if any)")
@@ -617,14 +618,14 @@ class AuthHandler:
         for container in auth_containers:
             name = self.meta_client.get_container_name(container)
 
-            logger.info(f"creating backup of {name}:{jks_fn}")
+            logger.info("creating backup of %s:%s", name, jks_fn)
             self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-            logger.info(f"creating new {name}:{jks_fn}")
+            logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
 
-            logger.info(f"creating backup of {name}:{jwks_fn}")
+            logger.info("creating backup of %s:%s", name, jwks_fn)
             self.meta_client.exec_cmd(container, f"cp {jwks_fn} {jwks_fn}.backup")
-            logger.info(f"creating new {name}:{jwks_fn}")
+            logger.info("creating new %s:%s", name, jwks_fn)
             self.meta_client.copy_to_container(container, jwks_fn)
 
         try:
@@ -645,9 +646,9 @@ class AuthHandler:
                 logger.warning("failed to modify jans-auth configuration")
                 for container in auth_containers:
                     name = self.meta_client.get_container_name(container)
-                    logger.info(f"restoring backup of {name}:{jks_fn}")
+                    logger.info("restoring backup of %s:%s", name, jks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
-                    logger.info(f"restoring backup of {name}:{jwks_fn}")
+                    logger.info("restoring backup of %s:%s", name, jwks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
             else:
                 self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
@@ -661,7 +662,7 @@ class AuthHandler:
                     generate_base64_contents(json.dumps(keys)),
                 )
         except (TypeError, ValueError,) as exc:
-            logger.warning(f"Unable to get public keys; reason={exc}")
+            logger.warning("Unable to get public keys; reason=%s", exc)
 
 
 class WebHandler:
@@ -690,9 +691,9 @@ class WebHandler:
 
         if source == "from-files":
             if not any([os.path.isfile(ssl_cert), os.path.isfile(ssl_key)]):
-                logger.warning(f"Unable to find existing {ssl_cert} or {ssl_key}")
+                logger.warning("Unable to find existing %s or %s", ssl_cert, ssl_key)
             else:
-                logger.info(f"Using existing {ssl_cert} and {ssl_key}")
+                logger.info("Using existing %s and %s", ssl_cert, ssl_key)
         else:
             email = self.manager.config.get("admin_email")
             hostname = self.manager.config.get("hostname")
@@ -701,7 +702,7 @@ class WebHandler:
             state = self.manager.config.get("state")
             city = self.manager.config.get("city")
 
-            logger.info(f"Creating self-generated {ssl_ca_cert} and {ssl_ca_key}")
+            logger.info("Creating self-generated %s and %s", ssl_ca_cert, ssl_ca_key)
 
             ca_cert, ca_key = generate_ssl_ca_certkey(
                 "ca",
@@ -714,7 +715,7 @@ class WebHandler:
                 valid_to=valid_to,
             )
 
-            logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
+            logger.info("Creating self-generated %s, %s, and %s", ssl_csr, ssl_cert, ssl_key)
             generate_signed_ssl_certkey(
                 "web_https",
                 ca_key,
@@ -791,7 +792,7 @@ def patch(service, dry_run, opts):
     if dry_run:
         logger.warning("Dry-run mode is enabled!")
 
-    logger.info(f"Processing updates for service {service}")
+    logger.info("Processing updates for service %s", service)
     parsed_opts = _parse_opts(opts)
     callback_cls = PATCH_SERVICE_MAP[service]
 
@@ -816,7 +817,7 @@ def prune(service, dry_run, opts):
     if dry_run:
         logger.warning("Dry-run mode is enabled!")
 
-    logger.info(f"Processing updates for service {service}")
+    logger.info("Processing updates for service %s", service)
     parsed_opts = _parse_opts(opts)
     callback_cls = PRUNE_SERVICE_MAP[service]
 

@@ -4,29 +4,20 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 mod unsigned;
-mod user;
-mod workload;
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::schema::AttrsShape;
 use super::{
-    Arc, BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
-    BuiltEntities, ClaimMappings, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
-    RestrictedExpression, Token, TokenPrincipalMappings, Value, build_cedar_entity,
-    build_entity_attrs,
+    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
+    BuiltEntities, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
+    RestrictedExpression, TokenPrincipalMappings, Value, build_cedar_entity, build_entity_attrs,
 };
 use cedar_policy::Entity;
 use smol_str::SmolStr;
 use std::collections::HashSet;
 
-type TokenClaims = HashMap<String, Value>;
-
 #[derive(Clone, Copy)]
 pub(super) enum AttrSrc<'a> {
-    Token {
-        claims: &'a TokenClaims,
-        mappings: Option<&'a ClaimMappings>,
-    },
     Unsigned(&'a HashMap<String, Value>),
 }
 
@@ -83,10 +74,7 @@ fn extract_attrs_from_sources(
     let (attrs, errs) = srcs
         .into_iter()
         .map(|src| match src {
-            AttrSrc::Token { claims, mappings } => {
-                build_entity_attrs(claims, built_entities, attrs_shape, mappings)
-            },
-            AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape, None),
+            AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape),
         })
         .partition_result();
     ExtractedAttrsResult { attrs, errs }
@@ -100,101 +88,4 @@ struct ExtractedAttrsResult {
 pub(crate) struct BuiltPrincipalUnsigned {
     pub principal: Entity,
     pub parents: Vec<Entity>,
-}
-
-/// Information on how to get a principal's ID.
-///
-/// Used to define default values for the resolvers.
-///
-/// - [`user::UserIdSrcResolver`]     
-/// - [`workload::WorkloadIdSrcResolver`]     
-#[derive(Clone, Copy)]
-pub(super) struct PrincipalIdSrc<'a> {
-    token: &'a str,
-    claim: &'a str,
-}
-
-#[cfg(test)]
-mod test {
-    use std::str::FromStr;
-
-    use cedar_policy_core::validator::ValidatorSchema;
-
-    use super::*;
-    use crate::{
-        EntityBuilderConfig,
-        common::{default_entities::DefaultEntities, policy_store::TrustedIssuer},
-        entity_builder::TrustedIssuerIndex,
-    };
-
-    #[test]
-    fn err_on_missing_entity_id() {
-        let schema_src = r"namespace Jans {
-            entity TrustedIssuer;
-            entity Test;
-        }
-        ";
-        let validator_schema =
-            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
-        let iss = TrustedIssuer::default();
-        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-
-        let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
-            TrustedIssuerIndex::new(&issuers, None),
-            Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .expect("should init entity builder");
-
-        let type_name = "Test";
-        let id_token = Token::new("token", HashMap::from([]).into(), Some(iss.into()));
-        let attrs_srcs = Vec::default();
-        let tkn_principal_mappings = TokenPrincipalMappings::default();
-        let built_entities = BuiltEntities::default();
-        let parents = HashSet::default();
-
-        // Case where there's no available sources
-        let id_srcs = Vec::default();
-        let error = builder
-            .build_principal_entity(
-                type_name,
-                &id_srcs,
-                attrs_srcs.clone(),
-                &tkn_principal_mappings,
-                &built_entities,
-                parents.clone(),
-            )
-            .expect_err("should fail to build entity");
-        assert!(matches!(error, BuildEntityError {
-            ref entity_type_name,
-            ref error,
-        } if
-            entity_type_name == "Test" &&
-            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
-        ));
-
-        // Case where there's available sources but the token is missing the claim
-        let id_srcs = vec![EntityIdSrc::Token {
-            token: &id_token,
-            claim: "missing_claim",
-        }];
-        let error = builder
-            .build_principal_entity(
-                type_name,
-                &id_srcs,
-                attrs_srcs,
-                &tkn_principal_mappings,
-                &built_entities,
-                parents,
-            )
-            .expect_err("should fail to build entity");
-        assert!(matches!(error, BuildEntityError {
-            ref entity_type_name,
-            ref error,
-        } if
-            entity_type_name == "Test" &&
-            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
-        ));
-    }
 }

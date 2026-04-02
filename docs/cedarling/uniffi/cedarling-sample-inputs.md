@@ -3,23 +3,21 @@
 ```declarative
 {
     "CEDARLING_APPLICATION_NAME": "Cedarling-Test-In-Custom-Script",
-    "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
-    "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
-    "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
+    "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
+    "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
+    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
     "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
     "HS256",
     "RS256"
     ],
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-    "CEDARLING_LISTEN_SSE": "disabled",
+    "CEDARLING_LOCK_LISTEN_SSE": "disabled",
     "CEDARLING_LOCAL_JWKS": null,
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_SSA_JWT": null,
     "CEDARLING_LOG_LEVEL": "DEBUG",
     "CEDARLING_LOG_TYPE": "std_out",
-    "CEDARLING_POLICY_STORE_ID": "cdeb4b635459898300a5893589a76b726e202dcb5a86",
     "CEDARLING_POLICY_STORE_URI": "./custom/static/policy-store.json",
     "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
     "===": [
@@ -29,8 +27,6 @@
             "ALLOW"
         ]
     },
-    "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "id": "7a962b6e-aa45-4418-a94a-ee382d20a723"
 }
 ```
