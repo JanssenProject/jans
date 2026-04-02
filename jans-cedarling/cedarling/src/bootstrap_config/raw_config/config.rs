@@ -5,7 +5,6 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
-use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
     default_jti, default_log_channel_capacity, default_log_max_retries,
@@ -47,10 +46,6 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_uri: Option<String>,
-
-    /// An identifier for the policy store.
-    #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
-    pub policy_store_id: String,
 
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
@@ -104,16 +99,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub stdout_buffer_limit: usize,
 
-    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_user_claims: Vec<String>,
-
-    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_workload_claims: Vec<String>,
-
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(
@@ -122,18 +107,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub decision_log_default_jwt_id: String,
 
-    /// When `enabled`, Cedar engine authorization is queried for a User principal.
-    #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
-    pub user_authz: FeatureToggle,
-
-    /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
-    #[serde(rename = "CEDARLING_WORKLOAD_AUTHZ", default)]
-    pub workload_authz: FeatureToggle,
-
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
-    /// making authz (authorization) decisions.
+    /// Specifies what boolean operation to use when combining per-principal
+    /// authorization decisions in `authorize_unsigned`.
+    ///
+    /// This setting only applies to [`authorize_unsigned`] — the
+    /// `authorize_multi_issuer` method does not use principals and ignores
+    /// this configuration entirely.
     ///
     /// Use [JsonLogic](https://jsonlogic.com/).
+    /// Variable names must match the full Cedar principal type identifier
+    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
+    /// against the strings `"ALLOW"` or `"DENY"`.
     ///
     /// Default value:
     /// ```json
@@ -148,26 +132,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema `TrustedIssuer` entity
-    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_iss: Option<String>,
-
-    /// Mapping name of cedar schema User entity
-    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_user: Option<String>,
-
-    /// Mapping name of cedar schema Workload entity.
-    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_workload: Option<String>,
-
     /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema Role entity.
+    /// Source attribute for unsigned role entity ID.
     #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
@@ -192,15 +161,6 @@ pub struct BootstrapConfigRaw {
     )]
     pub policy_store_local_fn: Option<String>,
 
-    /// Whether to validate file checksums when loading from directory or archive sources.
-    /// Defaults to `true`. Set to `false` to disable checksum validation.
-    #[serde(
-        rename = "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM",
-        default = "default_true",
-        deserialize_with = "deserialize_or_parse_string_as_json"
-    )]
-    pub policy_store_validate_checksum: bool,
-
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     /// If value is 0, there is no limit. But if None, default value is applied.
@@ -217,7 +177,8 @@ pub struct BootstrapConfigRaw {
 
     /// Whether to check the signature of all JWT tokens.
     ///
-    /// This requires that an `iss` (Issuer) claim is present on each token.
+    /// When enabled, this requires the `iss` (Issuer) claim to be present in
+    /// all tokens and the issuer URL must use the `https` scheme.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
@@ -240,17 +201,6 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
-
-    /// Varying levels of validations based on the preference of the developer.
-    ///
-    /// # Strict Mode
-    ///
-    /// Strict mode requires:
-    ///     1. `id_token` aud matches the `access_token` `client_id`;
-    ///     2. if a Userinfo token is present, the sub matches the `id_token`, and that
-    ///         the aud matches the access token `client_id`.
-    #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
-    pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -330,8 +280,10 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_log_max_retries: u32,
 
-    /// Allows to limit maximum token cache TTL in seconds.
-    /// Zero means no token cache TTL limit.
+    /// Maximum token cache TTL in seconds.
+    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
+    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
+    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
@@ -374,7 +326,9 @@ pub struct BootstrapConfigRaw {
     pub data_store_default_ttl: Option<u64>,
 
     /// Maximum allowed TTL for data entries in seconds.
-    /// Default: 3600 (1 hour). If not set, no upper limit (10 years max).
+    /// Default: 3600 (1 hour). Entries with TTL exceeding this value will be rejected.
+    /// Note: `0` means a zero-second max TTL (immediate expiry), not unlimited.
+    /// Omitting this property uses the default (1 hour).
     #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub data_store_max_ttl: Option<u64>,
@@ -526,10 +480,6 @@ mod tests {
                 "Policy store URI should be None by default"
             );
             assert_eq!(
-                config.policy_store_id, "",
-                "Policy store ID should be empty by default"
-            );
-            assert_eq!(
                 config.log_type,
                 LoggerType::Off,
                 "Logger should be off by default"
@@ -540,27 +490,9 @@ mod tests {
                 "Default log level should be WARN"
             );
             assert_eq!(config.log_ttl, None, "Log TTL should be None by default");
-            assert!(
-                config.decision_log_user_claims.is_empty(),
-                "Decision log user claims should be empty by default"
-            );
-            assert!(
-                config.decision_log_workload_claims.is_empty(),
-                "Decision log workload claims should be empty by default"
-            );
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"
-            );
-            assert_eq!(
-                config.user_authz,
-                FeatureToggle::Disabled,
-                "User authorization should be disabled by default"
-            );
-            assert_eq!(
-                config.workload_authz,
-                FeatureToggle::Disabled,
-                "Workload authorization should be disabled by default"
             );
             assert_eq!(
                 config.principal_bool_operation,

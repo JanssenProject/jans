@@ -11,8 +11,6 @@ use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
-#[cfg(not(target_arch = "wasm32"))]
-use super::super::manifest_validator::ManifestValidator;
 use super::super::schema_parser::ParsedSchema;
 use super::super::vfs_adapter::{MemoryVfs, PhysicalVfs};
 use super::*;
@@ -870,8 +868,6 @@ fn test_parse_issuer_with_token_metadata() {
     // Verify token metadata details
     let access_token = issuer.issuer.token_metadata.get("access_token").unwrap();
     assert_eq!(access_token.entity_type_name, "App::access_token");
-    assert_eq!(access_token.user_id, Some("sub".to_string()));
-    assert_eq!(access_token.role_mapping, Some("role".to_string()));
 }
 
 #[test]
@@ -1254,90 +1250,6 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
     assert!(!loaded_directory.schema.is_empty());
     assert_eq!(loaded_directory.policies.len(), 1);
-}
-
-#[test]
-#[cfg(not(target_arch = "wasm32"))]
-fn test_archive_vfs_with_manifest_validation() {
-    let temp_dir = TempDir::new().unwrap();
-    let archive_path = temp_dir.path().join("store_with_manifest.cjar");
-
-    // Create archive with manifest
-    let file = File::create(&archive_path).unwrap();
-    let mut zip = zip::ZipWriter::new(file);
-
-    let options = FileOptions::<ExtendedFileOptions>::default()
-        .compression_method(CompressionMethod::Deflated);
-
-    // Metadata
-    let metadata_content = br#"{
-        "cedar_version": "1.0.0",
-        "policy_store": {
-            "id": "abc123def456",
-            "name": "Manifest Test",
-            "version": "1.0.0"
-        }
-    }"#;
-    zip.start_file("metadata.json", options).unwrap();
-    zip.write_all(metadata_content).unwrap();
-
-    // Minimal schema
-    let options = FileOptions::<ExtendedFileOptions>::default()
-        .compression_method(CompressionMethod::Deflated);
-    zip.start_file("schema.cedarschema", options).unwrap();
-    zip.write_all(b"namespace Test { entity User; }").unwrap();
-
-    // Minimal policy (required)
-    let options = FileOptions::<ExtendedFileOptions>::default()
-        .compression_method(CompressionMethod::Deflated);
-    zip.start_file("policies/test.cedar", options).unwrap();
-    zip.write_all(b"permit(principal, action, resource);")
-        .unwrap();
-
-    // Manifest (simplified - no checksums for this test)
-    let options = FileOptions::<ExtendedFileOptions>::default()
-        .compression_method(CompressionMethod::Deflated);
-    zip.start_file("manifest.json", options).unwrap();
-    zip.write_all(
-        br#"{
-        "policy_store_id": "abc123def456",
-        "generated_date": "2024-01-01T00:00:00Z",
-        "files": {}
-    }"#,
-    )
-    .unwrap();
-
-    zip.finish().unwrap();
-
-    // Step 1: Create ArchiveVfs
-    let archive_vfs = ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs");
-
-    // Step 2: Load policy store
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader
-        .load_directory(".")
-        .expect("Should load with manifest");
-
-    // Step 3: Verify manifest was loaded
-    assert!(loaded_directory.manifest.is_some());
-    let manifest = loaded_directory.manifest.as_ref().unwrap();
-    assert_eq!(manifest.policy_store_id, "abc123def456");
-
-    // Step 4: Show that ManifestValidator can work with ArchiveVfs
-    let archive_vfs2 =
-        ArchiveVfs::from_file(&archive_path).expect("Should create second ArchiveVfs");
-    let validator = ManifestValidator::new(archive_vfs2, PathBuf::from("."));
-
-    // This demonstrates that manifest validation works with ANY VfsFileSystem,
-    // including ArchiveVfs (not just PhysicalVfs)
-    let validation_result = validator.validate(Some("abc123def456"));
-
-    // Validation should succeed when the expected ID matches the manifest's policy_store_id
-    assert!(
-        validation_result.is_valid,
-        "expected validation to succeed when IDs match, but got errors: {:?}",
-        validation_result.errors
-    );
 }
 
 #[test]

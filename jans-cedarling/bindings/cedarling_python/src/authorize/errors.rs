@@ -67,13 +67,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    IdTokenTrustModeError,
-    AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
-);
-
-create_exception!(
-    authorize_errors,
     BuildEntityError,
     AuthorizeError,
     "Error encountered while building Cedar entities"
@@ -112,6 +105,13 @@ create_exception!(
     RequestValidationError,
     AuthorizeError,
     "Error encountered while validating the request"
+);
+
+create_exception!(
+    authorize_errors,
+    IdentifierParsingError,
+    AuthorizeError,
+    "Error encountered while parsing an entity type name or action identifier"
 );
 
 #[pyclass]
@@ -158,13 +158,13 @@ errors_functions! {
     ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
-    IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
     ExecuteRule => ExecuteRuleError,
     BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
     MultiIssuerValidation => MultiIssuerValidationError,
     MultiIssuerEntity => MultiIssuerEntityError,
-    RequestValidation => RequestValidationError
+    RequestValidation => RequestValidationError,
+    IdentifierParsing => IdentifierParsingError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

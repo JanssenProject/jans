@@ -45,16 +45,14 @@ pub use crate::context_data_api::{
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
-#[cfg(test)]
-use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, Request, RequestUnsigned,
-    TokenInput,
+    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
+pub use common::policy_store::PolicyMetadata;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -183,13 +181,6 @@ impl Cedarling {
     // they no longer await internally. Future maintainers can safely remove
     // or refactor these methods when compatibility constraints allow.
 
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    #[allow(clippy::unused_async)]
-    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(&request)
-    }
-
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
     #[allow(clippy::unused_async)]
@@ -210,15 +201,33 @@ impl Cedarling {
         self.authz.authorize_multi_issuer(&request)
     }
 
-    /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
-    #[doc(hidden)]
-    #[cfg(test)]
-    pub(crate) fn build_entities(
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principals, actions, and resources.
+    ///
+    /// This performs scope-level filtering only (principal/action/resource constraints).
+    /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
+    pub fn get_matching_policies_unsigned(
         &self,
-        request: &Request,
-    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request)?;
-        self.authz.build_entities(request, &tokens)
+        principals: &[EntityData],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_unsigned(principals, actions, resources)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given token-derived principals, actions, and resources.
+    ///
+    /// Tokens are validated and their mapping types used as principal entity types.
+    pub fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[TokenInput],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.

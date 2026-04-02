@@ -75,7 +75,7 @@ A multi-issuer authorization request consists of:
 ┌─────────────────────────────────────────────────────────┐
 │ 2. Token Validation                                     │
 │    - Signature verification                             │
-│    - Time-based validation (exp, nbf, iat)             │
+│    - Time-based validation (exp, nbf)                   │
 │    - Status validation (revocation check)               │
 │    - Trusted issuer verification                        │
 └────────────────────┬────────────────────────────────────┘
@@ -111,11 +111,11 @@ Each validated token becomes a Cedar entity:
 
 ```cedar
 entity Token = {
-  "token_type": String,        // e.g., "Jans::Access_Token"
-  "jti": String,               // Token ID
+  "token_type"?: String,        // e.g., "Jans::Access_Token"
+  "jti"?: String,               // Token ID
   "iss"?: Jans::TrustedIssuer,  // JWT iss claim
-  "exp": Long,                 // Expiration timestamp
-  "validated_at": Long         // Validation timestamp
+  "exp"?: Long,                 // Expiration timestamp
+  "validated_at"?: Long         // Validation timestamp
 } tags Set<String>;
 ```
 
@@ -151,7 +151,7 @@ Tokens are organized in the context using a deterministic naming algorithm:
 | ------------------------------ | ------------------- | -------------------- | ---------------------------- |
 | `https://idp.acme.com/auth`    | `"Acme"`            | `Jans::Access_Token` | `acme_access_token`          |
 | `https://accounts.google.com`  | `"Google"`          | `Jans::Id_Token`     | `google_id_token`            |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_acme_dolphin_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_dolphintoken`       |
 
 ## Use Cases
 
@@ -514,11 +514,25 @@ Multi-issuer authorization creates token entities dynamically and places them in
 Token entities must have these required attributes:
 
 ```cedar
-namespace Jans{
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity Access_token = {
     token_type?: String,        // Required for multi-issuer
     jti?: String,               // Required for multi-issuer
-    iss?: Jans::TrustedIssuer,  // Required for multi-issuer
+    iss?: TrustedIssuer,        // Required for multi-issuer
     exp?: Long,                 // Required for multi-issuer
     validated_at?: Long,        // Required for multi-issuer
     // Other JWT claims as optional attributes
@@ -526,12 +540,8 @@ namespace Jans{
     iat?: Long,
     scope?: Set<String>,
     // ...
-  } tags Set<String>;         // Required for dynamic JWT claims
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+  } tags Set<String>;           // Required for dynamic JWT claims
+};
 ```
 
 **2. Context Structure**
@@ -617,13 +627,31 @@ Configure trusted issuers with the `name` field for predictable token naming:
 Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:
 
 ```cedar
+// Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
-  // Core token entity structure compatible with both standard and multi-issuer authorization
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  // Core token entity structure compatible with multi-issuer authorization
   entity Access_token = {
     // Required multi-issuer attributes
-    token_type?: String,        // Entity type name (e.g., "Jans::Access_Token")
+    token_type?: String,        // Entity type name (e.g., "Acme::Access_token")
     jti?: String,               // JWT ID - unique token identifier
-    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
+    iss?: TrustedIssuer,        // Issuer entity reference
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Timestamp when token was validated
 
@@ -648,7 +676,7 @@ namespace Jans {
     aud?: Set<String>,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     phone_number?: String,
     role?: Set<String>,
@@ -669,18 +697,14 @@ namespace Jans {
     aud?: String,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     birthdate?: String,
     phone_number?: String,
     role?: Set<String>,
     // Add other JWT claims as needed
   } tags Set<String>;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 
 ```
 
@@ -689,12 +713,26 @@ namespace Jans {
 For custom token types, follow the same pattern:
 
 ```cedar
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Custom namespace: custom service token entities.
 namespace Custom {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity ServiceToken = {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    iss?: Custom::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -703,11 +741,7 @@ namespace Custom {
     permissions?: Set<String>,
     service_tier?: String,
   } tags Set<String>;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 ```
 
 #### Complete Context Schema
@@ -860,77 +894,10 @@ partial_tokens_result = cedarling.authorize_multi_issuer(partial_tokens_request)
 mixed_tokens_result = cedarling.authorize_multi_issuer(mixed_tokens_request)
 ```
 
-## Migration from Standard Authorization
-
-Migrating from `authorize()` to `authorize_multi_issuer()`:
-
-### Before (Standard Authorization)
-
-```python
-request = Request(
-    tokens={
-        "access_token": access_token,
-        "id_token": id_token
-    },
-    action='Jans::Action::"Read"',
-    resource=resource,
-    context=context
-)
-
-result = cedarling.authorize(request)
-if result.is_allowed():
-    # Access granted
-```
-
-**Policy**:
-
-```cedar
-permit(
-  principal is Jans::User,
-  action == Jans::Action::"Read",
-  resource in Jans::Document
-) when {
-  principal.email == resource.owner
-};
-```
-
-### After (Multi-Issuer Authorization)
-
-```python
-request = AuthorizeMultiIssuerRequest(
-    tokens=[
-        TokenInput(mapping="Jans::Access_Token", payload=access_token),
-        TokenInput(mapping="Jans::Id_Token", payload=id_token)
-    ],
-    action='Jans::Action::"Read"',
-    resource=resource,
-    context=context
-)
-
-result = cedarling.authorize_multi_issuer(request)
-if result.decision:
-    # Access granted
-```
-
-**Policy**:
-
-```cedar
-permit(
-  principal,
-  action == Jans::Action::"Read",
-  resource in Jans::Document
-) when {
-  context has tokens.jans_id_token &&
-  context.tokens.jans_id_token.hasTag("email") &&
-  context.tokens.jans_id_token.getTag("email").contains(resource.owner)
-};
-```
-
 ## See Also
 
 - [Cedarling Authorization](./cedarling-authz.md)
 - [Cedarling Interfaces](./cedarling-interfaces.md)
-- [JWT Mapping](./cedarling-jwt-mapping.md)
 - [Policy Store Configuration](./cedarling-policy-store.md)
-- [Python Examples](./python/usage.md)
-- [Go Examples](./getting-started/go.md)
+- [Python Examples](../tutorials/python.md)
+- [Go Examples](../tutorials/go.md)

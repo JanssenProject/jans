@@ -113,4 +113,4 @@ Another example is to delete session with **sid=c190667e-a186-421d-8679-420e8261
 curl -k -X DELETE "https://example.jans.io/jans-config-api/api/v1/jans-auth-server/session/sid/c190667e-a186-421d-8679-420e82615a38" -H "Authorization: Bearer 5abf61a6-b86f-49d7-8134-77168303d0f9"
 ```
 
-Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](../../../../jans-config-api/docs/jans-config-api-swagger.yaml).
+Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml).

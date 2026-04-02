@@ -29,13 +29,13 @@ tags:
 | metricReporterInterval          | The interval for metric reporter in seconds                                                   | [Details](#metricreporterinterval)          |
 | metricReporterKeepDataDays      | The days to keep report data                                                                  | [Details](#metricreporterkeepdatadays)      |
 | personCustomObjectClassList     | Custom object class list for dynamic person enrolment                                         | [Details](#personcustomobjectclasslist)     |
-| enabledFidoAlgorithms           | List of Requested Credential Types                                                            | [Details](#enabledFidoAlgorithms)           |
+| enabledFidoAlgorithms           | List of Requested Credential Types                                                            | [Details](#enabledfidoalgorithms)           |
 | rp                              | Requested Parties Authenticators metadata in json format                                      | [Details](#rp)                              |
 | serverMetadataFolder            | Authenticators metadata in json format                                                        | [Details](#servermetadatafolder)            |
 
 | unfinishedRequestExpiration     | Expiration time in seconds for pending enrollment/authentication requests                     | [Details](#unfinishedrequestexpiration)     |
 | useLocalCache                   | Boolean value to indicate if Local Cache is to be used                                        | [Details](#uselocalcache)                   |
-| debugUserAutoEnrollment         | Allow to enroll users on enrollment/authentication requests                                   | [Details](#userautoenrollment)              |
+| debugUserAutoEnrollment         | Allow to enroll users on enrollment/authentication requests                                   | [Details](#debuguserautoenrollment)              |
 
 
 ### authenticationHistoryExpiration

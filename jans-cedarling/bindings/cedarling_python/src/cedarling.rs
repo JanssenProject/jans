@@ -12,7 +12,6 @@ use pyo3::prelude::*;
 use crate::authorize::authorize_result::AuthorizeResult;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
-use crate::authorize::request::Request;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
@@ -20,6 +19,7 @@ use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
 use crate::context_data_api::errors::data_error_to_py;
 use cedarling::DataApi;
+use cedarling::TrustedIssuerLoadingInfo;
 use serde_pyobject::{from_pyobject, to_pyobject};
 use std::time::Duration;
 
@@ -41,11 +41,6 @@ use std::time::Duration;
 ///     Initializes the Cedarling instance with the provided configuration.
 ///
 ///     :param config: A `BootstrapConfig` object with startup settings.
-///
-/// .. method:: authorize(self, request: Request) -> AuthorizeResult
-///
-///     Execute authorize request
-///     :param request: Request struct for authorize.
 ///
 /// .. method:: authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult
 ///
@@ -175,15 +170,6 @@ impl Cedarling {
         let inner = cedarling::blocking::Cedarling::new(config.inner())
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
         Ok(Self { inner })
-    }
-
-    /// Authorize request
-    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
-        let cedarling_instance = self
-            .inner
-            .authorize(request.borrow().to_cedarling()?)
-            .map_err(authorize_error_to_py)?;
-        Ok(cedarling_instance.into())
     }
 
     /// Authorize request with unsigned data.
@@ -382,6 +368,36 @@ impl Cedarling {
             .get_stats_ctx()
             .map(|stats| stats.into())
             .map_err(data_error_to_py)
+    }
+
+    /// Returns true if trusted issuer with the given policy-store id is loaded.
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    /// Returns true if trusted issuer with the given iss claim is loaded.
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    /// Returns total number of configured trusted issuers.
+    fn total_issuers(&self) -> usize {
+        self.inner.total_issuers()
+    }
+
+    /// Returns number of successfully loaded trusted issuers.
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.inner.loaded_trusted_issuers_count()
+    }
+
+    /// Returns ids of successfully loaded trusted issuers.
+    fn loaded_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.loaded_trusted_issuer_ids().into_iter().collect()
+    }
+
+    /// Returns ids of trusted issuers that failed to load.
+    fn failed_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }
 }
 

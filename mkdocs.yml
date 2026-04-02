@@ -64,7 +64,6 @@ nav:
     - Casa Quick Start: casa/administration/quick-start.md
     - Cedarling Quick Start: cedarling/quick-start/cedarling-quick-start.md
   - Terminology:
-    - Cedarling Terms: cedarling/reference/cedarling-terms.md
     - Learning Reference: janssen-server/reference/learning-reference.md
 
 # ====================
@@ -235,6 +234,7 @@ nav:
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata: janssen-server/fido/vendor-metadata.md
     - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
     - Types of Credentials: janssen-server/fido/types-of-creds.md
   - SAML:
     - Shibboleth IDP:
@@ -250,54 +250,6 @@ nav:
       - Federation: janssen-server/recipes/saml/federation.md
       - IDP-Initiated SSO: janssen-server/recipes/saml/idp-init-authn.md
       - SP Configuration: janssen-server/recipes/saml/sso-sp.md
-  - Agama (Auth Flows):
-    - Introduction: agama/introduction.md
-    - Language Reference: agama/language-reference.md
-    - Execution Rules: agama/execution-rules.md
-    - Gama Format: agama/gama-format.md
-    - Engine Configuration: janssen-server/developer/agama/engine-bridge-config.md
-    - Project Deployment: janssen-server/developer/agama/projects-deployment.md
-    - Navigation & UI: janssen-server/developer/agama/flows-navigation-ui.md
-    - Native Applications: janssen-server/developer/agama/native-applications.md
-    - Best Practices: janssen-server/developer/agama/agama-best-practices.md
-    - Advanced Usages: janssen-server/developer/agama/advanced-usages.md
-    - FAQ: janssen-server/developer/agama/faq.md  # also in FAQ & Troubleshooting for discoverability
-  - Cedarling (Authorization):
-    - Overview: cedarling/README.md
-    - Cedar Introduction: cedar-intro.md
-    - Tutorials:
-      - Getting Started: cedarling/tutorials/cedarling-getting-started.md
-      - Javascript: cedarling/tutorials/javascript.md
-      - Python: cedarling/tutorials/python.md
-      - Rust: cedarling/tutorials/rust.md
-      - Golang: cedarling/tutorials/go.md
-      - Java: cedarling/tutorials/java.md
-      - Kotlin: cedarling/tutorials/kotlin.md
-      - Swift: cedarling/tutorials/swift.md
-    - Reference:
-      - Authorization: cedarling/reference/cedarling-authz.md
-      - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md
-      - Interfaces: cedarling/reference/cedarling-interfaces.md
-      - Policy Store: cedarling/reference/cedarling-policy-store.md
-      - Properties: cedarling/reference/cedarling-properties.md
-      - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
-      - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
-      - JWT Mapping: cedarling/reference/cedarling-jwt-mapping.md
-      - Entities: cedarling/reference/cedarling-entities.md
-      - Logs: cedarling/reference/cedarling-logs.md
-      - Lock Server: cedarling/reference/cedarling-lock-server.md
-    - Developer:
-      - Rust: cedarling/developer/cedarling-rust.md
-      - Kotlin/Java: cedarling/developer/cedarling-kotlin.md
-      - Mobile Apps:
-        - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
-        - Android: cedarling/developer/mobile-apps/cedarling-android.md
-        - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
-      - Sidecar:
-        - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
-        - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
-    - Integrations:
-      - KrakenD: cedarling/integrations/cedarling-krakend.md
   - UMA:
     - janssen-server/auth-server/uma-features/README.md
     - RPT Endpoint: janssen-server/auth-server/uma-features/rpt-endpoint.md
@@ -317,7 +269,63 @@ nav:
     - Benchmark: janssen-server/recipes/benchmark.md
 
 # ====================
-# 4. CONFIGURE IDENTITY & POLICIES
+# 4. AGAMA
+# ====================
+- Agama:
+  - Introduction: agama/introduction.md
+  - Language Reference: agama/language-reference.md
+  - Execution Rules: agama/execution-rules.md
+  - Gama Format: agama/gama-format.md
+  - Engine Configuration: janssen-server/developer/agama/engine-bridge-config.md
+  - Project Deployment: janssen-server/developer/agama/projects-deployment.md
+  - Navigation & UI: janssen-server/developer/agama/flows-navigation-ui.md
+  - Native Applications: janssen-server/developer/agama/native-applications.md
+  - Best Practices: janssen-server/developer/agama/agama-best-practices.md
+  - Advanced Usages: janssen-server/developer/agama/advanced-usages.md
+  - FAQ: janssen-server/developer/agama/faq.md
+
+# ====================
+# 5. CEDARLING
+# ====================
+- Cedarling:
+  - Overview: cedarling/README.md
+  - Cedar Introduction: cedar-intro.md
+  - Quick Start: cedarling/quick-start/cedarling-quick-start.md
+  - Tutorials:
+    - Getting Started: cedarling/tutorials/cedarling-getting-started.md
+    - Javascript: cedarling/tutorials/javascript.md
+    - Python: cedarling/tutorials/python.md
+    - Rust: cedarling/tutorials/rust.md
+    - Golang: cedarling/tutorials/go.md
+    - Java: cedarling/tutorials/java.md
+    - Kotlin: cedarling/tutorials/kotlin.md
+    - Swift: cedarling/tutorials/swift.md
+  - Reference:
+    - Authorization: cedarling/reference/cedarling-authz.md
+    - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md
+    - Interfaces: cedarling/reference/cedarling-interfaces.md
+    - Policy Store: cedarling/reference/cedarling-policy-store.md
+    - Properties: cedarling/reference/cedarling-properties.md
+    - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
+    - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
+    - Entities: cedarling/reference/cedarling-entities.md
+    - Logs: cedarling/reference/cedarling-logs.md
+    - Lock Server: cedarling/reference/cedarling-lock-server.md
+  - Developer:
+    - Rust: cedarling/developer/cedarling-rust.md
+    - Kotlin/Java: cedarling/developer/cedarling-kotlin.md
+    - Mobile Apps:
+      - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
+      - Android: cedarling/developer/mobile-apps/cedarling-android.md
+      - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
+    - Sidecar:
+      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
+      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
+  - Integrations:
+    - KrakenD: cedarling/integrations/cedarling-krakend.md
+
+# ====================
+# 6. CONFIGURE IDENTITY & POLICIES
 # ====================
 - Configure Identity & Policies:
   - Overview: janssen-server/config-guide/README.md
@@ -456,7 +464,7 @@ nav:
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
 
 # ====================
-# 5. TEST & DEBUG
+# 7. TEST & DEBUG
 # ====================
 - Test & Debug:
   - Overview: janssen-server/test-debug/README.md
@@ -472,7 +480,7 @@ nav:
     - VM Logs: janssen-server/vm-ops/logs.md
     - Kubernetes Logs: janssen-server/kubernetes-ops/logs.md
   - Debugging:
-    - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+    - Script Debugging: janssen-server/developer/scripts/interception-scripts-debug.md
     - Remote Debugging: contribute/development/remote-debugging.md
   - Health Checks:
     - Kubernetes Health Check: janssen-server/kubernetes-ops/health-check.md
@@ -487,10 +495,10 @@ nav:
     - Install FAQ: janssen-server/install/install-faq.md
     - Developer FAQ: contribute/developer-faq.md
     - Casa FAQ: casa/administration/faq.md  # duplicate: also under Casa > Administration
-    - Agama FAQ: janssen-server/developer/agama/faq.md  # duplicate: also under Agama (Auth Flows)
+    - Agama FAQ: janssen-server/developer/agama/faq.md  # duplicate: also under Agama
 
 # ====================
-# 6. DEPLOY & OPERATE
+# 8. DEPLOY & OPERATE
 # ====================
 - Deploy & Operate:
   - Overview: janssen-server/README.md
@@ -589,7 +597,7 @@ nav:
     - Lock Server: janssen-server/lock/lock-server.md
 
 # ====================
-# 7. PRODUCT, RELEASES & SUPPORT
+# 9. PRODUCT, RELEASES & SUPPORT
 # ====================
 - Product & Releases:
   - Changelog: CHANGELOG.md

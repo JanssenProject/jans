@@ -15,5 +15,3 @@ all sections, or jump directly to common starting points:
   scenarios Janssen supports.
 - **[Quick Start Guides](../quick-start-guides/index.md)** — Get a running
   instance as fast as possible.
-- **[Terminology](../cedarling/reference/cedarling-terms.md)** — Key terms
-  and concepts used throughout the docs.

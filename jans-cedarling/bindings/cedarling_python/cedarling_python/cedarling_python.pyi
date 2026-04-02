@@ -105,33 +105,6 @@ class Cedarling:
         """
         ...
 
-    def authorize(self, request: Request) -> AuthorizeResult:
-        """
-        Execute authorize request.
-
-        Args:
-            request: Request struct for authorize.
-
-        Returns:
-            AuthorizeResult: The authorization result.
-
-        Raises:
-            ProcessTokens: Error encountered while processing JWT token data.
-            ActionError: Error encountered while parsing Action to EntityUid.
-            CreateContextError: Error encountered while validating context according to the schema.
-            InvalidPrincipalError: Error encountered while creating cedar_policy::Request for principal.
-            ValidateEntitiesError: Error encountered while validating the entities to the schema.
-            EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
-            BuildContextError: Error encountered while building the request context.
-            IdTokenTrustModeError: Error encountered while running on strict id token trust mode.
-            BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
-            BuildUnsignedRoleEntityError: Error building Role entity for unsigned request.
-            RequestValidationError: Error encountered while validating the request.
-            RuntimeError: If JSON conversion of tokens or context fails.
-        """
-        ...
-
     def authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult:
         """
         Authorize request with unsigned data.
@@ -178,7 +151,6 @@ class Cedarling:
             ValidateEntitiesError: Error encountered while validating the entities to the schema.
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
-            IdTokenTrustModeError: Error encountered while running on strict id token trust mode.
             BuildEntityError: Error encountered while building Cedar entities.
             ExecuteRuleError: Error encountered while executing the rule for principals.
             MultiIssuerValidationError: Error encountered during multi-issuer token validation.
@@ -379,20 +351,60 @@ class Cedarling:
         """
         ...
 
-@final
-class Request:
-    tokens: Dict[str, str]
-    action: str
-    resource: EntityData
-    context: Dict[str, Any]
+    def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
+        """
+        Check whether a trusted issuer was loaded by issuer identifier.
 
-    def __init__(
-        self,
-        tokens: Dict[str, Any],
-        action: str,
-        resource: EntityData,
-        context: Dict[str, Any],
-    ) -> None: ...
+        Args:
+            issuer_id: The trusted issuer identifier to check.
+
+        Returns:
+            True if the trusted issuer is loaded, otherwise False.
+        """
+        ...
+    def is_trusted_issuer_loaded_by_iss(self, iss_claim: str) -> bool:
+        """
+        Check whether a trusted issuer was loaded by `iss` claim.
+
+        Args:
+            iss_claim: The issuer claim value to check.
+
+        Returns:
+            True if the trusted issuer is loaded, otherwise False.
+        """
+        ...
+    def total_issuers(self) -> int:
+        """
+        Get the total number of trusted issuer entries discovered.
+
+        Returns:
+            int: Total trusted issuer count.
+        """
+        ...
+    def loaded_trusted_issuers_count(self) -> int:
+        """
+        Get the number of trusted issuers loaded successfully.
+
+        Returns:
+            int: Number of successfully loaded trusted issuers.
+        """
+        ...
+    def loaded_trusted_issuer_ids(self) -> List[str]:
+        """
+        Get identifiers of trusted issuers loaded successfully.
+
+        Returns:
+            List[str]: A list of trusted issuer identifiers.
+        """
+        ...
+    def failed_trusted_issuer_ids(self) -> List[str]:
+        """
+        Get identifiers of trusted issuers that failed to load.
+
+        Returns:
+            List[str]: A list of trusted issuer identifiers.
+        """
+        ...
 
 @final
 class RequestUnsigned:
@@ -441,8 +453,6 @@ class EntityData:
 @final
 class AuthorizeResult:
     def is_allowed(self) -> bool: ...
-    def workload(self) -> AuthorizeResultResponse | None: ...
-    def person(self) -> AuthorizeResultResponse | None: ...
     def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
     def request_id(self) -> str: ...
 

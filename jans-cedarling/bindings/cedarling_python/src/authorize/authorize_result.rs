@@ -18,9 +18,6 @@ use pyo3::prelude::*;
 /// .. method:: is_allowed(self) -> bool
 ///     Returns whether the request is allowed.
 ///
-/// .. method:: workload(self) -> AuthorizeResultResponse
-///     Returns the detailed response as an `AuthorizeResultResponse` object.
-///
 #[pyclass]
 pub struct AuthorizeResult {
     inner: cedarling::AuthorizeResult,
@@ -31,16 +28,6 @@ impl AuthorizeResult {
     /// Returns true if request is allowed
     fn is_allowed(&self) -> bool {
         self.inner.decision
-    }
-
-    /// Get the decision value for workload
-    fn workload(&self) -> Option<AuthorizeResultResponse> {
-        self.inner.workload.clone().map(|v| v.into())
-    }
-
-    /// Get the decision value for person/user
-    fn person(&self) -> Option<AuthorizeResultResponse> {
-        self.inner.person.clone().map(|v| v.into())
     }
 
     /// Get the decision value for a specific principal

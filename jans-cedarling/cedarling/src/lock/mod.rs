@@ -453,10 +453,15 @@ mod test {
 
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
+            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            kind: LogType::Decision,
-            id: "some_uuid_string".into(),
-            msg: "this is a test log entry".into(),
+            log_kind: LogType::Decision,
+            decision: "ALLOW".to_string(),
+            action: "Test".to_string(),
+            principal: vec!["Jans::User".to_string()],
+            resource: "Jans::Issue".to_string(),
+            application_id: "test_app".to_string(),
+            pdp_id: "test-pdp".to_string(),
         };
         logger.log_any(log_entry);
 
@@ -506,10 +511,15 @@ mod test {
 
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
+            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            kind: LogType::Decision,
-            id: "some_uuid_string".into(),
-            msg: "this is a test log entry".into(),
+            log_kind: LogType::Decision,
+            decision: "ALLOW".to_string(),
+            action: "Test".to_string(),
+            principal: vec!["Jans::User".to_string()],
+            resource: "Jans::Issue".to_string(),
+            application_id: "test_app".to_string(),
+            pdp_id: "test-pdp".to_string(),
         };
         logger.log_any(log_entry);
 
@@ -700,9 +710,15 @@ mod test {
         server
             .mock("POST", log_path)
             .match_body(mockito::Matcher::PartialJson(json!([{
-                "level": "TRACE",
-                "id": "some_uuid_string",
-                "msg": "this is a test log entry",
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "severity_level": "TRACE",
+                "action": "Test",
+                "decision_result": "ALLOW",
+                "requested_resource": "Jans::Issue",
+                "principal_id": "Jans::User",
             }])))
             .expect(1)
             .create()
@@ -734,10 +750,15 @@ mod test {
 
     #[derive(Serialize, Clone)]
     struct MockLogEntry {
+        timestamp: String,
         level: LogLevel,
-        kind: LogType,
-        id: String,
-        msg: String,
+        log_kind: LogType,
+        decision: String,
+        action: String,
+        principal: Vec<String>,
+        resource: String,
+        application_id: String,
+        pdp_id: String,
     }
 
     impl Loggable for MockLogEntry {
@@ -746,7 +767,7 @@ mod test {
         }
 
         fn get_log_kind(&self) -> Option<crate::log::LogType> {
-            Some(self.kind)
+            Some(self.log_kind)
         }
     }
 
