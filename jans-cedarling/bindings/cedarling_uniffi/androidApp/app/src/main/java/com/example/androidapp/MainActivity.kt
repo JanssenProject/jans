@@ -24,15 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.androidapp.ui.theme.AndroidAppTheme
-import com.example.androidapp.utils.jsonToMapWithStringType
+import com.example.androidapp.utils.jsonToTokenInputList
 import com.example.androidapp.utils.readJsonFromAssets
+import com.example.androidapp.utils.readZipFromAssets
 import com.example.androidapp.widgets.DataCard
 import com.example.androidapp.widgets.RadioButtonGroup
 import com.example.androidapp.widgets.StateDialog
-import uniffi.cedarling_uniffi.*;
 import com.google.gson.Gson
-import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
+import uniffi.cedarling_uniffi.Cedarling
+import uniffi.cedarling_uniffi.EntityData
+import uniffi.cedarling_uniffi.JsonValue
+import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult
+import uniffi.cedarling_uniffi.TokenInput
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,13 +63,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CardListScreen() {
     val contextApplication = androidx.compose.ui.platform.LocalContext.current
-    var bootstrapConfig by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "bootstrap.json")) }
-    var resource by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "resource.json")) }
-    var context by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "context.json")) }
-    var tokens by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "tokens.json")) }
+    val bootstrapConfig by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "bootstrap.json")) }
+    val resource by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "resource.json")) }
+    val context by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "context.json")) }
+    val tokens by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "tokens.json")) }
     var logType by rememberSaveable { mutableStateOf("Decision") }
-    var action by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "action.txt")) }
-
+    val action by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "action.txt")) }
+    val policyStoreByteArray = remember(contextApplication) {
+        readZipFromAssets(contextApplication, "MyStore.cjar")
+    }
     var showDialog by remember { mutableStateOf(false) } // Controls modal visibility
 
 
@@ -85,9 +91,7 @@ fun CardListScreen() {
             )
         }
         tokens?.let {
-            val map: Map<String, Any> = remember(it) {
-                Gson().fromJson(it, object : TypeToken<Map<String, Any>>() {}.type)
-            }
+            val map: List<TokenInput> = remember(it) { jsonToTokenInputList(it) }
             map.forEach { (key, value) ->
                 DataCard(
                     key,
@@ -119,24 +123,24 @@ fun CardListScreen() {
         // Display the modal dialog
         if (showDialog) {
             val instance: Cedarling? = bootstrapConfig?.let {
-                Cedarling.loadFromJson(it);
+                policyStoreByteArray?.let { it1 -> Cedarling.loadFromJsonWithArchiveBytes(it, it1) };
             };
 
+            val tokenList: List<TokenInput>? = tokens?.let { jsonToTokenInputList(it) };
+
+
             val nonNullableAction: String = action.orEmpty()
+
             val nonNullableResource: String = resource.orEmpty();
             val nonNullableContext: String = context.orEmpty();
             val jsonContext: JsonValue = nonNullableContext;
-
-            val principalsList: List<EntityData>? = readJsonFromAssets(contextApplication, "principals.json")?.let { principalsStr ->
-                JsonParser.parseString(principalsStr).asJsonArray.map { element ->
-                    EntityData.fromJson(element.toString())
-                }
-            };
-
-            val result: AuthorizeResult? = instance?.let { inst ->
-                principalsList?.let { principals ->
-                    inst.authorizeUnsigned(principals, nonNullableAction, EntityData.fromJson(nonNullableResource), jsonContext)
-                }
+            val result: MultiIssuerAuthorizeResult? = tokenList?.let {
+                instance?.authorizeMultiIssuer(
+                    it,
+                    nonNullableAction,
+                    EntityData.fromJson(nonNullableResource),
+                    jsonContext
+                )
             };
 
             val logs: List<String>? = instance?.getLogsByRequestIdAndTag(result?.requestId.orEmpty(), logType)
