@@ -536,7 +536,7 @@ spec:
   - {{ .Values.fqdn | quote }}
   rules:
   {{- /* 1. Lock Server Audit */}}
-  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
+  {{- /* DONT use URL rewrite to forward `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService` as AIO image handles it internally */}}
   {{- if ne (index .Values "gateway-api" "gateway" "className") "nginx" }}
   - matches:
     - path:

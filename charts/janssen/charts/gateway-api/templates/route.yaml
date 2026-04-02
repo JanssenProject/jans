@@ -691,13 +691,13 @@ spec:
     - method:
         service: io.jans.lock.audit.AuditService
         method: ProcessBulkTelemetry
-    {{- if and (eq .Values.gateway.className "nginx") (.Values.additionalConfig.nginx.enableGrpcRewriteSnippets) }}
+    {{- if and (eq .Values.gateway.className "nginx") (.Values.additionalConfig.nginx.enableAuditGrpcRewriteSnippets) }}
     filters:
     - type: ExtensionRef
       extensionRef:
         group: gateway.nginx.org
         kind: SnippetsFilter
-        name: {{ .Release.Name }}-nginx-grpc-rewrite
+        name: {{ .Release.Name }}-nginx-audit-grpc-rewrite
     {{- end }}
     backendRefs:
     - name: {{ $authSvc }}-grpc

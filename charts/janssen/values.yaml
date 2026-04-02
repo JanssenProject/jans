@@ -1228,10 +1228,10 @@ gateway-api:
   additionalConfig:
     # -- Configuration for NGINX Fabric.
     nginx:
-      # -- Enable URL rewrite to proxy gRPC requests to /jans-auth.
+      # -- Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`.
       # Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500).
-      # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup
-      enableGrpcRewriteSnippets: false
+      # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup.
+      enableAuditGrpcRewriteSnippets: false
     # -- Configuration for Traefik.
     traefik: {}
     # -- Configuration for Istio.

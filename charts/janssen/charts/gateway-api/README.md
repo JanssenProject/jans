@@ -24,7 +24,7 @@ Kubernetes: `>=v1.23.0-0`
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{"enableGrpcRewriteSnippets":false},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
+| additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{"enableAuditGrpcRewriteSnippets":false},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
 | additionalConfig.airlock | object | `{"createLbService":false}` | Configuration for Airlock Microgateway |
 | additionalConfig.airlock.createLbService | bool | `false` | Create LoadBalancer service using GatewayParameters (by default airlock-microgateway doesn't create the service). See https://docs.airlock.com/microgateway/latest/index/api/crds/gateway-parameters/v1alpha1/ for details. The GatewayParameters will be attached to gateway.infrastructure.parametersRef only if it's empty. |
 | additionalConfig.cilium | object | `{"ipPoolBlocks":[]}` | Configuration for Cilium. |
@@ -33,8 +33,8 @@ Kubernetes: `>=v1.23.0-0`
 | additionalConfig.envoy.createGatewayClass | bool | `false` | Create GatewayClass named `envoy` (by default Envoy doesn't create gatewayclass). The `envoy` name can be set as value of `gateway.className` attribute. |
 | additionalConfig.istio | object | `{}` | Configuration for Istio. |
 | additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
-| additionalConfig.nginx | object | `{"enableGrpcRewriteSnippets":false}` | Configuration for NGINX Fabric. |
-| additionalConfig.nginx.enableGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to proxy gRPC requests to /jans-auth. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup |
+| additionalConfig.nginx | object | `{"enableAuditGrpcRewriteSnippets":false}` | Configuration for NGINX Fabric. |
+| additionalConfig.nginx.enableAuditGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup |
 | additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
 | fullnameOverride | string | `""` |  |
 | gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","enabled":true,"httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
