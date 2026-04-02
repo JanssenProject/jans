@@ -323,6 +323,31 @@ pub(crate) struct DecisionLogEntry {
     pub pushed_data: Option<PushedDataInfo>,
 }
 
+/// log entry for telemetry metrics
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct MetricsLogEntry {
+    /// base information of entry
+    /// it is unwrap to flatten structure
+    #[serde(flatten)]
+    pub base: BaseLogEntry,
+    /// Number of policies loaded
+    pub loaded_policies: i64,
+    /// Total number of allowed requests
+    pub total_allows: i64,
+    /// Total number of denied requests
+    pub total_denies: i64,
+    /// Last policy evaluation time in nanoseconds
+    pub last_decision_time: i64,
+    /// Average policy evaluation time in nanoseconds
+    pub average_decision_time: i64,
+    /// Number of evaluation requests processed
+    pub evaluation_requests: i64,
+    /// Memory usage in bytes
+    pub memory_usage: i64,
+    /// Policy statistics
+    pub policy_stats: HashMap<String, i64>,
+}
+
 /// Information about pushed data injected into the authorization context
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub(crate) struct PushedDataInfo {
@@ -365,6 +390,30 @@ impl Indexed for DecisionLogEntry {
 }
 
 impl Loggable for DecisionLogEntry {
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
+}
+
+impl Indexed for MetricsLogEntry {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
+    }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for MetricsLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
