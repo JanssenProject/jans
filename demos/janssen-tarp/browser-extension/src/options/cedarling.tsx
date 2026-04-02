@@ -148,7 +148,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                 <TableHead>
                                     <TableRow>
                                         <StyledTableCell />
-                                        <StyledTableCell>Bootstrap Configuration</StyledTableCell>
+                                        <StyledTableCell headerColor="black">Bootstrap Configuration</StyledTableCell>
                                         <StyledTableCell align="right">Action</StyledTableCell>
                                     </TableRow>
                                 </TableHead>

@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import initWasm, { init, Cedarling } from "@janssenproject/cedarling_wasm";
+import initWasm, { init } from "@janssenproject/cedarling_wasm";
 import { v4 as uuidv4 } from 'uuid';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -130,15 +130,14 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
       await initWasm();
       await init(bootstrap);
 
-      chrome.storage.local.get(["cedarlingConfig"], (result) => {
-        let bootstrapArr = []
+      chrome.storage.local.get(["cedarlingConfig"], ({ cedarlingConfig = [] }) => {
+        const updatedConfig = [
+          ...cedarlingConfig,
+          { ...bootstrap, id: uuidv4() }
+        ];
 
-        let idObj = { id: uuidv4() };
-
-        bootstrapArr.push({ ...bootstrap, ...idObj });
-        chrome.storage.local.set({ cedarlingConfig: bootstrapArr });
-        handleClose();
-      });
+        chrome.storage.local.set({ cedarlingConfig: updatedConfig }, handleClose);
+});
     } catch (err) {
       console.error(err)
       setErrorMessage(ADD_BOOTSTRAP_ERROR + err)

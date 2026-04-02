@@ -89,12 +89,14 @@ export default function UnsignedAuthzForm({ data }) {
     };
 
     const resetInputs = () => {
-        setFormFields({
+        const emptyRequest = {
             principals: [],
             action: "",
             context: {},
             resource: {}
-        });
+        };
+        setFormFields(emptyRequest);
+        chrome.storage.local.set({ 'authzRequest_unsigned': emptyRequest });
     };
 
     return (

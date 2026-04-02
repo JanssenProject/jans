@@ -29,16 +29,25 @@ const SignedAuthzForm = ({ data }) => {
     React.useEffect(() => {
         if (!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0) {
             setCedarlingConfig(data?.cedarlingConfig);
-            setCedarlingBootstrapPresent((!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0));
+            setCedarlingBootstrapPresent(true);
+        } else {
+            setCedarlingConfig([]);
+            setCedarlingBootstrapPresent(false);
         }
-        setLoginDetails(data?.loginDetails);
+        setLoginDetails(data?.loginDetails ?? { access_token: "", id_token: "", userDetails: "" });
 
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
             if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
+                const storedRequest = authzRequest.authzRequest;
                 setFormFields({
-                    action: authzRequest.authzRequest.action,
-                    context: authzRequest.authzRequest.context,
-                    resource: authzRequest.authzRequest.resource
+                    action: storedRequest.action,
+                    context: storedRequest.context,
+                    resource: storedRequest.resource
+                });
+                setTokenSelection({
+                    accessToken: Boolean(storedRequest.tokens?.access_token),
+                    userInfo: Boolean(storedRequest.tokens?.userinfo_token),
+                    idToken: Boolean(storedRequest.tokens?.id_token),
                 });
             }
         });
@@ -107,6 +116,7 @@ const SignedAuthzForm = ({ data }) => {
             resource: {}
         });
         setTokenSelection({ accessToken: false, userInfo: false, idToken: false });
+        chrome.storage.local.remove(['authzRequest']);
     };
 
     return (

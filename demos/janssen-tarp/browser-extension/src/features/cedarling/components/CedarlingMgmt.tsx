@@ -28,8 +28,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import StyledTableCell from '../../../shared/components/StyledTableCell';
 
-function Row(props: { row: any, notifyOnDataChange }) {
-    const { row, notifyOnDataChange } = props;
+function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void }) {
+    const { row, rowIndex, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
 
     const handleDialog = (isOpen) => {
@@ -39,10 +39,13 @@ function Row(props: { row: any, notifyOnDataChange }) {
 
     async function resetBootstrap() {
         chrome.storage.local.get(["cedarlingConfig"], (result) => {
-            let cedarlingConfigArr = []
-            chrome.storage.local.set({ cedarlingConfig: cedarlingConfigArr });
+        const cedarlingConfigArr = Array.isArray(result.cedarlingConfig)
+                ? result.cedarlingConfig.filter((_: unknown, index: number) => index !== rowIndex)
+                : [];
+            chrome.storage.local.set({ cedarlingConfig: cedarlingConfigArr }, () => {
+                notifyOnDataChange();
+            });
         });
-        notifyOnDataChange();
     }
 
     return (
@@ -157,7 +160,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                 <TableBody>
                                     {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ?
                                         <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                        cedarlingConfig.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
+                                        cedarlingConfig.map((row, index) => (<Row key={index} rowIndex={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
                                     }
                                 </TableBody>
                             </Table>

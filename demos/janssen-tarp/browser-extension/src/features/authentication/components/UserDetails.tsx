@@ -390,12 +390,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         </AccordionSummary>
                         <AccordionDetails>
                             <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                                <p>{showPayloadAT ? (!!data ?
+                                <Box component="div">{showPayloadAT ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.access_token.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.access_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                                     </>
-                                    : '') : (!!data ? data?.access_token : '')}</p>
+                                    : '') : (!!data ? data?.access_token : '')}</Box>
                                 <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
                             </Box>
                         </AccordionDetails>
