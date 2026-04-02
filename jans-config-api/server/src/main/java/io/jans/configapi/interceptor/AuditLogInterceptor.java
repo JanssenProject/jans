@@ -52,7 +52,7 @@ public class AuditLogInterceptor {
 
             // return if audit disabled
             if (apiAppConfiguration.isDisableAuditLogger()) {
-                AUDIT_LOG.error("Audit is disabled by disableAuditLogger config.");
+                LOG.debug("Audit logging is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
 
@@ -74,7 +74,7 @@ public class AuditLogInterceptor {
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
                 // Log request without data
-                AUDIT_LOG.error("User:{} {} {} using client:{}", userInum, getAction(method),
+                AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method),
                         getResource(uriInfo.getPath()), client);
 
                 if (auditLogConf.isLogData()) {
@@ -90,7 +90,7 @@ public class AuditLogInterceptor {
     }
 
     private void processRequest(InvocationContext context, AuditLogConf auditLogConf) {
-        LOG.info("Process Audit Log Interceptor - context:{}, auditLogConf:{}", context, auditLogConf);
+        LOG.debug("Processing audit request data - method:{}", context.getMethod().getName());
 
         Object[] ctxParameters = context.getParameters();
         Method method = context.getMethod();
@@ -119,7 +119,7 @@ public class AuditLogInterceptor {
                     LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",
                             ignoreObject(propertyName, obj, auditLogConf));
 
-                    AUDIT_LOG.error("{}:{}", propertyName, obj);
+                    AUDIT_LOG.info("{}:{}", propertyName, obj);
                 }
             }
         }
