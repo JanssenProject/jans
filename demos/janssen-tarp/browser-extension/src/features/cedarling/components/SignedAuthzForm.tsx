@@ -55,7 +55,7 @@ const SignedAuthzForm = ({ data }) => {
                     instance = await init(!Utils.isEmpty(cedarlingConfig) ? cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    setAuthzResult(result.json_string())
+                    setAuthzResult(result.json_string());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
@@ -93,9 +93,11 @@ const SignedAuthzForm = ({ data }) => {
 
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
-        newLogType: string,
+        newLogType: string | null,
     ) => {
-        setLogType(newLogType);
+        if (newLogType) {
+            setLogType(newLogType);
+        }
     };
 
     const resetInputs = () => {

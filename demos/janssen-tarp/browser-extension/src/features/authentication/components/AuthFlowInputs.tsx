@@ -10,9 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Box from '@mui/material/Box';
-import Tooltip from '@mui/material/Tooltip';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { labelWithTooltip } from '../../../shared/components/Common';
 import qs from 'qs';
 import axios from 'axios';
 import Utils from '../../../options/Utils';
@@ -21,20 +19,11 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import { ILooseObject } from '../../../shared/types';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import AuthenticationService from '../services/authenticationService';
 const createOption = (label: string) => ({
   name: label,
 });
 const filter = createFilterOptions();
 
-  const labelWithTooltip = (label: string, tooltip: string) => (
-    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-      {label}
-      <Tooltip title={tooltip} placement="top" arrow>
-        <InfoOutlinedIcon sx={{ fontSize: 18, opacity: 0.75 }} />
-      </Tooltip>
-    </Box>
-  );
 /**
  * Renders a dialog that collects optional inputs (additional params, ACR values, scopes, and a display-token toggle)
  * and initiates an OAuth2/OIDC authorization code flow using the selected client configuration.

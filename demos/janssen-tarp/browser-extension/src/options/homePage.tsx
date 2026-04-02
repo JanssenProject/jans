@@ -6,11 +6,10 @@ import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import OIDCClients from '../features/authentication/components/OIDCClients';
 import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
 import Utils from './Utils';
-import UserDetails from '../features/authentication/components/UserDetails'
+import { OIDCClients, UserDetails } from '../features/authentication';
 import {AIAgent} from '../ai/agentUI/index'
 
 interface TabPanelProps {
@@ -95,9 +94,12 @@ export default function HomePage({ data, notifyOnDataChange }) {
             },
           }}
         >
-          {isLoggedIn ?
-            <Tab label="User Details" icon={<Password />} iconPosition="start" {...a11yProps(0)} /> :
-            <Tab label="Authentication" icon={<Password />} iconPosition="start" {...a11yProps(0)} />}
+           <Tab
+            label={isLoggedIn ? 'User Details' : 'Authentication'}
+            icon={<Password />}
+            iconPosition="start"
+            {...a11yProps(0)}
+          />
           <Tab label="Cedarling" icon={<LockPerson />} iconPosition="start" {...a11yProps(1)} />
           <Tab label="AI Agent" icon={<SmartToyOutlinedIcon />} iconPosition="start" {...a11yProps(2)} />
         </Tabs>

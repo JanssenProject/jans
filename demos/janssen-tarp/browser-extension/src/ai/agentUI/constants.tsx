@@ -67,7 +67,7 @@ export function getProviderColor(provider: string): string {
     case 'openai': return '#2196f3';
     case 'gemini': return '#ff9800';
     case 'deepseek': return '#4caf50';
-    default: return '#2196f3';
+    default: return '#9e9e9e';
   }
 }
 

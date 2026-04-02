@@ -56,7 +56,7 @@ const CedarlingSignedAuthz = ({ data }) => {
                     let result: AuthorizeResult = await instance.authorize(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
                     setAuthzResult(result.json_string())
-                    if (logs.length != 0) {
+                    if (logs.length !== 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
                     }

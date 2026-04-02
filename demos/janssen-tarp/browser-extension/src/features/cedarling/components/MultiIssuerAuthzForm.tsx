@@ -61,7 +61,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
     const [loginDetails, setLoginDetails] = React.useState<{
             access_token?: string;
             id_token?: string;
-            userDetails?: Record<string, unknown>;
+            userDetails?: string;
         } | null>(null);
     React.useEffect(() => {
         setLoginDetails(data?.loginDetails ?? null);

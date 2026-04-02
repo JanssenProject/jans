@@ -47,6 +47,10 @@ export default class AuthClientService {
           clientArr = result.oidcClients;
         }
 
+        if (!structured?.client_id || !structured?.client_secret) {
+          throw new Error("Registration response missing required client credentials");
+        }
+
         clientArr.push({
           'opHost': issuer,
           'clientId': structured?.client_id,

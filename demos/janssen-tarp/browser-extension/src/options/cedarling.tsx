@@ -27,17 +27,7 @@ import Alert from '@mui/material/Alert';
 import { JsonEditor } from 'json-edit-react'
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.primary.dark,
-        color: theme.palette.common.white,
-        fontWeight: 700,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
+import StyledTableCell from '../shared/components/StyledTableCell';
 
 function Row(props: { row: any, notifyOnDataChange }) {
     const { row, notifyOnDataChange } = props;

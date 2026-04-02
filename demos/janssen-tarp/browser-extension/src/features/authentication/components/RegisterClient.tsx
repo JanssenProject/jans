@@ -8,9 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { v4 as uuidv4 } from 'uuid';
 import CircularProgress from "@mui/material/CircularProgress";
-import Box from '@mui/material/Box';
-import Tooltip from '@mui/material/Tooltip';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { labelWithTooltip } from '../../../shared/components/Common';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -34,15 +32,6 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
   const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.'
   const filter = createFilterOptions();
-
-  const labelWithTooltip = (label: string, tooltip: string) => (
-    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-      {label}
-      <Tooltip title={tooltip} placement="top" arrow>
-        <InfoOutlinedIcon sx={{ fontSize: 18, opacity: 0.75 }} />
-      </Tooltip>
-    </Box>
-  );
 
   React.useEffect(() => {
     if (isOpen) {

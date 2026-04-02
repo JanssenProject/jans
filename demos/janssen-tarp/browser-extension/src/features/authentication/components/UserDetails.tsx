@@ -10,14 +10,13 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { jwtDecode } from "jwt-decode";
-import { IJWT } from '../../../shared/types';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { pink } from '@mui/material/colors';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
-import { OpenIDConfiguration, LogoutOptions, LoginDetails } from '../../../shared/types';
+import { OpenIDConfiguration, LogoutOptions, LoginDetails, IJWT } from '../../../shared/types';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);

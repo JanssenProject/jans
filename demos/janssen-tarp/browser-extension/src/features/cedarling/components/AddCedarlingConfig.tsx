@@ -105,7 +105,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
       setErrorMessage('Empty authorization request not allowed.');
       return false;
     }
-    isJsonValid(bootstrap);
+    await isJsonValid(bootstrap);
   };
 
   const isJsonValid = async (bootstrap) => {
@@ -123,12 +123,12 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const saveBootstrap = async () => {
     try {
       setLoading(true);
-      if (!isJsonValid(bootstrap)) {
+      if (!(await isJsonValid(bootstrap))) {
         return;
       }
 
       await initWasm();
-      let instance: Cedarling = await init(bootstrap);
+      await init(bootstrap);
 
       chrome.storage.local.get(["cedarlingConfig"], (result) => {
         let bootstrapArr = []

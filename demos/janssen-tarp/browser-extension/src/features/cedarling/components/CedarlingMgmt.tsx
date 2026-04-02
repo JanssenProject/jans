@@ -51,8 +51,8 @@ function Row(props: { row: any, notifyOnDataChange }) {
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <Tooltip title="Delete">
-                        <IconButton aria-label="Delete">
-                            <DeleteForeverOutlinedIcon sx={{ color: pink[500] }} onClick={resetBootstrap} />
+                        <IconButton aria-label="Delete" onClick={resetBootstrap}>
+                            <DeleteForeverOutlinedIcon sx={{ color: pink[500] }}/>
                         </IconButton>
                     </Tooltip>
                 </TableCell>
@@ -70,13 +70,14 @@ function Row(props: { row: any, notifyOnDataChange }) {
                 <TableCell component="th" scope="row">
                     <Grid size={{ xs:8}}>
                         <Tooltip title="Edit">
-                            <IconButton aria-label="Edit">
+                            <IconButton aria-label="Edit"
+                                onClick={() => {
+                                    setOpen(true);
+                                    notifyOnDataChange();
+                                }}>
                                 <Edit
                                     sx={{ color: green[500] }}
-                                    onClick={() => {
-                                        setOpen(true);
-                                        notifyOnDataChange();
-                                    }} />
+                                 />
                             </IconButton>
                         </Tooltip>
                     </Grid>
@@ -107,9 +108,11 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
 
     const handleScreenChange = (
         event: React.MouseEvent<HTMLElement>,
-        newScreenType: string,
+        newScreenType: string | null,
     ) => {
+        if (newScreenType) {
         setScreenType(newScreenType);
+        }
     };
 
     return (
