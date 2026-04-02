@@ -27,7 +27,7 @@ Use the table below to determine the current status of your installed version.
 
 | Version    | Release Date (GA) | End of Maintenance | End of Life (Support) | Status                |
 |------------|-------------------|--------------------|-----------------------|-----------------------|
-| **v1.x.0** | 2024-03-14        | 2025-04-10(Projected)| 2026-11-14 (Projected)| **Active**            |
+| **v1.x.0** | 2024-03-14        | 2025-04-10         | 2026-11-14 (Projected)| **Active**            |
 | **v1.0.x** | 2022-05-19        | 2023-05-19         | 2024-05-19            | **EOL**               |
 
 ---
