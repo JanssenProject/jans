@@ -48,6 +48,10 @@ impl Loggable for LockLogEntry {
     fn get_log_level(&self) -> Option<crate::LogLevel> {
         Some(self.level)
     }
+
+    fn get_log_kind(&self) -> Option<crate::log::LogType> {
+        None
+    }
 }
 
 impl Indexed for LockLogEntry {

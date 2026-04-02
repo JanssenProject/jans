@@ -248,6 +248,21 @@ where
         Ok(false)
     }
 
+    /// Check if a path is a file in the archive.
+    #[cfg(test)]
+    pub(super) fn is_file(&self, path: &str) -> bool {
+        let normalized = Self::normalize_path(path);
+        let Ok(mut archive) = self.archive.lock() else {
+            return false;
+        };
+
+        if let Ok(file) = archive.by_name(&normalized) {
+            return file.is_file();
+        }
+
+        false
+    }
+
     /// Check if a path is a directory in the archive.
     fn is_directory(&self, path: &str) -> Result<bool, std::io::Error> {
         let normalized = Self::normalize_path(path);
@@ -317,19 +332,6 @@ where
 
     fn is_dir(&self, path: &str) -> bool {
         self.is_directory(path).unwrap_or(false)
-    }
-
-    fn is_file(&self, path: &str) -> bool {
-        let normalized = Self::normalize_path(path);
-        let Ok(mut archive) = self.archive.lock() else {
-            return false;
-        };
-
-        if let Ok(file) = archive.by_name(&normalized) {
-            return file.is_file();
-        }
-
-        false
     }
 
     fn read_dir(&self, path: &str) -> Result<Vec<DirEntry>, std::io::Error> {

@@ -5,7 +5,6 @@
 
 #[cfg(test)]
 mod archive_security_tests;
-mod claim_mapping;
 pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
@@ -25,7 +24,6 @@ pub(crate) mod errors;
 pub(crate) mod issuer_parser;
 pub(crate) mod loader;
 pub(crate) mod manager;
-pub(crate) mod manifest_validator;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
@@ -33,13 +31,12 @@ pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
-use cedar_policy::{Policy, PolicyId};
+use cedar_policy::{ActionConstraint, EntityTypeName, EntityUid, Policy, PolicyId};
 use semver::Version;
-use serde::{Deserialize, Deserializer, de, de::Error};
-use std::collections::HashMap;
+use serde::{Deserialize, Deserializer, Serialize, de, de::Error};
+use std::collections::{HashMap, HashSet};
 use url::Url;
 
-pub(crate) use claim_mapping::ClaimMappings;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -223,6 +220,7 @@ pub struct TrustedIssuer {
     // attribute is private to force usage `iss_claim` method to get normalized iss claim
     #[serde(
         rename = "openid_configuration_endpoint",
+        alias = "configuration_endpoint",
         deserialize_with = "de_oidc_endpoint_url"
     )]
     oidc_endpoint: Url,
@@ -299,16 +297,6 @@ impl TrustedIssuer {
     /// If you need comparison with `iss` claim, use `iss_claim` method instead.
     pub(crate) fn get_oidc_endpoint(&self) -> &Url {
         &self.oidc_endpoint
-    }
-
-    pub(crate) fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
-        self.token_metadata
-            .get(token_name)
-            .map(|x| &x.claim_mapping)
-    }
-
-    pub(crate) fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
-        self.token_metadata.get(token_name)
     }
 
     pub(crate) fn iss_claim(&self) -> IssClaim {
@@ -532,6 +520,88 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principal types, action UIDs, and resource types.
+    ///
+    /// Filtering is scope-level only: policies with `when`/`unless` conditions
+    /// may still not apply at evaluation time. The returned set is a superset
+    /// of truly applicable policies.
+    pub fn get_matching_policies(
+        &self,
+        principal_entity_type_names: &HashSet<EntityTypeName>,
+        action_uids: &HashSet<EntityUid>,
+        resource_entity_type_names: &HashSet<EntityTypeName>,
+    ) -> Vec<PolicyMetadata> {
+        self.policy_set
+            .policies()
+            .filter(|policy| {
+                matches_principal(policy, principal_entity_type_names)
+                    && matches_action(policy, action_uids)
+                    && matches_resource(policy, resource_entity_type_names)
+            })
+            .map(PolicyMetadata::from_policy)
+            .collect()
+    }
+}
+
+/// Metadata about a single Cedar policy.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct PolicyMetadata {
+    /// The policy ID
+    pub id: String,
+    /// Key-value pairs from Cedar policy annotations (`@key("value")`)
+    pub annotations: HashMap<String, String>,
+    /// The Cedar policy source code (human-readable Cedar syntax)
+    pub source: String,
+}
+
+impl PolicyMetadata {
+    fn from_policy(policy: &Policy) -> Self {
+        Self {
+            id: policy.id().to_string(),
+            annotations: policy
+                .annotations()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            source: policy.to_string(),
+        }
+    }
+}
+
+/// Check if a policy's principal scope constraint matches any of the given principal entity types.
+fn matches_principal(policy: &Policy, principal_types: &HashSet<EntityTypeName>) -> bool {
+    use cedar_policy::PrincipalConstraint;
+    match policy.principal_constraint() {
+        PrincipalConstraint::Any => true,
+        PrincipalConstraint::Eq(euid) | PrincipalConstraint::In(euid) => {
+            principal_types.contains(euid.type_name())
+        },
+        PrincipalConstraint::Is(type_name)
+        | PrincipalConstraint::IsIn(type_name, _) => principal_types.contains(&type_name),
+    }
+}
+
+/// Check if a policy's action scope constraint matches any of the given action UIDs.
+fn matches_action(policy: &Policy, action_uids: &HashSet<EntityUid>) -> bool {
+    match policy.action_constraint() {
+        ActionConstraint::Any => true,
+        ActionConstraint::Eq(euid) => action_uids.contains(&euid),
+        ActionConstraint::In(euids) => euids.iter().any(|euid| action_uids.contains(euid)),
+    }
+}
+
+/// Check if a policy's resource scope constraint matches any of the given resource entity types.
+fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -> bool {
+    use cedar_policy::ResourceConstraint;
+    match policy.resource_constraint() {
+        ResourceConstraint::Any => true,
+        ResourceConstraint::Eq(euid) | ResourceConstraint::In(euid) => {
+            resource_types.contains(euid.type_name())
+        },
+        ResourceConstraint::Is(type_name)
+        | ResourceConstraint::IsIn(type_name, _) => resource_types.contains(&type_name),
+    }
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -627,16 +697,6 @@ where
     Ok(policy)
 }
 
-/// Custom parser for an Option<String> which returns `None` if the string is empty.
-fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = Option::<String>::deserialize(deserializer)?;
-
-    Ok(value.filter(|s| !s.is_empty()))
-}
-
 /// Custom deserializer for `PolicyStore` that provides better error messages
 impl<'de> Deserialize<'de> for PolicyStore {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -722,5 +782,286 @@ impl<'de> Deserialize<'de> for PolicyStore {
         };
 
         Ok(store)
+    }
+}
+
+#[cfg(test)]
+mod policy_metadata_tests {
+    use super::*;
+    use cedar_policy::{EntityTypeName, EntityUid, PolicySet};
+    use std::collections::HashSet;
+    use std::str::FromStr;
+
+    /// Helper: build a `PoliciesContainer` from individual policies with explicit IDs.
+    fn make_container(policies: &[(&str, &str)]) -> PoliciesContainer {
+        let mut policy_set = PolicySet::new();
+        for (id, src) in policies {
+            let policy =
+                Policy::parse(Some(PolicyId::new(id)), *src).expect("bad policy");
+            policy_set.add(policy).expect("duplicate policy id");
+        }
+        PoliciesContainer::new_empty(policy_set)
+    }
+
+    fn type_names(names: &[&str]) -> HashSet<EntityTypeName> {
+        names
+            .iter()
+            .map(|n| EntityTypeName::from_str(n).unwrap())
+            .collect()
+    }
+
+    fn action_uids(actions: &[&str]) -> HashSet<EntityUid> {
+        actions
+            .iter()
+            .map(|a| EntityUid::from_str(a).unwrap())
+            .collect()
+    }
+
+    #[test]
+    fn matches_all_policies_with_any_constraints() {
+        let container = make_container(&[(
+            "open",
+            "permit(principal, action, resource);",
+        )]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Foo::Bar"]),
+            &action_uids(&[r#"Foo::Action::"read""#]),
+            &type_names(&["Foo::Resource"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "open");
+    }
+
+    #[test]
+    fn filters_by_action() {
+        let container = make_container(&[
+            (
+                "read_policy",
+                r#"permit(principal, action == Jans::Action::"Read", resource);"#,
+            ),
+            (
+                "write_policy",
+                r#"permit(principal, action == Jans::Action::"Write", resource);"#,
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Document"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "read_policy");
+    }
+
+    #[test]
+    fn filters_by_principal_type() {
+        let container = make_container(&[
+            (
+                "workload_policy",
+                "permit(principal is Jans::Workload, action, resource);",
+            ),
+            (
+                "user_policy",
+                "permit(principal is Jans::User, action, resource);",
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Doc"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "user_policy");
+    }
+
+    #[test]
+    fn filters_by_resource_type() {
+        let container = make_container(&[
+            (
+                "issue_policy",
+                "permit(principal, action, resource is Jans::Issue);",
+            ),
+            (
+                "doc_policy",
+                "permit(principal, action, resource is Jans::Document);",
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Issue"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "issue_policy");
+    }
+
+    #[test]
+    fn combined_filtering() {
+        let container = make_container(&[
+            (
+                "specific",
+                r#"permit(
+                    principal is Jans::User,
+                    action == Jans::Action::"Read",
+                    resource is Jans::Document
+                );"#,
+            ),
+            (
+                "other_action",
+                r#"permit(
+                    principal is Jans::User,
+                    action == Jans::Action::"Delete",
+                    resource is Jans::Document
+                );"#,
+            ),
+            (
+                "other_principal",
+                r#"permit(
+                    principal is Jans::Workload,
+                    action == Jans::Action::"Read",
+                    resource is Jans::Document
+                );"#,
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Document"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "specific");
+    }
+
+    #[test]
+    fn action_in_constraint() {
+        let container = make_container(&[(
+            "multi_action",
+            r#"permit(
+                principal,
+                action in [Jans::Action::"Read", Jans::Action::"List"],
+                resource
+            );"#,
+        )]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Doc"]),
+        );
+        assert_eq!(result.len(), 1);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Delete""#]),
+            &type_names(&["Jans::Doc"]),
+        );
+        assert_eq!(result.len(), 0);
+    }
+
+    #[test]
+    fn annotations_are_extracted() {
+        let mut policy_set = PolicySet::new();
+        let policy = Policy::parse(
+            Some(PolicyId::new("annotated")),
+            r#"
+            @description("Allow users to read docs")
+            @category("access_control")
+            permit(principal, action, resource);
+            "#,
+        )
+        .unwrap();
+        policy_set.add(policy).unwrap();
+        let container = PoliciesContainer::new_empty(policy_set);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Doc"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        let policy = &result[0];
+        assert_eq!(
+            policy.annotations.get("description").unwrap(),
+            "Allow users to read docs"
+        );
+        assert_eq!(
+            policy.annotations.get("category").unwrap(),
+            "access_control"
+        );
+    }
+
+    #[test]
+    fn source_is_recoverable() {
+        let container = make_container(&[(
+            "p",
+            "permit(principal, action, resource);",
+        )]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Any::Type"]),
+            &action_uids(&[r#"Any::Action::"do""#]),
+            &type_names(&["Any::Res"]),
+        );
+
+        assert_eq!(result.len(), 1);
+        assert!(result[0].source.contains("permit"));
+    }
+
+    #[test]
+    fn empty_inputs_return_only_any_policies() {
+        let container = make_container(&[
+            ("any_policy", "permit(principal, action, resource);"),
+            (
+                "specific_policy",
+                r#"permit(
+                    principal is Jans::User,
+                    action == Jans::Action::"Read",
+                    resource is Jans::Doc
+                );"#,
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &HashSet::new(),
+            &HashSet::new(),
+            &HashSet::new(),
+        );
+
+        // Only the "any" policy matches — specific constraints can't match empty sets
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].id, "any_policy");
+    }
+
+    #[test]
+    fn multiple_principals_match_union() {
+        let container = make_container(&[
+            (
+                "workload_policy",
+                "permit(principal is Jans::Workload, action, resource);",
+            ),
+            (
+                "user_policy",
+                "permit(principal is Jans::User, action, resource);",
+            ),
+        ]);
+
+        let result = container.get_matching_policies(
+            &type_names(&["Jans::User", "Jans::Workload"]),
+            &action_uids(&[r#"Jans::Action::"Read""#]),
+            &type_names(&["Jans::Doc"]),
+        );
+
+        assert_eq!(result.len(), 2);
     }
 }

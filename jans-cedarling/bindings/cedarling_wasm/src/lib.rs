@@ -6,8 +6,8 @@
 use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, Request,
-    RequestUnsigned,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
+    RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
@@ -159,26 +159,6 @@ impl Cedarling {
 
         let conf_object = Object::from_entries(&conf_js_val)?;
         Self::new(&conf_object).await
-    }
-
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    pub async fn authorize(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-
-        let cedar_request: Request = serde_wasm_bindgen::from_value(request_object)?;
-
-        let result = self
-            .instance
-            .authorize(cedar_request)
-            .await
-            .map_err(Error::new)?;
-        Ok(result.into())
     }
 
     /// Authorize request for unsigned principals.
@@ -451,6 +431,88 @@ impl Cedarling {
             .map(|stats| stats.into())
             .map_err(Error::new)
     }
+
+    /// Check whether a trusted issuer was loaded by issuer identifier.
+    ///
+    /// # Arguments
+    ///
+    /// * `issuer_id` - Trusted issuer identifier to check.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ok = cedarling.is_trusted_issuer_loaded_by_name("issuer_id");
+    /// ```
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    /// Check whether a trusted issuer was loaded by `iss` claim.
+    ///
+    /// # Arguments
+    ///
+    /// * `iss_claim` - Issuer `iss` claim value to check.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ok = cedarling.is_trusted_issuer_loaded_by_iss("https://issuer.example.org");
+    /// ```
+    pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    /// Get the total number of trusted issuer entries discovered.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const total = cedarling.total_issuers();
+    /// ```
+    pub fn total_issuers(&self) -> usize {
+        self.instance.total_issuers()
+    }
+
+    /// Get the number of trusted issuers loaded successfully.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const loadedCount = cedarling.loaded_trusted_issuers_count();
+    /// ```
+    pub fn loaded_trusted_issuers_count(&self) -> usize {
+        self.instance.loaded_trusted_issuers_count()
+    }
+
+    /// Get trusted issuer identifiers loaded successfully.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ids = cedarling.loaded_trusted_issuer_ids();
+    /// ```
+    pub fn loaded_trusted_issuer_ids(&self) -> Array {
+        let result = Array::new();
+        for id in self.instance.loaded_trusted_issuer_ids() {
+            result.push(&id.into());
+        }
+        result
+    }
+
+    /// Get trusted issuer identifiers that failed to load.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ids = cedarling.failed_trusted_issuer_ids();
+    /// ```
+    pub fn failed_trusted_issuer_ids(&self) -> Array {
+        let result = Array::new();
+        for id in self.instance.failed_trusted_issuer_ids() {
+            result.push(&id.into());
+        }
+        result
+    }
 }
 
 /// convert json to js object
@@ -501,13 +563,6 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
 #[wasm_bindgen]
 #[derive(serde::Serialize)]
 pub struct AuthorizeResult {
-    /// Result of authorization where principal is `Jans::Workload`
-    #[wasm_bindgen(getter_with_clone)]
-    pub workload: Option<AuthorizeResultResponse>,
-    /// Result of authorization where principal is `Jans::User`
-    #[wasm_bindgen(getter_with_clone)]
-    pub person: Option<AuthorizeResultResponse>,
-
     #[wasm_bindgen(skip)]
     pub principals: HashMap<String, AuthorizeResultResponse>,
 
@@ -538,12 +593,6 @@ impl AuthorizeResult {
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
     fn from(value: cedarling::AuthorizeResult) -> Self {
         Self {
-            workload: value
-                .workload
-                .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
-            person: value
-                .person
-                .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
             principals: value
                 .principals
                 .into_iter()

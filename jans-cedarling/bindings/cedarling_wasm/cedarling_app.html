@@ -127,13 +127,13 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script type="module">
-        import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js"
+        import { BOOTSTRAP_CONFIG, REQUEST_UNSIGNED } from "/example_data.js"
         import initWasm, { init } from "./pkg/cedarling_wasm.js";
         await initWasm(); // Initialize the WebAssembly module
 
         // Define default config and request
         const DEFAULT_BOOTSTRAP_CONFIG_JSON = JSON.stringify(BOOTSTRAP_CONFIG, null, 2);
-        const REQUEST_JSON = JSON.stringify(REQUEST, null, 2);
+        const REQUEST_JSON = JSON.stringify(REQUEST_UNSIGNED, null, 2);
 
         // Program start here
 
@@ -213,7 +213,7 @@
             try {
                 let request_json = JSON.parse(request_textarea.val());
 
-                let auth_result = await window.cedar_instance.authorize(request_json);
+                let auth_result = await window.cedar_instance.authorize_unsigned(request_json);
                 let auth_result_json = auth_result.json_string();
 
                 // convert JSON to object and apply `JSON.stringify` to have pretty json string

@@ -12,11 +12,8 @@ var bootstrapConfig string = `
 {
         "CEDARLING_APPLICATION_NAME": "TestApp",
         "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "off",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "DEBUG",
@@ -117,107 +114,6 @@ func loadTestConfig(configUpdate func(conf map[string]any)) (map[string]any, err
 		configUpdate(config)
 	}
 	return config, nil
-}
-
-func TestAuthorizeSuccess(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-
-	result, err := instance.Authorize(request)
-	if err != nil {
-		t.Fatalf("Authorization failed: %v", err)
-	}
-
-	if !result.Decision {
-		t.Errorf("Expected allow decision, got DENY")
-	}
-
-	if result.Person.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got DENY")
-	}
-	if !reflect.DeepEqual(result.Person.Reason(), []string{"444da5d85403f35ea76519ed1a18a33989f855bf1cf8"}) {
-		t.Errorf("Expected reason for person to be 444da5d85403f35ea76519ed1a18a33989f855bf1cf8, got %v", result.Person.Reason())
-	}
-
-	if result.Workload.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got %s", result.Workload.Decision().ToString())
-	}
-	if !reflect.DeepEqual(result.Workload.Reason(), []string{"840da5d85403f35ea76519ed1a18a33989f855bf1cf8"}) {
-		t.Errorf("Expected reason for workload to be 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, got %v", result.Workload.Reason())
-	}
-}
-
-func BenchmarkAuthorize(b *testing.B) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		b.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		b.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-	b.ResetTimer()
-	result, err := instance.Authorize(request)
-	if err != nil {
-		b.Fatalf("Authorization failed: %v", err)
-	}
-	if !result.Decision {
-		b.Fatalf("Decision false")
-	}
 }
 
 func BenchmarkAuthorizeUnsigned(b *testing.B) {
@@ -398,46 +294,6 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 
 }
 
-func TestAuthorizeValidationError(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	// Invalid resource - org_id should be string but we set it to int
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  1, // Should be string
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		Context:  nil,
-	}
-
-	_, err = instance.Authorize(request)
-	if err == nil {
-		t.Fatal("Expected validation error, got nil")
-	}
-}
-
 func ExampleNewCedarling() {
 	// load bootstrap config
 	config, err := loadTestConfig(nil)
@@ -458,49 +314,6 @@ func ExampleNewCedarlingWithEnv() {
 		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
 	}
 	instance.ShutDown()
-}
-
-func ExampleCedarling_Authorize() {
-	// load bootstrap configuration
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		fmt.Printf("Failed to load bootstrap config: %v\n", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   "accessTokenJWT",
-			"id_token":       "idTokenJWT",
-			"userinfo_token": "userinfoTokenJWT",
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-
-	result, err := instance.Authorize(request)
-	if err != nil {
-		fmt.Printf("Authorization failed: %v\n", err)
-	}
-	fmt.Println(result.Decision)
-
 }
 
 func ExampleCedarling_AuthorizeUnsigned() {
@@ -585,17 +398,12 @@ func ExampleCedarling_GetLogsByTag() {
 // getMultiIssuerConfig returns configuration for multi-issuer tests
 func getMultiIssuerConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"CEDARLING_APPLICATION_NAME":                     "TestApp",
-		"CEDARLING_POLICY_STORE_ID":                      "a1bf93115de86de760ee0bea1d529b521489e5a11747",
-		"CEDARLING_JWT_SIG_VALIDATION":                   "disabled",
-		"CEDARLING_JWT_STATUS_VALIDATION":                "disabled",
-		"CEDARLING_ID_TOKEN_TRUST_MODE":                  "never",
-		"CEDARLING_POLICY_STORE_LOCAL_FN":                "../../test_files/policy-store-multi-issuer-test.yaml",
-		"CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL": "false",
-		"CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL":     "false",
-		"CEDARLING_USER_AUTHZ":                           "enabled",
-		"CEDARLING_WORKLOAD_AUTHZ":                       "enabled",
-		"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED":   []string{"HS256"},
+		"CEDARLING_APPLICATION_NAME":                   "TestApp",
+		"CEDARLING_POLICY_STORE_ID":                    "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+		"CEDARLING_JWT_SIG_VALIDATION":                 "disabled",
+		"CEDARLING_JWT_STATUS_VALIDATION":              "disabled",
+		"CEDARLING_POLICY_STORE_LOCAL_FN":              "../../test_files/policy-store-multi-issuer-test.yaml",
+		"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": []string{"HS256"},
 	}
 }
 
@@ -1034,5 +842,43 @@ func TestDataAPIInstanceIsolationCtx(t *testing.T) {
 	}
 	if result == nil {
 		t.Error("Data should be present in instance1")
+	}
+}
+
+func TestTrustedIssuerLoadingInfoDefaults(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	if instance.IsTrustedIssuerLoadedByName("missing_issuer") {
+		t.Error("unknown issuer id should not be loaded")
+	}
+	if instance.IsTrustedIssuerLoadedByIss("https://missing.example.org") {
+		t.Error("unknown issuer iss should not be loaded")
+	}
+
+	total := instance.TotalIssuers()
+	loaded := instance.LoadedTrustedIssuersCount()
+	loadedIds := instance.LoadedTrustedIssuerIds()
+	if loaded > total {
+		t.Errorf("loaded count %d should not exceed total %d", loaded, total)
+	}
+	if uint(len(loadedIds)) != loaded {
+		t.Errorf(
+			"loaded_trusted_issuers_count %d should match len(loaded ids) %d",
+			loaded,
+			len(loadedIds),
+		)
+	}
+	for _, id := range loadedIds {
+		if !instance.IsTrustedIssuerLoadedByName(id) {
+			t.Errorf("loaded id %q should satisfy IsTrustedIssuerLoadedByName", id)
+		}
 	}
 }

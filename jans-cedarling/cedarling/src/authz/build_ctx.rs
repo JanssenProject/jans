@@ -98,7 +98,12 @@ pub(super) fn build_context(
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(pushed_data.iter().map(|(k, v)| (k.clone(), v.clone())).collect());
+        let data_value = Value::Object(
+            pushed_data
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
+        );
         let pushed_wrapper = json!({ "data": data_value });
         ctx_entity_refs = merge_json_values(ctx_entity_refs, &pushed_wrapper)?;
     }
@@ -161,7 +166,12 @@ pub(super) fn build_multi_issuer_context(
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(pushed_data.iter().map(|(k, v)| (k.clone(), v.clone())).collect());
+        let data_value = Value::Object(
+            pushed_data
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
+        );
         let pushed_wrapper = json!({ "data": data_value });
         context_json = merge_json_values(context_json, &pushed_wrapper)?;
     }

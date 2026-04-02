@@ -1,0 +1,53 @@
+{
+    "start": 0,
+    "totalEntriesCount": 4,
+    "entriesCount": 4,
+    "entries": [
+        {
+            "dn": "jansId=0053a54e-5bf9-414f-b436-fcfcc9b1b440,ou=fido2-metrics,o=jans",
+            "id": "0053a54e-5bf9-414f-b436-fcfcc9b1b440",
+            "timestamp": "2026-02-20T15:53:39",
+            "userId": "e1f32d71-2954-4248-a7c5-a2d68ce39f8d",
+            "username": "admin",
+            "operationType": "REGISTRATION",
+            "status": "ATTEMPT",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=0053a54e-5bf9-414f-b436-fcfcc9b1b440,ou=fido2-metrics,o=jans"
+        },
+        {
+            "dn": "jansId=ff17dfa5-aaa1-4395-817e-b1f537c2b5ce,ou=fido2-metrics,o=jans",
+            "id": "ff17dfa5-aaa1-4395-817e-b1f537c2b5ce",
+            "timestamp": "2026-02-20T15:53:59",
+            "userId": "e1f32d71-2954-4248-a7c5-a2d68ce39f8d",
+            "username": "admin",
+            "operationType": "REGISTRATION",
+            "status": "ATTEMPT",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=ff17dfa5-aaa1-4395-817e-b1f537c2b5ce,ou=fido2-metrics,o=jans"
+        },
+        {
+            "dn": "jansId=eadd61b1-0ecf-43c8-863c-693470a001f7,ou=fido2-metrics,o=jans",
+            "id": "eadd61b1-0ecf-43c8-863c-693470a001f7",
+            "timestamp": "2026-02-20T15:54:26",
+            "userId": "e1f32d71-2954-4248-a7c5-a2d68ce39f8d",
+            "username": "admin",
+            "operationType": "REGISTRATION",
+            "status": "ATTEMPT",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=eadd61b1-0ecf-43c8-863c-693470a001f7,ou=fido2-metrics,o=jans"
+        },
+        {
+            "dn": "jansId=4000d3e0-a18b-4e1c-8184-d43263561a6a,ou=fido2-metrics,o=jans",
+            "id": "4000d3e0-a18b-4e1c-8184-d43263561a6a",
+            "timestamp": "2026-02-20T15:54:50",
+            "userId": "e1f32d71-2954-4248-a7c5-a2d68ce39f8d",
+            "username": "admin",
+            "operationType": "REGISTRATION",
+            "status": "SUCCESS",
+            "durationMs": 471,
+            "authenticatorType": "cross-platform",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=4000d3e0-a18b-4e1c-8184-d43263561a6a,ou=fido2-metrics,o=jans"
+        }
+    ]
+}

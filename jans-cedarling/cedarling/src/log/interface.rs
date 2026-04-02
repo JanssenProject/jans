@@ -10,7 +10,7 @@ use std::sync::{Arc, Weak};
 
 use super::{LogLevel, LogStrategy};
 use crate::log::{
-    BaseLogEntry,
+    BaseLogEntry, LogType,
     loggable_fn::LoggableFn,
     stdout_logger::{StdOutLogger, StdOutLoggerMode},
 };
@@ -148,6 +148,9 @@ pub(crate) trait Loggable:
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
+
+    /// get log kind for the entity
+    fn get_log_kind(&self) -> Option<LogType>;
 
     /// check if entry can log to logger
     // default implementation of method
