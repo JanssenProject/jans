@@ -15693,13 +15693,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -18519,6 +18519,8 @@ components:
           type: string
         accessToken:
           type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18529,8 +18531,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
