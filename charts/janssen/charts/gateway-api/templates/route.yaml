@@ -206,7 +206,6 @@ spec:
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
-{{- end }}
 
 {{- /* Auth Server: Redirect (HTTP -> HTTPS) */}}
 ---
