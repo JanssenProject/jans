@@ -3,7 +3,12 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 
-export default function HelpDrawer({ isOpen, handleDrawer }) {
+interface HelpDrawerProps {
+    isOpen: boolean;
+    handleDrawer: (open: boolean) => void;
+}
+
+export default function HelpDrawer({ isOpen, handleDrawer }: HelpDrawerProps) {
   const [open, setOpen] = React.useState(isOpen);
   const [width, setWidth] = React.useState((window.innerWidth * 2)/3 )
   React.useEffect(() => {

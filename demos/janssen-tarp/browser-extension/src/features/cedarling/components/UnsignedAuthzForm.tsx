@@ -13,10 +13,14 @@ import InputLabel from '@mui/material/InputLabel';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
-import Utils from './Utils';
+import Utils from '../../../options/Utils';
 import Stack from '@mui/material/Stack';
 
-export default function CedarlingUnsignedAuthz({ data }) {
+interface UnsignedAuthzFormProps {
+    data: any; // or define the actual shape of cedarlingConfig data
+}
+
+export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
@@ -54,7 +58,7 @@ export default function CedarlingUnsignedAuthz({ data }) {
                     instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize_unsigned(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    setAuthzResult(result.json_string())
+                    setAuthzResult(result.json_string());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
@@ -62,11 +66,13 @@ export default function CedarlingUnsignedAuthz({ data }) {
                 }
             } catch (err) {
                 setAuthzResult(err.toString());
-                console.log("err:", err);
-                let logs = await instance.pop_logs();
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
-                    setAuthzLogs(pretty_logs.toString());
+                console.error("err:", err);
+                if (instance) {
+                    const logs = await instance.pop_logs();
+                    if (logs.length !== 0) {
+                        const pretty_logs = logs.map((log: unknown) => JSON.stringify(log, null, 2));
+                        setAuthzLogs(pretty_logs.toString());
+                    }
                 }
             }
 
@@ -87,18 +93,20 @@ export default function CedarlingUnsignedAuthz({ data }) {
     };
 
     const resetInputs = () => {
-        setFormFields({
+        const emptyRequest = {
             principals: [],
             action: "",
             context: {},
             resource: {}
-        });
+        };
+        setFormFields(emptyRequest);
+        chrome.storage.local.set({ 'authzRequest_unsigned': emptyRequest });
     };
 
     return (
         <Container maxWidth="lg">
             {(data === undefined || data?.length == 0) ? '' :
-                <div className="box">
+                <Box sx={{ p: 1 }}>
                     <Accordion defaultExpanded>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
@@ -251,7 +259,7 @@ export default function CedarlingUnsignedAuthz({ data }) {
                                 <Button variant="text" color="success" onClick={() => setAuthzLogs('')}>Reset</Button>
                             </AccordionDetails>
                         </Accordion> : ''}
-                </div>}
+                </Box>}
         </Container >
     );
 }
