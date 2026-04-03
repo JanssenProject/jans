@@ -32,11 +32,11 @@ pub enum CedarlingErrorCode {
 /// Result structure for operations that return data
 #[repr(C)]
 pub struct CedarlingResult {
-    /// Error code (0=Success)
+    /// Error code (`Success` = 0). Check this first to detect failure.
     pub error_code: CedarlingErrorCode,
     /// Data pointer (null if error)
     pub data: *mut c_char,
-    /// Error message (null if success)
+    /// Human-readable detail on failure (null on success). Prefer `error_code` for control flow.
     pub error_message: *mut c_char,
 }
 
@@ -52,12 +52,25 @@ pub struct CedarlingStringArray {
 /// Structure for instance creation results
 #[repr(C)]
 pub struct CedarlingInstanceResult {
-    /// Error code (0=Success)
+    /// Error code (`Success` = 0). Check this first to detect failure.
     pub error_code: CedarlingErrorCode,
     /// Instance ID (0 if error)
     pub instance_id: u64,
-    /// Error message (null if success)
+    /// Human-readable detail on failure (null on success). Prefer `error_code` for control flow.
     pub error_message: *mut c_char,
+}
+
+/// When an error `message` cannot be represented as a C string (e.g. interior NUL), use this text
+/// so FFI callers still receive a non-null `error_message` whenever `error_code` indicates failure.
+const ERROR_MESSAGE_CSTRING_FALLBACK: &str = "Invalid error message encoding (interior NUL byte)";
+
+fn error_message_to_c_ptr(message: &str) -> *mut c_char {
+    match CString::new(message) {
+        Ok(s) => s.into_raw(),
+        Err(_) => CString::new(ERROR_MESSAGE_CSTRING_FALLBACK)
+            .expect("ERROR_MESSAGE_CSTRING_FALLBACK must be valid as CString")
+            .into_raw(),
+    }
 }
 
 impl CedarlingResult {
@@ -75,15 +88,10 @@ impl CedarlingResult {
     }
 
     pub fn error(code: CedarlingErrorCode, message: &str) -> Self {
-        let error_msg = match CString::new(message) {
-            Ok(s) => s.into_raw(),
-            Err(_) => ptr::null_mut(),
-        };
-
         CedarlingResult {
             error_code: code,
             data: ptr::null_mut(),
-            error_message: error_msg,
+            error_message: error_message_to_c_ptr(message),
         }
     }
 }
@@ -98,15 +106,10 @@ impl CedarlingInstanceResult {
     }
 
     pub fn error(code: CedarlingErrorCode, message: &str) -> Self {
-        let error_msg = match CString::new(message) {
-            Ok(s) => s.into_raw(),
-            Err(_) => ptr::null_mut(),
-        };
-
         Self {
             error_code: code,
             instance_id: 0,
-            error_message: error_msg,
+            error_message: error_message_to_c_ptr(message),
         }
     }
 }
@@ -199,4 +202,32 @@ pub fn clear_last_error() {
     LAST_ERROR.with(|last_error| {
         *last_error.borrow_mut() = None;
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cedarling_result_error_uses_fallback_when_message_has_interior_nul() {
+        let r = CedarlingResult::error(CedarlingErrorCode::Internal, "bad\0tail");
+        assert_eq!(r.error_code, CedarlingErrorCode::Internal);
+        assert!(!r.error_message.is_null());
+        unsafe {
+            let msg = CString::from_raw(r.error_message);
+            assert_eq!(msg.to_str().unwrap(), ERROR_MESSAGE_CSTRING_FALLBACK);
+        }
+    }
+
+    #[test]
+    fn cedarling_instance_result_error_uses_fallback_when_message_has_interior_nul() {
+        let r = CedarlingInstanceResult::error(CedarlingErrorCode::JsonError, "x\0y");
+        assert_eq!(r.error_code, CedarlingErrorCode::JsonError);
+        assert_eq!(r.instance_id, 0);
+        assert!(!r.error_message.is_null());
+        unsafe {
+            let msg = CString::from_raw(r.error_message);
+            assert_eq!(msg.to_str().unwrap(), ERROR_MESSAGE_CSTRING_FALLBACK);
+        }
+    }
 }

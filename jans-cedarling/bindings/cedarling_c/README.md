@@ -70,6 +70,10 @@ cl myapp.c cedarling_c.lib
 
 ## Usage
 
+### Result and error handling
+
+Most functions return `0` on success and a non-zero `CedarlingErrorCode` on failure. For APIs that populate `CedarlingResult` or `CedarlingInstanceResult`, use the return value and `error_code` on the struct to detect failure; `error_message` is extra detail (and is null on success). If the original message cannot be represented as a C string, the library substitutes a short fallback so `error_message` is still non-null on error paths built through these helpers.
+
 ### Initialization
 
 ```c
@@ -90,7 +94,8 @@ const char* config = "{"
 CedarlingInstanceResult result;
 int ret = cedarling_new(config, &result);
 if (ret != 0) {
-    printf("Error: %s\n", result.error_message);
+    printf("Error (code %d): %s\n", (int)result.error_code,
+           result.error_message ? result.error_message : "(no message)");
     cedarling_free_instance_result(&result);
     return 1;
 }
@@ -126,7 +131,8 @@ ret = cedarling_authorize_unsigned(instance_id, request, &auth_result);
 if (ret == 0) {
     printf("Authorization result: %s\n", (char*)auth_result.data);
 } else {
-    printf("Error: %s\n", auth_result.error_message);
+    printf("Error (code %d): %s\n", (int)auth_result.error_code,
+           auth_result.error_message ? auth_result.error_message : "(no message)");
 }
 cedarling_free_result(&auth_result);
 ```
@@ -155,7 +161,8 @@ ret = cedarling_authorize_multi_issuer(instance_id, request, &auth_result);
 if (ret == 0) {
     printf("Authorization result: %s\n", (char*)auth_result.data);
 } else {
-    printf("Error: %s\n", auth_result.error_message);
+    printf("Error (code %d): %s\n", (int)auth_result.error_code,
+           auth_result.error_message ? auth_result.error_message : "(no message)");
 }
 cedarling_free_result(&auth_result);
 ```
@@ -171,7 +178,8 @@ const char* value = "{\"role\": [\"admin\", \"editor\"], \"level\": 5}";
 CedarlingResult push_result;
 ret = cedarling_context_push(instance_id, "user:123", value, 300, &push_result);
 if (ret != 0) {
-    printf("Error: %s\n", push_result.error_message);
+    printf("Error (code %d): %s\n", (int)push_result.error_code,
+           push_result.error_message ? push_result.error_message : "(no message)");
 }
 cedarling_free_result(&push_result);
 ```

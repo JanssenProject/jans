@@ -94,11 +94,11 @@ int main() {
     int result = cedarling_new(BOOTSTRAP_CONFIG, &instance_result);
 
     if (result != 0) {
-        printf("   Failed to create instance (error code: %d)\n", result);
-        if (instance_result.error_message) {
-            printf("   Error: %s\n", instance_result.error_message);
-            cedarling_free_instance_result(&instance_result);
-        }
+        printf("   Failed to create instance (return=%d, error_code=%d)\n", result,
+               (int)instance_result.error_code);
+        printf("   %s\n",
+               instance_result.error_message ? instance_result.error_message : "(no message)");
+        cedarling_free_instance_result(&instance_result);
         print_error("cedarling_new");
         return 1;
     }
@@ -115,10 +115,10 @@ int main() {
     result = cedarling_authorize_unsigned(instance_id, REQUEST_JSON, &auth_result);
 
     if (result != 0) {
-        printf("   Authorization failed (error code: %d)\n", result);
-        if (auth_result.error_message) {
-            printf("   Error: %s\n", auth_result.error_message);
-        }
+        printf("   Authorization failed (return=%d, error_code=%d)\n", result,
+               (int)auth_result.error_code);
+        printf("   %s\n",
+               auth_result.error_message ? auth_result.error_message : "(no message)");
         print_error("cedarling_authorize_unsigned");
         cedarling_free_result(&auth_result);
         cedarling_drop(instance_id);
