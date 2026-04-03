@@ -35,6 +35,8 @@ spec:
     match:
     - uri:
         prefix: "/.well-known/openid-configuration"
+    rewrite:
+      uri: "/jans-auth/.well-known/openid-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -48,7 +50,7 @@ spec:
     - uri:
         prefix: "/device-code"
     rewrite:
-      uri: "/device_authorization.htm"
+      uri: "/jans-auth/device_authorization.htm"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -61,6 +63,8 @@ spec:
     match:
     - uri:
         prefix: "/firebase-messaging-sw.js"
+    rewrite:
+      uri: "/jans-auth/firebase-messaging-sw.js"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -74,7 +78,7 @@ spec:
     - uri:
         prefix: "/.well-known/uma2-configuration"
     rewrite:
-      uri: "/restv1/uma2-configuration"
+      uri: "/jans-auth/restv1/uma2-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -87,6 +91,8 @@ spec:
     match:
     - uri:
         prefix: "/.well-known/webfinger"
+    rewrite:
+      uri: "/jans-auth/.well-known/webfinger"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -98,11 +104,7 @@ spec:
   - name: "{{ .Release.Name }}-istio-cn"
     match:
     - uri:
-        prefix: "/jans-auth/"
-    - uri:
         prefix: "/jans-auth"
-    rewrite:
-      uri: "/"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -115,7 +117,7 @@ spec:
     - uri:
         prefix: "/.well-known/lock-server-configuration"
     rewrite:
-      uri: "/api/v1/configuration"
+      uri: "/jans-auth/api/v1/configuration"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -129,7 +131,7 @@ spec:
     - uri:
         prefix: "/.well-known/authzen-configuration"
     rewrite:
-      uri: "/restv1/authzen-configuration"
+      uri: "/jans-auth/restv1/authzen-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
