@@ -30,7 +30,7 @@
         <shibboleth.version>5.1.6</shibboleth.version>
         <opensaml.version>5.1.6</opensaml.version>
         
-        <spring.version>6.2.10</spring.version>
+        <spring.version>7.0.5</spring.version>
         <spring-webflow.version>3.0.0</spring-webflow.version>
         
         <jetty.version>12.0.25</jetty.version>
