@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Alert, Typography, Button } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
-import { PROVIDER_ICONS } from '../constants';
+import { PROVIDER_ICONS, getConnectionStatusSeverity, getConnectionStatusText } from '../constants';
 import { ConnectionStatus } from '../types';
 
 interface StatusPanelProps {
@@ -23,24 +23,6 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
   connectionStatus,
   onTestConnection
 }) => {
-  const getConnectionStatusColor = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'success';
-      case 'connecting': return 'warning';
-      case 'disconnected': return 'error';
-      default: return 'info';
-    }
-  };
-
-  const getConnectionStatusText = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'Connected';
-      case 'connecting': return 'Connecting...';
-      case 'disconnected': return 'Disconnected';
-      default: return 'Unknown';
-    }
-  };
-
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       <Grid size={{ xs:12, md: 6}}>
@@ -60,7 +42,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
       </Grid>
       <Grid size={{xs:12, md:6}}>
         <Alert 
-          severity={getConnectionStatusColor()}
+          severity={getConnectionStatusSeverity(connectionStatus)}
           icon={<LinkIcon />}
           sx={{ height: '100%' }}
           action={
@@ -77,7 +59,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
           <Typography variant="body2">
             <strong>MCP Server:</strong> {mcpServerUrl}
             <br />
-            <strong>Status:</strong> {getConnectionStatusText()}
+            <strong>Status:</strong> {getConnectionStatusText(connectionStatus)}
           </Typography>
         </Alert>
       </Grid>

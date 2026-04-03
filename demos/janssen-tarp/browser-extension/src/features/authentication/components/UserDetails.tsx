@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
-import '../static/css/options.css'
-import '../static/css/alerts.css';
 import CircularProgress from "@mui/material/CircularProgress";
+import Box from '@mui/material/Box';
 import { JsonEditor } from 'json-edit-react'
 import Button from '@mui/material/Button';
 import Accordion from '@mui/material/Accordion';
@@ -11,14 +10,13 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { jwtDecode } from "jwt-decode";
-import { IJWT } from './IJWT';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { pink } from '@mui/material/colors';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
-import { OpenIDConfiguration, LogoutOptions, LoginDetails } from './types';
+import { OpenIDConfiguration, LogoutOptions, LoginDetails, IJWT } from '../../../shared/types';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
@@ -63,8 +61,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     const decodeJWT = (token: string | undefined): IJWT => {
         try {
             if (!token) return { header: {}, payload: {} }; // Handle undefined token
-            const payload = jwtDecode(token);
-            const header = jwtDecode(token, { header: true });
+            const payload = jwtDecode<Record<string, unknown>>(token);
+            const header = jwtDecode<Record<string, unknown>>(token, { header: true });
             return { header, payload };
         } catch (error) {
             console.error("Error decoding JWT:", error);
@@ -349,7 +347,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
 
     return (
-        <div className="box">
+        <Box sx={{ position: 'relative', p: 3, borderRadius: 2 }}>
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
@@ -357,18 +355,19 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 message={snackbar.message}
                 action={action} />
 
-            <div className="w3-panel w3-pale-yellow w3-border">
-
-                {loading ? (
-                    <div className="loader-overlay">
-                        <CircularProgress color="success" />
-                    </div>
-                ) : (
-                    ""
-                )}
-
-                <br />
-            </div>
+            {loading && (
+              <Box
+                sx={{
+                  position: 'absolute', top: 0, left: 0,
+                  width: '100%', height: '100%',
+                  bgcolor: 'rgba(255,255,255,0.85)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  zIndex: 10, borderRadius: 2,
+                }}
+              >
+                <CircularProgress color="primary" />
+              </Box>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '90vw' }}>
                 <legend><span className="number">O</span> User Details:</legend>
                 <Tooltip title="Copy tokens JSON">
@@ -390,15 +389,15 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             <Typography component="span"><strong>Access Token</strong></Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                            <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showPayloadAT ? (!!data ?
+                            <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
+                                <Box component="div">{showPayloadAT ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.access_token.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.access_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                                     </>
-                                    : '') : (!!data ? data?.access_token : '')}</p>
+                                    : '') : (!!data ? data?.access_token : '')}</Box>
                                 <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
-                            </div>
+                            </Box>
                         </AccordionDetails>
                     </Accordion>
                     <Accordion>
@@ -411,7 +410,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         </AccordionSummary>
                         <AccordionDetails>
 
-                            <div className="alert alert-success alert-dismissable fade in">
+                            <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
                                 <p>{showPayloadIdToken ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.id_token.header} rootName="header" />
@@ -419,7 +418,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                                     </>
                                     : '') : (!!data ? data?.id_token : '')}</p>
                                 <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
-                            </div>
+                            </Box>
                         </AccordionDetails>
                     </Accordion>
                 </>}
@@ -432,7 +431,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     <Typography component="span"><strong>User Details</strong></Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <div className="alert alert-success alert-dismissable fade in">
+                    <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
                         <p>{showPayloadUI ? (!!data ?
                             <>
                                 <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userinfo_token.header} rootName="header" />
@@ -440,12 +439,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             </>
                             : '') : (!!data ? data?.userDetails : '')}</p>
                         <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>
-                    </div>
+                    </Box>
                 </AccordionDetails>
             </Accordion>
             <hr />
             <Button variant="contained" id="logoutButton" color="success" onClick={() => logout({ forceSilentLogout: false, notifyOnComplete: true })}>Logout</Button>
-        </div>
+        </Box>
     )
 };
 

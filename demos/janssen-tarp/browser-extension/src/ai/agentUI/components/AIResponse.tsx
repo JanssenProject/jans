@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Paper, Typography, CircularProgress } from '@mui/material';
+import { getProviderColor } from '../constants';
 
 interface AIResponseProps {
   result: string | any;
@@ -18,15 +19,6 @@ const AIResponse: React.FC<AIResponseProps> = ({
   modelName,
   providerLabel
 }) => {
-  const getProviderColor = () => {
-    switch (provider) {
-      case 'openai': return 'primary';
-      case 'gemini': return 'secondary';
-      case 'deepseek': return 'success';
-      default: return 'primary';
-    }
-  };
-
   if (!result && !loading && !error) return null;
 
   return (
@@ -48,7 +40,7 @@ const AIResponse: React.FC<AIResponseProps> = ({
       >
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-            <CircularProgress sx={{ color: getProviderColor() }} />
+            <CircularProgress sx={{ color: getProviderColor(provider) }} />
             <Typography variant="body1" sx={{ ml: 2 }}>
               Processing with {providerLabel} - {modelName}...
             </Typography>
