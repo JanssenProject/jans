@@ -16,6 +16,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/.well-known/openid-configuration
 {{- if index .Values.global "auth-server" "ingress" "openidAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "openidAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -71,7 +72,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /device_authorization.htm
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/device_authorization.htm
 {{- if index .Values.global "auth-server" "ingress" "deviceCodeAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "deviceCodeAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -127,6 +128,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/firebase-messaging-sw.js
 {{- if index .Values.global "auth-server" "ingress" "firebaseMessagingAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "firebaseMessagingAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -182,7 +184,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /restv1/uma2-configuration
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/uma2-configuration
 {{- if index .Values.global "auth-server" "ingress" "uma2AdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "uma2AdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -238,6 +240,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/.well-known/webfinger
 {{- if index .Values.global "auth-server" "ingress" "webfingerAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "webfingerAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -627,7 +630,6 @@ metadata:
 {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 {{- if index .Values.global "auth-server" "ingress" "authServerAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "authServerAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -653,8 +655,8 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /jans-auth(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /jans-auth
+            pathType: Prefix
             backend:
               service:
                 name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
@@ -742,7 +744,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /api/v1/configuration
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/api/v1/configuration
 {{- if index .Values.global "auth-server" "ingress" "lockConfigAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "lockConfigAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -799,7 +801,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/rewrite-target: /restv1/authzen-configuration
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/authzen-configuration
 {{- if index .Values.global "auth-server" "ingress" "authzenAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "authzenAdditionalAnnotations") | indent 4 }}
 {{- end }}
