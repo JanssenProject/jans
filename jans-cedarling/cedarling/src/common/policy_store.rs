@@ -7,8 +7,6 @@
 mod archive_security_tests;
 pub(crate) mod log_entry;
 #[cfg(test)]
-mod test;
-#[cfg(test)]
 pub(crate) mod test_utils;
 mod token_entity_metadata;
 
@@ -22,6 +20,7 @@ pub(crate) mod archive_handler;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
 pub(crate) mod issuer_parser;
+pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;
 pub(crate) mod metadata;
@@ -30,10 +29,10 @@ pub(crate) mod schema_parser;
 pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
-use super::{PartitionResult, cedar_schema::CedarSchema};
-use cedar_policy::{ActionConstraint, EntityTypeName, EntityUid, Policy, PolicyId};
+use super::cedar_schema::CedarSchema;
+use cedar_policy::{ActionConstraint, EntityTypeName, EntityUid, Policy};
 use semver::Version;
-use serde::{Deserialize, Deserializer, Serialize, de, de::Error};
+use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
 
@@ -42,66 +41,6 @@ pub(crate) use token_entity_metadata::TokenEntityMetadata;
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;
 pub(crate) use metadata::PolicyStoreMetadata;
-/// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone)]
-#[cfg_attr(test, derive(PartialEq))]
-pub(crate) struct AgamaPolicyStore {
-    /// The cedar version to use when parsing the schema and policies.
-    ///
-    /// **Note**: This field is currently unused after deserialization but is kept for:
-    /// 1. Input validation - ensures policy store files specify a valid version format
-    /// 2. Format compatibility - maintains the Agama Lab Policy Designer format specification
-    /// 3. Future use - may be needed for version-specific parsing logic as Cedar evolves
-    #[allow(dead_code)]
-    pub cedar_version: Version,
-    pub policy_stores: HashMap<String, PolicyStore>,
-}
-
-impl<'de> Deserialize<'de> for AgamaPolicyStore {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        // First try to deserialize into a Value to get better error messages
-        let value = serde_json::Value::deserialize(deserializer)?;
-
-        // Check for required fields
-        let obj = value
-            .as_object()
-            .ok_or_else(|| de::Error::custom("policy store must be a JSON object"))?;
-
-        // Check cedar_version field
-        let cedar_version = obj.get("cedar_version").ok_or_else(|| {
-            de::Error::custom("missing required field 'cedar_version' in policy store")
-        })?;
-
-        // Check policy_stores field
-        let policy_stores = obj.get("policy_stores").ok_or_else(|| {
-            de::Error::custom("missing required field 'policy_stores' in policy store")
-        })?;
-
-        // Now deserialize the actual struct
-        let mut store = AgamaPolicyStore {
-            cedar_version: parse_cedar_version(cedar_version)
-                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?,
-            policy_stores: HashMap::new(),
-        };
-
-        // Deserialize policy stores
-        let stores_obj = policy_stores
-            .as_object()
-            .ok_or_else(|| de::Error::custom("'policy_stores' must be a JSON object"))?;
-
-        for (key, value) in stores_obj {
-            let policy_store = PolicyStore::deserialize(value).map_err(|e| {
-                de::Error::custom(format!("error parsing policy store '{key}': {e}"))
-            })?;
-            store.policy_stores.insert(key.clone(), policy_store);
-        }
-
-        Ok(store)
-    }
-}
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
@@ -206,7 +145,7 @@ pub struct PolicyStoreWithID {
 ///
 /// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
@@ -216,28 +155,10 @@ pub struct TrustedIssuer {
     /// The `OpenID` configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
-    //
-    // attribute is private to force usage `iss_claim` method to get normalized iss claim
-    #[serde(
-        rename = "openid_configuration_endpoint",
-        alias = "configuration_endpoint",
-        deserialize_with = "de_oidc_endpoint_url"
-    )]
+    // Private to force usage of `iss_claim` method to get normalized iss claim
     oidc_endpoint: Url,
     /// Metadata for tokens issued by the trusted issuer.
-    #[serde(default)]
     pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
-}
-
-fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let url_str = String::deserialize(deserializer)?;
-    let url = Url::parse(&url_str).map_err(|_| {
-        de::Error::custom("the `\"openid_configuration_endpoint\"` is not a valid url")
-    })?;
-    Ok(url)
 }
 
 #[cfg(test)]
@@ -271,7 +192,6 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    #[cfg(test)]
     pub(crate) fn new(
         name: String,
         description: String,
@@ -304,159 +224,20 @@ impl TrustedIssuer {
     }
 }
 
-/// Parses the `cedar_version` field.
-///
-/// This function checks that the version string follows the format `major.minor.patch`,
-/// where each component is a valid number. This also supports having a "v" prefix in the
-/// version, e.g. `v1.0.1`.
-fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let version: String = String::deserialize(deserializer)?;
 
-    // Check for "v" prefix
-    let version = version.strip_prefix('v').unwrap_or(&version);
-
-    let version = Version::parse(version)
-        .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{e}")))?;
-
-    Ok(version)
-}
-
-/// Parses the optional `cedar_version` field.
-///
-/// This function checks that the version string follows the format `major.minor.patch`,
-/// where each component is a valid number. This also supports having a "v" prefix in the
-/// version, e.g. `v1.0.1`.
-fn parse_maybe_cedar_version<'de, D>(deserializer: D) -> Result<Option<Version>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let maybe_version: Option<String> = Option::<String>::deserialize(deserializer)?;
-
-    match maybe_version {
-        Some(version) => {
-            // Check for "v" prefix
-            let version = version.strip_prefix('v').unwrap_or(&version);
-
-            let version = Version::parse(version).map_err(|e| {
-                serde::de::Error::custom(format!("error parsing cedar version :{e}"))
-            })?;
-
-            Ok(Some(version))
-        },
-        None => Ok(None),
-    }
-}
-
-/// Enum representing various error messages that can occur while parsing policy sets.
-///
-/// This enum is used to provide detailed error information during the deserialization
-/// of policy sets within the `PolicyStore`.
-#[derive(Debug, thiserror::Error)]
-enum ParsePolicySetMessage {
-    /// Indicates failure to decode policy content as base64.
-    #[error("unable to decode policy_content as base64")]
-    Base64,
-
-    /// Indicates failure to decode policy content to a UTF-8 string.
-    #[error("unable to decode policy_content to utf8 string")]
-    String,
-
-    /// Indicates failure to decode policy content from a human-readable format.
-    #[error("unable to decode policy_content from human readable format")]
-    HumanReadable,
-
-    /// Indicates failure to collect policies into a policy set.
-    #[error("could not collect policy store's to policy set")]
-    CreatePolicySet,
-}
-
-/// `content_type` for the `policy_content` field.
-///
-/// Only contains a single member, because as of 31-Oct-2024, cedar-policy 4.2.1
-/// `cedar_policy::Policy::from_json` does not work with a single policy.
-///
-/// NOTE if/when `cedar_policy::Policy::from_json` gains this ability, this type
-/// can be replaced by `super::ContentType`
-#[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]
-enum PolicyContentType {
-    /// indicates that the related value is in the cedar policy / schema language
-    #[serde(rename = "cedar")]
-    Cedar,
-}
-
-/// `policy_content` value which specifies both encoding and `content_type`
-///
-/// encoding is one of none or base64
-/// `content_type` is one of cedar or cedar-json
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
-struct EncodedPolicy {
-    pub encoding: super::Encoding,
-    pub content_type: PolicyContentType,
-    pub body: String,
-}
-
-/// Intermediate struct to handle both kinds of `policy_content` values.
-///
-/// Either
-/// ```json
-///   "policy_content": "cGVybWl0KA..."
-/// ```
-/// OR
-/// ```json
-/// "policy_content": {
-///   "encoding": "...",
-///   "content_type": "...",
-///   "body": "permit(...)"
-/// }
-/// ```
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
-#[serde(untagged)]
-enum MaybeEncoded {
-    Plain(String),
-    Tagged(EncodedPolicy),
-}
-/// Represents a raw policy entry from the `PolicyStore`.
-///
-/// This is a helper struct used internally for parsing base64-encoded policies.
-// TODO: We only use the `description` field at runtime. The raw `policy_content`
-//       is not needed once policies are compiled into a `PolicySet`. Refactor
-//       to remove `RawPolicy` (and stored raw content) and keep only descriptions.
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
-struct RawPolicy {
-    /// Base64-encoded content of the policy.
-    pub policy_content: MaybeEncoded,
-
-    /// Description of policy
-    pub description: String,
-}
-
-/// Container to decode policy stores into container
-///
-/// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
+/// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
 pub struct PoliciesContainer {
-    /// `HashMap` to store raw policy info
-    /// Is used to get policy description by ID
-    // In HashMap ID is ID of policy
-    raw_policy_info: HashMap<String, RawPolicy>,
-
-    /// compiled `cedar_policy` Policy set
+    /// Policy descriptions by ID
+    descriptions: HashMap<String, String>,
+    /// Compiled `cedar_policy` Policy set
     policy_set: cedar_policy::PolicySet,
 }
 
 #[cfg(test)]
 impl PartialEq for PoliciesContainer {
     fn eq(&self, other: &Self) -> bool {
-        // Compare only the compiled policy_set, ignoring:
-        // 1. Order of policies (using BTreeMap for deterministic comparison)
-        // 2. raw_policy_info (auxiliary data like descriptions)
-        // The policy_set is the canonical representation; if policies are equal,
-        // the containers are semantically equal for testing purposes.
         use std::collections::BTreeMap;
-
         let self_policies: BTreeMap<_, _> = self
             .policy_set
             .policies()
@@ -473,41 +254,18 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    ///
-    /// This constructor is used by the policy store manager when converting
-    /// from the new directory/archive format to the legacy format.
-    ///
-    /// # Arguments
-    ///
-    /// * `policy_set` - The compiled Cedar policy set
-    /// * `descriptions` - Map of policy ID to description (typically filename)
     pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
-        let raw_policy_info = descriptions
-            .into_iter()
-            .map(|(id, desc)| {
-                (
-                    id,
-                    RawPolicy {
-                        policy_content: MaybeEncoded::Plain(String::new()),
-                        description: desc,
-                    },
-                )
-            })
-            .collect();
-
         Self {
-            raw_policy_info,
+            descriptions,
             policy_set,
         }
     }
 
     /// Create an empty `PoliciesContainer` with the given policy set.
-    ///
-    /// Used when there are no policy descriptions available.
     pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
         Self {
             policy_set,
-            raw_policy_info: HashMap::new(),
+            descriptions: HashMap::new(),
         }
     }
 
@@ -518,7 +276,7 @@ impl PoliciesContainer {
 
     /// Get policy description based on id of policy
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
-        self.raw_policy_info.get(id).map(|v| v.description.as_str())
+        self.descriptions.get(id).map(String::as_str)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -604,191 +362,10 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
     }
 }
 
-/// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
-///
-/// This function is used to deserialize the `policies` field in `PolicyStore`.
-impl<'de> serde::Deserialize<'de> for PoliciesContainer {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let policies =
-            <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
-
-        let (policy_vec, errs): (Vec<_>, Vec<_>) = policies
-            .iter()
-            .map(|(id, policy_raw)| {
-                let policy: Result<Policy, D::Error> = parse_single_policy::<D>(id, policy_raw)
-                    .map_err(|err| {
-                        de::Error::custom(format!(
-                            "unable to decode policy with id: {id}, error: {err}"
-                        ))
-                    });
-                policy
-            })
-            .partition_result();
-
-        // Collect all errors into a single error message or return them as a vector.
-        if !errs.is_empty() {
-            let error_messages: Vec<D::Error> = errs.into_iter().collect();
-
-            return Err(serde::de::Error::custom(format!(
-                "Errors encountered while parsing policies: {error_messages:?}"
-            )));
-        }
-
-        let policy_set = cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-        })?;
-
-        Ok(PoliciesContainer {
-            policy_set,
-            raw_policy_info: policies,
-        })
-    }
-}
-
-/// Parses a single policy from its base64-encoded format.
-///
-/// This function is responsible for decoding the base64-encoded policy content,
-/// converting it to a UTF-8 string, and parsing it into a `Policy`.
-fn parse_single_policy<'de, D>(
-    id: &str,
-    policy_raw: &RawPolicy,
-) -> Result<cedar_policy::Policy, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    let policy_with_metadata = match &policy_raw.policy_content {
-        // It's a plain string, so assume its cedar inside base64
-        MaybeEncoded::Plain(base64_encoded) => &EncodedPolicy {
-            encoding: super::Encoding::Base64,
-            content_type: PolicyContentType::Cedar,
-            body: base64_encoded.to_owned(),
-        },
-        MaybeEncoded::Tagged(policy_with_metadata) => policy_with_metadata,
-    };
-
-    let decoded_body = match policy_with_metadata.encoding {
-        super::Encoding::None => policy_with_metadata.body.clone(),
-        super::Encoding::Base64 => {
-            use base64::prelude::*;
-            let buf = BASE64_STANDARD
-                .decode(policy_with_metadata.body.as_str())
-                .map_err(|err| {
-                    serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
-                })?;
-
-            String::from_utf8(buf).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
-            })?
-        },
-    };
-
-    let policy = match policy_with_metadata.content_type {
-        // see comments for PolicyContentType
-        PolicyContentType::Cedar => {
-            cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
-            })?
-        },
-    };
-
-    Ok(policy)
-}
-
-/// Custom deserializer for `PolicyStore` that provides better error messages
-impl<'de> Deserialize<'de> for PolicyStore {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        // First try to deserialize into a Value to get better error messages
-        let value = serde_json::Value::deserialize(deserializer)?;
-
-        // Check for required fields
-        let obj = value
-            .as_object()
-            .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
-
-        // Check name field
-        let name = obj.get("name").ok_or_else(|| {
-            de::Error::custom("missing required field 'name' in policy store entry")
-        })?;
-        let name = name
-            .as_str()
-            .ok_or_else(|| de::Error::custom("'name' must be a string"))?;
-
-        // Check schema field
-        let schema = obj
-            .get("schema")
-            .or_else(|| obj.get("cedar_schema"))
-            .ok_or_else(|| {
-                de::Error::custom(
-                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
-                )
-            })?;
-
-        // Check policies field
-        let policies = obj
-            .get("policies")
-            .or_else(|| obj.get("cedar_policies"))
-            .ok_or_else(|| {
-                de::Error::custom(
-                    "missing required field 'policies' or 'cedar_policies' in policy store entry",
-                )
-            })?;
-
-        // Now deserialize the actual struct
-        let store = PolicyStore {
-            version: obj
-                .get("version")
-                .or_else(|| obj.get("policy_store_version"))
-                .and_then(|v| v.as_str())
-                .map(std::string::ToString::to_string),
-            name: name.to_string(),
-            description: obj
-                .get("description")
-                .and_then(|v| v.as_str())
-                .map(std::string::ToString::to_string),
-            cedar_version: obj
-                .get("cedar_version")
-                .map(parse_maybe_cedar_version)
-                .transpose()
-                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?
-                .flatten(),
-            schema: CedarSchema::deserialize(schema)
-                .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))?,
-            policies: PoliciesContainer::deserialize(policies)
-                .map_err(|e| de::Error::custom(format!("error parsing policies: {e}")))?,
-            trusted_issuers: obj
-                .get("trusted_issuers")
-                .map(|v| {
-                    HashMap::<String, TrustedIssuer>::deserialize(v).map_err(|e| {
-                        de::Error::custom(format!("error parsing trusted issuers: {e}"))
-                    })
-                })
-                .transpose()?,
-            default_entities: obj
-                .get("default_entities")
-                .map(|v| {
-                    // Expect an object mapping entity_id -> base64 string
-                    DefaultEntitiesWithWarns::deserialize(v).map_err(|e| {
-                        D::Error::custom(format!("could not deserialize `default entities`: {e}"))
-                    })
-                })
-                .transpose()?
-                .unwrap_or_default(),
-        };
-
-        Ok(store)
-    }
-}
-
 #[cfg(test)]
 mod policy_metadata_tests {
     use super::*;
-    use cedar_policy::{EntityTypeName, EntityUid, PolicySet};
+    use cedar_policy::{EntityTypeName, EntityUid, PolicyId, PolicySet};
     use std::collections::HashSet;
     use std::str::FromStr;
 

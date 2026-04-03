@@ -8,29 +8,25 @@ use std::str::FromStr;
 use base64::prelude::*;
 use serde_json::json;
 
-use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore};
-use crate::common::policy_store::parse_cedar_version;
+use super::{LegacyAgamaPolicyStore, LegacyPolicyStore, ParsePolicySetMessage, parse_maybe_cedar_version};
 
 /// Tests successful deserialization of a valid policy store JSON.
 #[test]
 fn test_policy_store_deserialization_success() {
     let policy = r#"
         permit (
-            principal is Jans::Workload, 
-            action in [Jans::Action::"Update"], 
+            principal is Jans::Workload,
+            action in [Jans::Action::"Update"],
             resource is Jans::Issue
-        ) when { 
-            principal.org_id == resource.org_id 
+        ) when {
+            principal.org_id == resource.org_id
         };
     "#;
-    // check if the string is a valid policy
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
 
-    let schema = include_str!("./cedar-schema.json");
-    // check if the string is a valid schema
+    let schema = include_str!("../cedar-schema.json");
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
-    // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
         "name": "Jans",
@@ -44,32 +40,27 @@ fn test_policy_store_deserialization_success() {
         "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str()).unwrap();
+    serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str()).expect("failed to deserialize LegacyPolicyStore from policy_store_json");
 }
 
 #[test]
-/// Tests for base64 decoding error in the policy store.
 fn test_base64_decoding_error_in_policy_store() {
     let policy = r#"
         permit (
-            principal is Jans::Workload, 
-            action in [Jans::Action::"Update"], 
+            principal is Jans::Workload,
+            action in [Jans::Action::"Update"],
             resource is Jans::Issue
-        ) when { 
-            principal.org_id == resource.org_id 
+        ) when {
+            principal.org_id == resource.org_id
         };
     "#;
-    // check if the string is a valid policy
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
     let mut encoded_policy = BASE64_STANDARD.encode(policy);
-    // simulate an invalid base64 encoding by adding an invalid character
     encoded_policy.push('!');
 
-    let schema = include_str!("./cedar-schema.json");
-    // check if the string is a valid schema
+    let schema = include_str!("../cedar-schema.json");
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
-    // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
         "name": "Jans",
@@ -83,7 +74,8 @@ fn test_base64_decoding_error_in_policy_store() {
         "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
+    let policy_result =
+        serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str());
     let err =
         policy_result.expect_err("Expected base64 decoding error for invalid base64 character");
     assert!(
@@ -93,36 +85,29 @@ fn test_base64_decoding_error_in_policy_store() {
     );
 }
 
-/// Tests for parsing error due to broken UTF-8 in the policy store.
 #[test]
 fn test_policy_parsing_error_in_policy_store() {
     let policy = r#"
         permit (
-            principal is Jans::Workload, 
-            action in [Jans::Action::"Update"], 
+            principal is Jans::Workload,
+            action in [Jans::Action::"Update"],
             resource is Jans::Issue
-        ) when { 
-            principal.org_id == resource.org_id 
+        ) when {
+            principal.org_id == resource.org_id
         };
     "#;
-    // check if the string is a valid policy
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
 
-    // base64 encode the policy
     let mut encoded_policy = BASE64_STANDARD.encode(policy);
-
-    // Simulate invalid UTF-8 by manually inserting invalid byte sequences
     let mut invalid_utf8_bytes = BASE64_STANDARD
         .decode(&encoded_policy)
         .expect("Failed to decode Base64");
-    invalid_utf8_bytes[10] = 0xFF; // inserting invalid byte
-    encoded_policy = BASE64_STANDARD.encode(&invalid_utf8_bytes); // re-encode with invalid UTF-8
+    invalid_utf8_bytes[10] = 0xFF;
+    encoded_policy = BASE64_STANDARD.encode(&invalid_utf8_bytes);
 
-    let schema = include_str!("./cedar-schema.json");
-    // check if the string is a valid schema
+    let schema = include_str!("../cedar-schema.json");
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
-    // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
         "name": "Jans",
@@ -136,7 +121,8 @@ fn test_policy_parsing_error_in_policy_store() {
         "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
+    let policy_result =
+        serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str());
     let err = policy_result.expect_err("Expected UTF-8 parsing error for invalid byte sequence");
     assert!(
         err.to_string()
@@ -145,13 +131,12 @@ fn test_policy_parsing_error_in_policy_store() {
     );
 }
 
-/// Tests for broken policy parsing error in the policy store.
 #[test]
 fn test_broken_policy_parsing_error_in_policy_store() {
     static POLICY_STORE_RAW_YAML: &str =
-        include_str!("../../../../test_files/policy-store_policy_err_broken_policy.yaml");
+        include_str!("../../../../../test_files/policy-store_policy_err_broken_policy.yaml");
 
-    let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
+    let policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
     let err = policy_result.expect_err("Expected policy parsing error for broken policy syntax");
     let err_msg = err.to_string();
 
@@ -169,85 +154,56 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     );
 }
 
-/// Tests that a valid version string is accepted.
 #[test]
 fn test_valid_version() {
-    let valid_version = "1.2.3".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(valid_version)).is_ok());
+    let valid_version = json!("1.2.3");
+    parse_maybe_cedar_version(&valid_version).expect("expected valid Cedar version '1.2.3' to parse");
 }
 
-/// Tests that a valid version string with 'v' prefix is accepted.
 #[test]
 fn test_valid_version_with_v() {
-    let valid_version_with_v = "v1.2.3".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
+    let valid_version_with_v = json!("v1.2.3");
+    parse_maybe_cedar_version(&valid_version_with_v).expect("expected valid Cedar version 'v1.2.3' to parse");
 }
 
-/// Tests that an invalid version format is rejected.
 #[test]
 fn test_invalid_version_format() {
-    let invalid_version = "1.2".to_string();
-    let err = parse_cedar_version(serde_json::Value::String(invalid_version))
+    let invalid_version = json!("1.2");
+    let err = parse_maybe_cedar_version(&invalid_version)
         .expect_err("Expected error for incomplete version format (missing patch)");
     assert!(
-        err.to_string().contains("error parsing cedar version"),
+        err.contains("error parsing cedar version"),
         "Error should mention version parsing, got: {err}"
     );
 }
 
-/// Tests that an invalid version part (non-numeric) is rejected.
 #[test]
 fn test_invalid_version_part() {
-    let invalid_version = "1.two.3".to_string();
-    let err = parse_cedar_version(serde_json::Value::String(invalid_version))
+    let invalid_version = json!("1.two.3");
+    let err = parse_maybe_cedar_version(&invalid_version)
         .expect_err("Expected error for non-numeric version part");
     assert!(
-        err.to_string().contains("error parsing cedar version"),
+        err.contains("error parsing cedar version"),
         "Error should mention version parsing, got: {err}"
     );
 }
 
-/// Tests that an invalid version format with 'v' prefix is rejected.
 #[test]
 fn test_invalid_version_format_with_v() {
-    let invalid_version_with_v = "v1.2".to_string();
-    let err = parse_cedar_version(serde_json::Value::String(invalid_version_with_v))
+    let invalid_version_with_v = json!("v1.2");
+    let err = parse_maybe_cedar_version(&invalid_version_with_v)
         .expect_err("Expected error for incomplete version format with v prefix");
     assert!(
-        err.to_string().contains("error parsing cedar version"),
+        err.contains("error parsing cedar version"),
         "Error should mention version parsing, got: {err}"
     );
 }
 
 #[test]
 fn test_missing_required_fields() {
-    // Test missing cedar_version
-    let json = json!({
-        // Missing cedar_version
-        "policy_stores": {
-            "test": {
-                "name": "test",
-                "schema": "test",
-                "policies": {}
-            }
-        }
-    });
+    let json = json!({});
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for missing cedar_version field");
-    assert!(
-        err.to_string()
-            .contains("missing required field 'cedar_version' in policy store"),
-        "Error should mention missing cedar_version, got: {err}"
-    );
-
-    // Test missing policy_stores
-    let json = json!({
-        "cedar_version": "v4.0.0",
-        // Missing policy_stores
-    });
-
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for missing policy_stores field");
     assert!(
         err.to_string()
@@ -258,19 +214,17 @@ fn test_missing_required_fields() {
 
 #[test]
 fn test_invalid_policy_store_entry() {
-    // Test missing name in policy store entry
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
-                // Missing name
                 "schema": "test",
                 "policies": {}
             }
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for missing name in policy store entry");
     assert!(
         err.to_string()
@@ -278,19 +232,17 @@ fn test_invalid_policy_store_entry() {
         "Error should mention missing name field, got: {err}"
     );
 
-    // Test missing schema in policy store entry
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
                 "name": "test",
-                // Missing schema
                 "policies": {}
             }
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for missing schema in policy store entry");
     assert!(
         err.to_string()
@@ -298,19 +250,17 @@ fn test_invalid_policy_store_entry() {
         "Error should mention missing schema field, got: {err}"
     );
 
-    // Test missing policies in policy store entry
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
                 "name": "test",
                 "schema": "test",
-                // Missing policies
             }
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for missing policies in policy store entry");
     assert!(
         err.to_string().contains(
@@ -320,26 +270,6 @@ fn test_invalid_policy_store_entry() {
     );
 }
 
-#[test]
-fn test_invalid_cedar_version() {
-    let json = json!({
-        "cedar_version": "invalid",
-        "policy_stores": {
-            "test": {
-                "name": "test",
-                "schema": "test",
-                "policies": {}
-            }
-        }
-    });
-
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for invalid cedar_version format");
-    assert!(
-        err.to_string().contains("invalid cedar_version format"),
-        "Error should mention invalid cedar_version format, got: {err}"
-    );
-}
 
 #[test]
 fn test_invalid_schema_format() {
@@ -354,7 +284,7 @@ fn test_invalid_schema_format() {
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for invalid schema format");
     assert!(
         err.to_string().contains("error parsing schema"),
@@ -364,7 +294,7 @@ fn test_invalid_schema_format() {
 
 #[test]
 fn test_invalid_policies_format() {
-    let schema = base64::prelude::BASE64_STANDARD.encode("{}"); // minimal valid JSON schema
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}");
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
@@ -381,7 +311,7 @@ fn test_invalid_policies_format() {
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for invalid policy content");
     assert!(
         err.to_string().contains("unable to decode policy with id"),
@@ -391,7 +321,7 @@ fn test_invalid_policies_format() {
 
 #[test]
 fn test_invalid_trusted_issuers_format() {
-    let schema = base64::prelude::BASE64_STANDARD.encode("{}"); // minimal valid JSON schema
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}");
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
@@ -410,7 +340,7 @@ fn test_invalid_trusted_issuers_format() {
         }
     });
 
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for invalid openid_configuration_endpoint URL");
     assert!(
         err.to_string()
