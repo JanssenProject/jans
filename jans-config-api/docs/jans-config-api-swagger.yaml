@@ -1492,6 +1492,9 @@ paths:
                       "origin": "jansPerson",
                       "jansMultivaluedAttr": false,
                       "status": "active",
+                      "usageType": [
+                          "openid"
+                      ],
                       "urn": "urn:mace:dir:attribute-def:qaattribute",
                       "userCanAccess": true,
                       "userCanEdit": true,
@@ -1529,6 +1532,9 @@ paths:
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
                         "status": "active",
+                        "usageType": [
+                            "openid"
+                        ],
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
                         "userCanEdit": true,
@@ -1584,6 +1590,9 @@ paths:
                       "origin": "jansPerson",
                       "jansMultivaluedAttr": false,
                       "status": "active",
+                      "usageType": [
+                          "openid"
+                      ],
                       "urn": "urn:mace:dir:attribute-def:qaattribute",
                       "userCanAccess": true,
                       "userCanEdit": true,
@@ -1621,6 +1630,9 @@ paths:
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
                         "status": "active",
+                        "usageType": [
+                            "openid"
+                        ],
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
                         "userCanEdit": true,
@@ -1800,6 +1812,9 @@ paths:
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
                         "status": "active",
+                        "usageType": [
+                            "openid"
+                        ],
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
                         "userCanEdit": true,
@@ -6989,8 +7004,8 @@ paths:
                             "jansattrusgtyp": {
                                 "name": "jansattrusgtyp",
                                 "defName": "jansAttrUsgTyp",
-                                "type": "varchar",
-                                "multiValued": false
+                                "type": "jsonb",
+                                "multiValued": true
                             },
                             "janssaml2uri": {
                                 "name": "janssaml2uri",

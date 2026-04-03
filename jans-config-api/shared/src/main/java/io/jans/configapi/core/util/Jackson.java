@@ -28,6 +28,8 @@ import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,9 +99,10 @@ public class Jackson {
     public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);
         Preconditions.checkNotNull(obj);
-        ObjectMapper objectMapper = JacksonUtils.newMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JsonNode patched = jsonPatch.apply(objectMapper.convertValue(obj, JsonNode.class));
+        ObjectMapper objectMapper = ObjectMapperContextResolver.createDefaultMapper();
+        ObjectMapper patchTreeMapper = objectMapper.copy();
+        patchTreeMapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS);
+        JsonNode patched = jsonPatch.apply(patchTreeMapper.convertValue(obj, JsonNode.class));
         return (T) objectMapper.treeToValue(patched, obj.getClass());
     }
 

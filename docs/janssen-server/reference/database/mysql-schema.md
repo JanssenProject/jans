@@ -142,7 +142,7 @@ tags:
 | jansAttrSystemEditTyp | varchar(64)  | YES  |     | None    | TODO - still required?                                                                                                       |
 | jansAttrTyp           | varchar(64)  | YES  |     | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
 | jansClaimName         | varchar(64)  | YES  |     | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in datastore.                                       |
-| jansAttrUsgTyp        | varchar(64)  | YES  |     | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrUsgTyp        | json         | YES  |     | None    | TODO - Usg? Value can be OpenID                                                                                              |
 | jansAttrViewTyp       | json         | YES  |     | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
 | jansSAML1URI          | varchar(64)  | YES  |     | None    | SAML 1 uri of attribute                                                                                                      |
 | jansSAML2URI          | varchar(64)  | YES  |     | None    | SAML 2 uri of attribute                                                                                                      |

@@ -1547,8 +1547,8 @@
         "jansattrusgtyp": {
             "name": "jansattrusgtyp",
             "defName": "jansAttrUsgTyp",
-            "type": "varchar",
-            "multiValued": false
+            "type": "jsonb",
+            "multiValued": true
         },
         "janssaml2uri": {
             "name": "janssaml2uri",
