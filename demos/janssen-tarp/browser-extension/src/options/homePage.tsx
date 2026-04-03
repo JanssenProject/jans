@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import CedarlingMgmt from './cedarling';
+import CedarlingMgmt from '../features/cedarling/components/CedarlingMgmt';
 import Grid from '@mui/material/Grid';
 import Utils from './Utils';
 import { OIDCClients, UserDetails } from '../features/authentication';
