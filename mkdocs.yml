@@ -56,7 +56,6 @@ nav:
   - Get Started:
     - Overview: getting-started/index.md
     - Welcome: index.md
-    - Introduction: janssen-server/README.md
     - Platform Goals: janssen-server/planning/platform-goal.md
     - Use Cases: janssen-server/planning/use-cases.md
     - Quick Start Guides:
