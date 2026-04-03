@@ -2,9 +2,30 @@ package io.jans.cedarling.binding.wrapper;
 
 import uniffi.cedarling_uniffi.*;
 import org.json.JSONObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * High-level wrapper around the Cedarling UniFFI binding.
+ *
+ * <p>This adapter hides the UniFFI-generated types from application code by
+ * providing convenience methods that accept standard Java types ({@code Map},
+ * {@code String}, {@code JSONObject}).  The lower-level overloads that accept
+ * {@link EntityData} and {@link TokenInput} directly are still available for
+ * advanced use cases.</p>
+ *
+ * <h3>Migration from v16.0</h3>
+ * <p>The legacy {@code authorize(Map&lt;String,String&gt; tokens, ...)} method
+ * has been replaced by two dedicated methods:</p>
+ * <ul>
+ *   <li>{@link #authorizeMultiIssuer(Map, String, JSONObject, JSONObject)} –
+ *       drop-in replacement that takes a token map, validates JWTs, and evaluates
+ *       policies.</li>
+ *   <li>{@link #authorizeUnsigned(String, String, JSONObject, JSONObject)} –
+ *       for pre-validated / unsigned entity data.</li>
+ * </ul>
+ */
 public class CedarlingAdapter implements AutoCloseable {
 
     Cedarling cedarling;
@@ -19,19 +40,114 @@ public class CedarlingAdapter implements AutoCloseable {
         this.cedarling = Cedarling.Companion.loadFromFile(path);
     }
 
-    public AuthorizeResult authorizeUnsigned(List<EntityData> principals, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
-        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        return cedarling.authorizeUnsigned(principals, action, resourceObj, context.toString());
+    // ── authorize_multi_issuer ──────────────────────────────────────────
+
+    /**
+     * Authorize using JWT tokens from multiple issuers.
+     *
+     * <p>This is the recommended replacement for the removed
+     * {@code authorize(Map&lt;String,String&gt;, ...)} method.  Each map entry
+     * is a token mapping name (e.g. {@code "Jans::Access_Token"}) to the raw
+     * JWT string.</p>
+     *
+     * @param tokens  mapping name → JWT string
+     * @param action  Cedar action (e.g. {@code "Jans::Action::\"Read\""})
+     * @param resource resource as JSONObject
+     * @param context  context as JSONObject (may be null)
+     * @return authorization result
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            Map<String, String> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        List<TokenInput> tokenInputs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
+        }
+        return authorizeMultiIssuer(tokenInputs, action, resource, context);
     }
 
-    public MultiIssuerAuthorizeResult authorizeMultiIssuer(List<TokenInput> tokens, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
+    /**
+     * Authorize using pre-built {@link TokenInput} objects.
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            List<TokenInput> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : null;
         return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
+    }
+
+    // ── authorize_unsigned ──────────────────────────────────────────────
+
+    /**
+     * Authorize with a single principal provided as a JSON string.
+     *
+     * <p>This is the simplest way to call {@code authorizeUnsigned} without
+     * importing any UniFFI types.  The JSON string is converted to an
+     * {@link EntityData} internally.</p>
+     *
+     * @param principalJson single principal as a JSON string
+     * @param action  Cedar action
+     * @param resource resource as JSONObject
+     * @param context  context as JSONObject
+     * @return authorization result
+     */
+    public AuthorizeResult authorizeUnsigned(
+            String principalJson,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        EntityData principal = EntityData.Companion.fromJson(principalJson);
+        return authorizeUnsigned(List.of(principal), action, resource, context);
+    }
+
+    /**
+     * Authorize with multiple principals provided as JSON strings.
+     *
+     * <p>Use this when you have more than one principal and want to avoid
+     * importing UniFFI types.  Each JSON string is converted to an
+     * {@link EntityData} internally.</p>
+     *
+     * @param principalsJson principal JSON strings
+     * @param action  Cedar action
+     * @param resource resource as JSONObject
+     * @param context  context as JSONObject
+     * @return authorization result
+     */
+    public AuthorizeResult authorizeUnsignedFromJson(
+            List<String> principalsJson,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        List<EntityData> principals = new ArrayList<>();
+        for (String json : principalsJson) {
+            principals.add(EntityData.Companion.fromJson(json));
+        }
+        return authorizeUnsigned(principals, action, resource, context);
+    }
+
+    /**
+     * Authorize with pre-built {@link EntityData} principals.
+     *
+     * <p>Use this overload when you already have {@link EntityData} objects
+     * (e.g. from advanced integration code).</p>
+     */
+    public AuthorizeResult authorizeUnsigned(
+            List<EntityData> principals,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
+        return cedarling.authorizeUnsigned(principals, action, resourceObj, context.toString());
     }
 
     public String getLogById(String id) throws LogException {
