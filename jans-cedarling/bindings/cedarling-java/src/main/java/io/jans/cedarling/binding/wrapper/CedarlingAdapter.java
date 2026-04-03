@@ -62,6 +62,9 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
+        if (tokens == null) {
+            throw new IllegalArgumentException("tokens must not be null");
+        }
         List<TokenInput> tokenInputs = new ArrayList<>();
         for (Map.Entry<String, String> entry : tokens.entrySet()) {
             tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
@@ -147,7 +150,8 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject context) throws AuthorizeException, EntityException {
 
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        return cedarling.authorizeUnsigned(principals, action, resourceObj, context.toString());
+        String contextStr = context != null ? context.toString() : null;
+        return cedarling.authorizeUnsigned(principals, action, resourceObj, contextStr);
     }
 
     public String getLogById(String id) throws LogException {

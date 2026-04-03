@@ -97,27 +97,28 @@ public class CedarlingAdapterTest {
     public void testAuthorizeMultiIssuerWithMapConversion() throws Exception {
         // Use the shared multi-issuer policy store (see jans-cedarling/test_files/policy-store-multi-issuer-test.yaml)
         // so the Cedar context includes `tokens` and policies can evaluate.
-        CedarlingAdapter multiIssuerAdapter = new CedarlingAdapter();
-        multiIssuerAdapter.loadFromJson(AppUtils.readFile(BOOTSTRAP_MULTI_ISSUER_JSON_PATH));
-        assertNotNull(multiIssuerAdapter.getCedarling());
+        try (CedarlingAdapter multiIssuerAdapter = new CedarlingAdapter()) {
+            multiIssuerAdapter.loadFromJson(AppUtils.readFile(BOOTSTRAP_MULTI_ISSUER_JSON_PATH));
+            assertNotNull(multiIssuerAdapter.getCedarling());
 
-        String action = AppUtils.readFile(ACTION_FILE_PATH);
-        String accessTokenPayload = AppUtils.readFile(MULTI_ISSUER_ACCESS_TOKEN_PAYLOAD_PATH);
-        String resourceJson = AppUtils.readFile(MULTI_ISSUER_RESOURCE_PATH);
+            String action = AppUtils.readFile(ACTION_FILE_PATH);
+            String accessTokenPayload = AppUtils.readFile(MULTI_ISSUER_ACCESS_TOKEN_PAYLOAD_PATH);
+            String resourceJson = AppUtils.readFile(MULTI_ISSUER_RESOURCE_PATH);
 
-        String accessJwt = jwtCreator.createJwtFromJson(accessTokenPayload);
+            String accessJwt = jwtCreator.createJwtFromJson(accessTokenPayload);
 
-        JSONObject resource = new JSONObject(resourceJson);
-        JSONObject context = new JSONObject();
+            JSONObject resource = new JSONObject(resourceJson);
+            JSONObject context = new JSONObject();
 
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("Jans::Access_Token", accessJwt);
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("Jans::Access_Token", accessJwt);
 
-        MultiIssuerAuthorizeResult result =
-                multiIssuerAdapter.authorizeMultiIssuer(tokens, action, resource, context);
-        assertNotNull(result);
-        assertNotNull(result.getRequestId());
-        assertTrue(result.getDecision(), "Multi-issuer authorize should ALLOW with matching org_id claim");
+            MultiIssuerAuthorizeResult result =
+                    multiIssuerAdapter.authorizeMultiIssuer(tokens, action, resource, context);
+            assertNotNull(result);
+            assertNotNull(result.getRequestId());
+            assertTrue(result.getDecision(), "Multi-issuer authorize should ALLOW with matching org_id claim");
+        }
     }
 
     @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
