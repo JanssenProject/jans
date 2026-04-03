@@ -50,10 +50,10 @@ public class CedarlingAdapter implements AutoCloseable {
      * is a token mapping name (e.g. {@code "Jans::Access_Token"}) to the raw
      * JWT string.</p>
      *
-     * @param tokens  mapping name → JWT string
+     * @param tokens  mapping name → JWT string (must not be null; no null keys or values)
      * @param action  Cedar action (e.g. {@code "Jans::Action::\"Read\""})
      * @param resource resource as JSONObject
-     * @param context  context as JSONObject (may be null)
+     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
     public MultiIssuerAuthorizeResult authorizeMultiIssuer(
@@ -67,6 +67,13 @@ public class CedarlingAdapter implements AutoCloseable {
         }
         List<TokenInput> tokenInputs = new ArrayList<>();
         for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("tokens map must not contain a null key");
+            }
+            if (entry.getValue() == null) {
+                throw new IllegalArgumentException(
+                        "tokens map must not contain a null value for key: " + entry.getKey());
+            }
             tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
         }
         return authorizeMultiIssuer(tokenInputs, action, resource, context);
@@ -82,7 +89,7 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject context) throws AuthorizeException, EntityException {
 
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : null;
+        String contextStr = context != null ? context.toString() : "{}";
         return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
     }
 
@@ -95,10 +102,10 @@ public class CedarlingAdapter implements AutoCloseable {
      * importing any UniFFI types.  The JSON string is converted to an
      * {@link EntityData} internally.</p>
      *
-     * @param principalJson single principal as a JSON string
+     * @param principalJson single principal as a JSON string (must not be null)
      * @param action  Cedar action
      * @param resource resource as JSONObject
-     * @param context  context as JSONObject
+     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
     public AuthorizeResult authorizeUnsigned(
@@ -107,6 +114,9 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
+        if (principalJson == null) {
+            throw new IllegalArgumentException("principalJson must not be null");
+        }
         EntityData principal = EntityData.Companion.fromJson(principalJson);
         return authorizeUnsigned(List.of(principal), action, resource, context);
     }
@@ -118,10 +128,10 @@ public class CedarlingAdapter implements AutoCloseable {
      * importing UniFFI types.  Each JSON string is converted to an
      * {@link EntityData} internally.</p>
      *
-     * @param principalsJson principal JSON strings
+     * @param principalsJson principal JSON strings (must not be null; no null elements)
      * @param action  Cedar action
      * @param resource resource as JSONObject
-     * @param context  context as JSONObject
+     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
     public AuthorizeResult authorizeUnsignedFromJson(
@@ -130,8 +140,14 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
+        if (principalsJson == null) {
+            throw new IllegalArgumentException("principalsJson must not be null");
+        }
         List<EntityData> principals = new ArrayList<>();
         for (String json : principalsJson) {
+            if (json == null) {
+                throw new IllegalArgumentException("principalsJson must not contain null elements");
+            }
             principals.add(EntityData.Companion.fromJson(json));
         }
         return authorizeUnsigned(principals, action, resource, context);
@@ -141,7 +157,8 @@ public class CedarlingAdapter implements AutoCloseable {
      * Authorize with pre-built {@link EntityData} principals.
      *
      * <p>Use this overload when you already have {@link EntityData} objects
-     * (e.g. from advanced integration code).</p>
+     * (e.g. from advanced integration code). A null {@code context} is sent as an
+     * empty JSON object to the engine.</p>
      */
     public AuthorizeResult authorizeUnsigned(
             List<EntityData> principals,
@@ -150,7 +167,7 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject context) throws AuthorizeException, EntityException {
 
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : null;
+        String contextStr = context != null ? context.toString() : "{}";
         return cedarling.authorizeUnsigned(principals, action, resourceObj, contextStr);
     }
 

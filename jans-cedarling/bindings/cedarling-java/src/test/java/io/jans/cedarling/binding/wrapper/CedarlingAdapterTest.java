@@ -94,6 +94,32 @@ public class CedarlingAdapterTest {
     }
 
     @Test
+    public void testAuthorizeUnsignedWithNullContext() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+
+        AuthorizeResult result = adapter.authorizeUnsigned(principalsString, action, resource, null);
+        assertNotNull(result);
+        assertNotNull(result.getPrincipals());
+        assertEquals(result.getDecision(), false);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testAuthorizeMultiIssuerRejectsNullTokens() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+        JSONObject context = new JSONObject(contextJson);
+
+        adapter.authorizeMultiIssuer((Map<String, String>) null, action, resource, context);
+    }
+
+    @Test
     public void testAuthorizeMultiIssuerWithMapConversion() throws Exception {
         // Use the shared multi-issuer policy store (see jans-cedarling/test_files/policy-store-multi-issuer-test.yaml)
         // so the Cedar context includes `tokens` and policies can evaluate.
