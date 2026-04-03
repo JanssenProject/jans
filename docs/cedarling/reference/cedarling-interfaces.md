@@ -76,6 +76,74 @@ These methods are called to create an authorization request, run authorization, 
 
     Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.
 
+### Policy Introspection
+
+These methods return metadata about policies that are potentially applicable to a given authorization request, **without executing authorization**. This is useful for admin tooling, policy auditing, and debugging.
+
+Both methods perform scope-level filtering only (principal/action/resource constraints). Policies with `when`/`unless` conditions may still not apply at evaluation time — the returned set is a superset of truly applicable policies.
+
+- `get_matching_policies_unsigned(principals, actions, resources)`
+
+    Returns metadata for all policies whose scope constraints are compatible with the given principals, actions, and resources.
+
+  - `principals`: Array of `EntityData` objects — their `entity_type` is matched against policy principal constraints
+  - `actions`: Array of action strings (e.g., `Jans::Action::"Read"`) — matched against policy action constraints
+  - `resources`: Array of `EntityData` objects — their `entity_type` is matched against policy resource constraints
+
+  Returns a list of `PolicyMetadata` objects.
+
+- `get_matching_policies_multi_issuer(tokens, actions, resources)`
+
+    Returns metadata for all policies whose scope constraints are compatible with the given token-derived principals, actions, and resources. Tokens are validated and their mapping types are used as principal entity types.
+
+  - `tokens`: Array of `TokenInput` objects — their `mapping` field is used as the principal entity type
+  - `actions`: Array of action strings
+  - `resources`: Array of `EntityData` objects
+
+  Returns a list of `PolicyMetadata` objects.
+
+#### PolicyMetadata
+
+Each returned `PolicyMetadata` object contains:
+
+- `id`: The policy ID (string)
+- `annotations`: Key-value pairs from Cedar policy annotations (`@key("value")`), returned as a map of strings
+- `source`: The Cedar policy source code in human-readable Cedar syntax
+
+#### Example (Rust)
+
+```rust
+use cedarling::{Cedarling, EntityData, CedarEntityMapping, PolicyMetadata};
+
+let principals = vec![EntityData {
+    cedar_mapping: CedarEntityMapping {
+        entity_type: "Jans::User".to_string(),
+        id: "user1".to_string(),
+    },
+    attributes: Default::default(),
+}];
+
+let actions = vec![r#"Jans::Action::"Read""#.to_string()];
+
+let resources = vec![EntityData {
+    cedar_mapping: CedarEntityMapping {
+        entity_type: "Jans::Document".to_string(),
+        id: "doc1".to_string(),
+    },
+    attributes: Default::default(),
+}];
+
+let policies = cedarling
+    .get_matching_policies_unsigned(principals, actions, resources)
+    .await
+    .expect("failed to get matching policies");
+
+for policy in &policies {
+    println!("Policy: {} (annotations: {:?})", policy.id, policy.annotations);
+    println!("Source:\n{}", policy.source);
+}
+```
+
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.
