@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.shibboleth.rest;
 
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 import io.jans.configapi.plugin.shibboleth.model.ShibbolethIdpConfiguration;
 import io.jans.configapi.plugin.shibboleth.model.TrustedServiceProvider;
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
@@ -23,9 +24,17 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.slf4j.Logger;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.*;
 
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.slf4j.Logger;
+
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

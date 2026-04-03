@@ -5992,6 +5992,8 @@
         "displayName",
         "description",
         "entityType",
+		"metadataSource",
+		"jansReleasedAttr",
         "jansStatus",
         "version",
         "lastSyncedVersion"

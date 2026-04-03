@@ -8,6 +8,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -46,6 +47,10 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName
     @Schema(description = "Metadata file source for Trust Relationship.")  
     private MetadataSource metadataSource;
+    
+    @AttributeName(name = "jansReleasedAttr")
+    @Schema(description = "Trust Relationship attributes that will be released to SAML server.")
+    private List<String> releasedAttributes;
     
     @AttributeName
     @Schema(description = "Trust Relationship version")
@@ -95,6 +100,14 @@ public class TrustRelationship extends Entry implements Serializable {
         this.metadataSource = metadataSource;
     }
 
+    public List<String> getReleasedAttributes() {
+        return releasedAttributes;
+    }
+
+    public void setReleasedAttributes(List<String> releasedAttributes) {
+        this.releasedAttributes = releasedAttributes;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -114,8 +127,8 @@ public class TrustRelationship extends Entry implements Serializable {
     @Override
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", version=" + version
-                + ", lastSyncedVersion=" + lastSyncedVersion + "]";
+                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", releasedAttributes="
+                + releasedAttributes + ", version=" + version + ", lastSyncedVersion=" + lastSyncedVersion + "]";
     }
     
 }
