@@ -312,7 +312,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build
-        uses: docker/setup-qemu-action@7e10951aea186e886cef2f1a25a7bbf4e593d710 # master
+        uses: docker/setup-qemu-action@f4e8deed0c3c26542279f4042c0e1d059cbf012d # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all
@@ -333,7 +333,7 @@ jobs:
       - name: Build and push
         if: steps.build_docker_image.outputs.build
         id: docker_build
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: ${{ steps.prep.outputs.dockerfilelocation }}
