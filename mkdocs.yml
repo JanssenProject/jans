@@ -63,7 +63,6 @@ nav:
       - Overview: quick-start-guides/index.md
       - Docker Quick Start: janssen-server/install/docker-install/quick-start.md
       - Casa Quick Start: casa/administration/quick-start.md
-      - Cedarling Quick Start: cedarling/quick-start/cedarling-quick-start.md
     - Terminology:
       - Learning Reference: janssen-server/reference/learning-reference.md
 
@@ -105,7 +104,6 @@ nav:
         - Web Pages: janssen-server/auth-server/international/web-pages.md
         - Client Configuration: janssen-server/auth-server/international/client-config.md
         - Scope Descriptions: janssen-server/auth-server/international/scope-descriptions.md
-    - Agama Engine: janssen-server/developer/agama/jans-agama-engine.md
     - Developer Guide:
       - janssen-server/developer/README.md
       - External Libraries: janssen-server/developer/external-libraries.md
@@ -152,12 +150,8 @@ nav:
         - Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
     - Reference:
       - janssen-server/reference/README.md
-      - Cedarling Dev Docs:
-        - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
-        - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
       - Javadocs / OpenAPI:
         - janssen-server/reference/openapi.md
-        - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
         - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
         - jans-casa: https://janssenproject.github.io/developer-docs/jans-casa/config/index.html
         - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
@@ -443,7 +437,6 @@ nav:
       - Install FAQ: janssen-server/install/install-faq.md
       - Developer FAQ: contribute/developer-faq.md
       - Casa FAQ: casa/administration/faq.md  # duplicate: also under Casa > Administration
-      - Agama FAQ: janssen-server/developer/agama/faq.md  # duplicate: also under Agama
 
   # ====================
   # 8. DEPLOY & OPERATE
@@ -571,8 +564,10 @@ nav:
 - Agama:
   - Introduction: agama/introduction.md
   - Language Reference: agama/language-reference.md
+  - API reference: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
   - Execution Rules: agama/execution-rules.md
   - Gama Format: agama/gama-format.md
+  - Agama Engine: janssen-server/developer/agama/jans-agama-engine.md
   - Engine Configuration: janssen-server/developer/agama/engine-bridge-config.md
   - Project Deployment: janssen-server/developer/agama/projects-deployment.md
   - Navigation & UI: janssen-server/developer/agama/flows-navigation-ui.md
@@ -618,6 +613,9 @@ nav:
     - Sidecar:
       - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
       - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
+    - Interface Reference:
+      - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md
 
