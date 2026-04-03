@@ -65,7 +65,7 @@ export default function HomePage({ data, notifyOnDataChange }: HomePageProps) {
     setValue(newValue);
   };
 
-  const isLoggedIn = !Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0;
+  const isLoggedIn = !Utils.isEmpty(data?.loginDetails) && Object.keys(data?.loginDetails ?? {}).length !== 0;
 
   return (
     <Container maxWidth="lg" disableGutters>

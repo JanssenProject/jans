@@ -10,10 +10,10 @@ export const labelWithTooltip = (
 ) => (
   <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
     {label}
-    <Tooltip title={tooltip} placement="top" arrow>
+    <Tooltip title={tooltip} placement="top" arrow tabIndex={-1} >
       <IconButton
         size="small"
-        tabIndex={0}
+        tabIndex={-1}
         aria-label={`${label} help`}
         sx={{ p: 0.25 }}
       >
