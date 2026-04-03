@@ -998,6 +998,34 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Connection service Configuration")
     private ConnectionServiceConfiguration connectionServiceConfiguration;
 
+    // Client ID Metadata Document (CIMD) Configuration
+    @DocProperty(description = "Allowed URL schemes for CIMD client_id (default: https only)")
+    private List<String> cimdSchemeAllowlist;
+
+    @DocProperty(description = "Allowed domains for CIMD client_id URLs")
+    private List<String> cimdDomainAllowlist;
+
+    @DocProperty(description = "Blocked domains for CIMD client_id URLs")
+    private List<String> cimdDomainBlocklist;
+
+    @DocProperty(description = "Block private/internal IP ranges for CIMD (RFC 1918, loopback, link-local)", defaultValue = "true")
+    private Boolean cimdBlockPrivateIp = true;
+
+    @DocProperty(description = "Maximum response size in bytes for CIMD fetch", defaultValue = "65536")
+    private Integer cimdMaxResponseSize = 65536;
+
+    @DocProperty(description = "Connection timeout in milliseconds for CIMD fetch", defaultValue = "5000")
+    private Integer cimdConnectTimeoutMs = 5000;
+
+    @DocProperty(description = "Read timeout in milliseconds for CIMD fetch", defaultValue = "10000")
+    private Integer cimdReadTimeoutMs = 10000;
+
+    @DocProperty(description = "Default TTL in minutes for persisted CIMD client metadata (also used as fallback when HTTP Cache-Control header is absent)", defaultValue = "60")
+    private Integer cimdTtlMinutes = 60;
+
+    @DocProperty(description = "Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)", defaultValue = "1440")
+    private Integer cimdMaxTtlMinutes = 1440;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -3861,4 +3889,87 @@ public class AppConfiguration implements Configuration {
 	public void setConnectionServiceConfiguration(ConnectionServiceConfiguration connectionServiceConfiguration) {
 		this.connectionServiceConfiguration = connectionServiceConfiguration;
 	}
+
+    // CIMD getters and setters
+    public List<String> getCimdSchemeAllowlist() {
+        if (cimdSchemeAllowlist == null || cimdSchemeAllowlist.isEmpty()) {
+            cimdSchemeAllowlist = List.of("https");
+        }
+        return cimdSchemeAllowlist;
+    }
+
+    public void setCimdSchemeAllowlist(List<String> cimdSchemeAllowlist) {
+        this.cimdSchemeAllowlist = cimdSchemeAllowlist;
+    }
+
+    public List<String> getCimdDomainAllowlist() {
+        return cimdDomainAllowlist;
+    }
+
+    public void setCimdDomainAllowlist(List<String> cimdDomainAllowlist) {
+        this.cimdDomainAllowlist = cimdDomainAllowlist;
+    }
+
+    public List<String> getCimdDomainBlocklist() {
+        return cimdDomainBlocklist;
+    }
+
+    public void setCimdDomainBlocklist(List<String> cimdDomainBlocklist) {
+        this.cimdDomainBlocklist = cimdDomainBlocklist;
+    }
+
+    public Boolean getCimdBlockPrivateIp() {
+        if (cimdBlockPrivateIp == null) cimdBlockPrivateIp = true;
+        return cimdBlockPrivateIp;
+    }
+
+    public void setCimdBlockPrivateIp(Boolean cimdBlockPrivateIp) {
+        this.cimdBlockPrivateIp = cimdBlockPrivateIp;
+    }
+
+    public Integer getCimdMaxResponseSize() {
+        if (cimdMaxResponseSize == null) cimdMaxResponseSize = 65536;
+        return cimdMaxResponseSize;
+    }
+
+    public void setCimdMaxResponseSize(Integer cimdMaxResponseSize) {
+        this.cimdMaxResponseSize = cimdMaxResponseSize;
+    }
+
+    public Integer getCimdConnectTimeoutMs() {
+        if (cimdConnectTimeoutMs == null) cimdConnectTimeoutMs = 5000;
+        return cimdConnectTimeoutMs;
+    }
+
+    public void setCimdConnectTimeoutMs(Integer cimdConnectTimeoutMs) {
+        this.cimdConnectTimeoutMs = cimdConnectTimeoutMs;
+    }
+
+    public Integer getCimdReadTimeoutMs() {
+        if (cimdReadTimeoutMs == null) cimdReadTimeoutMs = 10000;
+        return cimdReadTimeoutMs;
+    }
+
+    public void setCimdReadTimeoutMs(Integer cimdReadTimeoutMs) {
+        this.cimdReadTimeoutMs = cimdReadTimeoutMs;
+    }
+
+    public Integer getCimdTtlMinutes() {
+        if (cimdTtlMinutes == null) cimdTtlMinutes = 60;
+        return cimdTtlMinutes;
+    }
+
+    public void setCimdTtlMinutes(Integer cimdTtlMinutes) {
+        this.cimdTtlMinutes = cimdTtlMinutes;
+    }
+
+    public Integer getCimdMaxTtlMinutes() {
+        if (cimdMaxTtlMinutes == null) cimdMaxTtlMinutes = 1440;
+        return cimdMaxTtlMinutes;
+    }
+
+    public void setCimdMaxTtlMinutes(Integer cimdMaxTtlMinutes) {
+        this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
+    }
+
 }

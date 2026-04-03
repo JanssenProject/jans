@@ -5,10 +5,7 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RedirectionUriService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
@@ -54,6 +51,9 @@ public class AuthorizeRestWebServiceValidatorTest {
 
     @Mock
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
+
+    @Mock
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Test
     public void validatePkce_withBlankCodeChallengeAndWithoutRequiredPkce_shouldPass() {
@@ -261,5 +261,51 @@ public class AuthorizeRestWebServiceValidatorTest {
         client.getAttributes().setAuthorizationDetailsTypes(Collections.singletonList("internal_type"));
 
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
+    }
+
+    // ==================== CIMD Tests ====================
+
+    @Test
+    public void validateClient_withCimdClientId_shouldReturnCimdClient() {
+        String cimdClientId = "https://example.com/client";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+
+        when(clientIdMetadataService.isCimdClientId(cimdClientId)).thenReturn(true);
+        when(clientIdMetadataService.getClient(cimdClientId)).thenReturn(cimdClient);
+
+        Client result = authorizeRestWebServiceValidator.validateClient(cimdClientId, "state", false);
+
+        assertEquals(cimdClientId, result.getClientId());
+        verify(clientIdMetadataService).isCimdClientId(cimdClientId);
+        verify(clientIdMetadataService).getClient(cimdClientId);
+        verify(clientService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void validateClient_withTraditionalClientId_shouldReturnDatabaseClient() {
+        String clientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(clientId);
+
+        when(clientIdMetadataService.isCimdClientId(clientId)).thenReturn(false);
+        when(clientService.getClient(clientId)).thenReturn(dbClient);
+
+        Client result = authorizeRestWebServiceValidator.validateClient(clientId, "state", false);
+
+        assertEquals(clientId, result.getClientId());
+        verify(clientIdMetadataService).isCimdClientId(clientId);
+        verify(clientIdMetadataService, never()).getClient(anyString());
+        verify(clientService).getClient(clientId);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateClient_withBlankClientId_shouldThrowException() {
+        authorizeRestWebServiceValidator.validateClient("", "state", false);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateClient_withNullClientId_shouldThrowException() {
+        authorizeRestWebServiceValidator.validateClient(null, "state", false);
     }
 }
