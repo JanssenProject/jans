@@ -1,0 +1,38 @@
+{
+    "loggingLevel": "INFO",
+    "loggingLayout": "text",
+    "disableJdkLogger": true,
+    "maxCount": 200,
+    "userExclusionAttributes": [
+        "userPassword"
+    ],
+    "userMandatoryAttributes": [
+        "mail",
+        "displayName",
+        "status",
+        "userPassword",
+        "givenName"
+    ],
+    "agamaConfiguration": {
+        "mandatoryAttributes": [
+            "qname",
+            "source"
+        ],
+        "optionalAttributes": [
+            "enabled",
+            "metadata"
+        ]
+    },
+    "auditLogConf": {
+        "enabled": true,
+        "headerAttributes": [
+            "User-inum"
+        ]
+    },
+    "dataFormatConversionConf": {
+        "enabled": true,
+        "ignoreHttpMethod": []
+    },
+    "acrValidationEnabled": true,
+    "endpointDetails": {}
+}

@@ -1,0 +1,5 @@
+[
+    {"op": "replace", "path": "/loggingLevel", "value": "INFO"},
+    {"op": "replace", "path": "/disableJdkLogger", "value": true},
+    {"op": "replace", "path": "/maxCount", "value": 200}
+]

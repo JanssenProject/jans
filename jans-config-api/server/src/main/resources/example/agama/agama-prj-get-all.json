@@ -1,0 +1,37 @@
+{
+    "start": 0,
+    "totalEntriesCount": 1,
+    "entriesCount": 1,
+    "entries": [
+        {
+            "dn": "jansAgamaPrjName=my-agama-project,ou=deployments,ou=agama,o=jans",
+            "name": "my-agama-project",
+            "creationTime": "2024-09-01T10:00:00",
+            "finishedAt": "2024-09-01T10:00:45",
+            "details": {
+                "error": null,
+                "flowsError": {
+                    "io.jans.agama.pw.main": null,
+                    "io.jans.agama.pw.secondary": null
+                },
+                "projectMetadata": {
+                    "projectName": "my-agama-project",
+                    "author": "John Doe",
+                    "type": "community",
+                    "description": "A sample Agama project for password authentication",
+                    "version": "1.0.0",
+                    "configs": {
+                        "io.jans.agama.pw.main": {
+                            "lockConfig": {
+                                "MAX_LOGIN_ATTEMPT": 6,
+                                "ENABLE_LOCK": true,
+                                "LOCK_EXP_TIME": 180
+                            }
+                        }
+                    }
+                }
+            },
+            "baseDn": "jansAgamaPrjName=my-agama-project,ou=deployments,ou=agama,o=jans"
+        }
+    ]
+}

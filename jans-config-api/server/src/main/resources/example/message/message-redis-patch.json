@@ -1,0 +1,4 @@
+[
+    {"op": "replace", "path": "/defaultPutExpiration", "value": 80},
+    {"op": "replace", "path": "/maxTotalConnections", "value": 600}
+]

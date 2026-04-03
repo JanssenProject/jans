@@ -1,0 +1,28 @@
+[
+    {
+        "name": "GluuFederation/agama-catalog",
+        "full_name": "GluuFederation/agama-catalog",
+        "description": "Official Agama project catalog",
+        "html_url": "https://github.com/GluuFederation/agama-catalog",
+        "stargazers_count": 42,
+        "updated_at": "2024-08-15T12:00:00Z",
+        "topics": [
+            "agama",
+            "authentication",
+            "janssen"
+        ]
+    },
+    {
+        "name": "GluuFederation/agama-ldap",
+        "full_name": "GluuFederation/agama-ldap",
+        "description": "Agama project for LDAP-based authentication",
+        "html_url": "https://github.com/GluuFederation/agama-ldap",
+        "stargazers_count": 18,
+        "updated_at": "2024-07-20T09:30:00Z",
+        "topics": [
+            "agama",
+            "ldap",
+            "authentication"
+        ]
+    }
+]

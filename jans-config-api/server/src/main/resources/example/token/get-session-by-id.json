@@ -1,0 +1,30 @@
+{
+    "dn": "jansId=c0baae4d-3282-4d20-99d9-90c30a1b6e53,ou=sessions,o=jans",
+    "id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
+    "outsideSid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
+    "lastUsedAt": "2024-09-24T14:53:13",
+    "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
+    "authenticationTime": "2024-09-24T14:53:13",
+    "state": "authenticated",
+    "sessionState": "34d35953e0008389587369ab1be6d6c93aa6d9e103dc2da93c157fc1b8d12385.696be3a5-d30c-4401-831f-4cd9017e8772",
+    "permissionGrantedMap": {
+        "permissionGranted": {
+            "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
+        }
+    },
+    "sessionAttributes": {
+        "acr": "simple_password_auth",
+        "remote_ip": "123.201.169.114",
+        "opbs": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5",
+        "auth_user": "admin",
+        "session_id": "c0baae4d-3282-4d20-99d9-90c30a1b6e53",
+        "sid": "652dc5e2-d95b-416e-b1ca-34b7dfb441d9",
+        "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9"
+    },
+    "expirationDate": "2024-11-25T14:53:06",
+    "deletable": true,
+    "creationDate": "2024-09-24T14:53:06",
+    "persisted": false,
+    "ttl": 0,
+    "opbrowserState": "355386a7-8e51-488b-ab1d-b65fa9f5a6d5"
+}

@@ -16,7 +16,9 @@ import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
@@ -44,8 +46,9 @@ public class AgamaResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @RequestBody(description = "Agama flow source code (plain text)", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string"), examples = @ExampleObject(name = "Request example", value = "example/agama/agama-syntax-check-request.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agama Syntax Check message", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Exception.class))),
+            @ApiResponse(responseCode = "200", description = "Agama Syntax Check message", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Exception.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama-syntax-check-response.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST

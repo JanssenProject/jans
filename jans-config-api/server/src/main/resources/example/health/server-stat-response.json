@@ -1,0 +1,18 @@
+{
+    "response": {
+        "202104": {
+            "monthly_active_users": 1234,
+            "operations": {
+                "id_token": 5678,
+                "access_token": 9012
+            }
+        },
+        "202105": {
+            "monthly_active_users": 1456,
+            "operations": {
+                "id_token": 6100,
+                "access_token": 9500
+            }
+        }
+    }
+}
