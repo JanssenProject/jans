@@ -31,7 +31,7 @@ pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
-use cedar_policy::{ActionConstraint, EntityTypeName, EntityUid, Policy, PolicyId};
+use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use semver::Version;
 use serde::{Deserialize, Deserializer, Serialize, de, de::Error};
 use std::collections::{HashMap, HashSet};
@@ -545,11 +545,32 @@ impl PoliciesContainer {
     }
 }
 
+/// The effect of a Cedar policy: either `Permit` or `Forbid`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PolicyEffect {
+    /// The policy permits the request.
+    Permit,
+    /// The policy forbids the request.
+    Forbid,
+}
+
+impl From<Effect> for PolicyEffect {
+    fn from(effect: Effect) -> Self {
+        match effect {
+            Effect::Permit => PolicyEffect::Permit,
+            Effect::Forbid => PolicyEffect::Forbid,
+        }
+    }
+}
+
 /// Metadata about a single Cedar policy.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct PolicyMetadata {
     /// The policy ID
     pub id: String,
+    /// The effect of the policy (`Permit` or `Forbid`)
+    pub effect: PolicyEffect,
     /// Key-value pairs from Cedar policy annotations (`@key("value")`)
     pub annotations: HashMap<String, String>,
     /// The Cedar policy source code (human-readable Cedar syntax)
@@ -560,6 +581,7 @@ impl PolicyMetadata {
     fn from_policy(policy: &Policy) -> Self {
         Self {
             id: policy.id().to_string(),
+            effect: policy.effect().into(),
             annotations: policy
                 .annotations()
                 .map(|(k, v)| (k.to_string(), v.to_string()))
