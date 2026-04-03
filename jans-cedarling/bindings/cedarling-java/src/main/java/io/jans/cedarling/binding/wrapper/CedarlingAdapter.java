@@ -52,7 +52,7 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * @param tokens  mapping name → JWT string (must not be null; no null keys or values)
      * @param action  Cedar action (e.g. {@code "Jans::Action::\"Read\""})
-     * @param resource resource as JSONObject
+     * @param resource resource as JSONObject (must not be null)
      * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
@@ -81,6 +81,8 @@ public class CedarlingAdapter implements AutoCloseable {
 
     /**
      * Authorize using pre-built {@link TokenInput} objects.
+     *
+     * @param resource resource as JSONObject (must not be null)
      */
     public MultiIssuerAuthorizeResult authorizeMultiIssuer(
             List<TokenInput> tokens,
@@ -88,6 +90,9 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
+        if (resource == null) {
+            throw new IllegalArgumentException("resource must not be null");
+        }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : "{}";
         return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
@@ -104,7 +109,7 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * @param principalJson single principal as a JSON string (must not be null)
      * @param action  Cedar action
-     * @param resource resource as JSONObject
+     * @param resource resource as JSONObject (must not be null)
      * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
@@ -130,7 +135,7 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * @param principalsJson principal JSON strings (must not be null; no null elements)
      * @param action  Cedar action
-     * @param resource resource as JSONObject
+     * @param resource resource as JSONObject (must not be null)
      * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
      * @return authorization result
      */
@@ -159,6 +164,8 @@ public class CedarlingAdapter implements AutoCloseable {
      * <p>Use this overload when you already have {@link EntityData} objects
      * (e.g. from advanced integration code). A null {@code context} is sent as an
      * empty JSON object to the engine.</p>
+     *
+     * @param resource resource as JSONObject (must not be null)
      */
     public AuthorizeResult authorizeUnsigned(
             List<EntityData> principals,
@@ -166,6 +173,9 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
+        if (resource == null) {
+            throw new IllegalArgumentException("resource must not be null");
+        }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : "{}";
         return cedarling.authorizeUnsigned(principals, action, resourceObj, contextStr);
