@@ -535,7 +535,6 @@ metadata:
 {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
-    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/$2
 {{- if index .Values "auth-server" "ingress" "authServerAdditionalAnnotations" }}
 {{ toYaml (index .Values "auth-server" "ingress" "authServerAdditionalAnnotations") | indent 4 }}
 {{- end }}
@@ -554,8 +553,8 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /jans-auth(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /jans-auth
+            pathType: Prefix
             backend:
               service:
                 name: {{ .Values.service.name }}
