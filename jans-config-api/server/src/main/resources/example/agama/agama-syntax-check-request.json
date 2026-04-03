@@ -1,0 +1,8 @@
+Flow test
+    Basepath "hello"
+
+in = { name: "John" }
+RRF "index.ftlh" in
+
+Log "Done!"
+Finish "john_doe"
