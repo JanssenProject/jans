@@ -123,7 +123,6 @@ spec:
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  {{- /* DON'T remove `/jans-auth` prefix in filters; they will be stripped in AIO image internally */}}
 
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
@@ -478,8 +477,7 @@ spec:
 {{- /* These endpoints use gRPC                                 */}}
 {{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
-{{- if or (eq (index .Values "gateway-api" "gateway" "className") "istio") (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") }}
-{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+{{- if ne (index .Values "gateway-api" "gateway" "className") "nginx" }}
 kind: HTTPRoute
 {{- else }}
 kind: GRPCRoute
@@ -504,9 +502,8 @@ spec:
   - {{ .Values.fqdn | quote }}
   rules:
   {{- /* 1. Lock Server Audit */}}
-  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
-  {{- if or (eq (index .Values "gateway-api" "gateway" "className") "istio") (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") }}
-  {{- /* HTTPRoute matches for istio */}}
+  {{- /* DONT use URL rewrite to forward `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService` as AIO image handles it internally */}}
+  {{- if ne (index .Values "gateway-api" "gateway" "className") "nginx" }}
   - matches:
     - path:
         type: PathPrefix

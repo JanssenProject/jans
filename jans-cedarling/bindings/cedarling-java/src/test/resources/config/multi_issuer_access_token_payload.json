@@ -1,0 +1,10 @@
+{
+  "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+  "iss": "https://test.jans.org",
+  "token_type": "Bearer",
+  "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+  "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+  "scope": ["openid", "profile"],
+  "org_id": "some_long_id",
+  "jti": "lxTmCVRFTxOjJgvEEpozMQ"
+}

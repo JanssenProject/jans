@@ -58,6 +58,9 @@ pub enum AuthorizeError {
     /// Error encountered while parsing Action to `EntityUid`
     #[error("could not parse action: {0}")]
     Action(Box<ParseErrors>),
+    /// Error encountered while parsing an entity type name or action identifier
+    #[error("could not parse identifier: {0}")]
+    IdentifierParsing(Box<ParseErrors>),
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] Box<ContextJsonError>),

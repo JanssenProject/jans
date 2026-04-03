@@ -52,6 +52,7 @@ pub use authz::request::{
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
+pub use common::policy_store::PolicyMetadata;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -198,6 +199,35 @@ impl Cedarling {
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.authorize_multi_issuer(&request)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principals, actions, and resources.
+    ///
+    /// This performs scope-level filtering only (principal/action/resource constraints).
+    /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
+    pub fn get_matching_policies_unsigned(
+        &self,
+        principals: &[EntityData],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_unsigned(principals, actions, resources)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given token-derived principals, actions, and resources.
+    ///
+    /// Tokens are validated and their mapping types used as principal entity types.
+    pub fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[TokenInput],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
