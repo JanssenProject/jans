@@ -198,6 +198,7 @@ nav:
       - DPoP: janssen-server/auth-server/oauth-features/dpop.md
       - MTLS: janssen-server/auth-server/oauth-features/mtls.md
       - PAR: janssen-server/auth-server/oauth-features/par.md
+      - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
     - Tokens:
       - janssen-server/auth-server/tokens/README.md
       - Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md
