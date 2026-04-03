@@ -27,7 +27,13 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
+interface AddCedarlingConfigProps {
+  newData: any; // or define the actual shape of cedarlingConfig data
+  handleDialog: (isOpen: boolean) => void;
+  isOpen: boolean;
+}
+
+export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: AddCedarlingConfigProps) {
   const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
   const [errorMessage, setErrorMessage] = React.useState("")

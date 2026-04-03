@@ -41,6 +41,11 @@ function a11yProps(index: number) {
   };
 }
 
+interface HomePageProps {
+    data: any; // or define the actual shape of data expected by HomePage
+    notifyOnDataChange: () => void;
+}
+
 /**
  * Renders the main home page containing three tabs: user/authentication, Cedarling management, and AI Agent.
  *
@@ -52,7 +57,7 @@ function a11yProps(index: number) {
  * @param notifyOnDataChange - Callback invoked by child components to notify the parent of data changes
  * @returns The page's React element containing the tabbed interface
  */
-export default function HomePage({ data, notifyOnDataChange }) {
+export default function HomePage({ data, notifyOnDataChange }: HomePageProps) {
 
   const [value, setValue] = React.useState(0);
 

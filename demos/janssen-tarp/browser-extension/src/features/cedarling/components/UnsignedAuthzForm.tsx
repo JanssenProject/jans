@@ -16,7 +16,11 @@ import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/ceda
 import Utils from '../../../options/Utils';
 import Stack from '@mui/material/Stack';
 
-export default function UnsignedAuthzForm({ data }) {
+interface UnsignedAuthzFormProps {
+    data: any; // or define the actual shape of cedarlingConfig data
+}
+
+export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");

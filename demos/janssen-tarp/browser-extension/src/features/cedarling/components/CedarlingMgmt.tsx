@@ -90,7 +90,13 @@ function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void
     );
 }
 
-export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) {
+interface UnsignedAuthzFormProps {
+    data: any; // or define the actual shape of cedarlingConfig data
+    notifyOnDataChange: () => void;
+    isLoggedIn: boolean;
+}
+
+export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }: UnsignedAuthzFormProps) {
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const [screenType, setScreenType] = React.useState("config");
