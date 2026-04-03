@@ -68,8 +68,6 @@ void print_error(const char* operation) {
     if (error_msg) {
         printf("Error in %s: %s\n", operation, error_msg);
         cedarling_free_string(error_msg);
-    } else {
-        printf("Error in %s: Unknown error\n", operation);
     }
 }
 

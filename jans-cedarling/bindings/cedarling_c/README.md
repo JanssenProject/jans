@@ -72,7 +72,13 @@ cl myapp.c cedarling_c.lib
 
 ### Result and error handling
 
-Most functions return `0` on success and a non-zero `CedarlingErrorCode` on failure. For APIs that populate `CedarlingResult` or `CedarlingInstanceResult`, use the return value and `error_code` on the struct to detect failure; `error_message` is extra detail (and is null on success). If the original message cannot be represented as a C string, the library substitutes a short fallback so `error_message` is still non-null on error paths built through these helpers.
+Most functions return `0` on success and a non-zero `CedarlingErrorCode` on failure.
+
+- **`CedarlingResult` / `CedarlingInstanceResult`:** Use the function’s return value plus `error_code` and `error_message` on the struct. The library does **not** mirror that text into `cedarling_get_last_error()` for those calls, so you should not need to free both. If the original message cannot be represented as a C string, a short fallback is used so `error_message` is still set on error.
+
+- **Scalar / array outputs** (e.g. `CedarlingStringArray`, `bool`, counts): There is no `error_message` field; use the return code and, when set, `cedarling_get_last_error()` for a human-readable string (caller must `cedarling_free_string` it).
+
+- **Validation** where the out-parameter cannot carry text (e.g. null `result` pointer): only `cedarling_get_last_error()` may be set.
 
 ### Initialization
 
@@ -312,6 +318,8 @@ cedarling_cleanup();
 ```
 
 ### Error Handling
+
+Use `cedarling_get_last_error()` for APIs that only return a code (and optional thread-local text), not for errors already returned in `CedarlingResult` / `CedarlingInstanceResult`.
 
 ```c
 // Get the last error message (owned; caller must free)

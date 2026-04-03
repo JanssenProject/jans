@@ -576,16 +576,20 @@ void test_trusted_issuer_loading_info() {
     char* error = cedarling_get_last_error();
      TEST_ASSERT(error == NULL, "No error after clear");
  
-     // Trigger an error
+     // Trigger an error — detail is in CedarlingInstanceResult, not duplicated in get_last_error
      CedarlingInstanceResult result;
-     cedarling_new("{invalid}",&result);
-     error=cedarling_get_last_error();
-     TEST_ASSERT(error != NULL, "Error message set after failure");
-    if (error) {
-        TEST_ASSERT(strlen(error) > 0, "Error message is not empty");
-        printf(" Error message: %s\n", error);
-        cedarling_free_string(error);
-    }
+     int bad_ret = cedarling_new("{invalid}", &result);
+     TEST_ASSERT(bad_ret != 0, "Invalid JSON config rejected");
+     TEST_ASSERT(result.error_message != NULL, "Error message in result struct after failure");
+     if (result.error_message) {
+         TEST_ASSERT(strlen(result.error_message) > 0, "Result error message is not empty");
+         printf(" Error message: %s\n", result.error_message);
+     }
+     error = cedarling_get_last_error();
+     TEST_ASSERT(error == NULL, "get_last_error not duplicated for instance result errors");
+     if (error) {
+         cedarling_free_string(error);
+     }
  
      cedarling_free_instance_result(&result);
  

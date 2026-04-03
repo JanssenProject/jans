@@ -29,22 +29,22 @@ struct CedarlingRuntime {
     instances: Mutex<HashMap<u64, blocking::Cedarling>>,
 }
 
+/// Lock acquisition failure when accessing the instance registry (`CedarlingErrorCode` + detail).
+pub(crate) type InstanceRegistryLockError = (CedarlingErrorCode, String);
+
 impl CedarlingRuntime {
-    fn add_instance(&self, instance: blocking::Cedarling) -> u64 {
+    fn add_instance(&self, instance: blocking::Cedarling) -> Result<u64, String> {
         let instance_id = get_instance_id();
         match self.instances.lock() {
             Ok(mut guard) => {
                 guard.insert(instance_id, instance);
+                Ok(instance_id)
             },
-            Err(e) => {
-                set_last_error(&format!(
-                    "Internal lock failure while adding instance: {}",
-                    e
-                ));
-                return 0;
-            },
+            Err(e) => Err(format!(
+                "Internal lock failure while adding instance: {}",
+                e
+            )),
         }
-        instance_id
     }
 
     fn drop_instance(&self, instance_id: u64) -> CedarlingErrorCode {
@@ -70,16 +70,13 @@ impl CedarlingRuntime {
     fn get_instance(
         &self,
         instance_id: u64,
-    ) -> Result<Option<blocking::Cedarling>, CedarlingErrorCode> {
+    ) -> Result<Option<blocking::Cedarling>, InstanceRegistryLockError> {
         match self.instances.lock() {
             Ok(guard) => Ok(guard.get(&instance_id).cloned()),
-            Err(e) => {
-                set_last_error(&format!(
-                    "Internal lock failure while getting instance: {}",
-                    e
-                ));
-                Err(CedarlingErrorCode::Internal)
-            },
+            Err(e) => Err((
+                CedarlingErrorCode::Internal,
+                format!("Internal lock failure while getting instance: {}", e),
+            )),
         }
     }
 
@@ -132,8 +129,6 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
         Ok(config) => config,
         Err(e) => {
             let error_msg = format!("Failed to parse bootstrap config: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingInstanceResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
@@ -142,8 +137,6 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
         Ok(config) => config,
         Err(e) => {
             let error_msg = format!("Invalid bootstrap config: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingInstanceResult::error(
                 CedarlingErrorCode::ConfigurationError,
                 &error_msg,
@@ -157,19 +150,16 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
         Ok(instance) => instance,
         Err(e) => {
             let error_msg = format!("Failed to create Cedarling instance: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &error_msg);
         },
     };
 
-    let instance_id = runtime.add_instance(instance);
-    if instance_id == 0 {
-        return CedarlingInstanceResult::error(
-            CedarlingErrorCode::Internal,
-            "Internal lock failure while adding instance",
-        );
-    }
+    let instance_id = match runtime.add_instance(instance) {
+        Ok(id) => id,
+        Err(msg) => {
+            return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &msg);
+        },
+    };
 
     CedarlingInstanceResult::success(instance_id)
 }
@@ -183,8 +173,6 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
             Ok(config) => config,
             Err(e) => {
                 let error_msg = format!("Failed to parse bootstrap config: {}", e);
-                set_last_error(&error_msg);
-
                 return CedarlingInstanceResult::error(CedarlingErrorCode::JsonError, &error_msg);
             },
         },
@@ -197,19 +185,16 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
         Ok(instance) => instance,
         Err(e) => {
             let error_msg = format!("Failed to create Cedarling instance: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &error_msg);
         },
     };
 
-    let instance_id = runtime.add_instance(instance);
-    if instance_id == 0 {
-        return CedarlingInstanceResult::error(
-            CedarlingErrorCode::Internal,
-            "Internal lock failure while adding instance",
-        );
-    }
+    let instance_id = match runtime.add_instance(instance) {
+        Ok(id) => id,
+        Err(msg) => {
+            return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &msg);
+        },
+    };
 
     CedarlingInstanceResult::success(instance_id)
 }
@@ -229,12 +214,13 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -242,8 +228,6 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
         Ok(request) => request,
         Err(e) => {
             let error_msg = format!("Failed to parse request JSON: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
@@ -253,13 +237,11 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
                 let error_msg = format!("Failed to serialize response: {}", e);
-                set_last_error(&error_msg);
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Err(e) => {
             let error_msg = format!("Authorization failed: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
         },
     }
@@ -274,12 +256,13 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -287,8 +270,6 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
         Ok(request) => request,
         Err(e) => {
             let error_msg = format!("Failed to parse request JSON: {}", e);
-            set_last_error(&error_msg);
-
             return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
@@ -298,13 +279,11 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
                 let error_msg = format!("Failed to serialize response: {}", e);
-                set_last_error(&error_msg);
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Err(e) => {
             let error_msg = format!("Authorization failed: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
         },
     }
@@ -326,12 +305,13 @@ pub fn context_push(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -339,7 +319,6 @@ pub fn context_push(
         Ok(v) => v,
         Err(e) => {
             let error_msg = format!("Failed to parse value JSON: {}", e);
-            set_last_error(&error_msg);
             return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
@@ -354,7 +333,6 @@ pub fn context_push(
         Ok(()) => CedarlingResult::success("{}".to_string()),
         Err(e) => {
             let error_msg = format!("Failed to push data: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -369,12 +347,13 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -383,14 +362,12 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
                 let error_msg = format!("Failed to serialize value: {}", e);
-                set_last_error(&error_msg);
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Ok(None) => CedarlingResult::success("null".to_string()),
         Err(e) => {
             let error_msg = format!("Failed to get data: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -405,12 +382,13 @@ pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -421,7 +399,6 @@ pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
         },
         Err(e) => {
             let error_msg = format!("Failed to remove data: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -436,12 +413,13 @@ pub fn context_clear(instance_id: u64) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -449,7 +427,6 @@ pub fn context_clear(instance_id: u64) -> CedarlingResult {
         Ok(()) => CedarlingResult::success("{}".to_string()),
         Err(e) => {
             let error_msg = format!("Failed to clear data: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -464,12 +441,13 @@ pub fn context_list(instance_id: u64) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -478,13 +456,11 @@ pub fn context_list(instance_id: u64) -> CedarlingResult {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
                 let error_msg = format!("Failed to serialize entries: {}", e);
-                set_last_error(&error_msg);
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Err(e) => {
             let error_msg = format!("Failed to list data: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -499,12 +475,13 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
@@ -513,13 +490,11 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
                 let error_msg = format!("Failed to serialize stats: {}", e);
-                set_last_error(&error_msg);
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Err(e) => {
             let error_msg = format!("Failed to get stats: {}", e);
-            set_last_error(&error_msg);
             CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
         },
     }
@@ -534,11 +509,13 @@ pub fn pop_logs(instance_id: u64) -> Result<CedarlingStringArray, CedarlingError
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
 
     let logs = instance.pop_logs();
@@ -557,22 +534,19 @@ pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
-            return CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
         },
-        Err(code) => {
-            return CedarlingResult::error(code, "Internal lock failure");
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
         },
     };
 
     match instance.get_log_by_id(log_id) {
         Some(log) => CedarlingResult::success(log.to_string()),
-        None => {
-            let error_msg = "Log not found";
-            set_last_error(error_msg);
-            CedarlingResult::error(CedarlingErrorCode::KeyNotFound, error_msg)
-        },
+        None => CedarlingResult::error(CedarlingErrorCode::KeyNotFound, "Log not found"),
     }
 }
 
@@ -585,11 +559,13 @@ pub fn get_log_ids(instance_id: u64) -> Result<CedarlingStringArray, CedarlingEr
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
 
     let logs = instance.get_log_ids();
@@ -610,11 +586,13 @@ pub fn get_logs_by_tag(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     let logs = instance.get_logs_by_tag(tag);
 
@@ -634,11 +612,13 @@ pub fn get_logs_by_request_id(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     let logs = instance.get_logs_by_request_id(request_id);
 
@@ -658,11 +638,13 @@ pub fn get_logs_by_request_id_and_tag(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     let logs = instance.get_logs_by_request_id_and_tag(request_id, tag);
 
@@ -684,7 +666,10 @@ pub fn is_trusted_issuer_loaded_by_name(
             set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     Ok(instance.is_trusted_issuer_loaded_by_name(issuer_id))
 }
@@ -702,7 +687,10 @@ pub fn is_trusted_issuer_loaded_by_iss(
             set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     Ok(instance.is_trusted_issuer_loaded_by_iss(iss_claim))
 }
@@ -717,7 +705,10 @@ pub fn total_issuers(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
             set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     Ok(instance.total_issuers())
 }
@@ -732,7 +723,10 @@ pub fn loaded_trusted_issuers_count(instance_id: u64) -> Result<usize, Cedarling
             set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     Ok(instance.loaded_trusted_issuers_count())
 }
@@ -746,11 +740,13 @@ pub fn loaded_trusted_issuer_ids(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     let ids: Vec<String> = instance.loaded_trusted_issuer_ids().into_iter().collect();
     CedarlingStringArray::try_new(ids)
@@ -766,11 +762,13 @@ pub fn failed_trusted_issuer_ids(
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            let error_msg = "Instance not found";
-            set_last_error(error_msg);
+            set_last_error("Instance not found");
             return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(code) => return Err(code),
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
     };
     let ids: Vec<String> = instance.failed_trusted_issuer_ids().into_iter().collect();
     CedarlingStringArray::try_new(ids)
@@ -788,7 +786,8 @@ pub fn shutdown_instance(instance_id: u64) -> CedarlingErrorCode {
             set_last_error("Instance not found");
             return CedarlingErrorCode::InstanceNotFound;
         },
-        Err(code) => {
+        Err((code, ref msg)) => {
+            set_last_error(msg);
             return code;
         },
     };
