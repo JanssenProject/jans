@@ -52,7 +52,7 @@ pub use authz::request::{
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
-pub use common::policy_store::PolicyMetadata;
+pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
