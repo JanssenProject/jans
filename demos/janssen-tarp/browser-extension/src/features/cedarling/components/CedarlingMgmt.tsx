@@ -1,7 +1,7 @@
 import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
@@ -9,37 +9,27 @@ import Edit from '@mui/icons-material/Edit';
 import { pink, green } from '@mui/material/colors';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import AddCedarlingConfig from './addCedarlingConfig';
-import CedarlingUnsignedAuthz from './cedarlingUnsignedAuthz';
-import CedarlingSignedAuthz from './cedarlingSignedAuthz';
-import CedarlingMultiIssuerAuthz from './cedarlingMultiIssuerAuthz';
+import AddCedarlingConfig from './AddCedarlingConfig';
+import UnsignedAuthzForm from './UnsignedAuthzForm';
+import SignedAuthzForm from './SignedAuthzForm';
+import MultiIssuerAuthzForm from './MultiIssuerAuthzForm';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import HelpDrawer from './helpDrawer'
+import HelpDrawer from '../../../options/helpDrawer'
 import Alert from '@mui/material/Alert';
 import { JsonEditor } from 'json-edit-react'
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import StyledTableCell from '../../../shared/components/StyledTableCell';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
-
-function Row(props: { row: any, notifyOnDataChange }) {
-    const { row, notifyOnDataChange } = props;
+function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void }) {
+    const { row, rowIndex, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
 
     const handleDialog = (isOpen) => {
@@ -49,10 +39,13 @@ function Row(props: { row: any, notifyOnDataChange }) {
 
     async function resetBootstrap() {
         chrome.storage.local.get(["cedarlingConfig"], (result) => {
-            let cedarlingConfigArr = []
-            chrome.storage.local.set({ cedarlingConfig: cedarlingConfigArr });
+        const cedarlingConfigArr = Array.isArray(result.cedarlingConfig)
+                ? result.cedarlingConfig.filter((_: unknown, index: number) => index !== rowIndex)
+                : [];
+            chrome.storage.local.set({ cedarlingConfig: cedarlingConfigArr }, () => {
+                notifyOnDataChange();
+            });
         });
-        notifyOnDataChange();
     }
 
     return (
@@ -61,8 +54,8 @@ function Row(props: { row: any, notifyOnDataChange }) {
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <Tooltip title="Delete">
-                        <IconButton aria-label="Delete">
-                            <DeleteForeverOutlinedIcon sx={{ color: pink[500] }} onClick={resetBootstrap} />
+                        <IconButton aria-label="Delete" onClick={resetBootstrap}>
+                            <DeleteForeverOutlinedIcon sx={{ color: pink[500] }}/>
                         </IconButton>
                     </Tooltip>
                 </TableCell>
@@ -80,13 +73,14 @@ function Row(props: { row: any, notifyOnDataChange }) {
                 <TableCell component="th" scope="row">
                     <Grid size={{ xs:8}}>
                         <Tooltip title="Edit">
-                            <IconButton aria-label="Edit">
+                            <IconButton aria-label="Edit"
+                                onClick={() => {
+                                    setOpen(true);
+                                    notifyOnDataChange();
+                                }}>
                                 <Edit
                                     sx={{ color: green[500] }}
-                                    onClick={() => {
-                                        setOpen(true);
-                                        notifyOnDataChange();
-                                    }} />
+                                 />
                             </IconButton>
                         </Tooltip>
                     </Grid>
@@ -96,30 +90,38 @@ function Row(props: { row: any, notifyOnDataChange }) {
     );
 }
 
-export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) {
+interface CedarlingMgmtProps {
+    data: any; // or define the actual shape of cedarlingConfig data
+    notifyOnDataChange: () => void;
+    isLoggedIn: boolean;
+}
+
+export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }: CedarlingMgmtProps) {
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const [screenType, setScreenType] = React.useState("config");
     const [cedarlingConfig, setCedarlingConfig] = React.useState([]);
 
-    React.useEffect(() => { 
+    React.useEffect(() => {
         setCedarlingConfig(data?.cedarlingConfig)
     }, [data])
 
-    const handleDialog = (isOpen) => {
+    const handleDialog = (isOpen: boolean) => {
         setModelOpen(isOpen);
         notifyOnDataChange();
     };
 
-    const handleDrawer = (isOpen) => {
+    const handleDrawer = (isOpen: boolean) => {
         setDrawerOpen(isOpen);
     };
 
     const handleScreenChange = (
         event: React.MouseEvent<HTMLElement>,
-        newScreenType: string,
+        newScreenType: string | null,
     ) => {
+        if (newScreenType) {
         setScreenType(newScreenType);
+        }
     };
 
     return (
@@ -164,7 +166,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                 <TableBody>
                                     {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ?
                                         <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                        cedarlingConfig.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
+                                        cedarlingConfig.map((row, index) => (<Row key={index} rowIndex={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
                                     }
                                 </TableBody>
                             </Table>
@@ -173,11 +175,11 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                             (
                                 <>
                                     {screenType === 'unsignedAuthz' &&
-                                        <CedarlingUnsignedAuthz data={data} />}
+                                        <UnsignedAuthzForm data={data} />}
                                     {screenType === 'multiIssuerAuthz' &&
-                                        <CedarlingMultiIssuerAuthz data={data} />}
+                                        <MultiIssuerAuthzForm data={data} />}
                                     {(screenType === 'signedAuthz' && isLoggedIn)&&
-                                        <CedarlingSignedAuthz data={data} />}
+                                        <SignedAuthzForm data={data} />}
                                 </>
                             )
                         }

@@ -24,6 +24,7 @@ import SettingsDialog from './components/SettingsDialog';
 import StatusPanel from './components/StatusPanel';
 import AIResponse from './components/AIResponse';
 import { AIAgentProps } from './types';
+import { getProviderColor } from './constants';
 
 const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -90,15 +91,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
     return model;
   }, [getCurrentProviderConfig, model]);
 
-  const getProviderColor = useCallback(() => {
-    switch (provider) {
-      case 'openai': return '#2196f3';
-      case 'gemini': return '#ff9800';
-      case 'deepseek': return '#4caf50';
-      default: return 'primary';
-    }
-  }, [provider]);
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header with Settings Button */}
@@ -133,7 +125,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
       </Stack>
       
       {/* Input Section */}
-      <Box className="box" sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <TextField
           fullWidth
           id="outlined-multiline-flexible"
@@ -161,7 +153,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
                   onClick={handleSend}
                   disabled={loading || !query.trim() || !apiKeyValid || connectionStatus !== 'connected'}
                   sx={{ 
-                    color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor() : 'action.disabled',
+                    color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor(provider) : 'action.disabled',
                     '&:hover': { backgroundColor: apiKeyValid ? green[50] : 'transparent' }
                   }}
                 >

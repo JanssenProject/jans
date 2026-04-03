@@ -15,7 +15,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import initWasm, { init, Cedarling, MultiIssuerAuthorizeResult } from '@janssenproject/cedarling_wasm';
-import Utils from './Utils';
+import Utils from '../../../options/Utils';
 import Stack from '@mui/material/Stack';
 import Tooltip from "@mui/material/Tooltip";
 import HelpIcon from '@mui/icons-material/Help';
@@ -24,6 +24,7 @@ import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
 import Alert from '@mui/material/Alert';
 import Chip from '@mui/material/Chip';
+import { labelWithTooltip } from '../../../shared/components/Common';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -50,7 +51,7 @@ type FormFields = {
     resource: Record<string, unknown>;
 };
 
-export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuerAuthzProps) {
+export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthzProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
@@ -61,21 +62,25 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
     const [loginDetails, setLoginDetails] = React.useState<{
             access_token?: string;
             id_token?: string;
-            userDetails?: Record<string, unknown>;
+            userDetails?: string;
         } | null>(null);
+
     React.useEffect(() => {
         setLoginDetails(data?.loginDetails ?? null);
+    }, [data?.loginDetails]);
+
+    React.useEffect(() => {
         chrome.storage.local.get(["multiIssueAuthz"], (result) => {
             if (result?.multiIssueAuthz) {
                 setFormFields({
-                    tokens: result.multiIssueAuthz.tokens,
-                    action: result.multiIssueAuthz.action,
-                    context: result.multiIssueAuthz.context,
-                    resource: result.multiIssueAuthz.resource
+                    tokens: result.multiIssueAuthz.tokens ?? [],
+                    action: result.multiIssueAuthz.action ?? "",
+                    context: result.multiIssueAuthz.context ?? {},
+                    resource: result.multiIssueAuthz.resource ?? {},
                 });
             }
         });
-    }, [data]);
+    }, []);
 
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
@@ -203,6 +208,7 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
             context: {},
             resource: {}
         });
+        chrome.storage.local.remove("multiIssueAuthz");
     };
 
     const canSubmit = React.useMemo(() => {
@@ -281,6 +287,39 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                                         </Box>
                                     </>
                                 }
+                                {labelWithTooltip(
+                                    <Typography
+                                        variant="caption"
+                                        sx={{ display: "block", mb: 0.5, color: "text.secondary" }}
+                                    >
+                                        Example JSON format
+                                    </Typography>,
+                                    <Box
+                                        component="pre"
+                                        sx={{
+                                            margin: 0,
+                                            padding: 1.25,
+                                            borderRadius: 1,
+                                            backgroundColor: "grey.900",
+                                            color: "grey.100",
+                                            fontFamily: "Monospace, monospace",
+                                            fontSize: "0.75rem",
+                                            whiteSpace: "pre-wrap",
+                                            wordBreak: "break-all",
+                                        }}
+                                    >
+                                        {`[
+                                                    {
+                                                        "mapping": "Namespace_Name::Token_Entity",
+                                                        "payload": "<JWT_TOKEN_STRING>"
+                                                    },
+                                                    {
+                                                        "mapping": "Acme::Access_token",
+                                                        "payload": "<JWT_TOKEN_STRING>"
+                                                    }
+                                                ]`}
+                                    </Box>
+                                )}
                                 <Tooltip
                                     placement="bottom-start"
                                     title={
