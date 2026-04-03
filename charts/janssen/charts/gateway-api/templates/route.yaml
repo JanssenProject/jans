@@ -97,6 +97,7 @@ spec:
     - name: {{ $authSvc }}
       port: 8080
   {{- end }}
+  {{- if index .Values.global "auth-server" "ingress" "webfingerEnabled" }}
   - matches:
     - path:
         type: Exact
