@@ -19,7 +19,7 @@ python-dotenv = "^1.0.1"
 structlog = "^24.4.0"
 python-json-logger = "^2.0.7"
 gunicorn = "^22.0.0"
-orjson = "^3.11.5"
+orjson = "^3.11.6"
 
 
 [tool.poetry.group.test.dependencies]
