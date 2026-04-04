@@ -229,3 +229,36 @@ jobs:
       run: |
         export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
         go test .
+
+  c_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
+    - name: Install cbindgen
+      run: cargo install cbindgen --version 0.29.0 --locked
+    - name: Build Rust C library
+      working-directory: jans-cedarling/bindings/cedarling_c
+      run: |
+        cargo build --release -p cedarling_c
+        test -f target/include/cedarling_c.h || (echo "header missing" && exit 1)
+    - name: Build and run C tests
+      working-directory: jans-cedarling/bindings/cedarling_c
+      run: |
+        export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
+        cd tests
+        make
+        ./test_cedarling
