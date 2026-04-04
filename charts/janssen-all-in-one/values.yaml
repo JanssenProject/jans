@@ -138,8 +138,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Load balancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
-  quarkusTransactionEnableRecovery: true
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 nameOverride: ""
@@ -152,9 +150,6 @@ config:
 persistence:
   # -- Boolean flag to enable/disable the persistence job.
   enabled: true
-alb:
-  # -- switches the service to Nodeport for ALB ingress
-  ingress: false
 # -- Parameters used globally across all services helm charts.
 auth-server:
   # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
@@ -211,10 +206,6 @@ auth-server:
     uma2ConfigEnabled: true
     # -- Enable endpoint /.well-known/webfinger
     webfingerEnabled: true
-    # -- Enable endpoint /.well-known/simple-web-discovery
-    webdiscoveryEnabled: true
-    # -- Enable endpoint /.well-known/fido-configuration
-    u2fConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
     # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
@@ -247,14 +238,6 @@ auth-server:
     webfingerLabels: { }
     # -- webfinger ingress resource additional annotations.
     webfingerAdditionalAnnotations: { }
-    # -- webdiscovery ingress resource labels. key app is taken
-    webdiscoveryLabels: { }
-    # -- webdiscovery ingress resource additional annotations.
-    webdiscoveryAdditionalAnnotations: { }
-    # -- u2f config ingress resource labels. key app is taken
-    u2fConfigLabels: { }
-    # -- u2f config ingress resource additional annotations.
-    u2fAdditionalAnnotations: { }
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
     # -- authzen config ingress resource labels. key app is taken
@@ -495,22 +478,6 @@ scim:
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
     scimAdditionalAnnotations: { }
-saml:
-  # -- Name of the saml service. Please keep it as default.
-  samlServiceName: saml
-  # -- Boolean flag to enable/disable the saml chart.
-  enabled: false
-  # -- passing custom java options to saml. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
-  cnCustomJavaOptions: ""
-  # -- Enable endpoints in either istio or nginx ingress depending on users choice
-  ingress:
-    # Enable saml endpoints /kc
-    samlEnabled: false
-    # -- SAML config ingress resource labels. key app is taken
-    samlLabels: { }
-    # -- SAML ingress resource additional annotations.
-    samlAdditionalAnnotations: { }
-
 shibboleth:
   # -- Name of the shibboleth service. Please keep it as default.
   shibbolethServiceName: shibboleth-idp
@@ -815,70 +782,6 @@ customScripts: [ ]
 customCommand: []
 # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
 nodeSelector: {}
-
-# -- Responsible for synchronizing Keycloak SAML clients
-kc-scheduler:
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/cloudtools
-    # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 300m
-      # -- Memory limit.
-      memory: 300Mi
-    requests:
-      # -- CPU request.
-      cpu: 300m
-      # -- Memory request.
-      memory: 300Mi
-  # -- Interval of running the scheduler (in minutes)
-  interval: 10
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  # Actions on lifecycle events such as postStart and preStop
-  # Example
-  # lifecycle:
-  #   postStart:
-  #     exec:
-  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
-  lifecycle: {}
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: {}
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: []
-  # -- Add custom job's command. If passed, it will override the default conditional command.
-  customCommand: []
-  # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
-  enabled: false
-  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
-  nodeSelector: {}
-
 # -- Cleanup expired entries in persistence
 cleanup:
   # -- Add custom normal and secret envs to the service

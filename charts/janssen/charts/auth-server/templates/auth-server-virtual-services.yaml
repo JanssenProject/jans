@@ -100,20 +100,6 @@ spec:
           number: 8080
       weight: 100
   {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "webdiscoveryEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-webdiscovery"
-    match:
-    - uri:
-        prefix: "/.well-known/simple-web-discovery"
-    rewrite:
-      uri: "/jans-auth/.well-known/simple-web-discovery"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  {{- end }}
   {{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
   - name: "{{ .Release.Name }}-istio-cn"
     match:
@@ -125,41 +111,13 @@ spec:
         port:
           number: 8080
   {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "u2fConfigEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-u2f-config"
-    match:
-    - uri:
-        prefix: "/.well-known/fido-configuration"
-    rewrite:
-      uri: "/jans-auth/restv1/fido-configuration"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  {{- end }}
   {{ if index .Values "global" "auth-server" "ingress" "lockConfigEnabled" -}}
   - name: "{{ .Release.Name }}-istio-lock-config"
     match:
     - uri:
         prefix: "/.well-known/lock-server-configuration"
     rewrite:
-      uri: "/jans-auth/v1/configuration"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "lockEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-lock"
-    match:
-    - uri:
-        prefix: "/jans-lock"
-    rewrite:
-      uri: "/jans-auth"
+      uri: "/jans-auth/api/v1/configuration"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local

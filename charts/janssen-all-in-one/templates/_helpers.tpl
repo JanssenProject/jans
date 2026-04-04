@@ -137,9 +137,6 @@ Create aio enabled list
 {{- if .Values.scim.enabled}}
 {{ $newList = append $newList ("jans-scim") }}
 {{- end}}
-{{- if .Values.saml.enabled}}
-{{ $newList = append $newList ("jans-saml") }}
-{{- end}}
 {{- if .Values.shibboleth.enabled}}
 {{ $newList = append $newList ("jans-shibboleth") }}
 {{- end}}
@@ -267,19 +264,6 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{- end }}
 
 {{/*
-Create JAVA_OPTIONS ENV for passing custom work and detailed logs
-*/}}
-{{- define "saml.customJavaOptions"}}
-{{ $custom := "" }}
-{{ $custom = printf "%s" .Values.saml.cnCustomJavaOptions }}
-{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
-{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
-{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
-{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
-{{ $customJavaOptions | trim | quote }}
-{{- end }}
-
-{{/*
 Create JAVA_OPTIONS ENV for Shibboleth IDP
 */}}
 {{- define "shibboleth.customJavaOptions"}}
@@ -307,9 +291,6 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $configmapSchema "auth_sig_keys" (index .Values "auth-server" "authSigKeys") }}
 {{- $_ := set $configmapSchema "auth_enc_keys" (index .Values "auth-server" "authEncKeys") }}
 {{- $_ := set $configmapSchema "optional_scopes" (include "janssen-all-in-one.optionalScopes" . | trim) }}
-{{- if .Values.saml.enabled }}
-{{- $_ := set $configmapSchema "kc_admin_username" .Values.configmap.kcAdminUsername }}
-{{- end }}
 {{- $_ := set $configmapSchema "init_keys_exp" (index .Values "auth-server-key-rotation" "initKeysLife") }}
 
 {{- $secretSchema := dict }}
@@ -332,10 +313,6 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "aws_credentials" (include "janssen-all-in-one.aws-shared-credentials" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_config" (include "janssen-all-in-one.aws-config" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
-{{- end }}
-{{- if .Values.saml.enabled }}
-{{- $_ := set $secretSchema "kc_db_password" .Values.configmap.kcDbPassword }}
-{{- $_ := set $secretSchema "kc_admin_password" .Values.configmap.kcAdminPassword }}
 {{- end }}
 {{- $_ := set $secretSchema "encoded_salt" .Values.salt }}
 

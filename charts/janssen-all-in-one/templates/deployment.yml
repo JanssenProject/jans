@@ -73,8 +73,6 @@ spec:
             value: {{ include "casa.customJavaOptions" . | trim }}
           - name: CN_CONFIG_API_JAVA_OPTIONS
             value: {{ include "config-api.customJavaOptions" . | trim }}
-          - name: CN_SAML_JAVA_OPTIONS
-            value: {{ include "saml.customJavaOptions" . | trim }}
           - name: CN_SHIBBOLETH_JAVA_OPTIONS
             value: {{ include "shibboleth.customJavaOptions" . | trim }}
           - name: CN_SCIM_JAVA_OPTIONS

@@ -209,40 +209,6 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 6. Simple Web Discovery */}}
-  {{- if index .Values "auth-server" "ingress" "webdiscoveryEnabled" }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/simple-web-discovery
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/.well-known/simple-web-discovery
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 7. FIDO Configuration (U2F) */}}
-  {{- if index .Values "auth-server" "ingress" "u2fConfigEnabled" }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/fido-configuration
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/restv1/fido-configuration
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
   {{- /* 8. FIDO2 Configuration */}}
   {{- if .Values.fido2.ingress.fido2ConfigEnabled }}
   - matches:

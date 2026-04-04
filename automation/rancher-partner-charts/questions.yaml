@@ -289,13 +289,6 @@ questions:
     required: true
     description: "Enable endpoint /.well-known/webfinger"
     label: Enable endpoint /.well-known/webfinger
-  - variable: nginx-ingress.ingress.webdiscoveryEnabled
-    default: true
-    type: boolean
-    group: "NGINX"
-    required: true
-    description: "Enable endpoint /.well-known/simple-web-discovery"
-    label: Enable endpoint /.well-known/simple-web-discovery
   - variable: nginx-ingress.ingress.configApiEnabled
     default: true
     type: boolean
@@ -303,13 +296,6 @@ questions:
     required: true
     description: "Enable config API endpoints /jans-config-api"
     label: Enable config API endpoints /jans-config-api
-  - variable: nginx-ingress.ingress.u2fConfigEnabled
-    default: true
-    type: boolean
-    group: "NGINX"
-    required: true
-    description: "Enable endpoint /.well-known/fido-configuration"
-    label: Enable endpoint /.well-known/fido-configuration
   - variable: nginx-ingress.ingress.authServerEnabled
     default: true
     type: boolean
