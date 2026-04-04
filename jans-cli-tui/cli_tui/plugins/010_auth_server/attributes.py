@@ -263,9 +263,8 @@ class Attributes(DialogUtils):
             async def coroutine():
                 operation_id = 'put-attributes' if 'inum' in dialog.data  else 'post-attributes'
                 cli_args = {'operation_id': operation_id, 'data': new_data}
-                self.app.start_progressing(_("Saving Attribute ..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Saving Attribute ...")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response.status_code in (200, 201):
                     self.app.start_progressing(_("Attribute was saved"))
@@ -343,18 +342,19 @@ class Attributes(DialogUtils):
                 endpoint_args +=',pattern:'+pattern
 
             cli_args = {'operation_id': 'get-attributes', 'endpoint_args':endpoint_args}
-            self.app.start_progressing(_("Retreiving attributes..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retreiving attributes...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             try:
                 data = response.json()
-            except Exception:
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError):
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned non json data <i>{}</i>").format(response.text)), tobefocused=self.app.center_container)
                 return
 
             if not 'entriesCount' in data:
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned unexpected data <i>{}</i>").format(data)), tobefocused=self.app.center_container)
                 return
+
             self.working_container.all_data = data.get('entries', [])
             self.update_working_container(pattern=pattern, data=data)
 
@@ -381,9 +381,8 @@ class Attributes(DialogUtils):
         def do_delete_attribute(dialog):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-attributes-by-inum', 'url_suffix':'inum:{}'.format(selected_attribute['inum'])}
-                self.app.start_progressing(_("Deleting attribute {}").format(selected_attribute['name']))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Deleting attribute {}").format(selected_attribute['name'])
+                await common_data.app.run_config_api_operation(cli_args, msg)
                 self.refresh_attributes_cache()
 
             asyncio.ensure_future(coroutine())

@@ -16,6 +16,7 @@ import configparser
 import readline
 import argparse
 import random
+import time
 import datetime
 import code
 import traceback
@@ -64,6 +65,7 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 file_data_type = '/path/to/file'
+id_token_expired = "ID Token is expired"
 
 def clear():
     if not debug:
@@ -492,7 +494,6 @@ class JCA_CLI:
             user = self.get_user_info()
             if 'inum' in user:
                 headers['User-inum'] = user['inum']
-                headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
@@ -522,6 +523,17 @@ class JCA_CLI:
         return response
 
     def check_connection(self):
+
+        # check if access token expires in an hour
+        if self.access_token:
+            result = self.get_access_token_details()
+            if not result.get('active'):
+                self.access_token = ''
+                return id_token_expired
+            if 'exp' in result and result['exp'] - int(time.time()) < 60*60:
+                self.access_token = ''
+                return id_token_expired
+
         url = urljoin(self.auth_url, self.auth_url_token_endpoint_postfix)
         self.cli_logger.debug("Checking connection with url: %s", url)
 
@@ -602,6 +614,25 @@ class JCA_CLI:
                 config['DEFAULT'].pop(key)
         write_config()
 
+
+    def get_access_token_details(self):
+        self.cli_logger.debug("Getting Access token details")
+        url = urljoin(self.auth_url, 'restv1/introspection')
+        url_params = urlencode({'token': self.access_token, 'response_as_jwt': 'false'})
+
+        try:
+            response = session.get(
+                    url=url + '?' + url_params,
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+            if response.status_code == 200:
+                return response.json()
+            self.cli_logger.warning(f"Token introspection returned status {response.status_code}")
+        except requests.RequestException:
+            self.cli_logger.exception("Error during token introspection")
+        return {}
 
     def check_access_token(self):
 
@@ -941,7 +972,7 @@ class JCA_CLI:
             return response
 
         if response.status_code in (404, 401):
-            if response.text == 'ID Token is expired' or 'unauthorized' in response.text.lower():
+            if response.text == id_token_expired or 'unauthorized' in response.text.lower():
                 self.access_token = None
                 self.get_access_token(security)
                 return self.get_requests(endpoint, params)
@@ -1694,6 +1725,8 @@ def main():
 
     error_log_file = os.path.join(log_dir, 'cli_error.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client, wrapped=False)
+
+
 
     if args.revoke_session:
         cli_object.revoke_session()

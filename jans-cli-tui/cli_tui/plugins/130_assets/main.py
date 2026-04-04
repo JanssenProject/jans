@@ -2,6 +2,9 @@ import os
 import copy
 import asyncio
 
+from json import JSONDecodeError
+from requests.exceptions import RequestException
+
 from typing import Any, Optional
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, FormattedTextControl
@@ -141,20 +144,16 @@ class Plugin(DialogUtils):
             cli_args = {'operation_id': operation_id, 'data': form_data}
 
             async def coroutine():
-                common_data.app.start_progressing()
-                response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+                msg = _("Saving asset")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response.status_code in (200, 201):
                     self.data = response.json()
-                    common_data.app.stop_progressing(_("Asset was saved."))
                     dialog.future.set_result(DialogResult.ACCEPT)
-                #    await self.myparent.get_trust_relations()
 
                 else:
                     common_data.app.show_message(_(common_strings.error), _("Save failed: Status {} - {}\n").format(response.status_code, response.text), tobefocused=dialog)
-                    common_data.app.stop_progressing(_("Failed to save Trust Relationship."))
 
-                #dialog.future.set_result(DialogResult.ACCEPT)
                 await self.get_assets()
 
             asyncio.ensure_future(coroutine())
@@ -236,9 +235,9 @@ class Plugin(DialogUtils):
         def do_delete():
             async def coroutine():
                 cli_args = {'operation_id': 'delete-asset', 'url_suffix': 'inum:{}'.format(kwargs['selected'][0])}
-                self.app.start_progressing(_("Deleting asset {}").format(kwargs['selected'][1]))
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Deleting asset {}").format(kwargs['selected'][1])
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
+
                 if response:
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.main_container)
                 else:
@@ -269,13 +268,12 @@ class Plugin(DialogUtils):
         if pattern:
             cli_args['endpoint_args'] = f'pattern:{pattern}'
 
-        self.app.start_progressing(_("Retreiving assets from server..."))
-        response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        self.app.stop_progressing()
+        msg = _("Retreiving assets from server...")
+        response = await common_data.app.run_config_api_operation(cli_args, msg)
 
         try:
             result = response.json()
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
             self.app.show_message(_("Error getting Assets"), str(e), tobefocused=self.app.center_container)
             return
 
@@ -302,8 +300,11 @@ class Plugin(DialogUtils):
     async def get_initial_data(self) -> None:
 
         if not hasattr(common_data, 'asset_types'):
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, {'operation_id': 'get-asset-types'})
+            cli_args = {'operation_id': 'get-asset-types'}
+            msg = _("Retrieving asset types")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             try:
                 common_data.asset_types = response.json()
-            except Exception as e:
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
                 self.app.logger.error(f"Fail to get asset types: {e}")

@@ -17,7 +17,7 @@ from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 
 
@@ -99,22 +99,20 @@ class Plugin(DialogUtils):
             self.app.create_background_task(self.get_smtp_config())
 
     async def get_smtp_config(self) -> None:
-        self.app.start_progressing(_("Retrieving smtp configuration..."))
+
+        cli_args = {'operation_id': 'get-config-smtp'}
+        msg = _("Retrieving smtp configuration...")
 
         try:
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-smtp'})
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             if response.status_code != 200:
-                self.app.stop_progressing()
                 self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(response.text), tobefocused=self.main_container)
                 return
             self.data = response.json()
         except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
             self.app.logger.exception("An error occurred during retrieving smtp configuration")
-            self.app.stop_progressing()
             self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(e), tobefocused=self.main_container)
             return
-
-        self.app.stop_progressing()
 
         self.host_widget.me.text = self.data.get('host') or ''
         self.port_widget.me.text = str(self.data.get('port') or '')
@@ -156,11 +154,10 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': operation_id, 'data': cur_data}
-            self.app.start_progressing(_("Saving SMTP Configuration..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            msg = _("Saving SMTP Configuration...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             if response.status_code == 200:
                 self.data = cur_data
-                self.app.stop_progressing("")
                 self.app.show_message(title=_(common_strings.success), message=_("SMTP configuration was saved."), tobefocused=self.app.center_container)
                 await self.get_smtp_config()
             else:
@@ -186,9 +183,8 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'test-config-smtp', 'data': {'sign': True, 'subject': "SMTP Configuration verification", 'message': "Mail to test SMTP configuration"}}
-            self.app.start_progressing(_("Testing SMTP Configuration..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_("SMTP Configuration test was completed."))
+            msg = _("Testing SMTP Configuration...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             try:
                 result = response.json()

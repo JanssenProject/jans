@@ -15,7 +15,7 @@ from prompt_toolkit.eventloop import get_event_loop
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
 from fido_entries import FidoEntries
-from utils.utils import DialogUtils, get_help_with
+from utils.utils import DialogUtils, get_help_with, common_data
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
@@ -123,11 +123,10 @@ class Plugin(DialogUtils):
         if pattern:
             endpoint_args += ',pattern:'+pattern
         cli_args = {'operation_id': 'get-user', 'endpoint_args': endpoint_args}
+        msg = _("Retreiving users from server...")
 
         async def coroutine():
-            self.app.start_progressing(_("Retreiving users from server..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             self.users = response.json()
             self.app.logger.debug("Users: {}".format(self.users))
 
@@ -173,9 +172,8 @@ class Plugin(DialogUtils):
                                 "multiValued": False,
                                 "value": "{}".format(self.new_password.me.text)}]}
                     }
-                self.app.start_progressing(_("Changing Password ..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Changing Password ...")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response.status_code not in (200, 201):
                     self.app.show_message(_('Error'), response.text + '\n' + response.reason, tobefocused=self.app.center_container)
@@ -213,9 +211,9 @@ class Plugin(DialogUtils):
                 if user.get('userId') == kwargs['selected'][1]:
                     async def coroutine():
                         cli_args = {'operation_id': 'delete-user', 'url_suffix':'inum:{}'.format(user['inum'])}
-                        self.app.start_progressing(_("Deleting user {}").format(user['userId']))
-                        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                        self.app.stop_progressing()
+                        msg = _("Deleting user {}").format(user['userId'])
+                        response = await common_data.app.run_config_api_operation(cli_args, msg)
+
                         if response:
                             self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
                         else:

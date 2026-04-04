@@ -216,10 +216,15 @@ class Authn(DialogUtils):
         async def coroutine():
             # retreive auth ldap servers
             cli_args = {'operation_id': 'get-config-database-ldap'}
-            self.app.start_progressing(_("Retreiving LDAP Configurations..."))
-            result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            self.ldap_servers = result.json()
+            msg = _("Retreiving LDAP Configurations...")
+            result = await common_data.app.run_config_api_operation(cli_args, msg)
+
+
+            try:
+                self.ldap_servers = result.json()
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+                common_data.app.show_message(common_strings.error, str(result), tobefocused=self.ldap_servers_container)
+                return
 
             acr_values_supported = self.app.cli_object.openid_configuration.get('acr_values_supported', [])[:]
             if BUILTIN_AUTHN in acr_values_supported:
@@ -227,10 +232,10 @@ class Authn(DialogUtils):
 
             self.auth_scripts.clear()
 
-            self.app.start_progressing(_("Retreiving Auth Scripts"))
             cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:scriptType=person_authentication,fieldValuePair:enabled=true'}
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retreiving Auth Scripts")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 200:
                 result = response.json()
                 if result.get('entriesCount', 0) > 0:
@@ -322,9 +327,8 @@ class Authn(DialogUtils):
 
             async def coroutine():
                 cli_args = {'operation_id': 'post-config-database-ldap-test', 'data': ldap_config}
-                self.app.start_progressing(_("Testing LDAP Configuration..."))
-                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Testing LDAP Configuration...")
+                result = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if result.status_code == 200 and result.text == 'true':
                     # if diolog needs to be closed, use handler: lambda: dialog.future.set_result(True)
@@ -344,8 +348,8 @@ class Authn(DialogUtils):
 
             async def coroutine():
                 cli_args = {'operation_id': operation_id, 'data': ldap_config}
-                self.app.start_progressing(_("Saving LDAP configuration..."))
-                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                msg = _("Saving LDAP configuration...")
+                result = await common_data.app.run_config_api_operation(cli_args, msg)
                 self.app.stop_progressing()
 
                 if result.status_code not in (200, 201):
@@ -483,9 +487,9 @@ class Authn(DialogUtils):
 
             async def coroutine():
                 cli_args = {'operation_id': 'put-config-scripts', 'data': config}
-                self.app.start_progressing("Saving Script ...")
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = "Saving Script ..."
+                response = awaitcommon_data.app.run_config_api_operation(cli_args, msg)
+
                 if response.status_code == 500:
                     self.app.show_message(_('Error'), response.text + '\n' + response.reason)
                 else:
@@ -506,9 +510,9 @@ class Authn(DialogUtils):
     def delete_ldap_server(self, **params: Any) -> None:
         async def coroutine(config_id):
             cli_args = {'operation_id': 'delete-config-database-ldap-by-name', 'url_suffix':'name:{}'.format(config_id) }
-            self.app.start_progressing(_("Deleting Source LDAP..."))
-            await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Deleting Source LDAP...")
+            await common_data.app.run_config_api_operation(cli_args, msg)
+
             self.on_page_enter()
 
         def do_delete_ldap_server(config_id, dialog):
@@ -545,9 +549,9 @@ class Authn(DialogUtils):
         async def coroutine():
             # save default acr
             cli_args = {'operation_id': 'put-acrs', 'data': {'defaultAcr': acr}}
-            self.app.start_progressing(_("Saving default ACR..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Saving default ACR...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 200:
                 self.default_acr = response.json()['defaultAcr']
                 self.app.show_message(_(common_strings.info), _(HTML("Default ACR was set to <b>{}</b>")).format(response.json()['defaultAcr']), tobefocused=self.main_container)
@@ -574,9 +578,9 @@ class Authn(DialogUtils):
         op = 'replace' if 'acrMappings' in self.app.app_configuration else 'add'
         patch_data = [{'op':op, 'path': 'acrMappings', 'value': mappings}]
         cli_args = {'operation_id': 'patch-properties', 'data': patch_data}
-        self.app.start_progressing("Saving Mappings ...")
-        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        self.app.stop_progressing()
+        msg = _("Saving Mappings ...")
+        response = await common_data.app.run_config_api_operation(cli_args, msg)
+
         if response.status_code == 200:
             self.app.show_message(_(common_strings.success), _("ACR mappings were saved successfully"), tobefocused=self.aliases_container)
             if dialog:

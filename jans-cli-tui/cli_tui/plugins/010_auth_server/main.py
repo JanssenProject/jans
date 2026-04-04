@@ -1,6 +1,8 @@
 import time
 import json
 import asyncio
+from json import JSONDecodeError
+from requests.exceptions import RequestException
 from functools import partial
 from typing import Any, Optional
 from prompt_toolkit.application.current import get_app
@@ -104,13 +106,19 @@ class Plugin(DialogUtils):
         'Coroutine for getting application configuration.'
 
         cli_args = {'operation_id': 'get-properties'}
-        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+        msg = _("Retrieving properties")
+        response = await common_data.app.run_config_api_operation(cli_args, msg)
 
         if response.status_code not in (200, 201):
             self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
-        self.app.app_configuration = response.json()
+        try:
+            self.app.app_configuration = response.json()
+        except (ConnectionError, TimeoutError, ValueError, RequestException):
+            common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.app.center_frame)
+            return
+
         self.ssa.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
         self.oauth_logging()
 
@@ -133,8 +141,9 @@ class Plugin(DialogUtils):
 
         while True:
 
+            msg = _("Retrieving scopes")
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if response.status_code == 200:
                 try:
@@ -378,9 +387,8 @@ class Plugin(DialogUtils):
             if pattern:
                 endpoint_args +=',pattern:'+pattern
             cli_args = {'operation_id': 'get-oauth-openid-clients', 'endpoint_args': endpoint_args}
-            self.app.start_progressing(_("Retreiving clients from server..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+
+            response = await self.app.run_config_api_operation(cli_args)
 
             if response.status_code not in (200, 201):
                 self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
@@ -436,9 +444,8 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':'limit:200,startIndex:0'}
-            self.app.start_progressing(_("Retreiving client Scopes..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retreiving client Scopes...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if response.status_code not in (200, 201):
                 self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
@@ -527,9 +534,8 @@ class Plugin(DialogUtils):
                 endpoint_args += ',pattern:' + pattern
 
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
-            self.app.start_progressing(_("Retreiving scopes from server..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retreiving scopes from server...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             try:
                 result = response.json()
@@ -802,10 +808,15 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'get-config-jwks'}
-            self.app.start_progressing("Retreiving JWKS keys...")
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            self.jwks_keys = response.json()
+            msg = "Retreiving JWKS keys..."
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
+            try:
+                self.jwks_keys = response.json()
+            except (ConnectionError, TimeoutError, ValueError, RequestException):
+                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=common_data.app.center_frame)
+                return
+
             self.oauth_update_keys()
 
         asyncio.ensure_future(coroutine())
@@ -857,13 +868,13 @@ class Plugin(DialogUtils):
         """
 
         async def coroutine():
-            self.app.start_progressing(_("Saving clinet ..."))
+
             operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client'
             cli_args = {'operation_id': operation_id, 'data': dialog.data}
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            msg = _("Saving clinet ...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             dialog.future.set_result(DialogResult.ACCEPT)
-            self.app.stop_progressing()
 
             if response.status_code in (200, 201):
                 self.oauth_update_clients()
@@ -886,9 +897,9 @@ class Plugin(DialogUtils):
         async def coroutine():
             operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes'
             cli_args = {'operation_id': operation_id, 'data': dialog.data}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Saving scope")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             dialog.future.set_result(DialogResult.ACCEPT)
             if response.status_code == 500:
                 self.app.show_message(_('Error'), response.text + '\n' + response.reason)

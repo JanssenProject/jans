@@ -174,8 +174,7 @@ class SSA(DialogUtils):
         async def coroutine():
             cli_args = {'operation_id': 'get-ssa', 'cli_object': self.cli_object}
             self.app.start_progressing(_("Retreiving ssa..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             self.data = response.json()
             self.working_container.all_data = self.data
             self.update_ssa_container(search_str=search_str)
@@ -235,14 +234,20 @@ class SSA(DialogUtils):
             async def coroutine():
                 operation_id = 'post-register-ssa'
                 cli_args = {'operation_id': operation_id, 'cli_object': self.cli_object, 'data': new_data}
-                self.app.start_progressing(_("Saving ssa..."))
-                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-                ssa = result.json()
+                msg = _("Saving ssa...")
+                result = await common_data.app.run_config_api_operation(cli_args, msg)
+
+                try:
+                    ssa = result.json()
+                except (ConnectionError, TimeoutError, ValueError, RequestException):
+                    common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.working_container)
+                    return
+
                 self.display_ssa_token(ssa)
                 dialog.future.set_result(True)
+
                 if 'ssa' in ssa:
-                    
+
                     self.get_ssa()
                 else:
                     self.app.show_message(_(common_strings.error), _("Something not went good while creating SSA:" + "\n" + str(ssa)), tobefocused = self.main_container)
@@ -573,9 +578,8 @@ class SSA(DialogUtils):
 
     async def delete_ssa_coroutine(self, jti):
         cli_args = {'operation_id': 'delete-ssa', 'cli_object': self.cli_object, 'url_suffix': 'jti:{}'.format(jti)}
-        self.app.start_progressing(_("Deleting ssa {}".format(jti)))
-        await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        self.app.stop_progressing()
+        msg = _("Deleting ssa {}").format(jti)
+        await common_data.app.run_config_api_operation(cli_args, msg)
 
 
     def delete_ssa(self, **kwargs: Any) -> None:
@@ -614,10 +618,15 @@ class SSA(DialogUtils):
     def show_token(self, dialog):
         async def coroutine():
             cli_args = {'operation_id': 'get-jwt-ssa', 'cli_object': self.cli_object, 'endpoint_args': f'jti:{dialog.jti}'}
-            self.app.start_progressing(_("Retreiving ssa token..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            ssa = response.json()
+            msg = _("Retreiving ssa token...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
+            try:
+                ssa = response.json()
+            except (ConnectionError, TimeoutError, ValueError, RequestException):
+                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=dialog)
+                return
+
             self.display_ssa_token(ssa, tobefocused=dialog)
 
         asyncio.ensure_future(coroutine())

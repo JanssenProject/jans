@@ -81,12 +81,10 @@ class Plugin(DialogUtils):
             try:
                 self.app.layout.focus(focused_before)
             except:
-                self.app.stop_progressing()
                 self.app.layout.focus(self.app.center_frame)
 
             if result.lower() == 'yes':
                 self.requested_parties_container.remove_item(kwargs['selected'])
-                self.app.stop_progressing()
 
             return result
 
@@ -297,9 +295,8 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
-            self.app.start_progressing(_("Saving FIDO Configuration..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_(""))
+            msg = _("Saving FIDO Configuration...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             if response.status_code == 200:
                 self.app.show_message(title=_(common_strings.success), message=_("FIDO configuration was saved."), tobefocused=self.main_container)
             else:

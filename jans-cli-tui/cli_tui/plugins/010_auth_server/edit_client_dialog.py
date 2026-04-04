@@ -1054,9 +1054,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
             cli_args = {'operation_id': 'revoke-token', 'url_suffix': f"tknCde:{entry['tokenCode']}"}
 
             async def coroutine():
-                common_data.app.start_progressing(_("Deleting token {}...").format(entry['tokenCode']))
-                response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-                common_data.app.stop_progressing()
+                msg = _("Deleting token {}...").format(entry['tokenCode'])
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response is not None:
                     common_data.app.show_message(_(common_strings.error), _("Token was not delated"), tobefocused=self.active_tokens_list)
@@ -1122,10 +1121,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
         async def coroutine():
-            common_data.app.start_progressing(_("Retreiving tokens from server..."))
-            response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
-            result = response.json()
+            msg = _("Retreiving tokens from server...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
+            try:
+                result = response.json()
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError):
+                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.tabs['Active Tokens'])
+                return
+
             common_data.app.logger.debug("Tokens: {}".format(result))
 
             if not result.get('entries'):

@@ -268,12 +268,12 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
         async def coroutine():
             operation_id = 'post-saml-identity-provider' if self.new_provider else 'put-saml-identity-provider'
             cli_args = {'operation_id': operation_id, 'data': data}
-            common_data.app.start_progressing()
-            response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+            msg = _("Saving IDP")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if response.status_code in (200, 201):
                 self.data = response.json()
-                common_data.app.stop_progressing(_("IDP Provider was saved."))
+                common_data.app.stop_progressing(_("IDP was saved."))
                 self.future.set_result(DialogResult.ACCEPT)
                 await self.myparent.get_identity_providers()
 

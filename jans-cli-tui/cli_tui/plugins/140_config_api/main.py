@@ -849,9 +849,9 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'patch-config-api-properties', 'data': patches}
-            self.app.start_progressing(_("Saving Config API Configuration changes..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg =_("Saving Config API Configuration changes...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 200:
                 self.app.show_message(_(common_strings.info), _("Config API Configuration changes were saved."), tobefocused=self.main_container)
                 self.data = response.json()

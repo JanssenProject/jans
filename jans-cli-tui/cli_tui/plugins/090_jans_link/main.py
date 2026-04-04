@@ -481,10 +481,10 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'put-jans-link-properties', 'data': new_data}
-            self.app.start_progressing(_("Saving Jans Link Configuration..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            msg = _("Saving Jans Link Configuration...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 200:
-                self.app.stop_progressing()
                 self.app.show_message(title=_(common_strings.success), message=_("Jans Link configuration was saved."), tobefocused=self.app.center_container)
                 self.data = response.json()
                 self.update_source_backends_container()

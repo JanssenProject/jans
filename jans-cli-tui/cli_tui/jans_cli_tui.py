@@ -218,6 +218,7 @@ class JansCliApp(Application):
         self.app_configuration = {}
         self.current_page = None
         self.jans_help = get_help_with()
+        self.auth_retry_count = 0
 
         self.not_implemented = Frame(
             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -324,6 +325,38 @@ class JansCliApp(Application):
 
         asyncio.ensure_future(coroutine())
 
+
+    def show_auth_failed_error_and_exit(self):
+        def exit_app():
+            get_app().exit(result=True)
+            sys.exit()
+
+        self.show_message(
+                _(common_strings.error),
+                _("Authentication failed three times. Exiting."),
+                buttons=[Button(_("OK"), handler=exit_app)]
+                )
+
+
+    async def run_config_api_operation(self, cli_args, msg=None, cli_object=None):
+
+        if not msg:
+            msg = _("Calling Config API operation ") + cli_args['operation_id']
+        if not cli_object:
+            cli_object = self.cli_requests
+
+        self.start_progressing(msg)
+
+        try:
+            response = await get_event_loop().run_in_executor(self.executor, cli_object, cli_args)
+            return response
+        except:
+            self.logger.exception("Config API operation failed")
+            raise
+        finally:
+            self.stop_progressing()
+
+
     def start_progressing(self, message: Optional[str] = "Progressing") -> None:
         self.progressing_text = message
         self.create_background_task(self.progress_coroutine())
@@ -406,6 +439,72 @@ class JansCliApp(Application):
         self.logger.addHandler(file_handler)
         self.logger.debug('JANS CLI Started')
 
+
+    async def do_authentication(self) -> None:
+        """This function does the authentication process."""
+        self.auth_retry_count += 1
+
+        # Limit authentication retry
+        if self.auth_retry_count > 3:
+            self.show_auth_failed_error_and_exit()
+
+        result = {}
+        try:
+            response = self.cli_object.get_device_verification_code()
+            result = response.json()
+        except Exception as e:
+            self.cli_object_ok = False
+            self.show_message(
+                _(common_strings.error),
+                _("Can't get device verification code: \n{}").format(str(e)),
+                buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                tobefocused=self.center_container)
+            return
+
+        if 'verification_uri_complete' not in result:
+            self.cli_object_ok = False
+            self.show_message(
+                _(common_strings.error),
+                _("Can't find verification code in server response: \n{}").format(response.text),
+                buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                tobefocused=self.center_container)
+            return
+
+
+        msg = _("Please visit verification url {} and authorize this device within {} seconds.")
+        body = HSplit([Label(msg.format(result['verification_uri_complete'], result['expires_in']),
+                             style='class:jans-main-verificationuri.text')],
+                      style='class:jans-main-verificationuri')
+        dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
+        app = get_app()
+        focused_before = app.layout.current_window
+        await self.show_dialog_as_float(dialog)
+        try:
+            app.layout.focus(focused_before)
+        except Exception:
+            app.layout.focus(self.center_frame)
+
+        self.start_progressing()
+        try:
+            await self.loop.run_in_executor(
+                            self.executor,
+                            self.cli_object.get_jwt_access_token,
+                            result
+                        )
+        except Exception as e:
+            self.stop_progressing()
+            err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
+            await self.show_dialog_as_float(err_dialog)
+            self.cli_object_ok = False
+            self.create_cli()
+            return
+
+        self.stop_progressing()
+
+        self.cli_object_ok = True
+        self.check_available_plugins()
+
+
     def create_cli(self) -> None:
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
@@ -438,72 +537,20 @@ class JansCliApp(Application):
 
         self.invalidate()
 
-        if status not in (True, 'ID Token is expired'):
+        if status not in (True, config_cli.id_token_expired):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
             self.show_message(_("Error connecting to Auth Server"), status, buttons=buttons)
 
         else:
             if not test_client and not self.cli_object.access_token:
-
-                result = {}
-                try:
-                    response = self.cli_object.get_device_verification_code()
-                    result = response.json()
-                except Exception as e:
-                    self.cli_object_ok = False
-                    self.show_message(
-                        _(common_strings.error),
-                        _("Can't get device verification code: \n{}").format(str(e)),
-                        buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
-                        tobefocused=self.center_container)
-                    return
-
-                if not 'verification_uri_complete' in result:
-                    self.cli_object_ok = False
-                    self.show_message(
-                        _(common_strings.error),
-                        _("Can't find verification code in server response: \n{}").format(response.text),
-                        buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
-                        tobefocused=self.center_container)
-                    return
-
-                msg = _("Please visit verification url {} and authorize this device within {} seconds.")
-                body = HSplit([Label(msg.format(result['verification_uri_complete'], result['expires_in']),
-                                     style='class:jans-main-verificationuri.text')],
-                              style='class:jans-main-verificationuri')
-                dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
-
                 async def coroutine():
-                    app = get_app()
-                    focused_before = app.layout.current_window
-                    await self.show_dialog_as_float(dialog)
-                    try:
-                        app.layout.focus(focused_before)
-                    except Exception:
-                        app.layout.focus(self.center_frame)
-
-                    self.start_progressing()
-                    try:
-                        response = await self.loop.run_in_executor(self.executor, self.cli_object.get_jwt_access_token,
-                                                                   result)
-                    except Exception as e:
-                        self.stop_progressing()
-                        err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
-                        await self.show_dialog_as_float(err_dialog)
-                        self.cli_object_ok = False
-                        self.create_cli()
-                        return
-
-                    self.stop_progressing()
-
-                    self.cli_object_ok = True
-                    self.check_available_plugins()
-
+                    await self.do_authentication()
                 asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
                 self.check_available_plugins()
+
 
     def check_available_plugins(self) -> None:
         """Disables plugins when cli object is ready.

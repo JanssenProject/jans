@@ -138,9 +138,9 @@ class ConfigApiAuditLogs(DialogUtils):
             processing_message = _("Searching auidit logs")
             if search_pattern:
                 processing_message += ' ' + _("for patters %s" % search_pattern)
-            common_data.app.start_progressing(search_pattern)
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = processing_message
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
 
             if response.status_code not in (200, 201):
                 common_data.app.show_message(_(common_strings.error), str(response) + ':' + response.text, tobefocused=self.main_container)
