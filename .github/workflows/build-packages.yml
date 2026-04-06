@@ -113,7 +113,7 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -221,7 +221,7 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -323,7 +323,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -432,7 +432,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -501,7 +501,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -570,7 +570,7 @@ jobs:
             os: windows-2025
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -690,7 +690,7 @@ jobs:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -753,7 +753,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
