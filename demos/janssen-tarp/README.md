@@ -82,9 +82,9 @@ Follow your browser's procedure to import or trust the self-signed certificate a
 ![image](./docs/images/3-cedarling-configuration.png)
 ![image](./docs/images/4-auth-code-flow.png)
 ![image](./docs/images/5-auth-code-flow.png)
-* See [here](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for more details on Unsigned authorization.
+* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for unsigned authorization details.
 ![image](./docs/images/6-unsigned-authz.png)
-* See [here](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for more details on Multi-Issuer authorization.
+* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for multi-issuer authorization details.
 ![image](./docs/images/7-multi-issuer-authz.png)
 <br>
 
