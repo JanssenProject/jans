@@ -15,7 +15,6 @@ mod entity_data;
 pub(crate) mod errors;
 pub(crate) mod multi_issuer_authorize_result;
 mod policy_evaluation_error;
-pub(crate) mod request;
 pub(crate) mod request_multi_issuer;
 pub(crate) mod request_unsigned;
 pub(crate) mod token_input;
@@ -26,7 +25,6 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<decision::Decision>()?;
     m.add_class::<entity_data::EntityData>()?;
     m.add_class::<entity_data::CedarEntityMapping>()?;
-    m.add_class::<request::Request>()?;
     m.add_class::<request_unsigned::RequestUnsigned>()?;
     m.add_class::<token_input::TokenInput>()?;
     m.add_class::<request_multi_issuer::AuthorizeMultiIssuerRequest>()?;

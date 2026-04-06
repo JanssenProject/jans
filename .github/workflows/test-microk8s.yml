@@ -43,7 +43,7 @@ jobs:
       KUBECONFIG: /home/runner/.kube/config
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -385,7 +385,7 @@ jobs:
         echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
 
     - name: Set up Go
-      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+      uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
       with:
         go-version-file: terraform-provider-jans/go.mod
         cache-dependency-path: terraform-provider-jans/go.sum

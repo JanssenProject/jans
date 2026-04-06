@@ -15,5 +15,10 @@
         </classes>
     </test>
 	
+	<test name="Fido2Metrics" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.fido2.test.Fido2MetricsTest" />
+        </classes>
+    </test>
 
 </suite>
