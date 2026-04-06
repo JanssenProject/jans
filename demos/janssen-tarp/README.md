@@ -10,7 +10,7 @@
 6. [Installation in Browser](#installation-in-browser)
    - [Chrome](#chrome)
    - [Firefox](#firefox)
-7. [Note on Self-Signed Certificates](#note)
+7. [Note on Self-Signed Certificates](#self-signed-certificate-handling)
 8. [Testing Using Janssen Tarp](#testing-using-janssen-tarp)
 9. [Cedarling Authorization](#cedarling-authorization)
 10. [Cedarling Unsigned Authorization](#cedarling-unsigned-authorization)
