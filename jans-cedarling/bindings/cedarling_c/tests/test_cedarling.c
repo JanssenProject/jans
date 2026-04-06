@@ -239,10 +239,32 @@ void test_context_data_api(void) {
     }
     cedarling_free_result(&r);
 
+    ret = cedarling_context_get_entry(instance_id, "c_test_key", &r);
+    TEST_ASSERT(ret == 0, "context_get_entry succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "c_test_key") != NULL,
+                    "context_get_entry JSON includes key");
+        TEST_ASSERT(strstr((char*)r.data, "access_count") != NULL,
+                    "context_get_entry JSON includes access_count");
+        TEST_ASSERT(strstr((char*)r.data, "data_type") != NULL,
+                    "context_get_entry JSON includes data_type");
+        TEST_ASSERT(strstr((char*)r.data, "42") != NULL,
+                    "context_get_entry JSON includes value");
+    }
+    cedarling_free_result(&r);
+
     ret = cedarling_context_get(instance_id, "no_such_context_key", &r);
     TEST_ASSERT(ret == 0, "context_get missing key returns success code");
     if (ret == 0 && r.data != NULL) {
         TEST_ASSERT(strcmp((char*)r.data, "null") == 0, "context_get missing key returns null JSON");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_get_entry(instance_id, "no_such_context_key", &r);
+    TEST_ASSERT(ret == 0, "context_get_entry missing key returns success code");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strcmp((char*)r.data, "null") == 0,
+                    "context_get_entry missing key returns null JSON");
     }
     cedarling_free_result(&r);
 
@@ -295,6 +317,9 @@ void test_context_data_api(void) {
     ret = cedarling_context_get(instance_id, "k", NULL);
     TEST_ASSERT(ret != 0, "context_get rejects NULL result");
 
+    ret = cedarling_context_get_entry(instance_id, "k", NULL);
+    TEST_ASSERT(ret != 0, "context_get_entry rejects NULL result");
+
     ret = cedarling_context_remove(instance_id, "k", NULL);
     TEST_ASSERT(ret != 0, "context_remove rejects NULL result");
 
@@ -319,12 +344,20 @@ void test_context_data_api(void) {
     TEST_ASSERT(ret != 0, "context_get rejects NULL key");
     cedarling_free_result(&r);
 
+    ret = cedarling_context_get_entry(instance_id, NULL, &r);
+    TEST_ASSERT(ret != 0, "context_get_entry rejects NULL key");
+    cedarling_free_result(&r);
+
     ret = cedarling_context_remove(instance_id, NULL, &r);
     TEST_ASSERT(ret != 0, "context_remove rejects NULL key");
     cedarling_free_result(&r);
 
     ret = cedarling_context_push(99999, "k", "{}", 0, &r);
     TEST_ASSERT(ret != 0, "context_push rejects invalid instance id");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_get_entry(99999, "k", &r);
+    TEST_ASSERT(ret != 0, "context_get_entry rejects invalid instance id");
     cedarling_free_result(&r);
 
     cedarling_drop(instance_id);

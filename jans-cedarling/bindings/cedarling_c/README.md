@@ -201,6 +201,19 @@ if (ret == 0) {
 cedarling_free_result(&get_result);
 ```
 
+#### Get Data Entry (value and metadata)
+
+Same as `cedarling_context_get` for success and missing keys (`data` is the JSON literal `null` when the key is absent), but the payload is a full entry object: `key`, `value`, `data_type`, `created_at`, `expires_at`, and `access_count` (RFC 3339 timestamps where applicable).
+
+```c
+CedarlingResult entry_result;
+ret = cedarling_context_get_entry(instance_id, "user:123", &entry_result);
+if (ret == 0 && entry_result.data != NULL) {
+    printf("Entry: %s\n", (char*)entry_result.data);
+}
+cedarling_free_result(&entry_result);
+```
+
 #### Remove Data
 
 ```c
@@ -371,6 +384,7 @@ cedarling_clear_last_error();
 |----------|-------------|
 | `cedarling_context_push(instance_id, key, value, ttl_secs, result)` | Push data into context with optional TTL (`<=0` means default/no override) |
 | `cedarling_context_get(instance_id, key, result)` | Get data by key |
+| `cedarling_context_get_entry(instance_id, key, result)` | Get entry (value + metadata) by key |
 | `cedarling_context_remove(instance_id, key, result)` | Remove data by key |
 | `cedarling_context_clear(instance_id, result)` | Clear all data |
 | `cedarling_context_list(instance_id, result)` | List all entries |

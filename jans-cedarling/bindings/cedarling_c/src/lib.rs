@@ -334,6 +334,46 @@ pub unsafe extern "C" fn cedarling_context_get(
 /// # Safety
 /// Caller must pass valid pointers for any non-null pointer arguments.
 /// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
+/// Get context data entry by key (JSON object with `key`, `value`, `data_type`, `created_at`,
+/// `expires_at`, `access_count`).
+///
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_context_get_entry(
+    instance_id: u64,
+    key: *const c_char,
+    result: *mut CedarlingResult,
+) -> c_int {
+    ffi_guard_int!({
+        clear_last_error();
+        if result.is_null() {
+            set_last_error("null result pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+        if key.is_null() {
+            unsafe {
+                *result =
+                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+            }
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+
+        let key_str = match c_string_to_string(key) {
+            Ok(s) => s,
+            Err(code) => unsafe {
+                *result = CedarlingResult::error(code, "Invalid key string");
+                return code as c_int;
+            },
+        };
+
+        let entry_result = context_get_entry(instance_id, &key_str);
+        unsafe { *result = entry_result };
+        unsafe { (*result).error_code as c_int }
+    })
+}
+
+/// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Remove context data by key
 ///
 #[unsafe(no_mangle)]

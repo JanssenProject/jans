@@ -373,6 +373,41 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
     }
 }
 
+/// Get a single context [`cedarling::context_data_api::DataEntry`] (value plus metadata) by key.
+pub fn context_get_entry(instance_id: u64, key: &str) -> CedarlingResult {
+    clear_last_error();
+
+    let runtime = runtime_ref();
+
+    let instance = match runtime.get_instance(instance_id) {
+        Ok(Some(instance)) => instance,
+        Ok(None) => {
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
+        },
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
+        },
+    };
+
+    match instance.get_data_entry_ctx(key) {
+        Ok(Some(entry)) => match serde_json::to_string(&entry) {
+            Ok(json) => CedarlingResult::success(json),
+            Err(e) => {
+                let error_msg = format!("Failed to serialize data entry: {}", e);
+                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
+            },
+        },
+        Ok(None) => CedarlingResult::success("null".to_string()),
+        Err(e) => {
+            let error_msg = format!("Failed to get data entry: {}", e);
+            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
+        },
+    }
+}
+
 /// Remove context data by key
 pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
     clear_last_error();
