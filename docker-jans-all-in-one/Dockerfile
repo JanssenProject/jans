@@ -9,7 +9,7 @@ ARG BASE_VERSION=1.16.0-1
 # they can be overriden in build process via --build-arg option
 ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${BASE_VERSION}
 ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${BASE_VERSION}
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${BASE_VERSION}
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.16.0-2
 ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
