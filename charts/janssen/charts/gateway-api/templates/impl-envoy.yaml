@@ -1,5 +1,5 @@
 {{- if eq .Values.gateway.className "envoy" }}
-{{- if and (eq .Values.gateway.className "envoy") (.Values.additionalConfig.envoy.createGatewayClass) }}
+{{- if .Values.additionalConfig.envoy.createGatewayClass }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:

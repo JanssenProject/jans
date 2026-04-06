@@ -19,7 +19,7 @@ spec:
   gatewayClassName: {{ index .Values "gateway-api" "gateway" "className" }}
   infrastructure:
     labels:
-      app: {{ $fullName  }}-gateway-infrastructure
+      app: {{ $fullName }}-gateway-infrastructure
     {{- if index .Values "gateway-api" "gateway" "infrastructure" "labels" }}
     {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "labels") | nindent 6 }}
     {{- end }}

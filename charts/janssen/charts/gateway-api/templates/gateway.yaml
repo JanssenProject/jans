@@ -21,7 +21,7 @@ spec:
   gatewayClassName: {{ .Values.gateway.className }}
   infrastructure:
     labels:
-      app: {{ $fullName  }}-gateway-infrastructure
+      app: {{ $fullName }}-gateway-infrastructure
     {{- if .Values.gateway.infrastructure.labels }}
     {{- toYaml .Values.gateway.infrastructure.labels | nindent 6 }}
     {{- end }}
