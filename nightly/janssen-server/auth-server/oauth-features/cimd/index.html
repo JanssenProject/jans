@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/token/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/cimd/">
       
       
-        <link rel="prev" href="../access-evaluation/">
+        <link rel="prev" href="../par/">
       
       
-        <link rel="next" href="../ssa/">
+        <link rel="next" href="../../tokens/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Token - Janssen Documentation</title>
+        <title>Client ID Metadata Document - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#token-endpoint" class="md-skip">
+        <a href="#client-id-metadata-document-cimd" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Token
+              Client ID Metadata Document
             
           </span>
         </div>
@@ -533,8 +533,6 @@
                 
   
   
-    
-  
   
   
     
@@ -562,17 +560,18 @@
     
     
       
+        
+        
+      
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../architecture/" class="md-nav__link ">
-              
+  
+  
+  
+    <a href="../../../architecture/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
@@ -586,51 +585,13 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Architecture & Concepts
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
   
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../planning/components/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Components Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
+      
     </li>
   
 
@@ -648,6 +609,16 @@
     
       
         
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
       
         
       
@@ -666,17 +637,18 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_2_3" id="__nav_1_2_3_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
     
   
-    Auth Server Internals
+    Integrate & Authenticate
   
 
     
@@ -684,19 +656,27 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_2_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Auth Server Internals
+    Integrate & Authenticate
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
             
               
                 
@@ -721,34 +701,6 @@
       
         
       
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -762,7 +714,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_3_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2" checked>
         
           
           <div class="md-nav__link md-nav__container">
@@ -773,7 +725,7 @@
   <span class="md-ellipsis">
     
   
-    Endpoints
+    OAuth 2.0
   
 
     
@@ -784,18 +736,18 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1_2_3_1" id="__nav_1_2_3_1_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_1_3_2" id="__nav_1_3_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_2_3_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_3_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Endpoints
+    OAuth 2.0
   
 
           </label>
@@ -809,15 +761,47 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../auth-code-grant/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
     
   
-    OpenID Configuration
+    Grants & Flows
   
 
     
@@ -825,119 +809,13 @@
   
   
 
-      </a>
-    </li>
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
   
 
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../client-registration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Client Registration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../authorization/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Authorization
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../authorization-challenge/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Authorization Challenge
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../access-evaluation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Access Evaluation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
+      
     </li>
   
 
@@ -951,22 +829,43 @@
   
   
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
+    
+    
       
         
       
+        
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2_3" checked>
+        
           
+          <label class="md-nav__link" for="__nav_1_3_2_3" id="__nav_1_3_2_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    Token
+    Security Extensions
   
 
     
@@ -974,93 +873,19 @@
   
   
 
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_3_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
   
-  
-  <span class="md-ellipsis">
-    
-  
-    Token
-  
-
-    
-  </span>
-  
+    Security Extensions
   
 
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration Properties
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#client-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client Authentication
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supported-grant-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Supported Grant Types
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#interception-scripts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interception Scripts
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -1069,14 +894,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../ssa/" class="md-nav__link">
+      <a href="../pkce/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    SSA
+    PKCE
   
 
     
@@ -1097,14 +922,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../userinfo/" class="md-nav__link">
+      <a href="../dpop/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Userinfo
+    DPoP
   
 
     
@@ -1125,210 +950,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../token-revocation/" class="md-nav__link">
+      <a href="../mtls/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Token Revocation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../global-token-revocation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Global Token Revocation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../end-session/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    End Session
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../clientinfo/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Clientinfo
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../jwks-uri/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JWKS URI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../archived-jwks-uri/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Archived JWKS URI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../introspection/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Introspection
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../device-authorization/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Device Authorization
+    MTLS
   
 
     
@@ -1374,17 +1003,330 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../backchannel-authentication/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client ID Metadata Document
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Backchannel Authentication
+    Client ID Metadata Document
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enabling-cimd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling CIMD
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata-document-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Metadata Document Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Metadata Document Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forbidden-authentication-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forbidden Authentication Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ttl-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TTL and Caching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Properties
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain Controls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scheme-restriction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheme Restriction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-script-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Script Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-cimd-in-authorization-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using CIMD in Authorization Requests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#have-questions-in-the-meantime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Have questions in the meantime?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#want-to-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Want to contribute?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tokens/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tokens
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authz-details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rich Authorization Requests
   
 
     
@@ -1425,6 +1367,26 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1443,14 +1405,14 @@
   
   
   
-    <a href="../../crypto/" class="md-nav__link">
+    <a href="../../openid-features/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    Crypto
+    OpenID Connect
   
 
     
@@ -1462,6 +1424,138 @@
         <span class="md-nav__icon md-icon"></span>
       
     </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../fido/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FIDO2 / Passkeys
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../shibboleth-idp/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
   
 
       
@@ -1507,14 +1601,92 @@
   
   
   
-    <a href="../../international/" class="md-nav__link">
+    <a href="../../uma-features/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    Internationalization
+    UMA
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../recipes/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes & How-To
   
 
     
@@ -1536,296 +1708,6 @@
             
           </ul>
         </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../developer/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Developer Guide
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../contribute/implementation-design/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Implementation Design
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../reference/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integrate & Authenticate
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
       
     </li>
   
@@ -2302,6 +2184,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enabling-cimd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling CIMD
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata-document-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Metadata Document Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Metadata Document Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forbidden-authentication-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forbidden Authentication Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ttl-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TTL and Caching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration-properties" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2313,10 +2256,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#client-authentication" class="md-nav__link">
+  <a href="#security-considerations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Client Authentication
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain Controls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scheme-restriction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheme Restriction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-script-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Script Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-cimd-in-authorization-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using CIMD in Authorization Requests
       
     </span>
   </a>
@@ -2324,10 +2328,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-grant-types" class="md-nav__link">
+  <a href="#have-questions-in-the-meantime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supported Grant Types
+        Have questions in the meantime?
       
     </span>
   </a>
@@ -2335,10 +2339,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interception-scripts" class="md-nav__link">
+  <a href="#want-to-contribute" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interception Scripts
+        Want to contribute?
       
     </span>
   </a>
@@ -2397,10 +2401,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../../architecture/" class="md-path__link">
+        <a href="../../" class="md-path__link">
           
   <span class="md-ellipsis">
-    Architecture & Concepts
+    Integrate & Authenticate
   </span>
 
         </a>
@@ -2414,23 +2418,15 @@
   
     
     
-      
-  
-  
-    
-    
       <li class="md-path__item">
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    Auth Server Internals
+    OAuth 2.0
   </span>
 
         </a>
       </li>
-    
-  
-
     
   
 
@@ -2441,10 +2437,10 @@
     
     
       <li class="md-path__item">
-        <a href="../" class="md-path__link">
+        <a href="../pkce/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Endpoints
+    Security Extensions
   </span>
 
         </a>
@@ -2482,14 +2478,28 @@
       
       
       
-        <span class="md-tag">endpoint</span>
+        <span class="md-tag">cimd</span>
       
     
       
       
       
       
-        <span class="md-tag">token</span>
+        <span class="md-tag">client-id-metadata-document</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">feature</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">oauth</span>
       
     
   </nav>
@@ -2499,130 +2509,171 @@
   
 
 
-<h1 id="token-endpoint">Token Endpoint<a class="headerlink" href="#token-endpoint" title="Permanent link">#</a></h1>
-<p>Token endpoint is an OAuth2 protected endpoint that is used to grant tokens to client in response to valid request.
-Token endpoint is defined in the <a href="https://datatracker.ietf.org/doc/html/rfc6749">OAuth 2.0 framework</a>,
-<a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect</a> specification and other specifications relevant
-to them.</p>
-<p>Tokens granted by this endpoint depends on grant type and scopes that are specified in the token request. The token
-endpoint is used with every authorization grant type except for the implicit grant type (since an access token is issued
-directly).</p>
-<p>Based on request, this endpoint can grant following types of tokens:</p>
-<ul>
-<li><a href="https://datatracker.ietf.org/doc/html/rfc6749#section-1.4">Access Token</a></li>
-<li><a href="https://datatracker.ietf.org/doc/html/rfc6749#section-1.5">Refresh Token</a></li>
-<li><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken">ID Token</a></li>
-</ul>
-<p>URL to access token endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-<a href="../configuration/">configuration endpoint</a> given below.</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
-</code></pre></div>
-<p><code>token_endpoint</code> claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
-like below:</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/token
-</code></pre></div>
-<p>In response to a valid request, the token endpoint returns token/s in JSON format similar to below. This is just a
-sample response. Actual response can greatly vary in its contents based on request:</p>
-<div class="highlight"><pre><span></span><code>  HTTP/1.1 200 OK
-  Content-Type: application/json
-  Cache-Control: no-store
-  Pragma: no-cache
+<h1 id="client-id-metadata-document-cimd">Client ID Metadata Document (CIMD)<a class="headerlink" href="#client-id-metadata-document-cimd" title="Permanent link">#</a></h1>
+<p>The Client ID Metadata Document feature allows a URL to serve as a <code>client_id</code> in OAuth 2.0 flows. When a URL is used as a <code>client_id</code>, the Janssen Server fetches client metadata from that URL (an RFC 7591-compatible JSON document), automatically registering the client without requiring prior Dynamic Client Registration (DCR).</p>
+<p>This is based on the IETF draft specification: <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html">OAuth 2.0 Client ID Metadata Document</a></p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>In traditional OAuth 2.0, a <code>client_id</code> is an opaque string assigned during client registration. With CIMD, the <code>client_id</code> is a URL that also serves as the location of the client's metadata document:</p>
+<div class="highlight"><pre><span></span><code>GET https://example.com/client-metadata HTTP/1.1
+Accept: application/json
 
-  {
-   &quot;access_token&quot;: &quot;SlAV32hkKG&quot;,
-   &quot;token_type&quot;: &quot;Bearer&quot;,
-   &quot;refresh_token&quot;: &quot;8xLOxBtZp8&quot;,
-   &quot;expires_in&quot;: 3600,
-   &quot;id_token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ.ewogImlzc
-     yI6ICJodHRwOi8vc2VydmVyLmV4YW1wbGUuY29tIiwKICJzdWIiOiAiMjQ4Mjg5
-     NzYxMDAxIiwKICJhdWQiOiAiczZCaGRSa3F0MyIsCiAibm9uY2UiOiAibi0wUzZ
-     fV3pBMk1qIiwKICJleHAiOiAxMzExMjgxOTcwLAogImlhdCI6IDEzMTEyODA5Nz
-     AKfQ.ggW8hZ1EuVLuxNuuIJKX_V8a_OMXzR0EHR9R6jgdqrOOF4daGU96Sr_P6q
-     Jp6IcmD3HP99Obi1PRs-cwh3LO-p146waJ8IhehcwL7F09JdijmBqkvPeB2T9CJ
-     NqeGpe-gccMg4vfKjkM8FcGvnzZUN4_KSP0aAp1tOJ1zZwgjxqGByKHiOtX7Tpd
-     QyHE5lcMiKPXfEIQILVq0pc_E2DzL7emopWoaoZTF_m0_N0YzFC6g6EJbOEoRoS
-     K5hoDalrcvRYLSrQAZZKflyuVCyixEoV9GfNQC3_osjzw2PAithfubEEBLuVVk4
-     XUVrWOLrLl0nx7RkKU8NXNHq-rvKMzqg&quot;
-  }
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: max-age=3600
+
+{
+  &quot;redirect_uris&quot;: [&quot;https://app.example.com/callback&quot;],
+  &quot;grant_types&quot;: [&quot;authorization_code&quot;],
+  &quot;response_types&quot;: [&quot;code&quot;],
+  &quot;client_name&quot;: &quot;My Application&quot;,
+  &quot;token_endpoint_auth_method&quot;: &quot;private_key_jwt&quot;,
+  &quot;jwks_uri&quot;: &quot;https://example.com/jwks&quot;
+}
 </code></pre></div>
-<p>More information about request and response of the token endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token">jans-auth-server module</a>.</p>
+<p>When the Janssen Server receives an authorization request with <code>client_id=https://example.com/client-metadata</code>, it:</p>
+<ol>
+<li>Fetches the metadata document from that URL</li>
+<li>Validates the metadata (redirect URIs, grant types, etc.)</li>
+<li>Persists the client to the database with a TTL</li>
+<li>Processes the authorization request using the fetched metadata</li>
+</ol>
+<p>On subsequent requests within the TTL window, the persisted client is used directly without re-fetching.</p>
+<h2 id="enabling-cimd">Enabling CIMD<a class="headerlink" href="#enabling-cimd" title="Permanent link">#</a></h2>
+<p>CIMD is disabled by default. To enable it, add <code>CLIENT_ID_METADATA_DOCUMENT</code> to the <code>featureFlags</code> configuration property:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;featureFlags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CLIENT_ID_METADATA_DOCUMENT&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="client-metadata-document-format">Client Metadata Document Format<a class="headerlink" href="#client-metadata-document-format" title="Permanent link">#</a></h2>
+<p>The metadata document must be valid JSON and follow the RFC 7591 client metadata format. The document is fetched with an <code>Accept: application/json</code> header.</p>
+<p>Example document:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;redirect_uris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://app.example.com/callback&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Application&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;private_key_jwt&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jwks_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://app.example.com/jwks&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile email&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>All standard RFC 7591 client metadata fields are supported.</p>
+<h3 id="forbidden-authentication-methods">Forbidden Authentication Methods<a class="headerlink" href="#forbidden-authentication-methods" title="Permanent link">#</a></h3>
+<p>Per <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html">CIMD spec Section 4.1</a>, the following <code>token_endpoint_auth_method</code> values <strong>MUST NOT</strong> be used in a client metadata document:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>client_secret_basic</code></td>
+<td>Requires a shared symmetric secret</td>
+</tr>
+<tr>
+<td><code>client_secret_post</code></td>
+<td>Requires a shared symmetric secret</td>
+</tr>
+<tr>
+<td><code>client_secret_jwt</code></td>
+<td>Requires a shared symmetric secret</td>
+</tr>
+</tbody>
+</table>
+<p>Since no shared secret can be pre-established between the metadata document and the authorization server, all symmetric-secret-based methods are prohibited. Requests using any of these methods will be rejected with <code>400 Bad Request</code>.</p>
+<p>Use <code>private_key_jwt</code>, <code>tls_client_auth</code>, <code>self_signed_tls_client_auth</code>, or <code>none</code> instead.</p>
+<h2 id="ttl-and-caching">TTL and Caching<a class="headerlink" href="#ttl-and-caching" title="Permanent link">#</a></h2>
+<p>The Janssen Server persists fetched client metadata to the database and caches it for a configurable duration (TTL). During the TTL window, the server uses the persisted client without re-fetching the document. When the TTL expires, the document is re-fetched on the next request.</p>
+<p>The TTL is determined as follows:</p>
+<ol>
+<li>If the metadata URL returns a <code>Cache-Control: max-age=&lt;seconds&gt;</code> header, that value is used (bounded by <code>cimdMaxTtlMinutes</code>).</li>
+<li>Otherwise, the default <code>cimdTtlMinutes</code> value is used.</li>
+</ol>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
-<p>Token endpoint and tokens issued by token endpoint can be further configured using Janssen Server configuration properties listed below. When using
-<a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
-navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
-<ul>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#tokenendpoint">tokenEndpoint</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#tokenendpointauthmethodssupported">tokenEndpointAuthMethodsSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#tokenendpointauthsigningalgvaluessupported">tokenEndpointAuthSigningAlgValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#accesstokenlifetime">accessTokenLifetime</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#checkuserpresenceonrefreshtoken">checkUserPresenceOnRefreshToken</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#defaultsignaturealgorithm">defaultSignatureAlgorithm</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#forceofflineaccessscopetoenablerefreshtoken">forceOfflineAccessScopeToEnableRefreshToken</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#granttypessupported">grantTypesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#accesstokensigningalgvaluessupported">accessTokenSigningAlgValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#idtokenencryptionalgvaluessupported">idTokenEncryptionAlgValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#idtokenencryptionencvaluessupported">idTokenEncryptionEncValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#idtokenfilterclaimsbasedonaccesstoken">idTokenFilterClaimsBasedOnAccessToken</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#idtokenlifetime">idTokenLifetime</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#idtokensigningalgvaluessupported">idTokenSigningAlgValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#accesstokensigningalgvaluessupported">accessTokenSigningAlgValuesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#legacyidtokenclaims">legacyIdTokenClaims</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlstokenendpoint">mtlsTokenEndpoint</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#openidscopebackwardcompatibility">openidScopeBackwardCompatibility</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#persistidtoken">persistIdToken</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#persistrefreshtoken">persistRefreshToken</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#refreshtokenextendlifetimeonrotation">refreshTokenExtendLifetimeOnRotation</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#refreshtokenlifetime">refreshTokenLifetime</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#responsetypessupported">responseTypesSupported</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#skiprefreshtokenduringrefreshing">skipRefreshTokenDuringRefreshing</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#refreshtokenlifetime">refreshTokenLifetime</a></li>
-</ul>
-<h2 id="client-authentication">Client Authentication<a class="headerlink" href="#client-authentication" title="Permanent link">#</a></h2>
-<p>Janssen Server Token Endpoint requires confidential clients to authenticate using one of the supported client
-authentication method listed below:</p>
-<ul>
-<li>client_secret_basic</li>
-<li>client_secret_post</li>
-<li>client_secret_jwt</li>
-<li>private_key_jwt</li>
-</ul>
-<p>Refer to <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">Client Authentication</a> section of OpenID
-Connect core specification for more details on these authentication methods.</p>
-<p>AS provides ability to customize Client Authentication behavior via <a href="../../../../script-catalog/client_authn/client-authn/">Client Authentication custom script</a></p>
-<p>Client can specify the default authentication method. To set default authentication method using
-<a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a>,
-navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>-&gt;<code>Basic</code>-&gt; <code>Authn Method Token Endpoint</code>.</p>
-<p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
-<h2 id="supported-grant-types">Supported Grant Types<a class="headerlink" href="#supported-grant-types" title="Permanent link">#</a></h2>
-<p>Token endpoint supports below mentioned grant types.</p>
-<ul>
-<li><a href="../../oauth-features/auth-code-grant/">Authorization Code</a></li>
-<li><a href="../../oauth-features/implicit-grant/">Implicit</a></li>
-<li><a href="../../oauth-features/">Refresh Token</a></li>
-<li><a href="../../oauth-features/client-credential-grant/">Client Credentials</a></li>
-<li><a href="../../oauth-features/password-grant/">Password</a></li>
-<li><a href="../../oauth-features/token-exchange/">Token Exchange</a></li>
-<li><a href="../../tokens/oauth-tx-tokens/">Transaction Tokens</a></li>
-<li><a href="../../oauth-features/device-grant/">Device Grant</a></li>
-<li><a href="../../oauth-features/jwt-grant/">JWT Grant</a></li>
-<li><a href="../backchannel-authentication/">CIBA</a></li>
-</ul>
-<p>Client can configure all the possible grant types it can request from token endpoint during client configuration.
-To select the available grant types using
-<a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a>,
-navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search client</code>-&gt;<code>Basic</code>-&gt; <code>Grant</code>.</p>
-<p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
-<h2 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h2>
-<p>Token endpoint response can be further customized using <a href="../../../developer/scripts/">interception scripts</a>.
-Following interception scripts are relevant to token endpoint:</p>
-<ul>
-<li><a href="../../../../script-catalog/update_token/update-token/">Update Token</a></li>
-</ul>
-<p>Client can configure a particular script to be executed using client configuration. To update configuration using
-<a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search</code>-&gt;
-<code>Client Scripts</code></p>
-<p><img alt="" src="../../../../assets/image-tui-client-registration-scripts.png" /></p>
+<p>The following properties control CIMD behavior in the Janssen Server configuration:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cimdSchemeAllowlist</code></td>
+<td><code>["https"]</code></td>
+<td>URL schemes allowed for <code>client_id</code> URLs. Only <code>https</code> is recommended for production.</td>
+</tr>
+<tr>
+<td><code>cimdDomainAllowlist</code></td>
+<td><em>(empty — all allowed)</em></td>
+<td>If set, only these domains are permitted as <code>client_id</code> hosts.</td>
+</tr>
+<tr>
+<td><code>cimdDomainBlocklist</code></td>
+<td><em>(empty)</em></td>
+<td>Domains explicitly blocked from use as <code>client_id</code> hosts.</td>
+</tr>
+<tr>
+<td><code>cimdBlockPrivateIp</code></td>
+<td><code>true</code></td>
+<td>When <code>true</code>, blocks <code>client_id</code> URLs that resolve to private/loopback IP addresses (SSRF protection).</td>
+</tr>
+<tr>
+<td><code>cimdMaxResponseSize</code></td>
+<td><code>65536</code></td>
+<td>Maximum size in bytes of a fetched metadata document. Documents exceeding this limit are rejected.</td>
+</tr>
+<tr>
+<td><code>cimdConnectTimeoutMs</code></td>
+<td><code>5000</code></td>
+<td>Connection timeout in milliseconds when fetching a metadata document.</td>
+</tr>
+<tr>
+<td><code>cimdReadTimeoutMs</code></td>
+<td><code>10000</code></td>
+<td>Read timeout in milliseconds when fetching a metadata document.</td>
+</tr>
+<tr>
+<td><code>cimdTtlMinutes</code></td>
+<td><code>60</code></td>
+<td>Default TTL (in minutes) for persisted client metadata when no <code>Cache-Control</code> header is present.</td>
+</tr>
+<tr>
+<td><code>cimdMaxTtlMinutes</code></td>
+<td><code>1440</code></td>
+<td>Maximum allowed TTL (in minutes), regardless of the <code>Cache-Control: max-age</code> value in the response.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">#</a></h2>
+<h3 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">#</a></h3>
+<p>By default, the server blocks <code>client_id</code> URLs that resolve to private or loopback IP addresses (e.g., <code>127.0.0.1</code>, <code>10.0.0.0/8</code>, <code>192.168.0.0/16</code>). This prevents Server-Side Request Forgery (SSRF) attacks. This behavior is controlled by <code>cimdBlockPrivateIp</code>.</p>
+<h3 id="domain-controls">Domain Controls<a class="headerlink" href="#domain-controls" title="Permanent link">#</a></h3>
+<p>Use <code>cimdDomainAllowlist</code> to restrict which domains may serve client metadata. This is recommended in production environments to prevent arbitrary URLs from being used as <code>client_id</code> values.</p>
+<p>Use <code>cimdDomainBlocklist</code> to explicitly block specific domains.</p>
+<h3 id="scheme-restriction">Scheme Restriction<a class="headerlink" href="#scheme-restriction" title="Permanent link">#</a></h3>
+<p>Only HTTPS should be used in production. The <code>cimdSchemeAllowlist</code> defaults to <code>["https"]</code> to prevent metadata from being fetched over unencrypted connections.</p>
+<h3 id="custom-script-integration">Custom Script Integration<a class="headerlink" href="#custom-script-integration" title="Permanent link">#</a></h3>
+<p>Before a fetched client is persisted, all registered Dynamic Client Registration (DCR) custom scripts are executed. This allows server operators to inspect, modify, or reject CIMD clients using the same script interface as regular DCR. A script returning <code>false</code> causes the request to be rejected with a <code>400 Bad Request</code> error.</p>
+<h2 id="using-cimd-in-authorization-requests">Using CIMD in Authorization Requests<a class="headerlink" href="#using-cimd-in-authorization-requests" title="Permanent link">#</a></h2>
+<p>Send the metadata URL as the <code>client_id</code> parameter in a standard authorization request:</p>
+<div class="highlight"><pre><span></span><code>GET /authorize
+  ?response_type=code
+  &amp;client_id=https%3A%2F%2Fapp.example.com%2Fclient-metadata
+  &amp;redirect_uri=https%3A%2F%2Fapp.example.com%2Fcallback
+  &amp;scope=openid
+  &amp;state=abc123
+</code></pre></div>
+<p>No prior registration is required. The server resolves the metadata on the first request.</p>
+<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
+<p>You can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
+<p>If you have content you'd like to contribute to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
 
@@ -2645,7 +2696,7 @@ Following interception scripts are relevant to token endpoint:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 6, 2026 09:26:17 UTC"><span class="timeago" datetime="2026-04-06T09:26:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 6, 2026 09:26:17 UTC">2026-04-06</span>
   </span>
 
     
@@ -2655,7 +2706,7 @@ Following interception scripts are relevant to token endpoint:</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 6, 2026 09:26:17 UTC"><span class="timeago" datetime="2026-04-06T09:26:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 6, 2026 09:26:17 UTC">2026-04-06</span>
   </span>
 
     
