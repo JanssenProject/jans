@@ -312,8 +312,6 @@ config:
     cnSecretKubernetesSecret: cn
     # -- Load balancer address for AWS if the FQDN is not registered.
     lbAddr: ""
-    # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
-    quarkusTransactionEnableRecovery: true
     # -- Message type (one of POSTGRES, REDIS, or DISABLED)
     cnMessageType: DISABLED
   # -- Country code. Used for certificate creation.
@@ -715,10 +713,6 @@ global:
     # -- Add custom secret envs to the service.
     # variable1: value1
     secret: {}
-  alb:
-    # -- Activates ALB ingress
-    ingress: false
-
   auth-server:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -786,10 +780,6 @@ global:
       uma2ConfigEnabled: true
       # -- Enable endpoint /.well-known/webfinger
       webfingerEnabled: true
-      # -- Enable endpoint /.well-known/simple-web-discovery
-      webdiscoveryEnabled: true
-      # -- Enable endpoint /.well-known/fido-configuration
-      u2fConfigEnabled: true
       # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
       # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
@@ -824,14 +814,6 @@ global:
       webfingerLabels: { }
       # -- webfinger ingress resource additional annotations.
       webfingerAdditionalAnnotations: { }
-      # -- webdiscovery ingress resource labels. key app is taken
-      webdiscoveryLabels: { }
-      # -- webdiscovery ingress resource additional annotations.
-      webdiscoveryAdditionalAnnotations: { }
-      # -- u2f config ingress resource labels. key app is taken
-      u2fConfigLabels: { }
-      # -- u2f config ingress resource additional annotations.
-      u2fAdditionalAnnotations: { }
       # -- authzen config ingress resource labels. key app is taken
       authzenConfigLabels: { }
       # -- authzen config ingress resource additional annotations.
@@ -1186,6 +1168,8 @@ global:
 gateway-api:
   # -- Configuration for Gateway resource
   gateway:
+    # -- Enable Gateway API and create a Gateway resource (if disabled, you will have to create and manage the Gateway resource externally).
+    enabled: true
     # -- Set the gatewayClassName corresponding to your installed controller.
     className: nginx
     # -- The name of the Gateway resource to be created
@@ -1213,6 +1197,11 @@ gateway-api:
       annotations: {}
   # -- Configuration for HTTPRoute and its related resources
   routes:
+    # -- Namespace where the Gateway resource resides. Set this ONLY if the Gateway is externally managed in a different namespace than this Helm release. If set, ensure the target namespace exists and your Gateway controller has the required cross-namespace RBAC permissions.
+    gatewayNamespace: ""
+    # -- Only set the httpSectionName and httpsSectionName if it doesn't work with the default values, according to your installed controller (e.g. some controller may require the listener name to be `default`).
+    httpSectionName: http
+    httpsSectionName: https
     # -- Specific labels for the HTTPRoute resource
     labels: {}
     # -- Specific annotations for the HTTPRoute resource
@@ -1220,7 +1209,11 @@ gateway-api:
   # -- Additional configuration for Specific Gateway API implementation
   additionalConfig:
     # -- Configuration for NGINX Fabric.
-    nginx: {}
+    nginx:
+      # -- Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`.
+      # Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500).
+      # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup.
+      enableAuditGrpcRewriteSnippets: false
     # -- Configuration for Traefik.
     traefik: {}
     # -- Configuration for Istio.

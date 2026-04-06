@@ -86,20 +86,12 @@ cargo run -p cedarling --example log_init -- lock
 
 ### Authorization Evaluation Examples
 
-#### Running Without JWT validation
+#### Running Unsigned Authorization
 
-To evaluate authorization without validating JWT tokens, use the following command:
-
-```bash
-cargo run -p cedarling --example authorize_without_jwt_validation
-```
-
-#### Running with JWT validation
-
-To include JWT validation in the authorization evaluation, use this command:
+To evaluate authorization with application-asserted principals (no JWT validation), use the following command:
 
 ```bash
-cargo run -p cedarling --example authorize_with_jwt_validation
+cargo run -p cedarling --example authorize_unsigned
 ```
 
 #### Lock Server Integration with SSA JWT

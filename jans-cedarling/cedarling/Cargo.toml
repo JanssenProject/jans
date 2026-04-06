@@ -110,7 +110,7 @@ tonic-prost-build = { version = "0.14.3", optional = true }
 workspace = true
 
 [[bench]]
-name = "authz_authorize_benchmark"
+name = "authz_authorize_unsigned_benchmark"
 harness = false
 
 [[bench]]

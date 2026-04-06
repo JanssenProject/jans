@@ -9,8 +9,8 @@ use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    IdTokenTrustMode, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -48,7 +48,6 @@ async fn test_cedarling_with_valid_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -59,18 +58,13 @@ async fn test_cedarling_with_valid_ssa() {
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
             decision_log_default_jwt_id: "jti".to_string(),
-            decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
-            decision_log_workload_claims: vec!["org_id".to_string()],
-            id_token_trust_mode: IdTokenTrustMode::Never,
             principal_bool_operator: JsonRule::new(serde_json::json!(
                 {"===": [{"var": "Jans::User"}, "ALLOW"]}
             ))
             .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
@@ -111,7 +105,6 @@ async fn test_cedarling_without_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -122,18 +115,13 @@ async fn test_cedarling_without_ssa() {
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
             decision_log_default_jwt_id: "jti".to_string(),
-            decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
-            decision_log_workload_claims: vec!["org_id".to_string()],
-            id_token_trust_mode: IdTokenTrustMode::Never,
             principal_bool_operator: JsonRule::new(serde_json::json!(
                 {"===": [{"var": "Jans::User"}, "ALLOW"]}
             ))
             .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
