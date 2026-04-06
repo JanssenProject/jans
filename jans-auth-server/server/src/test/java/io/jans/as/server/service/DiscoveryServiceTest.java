@@ -1,6 +1,7 @@
 package io.jans.as.server.service;
 
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.ConfigurationResponseClaim;
 import io.jans.as.model.util.Util;
@@ -24,6 +25,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
@@ -108,5 +110,27 @@ public class DiscoveryServiceTest {
     public void getAcrValuesList_whenCalled_shouldContainInternalAuthnAlias() {
         final List<String> acrValuesList = DiscoveryService.getAcrValuesList(new ArrayList<>());
         assertTrue(acrValuesList.contains("simple_password_auth"));
+    }
+
+    @Test
+    public void process_whenCimdFeatureIsEnabled_shouldReturnClientIdMetadataDocumentSupported() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        lenient().when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://as.com/end_session");
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.optBoolean(ConfigurationResponseClaim.CLIENT_ID_METADATA_DOCUMENT_SUPPORTED));
+    }
+
+    @Test
+    public void process_whenCimdFeatureIsDisabled_shouldNotReturnClientIdMetadataDocumentSupported() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        lenient().when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://as.com/end_session");
+
+        final JSONObject json = discoveryService.process();
+
+        assertFalse(json.has(ConfigurationResponseClaim.CLIENT_ID_METADATA_DOCUMENT_SUPPORTED));
     }
 }

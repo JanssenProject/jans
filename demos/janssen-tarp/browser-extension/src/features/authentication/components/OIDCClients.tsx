@@ -1,38 +1,29 @@
 import * as React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
 import { pink, green } from '@mui/material/colors';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import RegisterClient from './registerClient';
-import AuthFlowInputs from './authFlowInputs';
+import RegisterClient from './RegisterClient';
+import AuthFlowInputs from './AuthFlowInputs';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
-import HelpDrawer from './helpDrawer';
+import HelpDrawer from '../../../options/helpDrawer';
 import Alert from '@mui/material/Alert';
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
+import StyledTableCell from '../../../shared/components/StyledTableCell';
 
 function createData(
     opHost: string,
@@ -171,7 +162,7 @@ export default function OIDCClients({ data, notifyOnDataChange }) {
                         </Typography>
                     </div>
                     <Button
-                        color="success" 
+                        color="success"
                         variant="outlined"
                         startIcon={<AddIcon />}
                         onClick={() => setModelOpen(true)}
