@@ -112,36 +112,6 @@ spec:
     - name: {{ $authSvc }}
       port: 8080
   {{- end }}
-  {{- if index .Values.global "auth-server" "ingress" "webdiscoveryEnabled" }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/simple-web-discovery
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/.well-known/simple-web-discovery
-    backendRefs:
-    - name: {{ $authSvc }}
-      port: 8080
-  {{- end }}
-  {{- if index .Values.global "auth-server" "ingress" "u2fConfigEnabled" }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/fido-configuration
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/restv1/fido-configuration
-    backendRefs:
-    - name: {{ $authSvc }}
-      port: 8080
-  {{- end }}
   {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockConfigEnabled") }}
   - matches:
     - path:
