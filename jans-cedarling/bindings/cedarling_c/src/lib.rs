@@ -60,20 +60,21 @@ macro_rules! ffi_guard_ptr_const {
     };
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Initialize the Cedarling library
-/// This Function should be called before any other functions
+/// Initialize the Cedarling runtime.
+///
+/// Call before other library functions (per your process/thread model). This entry point has no
+/// pointer parameters and is safe to call from C.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_init() -> c_int {
     ffi_guard_int!({ initialize_runtime() as c_int })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Create a new Cedarling instance
+/// Create a new Cedarling instance from JSON bootstrap configuration.
 ///
+/// # Safety
+///
+/// - `config_json` must be a valid pointer to a NUL-terminated UTF-8 C string.
+/// - `result` must point to writable, properly aligned memory for [`CedarlingInstanceResult`].
+/// - After reading the output, call [`cedarling_free_instance_result`] (including when `error_message` is set).
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_new(
     config_json: *const c_char,
@@ -108,11 +109,13 @@ pub unsafe extern "C" fn cedarling_new(
         unsafe { (*result).error_code as c_int }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Create a new Cedarling instance with environment variables support
+/// Create a new Cedarling instance, merging JSON config with environment-variable overrides.
 ///
+/// # Safety
+///
+/// - `config_json` may be null; if non-null, it must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable, properly aligned memory for [`CedarlingInstanceResult`].
+/// - After reading the output, call [`cedarling_free_instance_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_new_with_env(
     config_json: *const c_char,
@@ -141,20 +144,21 @@ pub unsafe extern "C" fn cedarling_new_with_env(
         unsafe { (*result).error_code as c_int }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Drop a cedarling instance
+/// Remove an instance from the runtime registry (no graceful shutdown).
 ///
+/// # Safety
+///
+/// No raw pointers are passed. `instance_id` is validated by the library; unknown IDs return an error.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_drop(instance_id: u64) -> c_int {
     ffi_guard_int!({ drop_instance(instance_id) as c_int })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Authorize an unsigned request
+/// Authorize an unsigned request from JSON.
 ///
+/// # Safety
+///
+/// - `request_json` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_authorize_unsigned(
     instance_id: u64,
@@ -191,11 +195,12 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Authorize a multi-issuer request
+/// Authorize a multi-issuer request (JSON body).
 ///
+/// # Safety
+///
+/// - `request_json` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
     instance_id: u64,
@@ -234,11 +239,12 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
 
 // Context Data API functions
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Push context data
+/// Push context data (JSON value) under `key` with optional TTL in seconds.
 ///
+/// # Safety
+///
+/// - `key` and `value_json` must be valid NUL-terminated UTF-8 C strings.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_push(
     instance_id: u64,
@@ -292,11 +298,12 @@ pub unsafe extern "C" fn cedarling_context_push(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get context data by key
+/// Get context data (JSON value only) by key.
 ///
+/// # Safety
+///
+/// - `key` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_get(
     instance_id: u64,
@@ -331,12 +338,12 @@ pub unsafe extern "C" fn cedarling_context_get(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get context data entry by key (JSON object with `key`, `value`, `data_type`, `created_at`,
-/// `expires_at`, `access_count`).
+/// Get one context data entry (value plus metadata: `key`, `data_type`, timestamps, `access_count`) as JSON.
 ///
+/// # Safety
+///
+/// - `key` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_get_entry(
     instance_id: u64,
@@ -371,11 +378,12 @@ pub unsafe extern "C" fn cedarling_context_get_entry(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Remove context data by key
+/// Remove context data by key.
 ///
+/// # Safety
+///
+/// - `key` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_remove(
     instance_id: u64,
@@ -410,11 +418,11 @@ pub unsafe extern "C" fn cedarling_context_remove(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Clear all context data
+/// Clear all context data for the instance.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_clear(
     instance_id: u64,
@@ -433,11 +441,11 @@ pub unsafe extern "C" fn cedarling_context_clear(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// List all context entries with metadata
+/// List all context entries (JSON array of entries with metadata).
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_list(
     instance_id: u64,
@@ -456,11 +464,11 @@ pub unsafe extern "C" fn cedarling_context_list(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get context stats
+/// Get context store statistics as JSON.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_stats(
     instance_id: u64,
@@ -479,11 +487,12 @@ pub unsafe extern "C" fn cedarling_context_stats(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Pop all logs from an instance
+/// Pop all logs from an instance into a string array.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingStringArray`] storage.
+/// - On success, free the array (and nested strings) once with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_pop_logs(
     instance_id: u64,
@@ -512,11 +521,12 @@ pub unsafe extern "C" fn cedarling_pop_logs(
         }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get a log by ID
+/// Get a single log entry by ID (JSON in the result's `data` field).
 ///
+/// # Safety
+///
+/// - `log_id` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_log_by_id(
     instance_id: u64,
@@ -553,11 +563,12 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
         unsafe { (*result).error_code as c_int }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get all log IDs
+/// Get all log IDs as a string array.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingStringArray`] storage.
+/// - On success, free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_log_ids(
     instance_id: u64,
@@ -586,11 +597,12 @@ pub unsafe extern "C" fn cedarling_get_log_ids(
         }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get logs by tag
+/// Get logs matching `tag` as a string array of JSON lines.
 ///
+/// # Safety
+///
+/// - `tag` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingStringArray`] storage; on success free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     instance_id: u64,
@@ -641,11 +653,12 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
         }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get logs by request ID
+/// Get logs for a request ID as a string array of JSON lines.
 ///
+/// # Safety
+///
+/// - `request_id` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingStringArray`] storage; on success free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     instance_id: u64,
@@ -696,11 +709,12 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
         }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get logs by request ID and tag
+/// Get logs for a request ID and tag as a string array of JSON lines.
 ///
+/// # Safety
+///
+/// - `request_id` and `tag` must be valid NUL-terminated UTF-8 C strings.
+/// - `result` must point to writable [`CedarlingStringArray`] storage; on success free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     instance_id: u64,
@@ -775,11 +789,12 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Check whether a trusted issuer was loaded by issuer identifier
+/// Returns whether a trusted issuer was loaded, keyed by issuer identifier.
 ///
+/// # Safety
+///
+/// - `issuer_id` must be a valid NUL-terminated UTF-8 C string.
+/// - `out_result` must point to writable `bool` storage.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
     instance_id: u64,
@@ -818,11 +833,12 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Check whether a trusted issuer was loaded by `iss` claim
+/// Returns whether a trusted issuer was loaded for the given JWT `iss` claim value.
 ///
+/// # Safety
+///
+/// - `iss_claim` must be a valid NUL-terminated UTF-8 C string.
+/// - `out_result` must point to writable `bool` storage.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
     instance_id: u64,
@@ -861,11 +877,11 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get total number of trusted issuers discovered
+/// Write the total number of discovered trusted issuers into `*out_count`.
 ///
+/// # Safety
+///
+/// - `out_count` must point to writable `usize` storage.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *mut usize) -> c_int {
     ffi_guard_int!({
@@ -887,11 +903,11 @@ pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *m
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get number of trusted issuers loaded successfully
+/// Write the number of successfully loaded trusted issuers into `*out_count`.
 ///
+/// # Safety
+///
+/// - `out_count` must point to writable `usize` storage.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(
     instance_id: u64,
@@ -916,11 +932,12 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get trusted issuer IDs loaded successfully
+/// List issuer IDs that loaded successfully.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingStringArray`] storage.
+/// - On success, free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     instance_id: u64,
@@ -949,11 +966,12 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get trusted issuer IDs that failed to load
+/// List issuer IDs that failed to load.
 ///
+/// # Safety
+///
+/// - `result` must point to writable [`CedarlingStringArray`] storage.
+/// - On success, free with [`cedarling_free_string_array`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
     instance_id: u64,
@@ -982,20 +1000,21 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Shutdown a Cedarling instance
+/// Gracefully shut down an instance (flush resources, then remove from registry).
 ///
+/// # Safety
+///
+/// No raw pointers are passed. `instance_id` is validated by the library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
     ffi_guard_int!({ shutdown_instance(instance_id) as c_int })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Free a string returned by Cedarling functions
+/// Free a heap-allocated C string returned by this library (for example from [`cedarling_get_last_error`]).
 ///
+/// # Safety
+///
+/// - `str_ptr` may be null (no-op).
+/// - If non-null, `str_ptr` must be a pointer previously returned by this library as an owned string, and must not be freed twice.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
     ffi_guard_void!({
@@ -1007,11 +1026,12 @@ pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
         }
     })
 }
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Free a string array returned by Cedarling functions
+/// Free a [`CedarlingStringArray`] produced on the success path of log or issuer-ID functions.
 ///
+/// # Safety
+///
+/// - `array` may be null (no-op).
+/// - If non-null, `array` must point to a struct exactly as filled by this library (including `items`/`count`), and must not be freed twice.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingStringArray) {
     ffi_guard_void!({
@@ -1039,11 +1059,12 @@ pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingString
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Free a CedarlingResult structure
+/// Release `data` and `error_message` inside a [`CedarlingResult`] filled by this library.
 ///
+/// # Safety
+///
+/// - `result` may be null (no-op).
+/// - If non-null, `result` must point to a [`CedarlingResult`] whose pointer fields were produced by this library (or are null), and this function must not run twice on the same populated struct without reinitialization.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
     ffi_guard_void!({
@@ -1067,11 +1088,12 @@ pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Free a CedarlingInstanceResult structure
+/// Release `error_message` inside a [`CedarlingInstanceResult`] filled by this library.
 ///
+/// # Safety
+///
+/// - `result` may be null (no-op).
+/// - If non-null, `error_message` must either be null or a pointer produced by this library; do not double-free.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingInstanceResult) {
     ffi_guard_void!({
@@ -1091,23 +1113,18 @@ pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingIn
     })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Returns a thread-local detail string for errors that are **not** already carried in an
-/// out-parameter struct (for example `CedarlingResult` / `CedarlingInstanceResult` errors are only
-/// in that struct). The caller must free the returned pointer with `cedarling_free_string`, or
-/// null if none is stored.
+/// Returns a thread-local auxiliary error string for failures that are **not** already described in
+/// an out-parameter (for example [`CedarlingResult`] / [`CedarlingInstanceResult`] carry their own
+/// `error_message`).
 ///
+/// The return value is null if no such message is stored. If non-null, it must be released with
+/// [`cedarling_free_string`].
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_get_last_error() -> *mut c_char {
     ffi_guard_ptr_mut!({ get_last_error() })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Clear last error message
+/// Clears the thread-local string read by [`cedarling_get_last_error`].
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_clear_last_error() {
     ffi_guard_void!({ clear_last_error() })
@@ -1123,18 +1140,14 @@ pub extern "C" fn cedarling_version() -> *const c_char {
     ffi_guard_ptr_const!({ concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Global library cleanup helper.
+/// Shut down and remove **all** Cedarling instances held by the library, then clear this thread's
+/// auxiliary last-error string ([`cedarling_get_last_error`]).
 ///
-/// Shuts down and removes **all** Cedarling instances held by the library, then clears this
-/// thread's last-error string. Safe to call from any thread; repeated calls are idempotent beyond
-/// the first full teardown.
+/// Safe to call from any thread; repeated calls are effectively idempotent after the first full
+/// teardown. No pointer parameters.
 ///
-/// # Postconditions
-/// No instances remain registered; the calling thread's `cedarling_get_last_error()` reads as
-/// null until a new error is set.
+/// After a successful teardown, no instances remain registered and this thread's
+/// [`cedarling_get_last_error`] returns null until a new auxiliary error is stored.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_cleanup() {
     ffi_guard_void!({
