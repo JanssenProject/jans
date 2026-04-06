@@ -248,7 +248,7 @@ MULTI_ISSUER_POLICY_STORE = join(TEST_FILES_PATH, "policy-store-multi-issuer-tes
 
 
 def create_multi_issuer_instance():
-    def configure(config):
+    def configure(config) -> None:
         config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
         config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
         config["CEDARLING_POLICY_STORE_LOCAL_FN"] = MULTI_ISSUER_POLICY_STORE
