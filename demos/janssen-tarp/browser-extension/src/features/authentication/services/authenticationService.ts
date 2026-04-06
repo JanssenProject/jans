@@ -1,7 +1,8 @@
 
-import { ILooseObject } from '../options/ILooseObject';
+import { ILooseObject } from '../../../shared/types';
 import qs from 'qs';
 import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 
 export default class AuthenticationService {
     constructor() {
@@ -69,8 +70,8 @@ export default class AuthenticationService {
                     Authorization: 'Basic ' + btoa(`${client.clientId}:${client.clientSecret}`),
                 },
                 data: tokenReqData,
-                url: client.tokenEndpoint,
-            };
+                url: String(client.tokenEndpoint),
+            } satisfies AxiosRequestConfig;
 
             const tokenResponse = await axios(tokenReqOptions);
             return tokenResponse.data as ILooseObject;
@@ -96,8 +97,8 @@ export default class AuthenticationService {
             const userInfoOptions = {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${accessToken}` },
-                url: client.userinfoEndpoint,
-            };
+                url: String(client.userinfoEndpoint),
+            } satisfies AxiosRequestConfig;
 
             const userInfoResponse = await axios(userInfoOptions);
             return userInfoResponse.data as ILooseObject;

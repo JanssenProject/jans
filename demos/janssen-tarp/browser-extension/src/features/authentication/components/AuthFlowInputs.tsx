@@ -10,18 +10,20 @@ import InputLabel from '@mui/material/InputLabel';
 import CircularProgress from "@mui/material/CircularProgress";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import { labelWithTooltip } from '../../../shared/components/Common';
 import qs from 'qs';
 import axios from 'axios';
-import Utils from './Utils';
+import Utils from '../../../options/Utils';
 import { v4 as uuidv4 } from 'uuid';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import { ILooseObject } from './ILooseObject';
+import { ILooseObject } from '../../../shared/types';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 const createOption = (label: string) => ({
   name: label,
 });
 const filter = createFilterOptions();
+
 /**
  * Renders a dialog that collects optional inputs (additional params, ACR values, scopes, and a display-token toggle)
  * and initiates an OAuth2/OIDC authorization code flow using the selected client configuration.
@@ -279,7 +281,10 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               margin="dense"
               id="additionalParams"
               name="additionalParams"
-              label="Additional Params"
+              label={labelWithTooltip(
+                "Additional Params",
+                "Optional JSON key/value pairs that will be added to the authorization request (as query params). Example: {\"prompt\":\"login\",\"max_age\":300}"
+              )}
               type="text"
               fullWidth
               variant="outlined"
@@ -290,7 +295,12 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               defaultValue={client.additionalParams}
             />
 
-            <InputLabel id="acr-value-label">Acr Value</InputLabel>
+            <InputLabel id="acr-value-label">
+              {labelWithTooltip(
+                "Acr Value",
+                "Optional. Requested ACR value(s) for authentication (e.g. urn:mace:incommon:iap:silver). Typically only one is used."
+              )}
+            </InputLabel>
             <Autocomplete
               value={selectedAcr}
               multiple
@@ -341,10 +351,21 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
               freeSolo
               renderInput={(params) => (
-                <TextField {...params} label="Acr Values" />
+                <TextField
+                  {...params}
+                  label={labelWithTooltip(
+                    "Acr Values",
+                    "Pick an ACR value from discovery or type a custom one and press Enter."
+                  )}
+                />
               )}
             />
-            <InputLabel id="scope-value-label">Scope</InputLabel>
+            <InputLabel id="scope-value-label">
+              {labelWithTooltip(
+                "Scope",
+                "Optional. Scopes to request in the authorization flow (e.g. openid, profile, email). If omitted, the client’s default scopes are used."
+              )}
+            </InputLabel>
             <Autocomplete
               value={selectedScopes}
               multiple
@@ -396,11 +417,23 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
               freeSolo
               renderInput={(params) => (
-                <TextField {...params} label="Scopes" />
+                <TextField
+                  {...params}
+                  label={labelWithTooltip(
+                    "Scopes",
+                    "Select one or more scopes. You can also type a custom scope and press Enter to add it."
+                  )}
+                />
               )}
             />
 
-            <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)} />} label="Display Access Token and ID Token after authentication" />
+            <FormControlLabel
+              control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)} />}
+              label={labelWithTooltip(
+                "Display tokens after authentication",
+                "If enabled, the UI will show the access token, user-info and ID token after a successful login (useful for debugging)."
+              )}
+            />
           </Stack>
         </DialogContent>
         <DialogActions>

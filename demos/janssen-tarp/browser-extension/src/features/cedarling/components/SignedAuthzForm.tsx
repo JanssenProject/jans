@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import '../static/css/options.css'
-import '../static/css/alerts.css';
 import { JsonEditor } from 'json-edit-react'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -17,8 +15,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Stack from '@mui/material/Stack';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
-import Utils from './Utils';
-const CedarlingSignedAuthz = ({ data }) => {
+import Utils from '../../../options/Utils';
+const SignedAuthzForm = ({ data }) => {
     const [formFields, setFormFields] = useState({ action: "", context: {}, resource: {} });
     const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
@@ -31,16 +29,25 @@ const CedarlingSignedAuthz = ({ data }) => {
     React.useEffect(() => {
         if (!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0) {
             setCedarlingConfig(data?.cedarlingConfig);
-            setCedarlingBootstrapPresent((!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0));
+            setCedarlingBootstrapPresent(true);
+        } else {
+            setCedarlingConfig([]);
+            setCedarlingBootstrapPresent(false);
         }
-        setLoginDetails(data?.loginDetails);
+        setLoginDetails(data?.loginDetails ?? { access_token: "", id_token: "", userDetails: "" });
 
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
             if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
+                const storedRequest = authzRequest.authzRequest;
                 setFormFields({
-                    action: authzRequest.authzRequest.action,
-                    context: authzRequest.authzRequest.context,
-                    resource: authzRequest.authzRequest.resource
+                    action: storedRequest.action,
+                    context: storedRequest.context,
+                    resource: storedRequest.resource
+                });
+                setTokenSelection({
+                    accessToken: Boolean(storedRequest.tokens?.access_token),
+                    userInfo: Boolean(storedRequest.tokens?.userinfo_token),
+                    idToken: Boolean(storedRequest.tokens?.id_token),
                 });
             }
         });
@@ -57,7 +64,7 @@ const CedarlingSignedAuthz = ({ data }) => {
                     instance = await init(!Utils.isEmpty(cedarlingConfig) ? cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    setAuthzResult(result.json_string())
+                    setAuthzResult(result.json_string());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
@@ -66,11 +73,13 @@ const CedarlingSignedAuthz = ({ data }) => {
                 }
             } catch (err) {
                 setAuthzResult(err.toString());
-                console.log("err:", err);
-                let logs = await instance.pop_logs();
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
-                    setAuthzLogs(pretty_logs.toString());
+                console.error("err:", err);
+                if (instance) {
+                    const logs = await instance.pop_logs();
+                    if (logs.length !== 0) {
+                        const pretty_logs = logs.map((log: unknown) => JSON.stringify(log, null, 2));
+                        setAuthzLogs(pretty_logs.toString());
+                    }
                 }
             }
     }
@@ -86,16 +95,18 @@ const CedarlingSignedAuthz = ({ data }) => {
             context: formFields.context,
             resource: formFields.resource,
         };
-        
+
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
     };
 
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
-        newLogType: string,
+        newLogType: string | null,
     ) => {
-        setLogType(newLogType);
+        if (newLogType) {
+            setLogType(newLogType);
+        }
     };
 
     const resetInputs = () => {
@@ -105,10 +116,11 @@ const CedarlingSignedAuthz = ({ data }) => {
             resource: {}
         });
         setTokenSelection({ accessToken: false, userInfo: false, idToken: false });
+        chrome.storage.local.remove(['authzRequest']);
     };
 
     return (
-        <div className="box">
+        <Box sx={{ p: 1 }}>
             {cedarlingBootstrapPresent ?
                 <Accordion defaultExpanded>
                     <AccordionSummary
@@ -255,8 +267,8 @@ const CedarlingSignedAuthz = ({ data }) => {
                         <Button variant="text" color="success" onClick={() => setAuthzLogs('')}>Reset</Button>
                     </AccordionDetails>
                 </Accordion> : ''}
-        </div>
+        </Box>
     )
 };
 
-export default CedarlingSignedAuthz;
+export default SignedAuthzForm;
