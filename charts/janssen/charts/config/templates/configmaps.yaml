@@ -187,17 +187,6 @@ data:
   CN_CASA_ADMIN_ENABLED: {{ .Values.global.casa.adminEnabled | quote }}
   CN_SQL_PASSWORD_FILE: {{ .Values.global.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "global" "config-api" "plugins" | quote  }}
-  {{- if .Values.global.saml.enabled }}
-  QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
-  KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}
-  KC_DB: {{ .Values.configmap.kcDbVendor | quote }}
-  KC_DB_USERNAME: {{ .Values.configmap.kcDbUsername | quote }}
-  KC_DB_SCHEMA: {{ .Values.configmap.kcDbSchema | quote }}
-  KC_DB_URL_HOST: {{ .Values.configmap.kcDbUrlHost | quote }}
-  KC_DB_URL_PORT: {{ .Values.configmap.kcDbUrlPort | quote }}
-  KC_DB_URL_DATABASE: {{ .Values.configmap.kcDbUrlDatabase | quote }}
-  KC_DB_URL_PROPERTIES: {{ .Values.configmap.kcDbUrlProperties | quote }}
-  {{- end }}
   CN_LOCK_ENABLED: {{ index .Values "global" "auth-server" "lockEnabled" | quote }}
   CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
   CN_CONFIGURATOR_CONFIGURATION_FILE: {{ .Values.global.cnConfiguratorConfigurationFile | quote }}

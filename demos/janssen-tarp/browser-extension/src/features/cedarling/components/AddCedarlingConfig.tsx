@@ -9,25 +9,31 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import initWasm, { init, Cedarling } from "@janssenproject/cedarling_wasm";
+import initWasm, { init } from "@janssenproject/cedarling_wasm";
 import { v4 as uuidv4 } from 'uuid';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { JsonEditor } from 'json-edit-react';
 import axios from 'axios';
-import Utils from './Utils';
+import Utils from '../../../options/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { pink } from '@mui/material/colors';
-import cedarlingBootstrapJson from './cedarlingBootstrap.json';
+import cedarlingBootstrapJson from '../cedarlingBootstrap.json';
 import Chip from '@mui/material/Chip';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
+interface AddCedarlingConfigProps {
+  newData: any; // or define the actual shape of cedarlingConfig data
+  handleDialog: (isOpen: boolean) => void;
+  isOpen: boolean;
+}
+
+export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: AddCedarlingConfigProps) {
   const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
   const [errorMessage, setErrorMessage] = React.useState("")
@@ -105,7 +111,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
       setErrorMessage('Empty authorization request not allowed.');
       return false;
     }
-    isJsonValid(bootstrap);
+    await isJsonValid(bootstrap);
   };
 
   const isJsonValid = async (bootstrap) => {
@@ -123,22 +129,21 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const saveBootstrap = async () => {
     try {
       setLoading(true);
-      if (!isJsonValid(bootstrap)) {
+      if (!(await isJsonValid(bootstrap))) {
         return;
       }
 
       await initWasm();
-      let instance: Cedarling = await init(bootstrap);
+      await init(bootstrap);
 
-      chrome.storage.local.get(["cedarlingConfig"], (result) => {
-        let bootstrapArr = []
+      chrome.storage.local.get(["cedarlingConfig"], ({ cedarlingConfig = [] }) => {
+        const updatedConfig = [
+          ...cedarlingConfig,
+          { ...bootstrap, id: uuidv4() }
+        ];
 
-        let idObj = { id: uuidv4() };
-
-        bootstrapArr.push({ ...bootstrap, ...idObj });
-        chrome.storage.local.set({ cedarlingConfig: bootstrapArr });
-        handleClose();
-      });
+        chrome.storage.local.set({ cedarlingConfig: updatedConfig }, handleClose);
+});
     } catch (err) {
       console.error(err)
       setErrorMessage(ADD_BOOTSTRAP_ERROR + err)
@@ -161,7 +166,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
 
   return (
     <React.Fragment>
-      <Snackbar 
+      <Snackbar
       open={snackbar.open}
       autoHideDuration={6000}
       onClose={() => setSnackbar({ open: false, message: '' })}
