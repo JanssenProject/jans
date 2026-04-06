@@ -4,7 +4,6 @@ import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
 import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.testng.annotations.*;
 import org.json.JSONObject;
-import org.json.JSONException;
 
 import java.util.*;
 
@@ -18,6 +17,12 @@ public class CedarlingAdapterTest {
 
     public static final String JWT_SECRET = "-very-strong-shared-secret-of-at-least-32-bytes!";
     public static final String BOOTSTRAP_JSON_PATH = "./src/test/resources/config/bootstrap.json";
+    public static final String BOOTSTRAP_MULTI_ISSUER_JSON_PATH =
+            "./src/test/resources/config/bootstrap-multi-issuer.json";
+    public static final String MULTI_ISSUER_ACCESS_TOKEN_PAYLOAD_PATH =
+            "./src/test/resources/config/multi_issuer_access_token_payload.json";
+    public static final String MULTI_ISSUER_RESOURCE_PATH =
+            "./src/test/resources/config/multi_issuer_resource.json";
     public static final String ACCESS_TOKEN_FILE_PATH = "./src/test/resources/config/access_token_payload.json";
     public static final String ID_TOKEN_FILE_PATH = "./src/test/resources/config/id_token_payload.json";
     public static final String USER_INFO_FILE_PATH = "./src/test/resources/config/user_info_payload.json";
@@ -39,7 +44,6 @@ public class CedarlingAdapterTest {
 
     @Test
     public void testAuthorizeUnsigned() throws Exception {
-        // Read input files for authorization
         String action = AppUtils.readFile(ACTION_FILE_PATH);
         String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
         String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
@@ -56,9 +60,95 @@ public class CedarlingAdapterTest {
         assertEquals(result.getDecision(), false);
     }
 
+    @Test
+    public void testAuthorizeUnsignedFromJsonList() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+        JSONObject context = new JSONObject(contextJson);
+
+        List<String> principalJsonList = List.of(principalsString);
+        AuthorizeResult result = adapter.authorizeUnsignedFromJson(principalJsonList, action, resource, context);
+        assertNotNull(result);
+        assertNotNull(result.getPrincipals());
+        assertEquals(result.getDecision(), false);
+    }
+
+    @Test
+    public void testAuthorizeUnsignedWithSingleJsonString() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+        JSONObject context = new JSONObject(contextJson);
+
+        AuthorizeResult result = adapter.authorizeUnsigned(principalsString, action, resource, context);
+        assertNotNull(result);
+        assertNotNull(result.getPrincipals());
+        assertEquals(result.getDecision(), false);
+    }
+
+    @Test
+    public void testAuthorizeUnsignedWithNullContext() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+
+        AuthorizeResult result = adapter.authorizeUnsigned(principalsString, action, resource, null);
+        assertNotNull(result);
+        assertNotNull(result.getPrincipals());
+        assertEquals(result.getDecision(), false);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testAuthorizeMultiIssuerRejectsNullTokens() throws Exception {
+        String action = AppUtils.readFile(ACTION_FILE_PATH);
+        String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
+        String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
+
+        JSONObject resource = new JSONObject(resourceJson);
+        JSONObject context = new JSONObject(contextJson);
+
+        adapter.authorizeMultiIssuer((Map<String, String>) null, action, resource, context);
+    }
+
+    @Test
+    public void testAuthorizeMultiIssuerWithMapConversion() throws Exception {
+        // Use the shared multi-issuer policy store (see jans-cedarling/test_files/policy-store-multi-issuer-test.yaml)
+        // so the Cedar context includes `tokens` and policies can evaluate.
+        try (CedarlingAdapter multiIssuerAdapter = new CedarlingAdapter()) {
+            multiIssuerAdapter.loadFromJson(AppUtils.readFile(BOOTSTRAP_MULTI_ISSUER_JSON_PATH));
+            assertNotNull(multiIssuerAdapter.getCedarling());
+
+            String action = AppUtils.readFile(ACTION_FILE_PATH);
+            String accessTokenPayload = AppUtils.readFile(MULTI_ISSUER_ACCESS_TOKEN_PAYLOAD_PATH);
+            String resourceJson = AppUtils.readFile(MULTI_ISSUER_RESOURCE_PATH);
+
+            String accessJwt = jwtCreator.createJwtFromJson(accessTokenPayload);
+
+            JSONObject resource = new JSONObject(resourceJson);
+            JSONObject context = new JSONObject();
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("Jans::Access_Token", accessJwt);
+
+            MultiIssuerAuthorizeResult result =
+                    multiIssuerAdapter.authorizeMultiIssuer(tokens, action, resource, context);
+            assertNotNull(result);
+            assertNotNull(result.getRequestId());
+            assertTrue(result.getDecision(), "Multi-issuer authorize should ALLOW with matching org_id claim");
+        }
+    }
+
     @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
     public void testGetLogById() throws Exception {
-        // Ensure we have logs from testAuthorizeUnsigned
         String action = AppUtils.readFile(ACTION_FILE_PATH);
         String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
         String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
