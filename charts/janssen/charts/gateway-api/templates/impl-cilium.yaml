@@ -1,4 +1,5 @@
-{{- if and (eq .Values.gateway.className "cilium") (.Values.additionalConfig.cilium.ipPoolBlocks) }}
+{{- if eq .Values.gateway.className "cilium" }}
+{{- if .Values.additionalConfig.cilium.ipPoolBlocks }}
 apiVersion: "cilium.io/v2"
 kind: CiliumLoadBalancerIPPool
 metadata:
@@ -6,4 +7,5 @@ metadata:
 spec:
   blocks:
 {{- toYaml .Values.additionalConfig.cilium.ipPoolBlocks | nindent 4 }}
+{{- end }}
 {{- end }}
