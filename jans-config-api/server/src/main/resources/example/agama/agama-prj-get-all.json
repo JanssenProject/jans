@@ -6,7 +6,7 @@
         {
             "dn": "jansAgamaPrjName=my-agama-project,ou=deployments,ou=agama,o=jans",
             "name": "my-agama-project",
-            "creationTime": "2024-09-01T10:00:00",
+            "createdAt": "2024-09-01T10:00:00",
             "finishedAt": "2024-09-01T10:00:45",
             "details": {
                 "error": null,

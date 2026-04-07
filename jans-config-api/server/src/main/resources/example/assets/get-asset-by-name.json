@@ -15,8 +15,8 @@
                 "jar",
                 "/opt/jans/jetty/jans-config-api/custom/lib"
             ],
-            "jansLevel": "1",
-            "jansRevision": "2",
+            "jansLevel": 1,
+            "jansRevision": 2,
             "jansEnabled": true,
             "baseDn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans"
         }
