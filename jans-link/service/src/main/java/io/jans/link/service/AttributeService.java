@@ -442,8 +442,7 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
      */
     @SuppressWarnings({ "deprecation", "unchecked" })
     public List<JansAttribute> getAllActivePersonAttributes(GluuUserRole admin) {
-        List<JansAttribute> activeAttributeList = (List<JansAttribute>) cacheService
-                .get(OxConstants.CACHE_ACTIVE_ATTRIBUTE_NAME, OxConstants.CACHE_ACTIVE_ATTRIBUTE_KEY_LIST);
+        List<JansAttribute> activeAttributeList = (List<JansAttribute>) cacheService.get(OxConstants.CACHE_ACTIVE_ATTRIBUTE_KEY_LIST);
         if (activeAttributeList == null) {
             activeAttributeList = getAllActiveAtributesImpl(admin);
             cacheService.put(OxConstants.CACHE_ATTRIBUTE_KEY_LIST, activeAttributeList);

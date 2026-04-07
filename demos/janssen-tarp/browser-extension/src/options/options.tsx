@@ -3,36 +3,12 @@ import '../static/css/options.css';
 import Header from './header';
 import HomePage from './homePage';
 import Utils from './Utils';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
+import theme from '../theme/theme';
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#9c27b0',
-    },
-    background: {
-      default: '#f4f6f8',
-      paper: '#ffffff',
-    },
-  },
-  shape: {
-    borderRadius: 10,
-  },
-  components: {
-    MuiContainer: {
-      defaultProps: {
-        maxWidth: 'lg',
-      },
-    },
-  },
-});
 const Options = () => {
 
   const [optionType, setOptionType] = useState("");
@@ -40,7 +16,6 @@ const Options = () => {
   const [dataChanged, setDataChanged] = useState(false);
 
   useEffect(() => {
-    // Fetch cedarlingConfig first
     chrome.storage.local.get(["cedarlingConfig"], (cedarlingConfigResult) => {
       let cedarlingConfig = Utils.isEmpty(cedarlingConfigResult) ? {} : cedarlingConfigResult;
 
@@ -64,7 +39,6 @@ const Options = () => {
     });
   }, [dataChanged]);
 
-
   function handleDataChange() {
     setDataChanged(true);
   }
@@ -72,17 +46,13 @@ const Options = () => {
   function renderPage({ optionType, data }) {
     switch (optionType) {
       case 'homePage':
+      case 'loginPage':
         return <HomePage
           data={data}
           notifyOnDataChange={handleDataChange}
-        />
-      case 'loginPage':
-        return <HomePage
-        data={data}
-        notifyOnDataChange={handleDataChange}
-      />
+        />;
       default:
-        return null
+        return null;
     }
   }
 
@@ -91,22 +61,21 @@ const Options = () => {
       <CssBaseline />
       <Box
         sx={{
-          height: 'auto',
+          minHeight: '100vh',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'background.default',
-          alignItems: 'center',
         }}
       >
         <Header />
-        <Container sx={{ py: 3 }}>
+        <Container sx={{ py: 4, flex: 1 }}>
           <Box
             sx={{
               bgcolor: 'background.paper',
-              boxShadow: 1,
-              borderRadius: 2,
-              p: { xs: 2, sm: 3 },
+              boxShadow: 2,
+              borderRadius: 3,
+              overflow: 'hidden',
             }}
           >
             {renderPage({ optionType, data })}
