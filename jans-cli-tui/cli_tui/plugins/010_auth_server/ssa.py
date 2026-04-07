@@ -353,6 +353,17 @@ class SSA(DialogUtils):
 
     def edit_ssa_dialog(self, data=None):
 
+        # check if SSA flag is enabled
+        enabled_flags = self.app.app_configuration['featureFlags'] if self.app.app_configuration.get('featureFlags') is not None else []
+        if 'ssa' not in enabled_flags:
+            self.app.show_message(
+                title=_(common_strings.oops),
+                message=HTML(_("Auth Servers ssa flag should be enabled. Please navigate <b>Auth Server</b> -> <b>Properties</b>, search for <b>featureFlags</b> and enable.")),
+                tobefocused=self.working_container
+                )
+            return
+
+
         if data:
             title = _("Edit SSA")
         else:
