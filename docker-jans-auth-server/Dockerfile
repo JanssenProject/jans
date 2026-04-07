@@ -73,7 +73,7 @@ RUN mkdir -p /usr/share/java \
     ${JETTY_BASE}/jans-auth/_lock_libs \
     ${JETTY_BASE}/jans-auth/custom/libs
 
-ARG TWILIO_VERSION=7.17.0
+ARG TWILIO_VERSION=11.3.6
 ARG JSMPP_VERSION=2.3.7
 
 # Download other custom libs directly to custom/libs (always available)

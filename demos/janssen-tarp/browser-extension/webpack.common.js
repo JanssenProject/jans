@@ -77,6 +77,9 @@ const assetArr = [{
 },
 {
     from: path.resolve('src/static/tarpDocs6.png')
+},
+{
+    from: path.resolve('src/static/tarpDocs7.png')
 }];
 
 const chromeConfig = merge(commonConfig, {
