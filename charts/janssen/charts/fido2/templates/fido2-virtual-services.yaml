@@ -34,7 +34,7 @@ spec:
   - name: {{ .Release.Name }}-istio-fido2-configuration
     match:
     - uri:
-        prefix: /.well-known/fido2-configuration
+        exact: /.well-known/fido2-configuration
     rewrite:
       uri: /jans-fido2/restv1/configuration
     route:
@@ -60,7 +60,7 @@ spec:
   - name: {{ .Release.Name }}-istio-webauthn
     match:
     - uri:
-        prefix: /.well-known/webauthn
+        exact: /.well-known/webauthn
     rewrite:
       uri: /jans-fido2/restv1/webauthn/configuration
     route:
