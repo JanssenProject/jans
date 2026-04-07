@@ -14,21 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
         components: clippy
     - name: Ensure clippy is installed
       run: rustup component add --toolchain stable clippy
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
     - name: Run Tests (without default features)
@@ -47,23 +47,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
     - name: Install Rust Nightly
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
     - uses: cargo-bins/cargo-binstall@1800853f2578f8c34492ec76154caef8e163fbca # v1.17.7
@@ -96,18 +96,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
     - name: Run benchmarks
@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
 
@@ -133,7 +133,7 @@ jobs:
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
         components: clippy
@@ -142,7 +142,7 @@ jobs:
       run: rustup component add --toolchain stable clippy
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
 
@@ -175,7 +175,7 @@ jobs:
         python-version: ["3.10", "3.11"]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -197,18 +197,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
     - name: Install Golang dependencies

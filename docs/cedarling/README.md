@@ -132,34 +132,34 @@ hypothetical mobile application architecture:
 ![](../assets/cedarling/lock-cedarling-mobile-generic.jpg)
 
 1. **Identity Provider (IDP) Enforcement**  
-  - The IDP can use the Cedarling to determine if a mobile application should be allowed 
-    to register.  
-  - Example: An IDP policy might restrict registration to applications that present a 
-    valid Software Statement Assertion (SSA) or Google Play Integrity Attestation.
+    - The IDP can use the Cedarling to determine if a mobile application should be allowed
+      to register.  
+    - Example: An IDP policy might restrict registration to applications that present a
+      valid Software Statement Assertion (SSA) or Google Play Integrity Attestation.
 
 2. **Client-Side Authorization in Mobile and Web Apps**  
-  - A mobile application can embed the Cedarling to enforce real-time access control 
-    before exposing UI components or calling APIs.  
-  - Example: A finance app may check if a user's token has elevated risk signals (e.g., 
-    logging in from a new device) before enabling high-risk transactions.
+    - A mobile application can embed the Cedarling to enforce real-time access control
+      before exposing UI components or calling APIs.  
+    - Example: A finance app may check if a user's token has elevated risk signals (e.g.,
+      logging in from a new device) before enabling high-risk transactions.
 
 3. **API Gateway Enforcement**  
-  - API gateways can use the Cedarling to validate JWT claims and scope permissions 
-    before forwarding requests to backend services.  
-  - Example: A gateway might block API requests missing a valid `admin` scope or ensure 
-    an OAuth token is not revoked.
+    - API gateways can use the Cedarling to validate JWT claims and scope permissions
+      before forwarding requests to backend services.  
+    - Example: A gateway might block API requests missing a valid `admin` scope or ensure
+      an OAuth token is not revoked.
 
 4. **Backend Service Authorization**  
-  - The backend server can re-evaluate authorization decisions, ensuring end-to-end 
-    security rather than trusting the API gateway or mobile app.  
-  - Example: Even if a request passes through an API gateway, the backend can recheck 
-    authorization policies to prevent privilege escalation.
+    - The backend server can re-evaluate authorization decisions, ensuring end-to-end
+      security rather than trusting the API gateway or mobile app.  
+    - Example: Even if a request passes through an API gateway, the backend can recheck
+      authorization policies to prevent privilege escalation.
 
 5. **Database-Level Policy Enforcement**  
-  - The Cedarling can be embedded within databases to filter data at query time, 
-    ensuring only authorized records are returned.  
-  - Example: A multi-tenant SaaS application may enforce row-level security, so a user 
-    can only access their own organization's data.
+    - The Cedarling can be embedded within databases to filter data at query time,
+      ensuring only authorized records are returned.  
+    - Example: A multi-tenant SaaS application may enforce row-level security, so a user
+      can only access their own organization's data.
 
 ### Why Zero Trust Needs Cedarlings
 

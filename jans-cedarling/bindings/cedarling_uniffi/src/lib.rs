@@ -6,7 +6,7 @@
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
-    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource,
+    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
 mod result;
@@ -607,5 +607,35 @@ impl Cedarling {
             .get_stats_ctx()
             .map(Into::into)
             .map_err(|e: core::DataError| DataError::from(e))
+    }
+
+    #[uniffi::method]
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    #[uniffi::method]
+    pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    #[uniffi::method]
+    pub fn total_issuers(&self) -> i64 {
+        i64::try_from(self.inner.total_issuers()).unwrap_or(i64::MAX)
+    }
+
+    #[uniffi::method]
+    pub fn loaded_trusted_issuers_count(&self) -> i64 {
+        i64::try_from(self.inner.loaded_trusted_issuers_count()).unwrap_or(i64::MAX)
+    }
+
+    #[uniffi::method]
+    pub fn loaded_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.loaded_trusted_issuer_ids().into_iter().collect()
+    }
+
+    #[uniffi::method]
+    pub fn failed_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }
 }
