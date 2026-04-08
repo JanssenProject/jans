@@ -17,13 +17,13 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
     setResult(null);
     try {
       // Get settings from chrome storage
-      const results = await new Promise((resolve) => {
+      const results = await new Promise<Record<string, any>>((resolve) => {
         chrome.storage.local.get([
           LLM_MODEL_STORAGE_KEY,
           LLM_PROVIDER_STORAGE_KEY,
           MCP_SERVER_URL
         ], (result) => {
-          resolve(result);
+          resolve(result as Record<string, any>);
         });
       });
 

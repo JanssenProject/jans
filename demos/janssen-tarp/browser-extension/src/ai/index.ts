@@ -182,8 +182,8 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
     const authArgs = {
       ...args,
       scope: oidcClient.scope,
-      response_type: oidcClient.responseType?.[0] || 'code',
-      redirect_uri: oidcClient.redirectUris?.[0],
+      response_type: (Array.isArray(oidcClient.responseType) ? oidcClient.responseType[0] : undefined) || 'code',
+      redirect_uri: Array.isArray(oidcClient.redirectUris) ? oidcClient.redirectUris[0] : undefined,
       code_challenge: hashed,
       code_challenge_method: DEFAULT_VALUES.CODE_CHALLENGE_METHOD,
       nonce: uuidv4()

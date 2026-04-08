@@ -55,7 +55,7 @@ export default class AuthenticationService {
             }
 
             const tokenReqData = qs.stringify({
-                redirect_uri: client.redirectUris?.[0],
+                redirect_uri: Array.isArray(client.redirectUris) ? client.redirectUris[0] : undefined,
                 grant_type: 'authorization_code',
                 code_verifier: codeVerifier,
                 client_id: client.clientId,
