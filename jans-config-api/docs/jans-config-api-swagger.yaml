@@ -15691,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16557,31 +16557,32 @@ components:
           items:
             type: string
             enum:
-            - UNKNOWN
-            - HEALTH_CHECK
-            - USERINFO
-            - CLIENTINFO
-            - ID_GENERATION
-            - REGISTRATION
-            - INTROSPECTION
-            - REVOKE_TOKEN
-            - GLOBAL_TOKEN_REVOCATION
-            - STATUS_LIST
-            - LOGOUT_STATUS_JWT
-            - ACTIVE_SESSION
-            - END_SESSION
-            - STATUS_SESSION
-            - JANS_CONFIGURATION
-            - CIBA
-            - UMA
-            - U2F
-            - DEVICE_AUTHZ
-            - METRIC
-            - STAT
-            - PAR
-            - ACCESS_EVALUATION
-            - RATE_LIMIT
-            - SSA
+            - unknown
+            - health_check
+            - userinfo
+            - clientinfo
+            - id_generation
+            - registration
+            - introspection
+            - revoke_token
+            - global_token_revocation
+            - status_list
+            - logout_status_jwt
+            - active_session
+            - end_session
+            - status_session
+            - jans_configuration
+            - ciba
+            - uma
+            - u2f
+            - device_authz
+            - metric
+            - stat
+            - par
+            - access_evaluation
+            - rate_limit
+            - ssa
+            - client_id_metadata_document
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -16619,6 +16620,37 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        cimdSchemeAllowlist:
+          type: array
+          items:
+            type: string
+        cimdDomainAllowlist:
+          type: array
+          items:
+            type: string
+        cimdDomainBlocklist:
+          type: array
+          items:
+            type: string
+        cimdBlockPrivateIp:
+          type: boolean
+        cimdMaxResponseSize:
+          type: integer
+          format: int32
+        cimdConnectTimeoutMs:
+          type: integer
+          format: int32
+        cimdReadTimeoutMs:
+          type: integer
+          format: int32
+        cimdTtlMinutes:
+          type: integer
+          format: int32
+        cimdMaxTtlMinutes:
+          type: integer
+          format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16628,8 +16660,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17353,6 +17383,8 @@ components:
     ClientAttributes:
       type: object
       properties:
+        cimdExpired:
+          type: boolean
         tlsClientAuthSubjectDn:
           type: string
         runIntrospectionScriptBeforeJwtCreation:
@@ -17488,6 +17520,13 @@ components:
           type: array
           items:
             type: string
+        cimdClient:
+          type: boolean
+        cimdOriginalClientId:
+          type: string
+        cimdExpiresAt:
+          type: integer
+          format: int64
     CustomObjectAttribute:
       type: object
       properties:
@@ -18517,8 +18556,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18530,6 +18567,8 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

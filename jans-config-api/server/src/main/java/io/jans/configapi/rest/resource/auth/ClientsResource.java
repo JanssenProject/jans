@@ -218,8 +218,7 @@ public class ClientsResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}",
-                    escapeLog(client), escapeLog(client.getAttributes()), escapeLog(client.getCustomAttributes()));
+            logger.debug("Client to be added - clientId:{}", escapeLog(client.getClientId()));
         }
 
         String inum = client.getClientId();
@@ -249,16 +248,13 @@ public class ClientsResource extends ConfigBaseResource {
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         ignoreCustomObjectClassesForNonLDAP(client);
 
-        logger.trace(
-                "Final Client details to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}",
-                client, client.getAttributes(), client.getCustomAttributes());
+        logger.trace("Final Client details to be added - clientId:{}", client.getClientId());
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClaims(claims);
 
         // Response handling
         applyResponsePolicy(result);
-        logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -322,14 +318,13 @@ public class ClientsResource extends ConfigBaseResource {
 
         ignoreCustomObjectClassesForNonLDAP(client);
 
-        logger.debug("Final Client details to be updated - client:{}", client);
+        logger.trace("Final Client details to be updated - clientId:{}", client.getClientId());
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClaims(claims);
 
         // Response handling
         applyResponsePolicy(result);
-        logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
 
@@ -422,8 +417,9 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     private List<Client> applyResponsePolicy(List<Client> clients) {
-        logger.debug("isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, clients:{}",
-                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), clients);
+        logger.trace("applyResponsePolicy - returnSecret:{}, returnEncrypted:{}, count:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(),
+                clients != null ? clients.size() : 0);
         if (clients == null || clients.isEmpty()) {
             return clients;
         }
@@ -435,9 +431,9 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     private Client applyResponsePolicy(Client client) {
-        logger.debug(
-                " ApplyResponsePolicy - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, client:{}",
-                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), client);
+        logger.trace("applyResponsePolicy - returnSecret:{}, returnEncrypted:{}, clientId:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(),
+                client != null ? client.getClientId() : null);
         if (client == null) {
             return client;
         }
@@ -476,21 +472,14 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         PagedResult<Client> pagedResult = clientService.getClients(searchReq);
-        if (logger.isTraceEnabled()) {
-            logger.trace("PagedResult  - pagedResult:{}", pagedResult);
-        }
 
         if (pagedResult != null) {
-            logger.debug(
-                    "Client fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
-                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
-
+            logger.debug("Client search result - totalEntries:{}, entriesCount:{}", pagedResult.getTotalEntriesCount(),
+                    pagedResult.getEntriesCount());
             List<Client> clients = pagedResult.getEntries();
             applyResponsePolicy(clients);
-            logger.debug("Clients fetched  - clients:{}", clients);
             pagedResult.setEntries(clients);
         }
-        logger.debug("Clients pagedResult:{}", pagedResult);
         return pagedResult;
 
     }
@@ -513,7 +502,8 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         // check scope
-        logger.debug("Checking client.getScopes():{}", client.getScopes());
+        logger.debug("Validating scopes for clientId:{}, scopeCount:{}", client.getClientId(),
+                client.getScopes() != null ? client.getScopes().length : 0);
         if (client.getScopes() == null || client.getScopes().length == 0) {
             return client;
         }
@@ -522,7 +512,7 @@ public class ClientsResource extends ConfigBaseResource {
         List<String> invalidScopes = new ArrayList<>();
 
         for (String scope : client.getScopes()) {
-            logger.debug("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
+            logger.trace("Checking scope:{}, isValidDn:{}", scope, authUtil.isValidDn(scope));
             List<Scope> scopes = new ArrayList<>();
             if (authUtil.isValidDn(scope)) {
                 Scope scp = findScopeByDn(scope);
@@ -532,14 +522,13 @@ public class ClientsResource extends ConfigBaseResource {
             } else {
                 scopes = scopeService.searchScopesById(scope);
             }
-            logger.debug("Scopes from DB - {}'", scopes);
             if (!scopes.isEmpty()) {
                 validScopes.add(scopes.get(0).getDn());
             } else {
                 invalidScopes.add(scope);
             }
         }
-        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
+        logger.debug("Scope validation result - valid:{}, invalid:{}", validScopes.size(), invalidScopes);
 
         if (!invalidScopes.isEmpty()) {
             throwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
@@ -567,29 +556,28 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         // check claims
-        logger.debug("client.getClaims():{}", client.getClaims());
         List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
-        logger.debug("Client claims:{}", claims);
+        logger.debug("Validating claims for clientId:{}, claimCount:{}", client.getClientId(),
+                claims != null ? claims.size() : 0);
 
         List<String> validClaims = new ArrayList<>();
         List<String> invalidClaims = new ArrayList<>();
 
         for (String claim : claims) {
-            logger.debug("Is claim:{} valid-DN?:{}", claim, authUtil.isValidDn(claim));
+            logger.trace("Checking claim:{}, isValidDn:{}", claim, authUtil.isValidDn(claim));
             JansAttribute jansAttribute = null;
             if (authUtil.isValidDn(claim)) {
                 jansAttribute = attributeService.getAttributeUsingDn(claim);
             } else {
                 jansAttribute = attributeService.getAttributeUsingName(claim);
             }
-            logger.debug("Attribute from DB - {}'", jansAttribute);
             if (jansAttribute != null) {
                 validClaims.add(jansAttribute.getDn());
             } else {
                 invalidClaims.add(claim);
             }
         }
-        logger.debug("Claim validation result - validClaims:{}, invalidClaims:{} ", validClaims, invalidClaims);
+        logger.debug("Claim validation result - valid:{}, invalid:{}", validClaims.size(), invalidClaims);
 
         if (!invalidClaims.isEmpty()) {
             throwBadRequestException("Invalid claim in request -> " + invalidClaims.toString());
@@ -605,8 +593,6 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     private boolean isReturnEncryptedClientSecretInResponse() {
-        logger.debug("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
-                appConfiguration.isReturnEncryptedClientSecretInResponse());
         return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
     }
 
@@ -616,8 +602,6 @@ public class ClientsResource extends ConfigBaseResource {
      * @return `true` if responses should include client secrets, `false` otherwise.
      */
     private boolean isReturnClientSecretInResponse() {
-        logger.debug("appConfiguration.isReturnClientSecretInResponse():{} ",
-                appConfiguration.isReturnClientSecretInResponse());
         return this.appConfiguration.isReturnClientSecretInResponse();
     }
 

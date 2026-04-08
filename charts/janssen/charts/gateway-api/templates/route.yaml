@@ -9,7 +9,6 @@
 {{- $scimSvc := .Values.global.scim.scimServiceName -}}
 {{- $casaSvc := .Values.global.casa.casaServiceName -}}
 
-
 {{- /* ======================================================== */}}
 {{- /* 1. AUTH SERVER ROUTES                                    */}}
 {{- /* ======================================================== */}}
@@ -625,8 +624,6 @@ spec:
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
-  {{- /* 1. Lock Server Audit */}}
-  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
   {{- if ne .Values.gateway.className "nginx" }}
   - matches:
     - path:

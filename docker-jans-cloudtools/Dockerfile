@@ -55,7 +55,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout init --cone \
     && git sparse-checkout add jans-pycloudlib \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && mkdir -p /app/templates/kc-scheduler \
+    && mkdir -p /app/templates/kc-scheduler
 
 WORKDIR /
 

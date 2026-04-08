@@ -1,5 +1,6 @@
 package io.jans.as.model.common;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.doc.annotation.DocFeatureFlag;
 import org.apache.commons.lang3.StringUtils;
@@ -131,5 +132,11 @@ public enum FeatureFlagType {
             }
         }
         return result;
+    }
+	
+    @Override
+    @JsonValue
+    public String toString() {
+        return value;
     }
 }
