@@ -4,8 +4,8 @@ import AuthClientService from './service/AuthClientService';
 import { LLMClientFactory } from './llm/LLMClient';
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
-import AuthenticationService from '../service/authenticationService';
-import { ILooseObject } from "../options/ILooseObject";
+import AuthenticationService from '../features/authentication/services/authenticationService';
+import { ILooseObject } from "../shared/types";
 import StorageHelper from './helper/StorageHelper'
 import ConfigurationManager from './helper/ConfigurationManager'
 import { STORAGE_KEYS, DEFAULT_VALUES } from './helper/Constants';
@@ -149,7 +149,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
 
   const toolResult = await client.callTool({
     name: "registerOIDCClient",
-    arguments: enhancedArgs as ILooseObject,
+    arguments: enhancedArgs as unknown as ILooseObject,
   });
 
   await authClientService.saveClientInTarpStorage(toolResult);
@@ -197,7 +197,8 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
       arguments: authArgs,
     }) as ILooseObject;
 
-    const authorizationUrl = toolResult?.structuredContent?.authorization_url;
+    const structured = toolResult?.structuredContent as ILooseObject | undefined;
+    const authorizationUrl = structured?.authorization_url as string | undefined;
     if (!authorizationUrl) {
       throw new Error("No authorization URL returned from MCP server");
     }

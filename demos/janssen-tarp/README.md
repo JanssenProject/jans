@@ -10,7 +10,7 @@
 6. [Installation in Browser](#installation-in-browser)
    - [Chrome](#chrome)
    - [Firefox](#firefox)
-7. [Note on Self-Signed Certificates](#note)
+7. [Note on Self-Signed Certificates](#self-signed-certificate-handling)
 8. [Testing Using Janssen Tarp](#testing-using-janssen-tarp)
 9. [Cedarling Authorization](#cedarling-authorization)
 10. [Cedarling Unsigned Authorization](#cedarling-unsigned-authorization)
@@ -19,7 +19,7 @@
 
 ## Overview
 
-Janssen Tarp is a Relying Party tool in form of a Browser Extension
+Janssen Tarp is a browser extension demo tool built as part of the Janssen Project — an open-source Identity and Access Management (IAM) platform under the Linux Foundation. The extension allows developers and IAM engineers to quickly register OpenID Connect (OIDC) clients, trigger OAuth 2.0 Authorization Code flows, and test Cedarling-based authorization decisions — all directly from the browser without writing any application code.
 
 [Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
 
@@ -62,9 +62,11 @@ Instead of building from source code, you can download and install `janssen-tarp
 3. Click on `Setting` icon before `Manage your Extensions` label, then click the `Install Add-on from file...`.
 4. Browse and open the downloaded `demo-janssen-tarp-firefox-v{x.x.x}.xpi` file to install the extension.
 
-##### Note:
+##### Self-Signed Certificate Handling:
 
-When you are testing Janssen IdP with self-signed cert then follow below steps before client registration using janssen-tarp.
+When testing against a Janssen Auth Server using a self-signed TLS certificate, you must configure browser trust for the certificate before attempting client registration. Failure to do so will result in TLS errors during the Dynamic Client Registration call.
+
+Follow your browser's procedure to import or trust the self-signed certificate authority (CA) used by the Janssen Auth Server.
 
 1. Open the OP_HOST url on browser.
 2. Accept the security risk due to self-signed cert and continue.
@@ -74,39 +76,17 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 ## Testing using Janssen Tarp
 
 * Setup Janssen-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp)
-* Configuration to run Agama flow
-* Add Your Jans Auth server host , Client expiry date, Scopes and click on `Register` client. It will register new OP Client on your Auth server.
 
-![image](./docs/images/add-oidc-client.png)
-![image](./docs/images/oidc-client-reg.png)
-
-* Add `Acr values` and `Scopes ` click on Trigger Auth Code flow.
-
-![image](./docs/images/authentication-flow-input.png)
-
-* It will trigger agama flow and show login screen to you. You can use TUI to add testing user.
-
-![image](./docs/images/agamapw-login.png)
-
-* After successful auth, it will show you below screen
-
-![image](./docs/images/successful-tarp-auth-screen.png)
+![image](./docs/images/1-add-client.png)
+![image](./docs/images/2-DCR.png)
+![image](./docs/images/3-cedarling-configuration.png)
+![image](./docs/images/4-auth-code-flow.png)
+![image](./docs/images/5-auth-code-flow.png)
+* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for unsigned authorization details.
+![image](./docs/images/6-unsigned-authz.png)
+* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for multi-issuer authorization details.
+![image](./docs/images/7-multi-issuer-authz.png)
 <br>
-## Cedarling authorization
-
-* Add Cedarling bootstrap configuration on Cedarling tab (before authentication).
-
-![image](./docs/images/add-bootstrap-config.png)
-
-* After authentication, test Cedarling Authorization decision using following request form.
-
-![image](./docs/images/cedar-auth-form.png)
-
-## Cedarling unsigned authorization
-
-* The `authorize_unsigned` method allows making authorization decisions without JWT token verification.
-
-![image](./docs/images/unsigned-cedar-authz.png)
 
 ## Testing with Keycloak (installed on localhost)
 
