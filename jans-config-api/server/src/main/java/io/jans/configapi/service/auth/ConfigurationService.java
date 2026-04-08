@@ -74,35 +74,35 @@ public class ConfigurationService {
     
     public DocumentStoreConfiguration getDocumentStoreConfiguration() {
         GluuConfiguration gluuConfiguration = this.findGluuConfiguration();
-        logger.info("gluuConfiguration:{}",gluuConfiguration);
+        logger.debug("Fetching DocumentStoreConfiguration - gluuConfiguration found:{}", gluuConfiguration != null);
         DocumentStoreConfiguration documentStoreConfiguration = null;
         if(gluuConfiguration == null) {
             throw new WebApplicationException("Cannot fetch DocumentStoreConfiguration as GluuConfiguration is null! ");
         }
-        
+
         documentStoreConfiguration = gluuConfiguration.getDocumentStoreConfiguration();
-        logger.info("Fetched documentStoreConfiguration:{}",documentStoreConfiguration);
+        logger.debug("Fetched documentStoreConfiguration:{}", documentStoreConfiguration);
         return documentStoreConfiguration;
     }
-    
+
     public DocumentStoreConfiguration updateDocumentStoreConfiguration(DocumentStoreConfiguration documentStoreConfiguration) {
-        logger.info("documentStoreConfiguration:{}",documentStoreConfiguration);
+        logger.debug("Updating documentStoreConfiguration:{}", documentStoreConfiguration);
         if(documentStoreConfiguration == null) {
             return documentStoreConfiguration;
         }
-        
+
         GluuConfiguration gluuConfiguration = findGluuConfiguration();
-        logger.info("gluuConfiguration:{}",gluuConfiguration);
-        
+        logger.debug("Updating DocumentStoreConfiguration - gluuConfiguration found:{}", gluuConfiguration != null);
+
         if(gluuConfiguration==null) {
             throw new WebApplicationException("Cannot update DocumentStoreConfiguration as GluuConfiguration is null! ");
         }
-        
+
         gluuConfiguration.setDocumentStoreConfiguration(documentStoreConfiguration);
         merge(gluuConfiguration);
-        
+
         documentStoreConfiguration = gluuConfiguration.getDocumentStoreConfiguration();
-        logger.info("Updated documentStoreConfiguration:{}",documentStoreConfiguration);
+        logger.debug("Updated documentStoreConfiguration:{}", documentStoreConfiguration);
         return documentStoreConfiguration;
     }
     
