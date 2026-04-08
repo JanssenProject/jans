@@ -111,6 +111,8 @@ def configure_logging():
         "audit_log_level": "INFO",
         "lock_log_target": "STDOUT",
         "lock_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -156,6 +158,7 @@ def configure_logging():
         "script_log_target": "JANS_AUTH_SCRIPT_LOG_FILE",
         "audit_log_target": "JANS_AUTH_AUDIT_LOG_FILE",
         "lock_log_target": "JANS_LOCK_FILE",
+        "root_log_target": "FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":

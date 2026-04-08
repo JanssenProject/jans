@@ -85,8 +85,8 @@
 		</Logger>
 
 
-        <Root level="INFO">
-			<AppenderRef ref="STDOUT" />
+        <Root level="$root_log_level">
+			<AppenderRef ref="$root_log_target" />
         </Root>
     </Loggers>
 
