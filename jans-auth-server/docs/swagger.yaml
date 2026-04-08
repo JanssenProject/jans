@@ -3609,7 +3609,7 @@ paths:
                     type: string
                   details:
                     type: string
-  '/host/rsrc/resource_set/{rsid}:':
+  '/restv1/host/rsrc/resource_set/{rsid}:':
     parameters:
       - name: rsid
         in: path
