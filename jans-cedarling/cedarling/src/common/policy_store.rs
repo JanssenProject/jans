@@ -30,7 +30,7 @@ pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
 use super::cedar_schema::CedarSchema;
-use cedar_policy::{ActionConstraint, EntityTypeName, EntityUid, Policy};
+use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy};
 use semver::Version;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -224,7 +224,6 @@ impl TrustedIssuer {
     }
 }
 
-
 /// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
 pub struct PoliciesContainer {
@@ -303,11 +302,32 @@ impl PoliciesContainer {
     }
 }
 
+/// The effect of a Cedar policy: either `Permit` or `Forbid`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PolicyEffect {
+    /// The policy permits the request.
+    Permit,
+    /// The policy forbids the request.
+    Forbid,
+}
+
+impl From<Effect> for PolicyEffect {
+    fn from(effect: Effect) -> Self {
+        match effect {
+            Effect::Permit => PolicyEffect::Permit,
+            Effect::Forbid => PolicyEffect::Forbid,
+        }
+    }
+}
+
 /// Metadata about a single Cedar policy.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct PolicyMetadata {
     /// The policy ID
     pub id: String,
+    /// The effect of the policy (`Permit` or `Forbid`)
+    pub effect: PolicyEffect,
     /// Key-value pairs from Cedar policy annotations (`@key("value")`)
     pub annotations: HashMap<String, String>,
     /// The Cedar policy source code (human-readable Cedar syntax)
@@ -318,6 +338,7 @@ impl PolicyMetadata {
     fn from_policy(policy: &Policy) -> Self {
         Self {
             id: policy.id().to_string(),
+            effect: policy.effect().into(),
             annotations: policy
                 .annotations()
                 .map(|(k, v)| (k.to_string(), v.to_string()))
@@ -335,8 +356,9 @@ fn matches_principal(policy: &Policy, principal_types: &HashSet<EntityTypeName>)
         PrincipalConstraint::Eq(euid) | PrincipalConstraint::In(euid) => {
             principal_types.contains(euid.type_name())
         },
-        PrincipalConstraint::Is(type_name)
-        | PrincipalConstraint::IsIn(type_name, _) => principal_types.contains(&type_name),
+        PrincipalConstraint::Is(type_name) | PrincipalConstraint::IsIn(type_name, _) => {
+            principal_types.contains(&type_name)
+        },
     }
 }
 
@@ -357,8 +379,9 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
         ResourceConstraint::Eq(euid) | ResourceConstraint::In(euid) => {
             resource_types.contains(euid.type_name())
         },
-        ResourceConstraint::Is(type_name)
-        | ResourceConstraint::IsIn(type_name, _) => resource_types.contains(&type_name),
+        ResourceConstraint::Is(type_name) | ResourceConstraint::IsIn(type_name, _) => {
+            resource_types.contains(&type_name)
+        },
     }
 }
 
@@ -373,8 +396,7 @@ mod policy_metadata_tests {
     fn make_container(policies: &[(&str, &str)]) -> PoliciesContainer {
         let mut policy_set = PolicySet::new();
         for (id, src) in policies {
-            let policy =
-                Policy::parse(Some(PolicyId::new(id)), *src).expect("bad policy");
+            let policy = Policy::parse(Some(PolicyId::new(id)), *src).expect("bad policy");
             policy_set.add(policy).expect("duplicate policy id");
         }
         PoliciesContainer::new_empty(policy_set)
@@ -396,10 +418,7 @@ mod policy_metadata_tests {
 
     #[test]
     fn matches_all_policies_with_any_constraints() {
-        let container = make_container(&[(
-            "open",
-            "permit(principal, action, resource);",
-        )]);
+        let container = make_container(&[("open", "permit(principal, action, resource);")]);
 
         let result = container.get_matching_policies(
             &type_names(&["Foo::Bar"]),
@@ -580,10 +599,7 @@ mod policy_metadata_tests {
 
     #[test]
     fn source_is_recoverable() {
-        let container = make_container(&[(
-            "p",
-            "permit(principal, action, resource);",
-        )]);
+        let container = make_container(&[("p", "permit(principal, action, resource);")]);
 
         let result = container.get_matching_policies(
             &type_names(&["Any::Type"]),
@@ -609,11 +625,8 @@ mod policy_metadata_tests {
             ),
         ]);
 
-        let result = container.get_matching_policies(
-            &HashSet::new(),
-            &HashSet::new(),
-            &HashSet::new(),
-        );
+        let result =
+            container.get_matching_policies(&HashSet::new(), &HashSet::new(), &HashSet::new());
 
         // Only the "any" policy matches — specific constraints can't match empty sets
         assert_eq!(result.len(), 1);

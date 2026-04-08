@@ -160,6 +160,57 @@ class Cedarling:
         """
         ...
 
+    def get_matching_policies_unsigned(
+        self,
+        principals: List[EntityData],
+        actions: List[str],
+        resources: List[EntityData],
+    ) -> List["PolicyMetadata"]:
+        """
+        Returns metadata for all policies whose scope constraints are compatible
+        with the given principals, actions, and resources.
+
+        This performs scope-level filtering only (principal/action/resource constraints).
+        Policies with `when`/`unless` conditions may still not apply at evaluation time.
+
+        Args:
+            principals: List of EntityData representing principal entities.
+            actions: List of action strings (e.g., 'Jans::Action::"Read"').
+            resources: List of EntityData representing resource entities.
+
+        Returns:
+            A list of PolicyMetadata objects for matching policies.
+
+        Raises:
+            AuthorizeError: If policy matching fails.
+        """
+        ...
+
+    def get_matching_policies_multi_issuer(
+        self,
+        tokens: List[TokenInput],
+        actions: List[str],
+        resources: List[EntityData],
+    ) -> List["PolicyMetadata"]:
+        """
+        Returns metadata for all policies whose scope constraints are compatible
+        with the given token-derived principals, actions, and resources.
+
+        Tokens are validated and their mapping types used as principal entity types.
+
+        Args:
+            tokens: List of TokenInput representing JWT tokens with mapping types.
+            actions: List of action strings (e.g., 'Jans::Action::"Read"').
+            resources: List of EntityData representing resource entities.
+
+        Returns:
+            A list of PolicyMetadata objects for matching policies.
+
+        Raises:
+            AuthorizeError: If token validation or policy matching fails.
+        """
+        ...
+
     def pop_logs(self) -> List[Dict]:
         """
         Retrieves and removes all logs from storage.
@@ -595,3 +646,39 @@ class CedarType(Enum):
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
     def __eq__(self, other: "CedarType") -> bool: ...
+
+class PolicyEffect(Enum):
+    """
+    Represents the effect of a Cedar policy.
+
+    This is an enum with the following variants:
+        - Permit: The policy permits the request.
+        - Forbid: The policy forbids the request.
+    """
+
+    Permit = "Permit"
+    Forbid = "Forbid"
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: "PolicyEffect") -> bool: ...
+
+@final
+class PolicyMetadata:
+    """
+    Metadata about a Cedar policy, including its ID, effect, annotations, and source code.
+
+    Attributes:
+        id: The policy ID string.
+        effect: The policy effect as a PolicyEffect enum value.
+        annotations: Dictionary of policy annotations.
+        source: The Cedar policy source code.
+    """
+
+    id: str
+    effect: PolicyEffect
+    annotations: Dict[str, str]
+    source: str
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
