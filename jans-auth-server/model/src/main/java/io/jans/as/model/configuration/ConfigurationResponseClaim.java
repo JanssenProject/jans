@@ -102,6 +102,9 @@ public final class ConfigurationResponseClaim {
     // SSA
     public static final String SSA_ENDPOINT = "ssa_endpoint";
 
+    // Client ID Metadata Document (CIMD)
+    public static final String CLIENT_ID_METADATA_DOCUMENT_SUPPORTED = "client_id_metadata_document_supported";
+
     // AuthZEN
     public static final String AUTHZEN_POLICY_DECISION_POINT = "policy_decision_point";
     public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";
