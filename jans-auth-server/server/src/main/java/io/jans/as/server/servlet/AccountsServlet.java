@@ -9,17 +9,18 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.token.TokenService;
-import org.apache.commons.lang3.ArrayUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
+import io.jans.util.CoreCertUtil;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
@@ -107,7 +108,7 @@ public class AccountsServlet extends HttpServlet {
             }
 
 
-            String clientCertAsPem = servletRequest.getHeader("X-ClientCert");
+            String clientCertAsPem = CoreCertUtil.getClientCert(servletRequest).getCert();
             if (clientCertAsPem != null) {
                 log.info("FAPI Account: clientCertAsPem found*****************************************" + clientCertAsPem);
             } else

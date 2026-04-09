@@ -64,7 +64,7 @@ pub enum PolicyStoreSource {
     /// Read policy from a directory structure.
     ///
     /// The path points to a directory containing the policy store
-    /// in the new directory structure format (with manifest.json, policies/, etc.).
+    /// in the directory structure format (`metadata.json`, `schema.cedarschema`, `policies/`, etc.).
     Directory(PathBuf),
 
     /// Read policy from Cedar Archive bytes directly.
