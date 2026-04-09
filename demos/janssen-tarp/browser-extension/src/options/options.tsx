@@ -16,12 +16,12 @@ const Options = () => {
   const [dataChanged, setDataChanged] = useState(false);
 
   useEffect(() => {
-    chrome.storage.local.get(["cedarlingConfig"], (cedarlingConfigResult) => {
+    chrome.storage.local.get(["cedarlingConfig"], (cedarlingConfigResult: Record<string, unknown>) => {
       let cedarlingConfig = Utils.isEmpty(cedarlingConfigResult) ? {} : cedarlingConfigResult;
 
-      chrome.storage.local.get(["oidcClients"], (oidcClientResults) => {
+      chrome.storage.local.get(["oidcClients"], (oidcClientResults: Record<string, unknown>) => {
         if (!Utils.isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
-          chrome.storage.local.get(["loginDetails"], (loginDetailsResult) => {
+          chrome.storage.local.get(["loginDetails"], (loginDetailsResult: Record<string, unknown>) => {
             if (!Utils.isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
               setOptionType("loginPage");
               setdata({ ...loginDetailsResult, ...cedarlingConfig });
@@ -43,7 +43,7 @@ const Options = () => {
     setDataChanged(true);
   }
 
-  function renderPage({ optionType, data }) {
+  function renderPage({ optionType, data }: { optionType: string; data: Record<string, unknown> }) {
     switch (optionType) {
       case 'homePage':
       case 'loginPage':
