@@ -16,7 +16,7 @@ class FileSecret(BaseSecret):
 
         out, err, code = load_schema_from_file(filepath, exclude_configmap=True, key_file=key_file)
         if code != 0:
-            logger.warning(f"Unable to load secrets from file {filepath}; error={err}; local secrets will be excluded")
+            logger.warning("Unable to load secrets from file %s; error=%s; local secrets will be excluded", filepath, err)
 
         # set the data as immutable
         data = out.get("_secret") or {}

@@ -7,6 +7,7 @@
 //!
 //! This module provides integration with the Lock Server for centralized logging and monitoring.
 //! It includes support for Software Statement Assertion (SSA) JWT validation for secure client registration.
+//! The module supports both REST and gRPC transport protocols for communicating with the Lock Server.
 //!
 //! ## Overview
 //!
@@ -15,6 +16,7 @@
 //! - Register as a client using Dynamic Client Registration (DCR)
 //! - Validate SSA JWTs for enhanced security
 //! - Handle authentication and authorization with the Lock Server
+//! - Choose between REST and gRPC transport protocols
 //!
 //! ## Architecture
 //!
@@ -22,8 +24,19 @@
 //!
 //! - **[`LockService`]**: Main service that manages communication with the Lock Server
 //! - **[`LogWorker`]**: Background worker that sends logs to the Lock Server
+//! - **[`LockTransport`]**: Transport protocol selection (REST or gRPC)
+//! - **Transport Layer**: Abstraction for sending logs via [`RestTransport`] or [`GrpcTransport`]
 //! - **SSA Validation**: Validates Software Statement Assertion JWTs
 //! - **Client Registration**: Handles Dynamic Client Registration with the IDP
+//!
+//! ### Transport Protocols
+//!
+//! The module supports two transport protocols:
+//!
+//! - **REST**: HTTP-based transport using JSON payloads
+//! - **gRPC**: Protocol Buffers-based transport (requires `grpc` feature)
+//!
+//! The transport is selected via [`LockServiceConfig.transport`](crate::LockServiceConfig::transport).
 //!
 //! ### Flow
 //!
@@ -31,7 +44,8 @@
 //! 2. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
 //! 3. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
 //! 4. **Access Token**: Client credentials are obtained for Lock Server communication
-//! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//! 5. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
+//! 6. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
 //!
 //! ## SSA JWT Validation
 //!
@@ -68,6 +82,9 @@
 //! - **`GetLockConfig`**: Failed to retrieve Lock Server configuration
 //! - **`ClientRegistration`**: Failed to register client with IDP
 //! - **`InitHttpClient`**: Failed to initialize HTTP client
+//! - **`TransportError`**: Transport layer error (REST or gRPC)
+//! - **`MissingGrpcEndpoint`**: gRPC endpoint not configured when using gRPC transport
+//! - **`InvalidAccessToken`**: Failed to parse access token
 //!
 //! ## Integration with IDP
 //!
@@ -91,16 +108,25 @@ mod log_entry;
 mod log_worker;
 mod register_client;
 pub(crate) mod ssa_validation;
+mod transport;
+
+#[cfg(feature = "grpc")]
+mod proto {
+    // These lints are disabled because they are triggered by the generated code
+    #![allow(unreachable_pub)]
+    #![allow(clippy::pedantic)]
+    tonic::include_proto!("io.jans.lock.audit");
+}
 
 use crate::app_types::PdpID;
 use crate::common::issuer_utils::IssClaim;
-use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
-use crate::{LockServiceConfig, LogWriter};
+use crate::log::{LogType, LoggerWeak};
+use crate::{LockServiceConfig, LockTransport, LogWriter};
 use futures::channel::mpsc;
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
-use log_worker::{LogWorker, SerializedLogEntry};
+use log_worker::LogWorker;
 use register_client::{ClientRegistrationError, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -108,6 +134,7 @@ use ssa_validation::validate_ssa_jwt;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
+use transport::{SerializedLogEntry, rest::RestTransport};
 
 /// The base duration to wait for if an http request fails for workers.
 pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
@@ -190,42 +217,18 @@ impl LockService {
         )
         .await?;
 
-        // Build a default http client that already has the access_token in the headers
-        let mut headers = HeaderMap::new();
-        let mut auth_header =
-            HeaderValue::from_str(&format!("Bearer {}", client_creds.access_token))
-                .expect("build header");
-        auth_header.set_sensitive(true);
-        headers.insert("Authorization", auth_header);
-        let http_client = Arc::new(init_http_client(
-            Some(headers),
-            bootstrap_conf.accept_invalid_certs,
-        )?);
-
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             (Some(log_interval), Some(log_endpoint)) => {
-                let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
-
-                // Spawn log worker
-                let mut log_worker = LogWorker::new(
+                let worker = create_log_worker(
+                    bootstrap_conf,
+                    log_endpoint,
+                    &client_creds.access_token,
                     log_interval,
-                    http_client.clone(),
-                    log_endpoint.0.clone(),
                     logger.clone(),
-                );
-
-                let cancel_tkn = cancel_tkn.clone();
-
-                let handle =
-                    crate::http::spawn_task(
-                        async move { log_worker.run(log_rx, cancel_tkn).await },
-                    );
-
-                Some(WorkerSenderAndHandle {
-                    tx: log_tx.into(),
-                    handle,
-                })
+                    cancel_tkn.clone(),
+                )?;
+                Some(worker)
             },
             // Other cases that will always resolve to Cedarling not having to send logs
             _ => None,
@@ -246,31 +249,108 @@ impl LockService {
     }
 }
 
-// TODO: Lock service should be refactored and add filtering based on log type/level
+fn create_log_worker(
+    bootstrap_conf: &LockServiceConfig,
+    log_endpoint: lock_config::Url,
+    access_token: &str,
+    log_interval: Duration,
+    logger: Option<LoggerWeak>,
+    cancel_tkn: CancellationToken,
+) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
+    let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(bootstrap_conf.log_channel_capacity);
+
+    match bootstrap_conf.transport {
+        LockTransport::Rest => {
+            // Build a default http client that already has the access_token in the headers
+            let mut headers = HeaderMap::new();
+            let mut auth_header = HeaderValue::from_str(&format!("Bearer {access_token}"))
+                .map_err(|e| InitLockServiceError::InvalidAccessToken(e.to_string()))?;
+            auth_header.set_sensitive(true);
+            headers.insert("Authorization", auth_header);
+
+            let http_client = Arc::new(init_http_client(
+                Some(headers),
+                bootstrap_conf.accept_invalid_certs,
+            )?);
+
+            let transport = Arc::new(RestTransport::new(
+                http_client,
+                log_endpoint.0,
+                logger.as_ref().and_then(std::sync::Weak::upgrade),
+            ));
+
+            let mut log_worker = LogWorker::new(
+                log_interval,
+                transport,
+                logger,
+                bootstrap_conf.log_max_retries,
+            );
+            let handle =
+                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+
+            Ok(WorkerSenderAndHandle {
+                tx: log_tx.into(),
+                handle,
+            })
+        },
+        #[cfg(feature = "grpc")]
+        LockTransport::Grpc => {
+            use transport::grpc::GrpcTransport;
+
+            let transport = Arc::new(GrpcTransport::new(
+                log_endpoint.0.origin().ascii_serialization(),
+                access_token,
+                logger.as_ref().and_then(std::sync::Weak::upgrade),
+            )?);
+            let mut log_worker = LogWorker::new(
+                log_interval,
+                transport,
+                logger,
+                bootstrap_conf.log_max_retries,
+            );
+            let handle =
+                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+
+            Ok(WorkerSenderAndHandle {
+                tx: log_tx.into(),
+                handle,
+            })
+        },
+    }
+}
+
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
-        let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref() else {
-            return;
-        };
+        if let Some(log_kind) = entry.get_log_kind() {
+            match log_kind {
+                LogType::Decision => {
+                    let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref()
+                    else {
+                        return;
+                    };
 
-        let entry = serde_json::to_string(&entry)
-            .expect("entry should serialize successfully")
-            .into_boxed_str();
+                    let entry = serde_json::to_string(&entry)
+                        .expect("entry should serialize successfully")
+                        .into_boxed_str();
 
-        let mut log_tx = match tx_lock.write() {
-            Ok(log_tx) => log_tx,
-            Err(err) => {
-                self.logger.log_any(LockLogEntry::error(format!(
-                    "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
-                )));
-                return;
-            },
-        };
+                    let mut log_tx = match tx_lock.write() {
+                        Ok(log_tx) => log_tx,
+                        Err(err) => {
+                            self.logger.log_any(LockLogEntry::error(format!(
+                                "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
+                            )));
+                            return;
+                        },
+                    };
 
-        if let Err(err) = log_tx.try_send(entry) {
-            self.logger.log_any(LockLogEntry::error(format!(
-                "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
-            )));
+                    if let Err(err) = log_tx.try_send(entry) {
+                        self.logger.log_any(LockLogEntry::error(format!(
+                            "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
+                        )));
+                    }
+                },
+                LogType::System | LogType::Metric => (),
+            }
         }
     }
 
@@ -296,6 +376,10 @@ pub enum InitLockServiceError {
     ClientRegistration(#[from] ClientRegistrationError),
     #[error("failed to initialize the Lock logger's HttpClient: {0}")]
     InitHttpClient(#[from] reqwest::Error),
+    #[error("transport error: {0}")]
+    TransportError(#[from] transport::TransportError),
+    #[error("failed to parse access token: {0}")]
+    InvalidAccessToken(String),
 }
 
 #[cfg(test)]
@@ -353,6 +437,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: true, // Allow invalid certs for testing
+            transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup
@@ -367,9 +453,15 @@ mod test {
 
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
+            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            id: "some_uuid_string".into(),
-            msg: "this is a test log entry".into(),
+            log_kind: LogType::Decision,
+            decision: "ALLOW".to_string(),
+            action: "Test".to_string(),
+            principal: vec!["Jans::User".to_string()],
+            resource: "Jans::Issue".to_string(),
+            application_id: "test_app".to_string(),
+            pdp_id: "test-pdp".to_string(),
         };
         logger.log_any(log_entry);
 
@@ -404,6 +496,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup without SSA
@@ -417,9 +511,15 @@ mod test {
 
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
+            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            id: "some_uuid_string".into(),
-            msg: "this is a test log entry".into(),
+            log_kind: LogType::Decision,
+            decision: "ALLOW".to_string(),
+            action: "Test".to_string(),
+            principal: vec!["Jans::User".to_string()],
+            resource: "Jans::Issue".to_string(),
+            application_id: "test_app".to_string(),
+            pdp_id: "test-pdp".to_string(),
         };
         logger.log_any(log_entry);
 
@@ -451,6 +551,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup with invalid SSA should fail
@@ -608,9 +710,15 @@ mod test {
         server
             .mock("POST", log_path)
             .match_body(mockito::Matcher::PartialJson(json!([{
-                "level": "TRACE",
-                "id": "some_uuid_string",
-                "msg": "this is a test log entry",
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "severity_level": "TRACE",
+                "action": "Test",
+                "decision_result": "ALLOW",
+                "requested_resource": "Jans::Issue",
+                "principal_id": "Jans::User",
             }])))
             .expect(1)
             .create()
@@ -642,14 +750,24 @@ mod test {
 
     #[derive(Serialize, Clone)]
     struct MockLogEntry {
+        timestamp: String,
         level: LogLevel,
-        id: String,
-        msg: String,
+        log_kind: LogType,
+        decision: String,
+        action: String,
+        principal: Vec<String>,
+        resource: String,
+        application_id: String,
+        pdp_id: String,
     }
 
     impl Loggable for MockLogEntry {
         fn get_log_level(&self) -> Option<crate::LogLevel> {
             Some(self.level)
+        }
+
+        fn get_log_kind(&self) -> Option<crate::log::LogType> {
+            Some(self.log_kind)
         }
     }
 
