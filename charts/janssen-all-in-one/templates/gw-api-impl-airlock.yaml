@@ -1,0 +1,13 @@
+{{- if and (index .Values "gateway-api" "enabled") (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") }}
+{{- if index .Values "gateway-api" "additionalConfig" "airlock" "createLbService" }}
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: {{ .Release.Name }}-airlock-gw-params
+  namespace: {{ .Release.Namespace }}
+spec:
+  kubernetes:
+    service:
+      type: LoadBalancer
+{{- end }}
+{{- end }}

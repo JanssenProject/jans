@@ -8,10 +8,10 @@
 
 use crate::*;
 use cedarling::bindings::serde_yml;
-use cedarling::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
+use cedarling::{AuthorizeMultiIssuerRequest, EntityData, RequestUnsigned, TokenInput};
 use serde::Deserialize;
 use serde_json::json;
-use std::{collections::HashMap, sync::LazyLock};
+use std::sync::LazyLock;
 use test_utils::token_claims::generate_token_using_claims;
 use wasm_bindgen_test::*;
 
@@ -39,8 +39,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -61,7 +59,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -73,8 +70,6 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
         "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -95,7 +90,6 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -161,31 +155,19 @@ async fn test_init_conf_as_object() {
         .expect("init function should be initialized with js map");
 }
 
-/// Test execution of cedarling.
-/// Policy store and tokens data is used from python example.
+/// Test execution of cedarling with unsigned request.
+/// Policy store from python example; principals provided as entity data.
 ///
 /// Policies used:
-///    @444da5d85403f35ea76519ed1a18a33989f855bf1cf8
-///    permit(
-///        principal is Jans::Workload,
-///        action in [Jans::Action::"Read"],
-///        resource is Jans::Application
-///    )when{
-///        resource.name == "Some Application"
-///    };
-///    
-///    @840da5d85403f35ea76519ed1a18a33989f855bf1cf8
-///    permit(
-///        principal is Jans::User,
-///        action in [Jans::Action::"Read"],
-///        resource is Jans::Application
-///    )when{
-///        resource.name == "Some Application"
-///    };
-///
+///    permit(principal is Jans::Workload, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
+///    permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
 #[wasm_bindgen_test]
 async fn test_run_cedarling() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    // Require only Jans::User so a single User principal that ALLOWs yields overall ALLOW
+    bootstrap_config_json["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
+        "and": [{"===": [{"var": "Jans::User"}, "ALLOW"]}]
+    });
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -196,93 +178,17 @@ async fn test_run_cedarling() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request = Request {
-        tokens: HashMap::from([
-            (
-                "access_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "exp": 1732121460,
-                  "iat": 1731953030,
-                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-                  "token_type": "Bearer",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "x5t#S256": "",
-                  "nbf": 1731953030,
-                  "scope": [
-                    "role",
-                    "openid",
-                    "profile",
-                    "email"
-                  ],
-                  "auth_time": 1731953027,
-                  "username": "Default Admin User",
-                  "status": {
-                    "status_list": {
-                      "idx": 306,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "id_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "exp": 1731956630,
-                  "nbf": 1731953030,
-                  "iat": 1731953030,
-                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-                  "amr": [],
-                  "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-                  "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-                  "jansOpenIDConnectVersion": "openidconnect-1.0",
-                  "acr": "simple_password_auth",
-                  "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-                  "auth_time": 1731953027,
-                  "grant": "authorization_code",
-                  "status": {
-                    "status_list": {
-                      "idx": 307,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "userinfo_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "jti": "OIn3g1SPSDSKAYDzENVoug",
-                  "email_verified": true,
-                  "role": [
-                    "CasaAdmin"
-                  ],
-                  "given_name": "Admin",
-                  "middle_name": "Admin",
-                  "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "updated_at": 1731698135,
-                  "name": "Default Admin User",
-                  "nickname": "Admin",
-                  "family_name": "User",
-                  "email": "admin@jans.test",
-                  "jansAdminUIRole": [
-                    "api-admin"
-                  ]
-                })),
-            ),
-        ]),
+    let request = RequestUnsigned {
+        principals: vec![EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+        }))
+        .expect("Principal EntityData should be deserialized correctly")],
         context: json!({
-            "current_time": 1735349685, // unix time
+            "current_time": 1735349685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -308,13 +214,13 @@ async fn test_run_cedarling() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("Request should be converted to JsObject");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let result = instance
-        .authorize(js_request)
+        .authorize_unsigned(js_request)
         .await
-        .expect("authorize request should be executed");
+        .expect("authorize_unsigned request should be executed");
 
     assert!(result.decision, "decision should be allowed")
 }
@@ -329,8 +235,6 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_TYPE": "memory",
         "CEDARLING_LOG_TTL": 120,
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -351,7 +255,6 @@ async fn test_memory_log_interface() {
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
@@ -365,93 +268,17 @@ async fn test_memory_log_interface() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request = Request {
-        tokens: HashMap::from([
-            (
-                "access_token".to_string(),
-                generate_token_using_claims(json!({
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-                  "iss": "https://account.gluu.org",
-                  "token_type": "Bearer",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "x5t#S256": "",
-                  "nbf": 1731953030,
-                  "scope": [
-                    "role",
-                    "openid",
-                    "profile",
-                    "email"
-                  ],
-                  "auth_time": 1731953027,
-                  "exp": 1732121460,
-                  "iat": 1731953030,
-                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-                  "username": "Default Admin User",
-                  "status": {
-                    "status_list": {
-                      "idx": 306,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "id_token".to_string(),
-                generate_token_using_claims(json!({
-                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "amr": [],
-                  "iss": "https://account.gluu.org",
-                  "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-                  "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-                  "jansOpenIDConnectVersion": "openidconnect-1.0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-                  "nbf": 1731953030,
-                  "auth_time": 1731953027,
-                  "exp": 1731956630,
-                  "grant": "authorization_code",
-                  "iat": 1731953030,
-                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-                  "status": {
-                    "status_list": {
-                      "idx": 307,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "userinfo_token".to_string(),
-                generate_token_using_claims(json!({
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "email_verified": true,
-                  "role": [
-                    "CasaAdmin"
-                  ],
-                  "iss": "https://account.gluu.org",
-                  "given_name": "Admin",
-                  "middle_name": "Admin",
-                  "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "updated_at": 1731698135,
-                  "name": "Default Admin User",
-                  "nickname": "Admin",
-                  "family_name": "User",
-                  "jti": "OIn3g1SPSDSKAYDzENVoug",
-                  "email": "admin@jans.test",
-                  "jansAdminUIRole": [
-                    "api-admin"
-                  ]
-                })),
-            ),
-        ]),
+    let request = RequestUnsigned {
+        principals: vec![EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+        }))
+        .expect("Principal EntityData should be deserialized correctly")],
         context: json!({
-            "current_time": 1735349685, // unix time
+            "current_time": 1735349685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -477,13 +304,13 @@ async fn test_memory_log_interface() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("Request should be converted to JsObject");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let _result = instance
-        .authorize(js_request)
+        .authorize_unsigned(js_request)
         .await
-        .expect("authorize request should be executed");
+        .expect("authorize_unsigned request should be executed");
 
     let js_log_ids = instance.get_log_ids();
     let logs_count = js_log_ids.length();
@@ -602,15 +429,6 @@ async fn test_authorize_unsigned() {
         .expect("authorize_unsigned should be executed successfully");
 
     assert!(result.decision, "Decision should be Allow");
-
-    assert!(
-        result.workload.is_none(),
-        "Workload should not be present for unsigned request"
-    );
-    assert!(
-        result.person.is_none(),
-        "Person should not be present for unsigned request"
-    );
 
     // check by principal type
     assert!(
@@ -1328,6 +1146,51 @@ async fn test_data_api_invalid_key() {
         .expect("value should be converted to JsValue");
     let result = instance.push_data_ctx("", value, None);
     assert!(result.is_err(), "push_data_ctx with empty key should fail");
+}
+
+#[wasm_bindgen_test]
+async fn test_trusted_issuer_loading_info_defaults() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    assert!(
+        !instance.is_trusted_issuer_loaded_by_name("missing_issuer"),
+        "unknown issuer id should not be loaded"
+    );
+    assert!(
+        !instance.is_trusted_issuer_loaded_by_iss("https://missing.example.org"),
+        "unknown issuer iss should not be loaded"
+    );
+
+    let total = instance.total_issuers();
+    let loaded = instance.loaded_trusted_issuers_count();
+    assert!(
+        loaded <= total,
+        "loaded count {loaded} should not exceed total {total}"
+    );
+
+    let loaded_ids = instance.loaded_trusted_issuer_ids();
+    assert_eq!(
+        loaded_ids.length() as usize,
+        loaded,
+        "loaded ids length should match loaded_trusted_issuers_count"
+    );
+    for i in 0..loaded_ids.length() {
+        let id = loaded_ids
+            .get(i)
+            .as_string()
+            .expect("loaded trusted issuer id should be a string");
+        assert!(
+            instance.is_trusted_issuer_loaded_by_name(&id),
+            "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
+        );
+    }
 }
 
 /// Test that function `spawn_task` works as expected

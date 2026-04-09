@@ -38,13 +38,14 @@ jobs:
   build:
     permissions:
       contents: read
+      id-token: write  # keyless Cosign signing via Sigstore OIDC
     if: github.repository == 'JanssenProject/jans'
     name: Deploy docs
     runs-on: ubuntu-latest
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit
 
@@ -96,12 +97,6 @@ jobs:
         run: |
           cp CHANGELOG.md docs/CHANGELOG.md
 
-      - name: Copy generated chart from main
-        run: |
-          helm package charts/janssen/
-          helm package charts/janssen-all-in-one/
-          cp janssen-*.tgz ../
-
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
@@ -110,6 +105,18 @@ jobs:
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Package and sign Helm charts with Cosign
+        run: |
+          helm package charts/janssen/
+          helm package charts/janssen-all-in-one/
+          for chart in janssen-*.tgz; do
+            cosign sign-blob --yes --bundle "${chart}.sigstore.json" "$chart"
+          done
+          cp janssen-*.tgz janssen-*.tgz.sigstore.json ../
 
       - name: Configure Git
         run: |
@@ -214,9 +221,9 @@ jobs:
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout -f gh-pages
           git pull origin gh-pages
-          mv ../janssen-*.tgz ./charts/
+          mv ../janssen-*.tgz ../janssen-*.tgz.sigstore.json ./charts/
           cd ./charts
-          git add janssen-*.tgz && git update-index --refresh
+          git add janssen-*.tgz janssen-*.tgz.sigstore.json && git update-index --refresh
           helm repo index .
           git add index.yaml && git update-index --refresh
           cd ..
