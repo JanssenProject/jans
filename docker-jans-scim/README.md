@@ -104,7 +104,9 @@ The following key-value pairs are the defaults:
     "persistence_duration_log_target": "FILE",
     "persistence_duration_log_level": "INFO",
     "script_log_target": "FILE",
-    "script_log_level": "INFO"
+    "script_log_level": "INFO",
+    "root_log_target": "STDOUT",
+    "root_log_level": "INFO"
 }
 ```
 

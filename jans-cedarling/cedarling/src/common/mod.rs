@@ -16,30 +16,6 @@ pub(crate) mod json_rules;
 pub(crate) mod issuer_utils;
 pub(crate) mod policy_store;
 
-/// Used for decoding the policy and schema metadata
-#[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]
-enum Encoding {
-    /// indicates that the related value is base64 encoded
-    #[serde(rename = "base64")]
-    Base64,
-
-    /// indicates that the related value is not encoded, ie it's just a plain string
-    #[serde(rename = "none")]
-    None,
-}
-
-/// Used for decoding the policy and schema metadata
-#[derive(Debug, Clone, serde::Deserialize)]
-enum ContentType {
-    /// indicates that the related value is in the cedar policy / schema language
-    #[serde(rename = "cedar")]
-    Cedar,
-
-    /// indicates that the related value is in the json representation of the cedar policy / schema language
-    #[serde(rename = "cedar-json")]
-    CedarJson,
-}
-
 // Implement the trait for all iterators over Result<T, E>
 impl<T, E, I> PartitionResult<T, E> for I where I: Iterator<Item = Result<T, E>> {}
 
