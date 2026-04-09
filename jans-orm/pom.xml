@@ -27,7 +27,7 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
 
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.14</jacoco.version>
 
 		<sonar.projectKey>JanssenProject_jans-orm</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
