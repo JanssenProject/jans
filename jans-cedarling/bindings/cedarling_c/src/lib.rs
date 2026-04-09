@@ -1049,8 +1049,8 @@ pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingString
                         let _ = std::ffi::CString::from_raw(item_ptr);
                     }
                 }
-                // Free the array of pointers
-                let _ = Vec::from_raw_parts(array_ref.items, array_ref.count, array_ref.count);
+                let slice_ptr = ptr::slice_from_raw_parts_mut(array_ref.items, array_ref.count);
+                drop(Box::from_raw(slice_ptr));
             }
             // Clear the struct to prevent double-free
             array_ref.items = ptr::null_mut();

@@ -144,8 +144,11 @@ impl CedarlingStringArray {
                 },
             };
         }
-        let items_ptr = c_strings.as_mut_ptr();
-        std::mem::forget(c_strings);
+
+        let mut boxed = c_strings.into_boxed_slice();
+        let count = boxed.len();
+        let items_ptr = boxed.as_mut_ptr();
+        std::mem::forget(boxed);
         Ok(CedarlingStringArray {
             items: items_ptr,
             count,
