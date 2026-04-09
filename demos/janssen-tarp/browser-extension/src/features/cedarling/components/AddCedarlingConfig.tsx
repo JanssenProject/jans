@@ -84,11 +84,12 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
       navigator.clipboard.writeText(jsonString);
       setSnackbar({ open: true, message: 'JSON copied to clipboard!' });
     } catch (error) {
-      setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
+      const message = error instanceof Error ? error.message : String(error);
+      setSnackbar({ open: true, message: 'Copy failed: ' + message });
     }
   };
 
-  const validateBootstrap = async (e) => {
+  const validateBootstrap = async (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     let bootstrap = e.target.value;
     setErrorMessage('');
     if (inputSelection === 'url') {
@@ -114,14 +115,15 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
     await isJsonValid(bootstrap);
   };
 
-  const isJsonValid = async (bootstrap) => {
+  const isJsonValid = async (bootstrap: unknown) => {
     setErrorMessage('');
     try {
       setBootstrap(JSON.parse(JSON.stringify(bootstrap)));
       return true;
     } catch (err) {
       console.error(err)
-      setErrorMessage(`Invalid input: ${err}`);
+      const message = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`Invalid input: ${message}`);
       return false;
     }
   };
@@ -146,7 +148,8 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
 });
     } catch (err) {
       console.error(err)
-      setErrorMessage(ADD_BOOTSTRAP_ERROR + err)
+      const message = err instanceof Error ? err.message : String(err);
+      setErrorMessage(ADD_BOOTSTRAP_ERROR + ' ' + message)
     }
     setLoading(false);
   }
@@ -177,7 +180,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
         onClose={handleClose}
         PaperProps={{
           component: 'form',
-          onSubmit: (event) => {
+          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
           },
         }}
