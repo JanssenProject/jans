@@ -156,17 +156,6 @@ For a complete working example showing the full instantiation flow, see [`exampl
 
 For details on the directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
 
-### ID Token Trust Mode
-
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
-
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
-
 ### Testing Configuration
 
 For testing scenarios, you may want to disable JWT validation. You can set environment variables:
@@ -174,14 +163,12 @@ For testing scenarios, you may want to disable JWT validation. You can set envir
 ```bash
 export CEDARLING_JWT_SIG_VALIDATION="disabled"
 export CEDARLING_JWT_STATUS_VALIDATION="disabled"
-export CEDARLING_ID_TOKEN_TRUST_MODE="never"
 ```
 
 Or configure in your Python code:
 
 ```python
 import os
-os.environ['CEDARLING_ID_TOKEN_TRUST_MODE'] = 'never'
 os.environ['CEDARLING_JWT_SIG_VALIDATION'] = 'disabled'
 ```
 
@@ -326,6 +313,21 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+## Trusted Issuer Loading Info
+
+`Cedarling` exposes trusted issuer loading status APIs:
+
+```python
+loaded_by_name = instance.is_trusted_issuer_loaded_by_name("issuer_id")
+loaded_by_iss = instance.is_trusted_issuer_loaded_by_iss("https://issuer.example.org")
+total = instance.total_issuers()
+loaded_count = instance.loaded_trusted_issuers_count()
+loaded_ids = instance.loaded_trusted_issuer_ids()
+failed_ids = instance.failed_trusted_issuer_ids()
+```
+
+These values are meaningful when your policy store defines a `trusted-issuers/` section.
 
 ## Building the Python Library
 

@@ -1,3 +1,25 @@
 [target.wasm32-unknown-unknown]
 runner = 'wasm-bindgen-test-runner'
 rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
+
+[env]
+IOS_MIN = "17.5"
+IPHONEOS_DEPLOYMENT_TARGET = "17.5"
+
+# This handles your CFLAGS, CXXFLAGS, and DEPLOYMENT_TARGET
+[target.aarch64-apple-ios.env]
+CFLAGS = "-miphoneos-version-min=17.5"
+CXXFLAGS = "-miphoneos-version-min=17.5"
+
+[target.aarch64-apple-ios-sim.env]
+CFLAGS = "-mios-simulator-version-min=17.5"
+CXXFLAGS = "-mios-simulator-version-min=17.5"
+
+# Configuration specifically for 64-bit ARM iOS devices
+[target.aarch64-apple-ios]
+# This handles your RUSTFLAGS
+rustflags = ["-C", "link-arg=-miphoneos-version-min=17.5"]
+
+# Configuration for the iOS Simulator (Apple Silicon Macs)
+[target.aarch64-apple-ios-sim]
+rustflags = ["-C", "link-arg=-mios-simulator-version-min=17.5"]

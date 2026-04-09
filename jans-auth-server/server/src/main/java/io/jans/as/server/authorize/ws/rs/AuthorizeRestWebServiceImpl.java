@@ -51,6 +51,7 @@ import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.util.CoreCertUtil;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import jakarta.inject.Inject;
@@ -448,7 +449,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             final ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-            executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+            executionContext.setCertAsPem(CoreCertUtil.getClientCert(authzRequest.getHttpRequest()).getCert());
             newAccessToken = authorizationGrant.createAccessToken(executionContext);
 
             authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
@@ -594,7 +595,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         final ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-        executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+        executionContext.setCertAsPem(CoreCertUtil.getClientCert(authzRequest.getHttpRequest()).getCert());
 
         final LogoutStatusJwt logoutStatusJwt = authorizationGrant.createLogoutStatusJwt(executionContext);
         if (logoutStatusJwt != null) {
@@ -893,7 +894,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         executionContext.setAttributeService(attributeService);
         executionContext.setGrant(cibaGrant);
         executionContext.setClient(client);
-        executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+        executionContext.setCertAsPem(CoreCertUtil.getClientCert(authzRequest.getHttpRequest()).getCert());
         executionContext.setScopes(StringUtils.isNotBlank(authzRequest.getScope()) ? new HashSet<>(Arrays.asList(authzRequest.getScope().split(" "))) : new HashSet<>());
         executionContext.setAuthzRequest(authzRequest);
         executionContext.setAuthzDetails(authzRequest.getAuthzDetails());

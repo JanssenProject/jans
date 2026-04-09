@@ -13,8 +13,6 @@
 //! - Performance testing utilities
 
 use super::errors::PolicyStoreError;
-use chrono::Utc;
-use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
 use zip::write::{ExtendedFileOptions, FileOptions};
@@ -42,8 +40,6 @@ pub(crate) struct PolicyStoreTestBuilder {
     pub entities: HashMap<String, String>,
     /// Trusted issuers: filename -> content
     pub trusted_issuers: HashMap<String, String>,
-    /// Whether to generate manifest with checksums
-    pub generate_manifest: bool,
     /// Additional files to include
     pub extra_files: HashMap<String, String>,
 }
@@ -68,7 +64,6 @@ impl PolicyStoreTestBuilder {
             templates: HashMap::new(),
             entities: HashMap::new(),
             trusted_issuers: HashMap::new(),
-            generate_manifest: false,
             extra_files: HashMap::new(),
         }
     }
@@ -158,12 +153,6 @@ impl PolicyStoreTestBuilder {
         self
     }
 
-    /// Enable manifest generation with checksums.
-    pub(crate) fn with_manifest(mut self) -> Self {
-        self.generate_manifest = true;
-        self
-    }
-
     /// Generate metadata.json content.
     pub(crate) fn build_metadata_json(&self) -> String {
         let mut metadata = serde_json::json!({
@@ -180,35 +169,6 @@ impl PolicyStoreTestBuilder {
         }
 
         serde_json::to_string_pretty(&metadata).unwrap()
-    }
-
-    /// Generate manifest.json content with computed checksums (SHA-256).
-    fn build_manifest_json(&self, files: &HashMap<String, Vec<u8>>) -> String {
-        let mut manifest_files = HashMap::new();
-
-        for (path, content) in files {
-            if path != "manifest.json" {
-                let mut hasher = Sha256::new();
-                hasher.update(content);
-                let checksum = format!("sha256:{}", hex::encode(hasher.finalize()));
-
-                manifest_files.insert(
-                    path.clone(),
-                    serde_json::json!({
-                        "size": content.len(),
-                        "checksum": checksum
-                    }),
-                );
-            }
-        }
-
-        let manifest = serde_json::json!({
-            "policy_store_id": self.id,
-            "generated_date": Utc::now().to_rfc3339(),
-            "files": manifest_files
-        });
-
-        serde_json::to_string_pretty(&manifest).unwrap()
     }
 
     /// Build all files as a `HashMap` (path -> content bytes).
@@ -249,12 +209,6 @@ impl PolicyStoreTestBuilder {
         for (name, content) in &self.trusted_issuers {
             let path = format!("trusted-issuers/{name}.json");
             files.insert(path, content.as_bytes().to_vec());
-        }
-
-        // Generate manifest if requested (must be last before extra_files)
-        if self.generate_manifest {
-            let manifest_content = self.build_manifest_json(&files);
-            files.insert("manifest.json".to_string(), manifest_content.into_bytes());
         }
 
         // Add extra files last, overwriting any generated files with the same path

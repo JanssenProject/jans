@@ -124,6 +124,8 @@ components:
           type: boolean
         disableJdkLogger:
           type: boolean
+        disableExternalLoggerConfiguration:
+          type: boolean
         disableLoggerTimer:
           type: boolean
         useLocalCache:
