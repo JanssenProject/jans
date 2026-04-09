@@ -15,14 +15,6 @@ use crate::bootstrap_config::BootstrapConfigLoadingError;
 pub struct PolicyStoreConfig {
     /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
-    /// Whether to validate file checksums when loading from directory or archive sources.
-    /// Defaults to `true` on parsing json. Set to `false` to disable checksum validation.
-    #[serde(default = "default_validate_checksum")]
-    pub validate_checksum: bool,
-}
-
-fn default_validate_checksum() -> bool {
-    true
 }
 
 /// Raw policy store config
@@ -31,8 +23,6 @@ pub struct PolicyStoreConfigRaw {
     pub source: String,
     /// Path
     pub path: Option<String>,
-    /// Whether to validate file checksums (defaults to true)
-    pub validate_checksum: Option<bool>,
 }
 
 /// `PolicyStoreSource` represents the source from which policies will be retrieved.
@@ -74,7 +64,7 @@ pub enum PolicyStoreSource {
     /// Read policy from a directory structure.
     ///
     /// The path points to a directory containing the policy store
-    /// in the new directory structure format (with manifest.json, policies/, etc.).
+    /// in the directory structure format (`metadata.json`, `schema.cedarschema`, `policies/`, etc.).
     Directory(PathBuf),
 
     /// Read policy from Cedar Archive bytes directly.
@@ -139,9 +129,6 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             ),
             _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
         };
-        Ok(Self {
-            source,
-            validate_checksum: raw.validate_checksum.unwrap_or(true),
-        })
+        Ok(Self { source })
     }
 }
