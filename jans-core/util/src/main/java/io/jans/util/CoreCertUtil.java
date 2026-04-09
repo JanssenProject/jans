@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,7 @@ public class CoreCertUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CoreCertUtil.class);
 
     public static final String HEADER_XFCC_CERT = "X-Forwarded-Client-Cert";
+    public static final String HEADER_XFTCC_CERT = "X-Forwarded-Tls-Client-Cert";
     public static final String HEADER_CLIENT_CERT = "X-ClientCert";
 
     public static final Pattern PARAM_XFCC_HASH = Pattern.compile("Hash=([^;]+)");
@@ -28,7 +30,7 @@ public class CoreCertUtil {
             return MISSING_CERT_HEADERS;
         }
 
-        // First try to parse XFCC header
+        // 1. First try to parse XFCC header (Envoy/Istio)
         String headerValue = request.getHeader(HEADER_XFCC_CERT);
         ClientCert clientCert = null;
 
@@ -43,7 +45,20 @@ public class CoreCertUtil {
             }
         }
 
-        // Use legacy header if XFCC is not present, parsing failed, or XFCC has no cert
+        // 2. Try XFTCC header (Traefik) - raw base64 without PEM delimiters
+        headerValue = request.getHeader(HEADER_XFTCC_CERT);
+        if (headerValue != null && !headerValue.isEmpty()) {
+            String cert = parseXftccHeader(headerValue);
+            if (cert != null) {
+                // Combine with XFCC metadata if available
+                if (clientCert != null) {
+                    return new ClientCert(clientCert.getHash(), cert, clientCert.getSubject(), clientCert.getUri());
+                }
+                return new ClientCert(null, cert, null, null);
+            }
+        }
+
+        // 3. Use legacy header if neither XFCC nor XFTCC worked
         headerValue = request.getHeader(HEADER_CLIENT_CERT);
         if (headerValue != null && !headerValue.isEmpty()) {
             // If we have XFCC metadata (hash, subject, uri) but no cert, combine with legacy cert
@@ -82,6 +97,32 @@ public class CoreCertUtil {
         }
 
         return new ClientCert(hash, cert, subject, uri);
+    }
+
+    /**
+     * Parses the X-Forwarded-Tls-Client-Cert header (Traefik format).
+     * The header contains raw base64-encoded certificate without PEM delimiters.
+     *
+     * @param headerValue raw base64 string
+     * @return PEM-formatted certificate or null if invalid
+     */
+    public static String parseXftccHeader(String headerValue) {
+        if (headerValue == null || headerValue.trim().isEmpty()) {
+            return null;
+        }
+
+        String base64Content = headerValue.trim();
+
+        // Validate it's valid base64 by attempting decode
+        try {
+            Base64.getDecoder().decode(base64Content);
+        } catch (IllegalArgumentException e) {
+            LOG.error("Failed to decode X-Forwarded-Tls-Client-Cert header: {}", e.getMessage());
+            return null;
+        }
+
+        // Convert to PEM format
+        return "-----BEGIN CERTIFICATE-----\n" + base64Content + "\n-----END CERTIFICATE-----";
     }
 
     private static String extract(String input, Pattern pattern) {
