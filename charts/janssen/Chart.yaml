@@ -89,3 +89,7 @@ dependencies:
     - name: shibboleth-idp
       condition: global.shibboleth-idp.enabled
       version: 0.0.0-nightly
+
+    - name: gateway-api
+      condition: global.gateway-api.enabled
+      version: 0.0.0-nightly

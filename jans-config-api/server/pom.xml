@@ -80,15 +80,6 @@
 			<groupId>jakarta.enterprise</groupId>
 			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.weld.servlet</groupId>
-			<artifactId>weld-servlet-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.weld</groupId>
-			<artifactId>weld-core-impl</artifactId>
-		</dependency>
-
 
 		<!-- Microprofile -->
 		<dependency>
@@ -181,18 +172,12 @@
 			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.el</groupId>
-			<artifactId>jakarta.el-api</artifactId>
-		</dependency>
+
 		<dependency>
 		    <groupId>jakarta.servlet.jsp</groupId>
 		    <artifactId>jakarta.servlet.jsp-api</artifactId>
 		</dependency>
-        <dependency>
-    	    <groupId>org.glassfish</groupId>
-			<artifactId>jakarta.el</artifactId>
-	    </dependency>
+
 
 		<!-- Quartz -->
 		<dependency>
@@ -473,23 +458,12 @@
 				</dependency>
 
 				<dependency>
-					<groupId>jakarta.el</groupId>
-					<artifactId>jakarta.el-api</artifactId>
-				</dependency>
-
-				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-core</artifactId>
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.weld</groupId>
 					<artifactId>weld-core-impl</artifactId>
-				</dependency>
-
-				<dependency>
-					<groupId>jakarta.ejb</groupId>
-					<artifactId>jakarta.ejb-api</artifactId>
-					<scope>provided</scope>
 				</dependency>
 
 				<!-- Test: Embedded Jetty -->

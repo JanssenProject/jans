@@ -5,7 +5,7 @@
 
 mod spawn_task;
 
-pub(crate) use spawn_task::*;
+pub use spawn_task::*;
 
 use http_utils::{Backoff, HttpRequestError, Sender};
 use reqwest::Client;

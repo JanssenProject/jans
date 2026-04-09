@@ -20,7 +20,7 @@ pub(super) fn build_iss_entity(
     iss: &TrustedIssuer,
     schema: Option<&MappingSchema>,
 ) -> Result<(Origin, Entity), BuildEntityError> {
-    let origin = iss.oidc_endpoint.origin();
+    let origin = iss.get_oidc_endpoint().origin();
 
     let attrs_shape = schema
         .as_ref()
@@ -34,7 +34,6 @@ pub(super) fn build_iss_entity(
         &iss.entity_attr_srcs(),
         &BuiltEntities::default(),
         attrs_shape,
-        None,
     )
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
@@ -49,7 +48,7 @@ impl TrustedIssuer {
     /// This currently hard-coded since we don't have specifications yet on
     /// how to configure this using the policy store.
     fn entity_attr_srcs(&self) -> HashMap<String, Value> {
-        let oidc_endpoint = &self.oidc_endpoint;
+        let oidc_endpoint = &self.get_oidc_endpoint();
         HashMap::from([(
             "issuer_entity_id".into(),
             json!({
@@ -63,21 +62,28 @@ impl TrustedIssuer {
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashMap;
+
+    use serde_json::json;
+    use url::Url;
+
     use super::super::build_iss_entity::build_iss_entity;
     use super::super::test::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::schema::MappingSchema;
-    use serde_json::json;
+
+    fn test_trusted_issuer() -> TrustedIssuer {
+        TrustedIssuer::new(
+            "some_iss".to_string(),
+            "some_desc".to_string(),
+            Url::parse("https://test.jans.org").unwrap(),
+            HashMap::new(),
+        )
+    }
 
     #[test]
     fn can_build_trusted_issuer_entity_with_schema() {
-        let iss: TrustedIssuer = serde_json::from_value(json!({
-            "name": "some_iss",
-            "description": "some_desc",
-            "openid_configuration_endpoint": "https://test.jans.org",
-            "token_metadata": {},
-        }))
-        .expect("should be a valid trusted issuer");
+        let iss = test_trusted_issuer();
         let schema: MappingSchema = (&*CEDARLING_VALIDATOR_SCHEMA)
             .try_into()
             .expect("should initialize mapping schema");
@@ -106,13 +112,7 @@ mod test {
 
     #[test]
     fn can_build_trusted_issuer_entity_without_schema() {
-        let iss: TrustedIssuer = serde_json::from_value(json!({
-            "name": "some_iss",
-            "description": "some_desc",
-            "openid_configuration_endpoint": "https://test.jans.org",
-            "token_metadata": {},
-        }))
-        .expect("should be a valid trusted issuer");
+        let iss = test_trusted_issuer();
         let (origin, iss_entity) = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
             .expect("should build TrustedIssuer entity");
 
