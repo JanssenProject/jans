@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.model.BaseTest;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.FeatureFlagType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -517,6 +518,14 @@ public class UtilTest extends BaseTest {
         assertEquals(resultMap.get("key1"), inputMap.get("key1"));
         assertEquals(resultMap.get("key2"), inputMap.get("key2"));
         assertEquals(resultMap.get("key3"), inputMap.get("key3"));
+    }
+    
+    @Test
+    public void shouldSerializeFeatureFlagTypeEnumToLowerCase() {
+        ObjectMapper objectMapper = Util.createJsonMapper();
+        FeatureFlagType featureFlagType = FeatureFlagType.HEALTH_CHECK ;
+        String json = objectMapper.writeValueAsString(featureFlagType);
+        assertEquals("health_check", json);
     }
 
 }
