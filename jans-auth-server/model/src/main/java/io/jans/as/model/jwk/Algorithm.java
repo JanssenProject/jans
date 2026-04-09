@@ -9,8 +9,8 @@ package io.jans.as.model.jwk;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.crypto.signature.RSAKeyFactory;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -169,7 +169,7 @@ public enum Algorithm {
             Algorithm algorithm = Algorithm.fromString(param);
             if (algorithm != null && algorithm.use == use) {
                 algorithms.add(algorithm);
-            } else if (StringUtils.equals("RSA_OAEP", param)) {
+            } else if (Strings.CS.equals("RSA_OAEP", param)) {
                 algorithms.add(RSA_OAEP);
             }
         }

@@ -18,7 +18,7 @@ pub(crate) fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let submodule = PyModule::new(m.py(), "data_errors_ctx")?;
     errors::data_errors_module(&submodule)?;
     m.add_submodule(&submodule)?;
-    
+
     // Insert into sys.modules so it can be imported as cedarling_python.data_errors_ctx
     // Note: add_submodule only attaches the child as an attribute and does not insert it into sys.modules,
     // so the explicit set_item call is required to enable package-qualified imports
