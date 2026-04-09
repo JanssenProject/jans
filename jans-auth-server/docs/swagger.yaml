@@ -60,7 +60,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /evaluation:
+  /restv1/evaluation:
     post:
       tags:
         - Access Evaluation
@@ -97,7 +97,7 @@ paths:
           description: Invalid request
         500:
           description: Internal server error
-  /authorize-challenge:
+  /restv1/authorize-challenge:
     post:
       tags:
         - Authorization Challenge
@@ -183,7 +183,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /authorize:
+  /restv1/authorize:
     get:
       tags:
         - Authorization
@@ -565,7 +565,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /par:
+  /restv1/par:
     post:
       tags:
         - Authorization
@@ -711,7 +711,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /bc-authorize:
+  /restv1/bc-authorize:
     post:
       tags:
         - Authorization
@@ -811,7 +811,7 @@ paths:
                     type: string
         403:
           $ref: '#/components/responses/AccessDenied'
-  /bc-deviceRegistration:
+  /restv1/bc-deviceRegistration:
     post:
       tags:
         - Registration
@@ -869,7 +869,7 @@ paths:
                     type: string
         403:
           $ref: '#/components/responses/AccessDenied'
-  /clientinfo:
+  /restv1/clientinfo:
     get:
       tags:
         - Client Info
@@ -1062,7 +1062,7 @@ paths:
                       type: string
         500:
           $ref: '#/components/responses/InternalServerError'
-  /introspection:
+  /restv1/introspection:
     get:
       tags:
         - Token
@@ -1323,7 +1323,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /jwks:
+  /restv1/jwks:
     get:
       tags:
         - JWK - JSON Web Key Set (JWKs)
@@ -1349,7 +1349,7 @@ paths:
                       $ref: '#/components/schemas/JsonWebKey'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /jwks/archived:
+  /restv1/jwks/archived:
     get:
       tags:
         - Archived JWK - Archived JSON Web Key (JWK)
@@ -1394,7 +1394,7 @@ paths:
                     type: string
         500:
           $ref: '#/components/responses/InternalServerError'
-  /register:
+  /restv1/register:
     post:
       tags:
         - Registration
@@ -2735,7 +2735,7 @@ paths:
                     type: string
         500:
           $ref: '#/components/responses/InternalServerError'
-  /revoke:
+  /restv1/revoke:
     post:
       tags:
         - Token
@@ -2783,7 +2783,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /session_status:
+  /restv1/session_status:
     get:
       tags:
         - Session Management
@@ -2810,7 +2810,7 @@ paths:
                   custom_state:
                     type: string
 
-  /status_list_aggregation:
+  /restv1/status_list_aggregation:
     get:
       tags:
         - Status List Aggregation
@@ -2848,7 +2848,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /status_list:
+  /restv1/status_list:
     get:
       tags:
         - Status List
@@ -2894,7 +2894,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /global-token-revocation:
+  /restv1/global-token-revocation:
     post:
       tags:
         - Global Token Revocation
@@ -2928,7 +2928,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /end_session:
+  /restv1/end_session:
     get:
       tags:
         - Session Management
@@ -2994,7 +2994,7 @@ paths:
                     type: string
         500:
           $ref: '#/components/responses/InternalServerError'
-  /token:
+  /restv1/token:
     post:
       tags:
         - Token
@@ -3120,7 +3120,7 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /uma/gather_claims:
+  /restv1/uma/gather_claims:
     get:
       tags:
         - UMA (User Managed Access)
@@ -3262,7 +3262,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /uma2-configuration:
+  /restv1/uma2-configuration:
     get:
       tags:
         - UMA (User Managed Access)
@@ -3415,7 +3415,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /host/rsrc_pr:
+  /restv1/host/rsrc_pr:
     post:
       tags:
         - UMA (User Managed Access)
@@ -3516,7 +3516,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /host/rsrc/resource_set:
+  /restv1/host/rsrc/resource_set:
     post:
       tags:
         - UMA 2 Resource
@@ -3609,7 +3609,7 @@ paths:
                     type: string
                   details:
                     type: string
-  '/host/rsrc/resource_set/{rsid}:':
+  '/restv1/host/rsrc/resource_set/{rsid}:':
     parameters:
       - name: rsid
         in: path
@@ -3817,7 +3817,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /host/rsrc/resource_set/{rsid}:
+  /restv1/host/rsrc/resource_set/{rsid}:
     get:
       tags:
         - UMA 2 Resource
@@ -3907,7 +3907,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /rpt/status:
+  /restv1/rpt/status:
     get:
       tags:
         - Token Introspection
@@ -4190,7 +4190,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /uma/scopes{id}:
+  /restv1/uma/scopes{id}:
     parameters:
     - name: id
       in: path
@@ -4261,7 +4261,7 @@ paths:
                     type: string
                   details:
                     type: string
-  /userinfo:
+  /restv1/userinfo:
     get:
       tags:
         - User Info
@@ -4480,7 +4480,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /internal/stat:
+  /restv1/internal/stat:
     get:
       tags:
         - Internal Statistic
@@ -4626,7 +4626,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /ssa:
+  /restv1/ssa:
     post:
       tags:
         - SSA
@@ -4894,7 +4894,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 
-  /ssa/validation:
+  /restv1/ssa/validation:
     post:
       tags:
         - SSA
@@ -4929,7 +4929,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 
-  /ssa/jwt:
+  /restv1/ssa/jwt:
     get:
       tags:
         - SSA

@@ -10,7 +10,7 @@ tags:
 
 ## Including in the project
 
-The Cedarling library is not yet uploaded to [crates.io](jans-cedarling), so the only way to use it right now is by including it directly from the source in your project.
+The Cedarling library is not yet uploaded to [crates.io](https://crates.io), so the only way to use it right now is by including it directly from the source in your project.
 
 **1. Clone the Jans repository**
 
@@ -78,11 +78,11 @@ cargo doc -p cedarling --no-deps --open
 **5. Build examples**
 
 ```bash
-# Run JWT validation example
-cargo run -p cedarling --example authorize_with_jwt_validation
-
 # Run unsigned authorization example
 cargo run -p cedarling --example authorize_unsigned
+
+# Run multi-issuer profiling example
+cargo run -p cedarling --example profiling_multi_issuer
 
 # Stdout logging
 cargo run -p cedarling --example log_init -- stdout
@@ -132,16 +132,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             signature_algorithms_supported: HashSet::new(),
         }.allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
             principal_bool_operator: JsonRule::new(serde_json::json!(
                 {"===": [{"var": "Jans::User"}, "ALLOW"]}
             )).unwrap(),
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default()
-            .with_user()
-            .with_workload(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
     }).await?;
 
@@ -215,19 +211,6 @@ pub struct BootstrapConfig {
 }
 ```
 
-#### `Request`
-
-Token-based authorization request.
-
-```rust
-pub struct Request {
-    pub tokens: HashMap<String, String>,
-    pub action: String,
-    pub resource: EntityData,
-    pub context: serde_json::Value,
-}
-```
-
 #### `RequestUnsigned`
 
 Unsigned authorization request.
@@ -273,20 +256,20 @@ Initialize a new Cedarling instance.
 pub async fn new(config: &BootstrapConfig) -> Result<Self, CedarlingError>
 ```
 
-#### `authorize()`
-
-Perform token-based authorization.
-
-```rust
-pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, CedarlingError>
-```
-
 #### `authorize_unsigned()`
 
-Perform unsigned authorization.
+Perform unsigned authorization with directly provided principals.
 
 ```rust
 pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<AuthorizeResult, CedarlingError>
+```
+
+#### `authorize_multi_issuer()`
+
+Perform token-based authorization using multi-issuer tokens.
+
+```rust
+pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest) -> Result<MultiIssuerAuthorizeResult, AuthorizeError>
 ```
 
 #### `pop_logs()`
@@ -407,6 +390,6 @@ let config = BootstrapConfig {
 
 - [Getting Started with Cedarling Rust](../tutorials/rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
 - [Cedarling Properties](../reference/cedarling-properties.md)

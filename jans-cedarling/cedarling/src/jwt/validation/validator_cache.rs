@@ -304,7 +304,7 @@ impl OwnedValidatorInfo {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::common::policy_store::TokenEntityMetadata;
     use crate::jwt::validation::JwtValidator;
     use std::collections::HashSet;
 
@@ -320,10 +320,6 @@ mod test {
                 entity_type_name: "AccessToken".into(),
                 principal_mapping: HashSet::default(),
                 token_id: "iss".into(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: Some("aud".into()),
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
             jsonwebtoken::Algorithm::HS256,

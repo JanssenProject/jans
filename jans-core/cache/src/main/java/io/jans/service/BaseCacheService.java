@@ -9,9 +9,9 @@ package io.jans.service;
 import io.jans.service.cache.CacheInterface;
 import io.jans.service.cache.CacheProvider;
 import io.jans.service.cache.CacheProviderType;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
-import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.function.Supplier;
 
@@ -120,31 +120,8 @@ public abstract class BaseCacheService implements CacheInterface {
         cacheProvider.cleanup(now);
     }
 
-    @Deprecated
     public void put(String key, Object object) {
         put(DEFAULT_EXPIRATION, key, object);
-    }
-
-    @Deprecated // we keep it only for back-compatibility of scripts code
-    public Object get(String region, String key) {
-        return get(key);
-    }
-
-    @Deprecated // we keep it only for back-compatibility of scripts code
-    public void put(String expirationInSeconds, String key, Object object) {
-    	int expiration = DEFAULT_EXPIRATION; 
-    	try {
-			expiration = Integer.parseInt(expirationInSeconds);
-		} catch (NumberFormatException ex) {
-			// Use default expiration
-			log.trace("Using default expiration instead of expirationInSeconds: {}", expirationInSeconds);
-		}
-        put(expiration, key, object);
-    }
-
-    @Deprecated // we keep it only for back-compatibility of scripts code
-    public void remove(String region, String key) {
-        remove(key);
     }
 
     protected abstract CacheProvider getCacheProvider();

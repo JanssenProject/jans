@@ -13,7 +13,6 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.adminui.LicenseConfiguration;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
@@ -92,6 +91,15 @@ public class AUIConfigurationService extends BaseService {
         }
     }
 
+    /**
+     * Builds an AUIConfiguration populated from the given AdminConf and global AppConfiguration.
+     *
+     * Populates web and backend OIDC client settings, OIDC endpoints, UI settings, and Cedarling-related fields.
+     *
+     * @param appType the application type key to assign to the resulting configuration
+     * @param appConf the persisted AdminConf containing OIDC and UI configuration values
+     * @return an AUIConfiguration populated with values from appConf and the global AppConfiguration
+     */
     private AUIConfiguration addPropertiesToAUIConfiguration(String appType, AdminConf appConf) {
         AUIConfiguration auiConfig = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();
@@ -121,7 +129,6 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         auiConfig.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
         auiConfig.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
-        auiConfig.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
         auiConfig.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
         return auiConfig;
     }
