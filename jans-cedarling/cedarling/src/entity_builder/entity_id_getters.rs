@@ -5,7 +5,6 @@
 
 use super::BuildEntityErrorKind;
 use crate::jwt::Token;
-use serde_json::Value;
 use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
@@ -54,49 +53,6 @@ pub(super) fn get_first_valid_entity_id(
     }
 
     Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
-}
-
-/// Collects all valid entity IDs from the provided sources.
-pub(super) fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
-    id_srcs
-        .iter()
-        .filter_map(|src| match src {
-            EntityIdSrc::Token { token, claim } => token.get_claim_val(claim).cloned(),
-            EntityIdSrc::String(eid) => id_str_src_to_value(eid),
-        })
-        .flat_map(claim_to_ids)
-        .collect()
-}
-
-fn id_str_src_to_value(eid: &str) -> Option<Value> {
-    let eid = eid.trim().to_string();
-    if eid.is_empty() {
-        None
-    } else {
-        let eid =
-            serde_json::from_str::<Value>(&eid).expect("Strings should always be a valid JSON");
-        Some(eid)
-    }
-}
-
-fn claim_to_ids(claim: Value) -> Vec<SmolStr> {
-    let mut ids =
-        Vec::with_capacity(1 + claim.as_array().map(std::vec::Vec::len).unwrap_or_default());
-    match claim {
-        serde_json::Value::Number(number) => {
-            ids.push(number.to_smolstr());
-        },
-        serde_json::Value::String(string) => {
-            ids.push(string.trim_matches('"').into());
-        },
-        serde_json::Value::Array(values) => {
-            for value in values {
-                ids.append(&mut claim_to_ids(value));
-            }
-        },
-        _ => {},
-    }
-    ids
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -244,60 +200,5 @@ mod test {
             BuildEntityErrorKind::MissingEntityId(GetEntityIdErrors(expected_errs)),
             err,
         );
-    }
-
-    #[test]
-    fn test_collect_all_entity_ids() {
-        let token1 = Token::new(
-            "tkn1",
-            HashMap::from([("role".into(), json!("role1"))]).into(),
-            None,
-        );
-        let token2 = Token::new(
-            "tkn1",
-            HashMap::from([("role".into(), json!("role2"))]).into(),
-            None,
-        );
-
-        // Collecting one valid id
-        let ids = collect_all_valid_entity_ids(&[EntityIdSrc::Token {
-            token: &token1,
-            claim: "role",
-        }]);
-        assert_eq!(ids, vec!["role1"]);
-
-        // Collecting multiple valid ids
-        let ids = collect_all_valid_entity_ids(&[
-            EntityIdSrc::Token {
-                token: &token1,
-                claim: "role",
-            },
-            EntityIdSrc::Token {
-                token: &token2,
-                claim: "role",
-            },
-        ]);
-        assert_eq!(ids, vec!["role1", "role2"]);
-
-        // Ignore invalid ids
-        let ids = collect_all_valid_entity_ids(&[
-            EntityIdSrc::Token {
-                token: &token1,
-                claim: "role",
-            },
-            EntityIdSrc::Token {
-                token: &token1,
-                claim: "missing",
-            },
-            EntityIdSrc::Token {
-                token: &token1,
-                claim: "",
-            },
-            EntityIdSrc::Token {
-                token: &token2,
-                claim: "role",
-            },
-        ]);
-        assert_eq!(ids, vec!["role1", "role2"]);
     }
 }

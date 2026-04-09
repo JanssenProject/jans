@@ -68,7 +68,7 @@ def main():
             manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
         else:
             hostname = manager.config.get("hostname")
-            logger.info(f"Pulling SSL certificate from {hostname}")
+            logger.info("Pulling SSL certificate from %s", hostname)
             get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
@@ -85,7 +85,7 @@ def main():
         persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
-    logger.info(f"Loaded config-api plugins: {plugins}")
+    logger.info("Loaded config-api plugins: %s", plugins)
 
     if "admin-ui" in plugins:
         admin_ui_plugin = AdminUiPlugin(manager)
@@ -117,6 +117,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -124,7 +126,7 @@ def configure_logging():
     try:
         custom_config = json.loads(os.environ.get("CN_CONFIG_API_APP_LOGGERS", "{}"))
     except json.decoder.JSONDecodeError as exc:
-        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        logger.warning("Unable to load logging configuration from environment variable; reason=%s; fallback to defaults", exc)
         custom_config = {}
 
     # ensure custom config is ``dict`` type
@@ -143,11 +145,11 @@ def configure_logging():
             continue
 
         if k.endswith("_log_level") and v not in log_levels:
-            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            logger.warning("Invalid %s log level for %s; fallback to defaults", v, k)
             v = config[k]
 
         if k.endswith("_log_target") and v not in log_targets:
-            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            logger.warning("Invalid %s log output for %s; fallback to defaults", v, k)
             v = config[k]
 
         # update the config
@@ -160,6 +162,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
         "audit_log_target": "AUDIT_FILE",
+        "root_log_target": "FILE",
     }
 
     for key, value in config.items():
@@ -200,7 +203,7 @@ def configure_admin_ui_logging():
     try:
         custom_config = json.loads(os.environ.get("CN_ADMIN_UI_PLUGIN_LOGGERS", "{}"))
     except json.decoder.JSONDecodeError as exc:
-        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        logger.warning("Unable to load logging configuration from environment variable; reason=%s; fallback to defaults", exc)
         custom_config = {}
 
     # ensure custom config is ``dict`` type
@@ -219,11 +222,11 @@ def configure_admin_ui_logging():
             continue
 
         if k.endswith("_log_level") and v not in log_levels:
-            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            logger.warning("Invalid %s log level for %s; fallback to defaults", v, k)
             v = config[k]
 
         if k.endswith("_log_target") and v not in log_targets:
-            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            logger.warning("Invalid %s log output for %s; fallback to defaults", v, k)
             v = config[k]
 
         # update the config
@@ -410,14 +413,14 @@ class PersistenceSetup:
 
         # Upsert scopes separately to ensure template changes are reflected in existing scopes
         scope_file = "/app/templates/jans-config-api/scopes.ldif"
-        logger.info(f"Importing {scope_file}")
+        logger.info("Importing %s", scope_file)
         self.client.upsert_from_file(scope_file, self.ctx)
 
         files = ["config.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:
-            logger.info(f"Importing {file_}")
+            logger.info("Importing %s", file_)
             self.client.create_from_ldif(file_, self.ctx)
 
 
