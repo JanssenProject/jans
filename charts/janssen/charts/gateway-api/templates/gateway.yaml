@@ -19,11 +19,11 @@ metadata:
 {{- end }}
 spec:
   gatewayClassName: {{ .Values.gateway.className }}
-  {{- if or (.Values.gateway.infrastructure.labels) (.Values.gateway.infrastructure.annotations) (.Values.gateway.infrastructure.parametersRef) (and (eq .Values.gateway.className "airlock-microgateway") .Values.additionalConfig.airlock.createLbService) }}
   infrastructure:
-    {{- if .Values.gateway.infrastructure.labels }}
     labels:
-      {{- toYaml .Values.gateway.infrastructure.labels | nindent 6 }}
+      app: {{ $fullName }}-gateway-infrastructure
+    {{- if .Values.gateway.infrastructure.labels }}
+    {{- toYaml .Values.gateway.infrastructure.labels | nindent 6 }}
     {{- end }}
     {{- if .Values.gateway.infrastructure.annotations }}
     annotations:
@@ -36,9 +36,8 @@ spec:
     parametersRef:
       group: microgateway.airlock.com
       kind: GatewayParameters
-      name: airlock-gw-params
+      name: {{ .Release.Name }}-airlock-gw-params
     {{- end }}
-  {{- end }}
   {{- if and (.Values.gateway.attachLbIp) (.Values.global.lbIp) }}
   addresses:
   - type: IPAddress
@@ -56,32 +55,3 @@ spec:
       certificateRefs:
       - name: {{ .Values.gateway.tlsSecretName }}
 {{- end }}
-
-{{- /* Start of GatewayParameters definition */}}
-{{- if and (eq .Values.gateway.className "airlock-microgateway") (.Values.additionalConfig.airlock.createLbService) }}
----
-
-apiVersion: microgateway.airlock.com/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: airlock-gw-params
-  namespace: {{ $namespace }}
-spec:
-  kubernetes:
-    service:
-      type: LoadBalancer
-{{- end }}
-{{- /* End of GatewayParameters definition */}}
-
-{{- /* Start of GatewayClass definition */}}
-{{- if and (eq .Values.gateway.className "envoy") (.Values.additionalConfig.envoy.createGatewayClass) }}
----
-
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: envoy
-spec:
-  controllerName: gateway.envoyproxy.io/gatewayclass-controller
-{{- end }}
-{{- /* End of GatewayClass definition */}}
