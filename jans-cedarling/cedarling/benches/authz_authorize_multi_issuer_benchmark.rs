@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig,
-    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, TokenInput,
+    EntityBuilderConfig, EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -103,7 +103,6 @@ async fn prepare_cedarling_with_jwt_validation(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -113,15 +112,10 @@ async fn prepare_cedarling_with_jwt_validation(
             ..Default::default()
         },
         authorization_config: AuthorizationConfig {
-            use_user_principal: false,
-            use_workload_principal: false,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default()
-            .with_no_workload()
-            .with_no_user(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,

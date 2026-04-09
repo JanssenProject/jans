@@ -13,6 +13,38 @@ Cedarling is written in the Rust programming language (folder `cedarling`). And 
 
 You can install Rust toolchain by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
 
+## Building with gRPC Support
+
+To build the project with gRPC support (enabled by default), you need to install the Protocol Buffers compiler.
+
+### Install protoc
+
+Download the pre-built protoc binaries from the [Protocol Buffers releases](https://github.com/protocolbuffers/protobuf/releases) page and extract them to a location of your choice.
+
+Set the `PROTOC` environment variable to point to the protoc binary:
+
+```bash
+export PROTOC=/path/to/the/protoc_folder/bin/protoc
+```
+
+For example, if you extracted protoc to `~/tools/protobuf`, you would run:
+
+```bash
+export PROTOC=~/tools/protobuf/bin/protoc
+```
+
+After installing protoc and setting the environment variable, build the project with:
+
+```bash
+cargo build --workspace
+```
+
+To build without gRPC support, disable the feature:
+
+```bash
+cargo build --workspace --no-default-features
+```
+
 ## Examples of rust Cedarling
 
 Rust examples of using Cedarling contains in the folder `cedarling/examples`.
@@ -54,20 +86,12 @@ cargo run -p cedarling --example log_init -- lock
 
 ### Authorization Evaluation Examples
 
-#### Running Without JWT validation
+#### Running Unsigned Authorization
 
-To evaluate authorization without validating JWT tokens, use the following command:
-
-```bash
-cargo run -p cedarling --example authorize_without_jwt_validation
-```
-
-#### Running with JWT validation
-
-To include JWT validation in the authorization evaluation, use this command:
+To evaluate authorization with application-asserted principals (no JWT validation), use the following command:
 
 ```bash
-cargo run -p cedarling --example authorize_with_jwt_validation
+cargo run -p cedarling --example authorize_unsigned
 ```
 
 #### Lock Server Integration with SSA JWT
@@ -213,4 +237,3 @@ cargo run --example profiling
 ```
 
 that outputs an SVG named `cedarling_profiling_flamegraph`.
-

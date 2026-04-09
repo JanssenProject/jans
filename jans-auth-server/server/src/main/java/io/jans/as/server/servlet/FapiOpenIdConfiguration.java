@@ -31,6 +31,7 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
+import io.jans.util.CoreCertUtil;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -130,7 +131,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
                 log.info("FAPI: Authorization token is non-Bearer is not allowed in query*********************************************");
             }
 
-            String clientCertAsPem = servletRequest.getHeader("X-ClientCert");
+            String clientCertAsPem = CoreCertUtil.getClientCert(servletRequest).getCert();
             if (clientCertAsPem != null) {
                 log.info("FAPI: clientCertAsPem found*****************************************");
                 log.info("FAPI: clientCertAsPem found*****************************************" + clientCertAsPem);
