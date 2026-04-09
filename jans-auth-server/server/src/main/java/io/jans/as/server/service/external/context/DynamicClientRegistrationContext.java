@@ -18,6 +18,7 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.cdi.util.CdiUtil;
+import io.jans.util.CoreCertUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -128,7 +129,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         final Map<String, SimpleCustomProperty> attrs = script.getConfigurationAttributes();
 
         if (httpRequest != null) {
-            final String cert = httpRequest.getHeader("X-ClientCert");
+            final String cert = CoreCertUtil.getClientCert(httpRequest).getCert();
             if (StringUtils.isNotBlank(cert)) {
                 SimpleCustomProperty certProperty = new SimpleCustomProperty();
                 certProperty.setValue1(cert);

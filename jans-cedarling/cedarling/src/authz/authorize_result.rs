@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedar_policy::{Decision, EntityUid, Response};
+use cedar_policy::{Decision, EntityUid};
 use serde::ser::{SerializeMap, SerializeStruct};
 use serde::{Serialize, Serializer};
 use smol_str::{SmolStr, ToSmolStr};
@@ -15,19 +15,11 @@ use uuid7::Uuid;
 use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
 
 /// Result of authorization and evaluation cedar policy
-/// based on the [Request](crate::models::request::Request) and policy store
+/// based on the policy store and principal(s) from the request
 #[derive(Debug, Clone, Serialize)]
 pub struct AuthorizeResult {
-    /// Result of authorization where principal is `Jans::Workload`
-    #[serde(serialize_with = "serialize_opt_response")]
-    pub workload: Option<cedar_policy::Response>,
-    /// Result of authorization where principal is `Jans::User`
-    #[serde(serialize_with = "serialize_opt_response")]
-    pub person: Option<cedar_policy::Response>,
-
     /// Result of authorization for all principals.
-    /// This field is useful when you want to get the authorization results for unsigned authorization requests.
-    /// Because it can be more than workload and person principals.
+    /// Maps principal type names to their Cedar authorization responses.
     #[serde(serialize_with = "serialize_hashmap_response")]
     pub principals: HashMap<SmolStr, cedar_policy::Response>,
 
@@ -42,22 +34,7 @@ pub struct AuthorizeResult {
     pub request_id: String,
 }
 
-/// Custom serializer for an Option<`cedar_policy::Response`> which converts `None` to an empty string and vice versa.
-#[allow(clippy::ref_option)]
-fn serialize_opt_response<S>(
-    value: &Option<cedar_policy::Response>,
-    serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    match value {
-        None => serializer.serialize_none(),
-        Some(response) => CedarResponse(response).serialize(serializer),
-    }
-}
-
-/// Custom serializer for an Option<`cedar_policy::Response`> which converts `None` to an empty string and vice versa.
+/// Custom serializer for principals map
 fn serialize_hashmap_response<S>(
     value: &HashMap<SmolStr, cedar_policy::Response>,
     serializer: S,
@@ -105,7 +82,7 @@ impl Serialize for CedarResponse<'_> {
 }
 
 /// Result of multi-issuer authorization
-/// This is a simpler result structure that doesn't deal with workload/user principals
+/// This result structure contains a single Cedar policy evaluation response
 #[derive(Debug, Clone, Serialize)]
 pub struct MultiIssuerAuthorizeResult {
     /// Result of authorization from Cedar policy evaluation
@@ -145,72 +122,18 @@ impl MultiIssuerAuthorizeResult {
 }
 
 impl AuthorizeResult {
-    /// Builder function for `AuthorizeResult`
-    pub(crate) fn new(
-        principal_bool_operator: &JsonRule,
-
-        workload_uid: Option<&EntityUid>,
-        person_uid: Option<&EntityUid>,
-
-        workload: Option<cedar_policy::Response>,
-        person: Option<cedar_policy::Response>,
-        request_id: Uuid,
-    ) -> Result<Self, ApplyRuleError> {
-        let mut principal_responses: HashMap<EntityUid, cedar_policy::Response> = HashMap::new();
-
-        workload_uid
-            .into_iter()
-            .zip(workload)
-            .for_each(|(typename, response)| {
-                principal_responses.insert(typename.clone(), response.clone());
-            });
-
-        person_uid
-            .into_iter()
-            .zip(person)
-            .for_each(|(typename, response)| {
-                principal_responses.insert(typename.clone(), response.clone());
-            });
-
-        Self::new_for_many_principals(
-            principal_bool_operator,
-            principal_responses,
-            workload_uid,
-            person_uid,
-            request_id,
-        )
-    }
-
     /// Builder function for [`AuthorizeResult`]
     pub(crate) fn new_for_many_principals(
         principal_bool_operator: &JsonRule,
         principal_responses: HashMap<EntityUid, cedar_policy::Response>,
-        workload_uid: Option<&EntityUid>,
-        person_uid: Option<&EntityUid>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
         let mut principals_decision_info = HashMap::new();
         let mut principals_response: HashMap<SmolStr, cedar_policy::Response> = HashMap::new();
 
-        let mut workload_result: Option<Response> = None;
-        let mut person_result: Option<Response> = None;
-
         for (principal_uid, response) in principal_responses {
-            if let Some(uid) = workload_uid
-                && uid == &principal_uid
-            {
-                workload_result = Some(response.clone());
-            }
-            if let Some(uid) = person_uid
-                && uid == &principal_uid
-            {
-                person_result = Some(response.clone());
-            }
-
             let principal_typename = principal_uid.type_name().to_smolstr();
             let principal_id = principal_uid.to_smolstr();
-            // Insert typename and principal id into hashmap.
-            // This allows us to easily access the decision for a given principal by type name and and uid.
             principals_decision_info.insert(principal_typename.clone(), response.decision().into());
             principals_decision_info.insert(principal_id.clone(), response.decision().into());
 
@@ -223,8 +146,6 @@ impl AuthorizeResult {
 
         Ok(Self {
             decision,
-            workload: workload_result,
-            person: person_result,
             principals: principals_response,
             request_id: request_id.to_string(),
         })

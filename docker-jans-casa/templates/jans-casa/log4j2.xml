@@ -32,8 +32,8 @@
         <Logger name="io.jans.casa" level="$casa_log_level" additivity="false">
             <AppenderRef ref="$casa_log_target" />
         </Logger>
-        <Root level="INFO">
-            <AppenderRef ref="Console" />
+        <Root level="$root_log_level">
+            <AppenderRef ref="$root_log_target" />
         </Root>
     </Loggers>
 

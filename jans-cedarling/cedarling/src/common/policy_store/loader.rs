@@ -21,10 +21,8 @@
 use std::path::Path;
 
 use super::errors::{PolicyStoreError, ValidationError};
-use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
+use super::metadata::PolicyStoreMetadata;
 use super::validator::MetadataValidator;
-#[cfg(not(target_arch = "wasm32"))]
-use super::vfs_adapter::PhysicalVfs;
 use super::vfs_adapter::VfsFileSystem;
 
 /// Load a policy store from a directory path.
@@ -50,18 +48,7 @@ pub(crate) async fn load_policy_store_directory(
         let loader = DefaultPolicyStoreLoader::new_physical();
 
         // Load all components from the directory.
-        let loaded_directory = loader.load_directory(&path_str)?;
-
-        // If a manifest is present, validate it against the physical filesystem.
-        if let Some(ref manifest) = loaded_directory.manifest {
-            DefaultPolicyStoreLoader::<PhysicalVfs>::validate_manifest(
-                &path_str,
-                &loaded_directory.metadata,
-                manifest,
-            )?;
-        }
-
-        Ok(loaded_directory)
+        loader.load_directory(&path_str)
     })
     .await
     .map_err(|e| {
@@ -102,7 +89,9 @@ pub(crate) async fn load_policy_store_archive(
         use super::archive_handler::ArchiveVfs;
         let archive_vfs = ArchiveVfs::from_file(&path)?;
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-        loader.load_directory(".")
+        let loaded_directory = loader.load_directory(".")?;
+
+        Ok(loaded_directory)
     })
     .await
     .map_err(|e| {
@@ -138,30 +127,7 @@ pub(crate) fn load_policy_store_archive_bytes(
 
     let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned())?;
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader.load_directory(".")?;
-
-    // Validate manifest if present (same validation used for archive-backed loading)
-    #[cfg(not(target_arch = "wasm32"))]
-    if let Some(ref _manifest) = loaded_directory.manifest {
-        use super::manifest_validator::ManifestValidator;
-        use std::path::PathBuf;
-
-        // Create a new ArchiveVfs instance for validation (ManifestValidator needs its own VFS)
-        let validator_vfs = ArchiveVfs::from_buffer(bytes.to_vec())?;
-        let validator = ManifestValidator::new(validator_vfs, PathBuf::from("."));
-        let result = validator.validate(Some(&loaded_directory.metadata.policy_store.id));
-
-        // If validation fails, return the first error
-        if !result.is_valid
-            && let Some(error) = result.errors.first()
-        {
-            return Err(PolicyStoreError::ManifestError {
-                err: error.error_type.clone(),
-            });
-        }
-    }
-
-    Ok(loaded_directory)
+    loader.load_directory(".")
 }
 
 /// A loaded policy store with all its components.
@@ -169,8 +135,6 @@ pub(crate) fn load_policy_store_archive_bytes(
 pub(crate) struct LoadedPolicyStore {
     /// Policy store metadata
     pub metadata: PolicyStoreMetadata,
-    /// Optional manifest for integrity checking
-    pub manifest: Option<PolicyStoreManifest>,
     /// Raw schema content
     pub schema: String,
     /// Policy files content (filename -> content)
@@ -235,71 +199,6 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     pub(super) fn new_physical() -> Self {
         Self::new(super::vfs_adapter::PhysicalVfs::new())
     }
-
-    /// Validate the manifest file against the policy store contents.
-    ///
-    /// This method is only available for `PhysicalVfs` because:
-    /// - It requires creating a new VFS instance for validation
-    /// - Other VFS types (`MemoryVfs`, custom implementations) may not support cheap instantiation
-    /// - WASM environments may not have filesystem access for validation
-    ///
-    /// Users of other VFS types should call `ManifestValidator::validate()` directly
-    /// with their VFS instance if they need manifest validation.
-    ///
-    /// This method is public so it can be called explicitly when needed, following
-    /// the Interface Segregation Principle.
-    #[cfg(not(target_arch = "wasm32"))]
-    pub(super) fn validate_manifest(
-        dir: &str,
-        metadata: &PolicyStoreMetadata,
-        manifest: &PolicyStoreManifest,
-    ) -> Result<(), PolicyStoreError> {
-        Self::validate_manifest_with_logger(dir, metadata, manifest, None)
-    }
-
-    /// Validate the manifest file with optional logging for unlisted files.
-    ///
-    /// Same as `validate_manifest` but accepts an optional logger for structured logging.
-    #[cfg(not(target_arch = "wasm32"))]
-    fn validate_manifest_with_logger(
-        dir: &str,
-        metadata: &PolicyStoreMetadata,
-        _manifest: &PolicyStoreManifest,
-        logger: Option<crate::log::Logger>,
-    ) -> Result<(), PolicyStoreError> {
-        use super::log_entry::PolicyStoreLogEntry;
-        use super::manifest_validator::ManifestValidator;
-        use crate::log::interface::LogWriter;
-        use std::path::PathBuf;
-
-        // Create a new PhysicalVfs instance for validation
-        let validator =
-            ManifestValidator::new(super::vfs_adapter::PhysicalVfs::new(), PathBuf::from(dir));
-
-        let result = validator.validate(Some(&metadata.policy_store.id));
-
-        // If validation fails, return the first error
-        if !result.is_valid
-            && let Some(error) = result.errors.first()
-        {
-            return Err(PolicyStoreError::ManifestError {
-                err: error.error_type.clone(),
-            });
-        }
-
-        // Log unlisted files if any (informational - these files are allowed but not checksummed)
-        if !result.unlisted_files.is_empty()
-            && let Some(logger) = logger
-        {
-            logger.log_any(PolicyStoreLogEntry::info(format!(
-                "Policy store contains {} unlisted file(s) not in manifest: {:?}",
-                result.unlisted_files.len(),
-                result.unlisted_files
-            )));
-        }
-
-        Ok(())
-    }
 }
 
 impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
@@ -326,10 +225,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                 path: dir.to_string(),
             });
         }
-
-        // Ensure is_file method is used (prevents dead code warning in WASM)
-        // This is a no-op check that ensures the trait method is called
-        let _ = self.vfs.is_file(dir);
 
         // Check for required files
         let metadata_path = Self::join_path(dir, "metadata.json");
@@ -383,30 +278,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
         // Parse and validate metadata
         MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
-    }
-
-    /// Load optional manifest from manifest.json file.
-    fn load_manifest(&self, dir: &str) -> Result<Option<PolicyStoreManifest>, PolicyStoreError> {
-        let manifest_path = Self::join_path(dir, "manifest.json");
-        if !self.vfs.exists(&manifest_path) {
-            return Ok(None);
-        }
-
-        // Open file and parse JSON using from_reader for better performance
-        let reader = self.vfs.open_file(&manifest_path).map_err(|source| {
-            PolicyStoreError::FileReadError {
-                path: manifest_path.clone(),
-                source,
-            }
-        })?;
-
-        let manifest =
-            serde_json::from_reader(reader).map_err(|source| PolicyStoreError::JsonParsing {
-                file: "manifest.json".to_string(),
-                source,
-            })?;
-
-        Ok(Some(manifest))
     }
 
     /// Load schema from schema.cedarschema file.
@@ -629,19 +500,13 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load a directory-based policy store.
     ///
-    /// This method is generic over the underlying `VfsFileSystem` and **does not**
-    /// perform manifest validation. For backends that need manifest validation
-    /// (e.g., `PhysicalVfs`), callers should use higher-level helpers such as
-    /// `load_policy_store_directory` or call `validate_manifest` explicitly on
-    /// `DefaultPolicyStoreLoader<PhysicalVfs>`.
+    /// This method is generic over the underlying `VfsFileSystem`.
     pub(super) fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
 
         // Load all components
         let metadata = self.load_metadata(dir)?;
-        let manifest = self.load_manifest(dir)?;
-
         let schema = self.load_schema(dir)?;
         let policies = self.load_policies(dir)?;
         let templates = self.load_templates(dir)?;
@@ -650,7 +515,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
         Ok(LoadedPolicyStore {
             metadata,
-            manifest,
             schema,
             policies,
             templates,
