@@ -107,6 +107,7 @@
       "names": [
         "jansAttrUsgTyp"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -4144,7 +4145,7 @@
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
-	{
+    {
       "desc": "Specifies if required",
       "equality": "booleanMatch",
       "names": [
@@ -4999,7 +5000,7 @@
         "jansRegExp",
         "jansTooltip",
         "jansValidation",
-		"jansRequired"
+        "jansRequired"
       ],
       "must": [
         "objectclass"

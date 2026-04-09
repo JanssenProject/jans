@@ -208,7 +208,7 @@ public class LicenseResource {
     public Response activate(@Valid @NotNull LicenseRequest licenseRequest) {
         GenericResponse licenseResponse = null;
         try {
-            log.info("Trying to activate license using licese-key.");
+            log.info("Trying to activate license using license-key.");
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isSuccess());
             return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();

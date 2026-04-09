@@ -117,6 +117,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -160,6 +162,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
         "audit_log_target": "AUDIT_FILE",
+        "root_log_target": "FILE",
     }
 
     for key, value in config.items():
