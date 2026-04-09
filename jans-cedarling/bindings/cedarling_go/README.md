@@ -4,8 +4,8 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ## Features
 
-- Token-based authorization (`Authorize()`)
 - Custom principal authorization (`AuthorizeUnsigned()`)
+- Multi-issuer authorization (`AuthorizeMultiIssuer()`)
 - Comprehensive logging capabilities
 - Flexible configuration options
 - Context Data API for pushing external data into policy evaluation context
@@ -139,14 +139,11 @@ import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 
 // Example configuration (populate dynamically in production)
 config := map[string]any{
-    "CEDARLING_APPLICATION_NAME":   "MyApp",
-    "CEDARLING_POLICY_STORE_ID":    "your-policy-store-id",
-    "CEDARLING_USER_AUTHZ":         "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ":     "enabled",
-    "CEDARLING_LOG_LEVEL":          "INFO",
-    "CEDARLING_LOG_TYPE":           "std_out",
+    "CEDARLING_APPLICATION_NAME":     "MyApp",
+    "CEDARLING_POLICY_STORE_ID":      "your-policy-store-id",
+    "CEDARLING_LOG_LEVEL":            "INFO",
+    "CEDARLING_LOG_TYPE":             "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "strict", // Options: "strict", "never", "always", "ifpresent"
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -155,13 +152,13 @@ if err != nil {
 }
 ```
 
-### Token-Based Authorization
+### Custom Principal Authorization (Unsigned)
 
-**1. Define the resource:**
+**1. Define the resource (optional, reuse for multiple requests):**
 
 ```go
 resource := cedarling_go.EntityData{
-    CedarMapping: cedarling_go.CedarMapping{
+    CedarMapping: cedarling_go.CedarEntityMapping{
         EntityType: "Jans::Issue",
         ID:         "random_id",
     },
@@ -172,49 +169,12 @@ resource := cedarling_go.EntityData{
 }
 ```
 
-**2. Define the action:**
-
-```go
-action := `Jans::Action::"Update"`
-```
-
-**3. Build the request with tokens:**
-
-```go
-request := cedarling_go.Request{
-    Tokens: map[string]string{
-        "access_token":   "your.jwt.token",
-        "id_token":       "your.id.token",
-        "userinfo_token": "your.userinfo.token",
-    },
-    Action:   action,
-    Resource: resource,
-}
-```
-
-**4. Authorize:**
-
-```go
-result, err := instance.Authorize(request)
-if err != nil {
-    // Handle error
-}
-
-if result.Decision {
-    fmt.Println("Access granted")
-} else {
-    fmt.Println("Access denied")
-}
-```
-
-### Custom Principal Authorization (Unsigned)
-
-**1. Define principals:**
+**2. Define principals:**
 
 ```go
 principals := []cedarling_go.EntityData{
     {
-        CedarMapping: cedarling_go.CedarMapping{
+        CedarMapping: cedarling_go.CedarEntityMapping{
             EntityType: "Jans::User",
             ID:         "random_id",
         },
@@ -227,17 +187,17 @@ principals := []cedarling_go.EntityData{
 }
 ```
 
-**2. Build the request:**
+**3. Build the request:**
 
 ```go
 request := cedarling_go.RequestUnsigned{
     Principals: principals,
     Action:     `Jans::Action::"Update"`,
-    Resource:   resource, // From previous example
+    Resource:   resource,
 }
 ```
 
-**3. Authorize:**
+**4. Authorize:**
 
 ```go
 result, err := instance.AuthorizeUnsigned(request)
@@ -408,6 +368,19 @@ permit(
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
 
+### Trusted Issuer Loading Info
+
+When trusted issuers are configured in the policy store, you can query loading status:
+
+```go
+loadedByName := instance.IsTrustedIssuerLoadedByName("issuer_id")
+loadedByIss := instance.IsTrustedIssuerLoadedByIss("https://issuer.example.org")
+totalIssuers := instance.TotalIssuers()
+loadedCount := instance.LoadedTrustedIssuersCount()
+loadedIDs := instance.LoadedTrustedIssuerIds()
+failedIDs := instance.FailedTrustedIssuerIds()
+```
+
 ## Configuration
 
 ### Policy Store Sources
@@ -443,32 +416,18 @@ config := map[string]any{
 }
 ```
 
-### ID Token Trust Mode
-
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
-
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
-
 ### Testing Configuration
 
 For testing scenarios, you may want to disable JWT validation:
 
 ```go
 config := map[string]any{
-    "CEDARLING_APPLICATION_NAME":   "TestApp",
-    "CEDARLING_POLICY_STORE_ID":    "test-policy-store",
-    "CEDARLING_USER_AUTHZ":         "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ":     "enabled",
-    "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+    "CEDARLING_APPLICATION_NAME":     "TestApp",
+    "CEDARLING_POLICY_STORE_ID":      "test-policy-store",
+    "CEDARLING_JWT_SIG_VALIDATION":   "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-    "CEDARLING_LOG_TYPE":           "std_out",
-    "CEDARLING_LOG_LEVEL":          "DEBUG",
+    "CEDARLING_LOG_TYPE":             "std_out",
+    "CEDARLING_LOG_LEVEL":            "DEBUG",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.json",
 }
 ```
@@ -481,4 +440,3 @@ Consider these settings for production deployments:
 
 - Set `CEDARLING_LOG_LEVEL` to `WARN` or `ERROR`
 - Enable JWT validation (ensure tokens are properly signed)
-- Use `CEDARLING_ID_TOKEN_TRUST_MODE: "strict"` for maximum security

@@ -6,8 +6,7 @@ public interface AppConstants {
     public static final String WEBHOOK_DN = "ou=auiWebhooks,ou=admin-ui,o=jans";
     public static final String ADMIN_UI_FEATURES_DN = "ou=auiFeatures,ou=admin-ui,o=jans";
     public static final String ADS_CONFIG_DN = "ou=agama-developer-studio,ou=configuration,o=jans";
-    public static final String LICENSE_SPRING_API_URL = "https://api.licensespring.com/api/v4/";
-    public static final String DEFAULT_POLICY_STORE_FILE_PATH = "./custom/config/adminUI/admin-ui-policy-store.json";
+    public static final String DEFAULT_POLICY_STORE_FILE_PATH = "./custom/config/adminUI/policy-store.cjar";
     //application type
     public static final String APPLICATION_KEY_ADMIN_UI = "admin-ui";
     public static final String APPLICATION_KEY_ADS = "ads";

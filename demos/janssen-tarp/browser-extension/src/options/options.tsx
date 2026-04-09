@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import '../static/css/options.css'
-import Header from './header'
-import HomePage from './homePage'
+import React, { useState, useEffect } from 'react';
+import '../static/css/options.css';
+import Header from './header';
+import HomePage from './homePage';
 import Utils from './Utils';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import theme from '../theme/theme';
+
 const Options = () => {
 
   const [optionType, setOptionType] = useState("");
@@ -10,7 +16,6 @@ const Options = () => {
   const [dataChanged, setDataChanged] = useState(false);
 
   useEffect(() => {
-    // Fetch cedarlingConfig first
     chrome.storage.local.get(["cedarlingConfig"], (cedarlingConfigResult) => {
       let cedarlingConfig = Utils.isEmpty(cedarlingConfigResult) ? {} : cedarlingConfigResult;
 
@@ -34,7 +39,6 @@ const Options = () => {
     });
   }, [dataChanged]);
 
-
   function handleDataChange() {
     setDataChanged(true);
   }
@@ -42,26 +46,44 @@ const Options = () => {
   function renderPage({ optionType, data }) {
     switch (optionType) {
       case 'homePage':
+      case 'loginPage':
         return <HomePage
           data={data}
           notifyOnDataChange={handleDataChange}
-        />
-      case 'loginPage':
-        return <HomePage
-        data={data}
-        notifyOnDataChange={handleDataChange}
-      />
+        />;
       default:
-        return null
+        return null;
     }
   }
 
   return (
-    <div className="container">
-      <Header />
-      {renderPage({ optionType, data })}
-    </div>
-  )
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.default',
+        }}
+      >
+        <Header />
+        <Container sx={{ py: 4, flex: 1 }}>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              boxShadow: 2,
+              borderRadius: 3,
+              overflow: 'hidden',
+            }}
+          >
+            {renderPage({ optionType, data })}
+          </Box>
+        </Container>
+      </Box>
+    </ThemeProvider>
+  );
 };
 
 export default Options;
