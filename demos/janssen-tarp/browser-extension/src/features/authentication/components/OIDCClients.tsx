@@ -71,7 +71,7 @@ function createData(
 function Row(props: { row: ClientDetails, notifyOnDataChange: () => void }) {
     const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
-    const lifetime = Math.floor((row.expireAt - Date.now()) / 1000);
+    const lifetime = row.expireAt ? Math.floor((row.expireAt - Date.now()) / 1000) : -1;
 
     const handleDialog = (isOpen: boolean) => {
         setOpen(isOpen);

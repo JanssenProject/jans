@@ -1,6 +1,6 @@
 export type ClientDetails = { clientId: string; 
   clientSecret: string; 
-  expireAt: number; 
+  expireAt?: number; 
   opHost: string; 
   showClientExpiry: boolean; 
   scope: string; 
@@ -9,7 +9,7 @@ export type ClientDetails = { clientId: string;
   tokenEndpoint: string; 
   userinfoEndpoint: string; 
   endSessionEndpoint: string; 
-  responseType: string; 
+  responseType: string[]; 
   postLogoutRedirectUris: string[]; 
   acrValuesSupported: string[] ;
   additionalParams: string;
