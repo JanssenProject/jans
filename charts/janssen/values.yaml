@@ -762,6 +762,10 @@ global:
       lockLogTarget: "STDOUT"
       # -- jans-lock.log level
       lockLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to jans-auth.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     authSigKeys: "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
     # -- space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
@@ -867,6 +871,10 @@ global:
       timerLogTarget: "FILE"
       # -- casa timer log level
       timerLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to casa.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Name of the casa service. Please keep it as default.
     casaServiceName: casa
     # -- Boolean flag to enable/disable the casa chart.
@@ -941,18 +949,22 @@ global:
       configApiLogTarget: "STDOUT"
       # -- configapi.log level
       configApiLogLevel: "INFO"
-      # -- config-api_persistence.log target
+      # -- configapi_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- config-api_persistence.log level
+      # -- configapi_persistence.log level
       persistenceLogLevel: "INFO"
-      # -- config-api_persistence_duration.log target
+      # -- configapi_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
-      # -- config-api_persistence_duration.log level
+      # -- configapi_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- config-api_script.log target
+      # -- configapi_script.log target
       scriptLogTarget: "FILE"
-      # -- config-api_script.log level
+      # -- configapi_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to configapi.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # Enable config API endpoints /jans-config-api
@@ -1002,6 +1014,10 @@ global:
       scriptLogTarget: "FILE"
       # -- fido2_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to fido2.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
@@ -1078,22 +1094,26 @@ global:
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
       enableStdoutLogPrefix: "true"
-      # -- jans-scim.log target
+      # -- scim.log target
       scimLogTarget: "STDOUT"
-      # -- jans-scim.log level
+      # -- scim.log level
       scimLogLevel: "INFO"
-      # -- jans-scim_persistence.log target
+      # -- scim_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- jans-scim_persistence.log level
+      # -- scim_persistence.log level
       persistenceLogLevel: "INFO"
-      # -- jans-scim_persistence_duration.log target
+      # -- scim_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
-      # -- jans-scim_persistence_duration.log level
+      # -- scim_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-scim_script.log target
+      # -- scim_script.log target
       scriptLogTarget: "FILE"
-      # -- jans-scim_script.log level
+      # -- scim_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to scim.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/scim-configuration
