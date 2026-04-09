@@ -14,8 +14,11 @@ use crate::{
     lock::{
         LockLogEntry,
         transport::{
-            AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
-            mapping::{CedarlingLogEntry, LockServerLogEntry},
+            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportResult,
+            mapping::{
+                CedarlingLogEntry, CedarlingMetricsEntry, LockServerLogEntry,
+                LockServerMetricsEntry,
+            },
         },
     },
     log::{LogWriter, Logger},
@@ -31,35 +34,6 @@ impl RestTransport {
     pub(crate) fn new(client: Arc<Client>, logger: Option<Logger>) -> Self {
         Self { client, logger }
     }
-
-    fn deserialize_entries(
-        &self,
-        entries: &[SerializedAuditEntry],
-    ) -> Result<Vec<LockServerLogEntry>, TransportError> {
-        let logs: Vec<LockServerLogEntry> = entries
-            .iter()
-            .filter_map(|v| {
-                serde_json::from_str::<CedarlingLogEntry>(v)
-                    .ok()
-                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
-            })
-            .collect();
-
-        let skipped = entries.len() - logs.len();
-        if skipped > 0 {
-            self.logger.log_any(LockLogEntry::warn(format!(
-                "skipped {skipped} malformed entries"
-            )));
-        }
-
-        if logs.is_empty() {
-            return Err(TransportError::Serialization(format!(
-                "all {skipped} entries were malformed, nothing to send"
-            )));
-        }
-
-        Ok(logs)
-    }
 }
 
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
@@ -74,14 +48,35 @@ impl AuditTransport for RestTransport {
             return Ok(());
         }
 
-        let logs = self.deserialize_entries(entries)?;
+        let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
+        match audit_kind {
+            AuditKind::Log(url) => {
+                let entries = transport::deserialize_entries::<
+                    LockServerLogEntry,
+                    CedarlingLogEntry,
+                >(entries, "log", warn)?;
 
-        self.client
-            .post(audit_kind.url().as_str())
-            .json(&logs)
-            .send()
-            .await?
-            .error_for_status()?;
+                self.client
+                    .post(url.as_str())
+                    .json(&entries)
+                    .send()
+                    .await?
+                    .error_for_status()?;
+            },
+            AuditKind::Telemetry(url) => {
+                let entries = transport::deserialize_entries::<
+                    LockServerMetricsEntry,
+                    CedarlingMetricsEntry,
+                >(entries, "telemetry", warn)?;
+
+                self.client
+                    .post(url.as_str())
+                    .json(&entries)
+                    .send()
+                    .await?
+                    .error_for_status()?;
+            },
+        }
 
         Ok(())
     }
@@ -89,6 +84,8 @@ impl AuditTransport for RestTransport {
 
 #[cfg(test)]
 mod test {
+    use crate::lock::transport::TransportError;
+
     use super::*;
 
     use mockito::{Server, ServerGuard};
@@ -102,6 +99,14 @@ mod test {
     fn mock_log_endpoint(server: &mut ServerGuard) -> mockito::Mock {
         server
             .mock("POST", "/audit/log/bulk")
+            .match_header("content-type", "application/json")
+            .with_status(201)
+            .create()
+    }
+
+    fn mock_telemetry_endpoint(server: &mut ServerGuard) -> mockito::Mock {
+        server
+            .mock("POST", "/audit/telemetry/bulk")
             .match_header("content-type", "application/json")
             .with_status(201)
             .create()
@@ -286,7 +291,7 @@ mod test {
 
         // Send 1000 entries
         let entries: Vec<_> = (0..1000)
-            .map(|_i| {
+            .map(|_| {
                 json!({
                     "timestamp": "2026-03-23T11:50:37.504Z",
                     "log_kind": "Decision",
@@ -307,6 +312,49 @@ mod test {
             .send(&entries, &AuditKind::Log(endpoint))
             .await
             .expect("logs should be sent successfully");
+        mock.assert();
+    }
+
+    #[tokio::test]
+    async fn test_send_telemetry_success() {
+        let mut server = Server::new_async().await;
+        let mock = mock_telemetry_endpoint(&mut server);
+
+        let endpoint: Url = format!("{}/audit/telemetry/bulk", server.url())
+            .parse()
+            .expect("valid telemetry endpoint URL");
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            json!({
+                "id": "f3c80a24-4608-45b8-adc3-a74f2841e156",
+                "request_id": "019d6842-7577-7e43-adfd-46e2bb275405",
+                "timestamp": "2026-04-07T17:04:39.162Z",
+                "log_kind": "Metric",
+                "loaded_policies": 9,
+                "total_allows": 89,
+                "total_denies": 11,
+                "last_decision_time": 2381,
+                "average_decision_time": 2981,
+                "evaluation_requests": 100,
+                "memory_usage": 240,
+                "policy_stats": {
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow": 6,
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": 7,
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny": 1
+                },
+                "pdp_id": "test-pdp",
+                "application_id": "test_app"
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send(&entries, &AuditKind::Telemetry(endpoint))
+            .await
+            .expect("telemetry should be sent successfully");
+
         mock.assert();
     }
 }

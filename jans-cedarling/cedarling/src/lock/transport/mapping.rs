@@ -137,7 +137,7 @@ impl TryFrom<CedarlingMetricsEntry> for LockServerMetricsEntry {
         Ok(Self {
             creation_date: timestamp.clone(),
             event_time: timestamp,
-            service: Some(value.application_id),
+            service: (!value.application_id.is_empty()).then_some(value.application_id),
             node_name: value.pdp_id,
             status: "ok".to_string(),
             last_policy_load_size: value.metric.loaded_policies,
@@ -412,7 +412,7 @@ mod test {
         let lock_entry = LockServerMetricsEntry::try_from(cedarling)
             .expect("convert CedarlingMetricsEntry to LockServerMetricsEntry");
 
-        assert_eq!(lock_entry.service, Some(String::new()));
+        assert_eq!(lock_entry.service, None);
         assert_eq!(lock_entry.status, "ok");
         assert_eq!(lock_entry.last_policy_load_size, 2048);
         assert_eq!(lock_entry.policy_stats.len(), 0);

@@ -75,9 +75,8 @@ where
                         .as_ref()
                         .and_then(std::sync::Weak::upgrade)
                         .log_any(LockLogEntry::info(format!(
-                            "audit worker ({}) shut down cleanly, flushed {} entries",
-                            self.kind.url(),
-                            self.buffer.len(), // will be 0 if flush succeeded
+                            "shutting down {} audit worker ({})",
+                            self.kind, self.kind.url()
                         )));
                     break;
                 }
@@ -101,22 +100,23 @@ where
             match self.transport.send(&entries, &self.kind).await {
                 Ok(()) => {
                     logger.log_any(LockLogEntry::info(format!(
-                        "sent {batch_size} entries to {} audit endpoint",
-                        self.kind.url(),
+                        "sent {batch_size} {} entries to lock server",
+                        self.kind,
                     )));
                     return;
                 },
                 Err(err) => {
                     logger.log_any(LockLogEntry::error(format!(
                         "failed to send to {} audit endpoint: {err}",
-                        self.kind.url(),
+                        self.kind,
                     )));
 
                     tokio::select! {
                         _ = backoff.snooze() => {},
                         () = cancel_tkn.cancelled() => {
                             logger.log_any(LockLogEntry::warn(format!(
-                                "cancellation requested during retry; dropping {batch_size} entries"
+                                "cancellation requested during retry; dropping {batch_size} {} entries",
+                                self.kind,
                             )));
                             break;
                         },

@@ -17,12 +17,14 @@ use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
+    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, Decision, DecisionLogEntry, Diagnostics,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, MetricsLogEntry, PushedDataInfo,
+    gen_uuid7,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
+use metrics::MetricsCollector;
 use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
 use serde_json::json;
 use smol_str::SmolStr;
@@ -35,6 +37,7 @@ use uuid7::Uuid;
 mod authorize_result;
 mod build_ctx;
 mod errors;
+mod metrics;
 
 pub(crate) mod request;
 
@@ -58,6 +61,7 @@ pub(crate) struct AuthzConfig {
 pub(super) struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
+    metrics: MetricsCollector,
 }
 
 impl Authz {
@@ -72,9 +76,12 @@ impl Authz {
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
+        let policy_count = config.policy_store.policies.get_set().num_of_policies();
+
         Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
+            metrics: MetricsCollector::new(policy_count),
         }
     }
 
@@ -459,6 +466,50 @@ impl Authz {
             pushed_data: metadata.pushed_data.clone(),
         });
         self.config.log_service.log_fn(entry);
+
+        // Collect policy decisions for metrics tracking
+        let decision = Decision::from(metadata.decision);
+        let policy_decisions = metadata
+            .decision_diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        self.log_metrics(
+            request_id,
+            decision,
+            metadata.decision_time,
+            policy_decisions,
+        );
+    }
+
+    /// Records the evaluation into the collector and logs a snapshot of the collected metrics
+    fn log_metrics<'a>(
+        &self,
+        request_id: Uuid,
+        decision: Decision,
+        decision_time_micro_sec: i64,
+        policy_decisions: impl Iterator<Item = (&'a str, Decision)>,
+    ) {
+        self.metrics
+            .record_evaluation(decision_time_micro_sec, decision, policy_decisions);
+
+        // Take snapshot and log
+        let snapshot = self.metrics.snapshot();
+
+        let metrics_entry = MetricsLogEntry {
+            base: BaseLogEntry::new_metric(request_id),
+            loaded_policies: snapshot.last_policy_load_size,
+            total_allows: snapshot.total_allows,
+            total_denies: snapshot.total_denies,
+            last_decision_time: snapshot.last_policy_evaluation_time_ns,
+            average_decision_time: snapshot.avg_policy_evaluation_time_ns,
+            memory_usage: snapshot.memory_usage,
+            evaluation_requests: snapshot.evaluation_requests_count,
+            policy_stats: snapshot.policy_stats,
+        };
+
+        self.config.log_service.log_any(metrics_entry);
     }
 
     /// Logs a debug log entry.

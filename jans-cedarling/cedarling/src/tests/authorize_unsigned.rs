@@ -358,8 +358,8 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         // Verify log kind is valid
         let log_kind = log.get("log_kind").unwrap();
         assert!(
-            log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {log_kind:?}"
+            log_kind == "Decision" || log_kind == "System" || log_kind == "Metric",
+            "Log kind should be Decision, System, or Metric, got: {log_kind:?}"
         );
 
         // For Decision logs, verify they have required fields
