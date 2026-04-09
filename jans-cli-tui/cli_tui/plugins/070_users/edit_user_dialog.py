@@ -14,7 +14,7 @@ from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea
 from prompt_toolkit.eventloop import get_event_loop
 
 from utils.multi_lang import _
-from utils.static import DialogResult
+from utils.static import DialogResult, common_strings
 from utils.utils import DialogUtils, common_data, check_email
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
@@ -336,6 +336,16 @@ class EditUserDialog(JansGDialog, DialogUtils):
             if ca['name'] == 'memberOf':
                 user_info['customAttributes'].append(ca)
                 break
+
+        for ca in user_info.get('customAttributes', []):
+            if ca['name'] == 'c':
+                for cval in ca['values']:
+                    if len(cval) != 2:
+                        common_data.app.show_message(
+                                _(common_strings.oops),
+                                _("Country should be two letters code ")
+                            )
+                        return
 
         async def coroutine():
             operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'
