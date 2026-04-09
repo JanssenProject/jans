@@ -340,16 +340,18 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for ca in user_info.get('customAttributes', []):
             if ca.get('name') != 'c':
                 continue
-            for cval in (ca.get('values') or []):
+            for idx, cval in enumerate(ca.get('values') or []):
                 normalized = str(cval).strip()
                 if not normalized:
                     continue
+                normalized = normalized.upper()
                 if len(normalized) != 2 or not normalized.isalpha():
                     common_data.app.show_message(
                         _(common_strings.oops),
                         _("Country must be a two-letter code."),
                     )
                     return
+                ca['values'][idx] = normalized
 
         async def coroutine():
             operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'
