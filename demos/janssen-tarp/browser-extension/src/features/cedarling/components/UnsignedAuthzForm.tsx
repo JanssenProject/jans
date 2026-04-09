@@ -24,7 +24,12 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
-    const [formFields, setFormFields] = React.useState({ principals: [], action: "", context: {}, resource: {} });
+    const [formFields, setFormFields] = React.useState<{
+        principals: unknown[];
+        action: string;
+        context: Record<string, unknown>;
+        resource: Record<string, unknown>;
+    }>({ principals: [], action: "", context: {}, resource: {} });
 
     React.useEffect(() => {
         chrome.storage.local.get(["authzRequest_unsigned"], (result) => {
@@ -51,7 +56,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
         setAuthzLogs("");
         let reqObj = await createCedarlingAuthzRequestObj();
         chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
-            let instance: Cedarling;
+            let instance: Cedarling | null = null;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
                     await initWasm();
@@ -64,8 +69,8 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
                         setAuthzLogs(pretty_logs.toString());
                     }
                 }
-            } catch (err) {
-                setAuthzResult(err.toString());
+            } catch (err: unknown) {
+                setAuthzResult(String(err));
                 console.error("err:", err);
                 if (instance) {
                     const logs = await instance.pop_logs();
@@ -152,19 +157,19 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
                                 <JsonEditor
                                     data={formFields.resource}
                                     rootName="resource"
-                                    setData={(e) => {
+                                    setData={(e: unknown) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            ["resource"]: e
+                                            resource: (e ?? {}) as Record<string, unknown>
                                         }));
                                     }} />
                                 <InputLabel id="context-value-label">Context</InputLabel>
                                 <JsonEditor
                                     data={formFields.context}
-                                    setData={(e) => {
+                                    setData={(e: unknown) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            ["context"]: e
+                                            context: (e ?? {}) as Record<string, unknown>
                                         }));
                                     }}
                                     rootName="context" />

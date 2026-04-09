@@ -68,8 +68,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
   const handleSend = useCallback(async () => {
     try {
       await send();
-    } catch (err) {
-      if (err.message.includes("configure your API key") || err.message.includes("configure MCP server")) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("configure your API key") || message.includes("configure MCP server")) {
         setSettingsOpen(true);
       }
     }

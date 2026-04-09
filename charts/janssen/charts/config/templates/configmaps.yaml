@@ -96,6 +96,8 @@ data:
   | replace "auditStatsLogLevel" "audit_log_level"
   | replace "lockLogTarget" "lock_log_target"
   | replace "lockLogLevel" "lock_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -110,6 +112,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -154,6 +158,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -169,6 +175,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -180,6 +188,8 @@ data:
   | replace "casaLogLevel" "casa_log_level"
   | replace "timerLogTarget" "timer_log_target"
   | replace "timerLogLevel" "timer_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
