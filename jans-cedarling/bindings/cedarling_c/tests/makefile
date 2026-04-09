@@ -1,4 +1,8 @@
 # Makefile for Cedarling C tests
+#
+# Link against ../../../target/release/libcedarling_c.so — run
+#   cargo build --release -p cedarling_c
+# from the jans-cedarling workspace root first so the binary matches current sources.
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2
