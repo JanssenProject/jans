@@ -96,6 +96,8 @@ data:
   | replace "auditStatsLogLevel" "audit_log_level"
   | replace "lockLogTarget" "lock_log_target"
   | replace "lockLogLevel" "lock_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -110,6 +112,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -150,6 +154,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -165,6 +171,8 @@ data:
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -176,6 +184,8 @@ data:
   | replace "casaLogLevel" "casa_log_level"
   | replace "timerLogTarget" "timer_log_target"
   | replace "timerLogLevel" "timer_log_level"
+  | replace "rootLogTarget" "root_log_target"
+  | replace "rootLogLevel" "root_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -184,17 +194,6 @@ data:
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
-  {{- if .Values.saml.enabled }}
-  QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
-  KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}
-  KC_DB: {{ .Values.configmap.kcDbVendor | quote }}
-  KC_DB_USERNAME: {{ .Values.configmap.kcDbUsername | quote }}
-  KC_DB_SCHEMA: {{ .Values.configmap.kcDbSchema | quote }}
-  KC_DB_URL_HOST: {{ .Values.configmap.kcDbUrlHost | quote }}
-  KC_DB_URL_PORT: {{ .Values.configmap.kcDbUrlPort | quote }}
-  KC_DB_URL_DATABASE: {{ .Values.configmap.kcDbUrlDatabase | quote }}
-  KC_DB_URL_PROPERTIES: {{ .Values.configmap.kcDbUrlProperties | quote }}
-  {{- end }}
   CN_LOCK_ENABLED: {{ index .Values "auth-server" "lockEnabled" | quote }}
   CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
   CN_CONFIGURATOR_CONFIGURATION_FILE: {{ .Values.cnConfiguratorConfigurationFile | quote }}

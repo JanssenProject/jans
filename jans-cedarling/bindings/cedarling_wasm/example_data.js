@@ -30,10 +30,6 @@ const BOOTSTRAP_CONFIG = {
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_LEVEL: "DEBUG",
   CEDARLING_LOG_TTL: 120,
-  "CEDARLING_DECISION_LOG_USER_CLAIMS ": ["aud", "sub", "email", "username"],
-  "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
-  CEDARLING_USER_AUTHZ: "enabled",
-  CEDARLING_WORKLOAD_AUTHZ: "enabled",
   CEDARLING_PRINCIPAL_BOOLEAN_OPERATION: {
     and: [
       {
@@ -59,7 +55,6 @@ const BOOTSTRAP_CONFIG = {
   CEDARLING_JWT_SIG_VALIDATION: "disabled",
   CEDARLING_JWT_STATUS_VALIDATION: "disabled",
   CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED: ["HS256", "RS256"],
-  CEDARLING_ID_TOKEN_TRUST_MODE: "strict",
   CEDARLING_LOCK: "disabled",
   CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null,
   CEDARLING_LOCK_DYNAMIC_CONFIGURATION: "disabled",
@@ -159,12 +154,15 @@ let ID_TOKEN =
 let USERINFO_TOKEN =
   "eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGUiOlsiQ2FzYUFkbWluIl0sImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsImdpdmVuX25hbWUiOiJBZG1pbiIsIm1pZGRsZV9uYW1lIjoiQWRtaW4iLCJpbnVtIjoiYTZhNzAzMDEtYWY0OS00OTAxLTk2ODctMGJjZGNmNGUzNGZhIiwiY2xpZW50X2lkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwiYXVkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwidXBkYXRlZF9hdCI6MTczMTY5ODEzNSwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsIm5pY2tuYW1lIjoiQWRtaW4iLCJmYW1pbHlfbmFtZSI6IlVzZXIiLCJqdGkiOiJPSW4zZzFTUFNEU0tBWUR6RU5Wb3VnIiwiZW1haWwiOiJhZG1pbkBqYW5zLnRlc3QiLCJqYW5zQWRtaW5VSVJvbGUiOlsiYXBpLWFkbWluIl19.CIahQtRpoTkIQx8KttLPIKH7gvGG8OmYCMzz7wch6k792DVYQG1R7q3sS9Ema1rO5Fm_GgjOsR0yTTMKsyhHDLBwkDd3cnMLgsh2AwVFZvxtpafTlUAPfjvMAy9YTtkPcY6rNUhsYLSSOA83kt6pHdIv5nI-G6ybqgg-bLBRpwZDoOV0TulRhmuukdiuugTXHT6Bb-K3ZeYs8CwewztnxoFTSDghSzq7VZIraV8SLTBLx5_xswn9mefamyB2XNN3o6vXuMyf4BEbYSCuJ3pu6YtNgfyWwt9cF8PYe4PVLoXZuJKN-cy4qrtgy43QXPCg96jSQUJqgLb5ZL5_3udm2Q";
 
-let REQUEST = {
-  tokens: {
-    access_token: ACCESS_TOKEN,
-    id_token: ID_TOKEN,
-    userinfo_token: USERINFO_TOKEN,
-  },
+// Unsigned request: principals as entity data (no JWT tokens).
+// Matches policies that permit principal is Jans::User or Jans::Workload with resource Jans::Application name "Some Application".
+const REQUEST_UNSIGNED = {
+  principals: [
+    {
+      cedar_entity_mapping: { entity_type: "Jans::User", id: "demo_user_id" },
+      sub: "demo_user_id",
+    },
+  ],
   action: 'Jans::Action::"Read"',
   resource: {
     cedar_entity_mapping: {
@@ -191,4 +189,4 @@ let REQUEST = {
   },
 };
 
-export { BOOTSTRAP_CONFIG, ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN, REQUEST };
+export { BOOTSTRAP_CONFIG, ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN, REQUEST_UNSIGNED };

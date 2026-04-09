@@ -10,7 +10,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.ca.plugin.adminui.service.adminui.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
@@ -265,12 +264,17 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     }
 
     /**
-     * Populate the AUIConfiguration instance with settings from the provided AdminConf and the persisted AppConfiguration.
-     * <p>
-     * Creates a new AUIConfiguration and sets OIDC/web-client values (host, client id/secret, scopes, redirect and logout URIs,
-     * ACR values), endpoints (authorization, token, introspection, userinfo, end-session), backend API client credentials and
-     * endpoints, UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling policy/store settings.
-     */
+         * Populate the in-memory AUIConfiguration with values taken from the provided AdminConf and the persisted AppConfiguration.
+         *
+         * <p>Sets OIDC/web-client properties (host, client id/secret, scopes, redirect and logout URIs, ACR values),
+         * authorization/token/introspection/userinfo/end-session endpoints, backend API client credentials and endpoints,
+         * UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling logging and policy store settings.
+         *
+         * <p>If the provided AdminConf or any required nested configuration is missing, this method logs an error and leaves
+         * {@code auiConfiguration} null so the caller can treat the Admin UI configuration as unavailable.
+         *
+         * @param appConf the AdminConf containing Admin UI and OIDC configuration values; may be null or incomplete
+         */
     private void addPropertiesToAUIConfiguration(AdminConf appConf) {
         if (appConf == null || appConf.getMainSettings() == null
                 || appConf.getMainSettings().getOidcConfig() == null
@@ -309,7 +313,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         config.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         config.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
         config.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
-        config.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
         config.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
 
         // Assign fully-constructed object last

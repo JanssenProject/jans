@@ -1,12 +1,14 @@
 package org.example;
 
-import org.example.jwt.JWTCreator;
 import org.example.utils.AppUtils;
 import org.example.utils.JsonUtil;
 import uniffi.cedarling_uniffi.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,20 +17,14 @@ public class Main {
             String bootstrapJson = AppUtils.readFile("./src/main/resources/config/bootstrap.json");
             Cedarling cedarling = Cedarling.Companion.loadFromJson(bootstrapJson);
 
-            // Create a JWT creator with a secure secret (must be at least 32 bytes)
-            JWTCreator jwtCreator = new JWTCreator("-very-strong-shared-secret-of-at-least-32-bytes!");
-
-            // Read JWT payloads from files
-            String accessTokenPayload = AppUtils.readFile("./src/main/resources/config/access_token_payload.json");
-            String idTokenPayload = AppUtils.readFile("./src/main/resources/config/id_token_payload.json");
-            String userInfoPayload = AppUtils.readFile("./src/main/resources/config/user_info_payload.json");
-
-            // Generate signed JWTs from the payloads
-            Map<String, String> tokens = Map.of(
-                    "access_token", jwtCreator.createJwtFromJson(accessTokenPayload),
-                    "id_token", jwtCreator.createJwtFromJson(idTokenPayload),
-                    "userinfo_token", jwtCreator.createJwtFromJson(userInfoPayload)
-            );
+            // Read principals from JSON array
+            String principalsJson = AppUtils.readFile("./src/main/resources/config/principals.json");
+            List<EntityData> principals = new ArrayList<>();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode array = mapper.readTree(principalsJson);
+            for (JsonNode element : array) {
+                principals.add(EntityData.Companion.fromJson(mapper.writeValueAsString(element)));
+            }
 
             // Read input files for authorization
             String action = AppUtils.readFile("./src/main/resources/config/action.txt");
@@ -38,8 +34,8 @@ public class Main {
             // Build EntityData from resource JSON
             EntityData resource = EntityData.Companion.fromJson(resourceJson);
 
-            // Perform authorization
-            AuthorizeResult result = cedarling.authorize(tokens, action, resource, contextJson);
+            // Perform authorization (unsigned: principals + action + resource + context)
+            AuthorizeResult result = cedarling.authorizeUnsigned(principals, action, resource, contextJson);
 
             // Print decision and full result as pretty-formatted JSON
             System.out.println("Decision:\n" + JsonUtil.toPrettyJson(result.getDecision()));
