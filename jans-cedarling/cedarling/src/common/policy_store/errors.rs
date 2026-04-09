@@ -72,51 +72,6 @@ pub(crate) enum TrustedIssuerErrorType {
     },
 }
 
-/// Manifest validation-specific errors.
-#[derive(Debug, Clone, PartialEq, thiserror::Error)]
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) enum ManifestErrorType {
-    /// Manifest file not found
-    #[error("Manifest file not found (manifest.json is required for integrity validation)")]
-    ManifestNotFound,
-
-    /// Manifest parsing failed
-    #[error("Failed to parse manifest: {0}")]
-    ParseError(String),
-
-    /// File listed in manifest is missing from policy store
-    #[error("File '{file}' is listed in manifest but not found in policy store")]
-    FileMissing { file: String },
-
-    /// Error reading file from policy store
-    #[error("Failed to read file '{file}': {error_message}")]
-    FileReadError { file: String, error_message: String },
-
-    /// File checksum mismatch
-    #[error("Checksum mismatch for '{file}': expected '{expected}', computed '{actual}'")]
-    ChecksumMismatch {
-        file: String,
-        expected: String,
-        actual: String,
-    },
-
-    /// Invalid checksum format
-    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>' or 'sha1:<hex>', found '{checksum}'")]
-    InvalidChecksumFormat { file: String, checksum: String },
-
-    /// File size mismatch
-    #[error("Size mismatch for '{file}': expected {expected} bytes, found {actual} bytes")]
-    SizeMismatch {
-        file: String,
-        expected: u64,
-        actual: u64,
-    },
-
-    /// Policy store ID mismatch
-    #[error("Policy store ID mismatch: manifest expects '{expected}', metadata has '{actual}'")]
-    PolicyStoreIdMismatch { expected: String, actual: String },
-}
-
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum PolicyStoreError {
@@ -167,11 +122,6 @@ pub(crate) enum PolicyStoreError {
         file: String,
         err: TrustedIssuerErrorType,
     },
-
-    /// Manifest validation error
-    #[error("Manifest validation error: {err}")]
-    #[cfg(not(target_arch = "wasm32"))]
-    ManifestError { err: ManifestErrorType },
 
     /// Path not found
     #[error("Path not found: {path}")]

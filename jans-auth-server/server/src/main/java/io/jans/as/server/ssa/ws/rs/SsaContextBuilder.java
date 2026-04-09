@@ -38,7 +38,6 @@ public class SsaContextBuilder {
      * @param client      Client
      * @return New instance of {@link ModifySsaResponseContext}
      */
-    @Deprecated
     public ModifySsaResponseContext buildModifySsaResponseContext(HttpServletRequest httpRequest, Client client) {
         return new ModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);
     }

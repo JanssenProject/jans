@@ -95,21 +95,24 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 			token := split_bearer[1]
 			action := fmt.Sprintf("%s::Action::\"%s\"", namespace, req.Method)
 			resource := createResource(req, namespace)
-			request := cedarling_go.Request{
-				Tokens: map[string]string{
-					"access_token": token,
+			request := cedarling_go.AuthorizeMultiIssuerRequest{
+				Tokens: []cedarling_go.TokenInput{
+					{
+						Mapping: fmt.Sprintf("%s::Access_Token", namespace),
+						Payload: token,
+					},
 				},
 				Action:   action,
 				Resource: resource,
 				Context:  nil,
 			}
-			result, err := cedarling_instance.Authorize(request)
+			result, err := cedarling_instance.AuthorizeMultiIssuer(request)
 			if err != nil {
 				logger.Debug(fmt.Sprintf("%s", err))
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
-			if result.Decision == true {
+			if result.Decision {
 				h.ServeHTTP(w, req)
 				return
 			} else {

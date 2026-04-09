@@ -21,7 +21,7 @@ def pull_auth_conf():
     for conf_file in conf_files:
         file_ = f"/etc/certs/{conf_file}"
         secret_name = os.path.splitext(conf_file)[0]
-        logger.info(f"Pulling {file_} from secrets")
+        logger.info("Pulling %s from secrets", file_)
         manager.secret.to_file(secret_name, file_)
 
 
