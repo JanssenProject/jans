@@ -179,11 +179,16 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
 
     const { secret, hashed } = await Utils.generateRandomChallengePair();
 
+    const redirectUri = Array.isArray(oidcClient.redirectUris) ? oidcClient.redirectUris[0] : undefined;
+    if (!redirectUri) {
+      throw new Error(`Client ${args.client_id} has no valid redirect URI`);
+    }
+
     const authArgs = {
       ...args,
       scope: oidcClient.scope,
-      response_type: oidcClient.responseType?.[0] || 'code',
-      redirect_uri: oidcClient.redirectUris?.[0],
+      response_type: (Array.isArray(oidcClient.responseType) ? oidcClient.responseType[0] : undefined) || 'code',
+      redirect_uri: redirectUri,
       code_challenge: hashed,
       code_challenge_method: DEFAULT_VALUES.CODE_CHALLENGE_METHOD,
       nonce: uuidv4()

@@ -101,6 +101,8 @@ def configure_logging():
         "persistence_duration_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -143,6 +145,7 @@ def configure_logging():
         "persistence_log_target": "JANS_SCIM_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_SCIM_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_SCIM_SCRIPT_LOG_FILE",
+        "root_log_target": "FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
