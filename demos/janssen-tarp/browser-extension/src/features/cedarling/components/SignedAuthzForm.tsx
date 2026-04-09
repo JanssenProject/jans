@@ -16,8 +16,19 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Stack from '@mui/material/Stack';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from '../../../options/Utils';
-const SignedAuthzForm = ({ data }) => {
-    const [formFields, setFormFields] = useState({ action: "", context: {}, resource: {} });
+
+type FormFields = {
+    action: string;
+    context: Record<string, unknown>;
+    resource: Record<string, unknown>;
+};
+
+type SignedAuthzFormProps = {
+    data?: any;
+};
+
+const SignedAuthzForm = ({ data }: SignedAuthzFormProps) => {
+    const [formFields, setFormFields] = useState<FormFields>({ action: "", context: {}, resource: {} });
     const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
     const [authzResult, setAuthzResult] = useState("")
@@ -57,7 +68,7 @@ const SignedAuthzForm = ({ data }) => {
         setAuthzResult("");
         setAuthzLogs("");
         let reqObj = await createCedarlingAuthzRequestObj();
-            let instance: Cedarling;
+            let instance: Cedarling | null = null;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
                     await initWasm();
@@ -71,8 +82,8 @@ const SignedAuthzForm = ({ data }) => {
                     }
 
                 }
-            } catch (err) {
-                setAuthzResult(err.toString());
+            } catch (err: unknown) {
+                setAuthzResult(String(err));
                 console.error("err:", err);
                 if (instance) {
                     const logs = await instance.pop_logs();
@@ -159,20 +170,20 @@ const SignedAuthzForm = ({ data }) => {
                             <InputLabel id="resource-value-label">Resource</InputLabel>
                             <JsonEditor
                                 data={formFields.resource}
-                                setData={(e) => {
+                                setData={(e: unknown) => {
                                     setFormFields((prev) => ({
                                         ...prev,
-                                        ["resource"]: e
+                                        resource: (e ?? {}) as Record<string, unknown>
                                     }));
                                 }}
                                 rootName="resource" />
                             <InputLabel id="context-value-label">Context</InputLabel>
                             <JsonEditor
                                 data={formFields.context}
-                                setData={(e) => {
+                                setData={(e: unknown) => {
                                     setFormFields((prev) => ({
                                         ...prev,
-                                        ["context"]: e
+                                        context: (e ?? {}) as Record<string, unknown>
                                     }));
                                 }}
                                 rootName="context" />

@@ -17,7 +17,13 @@ import { pink } from '@mui/material/colors';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 import { OpenIDConfiguration, LogoutOptions, LoginDetails, IJWT } from '../../../shared/types';
-const UserDetails = ({ data, notifyOnDataChange }) => {
+
+type UserDetailsProps = {
+    data?: any;
+    notifyOnDataChange: (value: string) => void;
+};
+
+const UserDetails = ({ data, notifyOnDataChange }: UserDetailsProps) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
     const [showPayloadAT, setShowPayloadAT] = useState(false);
@@ -167,7 +173,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
      */
     async function getStoredLoginDetails(): Promise<LoginDetails | null> {
         return new Promise((resolve) => {
-            chrome.storage.local.get(["loginDetails"], (result) => {
+            chrome.storage.local.get(["loginDetails"], (result: { loginDetails?: LoginDetails }) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error reading login details:", chrome.runtime.lastError);
                     resolve(null);
@@ -183,7 +189,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
      */
     async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
         const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
-            chrome.storage.local.get(["openidConfigurations"], (result) => {
+            chrome.storage.local.get(["openidConfigurations"], (result: { openidConfigurations?: OpenIDConfiguration[] }) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error reading OpenID configurations:", chrome.runtime.lastError);
                     resolve([]);
@@ -262,7 +268,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     url: logoutUrl,
                     interactive: true
                 },
-                (responseUrl) => {
+                (_responseUrl?: string) => {
                     if (chrome.runtime.lastError) {
                         console.warn("Interactive logout failed, trying silent:", chrome.runtime.lastError);
                         // Fallback to silent logout

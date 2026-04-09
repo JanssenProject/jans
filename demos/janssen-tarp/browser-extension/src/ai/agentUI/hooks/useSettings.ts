@@ -210,7 +210,10 @@ export const useSettings = () => {
 
     // Load API key for new provider from MCP server
     if (mcpServerUrl && connectionStatus === "connected") {
-      await loadApiKeyFromMCP(newProvider, providerConfig.models[0].value);
+      const firstModel = providerConfig?.models?.[0]?.value;
+      if (firstModel) {
+        await loadApiKeyFromMCP(newProvider, firstModel);
+      }
     }
   }, [mcpServerUrl, connectionStatus, loadApiKeyFromMCP]);
 
@@ -223,9 +226,9 @@ export const useSettings = () => {
     }
     // Load API key for new provider from MCP server
     if (mcpServerUrl && connectionStatus === "connected") {
-      await loadApiKeyFromMCP(null, newModel);
+      await loadApiKeyFromMCP(provider, newModel);
     }
-  }, [model]);
+  }, [model, provider, mcpServerUrl, connectionStatus, loadApiKeyFromMCP]);
 
   const handleMcpUrlChange = useCallback(async (newUrl: string) => {
     setMcpServerUrl(newUrl);
