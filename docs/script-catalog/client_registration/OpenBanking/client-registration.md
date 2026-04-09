@@ -130,8 +130,17 @@ The following are the ***mandatory*** functions which need to be implemented in 
     ```python3
     def createClient(self, context):
 
-        # 1. obtain client id. certProperty contains the httpRequest.getHeader("X-ClientCert"), inshort client certificate passed to the /register endpoint
-        cert = CertUtils.x509CertificateFromPem(configurationAttributes.get("certProperty").getValue1())
+        # 1. obtain client id. certProperty contains the CoreCertUtil.getClientCert(httpRequest).getCert(), inshort client certificate passed to the /register endpoint
+        certPem = configurationAttributes.get("certProperty").getValue1()
+        if certPem is None or certPem.strip() == "":
+            print "Client registration. Client certificate is missing"
+            context.createWebApplicationException(400, "invalid_request", "Client certificate is required")
+            return False
+        cert = CertUtils.x509CertificateFromPem(certPem)
+        if cert is None:
+            print "Client registration. Failed to parse client certificate"
+            context.createWebApplicationException(400, "invalid_request", "Invalid client certificate format")
+            return False
         cn = CertUtils.getCN(cert)
 
         # 2. validate SSA 

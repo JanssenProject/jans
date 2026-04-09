@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -22,9 +23,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,22 +52,19 @@ public class Jackson {
     }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj);
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
     }
 
     public static boolean isFieldPresent(String patchAsString, String fieldName) {
-        LOG.debug("Check if FieldPresent patchAsString:{} contains fieldName:{}", patchAsString, fieldName);
+        LOG.debug("Check if FieldPresent contains fieldName:{}", fieldName);
         boolean isPresent = false;
         if (patchAsString == null || fieldName == null) {
-            LOG.warn("isFieldPresent called with null parameter - patchAsString: {}, fieldName: {}", patchAsString,
-                    fieldName);
+            LOG.warn("isFieldPresent called with null parameter - fieldName: {}", fieldName);
             return isPresent;
         }
         try {
             JsonNode jsonNode = Jackson.asJsonNode(patchAsString);
-            LOG.debug("patchAsString jsonNode:{}", jsonNode);
             List<String> keys = new ArrayList<>();
             if (jsonNode.isArray()) {
                 for (JsonNode operationNode : jsonNode) {
@@ -90,12 +86,10 @@ public class Jackson {
     }
 
     public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}", patchAsString);
         return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
     }
 
     public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj);
         return applyPatch(jsonPatch, obj);
     }
 
@@ -157,6 +151,27 @@ public class Jackson {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
+    public static <T> T readStringValue(String content, Class<T> clazz) throws JsonProcessingException {
+        ObjectMapper mapper = readMapper();
+        return mapper.readValue(content, clazz);
+    }
+
+    public static <T> List<T> readListValue(String content, Class<T> clazz) throws JsonProcessingException {
+        ObjectMapper mapper = readMapper();
+        return mapper.readValue(content, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
+    }
+
+    public static <T> List<T> readList(String str, Class<T> type) throws JsonProcessingException {
+        return readList(str, ArrayList.class, type);
+    }
+
+    public static <T> List<T> readList(String str, Class<? extends List> type, Class<T> elementType)
+            throws JsonProcessingException {
+        ObjectMapper mapper = readMapper();
+        return mapper.readValue(str,
+                mapper.getTypeFactory().constructCollectionType(type.asSubclass(Collection.class), elementType));
+    }
+
     public static JSONObject createJSONObject(Map<String, Object> map) throws JSONException {
         if (map == null || map.size() == 0) {
             return null;
@@ -193,6 +208,12 @@ public class Jackson {
         String jsonString = objectMapper.writeValueAsString(obj);
         // Create JSONObject from the JSON string
         return new JSONObject(jsonString);
+    }
+    
+    /***** Helper Methods ******/
+    
+    private static ObjectMapper readMapper() {
+        return JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
 }

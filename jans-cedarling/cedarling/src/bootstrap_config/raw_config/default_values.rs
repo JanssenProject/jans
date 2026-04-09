@@ -5,9 +5,9 @@
 
 //! In this file we define functions for serde `default` macro.
 
-use crate::JwtConfig;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
+use crate::{JwtConfig, lock_config::LockServiceConfig};
 
 pub(super) fn default_jti() -> String {
     "jti".to_string()
@@ -29,4 +29,12 @@ pub(super) fn default_stdout_timeout_millis() -> u64 {
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) fn default_stdout_buffer_limit() -> usize {
     StdOutLoggerMode::DEFAULT_BUFFER_LIMIT
+}
+
+pub(super) fn default_log_channel_capacity() -> usize {
+    LockServiceConfig::DEFAULT_CHANNEL_CAPACITY
+}
+
+pub(super) fn default_log_max_retries() -> u32 {
+    LockServiceConfig::DEFAULT_LOG_MAX_RETRIES
 }
