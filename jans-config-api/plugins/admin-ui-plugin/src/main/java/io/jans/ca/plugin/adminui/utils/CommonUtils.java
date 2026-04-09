@@ -9,10 +9,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonValue;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,6 +77,15 @@ public class CommonUtils {
         return createGenericResponse(result, responseCode, responseMessage, null);
     }
 
+    /**
+     * Create a GenericResponse populated with the provided status, code, message, and JSON response object.
+     *
+     * @param result          whether the operation was successful
+     * @param responseCode    numeric response code
+     * @param responseMessage human-readable response message
+     * @param node            JSON node to use as the response object, may be null
+     * @return                a GenericResponse instance populated with the given values
+     */
     public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setResponseCode(responseCode);
@@ -90,6 +95,30 @@ public class CommonUtils {
         return genericResponse;
     }
 
+    /**
+     * Creates a GenericResponse populated with the provided success flag, response code, message, and byte array.
+     *
+     * @param result whether the response indicates success
+     * @param responseCode numeric response code
+     * @param responseMessage human-readable response message
+     * @param byteArray payload bytes to attach to the response
+     * @return the populated GenericResponse with `responseCode`, `responseMessage`, `success`, and `responseBytes` set
+     */
+    public static GenericResponse createResponseWithByteArray(boolean result, int responseCode, String responseMessage, byte[] byteArray) {
+        GenericResponse genericResponse = new GenericResponse();
+        genericResponse.setResponseCode(responseCode);
+        genericResponse.setResponseMessage(responseMessage);
+        genericResponse.setSuccess(result);
+        genericResponse.setResponseBytes(byteArray);
+        return genericResponse;
+    }
+
+    /**
+     * Checks whether any value in the provided map contains a placeholder of the form `${name}`.
+     *
+     * @param map the map whose values (converted to strings) will be scanned for placeholders
+     * @return `true` if at least one value contains a placeholder matching `${name}`, `false` otherwise
+     */
     public static boolean hasShortCode(Map<String, ?> map) {
         // Use regular expression to match placeholders in keys like "${placeholder}"
         String pattern = "\\$\\{(\\w+)}";

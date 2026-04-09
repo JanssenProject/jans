@@ -3,10 +3,11 @@ import SwiftUI
 struct ContentView: View {
     @State private var showModal = false
     @State private var bootstrapConfig: [String: Any] = Helper.dictionaryFromFile(filename: "bootstrap")
-    @State private var tokens: [String: String] = Helper.dictionaryFromFile(filename: "tokens")
-    @State private var action: String = "Jans::Action::\"Update\""
+    @State private var tokens: [TokenMapping] = Helper.loadTokens(fromFileName: "tokens")
+    @State private var action: String = "Jans::Action::\"Read\""
     @State private var resource: [String: Any] = Helper.dictionaryFromFile(filename: "resource")
     @State private var context: [String: Any] = Helper.dictionaryFromFile(filename: "context")
+    @State private var cjarBytes = Helper.zipToBytes(fileName: "MyStore.cjar")
     @State private var resultMessage = ""
     
     @State private var modelTitle: String = ""
@@ -33,10 +34,11 @@ struct ContentView: View {
             
             VStack(spacing: 10) {
                 DataButton(title: Labels.BOOTSTRAP_CONFIG, data: bootstrapConfig)
-                ForEach(tokens.keys.sorted(), id: \.self) { tokenName in
-                    if let tokenValue = tokens[tokenName] {
-                        DataButton(title: tokenName, data: tokenValue)
-                    }
+                ForEach(tokens.sorted(by: { $0.mapping < $1.mapping })) { token in
+                    DataButton(
+                        title: token.mapping,
+                        data: token.payload
+                    )
                 }
                 DataButton(title: Labels.ACTION, data: action)
                 DataButton(title: Labels.RESOURCE, data: resource)
@@ -84,49 +86,55 @@ struct ContentView: View {
         resultMessage = Labels.AUTHZ_NOT_PERFORMED
         
         do {
-            // Load policy-store file path into bootstrap config
-            if let policyStoreUrl = Bundle.main.path(forResource: "policy-store", ofType: "json") {
-                bootstrapConfig["CEDARLING_POLICY_STORE_LOCAL_FN"] = policyStoreUrl
-            }
             
             let bootstrapConfigStr = Helper.dictionaryToString(bootstrapConfig)
-            let instance = try Cedarling.loadFromJson(config: bootstrapConfigStr)
+            
+            guard let cjarBytes, !cjarBytes.isEmpty else {
+                let message = "Policy archive MyStore.cjar is missing or unreadable."
+                resultMessage = message
+                modelTitle = "Authorization Error"
+                modelTextField = message
+                modelJsonField = ""
+                modelJsonLogField = ""
+                isAuthzRequest = false
+                self.authzRequestType = .none
+                showModal = true
+                return
+            }
+            let instance = try Cedarling.loadFromJsonWithArchiveBytes(
+                config: bootstrapConfigStr,
+                archiveBytes: Data(cjarBytes)
+            )
             
             let resourceStr = Helper.dictionaryToString(resource)
             let resourceEntity = try EntityData.fromJson(jsonString: resourceStr)
-            
+            let tokenInputs: [TokenInput] = tokens.map { $0.toTokenInput() }
             let contextStr = Helper.dictionaryToString(context)
             let contextJson = JsonValue(contextStr)
             
-            let result = try instance.authorize(
-                tokens: tokens,
-                action: action,
-                resource: resourceEntity,
-                context: contextJson
-            )
+            let result: MultiIssuerAuthorizeResult = try instance.authorizeMultiIssuer(tokens:  tokenInputs,
+                                                           action: action,
+                                                           resource: resourceEntity,
+                                                           context: contextJson)
+
             
             let logs = try instance.getLogsByRequestIdAndTag(
                 requestId: result.requestId,
                 tag: selectedLogTypeOption
             )
             
-            // Safely unwrap `person` and `workload`
-            guard let person = result.person,
-                  let workload = result.workload,
-                  let personJSON = Helper.toJSONString(CodableResponse(from: person)),
-                  let workloadJSON = Helper.toJSONString(CodableResponse(from: workload)) else {
-                resultMessage = "Authorization succeeded, but failed to serialize person or workload"
-                return
-            }
-            
-            // Update UI-related state
+            // Update UI with decision and principals (no person/workload)
             resultMessage = "Authorization Result: \(result.decision)"
             modelTextField = resultMessage
+            let diagnosticsReason = Array(result.response.diagnostics.reasons).sorted().joined(separator: ", ")
+            let diagnosticsErrors = Array(result.response.diagnostics.errors).sorted().joined(separator: ", ")
             modelJsonField = """
-            [{
-                "person": \(personJSON),
-                "workload": \(workloadJSON)
-            }]
+            {
+                "decision": \(result.decision),
+                "requestId": "\(result.requestId)",
+                "diagnosticsReason": "\(diagnosticsReason)",
+                "diagnosticsErrors": "\(diagnosticsErrors)"
+            }
             """
             modelJsonLogField = Helper.processLogs(logs: logs)
             
@@ -136,8 +144,16 @@ struct ContentView: View {
             showModal = true
             
         } catch {
-            print("❌ Unexpected error: \(error)")
-            resultMessage = "Unexpected error occurred: \(error)"
+            let message = "Unexpected error occurred: \(error)"
+            print("❌ \(message)")
+            resultMessage = message
+            modelTitle = "Authorization Error"
+            modelTextField = message
+            modelJsonField = ""
+            modelJsonLogField = ""
+            isAuthzRequest = false
+            self.authzRequestType = .none
+            showModal = true
         }
     }
     

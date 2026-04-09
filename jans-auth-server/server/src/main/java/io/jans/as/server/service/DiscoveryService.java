@@ -226,6 +226,11 @@ public class DiscoveryService {
             jsonObj.put(SSA_ENDPOINT, appConfiguration.getSsaConfiguration().getSsaEndpoint());
         }
 
+        // Client ID Metadata Document (CIMD)
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)) {
+            jsonObj.put(CLIENT_ID_METADATA_DOCUMENT_SUPPORTED, true);
+        }
+
         final Map<String, String> acrMappings = appConfiguration.getAcrMappings();
         if (acrMappings != null && !acrMappings.isEmpty())
             jsonObj.put(ACR_MAPPINGS, acrMappings);

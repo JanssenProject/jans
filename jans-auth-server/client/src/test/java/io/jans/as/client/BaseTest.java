@@ -51,8 +51,8 @@ import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -104,7 +104,6 @@ public abstract class BaseTest {
     protected String introspectionEndpoint;
     protected String deviceAuthzEndpoint;
     protected String backchannelAuthenticationEndpoint;
-    protected String revokeSessionEndpoint;
     protected String parEndpoint;
     protected String ssaEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
@@ -429,14 +428,6 @@ public abstract class BaseTest {
 
     public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
         this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
-    }
-
-    public String getRevokeSessionEndpoint() {
-        return revokeSessionEndpoint;
-    }
-
-    public void setRevokeSessionEndpoint(String revokeSessionEndpoint) {
-        this.revokeSessionEndpoint = revokeSessionEndpoint;
     }
 
     public Map<String, List<String>> getScopeToClaimsMapping() {
@@ -1037,7 +1028,6 @@ public abstract class BaseTest {
             parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
             backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
-            revokeSessionEndpoint = response.getSessionRevocationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
             issuer = response.getIssuer();
@@ -1063,7 +1053,6 @@ public abstract class BaseTest {
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");
             backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
-            revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
             issuer = context.getCurrentXmlTest().getParameter("issuer");
             ssaEndpoint = context.getCurrentXmlTest().getParameter("ssaEndpoint");
@@ -1115,17 +1104,6 @@ public abstract class BaseTest {
             return client;
         } catch (Exception e) {
             throw new AssertionError("Failed to create par client");
-        }
-    }
-
-    protected RevokeSessionClient newRevokeSessionClient(RevokeSessionRequest request) {
-        try {
-            final RevokeSessionClient client = new RevokeSessionClient(revokeSessionEndpoint);
-            client.setRequest(request);
-            client.setExecutor(getClientExecutor());
-            return client;
-        } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
         }
     }
 
