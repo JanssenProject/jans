@@ -484,6 +484,81 @@ impl Authz {
         });
         self.config.log_service.log_fn(debug_log_fn);
     }
+
+    /// Returns metadata for policies matching the given unsigned request parameters.
+    ///
+    /// Builds entity type names from `EntityData` principals/resources and parses
+    /// action strings, then delegates to `PoliciesContainer::get_matching_policies`.
+    pub(super) fn get_matching_policies_unsigned(
+        &self,
+        principals: &[crate::EntityData],
+        actions: &[String],
+        resources: &[crate::EntityData],
+    ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
+        let principal_types = entity_data_to_type_names(principals)?;
+        let action_uids = parse_action_uids(actions)?;
+        let resource_types = entity_data_to_type_names(resources)?;
+
+        Ok(self.config.policy_store.policies.get_matching_policies(
+            &principal_types,
+            &action_uids,
+            &resource_types,
+        ))
+    }
+
+    /// Returns metadata for policies matching the given multi-issuer request parameters.
+    ///
+    /// Validates tokens and extracts principal entity types from them, then
+    /// delegates to `PoliciesContainer::get_matching_policies`.
+    pub(super) fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[crate::TokenInput],
+        actions: &[String],
+        resources: &[crate::EntityData],
+    ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
+        let validated_tokens = self
+            .config
+            .jwt_service
+            .validate_multi_issuer_tokens(tokens)?;
+
+        let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
+            .keys()
+            .map(|mapping| {
+                cedar_policy::EntityTypeName::from_str(mapping)
+                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
+            })
+            .collect::<Result<_, _>>()?;
+
+        let action_uids = parse_action_uids(actions)?;
+        let resource_types = entity_data_to_type_names(resources)?;
+
+        Ok(self.config.policy_store.policies.get_matching_policies(
+            &principal_types,
+            &action_uids,
+            &resource_types,
+        ))
+    }
+}
+
+/// Parse entity type names from `EntityData` slices.
+fn entity_data_to_type_names(
+    entities: &[crate::EntityData],
+) -> Result<HashSet<cedar_policy::EntityTypeName>, AuthorizeError> {
+    entities
+        .iter()
+        .map(|e| {
+            cedar_policy::EntityTypeName::from_str(&e.cedar_mapping.entity_type)
+                .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
+        })
+        .collect()
+}
+
+/// Parse action strings into `EntityUid` set.
+fn parse_action_uids(actions: &[String]) -> Result<HashSet<EntityUid>, AuthorizeError> {
+    actions
+        .iter()
+        .map(|a| EntityUid::from_str(a).map_err(Into::into))
+        .collect()
 }
 
 impl TrustedIssuerLoadingInfo for Authz {

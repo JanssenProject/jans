@@ -4,8 +4,8 @@ import AuthClientService from './service/AuthClientService';
 import { LLMClientFactory } from './llm/LLMClient';
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
-import AuthenticationService from '../service/authenticationService';
-import { ILooseObject } from "../options/ILooseObject";
+import AuthenticationService from '../features/authentication/services/authenticationService';
+import { ILooseObject } from "../shared/types";
 import StorageHelper from './helper/StorageHelper'
 import ConfigurationManager from './helper/ConfigurationManager'
 import { STORAGE_KEYS, DEFAULT_VALUES } from './helper/Constants';
@@ -149,7 +149,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
 
   const toolResult = await client.callTool({
     name: "registerOIDCClient",
-    arguments: enhancedArgs as ILooseObject,
+    arguments: enhancedArgs as unknown as ILooseObject,
   });
 
   await authClientService.saveClientInTarpStorage(toolResult);
@@ -179,11 +179,16 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
 
     const { secret, hashed } = await Utils.generateRandomChallengePair();
 
+    const redirectUri = Array.isArray(oidcClient.redirectUris) ? oidcClient.redirectUris[0] : undefined;
+    if (!redirectUri) {
+      throw new Error(`Client ${args.client_id} has no valid redirect URI`);
+    }
+
     const authArgs = {
       ...args,
       scope: oidcClient.scope,
-      response_type: oidcClient.responseType?.[0] || 'code',
-      redirect_uri: oidcClient.redirectUris?.[0],
+      response_type: (Array.isArray(oidcClient.responseType) ? oidcClient.responseType[0] : undefined) || 'code',
+      redirect_uri: redirectUri,
       code_challenge: hashed,
       code_challenge_method: DEFAULT_VALUES.CODE_CHALLENGE_METHOD,
       nonce: uuidv4()
@@ -197,7 +202,8 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
       arguments: authArgs,
     }) as ILooseObject;
 
-    const authorizationUrl = toolResult?.structuredContent?.authorization_url;
+    const structured = toolResult?.structuredContent as ILooseObject | undefined;
+    const authorizationUrl = structured?.authorization_url as string | undefined;
     if (!authorizationUrl) {
       throw new Error("No authorization URL returned from MCP server");
     }

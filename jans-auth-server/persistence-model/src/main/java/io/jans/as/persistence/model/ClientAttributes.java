@@ -170,6 +170,15 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
 
+    @JsonProperty("cimdClient")
+    private Boolean cimdClient = false;
+
+    @JsonProperty("cimdOriginalClientId")
+    private String cimdOriginalClientId;
+
+    @JsonProperty("cimdExpiresAt")
+    private Long cimdExpiresAt;
+
     public Boolean getRequirePkce() {
         if (requirePkce == null) {
             requirePkce = false;
@@ -179,6 +188,38 @@ public class ClientAttributes implements Serializable {
 
     public void setRequirePkce(Boolean requirePkce) {
         this.requirePkce = requirePkce;
+    }
+
+    public Boolean getCimdClient() {
+        return cimdClient;
+    }
+
+    public void setCimdClient(Boolean cimdClient) {
+        this.cimdClient = cimdClient;
+    }
+
+    public boolean isCimdClient() {
+        return cimdClient != null && cimdClient;
+    }
+
+    public String getCimdOriginalClientId() {
+        return cimdOriginalClientId;
+    }
+
+    public void setCimdOriginalClientId(String cimdOriginalClientId) {
+        this.cimdOriginalClientId = cimdOriginalClientId;
+    }
+
+    public Long getCimdExpiresAt() {
+        return cimdExpiresAt;
+    }
+
+    public void setCimdExpiresAt(Long cimdExpiresAt) {
+        this.cimdExpiresAt = cimdExpiresAt;
+    }
+
+    public boolean isCimdExpired() {
+        return cimdExpiresAt != null && System.currentTimeMillis() > cimdExpiresAt;
     }
 
     public List<String> getAuthorizationDetailsTypes() {
@@ -649,6 +690,9 @@ public class ClientAttributes implements Serializable {
                 ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
                 ", logoutStatusJwtSignedResponseAlg=" + logoutStatusJwtSignedResponseAlg +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
+                ", cimdClient=" + cimdClient +
+                ", cimdOriginalClientId=" + cimdOriginalClientId +
+                ", cimdExpiresAt=" + cimdExpiresAt +
                 '}';
     }
 }

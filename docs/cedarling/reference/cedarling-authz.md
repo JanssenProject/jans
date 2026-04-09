@@ -458,3 +458,22 @@ The result contains per-principal Cedar responses combined using the [`CEDARLING
   }
 }
 ```
+
+## Policy Introspection
+
+Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:
+
+- Showing operators which policies are relevant before authorization
+- Supporting policy auditing and review workflows
+- Debugging unexpected authorization outcomes by listing candidate policies
+
+Two methods are available, corresponding to the two authorization methods:
+
+- `get_matching_policies_unsigned(principals, actions, resources)` — for unsigned authorization
+- `get_matching_policies_multi_issuer(tokens, actions, resources)` — for multi-issuer authorization
+
+Both accept arrays of principals (or tokens), actions, and resources, and return a list of `PolicyMetadata` objects containing the policy `id`, `annotations`, and `source` code.
+
+**Important:** These methods perform scope-level filtering only (principal type, action, resource type). Policies with `when`/`unless` body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.
+
+See the [Interfaces](./cedarling-interfaces.md#policy-introspection) reference for full API details and examples.
