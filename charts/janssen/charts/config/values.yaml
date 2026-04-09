@@ -124,8 +124,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Loadbalancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
-  quarkusTransactionEnableRecovery: true
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.

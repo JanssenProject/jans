@@ -72,7 +72,7 @@ pub enum BuildEntityErrorKind {
 }
 
 #[derive(Debug, Error)]
-pub struct BuildAttrsErrorVec(Vec<BuildAttrsError>);
+pub struct BuildAttrsErrorVec(pub Vec<BuildAttrsError>);
 
 impl BuildAttrsErrorVec {
     pub fn into_inner(self) -> Vec<BuildAttrsError> {
