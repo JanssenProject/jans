@@ -7,185 +7,285 @@ tags:
   - Mappings
 ---
 
-# Cedarling Principal Mappings
+# Cedarling Entity Mappings
 
-Cedarling automatically creates the following entities:
+Cedarling creates Cedar entities automatically based on the authorization interface used. The two interfaces build different sets of entities:
 
-- [Trusted Issuer](#trusted-issuer-entity)
-- [Workload](#workload-entity)
-- [User](#user-entity)
-- [Role](#role-entity)
-- [JWT Entities](#jwt-entities)
+| Entity Type | `authorize_unsigned` | `authorize_multi_issuer` |
+| --- | --- | --- |
+| [Trusted Issuer](#trusted-issuer) | Created at startup | Created at startup |
+| [Principal (User, Workload, etc.)](#principal-entities) | Built from `EntityData` | Not created |
+| [Role](#role-entity) | Built as parent of principals | Not created |
+| [Token (JWT)](#token-entities) | Not created | Built from JWT claims |
+| [Resource](#resource-entity) | Built from `EntityData` | Built from `EntityData` |
 
-The entity type names of the Workload and User entities can be customized via the `CEDARLING_MAPPING_USER` and `CEDARLING_MAPPING_WORKLOAD` [properties](./cedarling-properties.md) respectively.
+The entity type names are defined in the Cedar schema within the policy store.
 
 > ***Notes***
 >
-> - All entity creation and attribute population logic is configurable via the [Token Metadata Schema (TEMS)](./cedarling-policy-store.md#token-metadata-schema) and [Cedarling bootstrap properties](./cedarling-properties.md).
-> - Attribute presence depends on token contents and policy store configuration.
+> - Attribute presence depends on the data provided and the Cedar schema in the policy store.
 > - Role inheritance simplifies **user-role mapping** for RBAC policy enforcement.
 
 ## Trusted Issuer
 
 Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the [policy store](./cedarling-policy-store.md#trusted-issuers-schema).
 
-- *Namespace:* Corresponds to the trusted issuer name of the trusted issuer object in the policy store..
+- *Namespace:* Corresponds to the trusted issuer name in the policy store.
 - *Type Name:* `TrustedIssuer`
-- *Entity ID:*  Set using issuer url and corresponds iss in token.
+- *Entity ID:* Set using the issuer URL (corresponds to `iss` in tokens).
 
-## Workload Entity
+## Principal Entities
 
-Cedarling creates a **Workload** entity for each request when the `CEDARLING_WORKLOAD_AUTHZ`  [bootstrap property](./cedarling-properties.md) is set to `enabled`.
+Principals are created only in the `authorize_unsigned` interface. The caller provides one or more principals as `EntityData`, each specifying the Cedar entity type, ID, and attributes explicitly.
 
-- *Default Type Name:* `Jans::Workload`
-- *Entity ID:* Determined by the `workload_id` attribute from the [Token Entity Metadata Schema (TEMS)](./cedarling-policy-store.md#token-metadata-schema).
-- If `workload_id` is **not set**, Cedarling will fall back to the following claims (in order):
-  1. `aud` from the `access_token`
-  2. `client_id` from the `access_token`
-  3. `aud` from the `id_token` -- note that the Workload attributes that will be created from this will still be from the `access_token`
-- *Entity Attributes*: Extracted from by the claims of the `access_token`. Cedarling will check the schema and use the JWT claims with the same names as the Workload attributes.
+There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include `User` and `Workload`, but these are just conventions defined in your schema.
 
-### Example Workload Entity Creation
+When multiple principals are provided, Cedarling evaluates each one independently and combines results using [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md).
 
-With the following `access_token` claims:
+### EntityData Structure
+
+Each principal is passed as an `EntityData`:
 
 ```json
 {
-  "iss": "https://test.com/",
-  "aud": "some_aud",
-  "jti": "some_jti",
+  "cedar_mapping": {
+    "entity_type": "Jans::User",
+    "id": "user_123"
+  },
+  "attributes": {
+    "sub": "user_123",
+    "email": "bob@email.com",
+    "role": ["Admin", "Editor"]
+  }
+}
+```
+
+- *Type Name:* Defined in `cedar_mapping.entity_type`. Must match a type in the Cedar schema.
+- *Entity ID:* Defined in `cedar_mapping.id`.
+- *Entity Attributes:* Cedarling checks the Cedar schema and maps the provided attributes to the entity's schema shape.
+
+### Example: User Principal
+
+Given the following `authorize_unsigned` request with a User principal:
+
+```json
+{
+  "principals": [
+    {
+      "cedar_mapping": {
+        "entity_type": "MyApp::User",
+        "id": "some_sub"
+      },
+      "attributes": {
+        "sub": "some_sub",
+        "email": {"domain": "email.com", "uid": "bob"},
+        "role": ["Admin", "Editor"]
+      }
+    }
+  ],
+  "action": "MyApp::Action::\"Read\"",
+  "resource": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::Application",
+      "id": "app_1"
+    },
+    "attributes": {
+      "app_id": "app_1",
+      "name": "MyApp",
+      "url": {"host": "myapp.com", "path": "/", "protocol": "https"}
+    }
+  },
+  "context": {}
 }
 ```
 
 and Cedar schema:
 
 ```cedarschema
-namespace Jans{
-  entity TrustedIssuer;
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
 };
 
-entity Workload = {
-  iss: Jans::TrustedIssuer,
-  client_id?: String,
-  aud?: String,
-  name?: String,
-  rp_id?: String,
-  spiffe_id?: String,
-  access_token?: Access_token,
+// MyApp namespace: your business entities.
+namespace MyApp {
+  entity Role;
+  entity User in [Role] = {
+    email?: Jans::email_address,
+    phone_number?: String,
+    role: Set<String>,
+    sub: String,
+    "username"?: String,
+  };
 };
 ```
 
-The following entity Workload Entity could be created:
+Cedarling builds the following entities:
+
+**User entity:**
 
 ```json
 {
-  "uid": {"type": "Workload", "id": "some_aud"},
+  "uid": {"type": "MyApp::User", "id": "some_sub"},
   "attrs": {
-    "iss": {"__entity": {"type": "Jans::TrustedIssuer", "id": "https://test.com/"}},
-    "aud": "some_aud"
-    "access_token": {"__entity": {"type": "Access_token", "id": "some_jti"}},
+    "sub": "some_sub",
+    "email": {"domain": "email.com", "uid": "bob"},
+    "role": ["Admin", "Editor"]
+  },
+  "parents": [
+    {"type": "MyApp::Role", "id": "Admin"},
+    {"type": "MyApp::Role", "id": "Editor"}
+  ]
+}
+```
+
+**Role entities** (created automatically as parents):
+
+```json
+[
+  {"uid": {"type": "MyApp::Role", "id": "Admin"}, "attrs": {}, "parents": []},
+  {"uid": {"type": "MyApp::Role", "id": "Editor"}, "attrs": {}, "parents": []}
+]
+```
+
+### Example: Workload Principal
+
+```json
+{
+  "principals": [
+    {
+      "cedar_mapping": {
+        "entity_type": "MyApp::Workload",
+        "id": "my_client"
+      },
+      "attributes": {
+        "client_id": "my_client",
+        "name": "Backend Service"
+      }
+    }
+  ],
+  "action": "MyApp::Action::\"Read\"",
+  "resource": { "..." : "..." },
+  "context": {}
+}
+```
+
+Cedarling builds:
+
+```json
+{
+  "uid": {"type": "MyApp::Workload", "id": "my_client"},
+  "attrs": {
+    "client_id": "my_client",
+    "name": "Backend Service"
   },
   "parents": []
 }
 ```
 
-## User Entity
-
-Cedarling creates a **User** entity for each request when the `CEDARLING_USER_AUTHZ`  [bootstrap property](./cedarling-properties.md) is set to `enabled`.
-
-- *Default Type Name:* `Jans::User`
-- *Entity ID:* Determined by the `user_id` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
-- If `user_id` is **not set**, Cedarling will fall back to the following claims (in order):
-  1. `sub` from the `userinfo_token`
-  2. `sub` from the `id_token`
-- *Entity Attributes*: Determined by the combined claims of the `id_token` and `userinfo_token`. Cedarling will check the schema and use the JWT claims with the same names as the User attributes.
-
-### Example User Entity Creation
-
-With the following `id_token` claims:
-
-```json
-{
-  "iss": "https://test.com/",
-  "sub": "some_sub",
-  "email": "bob@email.com",
-  "jti": "id_tkn_jti",
-  "role": "role1"
-}
-```
-
-and `userinfo_token` claims:
-
-```json
-{
-  "iss": "https://test.com/",
-  "sub": "some_sub",
-  "name": "bob",
-  "jti": "userinfo_tkn_jti",
-  "role": ["role2", "role3"]
-}
-```
-
-and Cedar schema:
-
-```cedarschema
-entity Role;
-entity User in [Role] = {
-  sub: String,
-  email: String,
-  name: String,
-};
-```
-
-The following entity Workload Entity could be created:
-
-```json
-{
-  "uid": {"type": "User", "id": "some_sub"},
-  "attrs": {
-    "sub": "some_sub",
-    "email": "email@email.com",
-    "name": "bob"
-  },
-  "parents": [
-    {"type": "Role", "id": "role1"},
-    {"type": "Role", "id": "role2"},
-    {"type": "Role", "id": "role3"}
-  ]
-}
-```
-
 ## Role Entity
 
-Cedarling automatically attempts to create **Role** entities for each request.
+Cedarling automatically creates **Role** entities when building principals in the `authorize_unsigned` interface.
 
-- **Default Type Name:** `Jans::Role`
-- **Entity ID:** Determined by the `role_mapping` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
-- If `role_mapping` is **not set**, Cedarling will try to create Role entities based on the following claims (in order):
-  1. `role` from the `userinfo_token`
-  2. `role` from the `id_token`
+- **Type Name:** Configurable via `mapping_role` bootstrap property. Must match the Role entity type in your Cedar schema.
+- **Entity ID:** Extracted from the attribute configured in `unsigned_role_id_src` (defaults to `role`). The value can be a single string or an array of strings, each becoming a separate Role entity.
+- **Relationship:** Role entities are added as **parents** of the principal entity, enabling RBAC policies.
 
 ### RBAC Support
 
-Since Role entities are automatically assigned as parents of User entities, you can easily define RBAC policies like:
+Since Role entities are automatically assigned as parents of principals, you can define RBAC policies like:
 
-```cedarschema
+```cedar
 permit (
-   principal == Jans::Role::"Admin",
-   action in [Jans::Action::"Compare",Jans::Action::"Execute"],
-)
+   principal == MyApp::Role::"Admin",
+   action in [MyApp::Action::"Compare", MyApp::Action::"Execute"],
+   resource
+);
 ```
 
-## JWT Entities
+## Token Entities
 
-Cedarling creates **JWT entities** for each token defined in the [trusted issuers schema](./cedarling-properties.md#trusted-issuers-schema).
+Token entities are created only in the `authorize_multi_issuer` interface. Cedarling builds one entity per JWT token provided in the request.
 
-- *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
-- *Entity ID:* Determined by the `token_id` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
+- *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema), or derived from the token's mapping name.
+- *Entity ID:* Extracted from the `jti` (JWT ID) claim by default, configurable via `token_id` in TEMS.
+- *Attributes:* JWT claims are mapped to entity attributes based on the Cedar schema. Reserved claims (`iss`, `jti`, `exp`) are typed correctly (entity reference, string, long). Synthetic attributes `token_type` and `validated_at` are added automatically.
+- *Tags:* Non-reserved JWT claims are also added as entity tags (`Set<String>`), enabling `hasTag`/`getTag` operations in policies.
 
-### Attribute Mappings
+### Example: Multi-Issuer Token Entity
 
-Each **claim** in the JWT is automatically added to the JWT entity's attributes.
+Given the following `authorize_multi_issuer` request:
+
+```json
+{
+  "tokens": [
+    {
+      "mapping": "Acme::Access_Token",
+      "payload": "<signed JWT>"
+    }
+  ],
+  "action": "Acme::Action::\"GetFood\"",
+  "resource": {
+    "cedar_mapping": {
+      "entity_type": "Acme::Resource",
+      "id": "approved_foods"
+    },
+    "attributes": {
+      "name": "Approved Foods"
+    }
+  }
+}
+```
+
+Where the JWT payload decodes to:
+
+```json
+{
+  "iss": "https://idp.acme.com/auth",
+  "sub": "user_123",
+  "jti": "token_abc",
+  "scope": ["read", "write"],
+  "exp": 2000000000
+}
+```
+
+Cedarling builds the following token entity:
+
+```json
+{
+  "uid": {"type": "Acme::Access_Token", "id": "token_abc"},
+  "attrs": {
+    "token_type": "Acme::Access_Token",
+    "jti": "token_abc",
+    "iss": {"__entity": {"type": "Acme::TrustedIssuer", "id": "https://idp.acme.com/auth"}},
+    "exp": 2000000000,
+    "validated_at": 1710892800,
+    "sub": "user_123",
+    "scope": ["read", "write"]
+  },
+  "tags": {
+    "sub": ["user_123"],
+    "scope": ["read", "write"]
+  },
+  "parents": []
+}
+```
+
+Token entities are accessible in policies via the context (e.g., `context.tokens.acme_access_token`).
+
+## Resource Entity
+
+Resource entities are built in both authorization interfaces from the `EntityData` provided in the request. The structure is identical to [principal entities](#entitydata-structure), but resources have no parent entities.
+
+If no attributes are provided and a default entity with the same UID exists in the policy store, the default entity's attributes are used.
 
 ## Entity Merging and Conflict Resolution
 
@@ -194,7 +294,7 @@ Cedarling automatically merges entities from multiple sources during authorizati
 ### Merging Order and Precedence
 
 1. **Default Entities**: Loaded first from policy store configuration
-2. **Request Entities**: Resource, issuers, roles, tokens, user, and workload entities
+2. **Request Entities**: Resource, issuers, roles, tokens, and principal entities
 3. **Conflict Resolution**: Request entities override default entities when UID conflicts occur
 
 ### Example: Entity Override Scenario
@@ -224,8 +324,8 @@ When a resource entity has the same UID as a default entity:
     "id": "org1"
   },
   "attrs": {
-    "name": "Updated Organization", // Different name
-    "is_active": false // Different status
+    "name": "Updated Organization",
+    "is_active": false
   },
   "parents": []
 }

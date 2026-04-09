@@ -6,25 +6,14 @@
 
 package io.jans.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * @see org.apache.commons.lang3.StringUtils
@@ -453,37 +442,10 @@ public final class StringHelper {
         return string;
     }
 
-    // Deprecated. Use IOUtils.toString(input)
-    @Deprecated
-    public static String convertStreamToString(InputStream is) throws IOException {
-        /*
-         * To convert the InputStream to String we use the Reader.read(char[] buffer)
-         * method. We iterate until the Reader return -1 which means there's no more
-         * data to read. We use the StringWriter class to produce the string.
-         */
-        if (is != null) {
-            Writer writer = new StringWriter();
-
-            char[] buffer = new char[1024];
-            try {
-                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, n);
-                }
-            } finally {
-                is.close();
-            }
-            return writer.toString();
-        } else {
-            return "";
-        }
-    }
-
     public static String replaceLast(final String string, String toReplace, String replacement) {
         int pos = string.lastIndexOf(toReplace);
         if (pos > -1) {
-            return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length(), string.length());
+            return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length());
         } else {
             return string;
         }

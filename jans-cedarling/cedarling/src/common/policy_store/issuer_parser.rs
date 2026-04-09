@@ -312,7 +312,6 @@ mod tests {
 
         let access_token = parsed[0].issuer.token_metadata.get("access_token").unwrap();
         assert_eq!(access_token.entity_type_name, "Jans::access_token");
-        assert_eq!(access_token.user_id, Some("sub".to_string()));
     }
 
     #[test]
