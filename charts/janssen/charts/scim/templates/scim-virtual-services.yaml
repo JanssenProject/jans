@@ -34,7 +34,7 @@ spec:
   - name: {{ .Release.Name }}-istio-scim-config
     match:
     - uri:
-        prefix: /.well-known/scim-configuration
+        exact: /.well-known/scim-configuration
     rewrite:
       uri: /jans-scim/restv1/scim-configuration
     route:

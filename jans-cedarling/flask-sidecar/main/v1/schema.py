@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@ limitations under the License.
 """
 
 import marshmallow as ma
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, INCLUDE
+from marshmallow import validate
+
 
 class BaseSchema(ma.Schema):
     class Meta(ma.Schema.Meta):
-        unknown = EXCLUDE 
+        unknown = EXCLUDE
         ordered = False
+
 
 class SmartNested(ma.fields.Nested):
     """Nested schema helper."""
@@ -30,27 +33,57 @@ class SmartNested(ma.fields.Nested):
             self.schema.transient = self.root.transient
         return super()._deserialize(*args, **kwargs)
 
+
+class TokenSchema(BaseSchema):
+    mapping = ma.fields.Str(required=True)
+    payload = ma.fields.Str(required=True)
+
+
+class TokenListSchema(BaseSchema):
+    tokens = ma.fields.List(
+        SmartNested(TokenSchema), required=True, validate=validate.Length(max=50)
+    )
+
+
 class SubjectSchema(BaseSchema):
     type_field = ma.fields.Str(required=True, data_key="type")
     id = ma.fields.Str(required=True)
-    properties = ma.fields.Dict()
+    properties = SmartNested(TokenListSchema)
 
-class ResourceSchema(SubjectSchema):
-    pass
+
+class CedarEntityMappingSchema(BaseSchema):
+    class Meta:
+        unknown = INCLUDE
+
+    class EntityMappingSchema(BaseSchema):
+        entity_type = ma.fields.Str(required=True)
+        id = ma.fields.Str(required=True)
+
+    cedar_entity_mapping = SmartNested(EntityMappingSchema, required=True)
+
+
+class ResourceSchema(BaseSchema):
+    type_field = ma.fields.Str(required=True, data_key="type")
+    id = ma.fields.Str(required=True)
+    properties = SmartNested(CedarEntityMappingSchema)
+
 
 class ActionSchema(BaseSchema):
     name = ma.fields.Str(required=True)
     properties = ma.fields.Dict()
 
+
 class EvaluationRequestSchema(BaseSchema):
     subject = SmartNested(SubjectSchema, required=True)
     resource = SmartNested(ResourceSchema, required=True)
     action = SmartNested(ActionSchema, required=True)
-    context = ma.fields.Dict()
+    context = ma.fields.Dict(load_default=None)
+
 
 class DecisionSchema(BaseSchema):
     decision = ma.fields.Bool(required=True)
     context = ma.fields.Dict()
+
 
 class WellKnownSchema(BaseSchema):
     access_evaluation_v1_endpoint = ma.fields.Str()
