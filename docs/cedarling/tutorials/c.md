@@ -15,7 +15,6 @@ C bindings for the Jans Cedarling authorization engine, providing policy-based a
 
 - C compiler (GCC, Clang, or MSVC)
 - Rust toolchain
-- cbindgen (`cargo install cbindgen`)
 
 ### Build from Source
 
@@ -31,19 +30,13 @@ C bindings for the Jans Cedarling authorization engine, providing policy-based a
     cd jans/jans-cedarling/bindings/cedarling_c
     ```
 
-3. Build the Rust library:
+3. Build the Rust library (this also generates `target/include/cedarling_c.h` under that crate’s `target/` directory):
 
     ```sh
     cargo build --release -p cedarling_c
     ```
 
-4. Generate the C header file:
-
-    ```sh
-    cbindgen --crate cedarling_c --output target/include/cedarling_c.h
-    ```
-
-5. Copy the built artifacts to your project:
+4. Copy the built artifacts to your project:
 
     - **Linux**: `cp target/release/libcedarling_c.so .`
     - **macOS**: `cp target/release/libcedarling_c.dylib .`

@@ -19,7 +19,7 @@ C bindings for the Jans Cedarling authorization engine, providing policy-based a
 
 - C compiler (GCC, Clang, or MSVC)
 - Rust toolchain
-- cbindgen (`cargo install cbindgen`)
+
 
 **1. Clone the repository:**
 
@@ -28,19 +28,13 @@ git clone --depth 1 https://github.com/JanssenProject/jans.git
 cd jans/jans-cedarling/bindings/cedarling_c
 ```
 
-**2. Build the Rust library:**
+**2. Build the Rust library** (also writes `target/include/cedarling_c.h` next to the crate’s `target/`):
 
 ```sh
 cargo build --release -p cedarling_c
 ```
 
-**3. Generate the C header file:**
-
-```sh
-cbindgen --crate cedarling_c --output target/include/cedarling_c.h
-```
-
-**4. Copy the built artifacts:**
+**3. Copy the built artifacts:**
 
 ```sh
 # Linux
@@ -191,6 +185,8 @@ cedarling_free_result(&push_result);
 ```
 
 #### Get Data
+
+Success returns JSON for the value, or the JSON literal `null` when the key is missing **or** when the stored value is JSON null—those cases look the same here. Use `cedarling_context_get_entry` if you need to distinguish them (e.g. presence via entry metadata).
 
 ```c
 CedarlingResult get_result;
