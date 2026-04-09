@@ -20,9 +20,11 @@ use std::sync::Arc;
 
 use serde_json::Value as JsonValue;
 use thiserror::Error;
-use url::Url;
 
-use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use crate::common::{
+    issuer_utils::IssClaim,
+    policy_store::{TokenEntityMetadata, TrustedIssuer},
+};
 
 /// Errors that can occur during trusted issuer validation.
 #[derive(Debug, Error)]
@@ -61,65 +63,33 @@ type Result<T> = std::result::Result<T, TrustedIssuerError>;
 /// - JWKS fetching and caching with configurable TTL
 /// - JWT signature verification
 pub(crate) struct TrustedIssuerValidator {
-    /// Map of issuer identifiers to their configurations
-    trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
     /// Reverse lookup map: OIDC base URL -> issuer
     /// This optimizes issuer lookup when dealing with hundreds of trusted issuers
-    url_to_issuer: HashMap<String, Arc<TrustedIssuer>>,
+    url_to_issuer: HashMap<IssClaim, Arc<TrustedIssuer>>,
 }
 
 impl TrustedIssuerValidator {
     /// Creates a new trusted issuer validator with a logger.
     pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
-        let trusted_issuers: HashMap<String, Arc<TrustedIssuer>> = trusted_issuers
-            .into_iter()
-            .map(|(k, v)| (k, Arc::new(v)))
-            .collect();
-
         // Build reverse lookup map: OIDC base URL -> issuer
         let mut url_to_issuer = HashMap::with_capacity(trusted_issuers.len());
-        for (id, issuer) in &trusted_issuers {
-            // Extract base URL from OIDC endpoint
-            if let Some(base_url) = issuer
-                .oidc_endpoint
-                .as_str()
-                .strip_suffix("/.well-known/openid-configuration")
-            {
-                let normalized_url = base_url.trim_end_matches('/');
-                url_to_issuer.insert(normalized_url.to_string(), issuer.clone());
-            }
-
-            // Also add the issuer ID if it's a URL format
-            if id.starts_with("http://") || id.starts_with("https://") {
-                let normalized_id = id.trim_end_matches('/');
-                url_to_issuer.insert(normalized_id.to_string(), issuer.clone());
-            }
+        for issuer in trusted_issuers.into_values().map(Arc::new) {
+            url_to_issuer.insert(issuer.iss_claim(), issuer);
         }
 
-        Self {
-            trusted_issuers,
-            url_to_issuer,
-        }
+        Self { url_to_issuer }
     }
 
     /// Finds a trusted issuer by the issuer claim value.
     ///
     /// This method matches the token's `iss` claim against the configured trusted issuers.
     /// The matching is done by comparing the issuer URL or issuer ID.
-    pub(crate) fn find_trusted_issuer(&self, issuer_claim: &str) -> Result<Arc<TrustedIssuer>> {
-        // Try exact match first by issuer ID
-        if let Some(issuer) = self.trusted_issuers.get(issuer_claim) {
+    pub(crate) fn find_trusted_issuer(
+        &self,
+        issuer_claim: &IssClaim,
+    ) -> Result<Arc<TrustedIssuer>> {
+        if let Some(issuer) = self.url_to_issuer.get(issuer_claim) {
             return Ok(issuer.clone());
-        }
-
-        // Try matching by URL using reverse lookup map (O(1) instead of O(n))
-        // Parse the issuer claim as a URL and normalize it for lookup
-        if let Ok(iss_url) = Url::parse(issuer_claim) {
-            let normalized_url = iss_url.as_str().trim_end_matches('/');
-
-            if let Some(issuer) = self.url_to_issuer.get(normalized_url) {
-                return Ok(issuer.clone());
-            }
         }
 
         Err(TrustedIssuerError::UntrustedIssuer(
@@ -135,7 +105,7 @@ impl TrustedIssuerValidator {
 /// - `entity_type_name` is not empty (configuration validation)
 /// - All claims in `required_claims` set exist
 ///
-/// Note: Mapping fields like `user_id`, `role_mapping`, `workload_id`, and `token_id`
+/// Note: Mapping fields like `user_id`, `role_mapping`, and `token_id`
 /// are configuration hints for claim extraction, not strictly required claims.
 /// They are validated only if explicitly included in `required_claims`.
 ///
@@ -173,6 +143,8 @@ pub(crate) fn validate_required_claims(
 
 #[cfg(test)]
 mod tests {
+    use url::Url;
+
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
     use std::collections::HashSet;
@@ -185,32 +157,12 @@ mod tests {
         );
         token_metadata.insert("id_token".to_string(), TokenEntityMetadata::id_token());
 
-        TrustedIssuer {
-            name: format!("Test Issuer {id}"),
-            description: "Test issuer for validation".to_string(),
-            oidc_endpoint: Url::parse(endpoint).unwrap(),
+        TrustedIssuer::new(
+            format!("Test Issuer {id}"),
+            "Test issuer for validation".to_string(),
+            Url::parse(endpoint).unwrap(),
             token_metadata,
-        }
-    }
-
-    #[test]
-    fn test_find_trusted_issuer_by_id() {
-        let issuers = HashMap::from([
-            (
-                "issuer1".to_string(),
-                create_test_issuer("1", "https://issuer1.com/.well-known/openid-configuration"),
-            ),
-            (
-                "issuer2".to_string(),
-                create_test_issuer("2", "https://issuer2.com/.well-known/openid-configuration"),
-            ),
-        ]);
-
-        let validator = TrustedIssuerValidator::new(issuers);
-
-        let result = validator.find_trusted_issuer("issuer1");
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap().name, "Test Issuer 1");
+        )
     }
 
     #[test]
@@ -222,7 +174,7 @@ mod tests {
 
         let validator = TrustedIssuerValidator::new(issuers);
 
-        let result = validator.find_trusted_issuer("https://issuer1.com");
+        let result = validator.find_trusted_issuer(&IssClaim::new("https://issuer1.com"));
         assert!(result.is_ok());
         assert_eq!(result.unwrap().name, "Test Issuer 1");
     }
@@ -236,7 +188,7 @@ mod tests {
 
         let validator = TrustedIssuerValidator::new(issuers);
 
-        let result = validator.find_trusted_issuer("https://evil.com");
+        let result = validator.find_trusted_issuer(&IssClaim::new("https://evil.com"));
         assert!(
             matches!(result.unwrap_err(), TrustedIssuerError::UntrustedIssuer(_)),
             "expected UntrustedIssuer error"
@@ -253,8 +205,6 @@ mod tests {
 
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))
-            .role_mapping(Some("role".to_string()))
             .token_id("jti".to_string())
             .build();
 
@@ -272,7 +222,6 @@ mod tests {
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string())) // This is just a mapping, not validated
             .token_id("jti".to_string())
             .required_claims(HashSet::from(["sub".to_string()])) // This IS validated
             .build();
@@ -297,7 +246,6 @@ mod tests {
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .role_mapping(Some("role".to_string())) // This is just a mapping, not validated
             .token_id("jti".to_string())
             .required_claims(HashSet::from(["role".to_string()])) // This IS validated
             .build();
@@ -347,8 +295,6 @@ mod tests {
 
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))     // Mapping only
-            .role_mapping(Some("role".to_string())) // Mapping only
             .token_id("jti".to_string())          // Mapping only
             .required_claims(HashSet::new())      // No required claims
             .build();

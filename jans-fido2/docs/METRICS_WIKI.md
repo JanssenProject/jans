@@ -513,8 +513,10 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/errors
     "Operation timed out": 8,
     "Credential not recognized": 5
   },
-  "successRate": 0.72,
-  "failureRate": 0.28
+  "successRate": 0.32,
+  "failureRate": 0.28,
+  "dropOffRate": 0.40,
+  "completionRate": 0.60
 }
 ```
 
@@ -524,11 +526,14 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/errors
 |-------|------|-------------|
 | `errorCategories` | object | Count of errors grouped by category. Keys are category codes, values are counts. **Common categories:** `USER_CANCELLED` (user clicked cancel), `TIMEOUT` (operation timed out), `INVALID_CREDENTIAL` (credential not recognized), `NETWORK_ERROR` (connectivity issues), `NOT_ALLOWED` (browser/security policy blocked), `SECURITY_ERROR` (security constraint violation). |
 | `topErrors` | object | Count of errors by specific error message. Keys are the actual error messages, values are counts. Use this to identify the most frequent specific issues users encounter. Example: `"User cancelled the operation": 12` means 12 users clicked cancel. |
-| `successRate` | number | Ratio of successful operations to total completed operations (0.0–1.0). **Interpretation:** 0.72 = 72% of operations succeeded. **Healthy range:** >0.85 (85%) is typical for mature deployments. <0.70 may indicate UX issues or technical problems. |
-| `failureRate` | number | Ratio of failed operations to total (0.0–1.0). Always equals `1 - successRate`. **Alert threshold suggestion:** Set alerts if failureRate exceeds 0.15 (15%). |
+| `successRate` | number | Ratio of **started** operations that succeeded (0.0–1.0). Denominator is the number of ATTEMPT entries (operations started). **Interpretation:** 0.32 = 32% of started operations succeeded. **Healthy range:** >0.85 is typical for mature deployments. |
+| `failureRate` | number | Ratio of **started** operations that failed (0.0–1.0). Denominator is the number of ATTEMPT entries. **Alert threshold suggestion:** Set alerts if failureRate exceeds 0.15 (15%). |
+| `dropOffRate` | number | Ratio of **started** operations that did not complete (user dropped off). Equals `1 - completionRate` (0.0–1.0). A popular metric for administrators to track abandonment. |
+| `completionRate` | number | Ratio of **started** operations that completed (either success or failure). Equals `successRate + failureRate` (0.0–1.0). |
 
 **Notes:**
-- `successRate + failureRate = 1.0` (100% of completed operations). These rates are calculated from operations that reached a final state (SUCCESS or FAILURE), not from ATTEMPT entries.
+- All rates use **started operations** (ATTEMPT count) as the denominator when ATTEMPT entries exist. Then `successRate + failureRate = completionRate`, and `dropOffRate = 1 - completionRate`.
+- If there are no ATTEMPT entries in the time range (e.g. legacy data), rates are computed from completed operations only: `completionRate` is 1.0 and `dropOffRate` is 0.0.
 - Empty `errorCategories` and `topErrors` (`{}`) indicate no failures occurred in the time range—this is good!
 - **Actionable insights:** High `USER_CANCELLED` counts may indicate confusing UX. High `TIMEOUT` counts may indicate slow network or authenticator issues. High `INVALID_CREDENTIAL` may indicate users trying wrong passkeys.
 - Error categorization depends on `errorCategorization` being enabled in configuration.
@@ -857,7 +862,7 @@ Data for the **current** hour may appear only a few minutes after the hour, once
 `deviceTypes` (e.g. platform, cross-platform), `authenticatorTypes`, `operatingSystems`, `browsers`.
 
 **Error:**  
-`errorCategories`, `topErrors`, `successRate`, `failureRate`.
+`errorCategories`, `topErrors`, `successRate`, `failureRate`, `dropOffRate`, `completionRate`.
 
 **Formulas:**
 

@@ -28,8 +28,7 @@ Kubernetes: `>=v1.23.0-0`
 | additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
-| alb.ingress | bool | `false` | switches the service to Nodeport for ALB ingress |
-| auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","lockLogLevel":"INFO","lockLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockAuditEnabled":false,"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
+| auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","lockLogLevel":"INFO","lockLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","rootLogLevel":"INFO","rootLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockAuditEnabled":false,"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
 | auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"cronJobSchedule":"","customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
 | auth-server-key-rotation.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | auth-server-key-rotation.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
@@ -59,7 +58,7 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server-key-rotation.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
 | auth-server-key-rotation.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | auth-server-key-rotation.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
-| auth-server.appLoggers | object | `{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","lockLogLevel":"INFO","lockLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| auth-server.appLoggers | object | `{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","lockLogLevel":"INFO","lockLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","rootLogLevel":"INFO","rootLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | auth-server.appLoggers.auditStatsLogLevel | string | `"INFO"` | jans-auth_audit.log level |
 | auth-server.appLoggers.auditStatsLogTarget | string | `"FILE"` | jans-auth_audit.log target |
 | auth-server.appLoggers.authLogLevel | string | `"INFO"` | jans-auth.log level |
@@ -73,13 +72,15 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-auth_persistence_duration.log target |
 | auth-server.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-auth_persistence.log level |
 | auth-server.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-auth_persistence.log target |
+| auth-server.appLoggers.rootLogLevel | string | `"INFO"` | root log level |
+| auth-server.appLoggers.rootLogTarget | string | `"STDOUT"` | root log target (if set to FILE, logs will be redirected to jans-auth.log) |
 | auth-server.appLoggers.scriptLogLevel | string | `"INFO"` | jans-auth_script.log level |
 | auth-server.appLoggers.scriptLogTarget | string | `"FILE"` | jans-auth_script.log target |
 | auth-server.authEncKeys | string | `"RSA1_5 RSA-OAEP"` | space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`) |
 | auth-server.authSigKeys | string | `"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"` | space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`) |
 | auth-server.cnCustomJavaOptions | string | `""` | passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | auth-server.enabled | bool | `true` | Boolean flag to enable/disable auth-server chart. You should never set this to false. |
-| auth-server.ingress | object | `{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockAuditEnabled":false,"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| auth-server.ingress | object | `{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockAuditEnabled":false,"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | auth-server.ingress.authServerAdditionalAnnotations | object | `{}` | Auth server ingress resource additional annotations. |
 | auth-server.ingress.authServerEnabled | bool | `true` | Enable Auth server endpoints /jans-auth |
 | auth-server.ingress.authServerLabels | object | `{}` | Auth server ingress resource labels. key app is taken |
@@ -101,24 +102,20 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server.ingress.openidAdditionalAnnotations | object | `{}` | openid-configuration ingress resource additional annotations. |
 | auth-server.ingress.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |
 | auth-server.ingress.openidConfigLabels | object | `{}` | openid-configuration ingress resource labels. key app is taken |
-| auth-server.ingress.u2fAdditionalAnnotations | object | `{}` | u2f config ingress resource additional annotations. |
-| auth-server.ingress.u2fConfigEnabled | bool | `true` | Enable endpoint /.well-known/fido-configuration |
-| auth-server.ingress.u2fConfigLabels | object | `{}` | u2f config ingress resource labels. key app is taken |
 | auth-server.ingress.uma2AdditionalAnnotations | object | `{}` | uma2 config ingress resource additional annotations. |
 | auth-server.ingress.uma2ConfigEnabled | bool | `true` | Enable endpoint /.well-known/uma2-configuration |
 | auth-server.ingress.uma2ConfigLabels | object | `{}` | uma2 config ingress resource labels. key app is taken |
-| auth-server.ingress.webdiscoveryAdditionalAnnotations | object | `{}` | webdiscovery ingress resource additional annotations. |
-| auth-server.ingress.webdiscoveryEnabled | bool | `true` | Enable endpoint /.well-known/simple-web-discovery |
-| auth-server.ingress.webdiscoveryLabels | object | `{}` | webdiscovery ingress resource labels. key app is taken |
 | auth-server.ingress.webfingerAdditionalAnnotations | object | `{}` | webfinger ingress resource additional annotations. |
 | auth-server.ingress.webfingerEnabled | bool | `true` | Enable endpoint /.well-known/webfinger |
 | auth-server.ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
 | auth-server.lockEnabled | bool | `false` | Enable jans-lock as service running inside auth-server |
 | casa.adminEnabled | bool | `true` | Boolean flag to enable/disable the casa admin console. |
-| casa.appLoggers | object | `{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| casa.appLoggers | object | `{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","rootLogLevel":"INFO","rootLogTarget":"STDOUT","timerLogLevel":"INFO","timerLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | casa.appLoggers.casaLogLevel | string | `"INFO"` | casa.log level |
 | casa.appLoggers.casaLogTarget | string | `"STDOUT"` | casa.log target |
 | casa.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e casa ===> 2022-12-20 17:49:55,744 INFO |
+| casa.appLoggers.rootLogLevel | string | `"INFO"` | root log level |
+| casa.appLoggers.rootLogTarget | string | `"STDOUT"` | root log target (if set to FILE, logs will be redirected to casa.log) |
 | casa.appLoggers.timerLogLevel | string | `"INFO"` | casa timer log level |
 | casa.appLoggers.timerLogTarget | string | `"FILE"` | casa timer log target |
 | casa.casaServiceName | string | `"casa"` | Name of the casa service. Please keep it as default. |
@@ -173,16 +170,18 @@ Kubernetes: `>=v1.23.0-0`
 | cnPersistenceType | string | `"sql"` | Persistence backend to run Janssen with hybrid|sql. |
 | cnPrometheusPort | string | `""` | Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. |
 | cnSqlPasswordFile | string | `"/etc/jans/conf/sql_password"` | Path to SQL password file |
-| config-api.appLoggers | object | `{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| config-api.appLoggers | object | `{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","rootLogLevel":"INFO","rootLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | config-api.appLoggers.configApiLogLevel | string | `"INFO"` | configapi.log level |
 | config-api.appLoggers.configApiLogTarget | string | `"STDOUT"` | configapi.log target |
 | config-api.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO |
-| config-api.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | config-api_persistence_duration.log level |
-| config-api.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | config-api_persistence_duration.log target |
-| config-api.appLoggers.persistenceLogLevel | string | `"INFO"` | config-api_persistence.log level |
-| config-api.appLoggers.persistenceLogTarget | string | `"FILE"` | config-api_persistence.log target |
-| config-api.appLoggers.scriptLogLevel | string | `"INFO"` | config-api_script.log level |
-| config-api.appLoggers.scriptLogTarget | string | `"FILE"` | config-api_script.log target |
+| config-api.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | configapi_persistence_duration.log level |
+| config-api.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | configapi_persistence_duration.log target |
+| config-api.appLoggers.persistenceLogLevel | string | `"INFO"` | configapi_persistence.log level |
+| config-api.appLoggers.persistenceLogTarget | string | `"FILE"` | configapi_persistence.log target |
+| config-api.appLoggers.rootLogLevel | string | `"INFO"` | root log level |
+| config-api.appLoggers.rootLogTarget | string | `"STDOUT"` | root log target (if set to FILE, logs will be redirected to configapi.log) |
+| config-api.appLoggers.scriptLogLevel | string | `"INFO"` | configapi_script.log level |
+| config-api.appLoggers.scriptLogTarget | string | `"FILE"` | configapi_script.log target |
 | config-api.cnCustomJavaOptions | string | `""` | passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | config-api.configApiServerServiceName | string | `"config-api"` | Name of the config-api service. Please keep it as default. |
 | config-api.enabled | bool | `true` | Boolean flag to enable/disable the config-api chart. |
@@ -241,7 +240,6 @@ Kubernetes: `>=v1.23.0-0`
 | configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.lbAddr | string | `""` | Load balancer address for AWS if the FQDN is not registered. |
-| configmap.quarkusTransactionEnableRecovery | bool | `true` | Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details. |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
 | customAnnotations.certificate | object | `{}` |  |
 | customAnnotations.clusterRoleBinding | object | `{}` |  |
@@ -260,7 +258,7 @@ Kubernetes: `>=v1.23.0-0`
 | dnsConfig | object | `{}` | Add custom dns config |
 | dnsPolicy | string | `""` | Add custom dns policy |
 | email | string | `"support@jans.io"` | Email address of the administrator usually. Used for certificate creation. |
-| fido2.appLoggers | object | `{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| fido2.appLoggers | object | `{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","rootLogLevel":"INFO","rootLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | fido2.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO |
 | fido2.appLoggers.fido2LogLevel | string | `"INFO"` | fido2.log level |
 | fido2.appLoggers.fido2LogTarget | string | `"STDOUT"` | fido2.log target |
@@ -268,6 +266,8 @@ Kubernetes: `>=v1.23.0-0`
 | fido2.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | fido2_persistence_duration.log target |
 | fido2.appLoggers.persistenceLogLevel | string | `"INFO"` | fido2_persistence.log level |
 | fido2.appLoggers.persistenceLogTarget | string | `"FILE"` | fido2_persistence.log target |
+| fido2.appLoggers.rootLogLevel | string | `"INFO"` | root log level |
+| fido2.appLoggers.rootLogTarget | string | `"STDOUT"` | root log target (if set to FILE, logs will be redirected to fido2.log) |
 | fido2.appLoggers.scriptLogLevel | string | `"INFO"` | fido2_script.log level |
 | fido2.appLoggers.scriptLogTarget | string | `"FILE"` | fido2_script.log target |
 | fido2.cnCustomJavaOptions | string | `""` | passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
@@ -285,16 +285,35 @@ Kubernetes: `>=v1.23.0-0`
 | fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
-| gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
-| gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
-| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
-| gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
-| gatewayApi.httpPort | int | `80` | Gateway http port number |
-| gatewayApi.httpsPort | int | `443` | Gateway https port number |
-| gatewayApi.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
-| gatewayApi.routeAnnotations | object | `{}` | Specific annotations for the HTTPRoute resource |
-| gatewayApi.routeLabels | object | `{}` | Specific labels for the HTTPRoute resource |
-| gatewayApi.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
+| gateway-api | object | `{"additionalConfig":{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{},"traefik":{}},"enabled":false,"gateway":{"annotations":{},"attachLbIp":false,"className":"nginx","httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"},"routes":{"annotations":{},"labels":{}}}` | Gateway API implementation. We support all GA-conformant implementations (e.g., 'nginx', 'istio', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gateway-api.additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
+| gateway-api.additionalConfig.airlock | object | `{"createLbService":false}` | Configuration for Airlock Microgateway |
+| gateway-api.additionalConfig.airlock.createLbService | bool | `false` | Create LoadBalancer service using GatewayParameters (by default airlock-microgateway doesn't create the service). See https://docs.airlock.com/microgateway/latest/index/api/crds/gateway-parameters/v1alpha1/ for details. The GatewayParameters will be attached to gateway.infrastructure.parametersRef only if it's empty. |
+| gateway-api.additionalConfig.cilium | object | `{"ipPoolBlocks":[]}` | Configuration for Cilium. |
+| gateway-api.additionalConfig.cilium.ipPoolBlocks | list | `[]` | Create Cilium IP pool with the specified blocks. See https://docs.cilium.io/en/stable/network/lb-ipam/ for details. |
+| gateway-api.additionalConfig.envoy | object | `{"createGatewayClass":false}` | Configuration for Envoy. |
+| gateway-api.additionalConfig.envoy.createGatewayClass | bool | `false` | Create GatewayClass named `envoy` (by default Envoy doesn't create gatewayclass). The `envoy` name can be set as value of `gateway.className` attribute. |
+| gateway-api.additionalConfig.istio | object | `{}` | Configuration for Istio. |
+| gateway-api.additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
+| gateway-api.additionalConfig.nginx | object | `{}` | Configuration for NGINX Fabric. |
+| gateway-api.additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
+| gateway-api.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
+| gateway-api.gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
+| gateway-api.gateway.annotations | object | `{}` | Specific annotations for the Gateway resource |
+| gateway-api.gateway.attachLbIp | bool | `false` | Attach global.lbIp to Gateway spec.addresses with IPAddress type (enable this if loadbalancer doesn't assign IP address to Gateway automatically) |
+| gateway-api.gateway.className | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. |
+| gateway-api.gateway.httpPort | int | `80` | Gateway http port number |
+| gateway-api.gateway.httpsPort | int | `443` | Gateway https port number |
+| gateway-api.gateway.infrastructure | object | `{"annotations":{},"labels":{},"parametersRef":{}}` | Gateway spec.infrastructure |
+| gateway-api.gateway.infrastructure.annotations | object | `{}` | Specific annotations for the infrastructure |
+| gateway-api.gateway.infrastructure.labels | object | `{}` | Specific labels for the infrastructure |
+| gateway-api.gateway.infrastructure.parametersRef | object | `{}` | Specific parametersRef for the infrastructure Some gateway implementation like `airlock-microgateway` may need to attach GatewayParameters to create Loadbalancer service automatically. |
+| gateway-api.gateway.labels | object | `{}` | Specific labels for the Gateway resource |
+| gateway-api.gateway.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
+| gateway-api.gateway.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
+| gateway-api.routes | object | `{"annotations":{},"labels":{}}` | Configuration for HTTPRoute and its related resources |
+| gateway-api.routes.annotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| gateway-api.routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
 | hpa.behavior | object | `{}` | Scaling Policies |
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |
@@ -310,30 +329,6 @@ Kubernetes: `>=v1.23.0-0`
 | istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | istio.tlsSecretName | string | `"tls-certificate"` |  |
-| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"interval":10,"lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
-| kc-scheduler.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
-| kc-scheduler.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
-| kc-scheduler.customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
-| kc-scheduler.customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
-| kc-scheduler.dnsConfig | object | `{}` | Add custom dns config |
-| kc-scheduler.dnsPolicy | string | `""` | Add custom dns policy |
-| kc-scheduler.enabled | bool | `false` | Boolean flag to enable/disable the kc-scheduler cronjob chart. |
-| kc-scheduler.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
-| kc-scheduler.image.pullSecrets | list | `[]` | Image Pull Secrets |
-| kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
-| kc-scheduler.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
-| kc-scheduler.interval | int | `10` | Interval of running the scheduler (in minutes) |
-| kc-scheduler.nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
-| kc-scheduler.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
-| kc-scheduler.resources.limits.cpu | string | `"300m"` | CPU limit. |
-| kc-scheduler.resources.limits.memory | string | `"300Mi"` | Memory limit. |
-| kc-scheduler.resources.requests.cpu | string | `"300m"` | CPU request. |
-| kc-scheduler.resources.requests.memory | string | `"300Mi"` | Memory request. |
-| kc-scheduler.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
-| kc-scheduler.usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
-| kc-scheduler.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
-| kc-scheduler.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
-| kc-scheduler.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable. |
 | lifecycle | object | `{}` |  |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
@@ -358,22 +353,18 @@ Kubernetes: `>=v1.23.0-0`
 | resources.requests.cpu | string | `"2500m"` | CPU request. |
 | resources.requests.memory | string | `"2500Mi"` | Memory request. |
 | salt | string | `""` | Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value. |
-| saml.cnCustomJavaOptions | string | `""` | passing custom java options to saml. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
-| saml.enabled | bool | `false` | Boolean flag to enable/disable the saml chart. |
-| saml.ingress | object | `{"samlAdditionalAnnotations":{},"samlEnabled":false,"samlLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
-| saml.ingress.samlAdditionalAnnotations | object | `{}` | SAML ingress resource additional annotations. |
-| saml.ingress.samlLabels | object | `{}` | SAML config ingress resource labels. key app is taken |
-| saml.samlServiceName | string | `"saml"` | Name of the saml service. Please keep it as default. |
-| scim.appLoggers | object | `{"enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
+| scim.appLoggers | object | `{"enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","rootLogLevel":"INFO","rootLogTarget":"STDOUT","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | scim.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO |
-| scim.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | jans-scim_persistence_duration.log level |
-| scim.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-scim_persistence_duration.log target |
-| scim.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-scim_persistence.log level |
-| scim.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-scim_persistence.log target |
-| scim.appLoggers.scimLogLevel | string | `"INFO"` | jans-scim.log level |
-| scim.appLoggers.scimLogTarget | string | `"STDOUT"` | jans-scim.log target |
-| scim.appLoggers.scriptLogLevel | string | `"INFO"` | jans-scim_script.log level |
-| scim.appLoggers.scriptLogTarget | string | `"FILE"` | jans-scim_script.log target |
+| scim.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | scim_persistence_duration.log level |
+| scim.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | scim_persistence_duration.log target |
+| scim.appLoggers.persistenceLogLevel | string | `"INFO"` | scim_persistence.log level |
+| scim.appLoggers.persistenceLogTarget | string | `"FILE"` | scim_persistence.log target |
+| scim.appLoggers.rootLogLevel | string | `"INFO"` | root log level |
+| scim.appLoggers.rootLogTarget | string | `"STDOUT"` | root log target (if set to FILE, logs will be redirected to scim.log) |
+| scim.appLoggers.scimLogLevel | string | `"INFO"` | scim.log level |
+| scim.appLoggers.scimLogTarget | string | `"STDOUT"` | scim.log target |
+| scim.appLoggers.scriptLogLevel | string | `"INFO"` | scim_script.log level |
+| scim.appLoggers.scriptLogTarget | string | `"FILE"` | scim_script.log target |
 | scim.cnCustomJavaOptions | string | `""` | passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | scim.enabled | bool | `true` | Boolean flag to enable/disable the SCIM chart. |
 | scim.ingress | object | `{"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigEnabled":false,"scimConfigLabels":{},"scimEnabled":false,"scimLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |

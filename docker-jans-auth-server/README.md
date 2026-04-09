@@ -118,7 +118,11 @@ The following key-value pairs are the defaults:
     "script_log_target": "FILE",
     "script_log_level": "INFO",
     "audit_log_target": "FILE",
-    "audit_log_level": "INFO"
+    "audit_log_level": "INFO",
+    "lock_log_target": "STDOUT",
+    "lock_log_level": "INFO",
+    "root_log_target": "STDOUT",
+    "root_log_level": "INFO"
 }
 ```
 
@@ -126,39 +130,6 @@ To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Ex
 
 ```
 {"auth_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
-```
-
-### Configure plugin loggers
-
-Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
-
-Supported redirect target:
-
-- `STDOUT`
-- `FILE`
-
-Supported level:
-
-- `FATAL`
-- `ERROR`
-- `WARN`
-- `INFO`
-- `DEBUG`
-- `TRACE`
-
-The following key-value pairs are the defaults:
-
-```json
-{
-    "lock_log_target": "STDOUT",
-    "lock_log_level": "INFO"
-}
-```
-
-To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
-
-```
-{"lock_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Hybrid mapping

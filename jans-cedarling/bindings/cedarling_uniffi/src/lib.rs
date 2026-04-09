@@ -6,7 +6,7 @@
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
-    DataStoreStats as CoreDataStoreStats, LogStorage,
+    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
 mod result;
@@ -154,17 +154,17 @@ impl TryFrom<CoreDataEntry> for DataEntry {
 
     fn try_from(entry: CoreDataEntry) -> Result<Self, Self::Error> {
         // Use serde_json::to_string for stable serialization of CedarType
-        let data_type = serde_json::to_string(&entry.data_type)
-            .map_err(|e| DataError::SerializationError(format!("Failed to serialize data_type: {}", e)))?;
+        let data_type = serde_json::to_string(&entry.data_type).map_err(|e| {
+            DataError::SerializationError(format!("Failed to serialize data_type: {}", e))
+        })?;
         // Remove quotes from the serialized string (serde_json adds quotes for enum strings)
         let data_type = data_type.trim_matches('"').to_string();
 
         Ok(Self {
             key: entry.key,
-            value: JsonValue(
-                serde_json::to_string(&entry.value)
-                    .map_err(|e| DataError::SerializationError(format!("Failed to serialize value: {}", e)))?,
-            ),
+            value: JsonValue(serde_json::to_string(&entry.value).map_err(|e| {
+                DataError::SerializationError(format!("Failed to serialize value: {}", e))
+            })?),
             data_type,
             created_at: entry.created_at.to_rfc3339(),
             expires_at: entry
@@ -181,29 +181,19 @@ impl From<core::DataError> for DataError {
     fn from(err: core::DataError) -> Self {
         match err {
             core::DataError::InvalidKey => DataError::InvalidKey,
-            core::DataError::KeyNotFound { key } => {
-                DataError::KeyNotFound { key }
-            },
+            core::DataError::KeyNotFound { key } => DataError::KeyNotFound { key },
             core::DataError::StorageLimitExceeded { max } => {
-                DataError::StorageLimitExceeded {
-                    max: max as u64,
-                }
+                DataError::StorageLimitExceeded { max: max as u64 }
             },
-            core::DataError::TTLExceeded { requested, max } => {
-                DataError::TTLExceeded {
-                    requested: requested.as_secs(),
-                    max: max.as_secs(),
-                }
+            core::DataError::TTLExceeded { requested, max } => DataError::TTLExceeded {
+                requested: requested.as_secs(),
+                max: max.as_secs(),
             },
-            core::DataError::ValueTooLarge { size, max } => {
-                DataError::ValueTooLarge {
-                    size: size as u64,
-                    max: max as u64,
-                }
+            core::DataError::ValueTooLarge { size, max } => DataError::ValueTooLarge {
+                size: size as u64,
+                max: max as u64,
             },
-            core::DataError::SerializationError(e) => {
-                DataError::SerializationError(e.to_string())
-            },
+            core::DataError::SerializationError(e) => DataError::SerializationError(e.to_string()),
         }
     }
 }
@@ -303,6 +293,43 @@ impl Cedarling {
         Ok(Self { inner: cedarling })
     }
 
+    /// Loads Cedarling from bootstrap JSON plus a Cedar archive (`.cjar`) as raw bytes.
+    ///
+    /// host cannot pass a filesystem path—for example Android assets loaded via `AssetManager`.
+    #[uniffi::constructor]
+    pub fn load_from_json_with_archive_bytes(
+        config: String,
+        archive_bytes: Vec<u8>,
+    ) -> Result<Self, CedarlingError> {
+        let mut raw_config: BootstrapConfigRaw =
+            serde_json::from_str(&config).map_err(|e| CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            })?;
+
+        raw_config.local_policy_store = None;
+        raw_config.policy_store_uri = None;
+        // Set a dummy .cjar file path to satisfy validation (will be overridden below)
+        raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
+
+        let mut bootstrap_config = BootstrapConfig::from_raw_config(&raw_config).map_err(|e| {
+            CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            }
+        })?;
+
+        // Override the policy store source with the archive bytes
+        bootstrap_config.policy_store_config.source =
+            PolicyStoreSource::ArchiveBytes(archive_bytes);
+
+        let cedarling = core::blocking::Cedarling::new(&bootstrap_config).map_err(|e| {
+            CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            }
+        })?;
+
+        Ok(Self { inner: cedarling })
+    }
+
     // Loads Cedarling instance from a configuration file
     #[uniffi::constructor]
     pub fn load_from_file(path: String) -> Result<Self, CedarlingError> {
@@ -320,35 +347,6 @@ impl Cedarling {
         })?;
 
         Ok(Self { inner: cedarling })
-    }
-
-    // Handles authorization and returns a structured result
-    #[uniffi::method]
-    pub fn authorize(
-        &self,
-        tokens: HashMap<String, String>,
-        action: String,
-        resource: Arc<EntityData>,
-        context: JsonValue,
-    ) -> Result<AuthorizeResult, AuthorizeError> {
-        let core_resource = resource.inner.clone();
-
-        let core_request = core::Request {
-            tokens,
-            action,
-            resource: core_resource,
-            context: context
-                .try_into()
-                .map_err(|_| AuthorizeError::InvalidContext)?,
-        };
-
-        let result: cedarling::AuthorizeResult =
-            self.inner.authorize(core_request).map_err(|e| {
-                AuthorizeError::AuthorizationFailed {
-                    error_msg: e.to_string(),
-                }
-            })?;
-        Ok(result.into())
     }
 
     // Handles authorization for unsigned requests
@@ -533,9 +531,9 @@ impl Cedarling {
         value: JsonValue,
         ttl_secs: Option<i64>,
     ) -> Result<(), DataError> {
-        let json_value: Value = value
-            .try_into()
-            .map_err(|e| DataError::SerializationError(format!("Failed to parse JSON value: {}", e)))?;
+        let json_value: Value = value.try_into().map_err(|e| {
+            DataError::SerializationError(format!("Failed to parse JSON value: {}", e))
+        })?;
 
         let ttl = ttl_secs
             .map(|secs| {
@@ -595,7 +593,8 @@ impl Cedarling {
     #[uniffi::method]
     pub fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
         let result: Result<_, core::DataError> = self.inner.list_data_ctx();
-        result.map_err(DataError::from)?
+        result
+            .map_err(DataError::from)?
             .into_iter()
             .map(TryInto::try_into)
             .collect()
@@ -608,5 +607,35 @@ impl Cedarling {
             .get_stats_ctx()
             .map(Into::into)
             .map_err(|e: core::DataError| DataError::from(e))
+    }
+
+    #[uniffi::method]
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    #[uniffi::method]
+    pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    #[uniffi::method]
+    pub fn total_issuers(&self) -> i64 {
+        i64::try_from(self.inner.total_issuers()).unwrap_or(i64::MAX)
+    }
+
+    #[uniffi::method]
+    pub fn loaded_trusted_issuers_count(&self) -> i64 {
+        i64::try_from(self.inner.loaded_trusted_issuers_count()).unwrap_or(i64::MAX)
+    }
+
+    #[uniffi::method]
+    pub fn loaded_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.loaded_trusted_issuer_ids().into_iter().collect()
+    }
+
+    #[uniffi::method]
+    pub fn failed_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }
 }

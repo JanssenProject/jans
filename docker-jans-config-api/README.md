@@ -112,7 +112,9 @@ The following key-value pairs are the defaults:
     "script_log_target": "FILE",
     "script_log_level": "INFO",
     "audit_log_target": "FILE",
-    "audit_log_level": "INFO"
+    "audit_log_level": "INFO",
+    "root_log_target": "STDOUT",
+    "root_log_level": "INFO"
 }
 ```
 
