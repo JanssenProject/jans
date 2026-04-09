@@ -12,10 +12,9 @@ export default class AuthClientService {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
-          let clientArr: ILooseObject[] = []
-          if (!!result.oidcClients) {
-            clientArr = result.oidcClients as ILooseObject[];
-          }
+          const clientArr: ILooseObject[] = Array.isArray(result.oidcClients)
+            ? (result.oidcClients as ILooseObject[])
+            : [];
           const record = clientArr.find((item: ILooseObject) => item.clientId === clientId);
 
           resolve(record || {});

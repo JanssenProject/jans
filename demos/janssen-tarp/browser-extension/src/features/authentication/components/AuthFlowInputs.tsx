@@ -19,7 +19,7 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import { ILooseObject } from '../../../shared/types';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import type { FilterOptionsState } from '@mui/material/useAutocomplete';
+import { ClientDetails } from '../type/Authentication';
 
 type Option = { name: string; label?: string; create?: boolean };
 const createOption = (label: string) => ({
@@ -44,18 +44,7 @@ const filter = createFilterOptions<Option>();
 type AuthFlowInputsProps = {
   isOpen: boolean;
   handleDialog: (isOpen: boolean) => void;
-  client: {
-    clientId?: string;
-    clientSecret?: string;
-    scope?: string;
-    redirectUris?: string[];
-    authorizationEndpoint?: string;
-    tokenEndpoint?: string;
-    userinfoEndpoint?: string;
-    acrValuesSupported?: string[];
-    responseType?: string[];
-    additionalParams?: string;
-  };
+  client: ClientDetails;
   notifyOnDataChange: () => void;
 };
 
@@ -149,7 +138,11 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
           let clientArr: any[] = []
           if (result.oidcClients) {
             clientArr = result.oidcClients;
-            clientArr = clientArr.map((obj) => obj.clientId === updatedClient.clientId ? updatedClient : obj);
+            clientArr = clientArr.map((obj) =>
+              obj.clientId === updatedClient.clientId
+                ? { ...obj, additionalParams: updatedClient.additionalParams }
+                : obj
+            );
             chrome.storage.local.set({ oidcClients: clientArr });
           }
         });

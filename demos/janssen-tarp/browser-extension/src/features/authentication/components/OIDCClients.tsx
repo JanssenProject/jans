@@ -24,6 +24,7 @@ import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import HelpDrawer from '../../../options/helpDrawer';
 import Alert from '@mui/material/Alert';
 import StyledTableCell from '../../../shared/components/StyledTableCell';
+import { ClientDetails } from '../type/Authentication';
 
 function createData(
     opHost: string,
@@ -67,7 +68,7 @@ function createData(
  * @param props.notifyOnDataChange - Callback invoked after client data changes (for example, after deletion or when the auth flow is triggered).
  * @returns A JSX element containing the table row and its action controls.
  */
-function Row(props: { row: any, notifyOnDataChange: () => void }) {
+function Row(props: { row: ClientDetails, notifyOnDataChange: () => void }) {
     const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
     const lifetime = Math.floor((row.expireAt - Date.now()) / 1000);

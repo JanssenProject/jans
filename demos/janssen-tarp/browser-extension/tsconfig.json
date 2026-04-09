@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "module": "NodeNext",
+    "module": "esnext",
     "target": "es2020",
-    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": ["es2020", "dom", "dom.iterable"],
@@ -11,7 +10,8 @@
     "typeRoots": ["./node_modules/@types"],
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "types": ["chrome"]
+    "types": ["chrome"],
+    "strict": true,
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]

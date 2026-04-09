@@ -30,7 +30,7 @@ type RegisterClientProps = {
 export default function RegisterClient({ isOpen, handleDialog }: RegisterClientProps) {
   const [open, setOpen] = React.useState(isOpen);
   const [selectedScopes, setSelectedScopes] = React.useState<ScopeOption[]>([])
-  const [scopeOptions, setScopeOptions] = React.useState<ScopeOption[]>([{ name: "openid" }]);
+  const [scopeOptions] = React.useState<ScopeOption[]>([{ name: "openid" }]);
   const [expireAt, setExpireAt] = React.useState<Moment | null>(null);
   const [issuer, setIssuer] = React.useState<string | null>(null);
   const [issuerError, setIssuerError] = React.useState("")
