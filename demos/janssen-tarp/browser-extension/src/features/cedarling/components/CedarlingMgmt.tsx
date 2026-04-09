@@ -32,7 +32,7 @@ function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void
     const { row, rowIndex, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
 
-    const handleDialog = (isOpen) => {
+    const handleDialog = (isOpen: boolean) => {
         setOpen(isOpen);
         notifyOnDataChange();
     };

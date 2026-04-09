@@ -18,20 +18,28 @@ import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import Alert, { AlertColor } from '@mui/material/Alert';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
+import type { Moment } from 'moment';
 
-export default function RegisterClient({ isOpen, handleDialog }) {
+type ScopeOption = { id?: string; name: string; label?: string; create?: boolean };
+
+type RegisterClientProps = {
+  isOpen: boolean;
+  handleDialog: (isOpen: boolean) => void;
+};
+
+export default function RegisterClient({ isOpen, handleDialog }: RegisterClientProps) {
   const [open, setOpen] = React.useState(isOpen);
-  const [selectedScopes, setSelectedScopes] = React.useState([])
-  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
-  const [expireAt, setExpireAt] = React.useState(null);
-  const [issuer, setIssuer] = React.useState(null);
+  const [selectedScopes, setSelectedScopes] = React.useState<ScopeOption[]>([])
+  const [scopeOptions] = React.useState<ScopeOption[]>([{ name: "openid" }]);
+  const [expireAt, setExpireAt] = React.useState<Moment | null>(null);
+  const [issuer, setIssuer] = React.useState<string | null>(null);
   const [issuerError, setIssuerError] = React.useState("")
   const [alert, setAlert] = React.useState("")
   const [alertSeverity, setAlertSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
 
   const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.'
-  const filter = createFilterOptions();
+  const filter = createFilterOptions<ScopeOption>();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -54,7 +62,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
     setOpen(true);
   };
 
-  const validateIssuer = async (e) => {
+  const validateIssuer = async (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 
     setIssuerError('');
     let issuer = e.target.value;
@@ -79,7 +87,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
     setLoading(false);
   };
 
-  const generateOpenIdConfigurationURL = (issuer) => {
+  const generateOpenIdConfigurationURL = (issuer: string) => {
     if (issuer.length === 0) {
       return '';
     }
@@ -93,7 +101,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
     return issuer;
   };
 
-  const registerOIDCClient = async (registration_endpoint, registerObj) => {
+  const registerOIDCClient = async (registration_endpoint: string, registerObj: RegistrationRequest) => {
     try {
       setAlert('');
       const registerReqOptions = {
@@ -112,7 +120,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
     }
   };
 
-  const getOpenidConfiguration = async (opConfigurationEndpoint) => {
+  const getOpenidConfiguration = async (opConfigurationEndpoint: string) => {
     try {
       setAlert('');
       const oidcConfigOptions = {
@@ -350,7 +358,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
         onClose={handleClose}
         PaperProps={{
           component: 'form',
-          onSubmit: (event) => {
+          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
           },
         }}
@@ -411,20 +419,15 @@ export default function RegisterClient({ isOpen, handleDialog }) {
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Autocomplete
+            <Autocomplete<ScopeOption, true, false, true>
               value={selectedScopes}
               multiple
               defaultValue={[scopeOptions[0]]}
-              onChange={(event, newValue, reason, details) => {
-                let valueList = selectedScopes;
-                if (details.option.create && reason !== 'removeOption') {
-                  valueList.push({ id: undefined, name: details.option.name, create: details.option.create });
-                  setSelectedScopes(valueList);
-                } else if (reason === 'createOption') {
-                  valueList.push({ id: undefined, name: details.option, create: true });
-                } else {
-                  setSelectedScopes(newValue);
-                }
+              onChange={(_event, newValue) => {
+                const normalized: ScopeOption[] = newValue.map((v) =>
+                  typeof v === 'string' ? { name: v, create: true } : v
+                );
+                setSelectedScopes(normalized);
               }}
               filterSelectedOptions
               filterOptions={(options, params) => {
@@ -454,13 +457,13 @@ export default function RegisterClient({ isOpen, handleDialog }) {
                   return option;
                 }
                 // Add "xxx" option created dynamically
-                if (option.label) {
-                  return option.name;
-                }
+                if (option.label) return option.name;
                 // Regular option
                 return option.name;
               }}
-              renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
+              renderOption={(props, option) => (
+                <li {...props}>{option.create ? (option.label ?? option.name) : option.name}</li>
+              )}
               freeSolo
               renderInput={(params) => (
                 <TextField

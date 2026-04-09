@@ -19,10 +19,13 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import { ILooseObject } from '../../../shared/types';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import { ClientDetails } from '../type/Authentication';
+
+type Option = { name: string; label?: string; create?: boolean };
 const createOption = (label: string) => ({
   name: label,
 });
-const filter = createFilterOptions();
+const filter = createFilterOptions<Option>();
 
 /**
  * Renders a dialog that collects optional inputs (additional params, ACR values, scopes, and a display-token toggle)
@@ -38,17 +41,24 @@ const filter = createFilterOptions();
  * @param notifyOnDataChange - Callback invoked after successful authentication to notify the parent of updated login data
  * @returns The rendered React fragment containing the authentication inputs dialog
  */
-export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnDataChange }) {
+type AuthFlowInputsProps = {
+  isOpen: boolean;
+  handleDialog: (isOpen: boolean) => void;
+  client: ClientDetails;
+  notifyOnDataChange: () => void;
+};
+
+export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnDataChange }: AuthFlowInputsProps) {
   const [open, setOpen] = React.useState(isOpen);
   const [errorMessage, setErrorMessage] = React.useState("")
   const [additionalParamError, setAdditionalParamError] = React.useState("")
   const [displayToken, setDisplayToken] = React.useState(false);
   const [additionalParams, setAdditionalParams] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [acrValueOption, setAcrValueOption] = React.useState([]);
-  const [selectedAcr, setSelectedAcr] = React.useState([])
-  const [selectedScopes, setSelectedScopes] = React.useState([])
-  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
+  const [acrValueOption, setAcrValueOption] = React.useState<Option[]>([]);
+  const [selectedAcr, setSelectedAcr] = React.useState<Option[]>([])
+  const [selectedScopes, setSelectedScopes] = React.useState<Option[]>([])
+  const [scopeOptions, setScopeOptions] = React.useState<Option[]>([{ name: "openid" }]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -60,8 +70,9 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
 
   React.useEffect(() => {
     (async () => {
-      const scopes = client?.scope.split(" ");
-      setAcrValueOption(client?.acrValuesSupported.map((ele) => createOption(ele)));
+      const scopes = String(client?.scope ?? '').split(" ").filter(Boolean);
+      const acr = Array.isArray(client?.acrValuesSupported) ? client.acrValuesSupported : [];
+      setAcrValueOption(acr.map((ele: string) => createOption(ele)));
       setScopeOptions(scopes.map((ele) => ({ name: ele })))
 
     })();
@@ -78,7 +89,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     setOpen(true);
   };
 
-  const validateJson = (e) => {
+  const validateJson = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     try {
       setAdditionalParamError('')
       let addParams = e.target.value;
@@ -87,7 +98,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
       }
       JSON.parse(addParams);
       setAdditionalParams(addParams);
-    } catch (e) {
+    } catch (_e) {
       setAdditionalParamError('Error in parsisng JSON.')
     }
   }
@@ -95,16 +106,16 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
   const triggerCodeFlow = async () => {
     try {
       setLoading(true);
-      const redirectUrl = client?.redirectUris[0];
+      const redirectUrl = Array.isArray(client?.redirectUris) ? client.redirectUris[0] : undefined;
       const { secret, hashed } = await Utils.generateRandomChallengePair();
       let scopes = selectedScopes.map((ele) => ele.name).join(" ");
       if (!(!!scopes && scopes.length > 0)) {
-        scopes = client?.scope;
+        scopes = String(client?.scope ?? '');
       }
 
       let options: ILooseObject = {
         scope: scopes,
-        response_type: client?.responseType[0],
+        response_type: Array.isArray(client?.responseType) ? client.responseType[0] : undefined,
         redirect_uri: redirectUrl,
         client_id: client?.clientId,
         code_challenge_method: 'S256',
@@ -123,11 +134,15 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
           ...client,
           additionalParams: additionalParams.trim(),
         };
-        chrome.storage.local.get(["oidcClients"], (result) => {
-          let clientArr = []
-          if (!!result.oidcClients) {
+        chrome.storage.local.get(["oidcClients"], (result: { oidcClients?: any[] }) => {
+          let clientArr: any[] = []
+          if (result.oidcClients) {
             clientArr = result.oidcClients;
-            clientArr = clientArr.map(obj => obj.clientId === updatedClient.clientId ? updatedClient : obj);
+            clientArr = clientArr.map((obj) =>
+              obj.clientId === updatedClient.clientId
+                ? { ...obj, additionalParams: updatedClient.additionalParams }
+                : obj
+            );
             chrome.storage.local.set({ oidcClients: clientArr });
           }
         });
@@ -244,7 +259,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
         }}
         PaperProps={{
           component: 'form',
-          onSubmit: (event) => {
+          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
           },
         }}
@@ -301,18 +316,16 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 "Optional. Requested ACR value(s) for authentication (e.g. urn:mace:incommon:iap:silver). Typically only one is used."
               )}
             </InputLabel>
-            <Autocomplete
+            <Autocomplete<Option, true, false, true>
               value={selectedAcr}
               multiple
               defaultValue={[acrValueOption[0]]}
-              onChange={(event, newValue, reason, details) => {
-                if (reason === 'removeOption') {
-                  setSelectedAcr([]);
-                } else if (reason === 'selectOption') {
-                  setSelectedAcr([{ id: undefined, name: details.option.name }]);
-                } else if (reason === 'createOption') {
-                  setSelectedAcr([{ id: undefined, name: details.option }]);
-                }
+              onChange={(_event, newValue) => {
+                const normalized: Option[] = newValue.map((v) =>
+                  typeof v === 'string' ? { name: v, create: true } : v
+                );
+                // ACR is effectively single-value; keep at most one.
+                setSelectedAcr(normalized.slice(0, 1));
               }}
               filterSelectedOptions
               filterOptions={(options, params) => {
@@ -348,7 +361,9 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 // Regular option
                 return option.name;
               }}
-              renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
+              renderOption={(props, option) => (
+                <li {...props}>{option.create ? (option.label ?? option.name) : option.name}</li>
+              )}
               freeSolo
               renderInput={(params) => (
                 <TextField
@@ -366,19 +381,15 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 "Optional. Scopes to request in the authorization flow (e.g. openid, profile, email). If omitted, the client’s default scopes are used."
               )}
             </InputLabel>
-            <Autocomplete
+            <Autocomplete<Option, true, false, true>
               value={selectedScopes}
               multiple
               defaultValue={[scopeOptions[0]]}
-              onChange={(event, newValue, reason, details) => {
-                let valueList = selectedScopes;
-                if (details.option.create && reason !== 'removeOption') {
-                  valueList.push({ id: undefined, name: details.option.name, create: details.option.create });
-                  setSelectedScopes(valueList);
-                }
-                else {
-                  setSelectedScopes(newValue);
-                }
+              onChange={(_event, newValue) => {
+                const normalized: Option[] = newValue.map((v) =>
+                  typeof v === 'string' ? { name: v, create: true } : v
+                );
+                setSelectedScopes(normalized);
               }}
               filterSelectedOptions
               filterOptions={(options, params) => {
@@ -414,7 +425,9 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 // Regular option
                 return option.name;
               }}
-              renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
+              renderOption={(props, option) => (
+                <li {...props}>{option.create ? (option.label ?? option.name) : option.name}</li>
+              )}
               freeSolo
               renderInput={(params) => (
                 <TextField
