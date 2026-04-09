@@ -86,14 +86,6 @@ impl PolicyStoreManager {
         loaded: LoadedPolicyStore,
         logger: Option<&Logger>,
     ) -> Result<PolicyStore, ConversionError> {
-        // Log manifest info if available
-        if let Some(manifest) = &loaded.manifest {
-            logger.log_any(PolicyStoreLogEntry::info(format!(
-                "Converting policy store '{}' (generated: {})",
-                manifest.policy_store_id, manifest.generated_date
-            )));
-        }
-
         // 1. Convert schema
         let cedar_schema = Self::convert_schema(&loaded.schema)?;
 
@@ -599,7 +591,6 @@ mod tests {
     fn test_convert_to_legacy_minimal() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            manifest: None,
             schema: r#"
         namespace TestApp {
             entity User;
@@ -636,7 +627,6 @@ mod tests {
     fn test_convert_to_legacy_full() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            manifest: None,
             schema: r#"
         namespace TestApp {
             entity User;

@@ -151,344 +151,34 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](../reference/cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
-Cedarling currently provides two modes of authorization:
+Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
 
-**Standard (Token-based) Interface**
+**Multi-Issuer Authorization (Token-based) — Recommended**
 
-- Extracts the **Principal** from a JWT.
-- Accepts the **Context** as a structured map.
+- Uses `authorize_multi_issuer` to process JWT tokens from multiple issuers.
+- Token data is mapped to Cedar entities based on `token_metadata` configuration in the policy store.
+- Authorization decisions are made based on context values derived from token payloads.
+- **Recommended for most production deployments** where you have JWT tokens from trusted identity providers.
 
-=== "JavaScript"
-
-    ```js
-    const tokens = {
-      access_token: "<access_token>",
-      id_token: "<id_token>",
-      userinfo_token: "<userinfo_token>",
-    };
-
-    const action = 'Jans::Action::"Read"';
-
-    const resource = {
-      cedar_entity_mapping: {
-        entity_type: "Jans::Application",
-        id: "app_id_001"
-      },
-      name: "Some Application",
-      url: {
-        host: "example.com",
-        path: "/admin-dashboard",
-        protocol: "https",
-      },
-    };
-
-    const context = {
-      current_time: Date.now(),
-      device_health: ["Healthy"],
-      fraud_indicators: ["Allowed"],
-      geolocation: ["America"],
-      network: "127.0.0.1",
-      network_type: "Local",
-      operating_system: "Linux",
-    };
-
-    const result = await cedarling.authorize({
-      tokens,
-      action,
-      resource,
-      context,
-    });
-    ```
-
-=== "Python"
-
-    ```py
-    import time
-
-    tokens = {
-        "access_token": "<access_token>",
-        "id_token": "<id_token>",
-        "userinfo_token": "<userinfo_token>"
-    }
-
-    action = 'Jans::Action::"Read"'
-
-    resource = {
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "app_id_001"
-        },
-        "name": "Some Application",
-        "url": {
-            "host": "example.com",
-            "path": "/admin-dashboard",
-            "protocol": "https"
-        }
-    }
-
-    context = {
-        "current_time": int(time.time() * 1000),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux",
-    }
-
-    result = cedarling.authorize(Request(
-        tokens,
-        action,
-        resource,
-        context,
-    ))
-    ```
-
-=== "Rust"
-
-    ```rs
-    use std::collections::HashMap;
-    use chrono::Utc;
-    use serde_json::json;
-
-    let tokens = HashMap::from([
-        ("access_token".to_string(), "<access_token>".to_string()),
-        ("id_token".to_string(), "<id_token>".to_string()),
-        ("userinfo_token".to_string(), "<userinfo_token>".to_string()),
-    ]);
-
-    let action = "Jans::Action::\"Read\"".to_string();
-
-    let resource = json!({
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "app_id_001"
-        },
-        "name": "Some Application",
-        "url": {
-            "host": "example.com",
-            "path": "/admin-dashboard",
-            "protocol": "https"
-        }
-    });
-
-    let context = json!({
-        "current_time": Utc::now().timestamp_millis(),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux",
-    });
-
-    let result = cedarling.authorize(Request {
-        tokens,
-        action,
-        resource,
-        context,
-    });
-    ```
-
-=== "Kotlin"
-
-    ```kotlin
-    val tokens = mapOf(
-        "access_token" to "<access_token>",
-        "id_token" to "<id_token>",
-        "userinfo_token" to "<userinfo_token>"
-    )
-
-    val action = """Jans::Action::"Read""""
-
-    val resource = mapOf(
-        "cedar_entity_mapping" to mapOf(
-            "entity_type" to "Jans::Application",
-            "id" to "app_id_001"
-        ),
-        "name" to "Some Application",
-        "url" to mapOf(
-            "host" to "example.com",
-            "path" to "/admin-dashboard",
-            "protocol" to "https"
-        )
-    )
-
-    val context = mapOf(
-        "current_time" to System.currentTimeMillis(),
-        "device_health" to listOf("Healthy"),
-        "fraud_indicators" to listOf("Allowed"),
-        "geolocation" to listOf("America"),
-        "network" to "127.0.0.1",
-        "network_type" to "Local",
-        "operating_system" to "Linux"
-    )
-
-    val result = cedarling?.authorize(
-        tokens,
-        action,
-        resource["cedar_entity_mapping"]?.get("entity_type") as String,
-        resource["cedar_entity_mapping"]?.get("id") as String,
-        anyToJson(resource),
-        context
-    )
-    ```
-
-=== "Swift"
-
-    ```swift
-    let tokens: [String: String] = [
-        "access_token": "<access_token>",
-        "id_token": "<id_token>",
-        "userinfo_token": "<userinfo_token>"
-    ]
-
-    let action = #"Jans::Action::"Read""#
-
-    let resource: [String: Any] = [
-        "cedar_entity_mapping": [
-            "entity_type": "Jans::Application",
-            "id": "app_id_001"
-        ],
-        "name": "Some Application",
-        "url": [
-            "host": "example.com",
-            "path": "/admin-dashboard",
-            "protocol": "https"
-        ]
-    ]
-
-    let context: [String: Any] = [
-        "current_time": Int(Date().timeIntervalSince1970 * 1000),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux"
-    ]
-
-    let payloadJsonString = try JSONSerialization.data(
-        withJSONObject: resource,
-        options: []
-    ).toUtf8String()
-
-    let result: AuthorizeResult = try cedarling.authorize(
-        tokens: tokens,
-        action: action,
-        resourceType: resource["cedar_entity_mapping"]?.get("entity_type") as! String,
-        resourceId: resource["cedar_entity_mapping"]?.get("id") as! String,
-        payload: payloadJsonString,
-        context: context
-    )
-    ```
-
-=== "Go"
-
-    ```go
-
-    tokens := map[string]string {
-        "access_token": "<access_token>",
-        "id_token": "<id_token>",
-        "userinfo_token": "<userinfo_token>"
-    }
-    action := "Jans::Action::\"Read\""
-    resource := cedarling_go.EntityData{
-        CedarMapping: cedarling_go.CedarMapping{
-            EntityType: "Jans::Application",
-            ID: "app_id_001",
-        },
-        Payload: map[string]any{
-            "name": "Some Application",
-            "url": map[string]string{
-                "host": "example.com",
-                "path": "/admin-dashboard",
-                "protocol": "https",
-            },
-        },
-    }
-    context := map[string]any{
-        "current_time": time.Now().Unix(),
-        "device_health": ["Healthy"],
-        "fraud_indicators": ["Allowed"],
-        "geolocation": ["America"],
-        "network": "127.0.0.1",
-        "network_type": "Local",
-        "operating_system": "Linux",
-    }
-    request := cedarling_go.Request{
-        Tokens: tokens,
-        Action: action,
-        Resource: resource,
-        Context: context,
-    }
-    result, err := cedarling_instance.Authorize(request)
-    if err != nil {
-        panic!(err)
-    }
-    ```
-
-=== "Java"
-
-    ```java
-
-    String resource = """
-        {
-          "cedar_entity_mapping": {
-            "entity_type": "Jans::Application",
-            "id": "app_id_001"
-          },
-          "name": "Some Application",
-          "url": {
-            "host": "example.com",
-            "path": "/admin-dashboard",
-            "protocol": "https"
-          }
-        }
-    """;
-
-    String action = "Jans::Action::\"Update\"";
-
-    String context = """
-        {
-          "device_health": ["Healthy"],
-          "fraud_indicators": ["Allowed"],
-          "geolocation": ["America"],
-          "network": "127.0.0.1",
-          "network_type": "Local",
-          "operating_system": "Linux",
-          "user_agent": "Linux"
-        }
-    """;
-
-    Map<String, String> tokens = Map.of(
-        "access_token", "<access_token>",
-        "id_token", "<id_token>",
-        "userinfo_token", "<userinfo_token>"
-    );
-
-    // Perform authorization
-    AuthorizeResult result = adapter.authorize(tokens, action, new JSONObject(resource), new JSONObject(context));
-    if(result.getDecision()) {
-        System.out.println("Access granted");
-    } else {
-        System.out.println("Access denied");
-    }
-
-    ```
+[More information](../reference/cedarling-multi-issuer.md)
 
 **Unsigned Authorization**
 
-- Accepts the **Principal** directly without requiring a JWT.
+- Uses `authorize_unsigned` to accept **Principals** directly without requiring JWTs.
 - This makes authorization decisions by passing a set of **Principals** directly.
-- Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
+- The **Context** is passed in as-is in a map-like structure.
+- When using multiple principals, configure [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](../reference/cedarling-principal-boolean-operations.md) to control how per-principal decisions are combined.
+- Use when your application has already authenticated the principal, for testing, or for service-to-service calls with upstream verification.
 
-**Multi-Issuer Authorization**
+See the language-specific tutorials for detailed examples of both authorization methods:
 
-- Doesn't use principal and all token information is stored in context.
-- This makes authorization decisions by rules based on context values (token payloads).
-
-[More information](../reference/cedarling-multi-issuer.md)
+- [JavaScript](./javascript.md)
+- [Python](./python.md)
+- [Rust](./rust.md)
+- [Kotlin](./kotlin.md)
+- [Swift](./swift.md)
+- [Go](./go.md)
+- [Java](./java.md)
 
 ### Context Data API
 
@@ -678,8 +368,7 @@ Cedarling supports logging of both **decision** and **system** events, useful fo
 
 You're now ready to dive deeper into Cedarling. From here, you could either:
 
-- See how you can use [RBAC with Cedarling using signed tokens](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac).
-- Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-cedarling).
+- See how you can use [RBAC with Cedarling using signed tokens (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) — the recommended starting point.
+- Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity) for custom auth flows or testing.
 - Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
- RBAC using signed tokens (TBAC)

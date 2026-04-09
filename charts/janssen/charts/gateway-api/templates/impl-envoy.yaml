@@ -1,0 +1,10 @@
+{{- if eq .Values.gateway.className "envoy" }}
+{{- if .Values.additionalConfig.envoy.createGatewayClass }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+{{- end }}
+{{- end }}
