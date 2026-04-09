@@ -54,7 +54,6 @@ python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/mod_context.py" jans-casa
 python3 "$basedir/upgrade.py"
-# python3 "$basedir/jca_sync.py" &
 python3 "$basedir/auth_conf.py"
 
 cd /opt/jans/jetty/jans-casa

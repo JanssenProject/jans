@@ -27,6 +27,7 @@ import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -108,26 +109,32 @@ public class GrpcAuditServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void handleGrpcRequest(HttpServletRequest req, HttpServletResponse resp, boolean isPost) throws IOException, ServletException {
+        if (!GrpcRequestWrapper.isGrpcRequest(req)) {
+            getServletContext().getNamedDispatcher("default").forward(req, resp);
+            return;
+        }
         ServletAdapter adapter = adapterRef.get();
-        if (adapter != null) {
-            HttpServletRequest wrappedRequest = GrpcRequestWrapper.isGrpcRequest(req) ? new GrpcRequestWrapper(req) : req;
-            adapter.doPost(wrappedRequest, resp);
-        } else {
+        if (adapter == null) {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
+            return;
+        }
+        GrpcRequestWrapper wrapped = new GrpcRequestWrapper(req);
+        if (isPost) {
+            adapter.doPost(wrapped, resp);
+        } else {
+            adapter.doGet(wrapped, resp);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ServletAdapter adapter = adapterRef.get();
-        if (adapter != null) {
-            HttpServletRequest wrappedRequest = GrpcRequestWrapper.isGrpcRequest(req) ? new GrpcRequestWrapper(req) : req;
-            adapter.doGet(wrappedRequest, resp);
-        } else {
-            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
-        }
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        handleGrpcRequest(req, resp, false);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        handleGrpcRequest(req, resp, true);
     }
 
     @Override
