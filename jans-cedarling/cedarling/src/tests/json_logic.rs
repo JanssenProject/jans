@@ -43,43 +43,30 @@ fn get_result(
     person: Option<bool>,
     rule: &JsonRule,
 ) -> Result<AuthorizeResult, ApplyRuleError> {
-    let workload_response = workload.map(|workload| {
-        cedar_policy::Response::new(
-            if workload {
-                Decision::Allow
-            } else {
-                Decision::Deny
-            },
-            HashSet::new(),
-            Vec::new(),
-        )
-    });
-
-    let person_response = person.map(|person| {
-        cedar_policy::Response::new(
-            if person {
-                Decision::Allow
-            } else {
-                Decision::Deny
-            },
-            HashSet::new(),
-            Vec::new(),
-        )
-    });
-
-    AuthorizeResult::new(
-        rule,
-        workload
-            .is_some()
-            .then_some(&EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap()),
-        person
-            .is_some()
-            .then_some(&EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap()),
-        workload_response,
-        person_response,
-        // just randomly generated UUID
-        gen_uuid4(),
-    )
+    let mut principal_responses = HashMap::new();
+    if let Some(w) = workload {
+        let uid = EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap();
+        principal_responses.insert(
+            uid,
+            cedar_policy::Response::new(
+                if w { Decision::Allow } else { Decision::Deny },
+                HashSet::new(),
+                Vec::new(),
+            ),
+        );
+    }
+    if let Some(p) = person {
+        let uid = EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap();
+        principal_responses.insert(
+            uid,
+            cedar_policy::Response::new(
+                if p { Decision::Allow } else { Decision::Deny },
+                HashSet::new(),
+                Vec::new(),
+            ),
+        );
+    }
+    AuthorizeResult::new_for_many_principals(rule, principal_responses, gen_uuid4())
 }
 
 /// Test JSON Rule with `and` operator
@@ -468,14 +455,8 @@ fn test_with_multiple_principals() {
         ),
     ]);
 
-    let result = AuthorizeResult::new_for_many_principals(
-        &rule,
-        principal_responses,
-        None,
-        None,
-        gen_uuid4(),
-    )
-    .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
+    let result = AuthorizeResult::new_for_many_principals(&rule, principal_responses, gen_uuid4())
+        .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
 
     assert_eq!(result.decision, true, "Decision should be ALLOW");
 

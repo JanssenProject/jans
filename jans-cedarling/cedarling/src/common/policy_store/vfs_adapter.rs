@@ -60,11 +60,6 @@ pub(super) trait VfsFileSystem: Send + Sync + 'static {
 
     /// Check if a path is a directory.
     fn is_dir(&self, path: &str) -> bool;
-
-    /// Check if a path is a file.
-    /// This method is only used in non-WASM builds for manifest validation.
-    /// Implementations should provide this method even if not used in WASM builds.
-    fn is_file(&self, path: &str) -> bool;
 }
 
 /// Physical filesystem implementation for native platforms.
@@ -143,8 +138,11 @@ impl VfsFileSystem for PhysicalVfs {
             .and_then(|p| p.metadata().ok())
             .is_some_and(|m| m.file_type == vfs::VfsFileType::Directory)
     }
+}
 
-    fn is_file(&self, path: &str) -> bool {
+#[cfg(all(not(target_arch = "wasm32"), test))]
+impl PhysicalVfs {
+    pub(super) fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())
@@ -255,8 +253,11 @@ impl VfsFileSystem for MemoryVfs {
             .and_then(|p| p.metadata().ok())
             .is_some_and(|m| m.file_type == vfs::VfsFileType::Directory)
     }
+}
 
-    fn is_file(&self, path: &str) -> bool {
+#[cfg(test)]
+impl MemoryVfs {
+    pub(super) fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())

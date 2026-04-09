@@ -1,0 +1,56 @@
+{{- if index .Values "gateway-api" "enabled" -}}
+{{- $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $namespace := .Release.Namespace -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ index .Values "gateway-api" "gateway" "name" }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-gateway
+{{- if index .Values "gateway-api" "gateway" "labels" }}
+{{- toYaml (index .Values "gateway-api" "gateway" "labels") | nindent 4 }}
+{{- end }}
+{{- if index .Values "gateway-api" "gateway" "annotations" }}
+  annotations:
+{{- toYaml (index .Values "gateway-api" "gateway" "annotations") | nindent 4 }}
+{{- end }}
+spec:
+  gatewayClassName: {{ index .Values "gateway-api" "gateway" "className" }}
+  infrastructure:
+    labels:
+      app: {{ $fullName }}-gateway-infrastructure
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "labels" }}
+    {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "labels") | nindent 6 }}
+    {{- end }}
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "annotations" }}
+    annotations:
+      {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "annotations") | nindent 6 }}
+    {{- end }}
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "parametersRef" }}
+    parametersRef:
+      {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "parametersRef") | nindent 6 }}
+    {{- else if and (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") (index .Values "gateway-api" "additionalConfig" "airlock" "createLbService") }}
+    parametersRef:
+      group: microgateway.airlock.com
+      kind: GatewayParameters
+      name: {{ .Release.Name }}-airlock-gw-params
+    {{- end }}
+  {{- if and (index .Values "gateway-api" "gateway" "attachLbIp") (.Values.lbIp) }}
+  addresses:
+  - type: IPAddress
+    value: {{ .Values.lbIp }}
+  {{- end }}
+  listeners:
+  - name: http
+    port: {{ index .Values "gateway-api" "gateway" "httpPort" }}
+    protocol: HTTP
+  - name: https
+    port: {{ index .Values "gateway-api" "gateway" "httpsPort" }}
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: {{ index .Values "gateway-api" "gateway" "tlsSecretName" }}
+
+{{- end }}

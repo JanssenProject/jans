@@ -6,24 +6,21 @@
 
 package io.jans.service;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
-
 import io.jans.model.JansAttribute;
 import io.jans.model.SchemaEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
+import jakarta.inject.Inject;
+import org.slf4j.Logger;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides operations with attributes
@@ -123,11 +120,10 @@ public abstract class AttributeService implements Serializable {
     public List<JansAttribute> getAllAttributes(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	List<JansAttribute> attributeList = (List<JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
-                OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
+    	List<JansAttribute> attributeList = (List<JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
         if (attributeList == null) {
             attributeList = getAllAtributesImpl(baseDn);
-            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
         }
 
         return attributeList;
@@ -141,12 +137,11 @@ public abstract class AttributeService implements Serializable {
     public Map<String, JansAttribute> getAllAttributesMap(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	Map<String, JansAttribute> attributeMap = (Map<String, JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
-                OxConstants.CACHE_ATTRIBUTE_KEY_MAP);
+    	Map<String, JansAttribute> attributeMap = (Map<String, JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_KEY_MAP);
         if (attributeMap == null) {
         	attributeMap = getAllAttributesMapImpl(baseDn);
 
-            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_MAP, attributeMap);
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_KEY_MAP, attributeMap);
         }
 
         return attributeMap;

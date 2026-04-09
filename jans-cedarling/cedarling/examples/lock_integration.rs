@@ -8,7 +8,7 @@
 use cedarling::log_config::StdOutLoggerMode;
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LockServiceConfig,
+    EntityBuilderConfig, EntityData, JsonRule, JwtConfig, LockServiceConfig, LockTransport,
     LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
@@ -36,6 +36,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         telemetry_interval: None,                   // don't send telemetry
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     let cedarling = Cedarling::new(&BootstrapConfig {
@@ -46,7 +48,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -57,19 +58,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
-
             decision_log_default_jwt_id: "jti".to_string(),
-            decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
-            decision_log_workload_claims: vec!["org_id".to_string()],
-            id_token_trust_mode: IdTokenTrustMode::Never,
             principal_bool_operator: JsonRule::new(serde_json::json!(
                 {"===": [{"var": "Jans::User"}, "ALLOW"]}
             ))
             .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,

@@ -6,23 +6,18 @@
 
 package io.jans.as.model.crypto.signature;
 
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.cert.CertIOException;
-import org.bouncycastle.operator.OperatorCreationException;
-
-import java.security.InvalidParameterException;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.util.security.SecurityProviderUtility;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.cert.CertIOException;
+import org.bouncycastle.operator.OperatorCreationException;
+
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm
@@ -30,29 +25,20 @@ import io.jans.util.security.SecurityProviderUtility;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  *
- * @deprecated
  */
-@SuppressWarnings("java:S1133") 
-@Deprecated
+@SuppressWarnings("java:S1133")
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
     public static final int DEF_KEYLENGTH = 2048;
 
-    private RSAPrivateKey rsaPrivateKey;
-    private RSAPublicKey rsaPublicKey;
+    private final RSAPrivateKey rsaPrivateKey;
+    private final RSAPublicKey rsaPublicKey;
 
     /**
-     * @param signatureAlgorithm
-     * @param dnName
-     * @throws NoSuchAlgorithmException
-     * @throws OperatorCreationException
-     * @throws CertificateException
-     * @throws CertIOException
-     * @throws SignatureException 
+     * @param signatureAlgorithm signature algorithm
+     * @param dnName dn name
      *
-     * @deprecated
      */
-    @Deprecated
     public RSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, CertIOException, SignatureException {
         if (signatureAlgorithm == null) {
             throw new InvalidParameterException("The signature algorithm cannot be null");
@@ -84,11 +70,9 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
     /**
      *
-     * @param pKey
+     * @param pKey key
      *
-     * @deprecated
      */
-    @Deprecated
     public RSAKeyFactory(JSONWebKey pKey) {
         if (pKey == null) {
             throw new IllegalArgumentException("Key value must not be null.");
