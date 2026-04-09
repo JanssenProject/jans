@@ -1,3 +1,4 @@
+import re
 import asyncio
 import json
 
@@ -341,14 +342,14 @@ class EditUserDialog(JansGDialog, DialogUtils):
             if ca.get('name') != 'c':
                 continue
             for idx, cval in enumerate(ca.get('values') or []):
-                normalized = str(cval).strip()
+                normalized = str(cval).strip().upper()
                 if not normalized:
+                    ca['values'][idx] = ""
                     continue
-                normalized = normalized.upper()
-                if len(normalized) != 2 or not normalized.isalpha():
+                if not re.fullmatch(r"[A-Z]{2}", normalized):
                     common_data.app.show_message(
                         _(common_strings.oops),
-                        _("Country must be a two-letter code."),
+                        _("Country must be an ASCII two-letter code."),
                     )
                     return
                 ca['values'][idx] = normalized
