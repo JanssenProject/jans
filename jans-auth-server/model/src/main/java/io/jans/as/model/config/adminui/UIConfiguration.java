@@ -6,8 +6,12 @@ public class UIConfiguration {
     private String cedarlingLogType;
     private String auiPolicyStoreUrl;
     private String auiDefaultPolicyStorePath;
-    private String cedarlingPolicyStoreRetrievalPoint;
 
+    /**
+     * Default no-argument constructor kept for frameworks and serialization.
+     *
+     * Intentionally empty; do not remove.
+     */
     public UIConfiguration() {
         //Do not remove
     }
@@ -40,18 +44,20 @@ public class UIConfiguration {
         return auiPolicyStoreUrl;
     }
 
+    /**
+     * Sets the base URL the admin UI will use to access the AUI policy store.
+     *
+     * @param auiPolicyStoreUrl the policy store base URL, or {@code null} to unset it
+     */
     public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
-    public String getCedarlingPolicyStoreRetrievalPoint() {
-        return cedarlingPolicyStoreRetrievalPoint;
-    }
-
-    public void setCedarlingPolicyStoreRetrievalPoint(String cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
-    }
-
+    /**
+     * Gets the default filesystem path used by the admin UI for the policy store.
+     *
+     * @return the default policy store path, or null if not configured
+     */
     public String getAuiDefaultPolicyStorePath() {
         return auiDefaultPolicyStorePath;
     }
