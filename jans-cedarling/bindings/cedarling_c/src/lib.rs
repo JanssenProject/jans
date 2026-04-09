@@ -300,6 +300,10 @@ pub unsafe extern "C" fn cedarling_context_push(
 
 /// Get context data (JSON value only) by key.
 ///
+/// On success, `data` is the JSON text for the value, or the JSON literal `null` when the key is
+/// absent **or** when the stored value is JSON null—those two cases are not distinguished here.
+/// Use [`cedarling_context_get_entry`] to tell them apart (missing keys yield no entry object).
+///
 /// # Safety
 ///
 /// - `key` must be a valid NUL-terminated UTF-8 C string.

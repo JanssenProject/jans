@@ -232,6 +232,12 @@ void test_context_data_api(void) {
     TEST_ASSERT(ret != 0, "context_push rejects invalid value JSON");
     cedarling_free_result(&r);
 
+    ret = cedarling_context_push(instance_id, "", "{}", 0, &r);
+    TEST_ASSERT(ret != 0, "context_push rejects empty key");
+    /* CedarlingErrorCode::InvalidArgument == 1 (see cedarling_c.h) */
+    TEST_ASSERT((int)r.error_code == 1, "empty key maps to InvalidArgument");
+    cedarling_free_result(&r);
+
     ret = cedarling_context_get(instance_id, "c_test_key", &r);
     TEST_ASSERT(ret == 0, "context_get succeeds");
     if (ret == 0 && r.data != NULL) {

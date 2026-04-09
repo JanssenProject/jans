@@ -9,10 +9,25 @@ use std::sync::{LazyLock, Mutex};
 use std::time::Duration;
 
 use cedarling::{
-    BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage, TrustedIssuerLoadingInfo, blocking,
+    BootstrapConfig, BootstrapConfigRaw, DataApi, DataError, LogStorage, TrustedIssuerLoadingInfo,
+    blocking,
 };
 
 use crate::types::*;
+
+/// Map core [`DataError`] to the closest [`CedarlingErrorCode`] for C callers.
+fn cedarling_result_from_data_error(e: DataError) -> CedarlingResult {
+    let msg = e.to_string();
+    let code = match &e {
+        DataError::InvalidKey => CedarlingErrorCode::InvalidArgument,
+        DataError::KeyNotFound { .. } => CedarlingErrorCode::KeyNotFound,
+        DataError::StorageLimitExceeded { .. } => CedarlingErrorCode::Internal,
+        DataError::TTLExceeded { .. } => CedarlingErrorCode::InvalidArgument,
+        DataError::ValueTooLarge { .. } => CedarlingErrorCode::InvalidArgument,
+        DataError::SerializationError(_) => CedarlingErrorCode::Internal,
+    };
+    CedarlingResult::error(code, &msg)
+}
 
 /// Global registry of per-thread blocking [`cedarling::blocking::Cedarling`] instances.
 static CEDARLING_RUNTIME: LazyLock<CedarlingRuntime> = LazyLock::new(|| CedarlingRuntime {
@@ -331,10 +346,7 @@ pub fn context_push(
 
     match instance.push_data_ctx(key, value, ttl) {
         Ok(()) => CedarlingResult::success("{}".to_string()),
-        Err(e) => {
-            let error_msg = format!("Failed to push data: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -366,10 +378,7 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
             },
         },
         Ok(None) => CedarlingResult::success("null".to_string()),
-        Err(e) => {
-            let error_msg = format!("Failed to get data: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -401,10 +410,7 @@ pub fn context_get_entry(instance_id: u64, key: &str) -> CedarlingResult {
             },
         },
         Ok(None) => CedarlingResult::success("null".to_string()),
-        Err(e) => {
-            let error_msg = format!("Failed to get data entry: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -432,10 +438,7 @@ pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
             let result = serde_json::json!({"removed": removed});
             CedarlingResult::success(result.to_string())
         },
-        Err(e) => {
-            let error_msg = format!("Failed to remove data: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -460,10 +463,7 @@ pub fn context_clear(instance_id: u64) -> CedarlingResult {
 
     match instance.clear_data_ctx() {
         Ok(()) => CedarlingResult::success("{}".to_string()),
-        Err(e) => {
-            let error_msg = format!("Failed to clear data: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -494,10 +494,7 @@ pub fn context_list(instance_id: u64) -> CedarlingResult {
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
-        Err(e) => {
-            let error_msg = format!("Failed to list data: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
@@ -528,10 +525,7 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
-        Err(e) => {
-            let error_msg = format!("Failed to get stats: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-        },
+        Err(e) => cedarling_result_from_data_error(e),
     }
 }
 
