@@ -7,9 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8E3059852D5358CC0056107D /* policy-store.json in Resources */ = {isa = PBXBuildFile; fileRef = 8E3059842D5358CC0056107D /* policy-store.json */; };
 		8E3059872D5377DB0056107D /* tokens.json in Resources */ = {isa = PBXBuildFile; fileRef = 8E3059862D5377DB0056107D /* tokens.json */; };
 		8E30598B2D5380ED0056107D /* resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 8E30598A2D5380ED0056107D /* resource.json */; };
+		8E361AA92F714F9D002AD4C1 /* Mobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */; };
+		8E361AAB2F71514A002AD4C1 /* cedarling_uniffi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */; };
+		8E361AAD2F715620002AD4C1 /* TokenMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E361AAC2F715620002AD4C1 /* TokenMapping.swift */; };
+		8E361AAF2F71723A002AD4C1 /* MyStore.cjar in Resources */ = {isa = PBXBuildFile; fileRef = 8E361AAE2F71723A002AD4C1 /* MyStore.cjar */; };
+		8E361AB22F717C76002AD4C1 /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = 8E361AB12F717C76002AD4C1 /* Zip */; };
 		8E7754142D609AA60078EBCA /* Labels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7754132D609AA60078EBCA /* Labels.swift */; };
 		8EBA63E52D567B3D0005899A /* context.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EBA63E42D567B3D0005899A /* context.json */; };
 		8EBA63E92D568EA20005899A /* bootstrap.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EBA63E82D568EA20005899A /* bootstrap.json */; };
@@ -43,9 +47,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8E3059842D5358CC0056107D /* policy-store.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "policy-store.json"; sourceTree = "<group>"; };
 		8E3059862D5377DB0056107D /* tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokens.json; sourceTree = "<group>"; };
 		8E30598A2D5380ED0056107D /* resource.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = resource.json; sourceTree = "<group>"; };
+		8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Mobile.xcframework; path = ../../../ios/Mobile.xcframework; sourceTree = "<group>"; };
+		8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = cedarling_uniffi.swift; path = ../output/cedarling_uniffi.swift; sourceTree = "<group>"; };
+		8E361AAC2F715620002AD4C1 /* TokenMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenMapping.swift; sourceTree = "<group>"; };
+		8E361AAE2F71723A002AD4C1 /* MyStore.cjar */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyStore.cjar; sourceTree = "<group>"; };
 		8E7754132D609AA60078EBCA /* Labels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Labels.swift; sourceTree = "<group>"; };
 		8EBA63E42D567B3D0005899A /* context.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = context.json; sourceTree = "<group>"; };
 		8EBA63E82D568EA20005899A /* bootstrap.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bootstrap.json; sourceTree = "<group>"; };
@@ -69,6 +76,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E361AB22F717C76002AD4C1 /* Zip in Frameworks */,
+				8E361AA92F714F9D002AD4C1 /* Mobile.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,11 +101,11 @@
 		8E7754102D6084650078EBCA /* data */ = {
 			isa = PBXGroup;
 			children = (
+				8E361AAE2F71723A002AD4C1 /* MyStore.cjar */,
 				8EBA63E82D568EA20005899A /* bootstrap.json */,
 				8EBA63E42D567B3D0005899A /* context.json */,
 				8E30598A2D5380ED0056107D /* resource.json */,
 				8E3059862D5377DB0056107D /* tokens.json */,
-				8E3059842D5358CC0056107D /* policy-store.json */,
 			);
 			path = data;
 			sourceTree = "<group>";
@@ -107,6 +116,7 @@
 				8EFB8D942D5F9CB7004D549C /* DataParserView.swift */,
 				8EFB8D922D5F7D81004D549C /* JSONTreeNodeView.swift */,
 				8EF92A522D52A53D00047C56 /* ContentView.swift */,
+				8E361AAC2F715620002AD4C1 /* TokenMapping.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -123,6 +133,8 @@
 		8EF92A442D52A53D00047C56 = {
 			isa = PBXGroup;
 			children = (
+				8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */,
+				8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */,
 				8EF92A4F2D52A53D00047C56 /* iOSApp */,
 				8EF92A602D52A53F00047C56 /* iOSAppTests */,
 				8EF92A6A2D52A53F00047C56 /* iOSAppUITests */,
@@ -194,6 +206,9 @@
 			dependencies = (
 			);
 			name = iOSApp;
+			packageProductDependencies = (
+				8E361AB12F717C76002AD4C1 /* Zip */,
+			);
 			productName = iOSApp;
 			productReference = 8EF92A4D2D52A53D00047C56 /* iOSApp.app */;
 			productType = "com.apple.product-type.application";
@@ -266,6 +281,9 @@
 				Base,
 			);
 			mainGroup = 8EF92A442D52A53D00047C56;
+			packageReferences = (
+				8E361AB02F717BCC002AD4C1 /* XCRemoteSwiftPackageReference "Zip" */,
+			);
 			productRefGroup = 8EF92A4E2D52A53D00047C56 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -283,7 +301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EBA63E92D568EA20005899A /* bootstrap.json in Resources */,
-				8E3059852D5358CC0056107D /* policy-store.json in Resources */,
+				8E361AAF2F71723A002AD4C1 /* MyStore.cjar in Resources */,
 				8EF92A582D52A53F00047C56 /* Preview Assets.xcassets in Resources */,
 				8E30598B2D5380ED0056107D /* resource.json in Resources */,
 				8EF92A552D52A53F00047C56 /* Assets.xcassets in Resources */,
@@ -315,8 +333,10 @@
 			files = (
 				8EF92A532D52A53D00047C56 /* ContentView.swift in Sources */,
 				8EFB8D952D5F9CB7004D549C /* DataParserView.swift in Sources */,
+				8E361AAD2F715620002AD4C1 /* TokenMapping.swift in Sources */,
 				8EF4CC152D56746300056A1B /* Helper.swift in Sources */,
 				8E7754142D609AA60078EBCA /* Labels.swift in Sources */,
+				8E361AAB2F71514A002AD4C1 /* cedarling_uniffi.swift in Sources */,
 				8EFB8D932D5F7D81004D549C /* JSONTreeNodeView.swift in Sources */,
 				8EF92A512D52A53D00047C56 /* iOSAppApp.swift in Sources */,
 			);
@@ -648,6 +668,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8E361AB02F717BCC002AD4C1 /* XCRemoteSwiftPackageReference "Zip" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/marmelroy/Zip.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8E361AB12F717C76002AD4C1 /* Zip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8E361AB02F717BCC002AD4C1 /* XCRemoteSwiftPackageReference "Zip" */;
+			productName = Zip;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8EF92A452D52A53D00047C56 /* Project object */;
 }

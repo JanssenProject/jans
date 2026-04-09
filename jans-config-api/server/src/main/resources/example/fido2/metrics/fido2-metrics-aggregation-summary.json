@@ -1,0 +1,8 @@
+{
+    "totalRegistrations": 4,
+    "totalOperations": 4,
+    "totalFallbacks": 0,
+    "totalAuthentications": 0,
+    "avgRegistrationSuccessRate": 0.25,
+    "avgAuthenticationSuccessRate": 0
+}
