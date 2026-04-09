@@ -35,7 +35,7 @@ The client can register a list of URIs as a value for redirect URI parameter. Re
 - Janssen Server supports all [methods of redirection](https://datatracker.ietf.org/doc/html/rfc8252#section-7) used by
   **native apps**. Use of Private-Use URI (or custom URL) is
   supported by allowing redirect URI to take the form of reverse DNS name, for example, ` com.example.app`. URLs for
-  loopback interface redirection are also supported.
+  loopback interface redirection are also supported. Any schema in URI is allowed for `native` client.
 - When the client registers **multiple redirect URIs** (Janssen Server accepts a list of URIs separated by space), be aware
   that Janssen Server will use these, one by one for validation purposes and the validation stops at the first match.
 - If there are multiple registered redirect_uris, and the client is using `pairwise` subject

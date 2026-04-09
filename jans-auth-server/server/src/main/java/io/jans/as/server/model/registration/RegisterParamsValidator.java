@@ -307,6 +307,36 @@ public class RegisterParamsValidator {
     }
 
     /**
+     * Validates a single redirect URI against the allowed schemes and per-application-type host rules.
+     */
+    private boolean isValidRedirectUri(URI uri, ApplicationType applicationType) {
+        String scheme = uri.getScheme();
+        switch (applicationType) {
+            case WEB:
+                if (HTTP.equalsIgnoreCase(scheme)) {
+                    if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
+                        log.debug("HTTP redirect_uri for web app must use localhost or 127.0.0.1, got host: '{}'", uri.getHost());
+                        return false;
+                    }
+                    return true;
+                } else if (HTTPS.equalsIgnoreCase(scheme)) {
+                    if (StringUtils.isBlank(uri.getHost())) {
+                        log.debug("HTTPS redirect_uri must have a non-blank host for web app: '{}'", uri);
+                        return false;
+                    }
+                    return true;
+                }
+                log.debug("Invalid schema for redirect_uri. Only HTTP (localhost) and HTTPS are supported, redirect_uri: '{}'", uri);
+                return false;
+            case NATIVE:
+                // Any schemes (including custom) are allowed for native apps per RFC 8252 (OAuth 2.0 for Native Apps).
+                return true;
+        }
+        log.debug("redirect_uri is not valid, redirect_uri: '{}'", uri);
+        return false;
+    }
+
+    /**
      * @param grantTypes          Grant Types that the Client is declaring that it will restrict itself to using.
      * @param applicationType     The Application Type: native or web.
      * @param subjectType         Subject Type requested for responses to this Client.
@@ -325,9 +355,10 @@ public class RegisterParamsValidator {
         if (redirectUris != null && !redirectUris.isEmpty()) {
             for (String redirectUri : redirectUris) {
                 if (redirectUri == null || redirectUri.contains("#")) {
+                    log.debug("Rejected redirect_uri (null or contains fragment): {}", redirectUri);
                     valid = false;
                 } else {
-                    URI uri = null;
+                    URI uri;
                     try {
                         uri = new URI(redirectUri);
                     } catch (URISyntaxException e) {
@@ -335,19 +366,13 @@ public class RegisterParamsValidator {
                         valid = false;
                         continue;
                     }
-                    redirectUriHosts.add(uri.getHost());
-                    switch (applicationType) {
-                        case WEB:
-                            if (HTTP.equalsIgnoreCase(uri.getScheme())) {
-                                if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                    log.debug("Invalid protocol for redirect_uri: {} (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)", redirectUri);
-                                    valid = false;
-                                }
-                            }
-                            break;
-                        case NATIVE:
-                            //"OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
-                            break;
+                    if (!isValidRedirectUri(uri, applicationType)) {
+                        log.debug("redirect_uri is not valid. uri: {}, applicationType: {}", redirectUri, applicationType);
+                        valid = false;
+                        continue;
+                    }
+                    if (uri.getHost() != null) {
+                        redirectUriHosts.add(uri.getHost());
                     }
                 }
             }

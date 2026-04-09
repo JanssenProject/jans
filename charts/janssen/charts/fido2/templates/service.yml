@@ -19,9 +19,6 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
-  {{- if .Values.global.alb.ingress }}
-  type: NodePort
-  {{- end }}
   ports:
   - port: {{ .Values.service.port }}
     name: {{ .Values.service.name }}

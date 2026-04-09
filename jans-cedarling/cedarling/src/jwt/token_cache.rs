@@ -9,6 +9,7 @@ use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
 use crate::LogLevel;
+use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
@@ -215,7 +216,7 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 #[derive(Debug, derive_more::Display)]
 pub(crate) enum IndexKey {
     #[display("iss:{_0}")]
-    Iss(String),
+    Iss(IssClaim),
 }
 
 impl IndexKey {

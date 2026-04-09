@@ -30,7 +30,7 @@
 		<jans-fido2.version>${project.version}</jans-fido2.version>
 
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
-		<activemq.version>5.16.8</activemq.version>
+		<activemq.version>5.19.3</activemq.version>
 
 		<jettison.version>1.5.4</jettison.version>
 
@@ -237,7 +237,7 @@
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr-runtime</artifactId>
-				<version>3.1.1</version>
+				<version>3.5.3</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-net</groupId>
@@ -510,7 +510,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

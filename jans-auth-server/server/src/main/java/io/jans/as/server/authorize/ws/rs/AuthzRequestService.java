@@ -257,8 +257,12 @@ public class AuthzRequestService {
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
                 }
 
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
-                if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && signatureAlgorithm == SignatureAlgorithm.NONE) {
+                SignatureAlgorithm signatureAlgorithm = jwtRequest.isJws() ? SignatureAlgorithm.fromString(jwtRequest.getAlgorithm()) : jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm();
+                // When forceSignedRequestObject is enabled, reject both:
+                // - SignatureAlgorithm.NONE (explicitly unsigned)
+                // - null (unrecognized algorithm, e.g., JWE encryption algorithm like "RSA-OAEP")
+                if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject())
+                        && (signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE)) {
                     throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
                 }
 

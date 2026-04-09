@@ -33,6 +33,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
+use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
@@ -43,16 +44,15 @@ pub use crate::context_data_api::{
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
-#[cfg(test)]
-use authz::AuthorizeEntitiesData;
+pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, Request, RequestUnsigned,
-    TokenInput,
+    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
+pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -71,7 +71,7 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
-
+    pub use crate::http::spawn_task;
     pub use serde_json;
     pub use serde_yml;
 }
@@ -181,13 +181,6 @@ impl Cedarling {
     // they no longer await internally. Future maintainers can safely remove
     // or refactor these methods when compatibility constraints allow.
 
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    #[allow(clippy::unused_async)]
-    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(&request)
-    }
-
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
     #[allow(clippy::unused_async)]
@@ -208,20 +201,64 @@ impl Cedarling {
         self.authz.authorize_multi_issuer(&request)
     }
 
-    /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
-    #[doc(hidden)]
-    #[cfg(test)]
-    pub(crate) fn build_entities(
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principals, actions, and resources.
+    ///
+    /// This performs scope-level filtering only (principal/action/resource constraints).
+    /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
+    pub fn get_matching_policies_unsigned(
         &self,
-        request: &Request,
-    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request)?;
-        self.authz.build_entities(request, &tokens)
+        principals: &[EntityData],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_unsigned(principals, actions, resources)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given token-derived principals, actions, and resources.
+    ///
+    /// Tokens are validated and their mapping types used as principal entity types.
+    pub fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[TokenInput],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.authz
+            .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.authz.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.authz.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.failed_trusted_issuer_ids()
     }
 }
 
@@ -383,8 +420,11 @@ impl DataApi for Cedarling {
         let config = self.data.config();
         if config.max_entries > 0 {
             let entry_count = self.data.count();
-            let (capacity_usage_percent, memory_alert_triggered) =
-                calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
+            let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+                entry_count,
+                config.max_entries,
+                config.memory_alert_threshold,
+            );
             if memory_alert_triggered {
                 let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::WARN,
@@ -436,8 +476,11 @@ impl DataApi for Cedarling {
         };
 
         // Calculate capacity usage percentage
-        let (capacity_usage_percent, memory_alert_triggered) =
-            calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
+        let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+            entry_count,
+            config.max_entries,
+            config.memory_alert_threshold,
+        );
 
         Ok(DataStoreStats {
             entry_count,
