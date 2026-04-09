@@ -28,7 +28,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import CloudIcon from '@mui/icons-material/Cloud';
-import { LLM_PROVIDERS } from '../constants';
+import { LLM_PROVIDERS, getConnectionStatusText } from '../constants';
 import { LLMProvider, ConnectionStatus } from '../types';
 
 interface SettingsDialogProps {
@@ -92,15 +92,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       case 'connecting': return '#ff9800';
       case 'disconnected': return '#f44336';
       default: return '#9e9e9e'; // grey for unknown status
-    }
-  };
-
-  const getConnectionStatusText = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'Connected';
-      case 'connecting': return 'Connecting...';
-      case 'disconnected': return 'Disconnected';
-      default: return 'Unknown';
     }
   };
 
@@ -313,7 +304,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   backgroundColor: getConnectionStatusColor() 
                 }} />
                 <Typography variant="body2">
-                  Status: {getConnectionStatusText()}
+                  Status: {getConnectionStatusText(connectionStatus)}
                 </Typography>
               </Box>
               </>

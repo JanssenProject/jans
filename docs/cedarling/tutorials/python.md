@@ -126,22 +126,25 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
 
-#### Token-Based Authorization
+#### Token-Based Authorization (Multi-Issuer)
 
-To perform an authorization check, follow these steps:
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
 
 **1. Prepare tokens**
 
-```py
-access_token = "<access_token>"
-id_token = "<id_token>"
-userinfo_token = "<userinfo_token>"
-```
+Tokens are provided as a list of `TokenInput` objects:
 
-Your _principals_ will be built from these tokens.
+```py
+from cedarling_python import TokenInput
+
+tokens = [
+    TokenInput(mapping="Jans::Access_token", payload="<access_token_jwt>"),
+    TokenInput(mapping="Jans::Id_token", payload="<id_token_jwt>"),
+]
+```
 
 **2. Define the resource**
 
@@ -166,41 +169,29 @@ resource = EntityData(
 action = 'Jans::Action::"Read"'
 ```
 
-**4. Define Context**
+**4. Define Context (optional)**
 
 ```py
 context = {
   "current_time": int(time.time()),
-  "device_health": ["Healthy"],
-  "fraud_indicators": ["Allowed"],
-  "geolocation": ["America"],
-  "network": "127.0.0.1",
-  "network_type": "Local",
-  "operating_system": "Linux",
-  "user_agent": "Linux"
 }
 ```
 
-**5. Build the request**
+**5. Authorize**
 
 ```py
-request = Request(
-  tokens={
-    "access_token": access_token,
-    "id_token": id_token,
-    "userinfo_token": userinfo_token,
-  },
-  action=action,
-  resource=resource,
-  context=context
+from cedarling_python import AuthorizeMultiIssuerRequest
+
+request = AuthorizeMultiIssuerRequest(
+    tokens=tokens,
+    action=action,
+    resource=resource,
+    context=context
 )
+result = cedarling.authorize_multi_issuer(request)
 ```
 
-**6. Authorize**
-
-```py
-authorize_result = cedarling.authorize(request)
-```
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -222,7 +213,7 @@ principals = [
       entity_type="Jans::User",
       id="random_user_id"
     ),
-    roles=["admin", "manager"]
+    role=["admin", "manager"]
   ),
 ]
 ```
@@ -283,10 +274,10 @@ request = RequestUnsigned(
 
 **6. Perform Authorization**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```py
-result = cedarling.authorize_unsigned(request);
+result = cedarling.authorize_unsigned(request)
 ```
 
 #### Multi-Issuer Authorization
@@ -368,15 +359,15 @@ else:
   print("Access denied")
 ```
 
-**Key Differences from standard authentication**:
+**Key Differences between authorization methods**:
 
-| Feature         | authorize                                                     | authorize_multi_issuer       |
-| --------------- | ------------------------------------------------------------- | ---------------------------- |
-| Principal Model | User/Workload entities                                        | No principals - token-based  |
-| Token Sources   | Single issuer expected                                        | Multiple issuers supported   |
-| Result Type     | `AuthorizeResult`                                             | `MultiIssuerAuthorizeResult` |
-| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean)  |
-| Use Case        | Standard RBAC/ABAC                                            | Federation, multi-org access |
+| Feature         | authorize_unsigned                              | authorize_multi_issuer                    |
+| --------------- | ----------------------------------------------- | ----------------------------------------- |
+| Principal Model | Directly provided entities                      | Token-derived (from `token_metadata`)     |
+| Token Sources   | No tokens required                              | Multiple issuers supported                |
+| Result Type     | `AuthorizeResult`                               | `MultiIssuerAuthorizeResult`              |
+| Decision Access | `result.decision`, `result.principals` map      | `result.decision` (boolean)               |
+| Use Case        | Internal data, custom principals                | Federation, OIDC, multi-org access        |
 
 ### Logging
 
@@ -398,4 +389,4 @@ logs: dict = cedarling.get_log_by_id(request_id)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
-- [Multi-Issuer Authorization Details](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer)
+- [Multi-Issuer Authorization Details](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer-recommended)

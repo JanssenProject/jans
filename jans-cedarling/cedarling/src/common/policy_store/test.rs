@@ -6,11 +6,9 @@
 use std::str::FromStr;
 
 use base64::prelude::*;
-use serde::Deserialize;
 use serde_json::json;
-use test_utils::assert_eq;
 
-use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore, parse_option_string};
+use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore};
 use crate::common::policy_store::parse_cedar_version;
 
 /// Tests successful deserialization of a valid policy store JSON.
@@ -222,40 +220,6 @@ fn test_invalid_version_format_with_v() {
 }
 
 #[test]
-fn test_parse_option_string() {
-    #[derive(Deserialize)]
-    struct Data {
-        #[serde(deserialize_with = "parse_option_string", default)]
-        maybe_string: Option<String>,
-    }
-
-    // If key can not be found in the JSON, we expect it to be
-    // deserialized into None.
-    let json = json!({});
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_string, None);
-
-    // If the value is an empty String, we expect it to be
-    // deserialized into None.
-
-    let json = json!({
-        "maybe_string": ""
-    });
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_string, None);
-
-    // If the value is a non-empty String, we expect it to be
-
-    // deserialized into Some(String).
-    let json = json!({
-        "maybe_string": "some_string"
-
-    });
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_string, Some("some_string".to_string()));
-}
-
-#[test]
 fn test_missing_required_fields() {
     // Test missing cedar_version
     let json = json!({
@@ -450,7 +414,7 @@ fn test_invalid_trusted_issuers_format() {
     let err = result.expect_err("Expected error for invalid openid_configuration_endpoint URL");
     assert!(
         err.to_string()
-            .contains("the `\"openid_configuration_endpoint\"` is not a valid url"),
+            .contains("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url"),
         "Error should mention invalid URL, got: {err}"
     );
 }

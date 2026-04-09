@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ import os
 from pathlib import Path
 from main.logger import logger
 
+
 def get_instance_path(parent_dir=""):
     parent_dir = parent_dir or Path.home()
     instance_path = Path(parent_dir).joinpath(".cloud")
     instance_path.mkdir(parents=True, exist_ok=True)
     return instance_path.resolve()
 
+
 def parse_bool_env(var_name: str, default: str = "False") -> bool:
     """Parse boolean environment variable."""
     value = os.getenv(var_name, default)
     return value.lower() in ("true", "1", "yes")
+
 
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
@@ -41,36 +44,49 @@ class BaseConfig:
         "x-internal-id": "1",
     }
     CEDARLING_BOOTSTRAP_CONFIG = None
-    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", "None")
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
+        "CEDARLING_BOOTSTRAP_CONFIG_FILE", "None"
+    )
     if CEDARLING_BOOTSTRAP_CONFIG_FILE == "None":
-        logger.info("Cedarling bootstrap file not found, falling back to environment variables")
+        logger.info(
+            "Cedarling bootstrap file not found, falling back to environment variables"
+        )
     else:
-        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-            CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        try:
+            with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+                CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        except OSError as e:
+            logger.warning(
+                f"Unable to read Cedarling bootstrap config from {CEDARLING_BOOTSTRAP_CONFIG_FILE}: {e}. "
+                "Falling back to environment variables"
+            )
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
-    DISABLE_HASH_CHECK = parse_bool_env("DISABLE_HASH_CHECK")
+
 
 class TestingConfig(BaseConfig):
     TESTING = True
     DEBUG = True
 
+
 class DevelopmentConfig(BaseConfig):
     DEVELOPMENT = True
     DEBUG = True
 
+
 class ProductionConfig(BaseConfig):
     DEVELOPMENT = False
+
 
 config = {
     "testing": TestingConfig,
     "default": TestingConfig,
     "development": DevelopmentConfig,
-    "production": ProductionConfig
+    "production": ProductionConfig,
 }
 
-class ConfigLoader:
 
+class ConfigLoader:
     @staticmethod
     def set_config():
         mode = os.environ.get("APP_MODE")
