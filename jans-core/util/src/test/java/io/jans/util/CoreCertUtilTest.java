@@ -253,11 +253,135 @@ public class CoreCertUtilTest {
         assertNull(cert.getUri());
     }
 
+    // ==================== parseXftccHeader tests (Traefik format) ====================
+
+    // Sample base64-encoded certificate (without PEM delimiters) for testing
+    private static final String SAMPLE_BASE64_CERT = "MIIESzCCAzOgAwIBAgIUQtWE/tpqIoRBO0PTdIeolg7sUVUwDQYJKoZIhvcNAQEL" +
+            "BQAwbTELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAlRYMQ8wDQYDVQQHDAZBdXN0aW4x" +
+            "DTALBgNVBAoMBEdsdXUxEzARBgNVBAMMCkphbnNzZW4gQ0ExHDAaBgkqhkiG9w0B" +
+            "CQEWDXRlYW1AZ2x1dS5vcmcwHhcNMjYwMzA3MTEyMTQxWhcNMjcwMzA3MTEyMTQx";
+
+    @Test
+    public void parseXftccHeader_withValidBase64_shouldReturnPemFormat() {
+        String result = CoreCertUtil.parseXftccHeader(SAMPLE_BASE64_CERT);
+
+        assertNotNull(result);
+        assertTrue(result.startsWith("-----BEGIN CERTIFICATE-----\n"));
+        assertTrue(result.endsWith("\n-----END CERTIFICATE-----"));
+        assertTrue(result.contains(SAMPLE_BASE64_CERT));
+    }
+
+    @Test
+    public void parseXftccHeader_withNullInput_shouldReturnNull() {
+        assertNull(CoreCertUtil.parseXftccHeader(null));
+    }
+
+    @Test
+    public void parseXftccHeader_withEmptyString_shouldReturnNull() {
+        assertNull(CoreCertUtil.parseXftccHeader(""));
+    }
+
+    @Test
+    public void parseXftccHeader_withWhitespaceOnly_shouldReturnNull() {
+        assertNull(CoreCertUtil.parseXftccHeader("   "));
+    }
+
+    @Test
+    public void parseXftccHeader_withInvalidBase64_shouldReturnNull() {
+        // Invalid base64 characters
+        assertNull(CoreCertUtil.parseXftccHeader("not!valid@base64#"));
+    }
+
+    @Test
+    public void parseXftccHeader_withLeadingTrailingWhitespace_shouldTrimAndParse() {
+        String result = CoreCertUtil.parseXftccHeader("  " + SAMPLE_BASE64_CERT + "  ");
+
+        assertNotNull(result);
+        assertTrue(result.contains(SAMPLE_BASE64_CERT));
+    }
+
+    // ==================== getClientCert tests for XFTCC header ====================
+
+    @Test
+    public void getClientCert_withXftccHeader_shouldParseCertificate() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn(null);
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn(SAMPLE_BASE64_CERT);
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        assertNotNull(value.getCert());
+        assertTrue(value.getCert().startsWith("-----BEGIN CERTIFICATE-----"));
+        assertTrue(value.getCert().contains(SAMPLE_BASE64_CERT));
+        assertNull(value.getHash());
+        assertNull(value.getSubject());
+        assertNull(value.getUri());
+    }
+
+    @Test
+    public void getClientCert_withXfccMetadataAndXftccCert_shouldCombine() {
+        // XFCC has metadata but no cert, XFTCC has cert
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn("Hash=abc123;Subject=\"CN=test,O=TestOrg\"");
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn(SAMPLE_BASE64_CERT);
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        assertEquals(value.getHash(), "abc123");
+        assertEquals(value.getSubject(), "CN=test,O=TestOrg");
+        assertNotNull(value.getCert());
+        assertTrue(value.getCert().contains(SAMPLE_BASE64_CERT));
+    }
+
+    @Test
+    public void getClientCert_withXfccCert_shouldPreferXfccOverXftcc() {
+        // Both headers present with certs - XFCC should win
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn(FULL_XFCC_HEADER);
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn(SAMPLE_BASE64_CERT);
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        // Should use XFCC cert, not XFTCC
+        assertEquals(value.getCert(), EXPECTED_DECODED_CERT);
+        assertEquals(value.getHash(), "f084aaef637355eda7e99c8dd985b5cdd9a8b6d92414e8dab70eb6f23ffdd157");
+    }
+
+    @Test
+    public void getClientCert_withInvalidXftcc_shouldFallbackToLegacy() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn(null);
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn("invalid!base64@");
+        when(request.getHeader(CoreCertUtil.HEADER_CLIENT_CERT)).thenReturn("legacy-cert-pem");
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        assertEquals(value.getCert(), "legacy-cert-pem");
+    }
+
+    @Test
+    public void getClientCert_withEmptyXftcc_shouldFallbackToLegacy() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn(null);
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn("");
+        when(request.getHeader(CoreCertUtil.HEADER_CLIENT_CERT)).thenReturn("legacy-cert-pem");
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        assertEquals(value.getCert(), "legacy-cert-pem");
+    }
+
     // ==================== Constants tests ====================
 
     @Test
     public void headerConstants_shouldHaveExpectedValues() {
         assertEquals(CoreCertUtil.HEADER_XFCC_CERT, "X-Forwarded-Client-Cert");
+        assertEquals(CoreCertUtil.HEADER_XFTCC_CERT, "X-Forwarded-Tls-Client-Cert");
         assertEquals(CoreCertUtil.HEADER_CLIENT_CERT, "X-ClientCert");
     }
 
