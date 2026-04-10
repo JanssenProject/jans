@@ -202,16 +202,19 @@ public class CoreCertUtilTest {
     @Test
     public void getClientCert_withXfccWithoutCert_shouldFallbackToLegacyHeader() {
         // XFCC header present with Hash/Subject but no Cert field
+        // Should NOT mix XFCC metadata with legacy cert to avoid combining different certificate identities
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn("Hash=abc123;Subject=\"CN=test,O=TestOrg\"");
+        when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn(null);
         when(request.getHeader(CoreCertUtil.HEADER_CLIENT_CERT)).thenReturn("legacy-cert-pem");
 
         CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
 
         assertNotNull(value);
-        // Should have XFCC metadata combined with legacy cert
-        assertEquals(value.getHash(), "abc123");
-        assertEquals(value.getSubject(), "CN=test,O=TestOrg");
+        // Should only have the legacy cert, no mixed metadata
+        assertNull(value.getHash());
+        assertNull(value.getSubject());
+        assertNull(value.getUri());
         assertEquals(value.getCert(), "legacy-cert-pem");
     }
 
@@ -320,8 +323,9 @@ public class CoreCertUtilTest {
     }
 
     @Test
-    public void getClientCert_withXfccMetadataAndXftccCert_shouldCombine() {
+    public void getClientCert_withXfccMetadataAndXftccCert_shouldNotMixMetadata() {
         // XFCC has metadata but no cert, XFTCC has cert
+        // Should NOT mix metadata from XFCC with cert from XFTCC to avoid combining different certificate identities
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn("Hash=abc123;Subject=\"CN=test,O=TestOrg\"");
         when(request.getHeader(CoreCertUtil.HEADER_XFTCC_CERT)).thenReturn(SAMPLE_BASE64_CERT);
@@ -329,8 +333,10 @@ public class CoreCertUtilTest {
         CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
 
         assertNotNull(value);
-        assertEquals(value.getHash(), "abc123");
-        assertEquals(value.getSubject(), "CN=test,O=TestOrg");
+        // Should only have the cert, no mixed metadata
+        assertNull(value.getHash());
+        assertNull(value.getSubject());
+        assertNull(value.getUri());
         assertNotNull(value.getCert());
         assertTrue(value.getCert().contains(SAMPLE_BASE64_CERT));
     }

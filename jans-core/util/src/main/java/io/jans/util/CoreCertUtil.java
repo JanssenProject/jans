@@ -46,25 +46,19 @@ public class CoreCertUtil {
         }
 
         // 2. Try XFTCC header (Traefik) - raw base64 without PEM delimiters
+        // Note: We don't mix XFCC metadata with XFTCC cert to avoid combining data from potentially different certificates
         headerValue = request.getHeader(HEADER_XFTCC_CERT);
         if (headerValue != null && !headerValue.isEmpty()) {
             String cert = parseXftccHeader(headerValue);
             if (cert != null) {
-                // Combine with XFCC metadata if available
-                if (clientCert != null) {
-                    return new ClientCert(clientCert.getHash(), cert, clientCert.getSubject(), clientCert.getUri());
-                }
                 return new ClientCert(null, cert, null, null);
             }
         }
 
         // 3. Use legacy header if neither XFCC nor XFTCC worked
+        // Note: We don't mix XFCC metadata with legacy cert to avoid combining data from potentially different certificates
         headerValue = request.getHeader(HEADER_CLIENT_CERT);
         if (headerValue != null && !headerValue.isEmpty()) {
-            // If we have XFCC metadata (hash, subject, uri) but no cert, combine with legacy cert
-            if (clientCert != null) {
-                return new ClientCert(clientCert.getHash(), headerValue, clientCert.getSubject(), clientCert.getUri());
-            }
             return new ClientCert(null, headerValue, null, null);
         }
 
