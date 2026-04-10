@@ -1,5 +1,6 @@
 package io.jans.as.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.doc.annotation.DocFeatureFlag;
@@ -102,6 +103,7 @@ public enum FeatureFlagType {
         return value;
     }
 
+    @JsonCreator
     public static FeatureFlagType fromValue(String v) {
         if (StringUtils.isBlank(v)) {
             return UNKNOWN;

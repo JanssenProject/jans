@@ -522,10 +522,20 @@ public class UtilTest extends BaseTest {
     
     @Test
     public void shouldSerializeFeatureFlagTypeEnumToLowerCase() {
+        FeatureFlagType enumValue = FeatureFlagType.HEALTH_CHECK;
+        String expectedJson = "\"health_check\"";
         ObjectMapper objectMapper = Util.createJsonMapper();
-        FeatureFlagType featureFlagType = FeatureFlagType.HEALTH_CHECK ;
+        FeatureFlagType featureFlagType = FeatureFlagType.HEALTH_CHECK;
         String json = objectMapper.writeValueAsString(featureFlagType);
-        assertEquals("health_check", json);
+        assertEquals(FeatureFlagType.fromValue("health_check"), FeatureFlagType.HEALTH_CHECK);
+
+        // Verify Serialization
+        String json = objectMapper.writeValueAsString(enumValue);
+        assertEquals(json, expectedJson);
+
+        // 2. Verify Deserialization
+        FeatureFlagType deserializedValue = objectMapper.readValue(expectedJson, FeatureFlagType.class);
+        assertEquals(deserializedValue, enumValue);
     }
 
 }
