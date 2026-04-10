@@ -54,8 +54,13 @@ export default class AuthenticationService {
                 throw new Error('Missing client configuration for token request');
             }
 
+            const redirectUri = Array.isArray(client.redirectUris) ? client.redirectUris[0] : undefined;
+            if (!redirectUri) {
+                throw new Error('Missing redirect URI in client configuration');
+            }
+
             const tokenReqData = qs.stringify({
-                redirect_uri: client.redirectUris?.[0],
+                redirect_uri: redirectUri,
                 grant_type: 'authorization_code',
                 code_verifier: codeVerifier,
                 client_id: client.clientId,
