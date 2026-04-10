@@ -66,7 +66,7 @@ def test_encoding_decode_file_no_salt(monkeypatch, gmanager):
 
     monkeypatch.setattr(
         "hvac.Client.is_authenticated",
-        lambda cls: True,
+        lambda _: True,
     )
 
     runner = CliRunner()
@@ -153,7 +153,7 @@ def test_encoding_decode_string_no_salt(monkeypatch, gmanager):
 
     monkeypatch.setattr(
         "hvac.Client.is_authenticated",
-        lambda cls: True,
+        lambda _: True,
     )
 
     runner = CliRunner()

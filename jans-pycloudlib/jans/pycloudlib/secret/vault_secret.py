@@ -4,7 +4,6 @@ import contextlib
 import typing as _t
 import logging
 import os
-import sys
 
 import backoff
 import hvac
@@ -20,13 +19,24 @@ MaybeCacert = _t.Union[bool, str]
 
 
 def on_backoff(details):
-    error = sys.exc_info()[1]
+    error = details.get("exception")
     logger.warning("Vault is not ready; reason=%s; retrying in %0.1f seconds", error, details["wait"])
 
 
 def on_giveup(details):
-    error = sys.exc_info()[1]
+    error = details.get("exception")
     logger.error("Vault is not ready after %0.1f seconds; reason=%s", details["elapsed"], error)
+
+
+def should_giveup(exc: Exception) -> bool:
+    non_retries_exc = (
+        FileNotFoundError,
+        PermissionError,
+        KeyError,
+        ValueError,
+        TypeError,
+    )
+    return isinstance(exc, non_retries_exc)
 
 
 retry_on_exception = backoff.on_exception(
@@ -35,6 +45,7 @@ retry_on_exception = backoff.on_exception(
     max_time=300,
     on_backoff=on_backoff,
     on_success=None,
+    giveup=should_giveup,
     on_giveup=on_giveup,
     jitter=None,
     interval=10,
