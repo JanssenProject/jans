@@ -11,6 +11,8 @@ import java.util.List;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
@@ -72,6 +74,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private AppleUtilService appleUtilService;
 
+	@Inject
+	private AppConfiguration appConfiguration;
+
 	private static final String SUBJECT_DN = "st=california, o=apple inc., cn=apple webauthn root ca";
 
 	@Override
@@ -110,7 +115,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			X509Certificate credCert = certificates.get(0);
 
 			try {
-				List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
+				List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(getAppleRootCaSubjectDn());
 				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate: " + trustAnchorCertificates.size());
 				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 				log.info("Step 1 completed");
@@ -179,5 +184,13 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			credIdAndCounters.setSignatureAlgorithm(alg);
 			credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 		}
+	}
+
+	private String getAppleRootCaSubjectDn() {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		if (fido2Configuration != null && fido2Configuration.getAppleRootCaSubjectDn() != null) {
+			return fido2Configuration.getAppleRootCaSubjectDn();
+		}
+		return SUBJECT_DN;
 	}
 }

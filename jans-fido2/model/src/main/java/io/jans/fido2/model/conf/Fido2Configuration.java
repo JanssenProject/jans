@@ -53,6 +53,8 @@ public class Fido2Configuration {
 	private boolean enterpriseAttestation = false;
 	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
 	private String attestationMode = "monitor";
+	@DocProperty(description = "Subject DN of the Apple WebAuthn root CA certificate used for apple fmt attestation verification")
+	private String appleRootCaSubjectDn = "st=california, o=apple inc., cn=apple webauthn root ca";
 
 	public String getAuthenticatorCertsFolder() {
 		return authenticatorCertsFolder;
@@ -168,6 +170,14 @@ public class Fido2Configuration {
 
 	public void setAttestationMode(String attestationMode) {
 		this.attestationMode = attestationMode;
+	}
+
+	public String getAppleRootCaSubjectDn() {
+		return appleRootCaSubjectDn;
+	}
+
+	public void setAppleRootCaSubjectDn(String appleRootCaSubjectDn) {
+		this.appleRootCaSubjectDn = appleRootCaSubjectDn;
 	}
 
 	public Fido2Configuration(String authenticatorCertsFolder, String mdsAccessToken, String mdsCertsFolder,
