@@ -8,10 +8,18 @@
 //! This module handles parsing Cedar policy files (.cedar) and extracting
 //! policy IDs from `@id()` annotations. It provides validation and error
 //! reporting with file names and line numbers.
+//!
+//! A file may contain multiple policies. Single-policy files use the first
+//! `@id()` annotation or the filename (without extension) as the policy id.
+//! When a file contains more than one policy, each policy must use Cedar's
+//! `@id("...")` policy annotation before `permit` / `forbid`; filename-based ids
+//! are not applied in that case. Policies are renamed so their [`PolicyId`] matches
+//! the `@id` value (Cedar 4 defaults internal ids to `policy0`, `policy1`, ...).
 
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
 #[cfg(test)]
 use std::collections::HashMap;
+use std::str::FromStr;
 
 use super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 
@@ -42,25 +50,27 @@ pub(super) struct ParsedTemplate {
 pub(super) struct PolicyParser;
 
 impl PolicyParser {
-    /// Parse a single policy from Cedar policy text.
+    /// Parse Cedar policy text from one file.
     ///
-    /// The policy ID is determined by:
+    /// Returns one [`ParsedPolicy`] for single-policy files, or one entry per policy
+    /// when the file contains multiple policies (see module docs).
+    ///
+    /// The policy ID for single-policy files is determined by:
     /// 1. Extracting from `@id()` annotation in the policy text, OR
     /// 2. Deriving from the filename (without .cedar extension)
     ///
-    /// Pass the ID to `Policy::parse()` using the annotation or the filename (without
-    /// the .cedar extension).
+    /// Multi-policy files are parsed with [`PolicySet`]; each policy must have a
+    /// Cedar `@id("...")` annotation, then policies are given [`PolicyId`]s equal to
+    /// those annotation values.
     pub(super) fn parse_policy(
         content: &str,
         filename: &str,
-    ) -> Result<ParsedPolicy, PolicyStoreError> {
-        // Extract policy ID from @id() annotation or derive from filename
+    ) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
         let policy_id_str = Self::extract_id_annotation(content)
             .or_else(|| Self::derive_id_from_filename(filename));
 
         let policy_id = match policy_id_str {
             Some(id_str) => {
-                // Validate the ID format
                 Self::validate_policy_id(&id_str, filename)
                     .map_err(PolicyStoreError::Validation)?;
                 PolicyId::new(&id_str)
@@ -73,19 +83,57 @@ impl PolicyParser {
             },
         };
 
-        // Parse the policy using Cedar engine with the policy ID
-        let policy = Policy::parse(Some(policy_id.clone()), content).map_err(|e| {
-            PolicyStoreError::CedarParsing {
-                file: filename.to_string(),
-                detail: CedarParseErrorDetail::ParseError(e.to_string()),
-            }
-        })?;
+        let parse_single_err = match Policy::parse(Some(policy_id.clone()), content) {
+            Ok(policy) => {
+                return Ok(vec![ParsedPolicy {
+                    id: policy_id,
+                    filename: filename.to_string(),
+                    policy,
+                }]);
+            },
+            Err(e) => e,
+        };
 
-        Ok(ParsedPolicy {
-            id: policy_id,
-            filename: filename.to_string(),
-            policy,
-        })
+        let Ok(policy_set) = PolicySet::from_str(content) else {
+            return Err(PolicyStoreError::CedarParsing {
+                file: filename.to_string(),
+                detail: CedarParseErrorDetail::ParseError(parse_single_err.to_string()),
+            });
+        };
+
+        let policies: Vec<Policy> = policy_set.policies().cloned().collect();
+        let n = policies.len();
+
+        if n <= 1 {
+            return Err(PolicyStoreError::CedarParsing {
+                file: filename.to_string(),
+                detail: CedarParseErrorDetail::ParseError(parse_single_err.to_string()),
+            });
+        }
+
+        let mut out = Vec::with_capacity(n);
+        for policy in policies {
+            // In Cedar 4+, `@id("...")` is a policy annotation named `id`; the AST `PolicyId`
+            // defaults to `policy0`, `policy1`, ... until renamed to match the annotation.
+            let id_str = policy
+                .annotation("id")
+                .filter(|s| !s.is_empty())
+                .map(str::to_owned)
+                .ok_or_else(|| PolicyStoreError::CedarParsing {
+                    file: filename.to_string(),
+                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
+                        internal_policy_id: policy.id().to_string(),
+                    },
+                })?;
+            Self::validate_policy_id(&id_str, filename).map_err(PolicyStoreError::Validation)?;
+            let policy = policy.new_id(PolicyId::new(&id_str));
+            out.push(ParsedPolicy {
+                id: policy.id().clone(),
+                filename: filename.to_string(),
+                policy,
+            });
+        }
+        Ok(out)
     }
 
     /// Parse a single template from Cedar policy text.
@@ -145,8 +193,9 @@ impl PolicyParser {
         let mut policy_map = HashMap::with_capacity(policy_files_vec.len());
 
         for (filename, content) in policy_files_vec {
-            let parsed = Self::parse_policy(content, filename)?;
-            policy_map.insert(parsed.id, parsed.filename);
+            for parsed in Self::parse_policy(content, filename)? {
+                policy_map.insert(parsed.id, parsed.filename);
+            }
         }
 
         Ok(policy_map)
@@ -216,26 +265,32 @@ impl PolicyParser {
         Some(sanitized)
     }
 
-    /// Extract `@id()` annotation from Cedar policy text.
+    /// Extract the first `@id()` annotation from Cedar policy text.
     ///
-    /// Looks for @id("...") or @id('...') pattern in comments.
+    /// Looks for `@id("...")` or `@id('...')` on each line.
     fn extract_id_annotation(content: &str) -> Option<String> {
-        // Look for @id("...") or @id('...') pattern
+        Self::collect_id_annotations(content).into_iter().next()
+    }
+
+    /// Collect every `@id("...")` / `@id('...')` value in file order.
+    fn collect_id_annotations(content: &str) -> Vec<String> {
+        let mut ids = Vec::new();
         for line in content.lines() {
-            let trimmed = line.trim();
-            if let Some(start_idx) = trimmed.find("@id(") {
-                let after_id = &trimmed[start_idx + 4..];
-                // Find the string content between quotes
-                if let Some(open_quote) = after_id.find('"').or_else(|| after_id.find('\'')) {
-                    let quote_char = after_id.chars().nth(open_quote).unwrap();
-                    let after_open = &after_id[open_quote + 1..];
-                    if let Some(close_quote) = after_open.find(quote_char) {
-                        return Some(after_open[..close_quote].to_string());
-                    }
-                }
+            if let Some(id) = Self::parse_id_from_line_trimmed(line.trim()) {
+                ids.push(id);
             }
         }
-        None
+        ids
+    }
+
+    fn parse_id_from_line_trimmed(trimmed: &str) -> Option<String> {
+        let start_idx = trimmed.find("@id(")?;
+        let after_id = &trimmed[start_idx + 4..];
+        let open_quote = after_id.find('"').or_else(|| after_id.find('\''))?;
+        let quote_char = after_id.chars().nth(open_quote)?;
+        let after_open = &after_id[open_quote + 1..];
+        let close_quote = after_open.find(quote_char)?;
+        Some(after_open[..close_quote].to_string())
     }
 
     /// Validate policy ID format (alphanumeric, underscore, hyphen, colon only).
@@ -277,12 +332,13 @@ mod tests {
         "#;
 
         let result = PolicyParser::parse_policy(policy_text, "test.cedar");
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "expected single policy to parse");
 
-        let parsed = result.unwrap();
-        assert_eq!(parsed.filename, "test.cedar");
+        let parsed = result.expect("parse_policy should succeed for simple policy");
+        assert_eq!(parsed.len(), 1, "expected exactly one policy");
+        assert_eq!(parsed[0].filename, "test.cedar");
         // ID should be derived from filename
-        assert_eq!(parsed.id.to_string(), "test");
+        assert_eq!(parsed[0].id.to_string(), "test");
     }
 
     #[test]
@@ -442,15 +498,17 @@ mod tests {
         let policy_text = r"permit(principal, action, resource);";
         let template_text = r"permit(principal == ?principal, action, resource);";
 
-        let parsed_policy = PolicyParser::parse_policy(policy_text, "policy.cedar").unwrap();
+        let parsed_policy = PolicyParser::parse_policy(policy_text, "policy.cedar")
+            .expect("parse_policy should succeed for policy.cedar");
+        assert_eq!(parsed_policy.len(), 1, "expected exactly one policy");
         let parsed_template =
             PolicyParser::parse_template(template_text, "template.cedar").unwrap();
 
         // Verify IDs are derived from filenames
-        assert_eq!(parsed_policy.id.to_string(), "policy");
+        assert_eq!(parsed_policy[0].id.to_string(), "policy");
         assert_eq!(parsed_template.template.id().to_string(), "template");
 
-        let result = PolicyParser::create_policy_set(vec![parsed_policy], vec![parsed_template]);
+        let result = PolicyParser::create_policy_set(parsed_policy, vec![parsed_template]);
         assert!(result.is_ok());
 
         let policy_set = result.unwrap();
@@ -486,10 +544,75 @@ mod tests {
         "#;
 
         let result = PolicyParser::parse_policy(policy_text, "ignored.cedar");
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "expected policy with @id to parse");
 
-        let parsed = result.unwrap();
+        let parsed = result.expect("parse_policy should succeed with @id annotation");
+        assert_eq!(parsed.len(), 1, "expected exactly one policy");
         // ID should come from @id annotation, not filename
-        assert_eq!(parsed.id.to_string(), "custom-policy-id");
+        assert_eq!(parsed[0].id.to_string(), "custom-policy-id");
+    }
+
+    #[test]
+    fn test_parse_multi_policy_file_success() {
+        let policy_text = r#"
+@id("researcher-search")
+permit(
+  principal == User::"researcher",
+  action == Action::"search",
+  resource == File::"doc1.txt"
+);
+
+@id("researcher-fetch")
+permit(
+  principal == User::"researcher",
+  action == Action::"edit",
+  resource == File::"doc2.txt"
+);
+        "#;
+
+        let result = PolicyParser::parse_policy(policy_text, "researcher.cedar");
+        let parsed = result.expect("multi-policy file with @id each should parse");
+
+        assert_eq!(parsed.len(), 2, "expected two policies from one file");
+        let ids: Vec<String> = parsed.iter().map(|p| p.id.to_string()).collect();
+        assert!(
+            ids.contains(&"researcher-search".to_string())
+                && ids.contains(&"researcher-fetch".to_string()),
+            "expected both policy ids, got {ids:?}"
+        );
+        for p in &parsed {
+            assert_eq!(p.filename, "researcher.cedar");
+        }
+    }
+
+    #[test]
+    fn test_parse_multi_policy_file_missing_explicit_id() {
+        let policy_text = r#"
+@id("only-one")
+permit(
+  principal == User::"alice",
+  action == Action::"view",
+  resource == File::"doc1.txt"
+);
+permit(
+  principal == User::"bob",
+  action == Action::"edit",
+  resource == File::"doc2.txt"
+);
+        "#;
+
+        let result = PolicyParser::parse_policy(policy_text, "two-permits.cedar");
+        let err = result.expect_err("second policy without @id should fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId { .. }
+                } if file == "two-permits.cedar"
+            ),
+            "expected MultiPolicyMissingExplicitId, got: {err:?}"
+        );
     }
 }

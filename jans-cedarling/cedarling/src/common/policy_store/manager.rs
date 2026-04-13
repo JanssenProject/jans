@@ -193,13 +193,17 @@ impl PolicyStoreManager {
             return Ok(PoliciesContainer::new_empty(policy_set));
         }
 
-        // Parse each policy file
-        let mut parsed_policies = Vec::with_capacity(policy_files.len());
+        // Parse each policy file (a file may contain multiple policies)
+        let mut parsed_policies = Vec::new();
         for file in policy_files {
-            let parsed = PolicyParser::parse_policy(&file.content, &file.name).map_err(|e| {
-                ConversionError::PolicyConversion(format!("Failed to parse '{}': {}", file.name, e))
-            })?;
-            parsed_policies.push(parsed);
+            let parsed_list =
+                PolicyParser::parse_policy(&file.content, &file.name).map_err(|e| {
+                    ConversionError::PolicyConversion(format!(
+                        "Failed to parse '{}': {}",
+                        file.name, e
+                    ))
+                })?;
+            parsed_policies.extend(parsed_list);
         }
 
         // Parse each template file

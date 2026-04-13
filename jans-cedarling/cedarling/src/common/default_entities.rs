@@ -188,7 +188,6 @@ pub(super) fn parse_default_entities_with_warns(
     }
 }
 
-
 #[derive(Debug, thiserror::Error)]
 #[error("failed to parse default entity, id: \"{entry_id}\" error: {error}")]
 pub(super) struct ParseDefaultEntityError {
