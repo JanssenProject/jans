@@ -412,6 +412,7 @@ impl PolicyParser {
     /// lines (back to the start of the file or the previous policy) contain no
     /// `@id(...)` annotation. Returns `(1-based line, trimmed-and-truncated snippet)`.
     fn find_first_policy_without_id(content: &str) -> Option<(usize, String)> {
+        const MAX_SNIPPET: usize = 80;
         let lines: Vec<&str> = content.lines().collect();
         let mut window_start = 0usize;
         for (idx, line) in lines.iter().enumerate() {
@@ -428,9 +429,8 @@ impl PolicyParser {
                 .any(|l| Self::parse_id_from_line_trimmed(l.trim()).is_some());
             if !has_id {
                 let mut snippet = trimmed.trim_end().to_string();
-                const MAX: usize = 80;
-                if snippet.chars().count() > MAX {
-                    snippet = snippet.chars().take(MAX).collect::<String>() + "...";
+                if snippet.chars().count() > MAX_SNIPPET {
+                    snippet = snippet.chars().take(MAX_SNIPPET).collect::<String>() + "...";
                 }
                 return Some((idx + 1, snippet));
             }

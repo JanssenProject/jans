@@ -769,7 +769,7 @@ forbid(
 
 /// End-to-end: a `.cjar` archive whose `templates/` contains a single file with
 /// two `@id`-annotated Cedar templates must fully round-trip (unpack -> loader
-/// -> PolicySet) with both templates present in the resulting `PolicySet`.
+/// -> `PolicySet`) with both templates present in the resulting `PolicySet`.
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_load_from_cjar_with_multi_template_file() {
