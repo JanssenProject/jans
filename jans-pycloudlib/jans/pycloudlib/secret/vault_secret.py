@@ -5,6 +5,7 @@ import typing as _t
 import logging
 import os
 
+import backoff
 import hvac
 
 from jans.pycloudlib.secret.base_secret import BaseSecret
@@ -15,6 +16,40 @@ logger = logging.getLogger(__name__)
 
 MaybeCert = _t.Union[tuple[str, str], None]
 MaybeCacert = _t.Union[bool, str]
+
+
+def on_backoff(details):
+    error = details.get("exception")
+    logger.warning("Vault is not ready; reason=%s; retrying in %0.1f seconds", error, details["wait"])
+
+
+def on_giveup(details):
+    error = details.get("exception")
+    logger.error("Vault is not ready after %0.1f seconds; reason=%s", details["elapsed"], error)
+
+
+def should_giveup(exc: Exception) -> bool:
+    non_retries_exc = (
+        FileNotFoundError,
+        PermissionError,
+        KeyError,
+        ValueError,
+        TypeError,
+    )
+    return isinstance(exc, non_retries_exc)
+
+
+retry_on_exception = backoff.on_exception(
+    backoff.constant,
+    Exception,
+    max_time=300,
+    on_backoff=on_backoff,
+    on_success=None,
+    giveup=should_giveup,
+    on_giveup=on_giveup,
+    jitter=None,
+    interval=10,
+)
 
 
 class VaultSecret(BaseSecret):
@@ -104,8 +139,8 @@ class VaultSecret(BaseSecret):
         for mapping_key, env_name in deprecated_envs.items():
             if env_name in os.environ:
                 logger.warning(
-                    f"Specifying {mapping_key} via {env_name} environment variable is deprecated. "
-                    f"Please specify {mapping_key} as part of CN_SECRET_VAULT_ADDR environment variable instead."
+                    "Specifying %s via %s environment variable is deprecated. "
+                    "Please specify %s as part of CN_SECRET_VAULT_ADDR environment variable instead.", mapping_key, env_name, mapping_key
                 )
                 addr_mapping[mapping_key] = os.environ[env_name]
 
@@ -139,8 +174,12 @@ class VaultSecret(BaseSecret):
         with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
             return f.read().strip()
 
+    @retry_on_exception
     def _authenticate(self) -> None:
-        """Authenticate client."""
+        """Authenticate client.
+
+        Backoff retries are applied to address Vault readiness.
+        """
         if self.client.is_authenticated():
             return
 

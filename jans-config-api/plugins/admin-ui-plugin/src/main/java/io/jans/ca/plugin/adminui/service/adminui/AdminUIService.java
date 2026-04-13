@@ -35,6 +35,12 @@ public class AdminUIService {
     @Inject
     AUIConfigurationService auiConfigurationService;
 
+    /**
+     * Builds an AppConfigResponse populated from the current AUIConfiguration.
+     *
+     * @return an AppConfigResponse containing editable admin UI configuration fields
+     * @throws ApplicationException if the AUIConfiguration cannot be retrieved or an internal error occurs
+     */
     public AppConfigResponse getAdminUIEditableConfiguration() throws ApplicationException {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -56,7 +62,6 @@ public class AdminUIService {
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
             appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
             appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
-            appConfigResponse.setCedarlingPolicyStoreRetrievalPoint(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -65,6 +70,15 @@ public class AdminUIService {
         }
     }
 
+    /**
+     * Apply editable Admin UI settings from the provided AppConfigResponse to persistent storage and synchronize those changes into the in-memory AUIConfiguration.
+     *
+     * Only non-null and non-empty fields in the provided AppConfigResponse are applied; unchanged fields are left as-is.
+     *
+     * @param appConfigResponse the incoming editable Admin UI settings to persist and propagate
+     * @return the updated AppConfigResponse reflecting the persisted and in-memory configuration
+     * @throws ApplicationException if saving or applying the configuration fails
+     */
     public AppConfigResponse editAdminUIEditableConfiguration(AppConfigResponse appConfigResponse) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
@@ -91,10 +105,6 @@ public class AdminUIService {
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
                 adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
                 auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
-            }
-            if (appConfigResponse.getCedarlingPolicyStoreRetrievalPoint() != null) {
-                adminConf.getMainSettings().getUiConfig().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint().toString());
-                auiConfigurationService.getAUIConfiguration().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint());
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
                 adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());

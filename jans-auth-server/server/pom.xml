@@ -220,7 +220,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.6</version>
+                <version>4.9.10</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -736,7 +736,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-testng</artifactId>
-			<version>0.4.8</version>
+			<version>0.5.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
