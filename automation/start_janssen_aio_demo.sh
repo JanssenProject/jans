@@ -482,8 +482,6 @@ EOF
 # main entrypoint
 # ===============
 
-install_docker
-
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 JANS_VERSION=$3
@@ -521,9 +519,10 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP  ]]; then
-        EXT_IP=$(curl --silent ipinfo.io/ip)
+    EXT_IP=$(curl --silent ipinfo.io/ip)
 fi
 
+install_docker
 prepare_dirs
 prepare_certs "$JANS_FQDN" "$EXT_IP"
 prepare_vault_files
