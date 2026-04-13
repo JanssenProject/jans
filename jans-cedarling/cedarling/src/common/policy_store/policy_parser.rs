@@ -66,74 +66,65 @@ impl PolicyParser {
         content: &str,
         filename: &str,
     ) -> Result<Vec<ParsedPolicy>, PolicyStoreError> {
-        let policy_id_str = Self::extract_id_annotation(content)
-            .or_else(|| Self::derive_id_from_filename(filename));
-
-        let policy_id = match policy_id_str {
-            Some(id_str) => {
-                Self::validate_policy_id(&id_str, filename)
-                    .map_err(PolicyStoreError::Validation)?;
-                PolicyId::new(&id_str)
-            },
-            None => {
-                return Err(PolicyStoreError::CedarParsing {
-                    file: filename.to_string(),
-                    detail: CedarParseErrorDetail::MissingIdAnnotation,
-                });
-            },
-        };
-
-        let parse_single_err = match Policy::parse(Some(policy_id.clone()), content) {
-            Ok(policy) => {
-                return Ok(vec![ParsedPolicy {
-                    id: policy_id,
-                    filename: filename.to_string(),
-                    policy,
-                }]);
-            },
-            Err(e) => e,
-        };
-
-        let Ok(policy_set) = PolicySet::from_str(content) else {
-            return Err(PolicyStoreError::CedarParsing {
+        let policy_set =
+            PolicySet::from_str(content).map_err(|e| PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                detail: CedarParseErrorDetail::ParseError(parse_single_err.to_string()),
-            });
-        };
+                detail: CedarParseErrorDetail::ParseError(e.to_string()),
+            })?;
 
         let policies: Vec<Policy> = policy_set.policies().cloned().collect();
-        let n = policies.len();
 
-        if n <= 1 {
-            return Err(PolicyStoreError::CedarParsing {
+        match policies.len() {
+            0 => Err(PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                detail: CedarParseErrorDetail::ParseError(parse_single_err.to_string()),
-            });
+                detail: CedarParseErrorDetail::ParseError(
+                    "no policies found in file".to_string(),
+                ),
+            }),
+            1 => {
+                let policy = policies.into_iter().next().expect("len == 1 checked above");
+                let id_str = Self::extract_id_annotation(content)
+                    .or_else(|| Self::derive_id_from_filename(filename))
+                    .ok_or_else(|| PolicyStoreError::CedarParsing {
+                        file: filename.to_string(),
+                        detail: CedarParseErrorDetail::MissingIdAnnotation,
+                    })?;
+                Self::validate_policy_id(&id_str, filename)
+                    .map_err(PolicyStoreError::Validation)?;
+                let policy = policy.new_id(PolicyId::new(&id_str));
+                Ok(vec![ParsedPolicy {
+                    id: policy.id().clone(),
+                    filename: filename.to_string(),
+                    policy,
+                }])
+            },
+            n => {
+                let mut out = Vec::with_capacity(n);
+                for policy in policies {
+                    // In Cedar 4+, `@id("...")` is a policy annotation named `id`; the AST
+                    // `PolicyId` defaults to `policy0`, `policy1`, ... until renamed.
+                    let id_str = policy
+                        .annotation("id")
+                        .filter(|s| !s.is_empty())
+                        .map(str::to_owned)
+                        .ok_or_else(|| PolicyStoreError::CedarParsing {
+                            file: filename.to_string(),
+                            detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
+                                internal_policy_id: policy.id().to_string(),
+                            },
+                        })?;
+                    Self::validate_policy_id(&id_str, filename)
+                        .map_err(PolicyStoreError::Validation)?;
+                    let policy = policy.new_id(PolicyId::new(&id_str));
+                    out.push(ParsedPolicy {
+                        id: policy.id().clone(),
+                        filename: filename.to_string(),
+                        policy,
+                    });
+                }
+                Ok(out)
+            },
         }
-
-        let mut out = Vec::with_capacity(n);
-        for policy in policies {
-            // In Cedar 4+, `@id("...")` is a policy annotation named `id`; the AST `PolicyId`
-            // defaults to `policy0`, `policy1`, ... until renamed to match the annotation.
-            let id_str = policy
-                .annotation("id")
-                .filter(|s| !s.is_empty())
-                .map(str::to_owned)
-                .ok_or_else(|| PolicyStoreError::CedarParsing {
-                    file: filename.to_string(),
-                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
-                        internal_policy_id: policy.id().to_string(),
-                    },
-                })?;
-            Self::validate_policy_id(&id_str, filename).map_err(PolicyStoreError::Validation)?;
-            let policy = policy.new_id(PolicyId::new(&id_str));
-            out.push(ParsedPolicy {
-                id: policy.id().clone(),
-                filename: filename.to_string(),
-                policy,
-            });
-        }
-        Ok(out)
     }
 
     /// Parse a single template from Cedar policy text.
