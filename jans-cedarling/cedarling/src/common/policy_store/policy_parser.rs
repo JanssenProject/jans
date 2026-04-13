@@ -106,6 +106,7 @@ impl PolicyParser {
             },
             n => {
                 let mut out = Vec::with_capacity(n);
+                let mut seen_ids = std::collections::HashSet::with_capacity(n);
                 for policy in policies {
                     // In Cedar 4+, `@id("...")` is a policy annotation named `id`; the AST
                     // `PolicyId` defaults to `policy0`, `policy1`, ... until renamed.
@@ -121,6 +122,14 @@ impl PolicyParser {
                         })?;
                     Self::validate_policy_id(&id_str, filename)
                         .map_err(PolicyStoreError::Validation)?;
+                    if !seen_ids.insert(id_str.clone()) {
+                        return Err(PolicyStoreError::CedarParsing {
+                            file: filename.to_string(),
+                            detail: CedarParseErrorDetail::DuplicatePolicyIdInFile {
+                                id: id_str,
+                            },
+                        });
+                    }
                     let policy = policy.new_id(PolicyId::new(&id_str));
                     out.push(ParsedPolicy {
                         id: policy.id().clone(),
@@ -569,6 +578,39 @@ permit(
         for p in &parsed {
             assert_eq!(p.filename, "researcher.cedar");
         }
+    }
+
+    #[test]
+    fn test_parse_multi_policy_file_duplicate_id() {
+        let policy_text = r#"
+@id("dup")
+permit(
+  principal == User::"alice",
+  action == Action::"view",
+  resource == File::"doc1.txt"
+);
+
+@id("dup")
+permit(
+  principal == User::"bob",
+  action == Action::"edit",
+  resource == File::"doc2.txt"
+);
+        "#;
+
+        let err = PolicyParser::parse_policy(policy_text, "dup.cedar")
+            .expect_err("duplicate @id within a file should fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::DuplicatePolicyIdInFile { id }
+                } if file == "dup.cedar" && id == "dup"
+            ),
+            "expected DuplicatePolicyIdInFile, got: {err:?}"
+        );
     }
 
     #[test]

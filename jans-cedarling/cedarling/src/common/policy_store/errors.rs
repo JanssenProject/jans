@@ -161,6 +161,10 @@ pub(crate) enum CedarParseErrorDetail {
     )]
     MultiPolicyMissingExplicitId { internal_policy_id: String },
 
+    /// Two or more policies in the same file share the same `@id("...")` value
+    #[error("duplicate @id(\"{id}\") within a single .cedar file")]
+    DuplicatePolicyIdInFile { id: String },
+
     /// Failed to parse Cedar policy or template
     #[error("{0}")]
     ParseError(String),
