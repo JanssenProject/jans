@@ -450,8 +450,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={triggerCodeFlow}>Trigger Auth Flow</Button>
+          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+          <Button variant="outlined" type="submit" onClick={triggerCodeFlow}>Trigger Auth Flow</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
