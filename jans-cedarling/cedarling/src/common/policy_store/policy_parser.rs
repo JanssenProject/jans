@@ -332,8 +332,6 @@ mod tests {
         "#;
 
         let result = PolicyParser::parse_policy(policy_text, "test.cedar");
-        assert!(result.is_ok(), "expected single policy to parse");
-
         let parsed = result.expect("parse_policy should succeed for simple policy");
         assert_eq!(parsed.len(), 1, "expected exactly one policy");
         assert_eq!(parsed[0].filename, "test.cedar");
@@ -369,9 +367,7 @@ mod tests {
         "#;
 
         let result = PolicyParser::parse_template(template_text, "template.cedar");
-        assert!(result.is_ok());
-
-        let parsed = result.unwrap();
+        let parsed = result.expect("parse_template should succeed for template.cedar");
         assert_eq!(parsed.filename, "template.cedar");
         // ID should be derived from filename - get from template directly
         assert_eq!(parsed.template.id().to_string(), "template");
@@ -398,9 +394,7 @@ mod tests {
         let files = vec![("policy1.cedar", policy1), ("policy2.cedar", policy2)];
 
         let result = PolicyParser::parse_policies(files);
-        assert!(result.is_ok());
-
-        let policy_map = result.unwrap();
+        let policy_map = result.expect("parse_policies should succeed for two separate policy files");
 
         assert!(!policy_map.is_empty());
     }
@@ -443,8 +437,8 @@ mod tests {
 
     #[test]
     fn test_validate_policy_id_valid() {
-        let result = PolicyParser::validate_policy_id("valid_policy-id:123", "test.cedar");
-        assert!(result.is_ok());
+        PolicyParser::validate_policy_id("valid_policy-id:123", "test.cedar")
+            .expect("valid_policy-id:123 should pass policy id validation for test.cedar");
     }
 
     #[test]
@@ -476,7 +470,8 @@ mod tests {
         "#;
 
         // Parse as a set to get unique IDs
-        let policy_set = PolicySet::from_str(combined_text).unwrap();
+        let policy_set = PolicySet::from_str(combined_text)
+            .expect("combined permit/forbid text should parse as PolicySet");
         let policies: Vec<ParsedPolicy> = policy_set
             .policies()
             .map(|p| ParsedPolicy {
@@ -486,10 +481,8 @@ mod tests {
             })
             .collect();
 
-        let result = PolicyParser::create_policy_set(policies, vec![]);
-        assert!(result.is_ok());
-
-        let policy_set = result.unwrap();
+        let policy_set = PolicyParser::create_policy_set(policies, vec![])
+            .expect("create_policy_set should succeed for permit+forbid policies");
         assert!(!policy_set.is_empty());
     }
 
@@ -501,17 +494,15 @@ mod tests {
         let parsed_policy = PolicyParser::parse_policy(policy_text, "policy.cedar")
             .expect("parse_policy should succeed for policy.cedar");
         assert_eq!(parsed_policy.len(), 1, "expected exactly one policy");
-        let parsed_template =
-            PolicyParser::parse_template(template_text, "template.cedar").unwrap();
+        let parsed_template = PolicyParser::parse_template(template_text, "template.cedar")
+            .expect("parse_template should succeed for template.cedar");
 
         // Verify IDs are derived from filenames
         assert_eq!(parsed_policy[0].id.to_string(), "policy");
         assert_eq!(parsed_template.template.id().to_string(), "template");
 
-        let result = PolicyParser::create_policy_set(parsed_policy, vec![parsed_template]);
-        assert!(result.is_ok());
-
-        let policy_set = result.unwrap();
+        let policy_set = PolicyParser::create_policy_set(parsed_policy, vec![parsed_template])
+            .expect("create_policy_set should succeed with one policy and one template");
         assert!(!policy_set.is_empty());
     }
 
@@ -544,8 +535,6 @@ mod tests {
         "#;
 
         let result = PolicyParser::parse_policy(policy_text, "ignored.cedar");
-        assert!(result.is_ok(), "expected policy with @id to parse");
-
         let parsed = result.expect("parse_policy should succeed with @id annotation");
         assert_eq!(parsed.len(), 1, "expected exactly one policy");
         // ID should come from @id annotation, not filename

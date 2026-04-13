@@ -70,7 +70,17 @@ mod tests {
         let yaml_policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
         let json_policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(JSON_POLICY_STORE);
 
-        assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());
+        let yaml = yaml_policy_result.expect(
+            "failed to parse YAML into LegacyAgamaPolicyStore from YAML_POLICY_STORE",
+        );
+        let json = json_policy_result.expect(
+            "failed to parse JSON into LegacyAgamaPolicyStore from JSON_POLICY_STORE",
+        );
+        assert_eq!(
+            yaml,
+            json,
+            "Parsed LegacyAgamaPolicyStore from YAML and JSON should be equal"
+        );
     }
 
     #[test]
@@ -125,7 +135,8 @@ mod tests {
             .to_string();
         assert_eq!(
             err_msg,
-            "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry"
+            "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry",
+            "parsing a policy store entry without 'name' should produce this specific policy-store parse error"
         );
     }
 }
