@@ -178,8 +178,8 @@ public class LdapConnectionProvider {
                 this.connectionPool.setMaxConnectionAgeMillis(Long.parseLong(maxConnectionAge));
             }
             boolean onCheckoutHealthCheckEnabled = StringHelper.toBoolean(props.getProperty("connection-pool.health-check.on-checkout.enabled"), false);
-            long healthCheckIntervalMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.interval-millis"), 0);
-            long healthCheckMaxResponsetimeMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.max-response-time-millis"), 0);
+            long healthCheckIntervalMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.interval-millis"), 0L);
+            long healthCheckMaxResponsetimeMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.max-response-time-millis"), 0L);
             boolean backgroundHealthCheckEnabled = !onCheckoutHealthCheckEnabled && (healthCheckIntervalMillis > 0);
             // Because otherwise it has no effect anyway
             if (backgroundHealthCheckEnabled) {
