@@ -121,8 +121,8 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                 } catch (logErr) {
                     setAuthzLogs(`Failed to fetch logs: ${String(logErr)}`);
                 }
-            } catch (err) {
-                setAuthzResult(err.toString());
+            } catch (err: unknown) {
+                setAuthzResult(String(err));
                 console.log("err:", err);
                 if (instance) {
                     const logs = await instance.pop_logs();
@@ -395,19 +395,19 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                 <JsonEditor
                                     data={formFields.resource}
                                     rootName="resource"
-                                    setData={(e: FormFields["resource"]) => {
+                                    setData={(e: unknown) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            resource: e
+                                            resource: (e ?? {}) as Record<string, unknown>
                                         }));
                                     }} />
                                 <InputLabel id="context-value-label">Context</InputLabel>
                                 <JsonEditor
                                     data={formFields.context}
-                                    setData={(e: FormFields["context"]) => {
+                                    setData={(e: unknown) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            context: e
+                                            context: (e ?? {}) as Record<string, unknown>
                                         }));
                                     }}
                                     rootName="context" />

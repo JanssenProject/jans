@@ -317,7 +317,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-fips</artifactId>
-				<version>1.0.6</version>
+				<version>1.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -507,7 +507,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<version>1.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
