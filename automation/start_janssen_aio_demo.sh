@@ -25,6 +25,7 @@ prepare_certs() {
 
     if [[ ! -f "$demo_templates_dir/ca.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/ca.key" 4096
+        chown 1000 "$demo_templates_dir/ca.key"
     fi
 
     if [[ ! -f "$demo_templates_dir/ca.crt" ]]; then
@@ -34,6 +35,7 @@ prepare_certs() {
 
     if [[ ! -f "$demo_templates_dir/web_https.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/web_https.key" 2048
+        chown 1000 "$demo_templates_dir/web_https.key"
     fi
 
     if [[ ! -f "$demo_templates_dir/web_https.csr" ]]; then
