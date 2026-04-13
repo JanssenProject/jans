@@ -45,6 +45,8 @@ def configure_logging():
         "casa_log_level": "INFO",
         "timer_log_target": "FILE",
         "timer_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -85,6 +87,7 @@ def configure_logging():
     file_aliases = {
         "casa_log_target": "LOG_FILE",
         "timer_log_target": "TIMERS_FILE",
+        "root_log_target": "LOG_FILE",
     }
     for key, value in config.items():
         if not key.endswith("_target"):
@@ -125,8 +128,7 @@ def main():
     sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if not os.path.exists(sql_prop):
-            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
+        render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)

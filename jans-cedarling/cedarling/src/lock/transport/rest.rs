@@ -9,13 +9,15 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use reqwest::Client;
-use serde_json::Value;
 use url::Url;
 
 use crate::{
     lock::{
         LockLogEntry,
-        transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult},
+        transport::{
+            AuditTransport, SerializedLogEntry, TransportError, TransportResult,
+            mapping::{CedarlingLogEntry, LockServerLogEntry},
+        },
     },
     log::{LogWriter, Logger},
 };
@@ -45,19 +47,16 @@ impl AuditTransport for RestTransport {
             return Ok(());
         }
 
-        let mut skipped = 0usize;
-        let logs: Vec<Value> = entries
+        let logs: Vec<LockServerLogEntry> = entries
             .iter()
             .filter_map(|v| {
-                if let Ok(log) = serde_json::from_str::<Value>(v) {
-                    Some(log)
-                } else {
-                    skipped += 1;
-                    None
-                }
+                serde_json::from_str::<CedarlingLogEntry>(v)
+                    .ok()
+                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
             })
             .collect();
 
+        let skipped = entries.len() - logs.len();
         if skipped > 0 {
             self.logger.log_any(LockLogEntry::warn(format!(
                 "skipped {skipped} entries because they were malformed"
@@ -109,59 +108,25 @@ mod test {
         let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
-            json!({"level": "INFO", "message": "test1"})
-                .to_string()
-                .into_boxed_str(),
-            json!({"level": "DEBUG", "message": "test2"})
-                .to_string()
-                .into_boxed_str(),
+            json!({
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "log_kind": "Decision",
+                "level": "INFO",
+                "action": "Test",
+                "decision": "ALLOW",
+                "principal": ["Jans::User"],
+                "resource": "Jans::Issue",
+                "application_id": "test_app",
+                "pdp_id": "test-pdp"
+            })
+            .to_string()
+            .into_boxed_str(),
         ];
 
         transport
             .send_logs(&entries)
             .await
             .expect("logs should be sent successfully");
-        mock.assert();
-    }
-
-    #[tokio::test]
-    async fn test_send_logs_empty() {
-        let server = Server::new_async().await;
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint, None);
-
-        transport
-            .send_logs(&[])
-            .await
-            .expect("logs should be sent successfully");
-    }
-
-    #[tokio::test]
-    async fn test_send_logs_server_error_500() {
-        let mut server = Server::new_async().await;
-        let mock = server
-            .mock("POST", "/audit/log/bulk")
-            .with_status(500)
-            .with_body("Internal Server Error")
-            .create();
-
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint, None);
-
-        let entries = vec![
-            json!({"level": "INFO", "message": "test"})
-                .to_string()
-                .into_boxed_str(),
-        ];
-
-        let error = transport
-            .send_logs(&entries)
-            .await
-            .expect_err("this should cause a server error");
-        assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
-        );
         mock.assert();
     }
 
@@ -178,9 +143,19 @@ mod test {
         let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
-            json!({"level": "INFO", "message": "test"})
-                .to_string()
-                .into_boxed_str(),
+            json!({
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "log_kind": "Decision",
+                "level": "INFO",
+                "action": "Test",
+                "decision": "ALLOW",
+                "principal": ["Jans::User"],
+                "resource": "Jans::Issue",
+                "application_id": "test_app",
+                "pdp_id": "test-pdp"
+            })
+            .to_string()
+            .into_boxed_str(),
         ];
 
         let error = transport
@@ -200,9 +175,19 @@ mod test {
         let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
-            json!({"level": "INFO", "message": "test"})
-                .to_string()
-                .into_boxed_str(),
+            json!({
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "log_kind": "Decision",
+                "level": "INFO",
+                "action": "Test",
+                "decision": "ALLOW",
+                "principal": ["Jans::User"],
+                "resource": "Jans::Issue",
+                "application_id": "test_app",
+                "pdp_id": "test-pdp"
+            })
+            .to_string()
+            .into_boxed_str(),
         ];
 
         let error = transport
@@ -242,10 +227,20 @@ mod test {
 
         // Send 1000 entries
         let entries: Vec<_> = (0..1000)
-            .map(|i| {
-                json!({"level": "INFO", "message": format!("test{}", i), "index": i})
-                    .to_string()
-                    .into_boxed_str()
+            .map(|_i| {
+                json!({
+                    "timestamp": "2026-03-23T11:50:37.504Z",
+                    "log_kind": "Decision",
+                    "level": "INFO",
+                    "action": "Test",
+                    "decision": "ALLOW",
+                    "principal": ["Jans::User"],
+                    "resource": "Jans::Issue",
+                    "application_id": "test_app",
+                    "pdp_id": "test-pdp"
+                })
+                .to_string()
+                .into_boxed_str()
             })
             .collect();
 

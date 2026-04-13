@@ -54,8 +54,7 @@ def main():
     sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if not os.path.exists(sql_prop):
-            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
+        render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)
@@ -117,6 +116,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -160,6 +161,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
         "audit_log_target": "AUDIT_FILE",
+        "root_log_target": "FILE",
     }
 
     for key, value in config.items():
