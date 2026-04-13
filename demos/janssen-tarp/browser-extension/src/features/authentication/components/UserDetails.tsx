@@ -17,7 +17,13 @@ import { pink } from '@mui/material/colors';
 import Snackbar from '@mui/material/Snackbar';
 import CloseIcon from '@mui/icons-material/Close';
 import { OpenIDConfiguration, LogoutOptions, LoginDetails, IJWT } from '../../../shared/types';
-const UserDetails = ({ data, notifyOnDataChange }) => {
+
+type UserDetailsProps = {
+    data?: any;
+    notifyOnDataChange: (value: string) => void;
+};
+
+const UserDetails = ({ data, notifyOnDataChange }: UserDetailsProps) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
     const [showPayloadAT, setShowPayloadAT] = useState(false);
@@ -167,7 +173,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
      */
     async function getStoredLoginDetails(): Promise<LoginDetails | null> {
         return new Promise((resolve) => {
-            chrome.storage.local.get(["loginDetails"], (result) => {
+            chrome.storage.local.get(["loginDetails"], (result: { loginDetails?: LoginDetails }) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error reading login details:", chrome.runtime.lastError);
                     resolve(null);
@@ -183,7 +189,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
      */
     async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
         const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
-            chrome.storage.local.get(["openidConfigurations"], (result) => {
+            chrome.storage.local.get(["openidConfigurations"], (result: { openidConfigurations?: OpenIDConfiguration[] }) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error reading OpenID configurations:", chrome.runtime.lastError);
                     resolve([]);
@@ -262,7 +268,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     url: logoutUrl,
                     interactive: true
                 },
-                (responseUrl) => {
+                (_responseUrl?: string) => {
                     if (chrome.runtime.lastError) {
                         console.warn("Interactive logout failed, trying silent:", chrome.runtime.lastError);
                         // Fallback to silent logout
@@ -390,7 +396,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         </AccordionSummary>
                         <AccordionDetails>
                             <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                                <Box component="div">{showPayloadAT ? (!!data ?
+                                <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadAT ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.access_token.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.access_token.payload} collapse={true} viewOnly={true} rootName="payload" />
@@ -411,12 +417,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         <AccordionDetails>
 
                             <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                                <p>{showPayloadIdToken ? (!!data ?
+                                <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadIdToken ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.id_token.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.id_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                                     </>
-                                    : '') : (!!data ? data?.id_token : '')}</p>
+                                    : '') : (!!data ? data?.id_token : '')}</Box>
                                 <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
                             </Box>
                         </AccordionDetails>
@@ -432,12 +438,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                        <p>{showPayloadUI ? (!!data ?
+                        <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadUI ? (!!data ?
                             <>
                                 <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userinfo_token.header} rootName="header" />
                                 <JsonEditor data={decodedTokens.userinfo_token.payload} collapse={true} viewOnly={true} rootName="payload" />
                             </>
-                            : '') : (!!data ? data?.userDetails : '')}</p>
+                            : '') : (!!data ? data?.userDetails : '')}</Box>
                         <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>
                     </Box>
                 </AccordionDetails>
