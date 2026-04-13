@@ -161,19 +161,10 @@ def wait_for_secret(manager: Manager, **kwargs: _t.Any) -> None:
             If set to `False` or omitted, this function will check secret entry.
     """
     conn_only = as_boolean(kwargs.get("conn_only", False))
+    auth_keys = manager.secret.get("auth_jks_base64")
 
-    # check following entries (shouldn't be empty) to mark whether secrets are ready
-    entries_ready = all([
-        # required for secure connection
-        manager.secret.get("ssl_cert"),
-        # required for obfuscating plain text
-        manager.secret.get("encoded_salt"),
-        # required for signing keys
-        manager.secret.get("auth_jks_base64"),
-    ])
-
-    if not conn_only and not entries_ready:
-        raise WaitError("Secret 'ssl_cert', 'encoded_salt', and 'auth_jks_base64' are not available")
+    if not conn_only and not auth_keys:
+        raise WaitError("Secret 'auth_jks_base64' is not available")
 
 
 #: DN of admin group
