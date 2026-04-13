@@ -45,7 +45,7 @@
 		<snake.version>2.0</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.14</jacoco.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swagger.version>2.2.11</swagger.version>
 

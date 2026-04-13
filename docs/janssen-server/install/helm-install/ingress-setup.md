@@ -11,6 +11,32 @@ tags:
 
 This guide covers configuring ingress for your Janssen deployment. Choose between the modern Gateway API (recommended) or the legacy Kubernetes Ingress.
 
+## Networking Architecture Selection: Gateway API vs. Ingress
+
+### Comparison Matrix
+
+| Capability | **Gateway API (Recommended)** | **Standard Ingress (Legacy)** |
+| :--- | :--- | :--- |
+| **Ecosystem Support** | **Broad:** NGINX, Istio, Traefik, Envoy, kgateway, airlock-microgateway, cilium | **Limited:** NGINX, Istio |
+| **Audit gRPC API** | **Yes** (Note: NGINX requires Snippets enabled) | **No** |
+| **Audit REST API** | **Yes** | **Yes** |
+
+### Which Pathway Should You Choose?
+
+Selecting the correct networking model depends on your specific security and protocol requirements:
+
+**Choose Gateway API if:**
+
+* You require **gRPC auditing** for your services.
+* You are using modern networking stacks like **Cilium**, **Traefik**, or **Envoy**.
+* You want a more expressive, role-oriented API that is the evolving standard for Kubernetes networking.
+
+**Choose Standard Ingress if:**
+
+* You are operating in a legacy environment that only supports the standard Ingress controller.
+* You only require **REST API auditing** and do not use gRPC.
+* Your organization has strict policies against enabling **NGINX Snippets** (which are required for advanced Gateway API features).
+
 ## Option 1: Gateway API (Recommended)
 
 The Kubernetes Gateway API provides a more expressive and extensible way to manage traffic.
