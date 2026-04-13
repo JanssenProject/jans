@@ -64,6 +64,11 @@ def test_encoding_decode_file_no_salt(monkeypatch, gmanager):
         lambda: gmanager,
     )
 
+    monkeypatch.setattr(
+        "hvac.Client.is_authenticated",
+        lambda _: True,
+    )
+
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open("password.txt", "w") as f:
@@ -144,6 +149,11 @@ def test_encoding_decode_string_no_salt(monkeypatch, gmanager):
     monkeypatch.setattr(
         "jans.pycloudlib.manager.get_manager",
         lambda: gmanager,
+    )
+
+    monkeypatch.setattr(
+        "hvac.Client.is_authenticated",
+        lambda _: True,
     )
 
     runner = CliRunner()
