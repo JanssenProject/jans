@@ -160,47 +160,104 @@ impl PolicyParser {
         }
     }
 
-    /// Parse a single template from Cedar policy text.
+    /// Parse Cedar template text from one file.
     ///
-    /// Templates support slots (e.g., ?principal) and are parsed similarly to policies.
-    /// The template ID is extracted from `@id()` annotation or derived from filename.
+    /// Symmetric to [`parse_policy`](Self::parse_policy):
+    /// returns one [`ParsedTemplate`] for single-template files, or one entry per
+    /// template when the file contains multiple. Templates use slots (e.g. `?principal`).
     ///
-    /// the ID to `Template::parse()` based on annotation or filename.
+    /// Single-template files use the `@id("...")` annotation, then the comment-style
+    /// `@id(...)`, then the filename (without `.cedar`) as the template id.
+    /// Multi-template files require a Cedar `@id("...")` annotation on each template.
+    /// Files that mix templates with non-template policies are rejected.
     pub(super) fn parse_template(
         content: &str,
         filename: &str,
-    ) -> Result<ParsedTemplate, PolicyStoreError> {
-        // Extract template ID from @id() annotation or derive from filename
-        let template_id_str = Self::extract_id_annotation(content)
-            .or_else(|| Self::derive_id_from_filename(filename));
-
-        let template_id = match template_id_str {
-            Some(id_str) => {
-                // Validate the ID format
-                Self::validate_policy_id(&id_str, filename)
-                    .map_err(PolicyStoreError::Validation)?;
-                PolicyId::new(&id_str)
-            },
-            None => {
-                return Err(PolicyStoreError::CedarParsing {
-                    file: filename.to_string(),
-                    detail: CedarParseErrorDetail::MissingIdAnnotation,
-                });
-            },
-        };
-
-        // Parse the template using Cedar engine with the template ID
-        let template = Template::parse(Some(template_id.clone()), content).map_err(|e| {
-            PolicyStoreError::CedarParsing {
+    ) -> Result<Vec<ParsedTemplate>, PolicyStoreError> {
+        let policy_set =
+            PolicySet::from_str(content).map_err(|e| PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
                 detail: CedarParseErrorDetail::ParseError(e.to_string()),
-            }
-        })?;
+            })?;
 
-        Ok(ParsedTemplate {
-            filename: filename.to_string(),
-            template,
-        })
+        // Reject template files that also contain non-template policies.
+        let policy_count = policy_set.policies().count();
+        if policy_count > 0 {
+            return Err(PolicyStoreError::CedarParsing {
+                file: filename.to_string(),
+                detail: CedarParseErrorDetail::PoliciesInTemplateFile {
+                    count: policy_count,
+                },
+            });
+        }
+
+        let templates: Vec<Template> = policy_set.templates().cloned().collect();
+
+        match templates.len() {
+            0 => Err(PolicyStoreError::CedarParsing {
+                file: filename.to_string(),
+                detail: CedarParseErrorDetail::ParseError(
+                    "no templates found in file".to_string(),
+                ),
+            }),
+            1 => {
+                let template = templates.into_iter().next().expect("len == 1 checked above");
+                let id_str = template
+                    .annotation("id")
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_owned)
+                    .or_else(|| Self::extract_id_annotation(content))
+                    .or_else(|| Self::derive_id_from_filename(filename))
+                    .ok_or_else(|| PolicyStoreError::CedarParsing {
+                        file: filename.to_string(),
+                        detail: CedarParseErrorDetail::MissingIdAnnotation,
+                    })?;
+                Self::validate_policy_id(&id_str, filename)
+                    .map_err(PolicyStoreError::Validation)?;
+                let template = template.new_id(PolicyId::new(&id_str));
+                Ok(vec![ParsedTemplate {
+                    filename: filename.to_string(),
+                    template,
+                }])
+            },
+            n => {
+                let mut out = Vec::with_capacity(n);
+                let mut seen_ids = std::collections::HashSet::with_capacity(n);
+                for template in templates {
+                    let id_str = template
+                        .annotation("id")
+                        .filter(|s| !s.is_empty())
+                        .map(str::to_owned)
+                        .ok_or_else(|| {
+                            let (line, snippet) = Self::find_first_policy_without_id(content)
+                                .unwrap_or((0, String::new()));
+                            PolicyStoreError::CedarParsing {
+                                file: filename.to_string(),
+                                detail: CedarParseErrorDetail::MultiTemplateMissingExplicitId {
+                                    line,
+                                    snippet,
+                                },
+                            }
+                        })?;
+                    Self::validate_policy_id(&id_str, filename)
+                        .map_err(PolicyStoreError::Validation)?;
+                    if !seen_ids.insert(id_str.clone()) {
+                        return Err(PolicyStoreError::CedarParsing {
+                            file: filename.to_string(),
+                            detail: CedarParseErrorDetail::DuplicateTemplateIdInFile {
+                                id: id_str,
+                            },
+                        });
+                    }
+                    let template = template.new_id(PolicyId::new(&id_str));
+                    out.push(ParsedTemplate {
+                        filename: filename.to_string(),
+                        template,
+                    });
+                }
+                Ok(out)
+            },
+        }
     }
 
     /// Parse multiple policies and return a map of policy ID to filename.
@@ -429,9 +486,10 @@ mod tests {
 
         let result = PolicyParser::parse_template(template_text, "template.cedar");
         let parsed = result.expect("parse_template should succeed for template.cedar");
-        assert_eq!(parsed.filename, "template.cedar");
+        assert_eq!(parsed.len(), 1, "expected exactly one template");
+        assert_eq!(parsed[0].filename, "template.cedar");
         // ID should be derived from filename - get from template directly
-        assert_eq!(parsed.template.id().to_string(), "template");
+        assert_eq!(parsed[0].template.id().to_string(), "template");
     }
 
     #[test]
@@ -561,9 +619,10 @@ mod tests {
 
         // Verify IDs are derived from filenames
         assert_eq!(parsed_policy[0].id.to_string(), "policy");
-        assert_eq!(parsed_template.template.id().to_string(), "template");
+        assert_eq!(parsed_template.len(), 1, "expected exactly one template");
+        assert_eq!(parsed_template[0].template.id().to_string(), "template");
 
-        let policy_set = PolicyParser::create_policy_set(parsed_policy, vec![parsed_template])
+        let policy_set = PolicyParser::create_policy_set(parsed_policy, parsed_template)
             .expect("create_policy_set should succeed with one policy and one template");
         assert!(!policy_set.is_empty());
     }
@@ -634,6 +693,68 @@ permit(
         for p in &parsed {
             assert_eq!(p.filename, "researcher.cedar");
         }
+    }
+
+    #[test]
+    fn test_parse_multi_template_file_success() {
+        let template_text = r#"
+@id("principal-view")
+permit(
+    principal == ?principal,
+    action == Action::"view",
+    resource
+);
+
+@id("resource-edit")
+permit(
+    principal,
+    action == Action::"edit",
+    resource == ?resource
+);
+        "#;
+
+        let parsed = PolicyParser::parse_template(template_text, "templates.cedar")
+            .expect("multi-template file with @id each should parse");
+        assert_eq!(parsed.len(), 2, "expected two templates");
+        let ids: Vec<String> = parsed.iter().map(|t| t.template.id().to_string()).collect();
+        assert!(
+            ids.contains(&"principal-view".to_string())
+                && ids.contains(&"resource-edit".to_string()),
+            "expected both template ids, got {ids:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_template_file_rejects_embedded_policy() {
+        // A template file that also contains a non-template policy.
+        let mixed_text = r#"
+@id("tpl")
+permit(
+    principal == ?principal,
+    action == Action::"view",
+    resource
+);
+
+@id("plain")
+permit(
+    principal,
+    action == Action::"view",
+    resource
+);
+        "#;
+
+        let err = PolicyParser::parse_template(mixed_text, "mixed-t.cedar")
+            .expect_err("template file containing a non-template policy should be rejected");
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::PoliciesInTemplateFile { count }
+                } if file == "mixed-t.cedar" && *count == 1
+            ),
+            "expected PoliciesInTemplateFile, got: {err:?}"
+        );
     }
 
     #[test]

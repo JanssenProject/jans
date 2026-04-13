@@ -173,6 +173,23 @@ pub(crate) enum CedarParseErrorDetail {
     )]
     TemplatesInPolicyFile { count: usize },
 
+    /// A `.cedar` template file contains one or more policies (no slots).
+    /// Policies must live in the `policies/` directory, not mixed with templates.
+    #[error(
+        "template file contains {count} policy/policies; policies must be placed in the `policies/` directory, not mixed with templates"
+    )]
+    PoliciesInTemplateFile { count: usize },
+
+    /// A template in a multi-template file has no `@id("...")` annotation.
+    #[error(
+        "Multi-template .cedar files require @id(\"...\") on each template; missing at line {line}: {snippet}"
+    )]
+    MultiTemplateMissingExplicitId { line: usize, snippet: String },
+
+    /// Two or more templates in the same file share the same `@id("...")` value.
+    #[error("duplicate @id(\"{id}\") within a single template .cedar file")]
+    DuplicateTemplateIdInFile { id: String },
+
     /// Failed to parse Cedar policy or template
     #[error("{0}")]
     ParseError(String),

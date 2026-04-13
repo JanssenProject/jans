@@ -547,10 +547,11 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     fn parse_templates(
         template_files: &[PolicyFile],
     ) -> Result<Vec<policy_parser::ParsedTemplate>, PolicyStoreError> {
-        let mut parsed_templates = Vec::with_capacity(template_files.len());
+        let mut parsed_templates = Vec::new();
         for file in template_files {
-            let parsed = policy_parser::PolicyParser::parse_template(&file.content, &file.name)?;
-            parsed_templates.push(parsed);
+            let parsed_list =
+                policy_parser::PolicyParser::parse_template(&file.content, &file.name)?;
+            parsed_templates.extend(parsed_list);
         }
         Ok(parsed_templates)
     }
