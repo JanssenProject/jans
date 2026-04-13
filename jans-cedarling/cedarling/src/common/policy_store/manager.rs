@@ -489,6 +489,47 @@ mod tests {
     }
 
     #[test]
+    fn test_convert_with_multi_policy_and_multi_template_files() {
+        // A single policy file with two @id-annotated policies, and a single
+        // template file with two @id-annotated templates. Exercises the full
+        // parser -> manager pipeline (same path cjar/directory loading uses).
+        let policy_files = vec![PolicyFile {
+            name: "combined.cedar".to_string(),
+            content: concat!(
+                "@id(\"p1\") permit(principal, action, resource);\n",
+                "@id(\"p2\") forbid(principal, action, resource);\n",
+            )
+            .to_string(),
+        }];
+        let template_files = vec![PolicyFile {
+            name: "tpls.cedar".to_string(),
+            content: concat!(
+                "@id(\"t1\") permit(principal == ?principal, action, resource);\n",
+                "@id(\"t2\") permit(principal, action, resource == ?resource);\n",
+            )
+            .to_string(),
+        }];
+
+        let container =
+            PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files)
+                .expect("multi-policy + multi-template conversion should succeed");
+
+        let set = container.get_set();
+        let policy_ids: Vec<String> = set.policies().map(|p| p.id().to_string()).collect();
+        let template_ids: Vec<String> = set.templates().map(|t| t.id().to_string()).collect();
+
+        assert!(
+            policy_ids.contains(&"p1".to_string()) && policy_ids.contains(&"p2".to_string()),
+            "expected both policy ids p1 and p2, got {policy_ids:?}"
+        );
+        assert!(
+            template_ids.contains(&"t1".to_string())
+                && template_ids.contains(&"t2".to_string()),
+            "expected both template ids t1 and t2, got {template_ids:?}"
+        );
+    }
+
+    #[test]
     fn test_convert_policies_empty() {
         let policy_files: Vec<PolicyFile> = vec![];
         let template_files: Vec<PolicyFile> = vec![];
