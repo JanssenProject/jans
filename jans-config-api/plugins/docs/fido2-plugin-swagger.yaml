@@ -1650,10 +1650,7 @@ components:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
+        registrationSuccessRate:
           type: number
           format: double
         authenticationFailures:
@@ -1662,28 +1659,29 @@ components:
         registrationAttempts:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
         registrationFailures:
           type: integer
           format: int64
-        authenticationAttempts:
+        registrationSuccesses:
           type: integer
           format: int64
         registrationAvgDuration:
           type: number
           format: double
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        period:
+          type: string
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         fallbackEvents:
           type: integer
           format: int64
@@ -1692,13 +1690,15 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        period:
-          type: string
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
