@@ -75,7 +75,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=bdd4d5814a4bc64116d5368b3214fa4db11659fe
+ENV JANS_SOURCE_VERSION=8a010dbf98e57da37ff9c3561887d67ca053dea0
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 

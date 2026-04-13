@@ -63,7 +63,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-link
 
-ENV JANS_SOURCE_VERSION=43d2f07f7b85186ea8c0a557793cea026a1584a3
+ENV JANS_SOURCE_VERSION=8a010dbf98e57da37ff9c3561887d67ca053dea0
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

@@ -44,7 +44,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=bdd4d5814a4bc64116d5368b3214fa4db11659fe
+ENV JANS_SOURCE_VERSION=8a010dbf98e57da37ff9c3561887d67ca053dea0
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
