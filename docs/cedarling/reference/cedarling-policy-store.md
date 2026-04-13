@@ -85,7 +85,29 @@ permit(
 );
 ```
 
-Each policy file must have an `@id` annotation that uniquely identifies the policy.
+Each policy must carry a Cedar `@id("...")` annotation that uniquely
+identifies it.
+
+##### Multiple policies per file
+
+A single `.cedar` file may contain more than one policy. Each policy must have
+its own `@id("...")` annotation:
+
+```cedar
+@id("researcher-search")
+permit(
+    principal == User::"researcher",
+    action == Action::"search",
+    resource
+);
+
+@id("researcher-edit")
+permit(
+    principal == User::"researcher",
+    action == Action::"edit",
+    resource
+);
+```
 
 #### Template Files
 
