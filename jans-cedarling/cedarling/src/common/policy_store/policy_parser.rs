@@ -72,6 +72,19 @@ impl PolicyParser {
                 detail: CedarParseErrorDetail::ParseError(e.to_string()),
             })?;
 
+        // Reject policy files that also contain templates (slots like `?principal`).
+        // Cedar parses them into a separate `templates()` collection, so iterating only
+        // `policies()` would silently drop them.
+        let template_count = policy_set.templates().count();
+        if template_count > 0 {
+            return Err(PolicyStoreError::CedarParsing {
+                file: filename.to_string(),
+                detail: CedarParseErrorDetail::TemplatesInPolicyFile {
+                    count: template_count,
+                },
+            });
+        }
+
         let policies: Vec<Policy> = policy_set.policies().cloned().collect();
 
         match policies.len() {
@@ -621,6 +634,42 @@ permit(
         for p in &parsed {
             assert_eq!(p.filename, "researcher.cedar");
         }
+    }
+
+    #[test]
+    fn test_parse_policy_file_rejects_embedded_template() {
+        // A policy file that also contains a template (uses `?principal` slot).
+        // Cedar would parse the template into `policy_set.templates()`, so without an
+        // explicit check it would be silently dropped.
+        let policy_text = r#"
+@id("allow-read")
+permit(
+    principal,
+    action == Action::"read",
+    resource
+);
+
+@id("tpl-access")
+permit(
+    principal == ?principal,
+    action == Action::"access",
+    resource
+);
+        "#;
+
+        let err = PolicyParser::parse_policy(policy_text, "mixed.cedar")
+            .expect_err("policy file containing a template should be rejected");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::TemplatesInPolicyFile { count }
+                } if file == "mixed.cedar" && *count == 1
+            ),
+            "expected TemplatesInPolicyFile, got: {err:?}"
+        );
     }
 
     #[test]

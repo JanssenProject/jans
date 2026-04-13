@@ -166,6 +166,13 @@ pub(crate) enum CedarParseErrorDetail {
     #[error("duplicate @id(\"{id}\") within a single .cedar file")]
     DuplicatePolicyIdInFile { id: String },
 
+    /// A `.cedar` policy file contains one or more templates (slots like `?principal`).
+    /// Templates must live in the `templates/` directory, not mixed with policies.
+    #[error(
+        "policy file contains {count} template(s); templates must be placed in the `templates/` directory, not mixed with policies"
+    )]
+    TemplatesInPolicyFile { count: usize },
+
     /// Failed to parse Cedar policy or template
     #[error("{0}")]
     ParseError(String),
