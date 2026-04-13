@@ -190,6 +190,19 @@ pub(crate) enum CedarParseErrorDetail {
     #[error("duplicate @id(\"{id}\") within a single template .cedar file")]
     DuplicateTemplateIdInFile { id: String },
 
+    /// The same policy/template id appears in two different files.
+    /// Cedar's `PolicySet` namespaces policies and templates together, so any
+    /// collision across files (policy↔policy, template↔template, or
+    /// policy↔template) is caught here with both file names.
+    #[error(
+        "duplicate @id(\"{id}\") across files: defined in both '{first_file}' and '{second_file}'"
+    )]
+    DuplicatePolicyIdAcrossFiles {
+        id: String,
+        first_file: String,
+        second_file: String,
+    },
+
     /// Failed to parse Cedar policy or template
     #[error("{0}")]
     ParseError(String),

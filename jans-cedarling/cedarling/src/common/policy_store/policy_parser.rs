@@ -17,7 +17,6 @@
 //! the `@id` value (Cedar 4 defaults internal ids to `policy0`, `policy1`, ...).
 
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
-#[cfg(test)]
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -196,12 +195,13 @@ impl PolicyParser {
         match templates.len() {
             0 => Err(PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                detail: CedarParseErrorDetail::ParseError(
-                    "no templates found in file".to_string(),
-                ),
+                detail: CedarParseErrorDetail::ParseError("no templates found in file".to_string()),
             }),
             1 => {
-                let template = templates.into_iter().next().expect("len == 1 checked above");
+                let template = templates
+                    .into_iter()
+                    .next()
+                    .expect("len == 1 checked above");
                 let id_str = template
                     .annotation("id")
                     .filter(|s| !s.is_empty())
@@ -244,9 +244,7 @@ impl PolicyParser {
                     if !seen_ids.insert(id_str.clone()) {
                         return Err(PolicyStoreError::CedarParsing {
                             file: filename.to_string(),
-                            detail: CedarParseErrorDetail::DuplicateTemplateIdInFile {
-                                id: id_str,
-                            },
+                            detail: CedarParseErrorDetail::DuplicateTemplateIdInFile { id: id_str },
                         });
                     }
                     let template = template.new_id(PolicyId::new(&id_str));
@@ -290,9 +288,40 @@ impl PolicyParser {
         policies: Vec<ParsedPolicy>,
         templates: Vec<ParsedTemplate>,
     ) -> Result<PolicySet, PolicyStoreError> {
+        // Cedar's PolicySet namespaces policies and templates together. Check
+        // cross-file duplicates up front so the error names both offending files
+        // instead of surfacing a generic Cedar "duplicate id" on add().
+        let mut seen: HashMap<PolicyId, String> =
+            HashMap::with_capacity(policies.len() + templates.len());
+        let check = |id: &PolicyId,
+                     filename: &str,
+                     seen: &mut HashMap<PolicyId, String>|
+         -> Result<(), PolicyStoreError> {
+            if let Some(first) = seen.get(id) {
+                if first != filename {
+                    return Err(PolicyStoreError::CedarParsing {
+                        file: filename.to_string(),
+                        detail: CedarParseErrorDetail::DuplicatePolicyIdAcrossFiles {
+                            id: id.to_string(),
+                            first_file: first.clone(),
+                            second_file: filename.to_string(),
+                        },
+                    });
+                }
+            } else {
+                seen.insert(id.clone(), filename.to_string());
+            }
+            Ok(())
+        };
+        for parsed in &policies {
+            check(&parsed.id, &parsed.filename, &mut seen)?;
+        }
+        for parsed in &templates {
+            check(parsed.template.id(), &parsed.filename, &mut seen)?;
+        }
+
         let mut policy_set = PolicySet::new();
 
-        // Add all policies
         for parsed in policies {
             policy_set
                 .add(parsed.policy)
@@ -302,7 +331,6 @@ impl PolicyParser {
                 })?;
         }
 
-        // Add all templates
         for parsed in templates {
             policy_set.add_template(parsed.template).map_err(|e| {
                 PolicyStoreError::CedarParsing {
@@ -693,6 +721,39 @@ permit(
         for p in &parsed {
             assert_eq!(p.filename, "researcher.cedar");
         }
+    }
+
+    #[test]
+    fn test_create_policy_set_rejects_duplicate_id_across_files() {
+        // Two files, each single-policy, both with @id("same") — the cross-file
+        // duplicate must be caught with names of both files before Cedar's add().
+        let p1 = PolicyParser::parse_policy(
+            r#"@id("same") permit(principal, action, resource);"#,
+            "file-a.cedar",
+        )
+        .expect("file-a should parse");
+        let p2 = PolicyParser::parse_policy(
+            r#"@id("same") forbid(principal, action, resource);"#,
+            "file-b.cedar",
+        )
+        .expect("file-b should parse");
+
+        let mut all = p1;
+        all.extend(p2);
+
+        let err = PolicyParser::create_policy_set(all, vec![])
+            .expect_err("duplicate id across files should fail");
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    detail: CedarParseErrorDetail::DuplicatePolicyIdAcrossFiles {
+                        id, first_file, second_file
+                    }, ..
+                } if id == "same" && first_file == "file-a.cedar" && second_file == "file-b.cedar"
+            ),
+            "expected DuplicatePolicyIdAcrossFiles with both filenames, got: {err:?}"
+        );
     }
 
     #[test]
