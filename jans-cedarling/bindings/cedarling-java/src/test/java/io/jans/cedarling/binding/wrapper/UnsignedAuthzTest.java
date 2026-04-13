@@ -13,7 +13,7 @@ import static org.testng.Assert.*;
 
 /*
  * To check the Policy Store used in UnsignedAuthzTest.java test-cases, upload the
- * `./src/test/resources/config/multiIssuer/TestStore_unsigned.cjar` in Agama-Lab Policy designer.
+ * `./src/test/resources/config/unsigned/TestStore_unsigned.cjar` in Agama-Lab Policy designer.
  *
  */
 public class UnsignedAuthzTest {

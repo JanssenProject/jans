@@ -22,7 +22,7 @@ import com.google.common.collect.Sets;
 
 public class UpdateTokenCedarling implements UpdateTokenType {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateTokenCedarling.class);
     CedarlingAdapter cedarlingAdapter = null;
 
 
