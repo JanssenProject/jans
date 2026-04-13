@@ -31,7 +31,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
         // Check if bootstrap JSON file path is configured
         if (!configurationAttributes.containsKey("BOOTSTRAP_JSON_PATH")) {
             log.error("Initialization. Property bootstrap_file_path is not specified.");
-            return true;
+            return false;
         }
         log.info("Initialize Cedarling...");
 
@@ -47,10 +47,12 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             cedarlingAdapter.loadFromJson(bootstrapJson);
         } catch (CedarlingException e) {
             log.error("Unable to initialize Cedarling" + e.getMessage());
-            return true;
+            cedarlingAdapter = null;
+            return false;
         } catch (Exception e) {
             log.error("Unable to initialize Cedarling" + e.getMessage());
-            return true;
+            cedarlingAdapter = null;
+            return false;
         }
         log.info("Cedarling Initialization successful...");
 
@@ -62,7 +64,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
         // Check if bootstrap JSON file path is configured
         if (!configurationAttributes.containsKey("BOOTSTRAP_JSON_PATH")) {
             log.error("Initialization. Property bootstrap_file_path is not specified.");
-            return true;
+            return false;
         }
         log.info("Initialize Cedarling...");
 
@@ -78,10 +80,12 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             cedarlingAdapter.loadFromJson(bootstrapJson);
         } catch (CedarlingException e) {
             log.error("Unable to initialize Cedarling" + e.getMessage());
-            return true;
+            cedarlingAdapter = null;
+            return false;
         } catch (Exception e) {
             log.error("Unable to initialize Cedarling" + e.getMessage());
-            return true;
+            cedarlingAdapter = null;
+            return false;
         }
         log.info("Cedarling Initialization successful...");
 

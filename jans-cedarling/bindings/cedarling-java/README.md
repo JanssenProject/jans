@@ -72,6 +72,7 @@ Here is a simple recipe to add scopes in access-token using update_token script 
 #### Policies
 
 ```bash
+
 @id("Allow_authorization_code")
 permit (
   principal is Jans::Workload,
@@ -81,10 +82,12 @@ permit (
 when {
   principal.grantTypes.contains("authorization_code")
 };
+
 ```
 #### Schema 
 
 ```bash
+
 namespace Jans {
   type Context = {
     current_time?: Long,
@@ -135,7 +138,6 @@ namespace Jans {
     context: Context
   };
 }
-
 
 ```
 

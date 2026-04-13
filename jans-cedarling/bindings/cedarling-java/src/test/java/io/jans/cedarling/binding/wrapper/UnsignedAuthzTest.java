@@ -11,6 +11,11 @@ import uniffi.cedarling_uniffi.*;
 
 import static org.testng.Assert.*;
 
+/*
+ * To check the Policy Store used in UnsignedAuthzTest.java test-cases, upload the
+ * `./src/test/resources/config/multiIssuer/TestStore_unsigned.cjar` in Agama-Lab Policy designer.
+ *
+ */
 public class UnsignedAuthzTest {
 
     private CedarlingAdapter adapter;
