@@ -83,7 +83,13 @@ impl PolicyParser {
             }),
             1 => {
                 let policy = policies.into_iter().next().expect("len == 1 checked above");
-                let id_str = Self::extract_id_annotation(content)
+                // Prefer Cedar's `@id("...")` annotation (same as multi-policy branch);
+                // fall back to scanning `@id(...)` in comments, then to the filename.
+                let id_str = policy
+                    .annotation("id")
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_owned)
+                    .or_else(|| Self::extract_id_annotation(content))
                     .or_else(|| Self::derive_id_from_filename(filename))
                     .ok_or_else(|| PolicyStoreError::CedarParsing {
                         file: filename.to_string(),
