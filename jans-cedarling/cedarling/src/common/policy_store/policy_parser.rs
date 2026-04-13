@@ -77,9 +77,7 @@ impl PolicyParser {
         match policies.len() {
             0 => Err(PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                detail: CedarParseErrorDetail::ParseError(
-                    "no policies found in file".to_string(),
-                ),
+                detail: CedarParseErrorDetail::ParseError("no policies found in file".to_string()),
             }),
             1 => {
                 let policy = policies.into_iter().next().expect("len == 1 checked above");
@@ -125,9 +123,7 @@ impl PolicyParser {
                     if !seen_ids.insert(id_str.clone()) {
                         return Err(PolicyStoreError::CedarParsing {
                             file: filename.to_string(),
-                            detail: CedarParseErrorDetail::DuplicatePolicyIdInFile {
-                                id: id_str,
-                            },
+                            detail: CedarParseErrorDetail::DuplicatePolicyIdInFile { id: id_str },
                         });
                     }
                     let policy = policy.new_id(PolicyId::new(&id_str));
@@ -406,7 +402,8 @@ mod tests {
         let files = vec![("policy1.cedar", policy1), ("policy2.cedar", policy2)];
 
         let result = PolicyParser::parse_policies(files);
-        let policy_map = result.expect("parse_policies should succeed for two separate policy files");
+        let policy_map =
+            result.expect("parse_policies should succeed for two separate policy files");
 
         assert!(!policy_map.is_empty());
     }
