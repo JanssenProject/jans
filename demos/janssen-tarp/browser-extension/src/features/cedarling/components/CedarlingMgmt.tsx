@@ -16,7 +16,6 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import AddCedarlingConfig from './AddCedarlingConfig';
 import UnsignedAuthzForm from './UnsignedAuthzForm';
-import SignedAuthzForm from './SignedAuthzForm';
 import MultiIssuerAuthzForm from './MultiIssuerAuthzForm';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
@@ -147,9 +146,6 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }: 
                                 <ToggleButton value="config">Bootstrap Configuration</ToggleButton>
                                 <ToggleButton value="unsignedAuthz">Cedarling Unsigned Authz Form</ToggleButton>
                                 <ToggleButton value="multiIssuerAuthz">Cedarling Multi-Issuer Authz Form</ToggleButton>
-                                {isLoggedIn &&
-                                    <ToggleButton value="signedAuthz">Cedarling Signed Authz Form</ToggleButton>
-                                }
                             </ToggleButtonGroup>
                         </Box>
                     }
@@ -178,8 +174,6 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }: 
                                         <UnsignedAuthzForm data={data} />}
                                     {screenType === 'multiIssuerAuthz' &&
                                         <MultiIssuerAuthzForm data={data} />}
-                                    {(screenType === 'signedAuthz' && isLoggedIn)&&
-                                        <SignedAuthzForm data={data} />}
                                 </>
                             )
                         }

@@ -45,8 +45,7 @@ def main():
     sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if not os.path.exists(sql_prop):
-            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
+        render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)
