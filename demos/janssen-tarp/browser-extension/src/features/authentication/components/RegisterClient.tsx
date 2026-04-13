@@ -478,8 +478,8 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={registerClient}>Register</Button>
+          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+          <Button variant="outlined" type="submit" onClick={registerClient}>Register</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
