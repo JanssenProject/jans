@@ -139,10 +139,13 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
       await init(bootstrap);
 
       chrome.storage.local.get(["cedarlingConfig"], ({ cedarlingConfig = [] }) => {
-        const updatedConfig = [
-          ...cedarlingConfig,
-          { ...bootstrap, id: uuidv4() }
-        ];
+        const updatedConfig = []
+          let idObj = { id: uuidv4() };
+
+      updatedConfig.push({
+        ...bootstrap,
+        ...idObj
+      });
 
         chrome.storage.local.set({ cedarlingConfig: updatedConfig }, handleClose);
 });
@@ -277,8 +280,8 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={saveBootstrap}>Save</Button>
+          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+          <Button variant="outlined" type="submit" onClick={saveBootstrap}>Save</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
