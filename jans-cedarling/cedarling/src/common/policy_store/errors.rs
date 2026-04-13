@@ -155,11 +155,12 @@ pub(crate) enum CedarParseErrorDetail {
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
 
-    /// A policy in a multi-policy file has no `@id("...")` annotation (Cedar internal id shown)
+    /// A policy in a multi-policy file has no `@id("...")` annotation.
+    /// `line` is 1-based; `snippet` is the offending `permit` / `forbid` line.
     #[error(
-        "Multi-policy .cedar files require @id(\"...\") on each policy; missing for Cedar policy id '{internal_policy_id}'"
+        "Multi-policy .cedar files require @id(\"...\") on each policy; missing at line {line}: {snippet}"
     )]
-    MultiPolicyMissingExplicitId { internal_policy_id: String },
+    MultiPolicyMissingExplicitId { line: usize, snippet: String },
 
     /// Two or more policies in the same file share the same `@id("...")` value
     #[error("duplicate @id(\"{id}\") within a single .cedar file")]

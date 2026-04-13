@@ -112,11 +112,20 @@ impl PolicyParser {
                         .annotation("id")
                         .filter(|s| !s.is_empty())
                         .map(str::to_owned)
-                        .ok_or_else(|| PolicyStoreError::CedarParsing {
-                            file: filename.to_string(),
-                            detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
-                                internal_policy_id: policy.id().to_string(),
-                            },
+                        .ok_or_else(|| {
+                            // Cedar's `policies()` iteration order is not guaranteed,
+                            // so `policy.id()` here (e.g. `policy0`) may not match file
+                            // order. Scan the source text to point at the first policy
+                            // start that has no preceding `@id(...)`.
+                            let (line, snippet) = Self::find_first_policy_without_id(content)
+                                .unwrap_or((0, String::new()));
+                            PolicyStoreError::CedarParsing {
+                                file: filename.to_string(),
+                                detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
+                                    line,
+                                    snippet,
+                                },
+                            }
                         })?;
                     Self::validate_policy_id(&id_str, filename)
                         .map_err(PolicyStoreError::Validation)?;
@@ -299,6 +308,37 @@ impl PolicyParser {
         let after_open = &after_id[open_quote + 1..];
         let close_quote = after_open.find(quote_char)?;
         Some(after_open[..close_quote].to_string())
+    }
+
+    /// Scan source text for the first `permit` / `forbid` policy whose preceding
+    /// lines (back to the start of the file or the previous policy) contain no
+    /// `@id(...)` annotation. Returns `(1-based line, trimmed-and-truncated snippet)`.
+    fn find_first_policy_without_id(content: &str) -> Option<(usize, String)> {
+        let lines: Vec<&str> = content.lines().collect();
+        let mut window_start = 0usize;
+        for (idx, line) in lines.iter().enumerate() {
+            let trimmed = line.trim_start();
+            let is_start = trimmed.starts_with("permit(")
+                || trimmed.starts_with("forbid(")
+                || trimmed.starts_with("permit ")
+                || trimmed.starts_with("forbid ");
+            if !is_start {
+                continue;
+            }
+            let has_id = lines[window_start..idx]
+                .iter()
+                .any(|l| Self::parse_id_from_line_trimmed(l.trim()).is_some());
+            if !has_id {
+                let mut snippet = trimmed.trim_end().to_string();
+                const MAX: usize = 80;
+                if snippet.chars().count() > MAX {
+                    snippet = snippet.chars().take(MAX).collect::<String>() + "...";
+                }
+                return Some((idx + 1, snippet));
+            }
+            window_start = idx + 1;
+        }
+        None
     }
 
     /// Validate policy ID format (alphanumeric, underscore, hyphen, colon only).
@@ -640,10 +680,12 @@ permit(
                 &err,
                 PolicyStoreError::CedarParsing {
                     file,
-                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId { .. }
+                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId { line, snippet }
                 } if file == "two-permits.cedar"
+                    && *line > 0
+                    && (snippet.starts_with("permit(") || snippet.starts_with("permit "))
             ),
-            "expected MultiPolicyMissingExplicitId, got: {err:?}"
+            "expected MultiPolicyMissingExplicitId with line + permit snippet, got: {err:?}"
         );
     }
 }
