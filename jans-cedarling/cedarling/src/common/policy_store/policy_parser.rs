@@ -292,8 +292,14 @@ impl PolicyParser {
     fn parse_id_from_line_trimmed(trimmed: &str) -> Option<String> {
         let start_idx = trimmed.find("@id(")?;
         let after_id = &trimmed[start_idx + 4..];
-        let open_quote = after_id.find('"').or_else(|| after_id.find('\''))?;
-        let quote_char = after_id.chars().nth(open_quote)?;
+        // Pair the byte offset with the quote we matched on. `str::find` returns a
+        // byte offset, not a char index, so recovering the quote via
+        // `chars().nth(open_quote)` would pick the wrong character once any
+        // multi-byte UTF-8 appears before the quote (e.g. `@id(🙂"x")`).
+        let (open_quote, quote_char) = after_id
+            .find('"')
+            .map(|i| (i, '"'))
+            .or_else(|| after_id.find('\'').map(|i| (i, '\'')))?;
         let after_open = &after_id[open_quote + 1..];
         let close_quote = after_open.find(quote_char)?;
         Some(after_open[..close_quote].to_string())
