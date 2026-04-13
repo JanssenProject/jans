@@ -26,7 +26,7 @@ class PackageUtils(SetupUtils):
                 update_command = ''
             else:
                 install_command = 'yum install -y {0}'
-                update_command = 'yum install -y epel-release'
+                update_command = f'yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-{base.os_version}.noarch.rpm'
             query_command = 'rpm -q {0}'
             check_text = 'is not installed'
 
