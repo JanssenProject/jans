@@ -767,6 +767,81 @@ forbid(
     );
 }
 
+/// End-to-end: a `.cjar` archive whose `templates/` contains a single file with
+/// two `@id`-annotated Cedar templates must fully round-trip (unpack -> loader
+/// -> PolicySet) with both templates present in the resulting `PolicySet`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_from_cjar_with_multi_template_file() {
+    let builder = PolicyStoreTestBuilder::new("b1b2b3b4b5b6b7b8")
+        .with_name("Multi-template cjar test")
+        .with_schema(
+            r#"namespace TestApp {
+    entity User {
+        name: String,
+    };
+    entity Resource {
+        name: String,
+    };
+    action "view" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+"#,
+        )
+        // At least one concrete policy so the store is non-trivial.
+        .with_policy(
+            "noop",
+            r#"@id("noop")
+permit(principal, action, resource);"#,
+        )
+        // One template file with two templates — symmetric to the multi-policy case.
+        .with_template(
+            "tpls",
+            r#"@id("principal-view")
+permit(
+    principal == ?principal,
+    action == TestApp::Action::"view",
+    resource
+);
+
+@id("resource-view")
+permit(
+    principal,
+    action == TestApp::Action::"view",
+    resource == ?resource
+);"#,
+        );
+
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+    let archive_path = temp_dir.path().join("multi_template.cjar");
+    fs::write(&archive_path, &archive).expect("Failed to write archive file");
+
+    let loaded = crate::load_policy_store(&crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::CjarFile(archive_path),
+    })
+    .await
+    .expect("Loading .cjar with a multi-template file should succeed");
+
+    let template_ids: Vec<String> = loaded
+        .store
+        .policies
+        .get_set()
+        .templates()
+        .map(|t| t.id().to_string())
+        .collect();
+    assert!(
+        template_ids.contains(&"principal-view".to_string())
+            && template_ids.contains(&"resource-view".to_string()),
+        "expected both template ids in loaded PolicySet, got {template_ids:?}"
+    );
+}
+
 // ============================================================================
 // Policy Store with Entities Tests
 // ============================================================================
