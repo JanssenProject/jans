@@ -27,8 +27,8 @@
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
         <pf4j.version>3.15.0</pf4j.version>
-        <log4j.version>2.25.3</log4j.version>
-        <jackson.version>2.21.0</jackson.version>
+        <log4j.version>2.25.4</log4j.version>
+        <jackson.version>2.21.2</jackson.version>
         <zk.version>10.1.0-jakarta</zk.version>
         <ldapsdk.version>7.0.3</ldapsdk.version>
         <resteasy.version>6.2.12.Final</resteasy.version>
@@ -94,7 +94,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.76.0</version>
+                <version>1.80.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -213,17 +213,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.10.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.3.1</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -246,12 +246,12 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.8.2</version>
+                    <version>4.9.8.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.1.2</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -268,7 +268,7 @@
                         <source>8</source>
                         <failOnError>false</failOnError>
                     </configuration>
-                    <version>3.8.0</version>
+                    <version>3.12.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

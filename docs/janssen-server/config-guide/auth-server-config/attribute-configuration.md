@@ -423,7 +423,7 @@ jans cli --operation-id post-attributes --data /tmp/custom-claim.json
 
 To update the configuration, follow the steps below.
 
-1. Get the [user claim](#get-attribute-by-inum) and store it into a file for editing. 
+1. Get the [user claim](#get-user-claim-by-inum) and store it into a file for editing. 
 The following command will retrieve the existing user claim in the required schema file.
   ```bash title="command"
    jans cli -no-color --operation-id get-attributes-by-inum \
