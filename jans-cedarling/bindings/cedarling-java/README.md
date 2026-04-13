@@ -67,25 +67,93 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
-**Note:** This recipe is compatible with Jans version 1.4.0 and earlier.
+Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has authorization_code grant-type. We will use below policy for this:
 
-1. Upload [bootstrap.json](./docs/bootstrap.json), [policy-store.json](./docs/policy-store.json), [action.txt](./docs/action.txt), [context.json](./docs/context.json), [principals.json](./docs/principals.json) and [resource.json](./docs/resource.json) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
-2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
-3. The following Post Authn script has been created for calling Cedarling authorization. Add and enable the following [Post Authn custom script](./docs/sample_cedarling_post_authn.java) (in Java) with following Custom Properties. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+#### Policies
 
-| Key                  | Values                          |
-| -------------------- | ------------------------------- |
-| BOOTSTRAP_JSON_PATH  | ./custom/static/bootstrap.json  |
-| ACTION_FILE_PATH     | ./custom/static/action.txt      |
-| RESOURCE_FILE_PATH   | ./custom/static/resource.json   |
-| CONTEXT_FILE_PATH    | ./custom/static/context.json    |
-| PRINCIPALS_FILE_PATH | ./custom/static/principals.json |
+```bash
+@id("Allow_authorization_code")
+permit (
+  principal is Jans::Workload,
+  action == Jans::Action::"Execute",
+  resource is Jans::Application
+)
+when {
+  principal.grantTypes.contains("authorization_code")
+};
+```
+#### Schema 
+
+```bash
+namespace Jans {
+  type Context = {
+    current_time?: Long,
+    device_health?: Set<String>,
+    fraud_indicators?: Set<String>,
+    geolocation?: Set<String>,
+    network?: String,
+    network_type?: String,
+    operating_system?: String,
+    user_agent?: String
+  };
+
+  type Url = __cedar::String;
+
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+
+  entity Application = {
+    grantTypes: Set<String>
+  };
+
+  entity Role;
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+
+  entity User in [Role] = {
+    email?: email_address,
+    role: Set<String>,
+    sub?: String
+  };
+
+  entity Workload = {
+    client_id: String,
+    grantTypes: Set<String>,
+    iss?: TrustedIssuer,
+    name?: String,
+    rp_id?: String,
+    spiffe_id?: String
+  };
+
+  action "Execute" appliesTo {
+    principal: [Workload],
+    resource: [Application],
+    context: Context
+  };
+}
+
+
+```
+
+#### Steps:
+
+1. Upload [bootstrap.json](./docs/bootstrap.json) and [update_token_script.cjar](./docs/update_token_script.cjar)  at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
+2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server. Rather than building the `cedarling-java-{version}.jar` from source code, you can directly download the latest version of the jar from the [Maven repository](https://maven.jans.io/maven/io/jans/cedarling-java/).
+3. The following java [Update Token](./docs/sample_cedarling_update_token.java) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
+
+    | Key                  | Values                          |
+    | -------------------- | ------------------------------- |
+    | BOOTSTRAP_JSON_PATH  | ./custom/static/bootstrap.json  |
 
 4. Map the script with client used to perform authentication.
 
 ![](./docs/mapping_post_authn_script_with_client.png)
 
-5. The script runs after client authentication to invoke Cedarling authz.
+5. The script runs before access_token generation and includes openid and profile scopes into the token if the oidc client has authorization_code in grant-types.
 
 ## Configuration
 
