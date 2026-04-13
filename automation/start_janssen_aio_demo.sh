@@ -531,6 +531,6 @@ prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
 prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP" "$LOG_TARGET" "$LOG_LEVEL"
 
-# docker compose up -d
+docker compose up -d
 echo "[I] Janssen is starting up!"
 echo "[I] Run 'docker compose logs -f' to check the progress"
