@@ -26,7 +26,6 @@ use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 #[cfg(test)]
 use crate::common::policy_store::TrustedIssuer;
-use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::{
     RequestUnsigned,
     entity_builder_config::{
@@ -53,7 +52,6 @@ pub(crate) use built_entities::BuiltEntities;
 pub(crate) use error::*;
 
 pub(crate) struct EntityBuilder {
-    config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
@@ -62,7 +60,7 @@ pub(crate) struct EntityBuilder {
 
 impl EntityBuilder {
     pub(super) fn new(
-        config: EntityBuilderConfig,
+        _config: EntityBuilderConfig,
         issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
@@ -91,7 +89,6 @@ impl EntityBuilder {
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
         Ok(Self {
-            config,
             iss_entities,
             schema,
             default_entities,
@@ -107,18 +104,10 @@ impl EntityBuilder {
         let mut built_entities = BuiltEntities::default();
 
         let mut principal_entity: Option<Entity> = None;
-        let mut roles = Vec::<Entity>::new();
         if let Some(principal) = request.principal.as_ref() {
-            let BuiltPrincipalUnsigned { principal, parents } =
-                self.build_principal_unsigned(principal, &built_entities)?;
-
+            let principal = self.build_principal_unsigned(principal, &built_entities)?;
             built_entities.insert(&principal.uid());
-            for role in &parents {
-                built_entities.insert(&role.uid());
-            }
-
             principal_entity = Some(principal);
-            roles.extend(parents);
         }
 
         let resource = self
@@ -127,7 +116,6 @@ impl EntityBuilder {
 
         Ok(BuiltEntitiesUnsigned {
             principal: principal_entity,
-            roles,
             resource,
             built_entities,
         })
@@ -153,7 +141,6 @@ impl EntityBuilder {
 
 pub(super) struct BuiltEntitiesUnsigned {
     pub principal: Option<Entity>,
-    pub roles: Vec<Entity>,
     pub resource: Entity,
     pub built_entities: BuiltEntities,
 }

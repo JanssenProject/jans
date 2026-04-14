@@ -259,7 +259,6 @@ impl Authz {
 
         let BuiltEntitiesUnsigned {
             principal,
-            roles,
             resource,
             built_entities,
         } = self
@@ -282,7 +281,7 @@ impl Authz {
         )?;
 
         let entities = Entities::from_entities(
-            principal.into_iter().chain(roles).chain([resource]),
+            principal.into_iter().chain([resource]),
             Some(&schema.schema),
         )
         .map_err(Box::new)?;
@@ -664,7 +663,6 @@ pub(super) struct AuthorizeEntitiesData {
     pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub roles: Vec<Entity>,
     pub resource: Entity,
     pub default_entities: DefaultEntities,
 }
@@ -688,7 +686,6 @@ impl AuthorizeEntitiesData {
         // Add request entities (these will override default entities if conflicts exist)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
-        merged_entities.extend(self.roles.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
         merged_entities.extend(
             vec![self.user, self.workload]

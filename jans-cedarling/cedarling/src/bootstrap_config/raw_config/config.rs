@@ -15,9 +15,9 @@ use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::JwtConfig;
+use crate::LockTransport;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
-use crate::{LockTransport, UnsignedRoleIdSrc};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -105,14 +105,6 @@ pub struct BootstrapConfigRaw {
         default = "default_jti"
     )]
     pub decision_log_default_jwt_id: String,
-
-    /// Mapping name of cedar schema Role entity.
-    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
-    pub mapping_role: Option<String>,
-
-    /// Source attribute for unsigned role entity ID.
-    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
-    pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
