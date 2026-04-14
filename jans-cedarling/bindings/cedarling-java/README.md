@@ -67,11 +67,11 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
 
 ### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
-Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has authorization_code grant-type. We will use below policy for this:
+Here is a simple recipe to add scopes to the access token using the update_token script only when the requesting client uses the authorization_code grant type. We will use the following [Policy Store](./docs/update_token_script.cjar) for this recipe. You can upload and modify this Policy Store in [Agama Lab's](https://cloud.gluu.org/agama-lab) Policy Designer. The Policy Store contains the policy and schema shown below.
 
-#### Policies
+##### Policies
 
-```bash
+```declarative
 
 @id("Allow_authorization_code")
 permit (
@@ -84,9 +84,10 @@ when {
 };
 
 ```
-#### Schema 
 
-```bash
+##### Schema 
+
+```declarative
 
 namespace Jans {
   type Context = {
@@ -153,7 +154,7 @@ namespace Jans {
 
 4. Map the script with client used to perform authentication.
 
-![](./docs/mapping_post_authn_script_with_client.png)
+![](./docs/mapping_update_token_script_with_client.png)
 
 5. The script runs before access_token generation and includes openid and profile scopes into the token if the oidc client has authorization_code in grant-types.
 

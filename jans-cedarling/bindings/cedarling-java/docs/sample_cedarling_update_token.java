@@ -22,7 +22,7 @@ import com.google.common.collect.Sets;
 
 public class UpdateTokenCedarling implements UpdateTokenType {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateTokenCedarling.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
     CedarlingAdapter cedarlingAdapter = null;
 
 
@@ -30,7 +30,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
         log.info("UpdateTokenCedarling initialized!!!");
         // Check if bootstrap JSON file path is configured
         if (!configurationAttributes.containsKey("BOOTSTRAP_JSON_PATH")) {
-            log.error("Initialization. Property bootstrap_file_path is not specified.");
+            log.error("Initialization. Property BOOTSTRAP_JSON_PATH is not specified.");
             return false;
         }
         log.info("Initialize Cedarling...");
@@ -46,11 +46,11 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             cedarlingAdapter = new CedarlingAdapter();
             cedarlingAdapter.loadFromJson(bootstrapJson);
         } catch (CedarlingException e) {
-            log.error("Unable to initialize Cedarling" + e.getMessage());
+            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
             cedarlingAdapter = null;
             return false;
         } catch (Exception e) {
-            log.error("Unable to initialize Cedarling" + e.getMessage());
+            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
             cedarlingAdapter = null;
             return false;
         }
@@ -63,7 +63,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
         log.info("UpdateTokenCedarling initialized!!!");
         // Check if bootstrap JSON file path is configured
         if (!configurationAttributes.containsKey("BOOTSTRAP_JSON_PATH")) {
-            log.error("Initialization. Property bootstrap_file_path is not specified.");
+            log.error("Initialization. Property BOOTSTRAP_JSON_PATH is not specified.");
             return false;
         }
         log.info("Initialize Cedarling...");
@@ -79,11 +79,11 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             cedarlingAdapter = new CedarlingAdapter();
             cedarlingAdapter.loadFromJson(bootstrapJson);
         } catch (CedarlingException e) {
-            log.error("Unable to initialize Cedarling" + e.getMessage());
+            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
             cedarlingAdapter = null;
             return false;
         } catch (Exception e) {
-            log.error("Unable to initialize Cedarling" + e.getMessage());
+            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
             cedarlingAdapter = null;
             return false;
         }

@@ -39,7 +39,6 @@ public class MultiIssuerAuthzTest {
     private static final String USERINFO_TOKEN_PATH = BASE_PATH + "userinfo.json";
     private static final String RESOURCE_PATH = BASE_PATH + "resource.json";
     private static final String ACTION_PATH = BASE_PATH + "action.txt";
-    private static final String CONTEXT_PATH = BASE_PATH + "context.json";
 
     @BeforeMethod
     public void setUp() throws Exception {
