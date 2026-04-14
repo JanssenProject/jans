@@ -493,20 +493,23 @@ check_jans_readiness() {
     cid=""
     retries=1
 
-    while [[ "$retries" -le 30 ]]; do
+    echo "[I] Waiting 120 seconds for services to initialize before starting health checks..."
+    sleep 120
+
+    while [[ "$retries" -le 20 ]]; do
         cid=$(docker ps --filter network=jans-aio-demo --filter name=jans --filter health=healthy -q ||:)
         if [[ -n "$cid" ]]; then
             echo "[I] Janssen is ready to accept request"
             break
         else
-            echo "[W] Janssen is not ready, retrying in 10 seconds ..."
+            echo "[W] Janssen is not ready yet; retrying in 10 seconds ..."
             retries=$((retries+1))
             sleep 10
         fi
     done
 
     if [[ -z "$cid" ]]; then
-        echo "[W] Janssen unable to accept request after 30 retries, please check the logs for details"
+        echo "[W] Janssen unable to accept request after 20 retries, please check the logs for details"
         exit 1
     fi
 }
@@ -570,5 +573,5 @@ prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP"
 docker compose -f "$basedir/compose.yaml" up -d
 echo "[I] Janssen is starting up!"
 echo "[I] To check the progress, run 'docker compose -f $basedir/compose.yaml logs -f' in separate terminal"
-echo "[I] Checking if Janssen is ready to accept request (this may take a while) ..."
+echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."
 check_jans_readiness "$JANS_FQDN"
