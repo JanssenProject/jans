@@ -324,7 +324,6 @@ EOF
     image: postgres:14
     container_name: postgresql
     environment:
-      - POSTGRES_ROOT_PASSWORD=Test1234#
       - POSTGRES_USER=jans
       - POSTGRES_PASSWORD=Test1234#
       - POSTGRES_DB=jans
@@ -556,7 +555,11 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP  ]]; then
-    EXT_IP=$(curl --silent ipinfo.io/ip)
+    EXT_IP=$(curl --silent --max-time 10 ipinfo.io/ip || true)
+    if [[ -z "$EXT_IP" ]]; then
+        echo "[E] Unable to determine external IP. Please provide it as the 4th argument."
+        exit 1
+    fi
 fi
 
 install_docker
