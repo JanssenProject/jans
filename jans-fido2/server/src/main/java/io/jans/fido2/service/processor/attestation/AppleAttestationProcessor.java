@@ -188,9 +188,11 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 
 	private String getAppleRootCaSubjectDn() {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-		if (fido2Configuration != null && fido2Configuration.getAppleRootCaSubjectDn() != null
-				&& !fido2Configuration.getAppleRootCaSubjectDn().isBlank()) {
-			return fido2Configuration.getAppleRootCaSubjectDn();
+		if (fido2Configuration != null) {
+			String configuredDn = fido2Configuration.getAppleRootCaSubjectDn();
+			if (configuredDn != null && !configuredDn.isBlank()) {
+				return configuredDn;
+			}
 		}
 		return SUBJECT_DN;
 	}
