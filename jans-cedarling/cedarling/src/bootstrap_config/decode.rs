@@ -126,7 +126,6 @@ impl BootstrapConfig {
         };
 
         let authorization_config = AuthorizationConfig {
-            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
         };
 

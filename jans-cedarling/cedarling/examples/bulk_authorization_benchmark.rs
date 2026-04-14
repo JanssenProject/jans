@@ -245,7 +245,7 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
         let grad_year = 2020 + (i % 7); // 2020-2026
         let gpa = (i as f64 * 0.001) % 5.0; // 0-5 GPA
 
-        let principals = vec![EntityData {
+        let principal = EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::User".to_string(),
                 id: format!("user_{i}"),
@@ -262,10 +262,10 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
                 ("gpa".to_string(), json!(gpa)),
                 ("grad_year".to_string(), json!(grad_year)),
             ]),
-        }];
+        };
 
         let document = RequestUnsigned {
-            principals,
+            principal: Some(principal),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {

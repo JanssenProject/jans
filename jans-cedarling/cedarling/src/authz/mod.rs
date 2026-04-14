@@ -258,7 +258,7 @@ impl Authz {
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
 
         let BuiltEntitiesUnsigned {
-            principals,
+            principal,
             roles,
             resource,
             built_entities,
@@ -266,10 +266,7 @@ impl Authz {
             .config
             .entity_builder
             .build_entities_unsigned(request)?;
-        let principal_uids = principals
-            .iter()
-            .map(cedar_policy::Entity::uid)
-            .collect::<Vec<EntityUid>>();
+        let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
 
         // Capture pushed data info for logging before context is built
@@ -285,58 +282,50 @@ impl Authz {
         )?;
 
         let entities = Entities::from_entities(
-            principals.into_iter().chain(roles).chain([resource]),
+            principal.into_iter().chain(roles).chain([resource]),
             Some(&schema.schema),
         )
         .map_err(Box::new)?;
 
-        let mut principal_responses = HashMap::new();
+        let response = self.execute_authorize(ExecuteAuthorizeParameters {
+            entities: &entities,
+            principal: principal_uid.clone(),
+            action: action.clone(),
+            resource: resource_uid.clone(),
+            context,
+        })?;
 
-        for principal_uid in &principal_uids {
-            let auth_result = self.execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: Some(principal_uid.clone()),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
-            })?;
-
-            principal_responses.insert(principal_uid.clone(), auth_result);
-        }
-
-        let result = AuthorizeResult::new_for_many_principals(
-            &self.config.authorization.principal_bool_operator,
-            principal_responses,
-            request_id,
-        )?;
+        let result = AuthorizeResult::new(response.clone(), request_id);
 
         // measure time how long request executes
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
-        let debug_authorize_info = result
-            .principals
-            .iter()
-            .map(|(principal, response)| AuthorizeInfo {
-                principal: principal.to_string(),
-                diagnostics: Diagnostics::new(
-                    response.diagnostics(),
-                    &self.config.policy_store.policies,
-                ),
-                decision: response.decision().into(),
-            })
-            .collect::<Vec<_>>();
+        let principal_label = principal_uid
+            .as_ref()
+            .map_or_else(|| "None".to_string(), ToString::to_string);
 
-        let diagnostics = debug_authorize_info
-            .iter()
-            .map(|info| info.diagnostics.clone())
-            .collect::<Vec<_>>();
+        let authz_info = AuthorizeInfo {
+            principal: principal_label,
+            diagnostics: Diagnostics::new(
+                response.diagnostics(),
+                &self.config.policy_store.policies,
+            ),
+            decision: response.decision().into(),
+        };
+
+        let debug_authorize_info = vec![authz_info.clone()];
+        let diagnostics = vec![authz_info.diagnostics.clone()];
 
         // Log policy evaluation errors if any exist
-        for info in &debug_authorize_info {
-            self.log_policy_evaluation_errors(&info.diagnostics, &info.principal, request_id);
-        }
+        self.log_policy_evaluation_errors(
+            &authz_info.diagnostics,
+            &authz_info.principal,
+            request_id,
+        );
+
+        let logged_principals = principal_uid.as_slice();
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
@@ -349,7 +338,7 @@ impl Authz {
                 tokens_logging_info: LogTokensInfo::empty(),
                 decision_time: decision_time_micro_sec,
                 decision_diagnostics: &diagnostics,
-                principal: DecisionLogEntry::all_principals(&principal_uids),
+                principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
             },
         );
@@ -382,6 +371,8 @@ impl Authz {
         &self,
         parameters: ExecuteAuthorizeParameters,
     ) -> Result<cedar_policy::Response, Box<cedar_policy::RequestValidationError>> {
+        let has_principal = parameters.principal.is_some();
+
         let mut request_builder = cedar_policy::Request::builder()
             .action(parameters.action)
             .resource(parameters.resource)
@@ -394,13 +385,36 @@ impl Authz {
 
         let request = request_builder.build().map_err(Box::new)?;
 
-        let response = self.authorizer.is_authorized(
-            &request,
-            self.config.policy_store.policies.get_set(),
-            parameters.entities,
-        );
+        if has_principal {
+            Ok(self.authorizer.is_authorized(
+                &request,
+                self.config.policy_store.policies.get_set(),
+                parameters.entities,
+            ))
+        } else {
+            let partial = self.authorizer.is_authorized_partial(
+                &request,
+                self.config.policy_store.policies.get_set(),
+                parameters.entities,
+            );
 
-        Ok(response)
+            // `decision()` is preferred over `concretize()`: it returns `Some` iff the partial
+            // response already has a concrete decision, letting us preserve the original
+            // diagnostics; only residual-dependent requests fall through to a synthesized Deny.
+            if partial.decision().is_some() {
+                Ok(partial.concretize())
+            } else {
+                let residual_ids: HashSet<cedar_policy::PolicyId> = partial
+                    .nontrivial_residuals()
+                    .map(|p| p.id().clone())
+                    .collect();
+                Ok(cedar_policy::Response::new(
+                    cedar_policy::Decision::Deny,
+                    residual_ids,
+                    Vec::new(),
+                ))
+            }
+        }
     }
 
     /// Log policy evaluation errors for diagnostics
@@ -491,11 +505,14 @@ impl Authz {
     /// action strings, then delegates to `PoliciesContainer::get_matching_policies`.
     pub(super) fn get_matching_policies_unsigned(
         &self,
-        principals: &[crate::EntityData],
+        principal: Option<&crate::EntityData>,
         actions: &[String],
         resources: &[crate::EntityData],
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
-        let principal_types = entity_data_to_type_names(principals)?;
+        let principal_types = match principal {
+            Some(p) => entity_data_to_type_names(std::slice::from_ref(p))?,
+            None => HashSet::new(),
+        };
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;
 

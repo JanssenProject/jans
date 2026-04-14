@@ -5,7 +5,6 @@
 
 //! Integration tests for SSA JWT validation functionality
 
-use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
@@ -59,10 +58,6 @@ async fn test_cedarling_with_valid_ssa() {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
@@ -116,10 +111,6 @@ async fn test_cedarling_without_ssa() {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),

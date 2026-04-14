@@ -106,18 +106,18 @@ impl EntityBuilder {
     ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
         let mut built_entities = BuiltEntities::default();
 
-        let mut principals = Vec::with_capacity(request.principals.len());
+        let mut principal_entity: Option<Entity> = None;
         let mut roles = Vec::<Entity>::new();
-        for principal in &request.principals {
+        if let Some(principal) = request.principal.as_ref() {
             let BuiltPrincipalUnsigned { principal, parents } =
                 self.build_principal_unsigned(principal, &built_entities)?;
 
             built_entities.insert(&principal.uid());
-            for role in &roles {
+            for role in &parents {
                 built_entities.insert(&role.uid());
             }
 
-            principals.push(principal);
+            principal_entity = Some(principal);
             roles.extend(parents);
         }
 
@@ -126,7 +126,7 @@ impl EntityBuilder {
             .map_err(Box::new)?;
 
         Ok(BuiltEntitiesUnsigned {
-            principals,
+            principal: principal_entity,
             roles,
             resource,
             built_entities,
@@ -152,7 +152,7 @@ impl EntityBuilder {
 }
 
 pub(super) struct BuiltEntitiesUnsigned {
-    pub principals: Vec<Entity>,
+    pub principal: Option<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
     pub built_entities: BuiltEntities,

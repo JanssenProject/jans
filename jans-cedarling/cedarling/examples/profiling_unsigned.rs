@@ -8,7 +8,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
 use serde::Deserialize;
@@ -152,13 +152,7 @@ async fn init_cedarling() -> Cedarling {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
         jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::new(json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .expect("valid rule"),
-            ..Default::default()
-        },
+        authorization_config: AuthorizationConfig::default(),
         entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
@@ -195,7 +189,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
     .expect("valid resource entity");
 
     RequestUnsigned {
-        principals: vec![principal],
+        principal: Some(principal),
         action: "Jans::Action::\"Update\"".to_string(),
         context: json!({}),
         resource,

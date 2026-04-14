@@ -17,7 +17,7 @@ use std::time::Duration;
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityBuilderConfig,
-    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
@@ -96,23 +96,12 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
         source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
     },
     jwt_config: JwtConfig::new_without_validation(),
-    authorization_config: AuthorizationConfig {
-        principal_bool_operator: JsonRule::default(),
-        ..Default::default()
-    },
+    authorization_config: AuthorizationConfig::default(),
     entity_builder_config: EntityBuilderConfig::default(),
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
-});
-
-// Custom principal operator for TestPrincipal
-static TEST_PRINCIPAL_OPERATOR: LazyLock<JsonRule> = LazyLock::new(|| {
-    JsonRule::new(json!({
-        "===": [{"var": "Jans::TestPrincipal"}, "ALLOW"]
-    }))
-    .unwrap()
 });
 
 static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
@@ -125,10 +114,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
         source: PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA.to_string()),
     },
     jwt_config: JwtConfig::new_without_validation(),
-    authorization_config: AuthorizationConfig {
-        principal_bool_operator: TEST_PRINCIPAL_OPERATOR.clone(),
-        ..Default::default()
-    },
+    authorization_config: AuthorizationConfig::default(),
     entity_builder_config: EntityBuilderConfig::default(),
     lock_config: None,
     max_base64_size: None,
@@ -334,7 +320,7 @@ fn bench_authorization_with_data(c: &mut Criterion) {
     let request = RequestUnsigned {
         action: "Jans::Action::\"DataAccess\"".to_string(),
         context: json!({}),
-        principals: vec![
+        principal: Some(
             EntityData::deserialize(json!({
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal",
@@ -342,7 +328,7 @@ fn bench_authorization_with_data(c: &mut Criterion) {
                 }
             }))
             .unwrap(),
-        ],
+        ),
         resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Resource",
@@ -408,7 +394,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
         let request = RequestUnsigned {
             action: "Jans::Action::\"DataAccess\"".to_string(),
             context: json!({}),
-            principals: vec![
+            principal: Some(
                 EntityData::deserialize(json!({
                     "cedar_entity_mapping": {
                         "entity_type": "Jans::TestPrincipal",
@@ -416,7 +402,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
                     }
                 }))
                 .unwrap(),
-            ],
+            ),
             resource: EntityData::deserialize(json!({
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::Resource",
