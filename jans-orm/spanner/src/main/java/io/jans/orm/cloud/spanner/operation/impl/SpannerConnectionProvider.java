@@ -143,11 +143,11 @@ public class SpannerConnectionProvider {
 		}
 
 		if (props.containsKey("statement.limit.default-maximum-result-size")) {
-            this.defaultMaximumResultSize = StringHelper.toLong(props.getProperty("statement.limit.default-maximum-result-size"), 1000);
+            this.defaultMaximumResultSize = StringHelper.toLong(props.getProperty("statement.limit.default-maximum-result-size"), 1000L);
         }
 
 		if (props.containsKey("statement.limit.maximum-result-delete-size")) {
-            this.maximumResultDeleteSize = StringHelper.toLong(props.getProperty("statement.limit.maximum-result-delete-size"), 10000);
+            this.maximumResultDeleteSize = StringHelper.toLong(props.getProperty("statement.limit.maximum-result-delete-size"), 10000L);
         }
 
 		this.connectionCredentialsFile = null;

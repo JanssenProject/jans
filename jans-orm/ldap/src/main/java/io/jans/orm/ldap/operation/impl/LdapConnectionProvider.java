@@ -43,7 +43,7 @@ public class LdapConnectionProvider {
     private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
     private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
 
-    private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"};
+    private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.3"};
 
     private LDAPConnectionPool connectionPool;
     private ResultCode creationResultCode;
@@ -103,6 +103,7 @@ public class LdapConnectionProvider {
      * @throws NumberFormatException
      * @throws LDAPException
      * @throws GeneralSecurityException
+     * @throws EncryptionException
      */
     protected void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
         String serverProp = props.getProperty("servers");
@@ -173,8 +174,8 @@ public class LdapConnectionProvider {
                 this.connectionPool.setMaxConnectionAgeMillis(Long.parseLong(maxConnectionAge));
             }
             boolean onCheckoutHealthCheckEnabled = StringHelper.toBoolean(props.getProperty("connection-pool.health-check.on-checkout.enabled"), false);
-            long healthCheckIntervalMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.interval-millis"), 0);
-            long healthCheckMaxResponsetimeMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.max-response-time-millis"), 0);
+            long healthCheckIntervalMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.interval-millis"), 0L);
+            long healthCheckMaxResponsetimeMillis = StringHelper.toLong(props.getProperty("connection-pool.health-check.max-response-time-millis"), 0L);
             boolean backgroundHealthCheckEnabled = !onCheckoutHealthCheckEnabled && (healthCheckIntervalMillis > 0);
             // Because otherwise it has no effect anyway
             if (backgroundHealthCheckEnabled) {
