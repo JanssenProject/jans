@@ -83,18 +83,11 @@ public class CustomScriptService extends AbstractCustomScriptService {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 String[] targetArray = new String[] { assertionValue };
-                boolean useLowercaseFilter = isLowercaseFilter(baseDn());
-                if (useLowercaseFilter) {
-                    filters.add(Filter.createORFilter(
-                            Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null,
-                                    targetArray, null),
-                            Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null,
-                                    targetArray, null)));
-                } else {
-                    filters.add(Filter.createORFilter(
-                            Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null),
-                            Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null)));
-                }
+
+                filters.add(Filter.createORFilter(
+                        Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null),
+                        Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null),
+                        Filter.createSubstringFilter(OxConstants.INUM, null, targetArray, null)));
 
             }
             searchFilter = Filter.createORFilter(filters);

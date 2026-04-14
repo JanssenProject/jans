@@ -187,7 +187,7 @@ public class CouchbaseFilterConverter {
 			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
 
 			if (multiValued) {
-    			// ANY mail_ IN mail SATISFIES mail_ = "test@gluu.org" END
+    			// ANY mail_ IN mail SATISFIES mail_ = "test@jans.org" END
     			String result = String.format("ANY %s_ IN %s SATISFIES %s %s $%s END",
     					internalAttribute, internalAttribute, leftExpressionPart, type.getSign(), variableExpression);
     			
@@ -216,7 +216,7 @@ public class CouchbaseFilterConverter {
 			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
 
 			if (multiValued) {
-    			// ANY mail_ IN mail SATISFIES mail_ = "test@gluu.org" END
+    			// ANY mail_ IN mail SATISFIES mail_ = "test@jans.org" END
     			String result = String.format("ANY %s_ IN %s SATISFIES %s IS NOT MISSING END",
     					internalAttribute, internalAttribute, leftExpressionPart);
     			

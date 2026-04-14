@@ -786,7 +786,7 @@
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.4.11</version>
+				<version>3.11.1</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
