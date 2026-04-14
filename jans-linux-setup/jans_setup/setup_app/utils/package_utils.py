@@ -53,7 +53,7 @@ class PackageUtils(SetupUtils):
             print(f"Supported distributions: {supported}")
             sys.exit(1)
 
-        install_command, update_command, query_command, check_text = self.get_install_commands()
+        install_command, update_command, query_command, _ = self.get_install_commands()
 
         dnf_command = shutil.which('dnf')
 
