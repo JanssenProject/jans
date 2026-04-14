@@ -223,7 +223,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 128M
     ports:
       - "127.0.0.1:8500:8500"
 
@@ -253,7 +253,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 768M
     ports:
       - "127.0.0.1:8200:8200"
 
@@ -279,7 +279,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 128M
     ports:
       - "80:80"
       - "443:443"
@@ -313,7 +313,7 @@ EOF
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 768M
     ports:
       - "127.0.0.1:3306:3306"
 
@@ -333,7 +333,7 @@ EOF
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 768M
     ports:
       - "127.0.0.1:5432:5432"
 
@@ -380,7 +380,7 @@ EOF
     deploy:
       resources:
         limits:
-          memory: 8G
+          memory: 6G
     healthcheck:
       test: ["CMD", "python3", "/app/jans_aio/jans_auth/healthcheck.py"]
       interval: 30s
