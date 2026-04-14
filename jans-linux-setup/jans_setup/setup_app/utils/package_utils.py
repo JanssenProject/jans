@@ -129,7 +129,7 @@ class PackageUtils(SetupUtils):
                 if install[install_type]:
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
-                    if not base.os_type in ('suse',):
+                    if base.os_type not in ('suse',):
                         sout, serr = self.run(update_command, shell=True, get_stderr=True)
                     self.installNetPackage(packages)
 

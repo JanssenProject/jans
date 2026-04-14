@@ -212,7 +212,7 @@ def get_os_package_list():
     for osn in packages.copy():
         aliases = packages[osn].pop('aliases', None) or []
         for alias in aliases:
-            packages[alias] = packages[osn]
+            packages[alias] = copy.deepcopy(packages[osn])
     return packages
 
 def check_os_supported():
