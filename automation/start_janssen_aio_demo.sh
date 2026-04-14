@@ -201,6 +201,9 @@ prepare_compose_files() {
     fi
 
     cat > "$basedir/compose.yaml" << EOF
+networks:
+  default:
+    name: jans-aio-demo
 services:
   consul:
     image: hashicorp/consul:1.22
@@ -374,6 +377,12 @@ EOF
       resources:
         limits:
           memory: 8G
+    healthcheck:
+      test: ["CMD", "python3", "/app/jans_aio/jans_auth/healthcheck.py"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 30s
     labels:
       # custom-label for app discovery (e.g. key rotation push)
       - "APP_NAME=auth-server"
@@ -480,6 +489,28 @@ EOF
     fi
 }
 
+check_jans_readiness() {
+    fqdn=$1
+    cid=""
+    retries=1
+
+    while [[ "$retries" -le 30 ]]; do
+        cid=$(docker ps --filter network=jans-aio-demo --filter name=jans --filter health=healthy -q ||:)
+        if [[ -n "$cid" ]]; then
+            echo "[I] Janssen is ready to accept request"
+            break
+        else
+            echo "[W] Janssen is not ready, retrying in 10 seconds ..."
+            retries=$((retries+1))
+            sleep 10
+        fi
+    done
+
+    if [[ -z "$cid" ]]; then
+        echo "[W] Janssen unable to accept request after 30 retries, please check the logs for details"
+    fi
+}
+
 # ===============
 # main entrypoint
 # ===============
@@ -534,4 +565,6 @@ prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP"
 
 docker compose up -d
 echo "[I] Janssen is starting up!"
-echo "[I] Run 'docker compose logs -f' to check the progress"
+echo "[I] Run 'docker compose logs -f' in separate terminal to check the progress"
+echo "[I] Checking if Janssen is ready to accept request (this may take a while) ..."
+check_jans_readiness "$JANS_FQDN"
