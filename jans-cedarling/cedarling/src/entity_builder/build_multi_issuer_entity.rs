@@ -454,7 +454,6 @@ mod tests {
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::TrustedIssuerIndex;
-    use crate::entity_builder_config::EntityBuilderConfig;
     use crate::jwt::{Token, TokenClaims};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
@@ -463,8 +462,6 @@ mod tests {
     use url::Url;
 
     fn create_test_entity_builder() -> EntityBuilder {
-        let config = EntityBuilderConfig::default();
-
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
@@ -504,7 +501,6 @@ mod tests {
         trusted_issuers.insert("company".to_string(), company_issuer);
 
         EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             None,
             DefaultEntities::default(),
@@ -760,8 +756,6 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let config = EntityBuilderConfig::default();
-
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
@@ -770,7 +764,6 @@ mod tests {
         );
         let trusted_issuers = HashMap::from_iter(vec![("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -933,8 +926,6 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let config = EntityBuilderConfig::default();
-
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
@@ -945,7 +936,6 @@ mod tests {
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),

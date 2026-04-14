@@ -138,7 +138,6 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
-            entity_builder_config: raw.into(),
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,

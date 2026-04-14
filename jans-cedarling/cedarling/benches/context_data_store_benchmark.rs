@@ -16,9 +16,9 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityBuilderConfig,
-    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityData,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -97,7 +97,6 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),
-    entity_builder_config: EntityBuilderConfig::default(),
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
@@ -115,7 +114,6 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),
-    entity_builder_config: EntityBuilderConfig::default(),
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,

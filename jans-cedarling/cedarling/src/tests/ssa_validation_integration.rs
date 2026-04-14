@@ -7,9 +7,8 @@
 
 use crate::log::StdOutLoggerMode;
 use crate::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LockServiceConfig,
+    LockTransport, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -59,7 +58,6 @@ async fn test_cedarling_with_valid_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
@@ -112,7 +110,6 @@ async fn test_cedarling_without_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,

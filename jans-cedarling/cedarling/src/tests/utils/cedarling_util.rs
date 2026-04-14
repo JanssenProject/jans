@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{AuthorizationConfig, EntityBuilderConfig, JwtConfig};
+use crate::{AuthorizationConfig, JwtConfig};
 pub(crate) use crate::{
     BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource,
@@ -26,7 +26,6 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,

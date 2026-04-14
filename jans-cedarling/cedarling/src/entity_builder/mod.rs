@@ -20,19 +20,13 @@ mod schema;
 mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
+use crate::RequestUnsigned;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 #[cfg(test)]
 use crate::common::policy_store::TrustedIssuer;
-use crate::{
-    RequestUnsigned,
-    entity_builder_config::{
-        DEFAULT_ACCESS_TKN_ENTITY_NAME, DEFAULT_ENTITY_TYPE_NAME, DEFAULT_ID_TKN_ENTITY_NAME,
-        DEFAULT_USERINFO_TKN_ENTITY_NAME, EntityBuilderConfig,
-    },
-};
 use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -51,6 +45,11 @@ pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
 
+pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
+pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
+pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
+pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
+
 pub(crate) struct EntityBuilder {
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
@@ -60,7 +59,6 @@ pub(crate) struct EntityBuilder {
 
 impl EntityBuilder {
     pub(super) fn new(
-        _config: EntityBuilderConfig,
         issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,

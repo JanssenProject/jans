@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData,
+    InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -151,7 +151,6 @@ async fn prepare_cedarling() -> Result<Cedarling, InitCedarlingError> {
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,

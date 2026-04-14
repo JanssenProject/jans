@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, TokenInput,
+    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, TokenInput,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -112,7 +112,6 @@ async fn prepare_cedarling_with_jwt_validation(
             ..Default::default()
         },
         authorization_config: AuthorizationConfig::default(),
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,

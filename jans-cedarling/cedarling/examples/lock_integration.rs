@@ -8,8 +8,8 @@
 use cedarling::log_config::StdOutLoggerMode;
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, JwtConfig, LockServiceConfig, LockTransport, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    EntityData, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -60,7 +60,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,

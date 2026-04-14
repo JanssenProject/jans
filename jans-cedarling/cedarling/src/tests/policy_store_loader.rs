@@ -147,9 +147,7 @@ fn create_jwt_cedarling_config_with_loader(
     async_loading: bool,
 ) -> BootstrapConfig {
     use crate::jwt_config::{JwtConfig, TrustedIssuerLoaderConfig, WorkersCount};
-    use crate::{
-        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, LogConfig, LogTypeConfig,
-    };
+    use crate::{AuthorizationConfig, BootstrapConfig, LogConfig, LogTypeConfig};
 
     let trusted_issuer_loader = if async_loading {
         TrustedIssuerLoaderConfig::Async {
@@ -181,7 +179,6 @@ fn create_jwt_cedarling_config_with_loader(
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
