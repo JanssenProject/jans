@@ -108,12 +108,12 @@ jobs:
         docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
         with:
           egress-policy: audit
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -312,7 +312,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build
-        uses: docker/setup-qemu-action@f4e8deed0c3c26542279f4042c0e1d059cbf012d # master
+        uses: docker/setup-qemu-action@76c0984808678992dc9f24265d45acf8c8fc8a96 # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all
@@ -324,7 +324,7 @@ jobs:
 
       - name: Login to ghcr
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -333,7 +333,7 @@ jobs:
       - name: Build and push
         if: steps.build_docker_image.outputs.build
         id: docker_build
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: ${{ steps.prep.outputs.dockerfilelocation }}

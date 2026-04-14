@@ -56,7 +56,7 @@
 		<jackson.databind.version>2.18.6</jackson.databind.version>
 		<json.version>20231013</json.version>
 
-		<log4j.version>2.25.3</log4j.version>
+		<log4j.version>2.25.4</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
@@ -317,7 +317,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-fips</artifactId>
-				<version>1.0.6</version>
+				<version>1.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -507,7 +507,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<version>1.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>

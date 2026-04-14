@@ -38,7 +38,7 @@ using [SSA feature flag](../../reference/json/feature-flags/janssenauthserver-fe
 Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md)
 or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
-When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+When using TUI, navigate via `Auth Server`->`Properties`->`featureFlags` to screen below. From here, enable or
 disable `SSA` flag as required.
 
 ![](../../../assets/image-tui-enable-components.png)
