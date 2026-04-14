@@ -21,7 +21,6 @@ prepare_certs() {
     echo "[I] Generating self-signed certificates"
 
     fqdn=$1
-    ipaddr=$2
 
     if [[ ! -f "$demo_templates_dir/ca.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/ca.key" 4096
@@ -55,7 +54,6 @@ keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName = @alt_names
 [alt_names]
 DNS.1 = $fqdn
-IP.1 = $ipaddr
 EOF
 
         openssl x509 -req -in "$demo_templates_dir/web_https.csr" \
@@ -442,9 +440,7 @@ prepare_jans_configuration() {
         "ssl_ca_key": "$ssl_ca_key",
         "ssl_cert": "$ssl_cert",
         "ssl_key": "$ssl_key",
-        "ssl_csr": "$ssl_csr",
-        "vault_role_id": "$(cat "$demo_templates_dir/vault_role_id")",
-        "vault_secret_id": "$(cat "$demo_templates_dir/vault_secret_id")"
+        "ssl_csr": "$ssl_csr"
     },
     "_configmap": {
         "city": "Austin",
@@ -511,6 +507,7 @@ check_jans_readiness() {
 
     if [[ -z "$cid" ]]; then
         echo "[W] Janssen unable to accept request after 30 retries, please check the logs for details"
+        exit 1
     fi
 }
 
@@ -564,7 +561,7 @@ fi
 
 install_docker
 prepare_dirs
-prepare_certs "$JANS_FQDN" "$EXT_IP"
+prepare_certs "$JANS_FQDN"
 prepare_vault_files
 prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
