@@ -77,7 +77,7 @@ The data model (injected _map_) is attached some additional keys for convenience
 
 - `cache`. Allows developers to retrieve values already stored in the Jans configured cache, e.g. `${cache.myKey}`. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard [expressions](https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing). Note you cannot store/modify values in the cache from templates
 
-- `labels` and `msgs`. These give access to localized messages. They are useful when templates have to render different texts depening on user context, such as country and language. Learn more [here](./advanced-usages.md#localization-and-internationalization)
+- `labels` and `msgs`. These give access to localized messages. They are useful when templates have to render different texts depending on user context, such as country and language. Learn more [here](./advanced-usages.md#localization-and-internationalization)
 
 ### Assets handling
 
