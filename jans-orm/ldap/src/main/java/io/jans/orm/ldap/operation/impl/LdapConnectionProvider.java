@@ -43,7 +43,7 @@ public class LdapConnectionProvider {
     private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
     private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
 
-    private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.3", "TLSv1.1", "TLSv1", "SSLv3"};
+    private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.3"};
 
     private LDAPConnectionPool connectionPool;
     private ResultCode creationResultCode;
@@ -104,7 +104,6 @@ public class LdapConnectionProvider {
      * @throws LDAPException
      * @throws GeneralSecurityException
      * @throws EncryptionException
-     * @throws EncryptionException
      */
     protected void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
         String serverProp = props.getProperty("servers");
@@ -137,9 +136,6 @@ public class LdapConnectionProvider {
         //connectionOptions.setAutoReconnect(true);
 
         this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
-
-        SSLUtil.setDefaultSSLProtocol(SSL_PROTOCOLS[0]);
-        SSLUtil.setEnabledSSLProtocols(Arrays.asList(SSL_PROTOCOLS));
 
         SSLUtil sslUtil = null;
         FailoverServerSet failoverSet;

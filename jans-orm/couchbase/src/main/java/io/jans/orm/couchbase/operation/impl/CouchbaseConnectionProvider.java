@@ -161,7 +161,7 @@ public class CouchbaseConnectionProvider {
 
             try {
                 open(waitUntilReadyTimeSeconds);
-                if (isConnected()) {
+                if (isConnected(-1)) {
                 	break;
                 } else {
                     LOG.info("Failed to connect to Couchbase");
@@ -235,7 +235,7 @@ public class CouchbaseConnectionProvider {
     	return true;
     }
 
-    public boolean isConnected() {
+    public boolean isConnected(long timeoutSeconds) {
         if (cluster == null) {
             return false;
         }
@@ -243,7 +243,7 @@ public class CouchbaseConnectionProvider {
         boolean isConnected = true;
         try {
 	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-                if (!isConnected(bucketMapping)) {
+                if (!isConnected(bucketMapping, timeoutSeconds)) {
                     LOG.error("Bucket '{}' is in invalid state", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -257,11 +257,16 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    private boolean isConnected(BucketMapping bucketMapping) {
+    private boolean isConnected(BucketMapping bucketMapping, long timeoutSeconds) {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = this.cluster.buckets();
-        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions().timeout(Duration.ofSeconds(5)));
+        BucketSettings bucketSettings;
+        if (timeoutSeconds == -1) {
+        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions());
+        } else {
+        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions().timeout(Duration.ofSeconds(timeoutSeconds)));
+        }
 
         boolean result = true;
         if (com.couchbase.client.java.manager.bucket.BucketType.COUCHBASE == bucketSettings.bucketType()) {
