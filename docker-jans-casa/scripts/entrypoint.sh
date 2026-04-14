@@ -10,7 +10,7 @@ get_prometheus_opt() {
 
     if [ -n "${CN_PROMETHEUS_PORT}" ]; then
         prom_opt="
-            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent-${PROMETHEUS_AGENT_VERSION}.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
         "
     fi
     echo "${prom_opt}"
