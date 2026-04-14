@@ -52,9 +52,11 @@ class PackageUtils(SetupUtils):
             print(f"{base.os_type} {base.os_version} is not supported.")
             print(f"Supported distributions: {supported}")
             sys.exit(1)
-        
+
         install_command, update_command, query_command, check_text = self.get_install_commands()
+
         dnf_command = shutil.which('dnf')
+
         if dnf_command:
             for action_, repo_ in (('disable', 'postgresql'), ('reset', 'postgresql'), ('enable', 'postgresql:12')):
                 self.run([dnf_command, '-y', 'module', action_, repo_])
@@ -127,15 +129,19 @@ class PackageUtils(SetupUtils):
                 if install[install_type]:
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
-                    if not base.os_type in ('fedora', 'suse'):
+                    if not base.os_type in ('suse',):
                         sout, serr = self.run(update_command, shell=True, get_stderr=True)
                     self.installNetPackage(packages)
+
+                if 'openssl' in packages:
+                    paths.cmd_openssl = shutil.which('openssl')
 
         if base.clone_type == 'deb':
             self.run('a2enmod ssl headers proxy proxy_http proxy_ajp', shell=True)
             default_site = '/etc/apache2/sites-enabled/000-default.conf'
             if os.path.exists(default_site):
                 os.remove(default_site)
+
 
 
     def installPackage(self, packageName, remote=False):
