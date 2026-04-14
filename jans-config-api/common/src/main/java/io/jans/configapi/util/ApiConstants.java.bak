@@ -131,7 +131,6 @@ public class ApiConstants {
     public static final String WITH_ASSOCIATED_CLIENTS = "withAssociatedClients";
     public static final String STATUS = "status";
     public static final String INUM = "inum";
-    public static final String PAGE = "page";
     public static final String JANSID = "jansId";
     public static final String SID = "sid";
     public static final String JANS_USR_DN = "jansUsrDN";
@@ -176,7 +175,6 @@ public class ApiConstants {
     //Pagination
     public static final String DEFAULT_LIST_SIZE = "50";
     public static final String DEFAULT_LIST_START_INDEX = "0";
-    public static final String PAGE_INDEX = "1";
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String DEFAULT_SEARCH_PATTERN = "^.*$";  
     public static final String SORT_BY = "sortBy";
