@@ -12,7 +12,7 @@ policy_stores:
     policies:
       5:
         description: simple policy for principal TestPrincipal-s used by authorize_unsigned tests
-        creation_date: '2025-03-18T17:22:39.996050'
+        creation_date: "2025-03-18T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -26,7 +26,7 @@ policy_stores:
             };
       6:
         description: allow-all public action used by authorize_unsigned no-principal tests
-        creation_date: '2025-03-18T17:22:39.996050'
+        creation_date: "2025-03-18T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -47,7 +47,7 @@ policy_stores:
         entity TestPrincipal1  = {"is_ok": Bool};
         entity TestPrincipal2  = {"is_ok": Bool};
         entity TestPrincipal3  = {"is_ok": Bool};
-        entity NoPrincipal;
+        entity Any;
         action "UpdateForTestPrincipals" appliesTo {
           principal: [TestPrincipal1, TestPrincipal2, TestPrincipal3],
           resource: [Issue],
@@ -59,7 +59,7 @@ policy_stores:
           context: {}
         };
         action "OpenPublicIssue" appliesTo {
-          principal: [NoPrincipal],
+          principal: [Any],
           resource: [Issue],
           context: {}
         };

@@ -499,7 +499,7 @@ let request = RequestUnsigned {
 let result = cedarling.authorize_unsigned(request).await?;
 ```
 
-The corresponding schema action must declare `principal: []` in its `appliesTo`, and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
+The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
 
 ## Policy Introspection
 

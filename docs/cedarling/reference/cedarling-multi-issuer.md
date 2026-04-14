@@ -582,19 +582,7 @@ Multi-issuer authorization runs Cedar's partial evaluator with **no principal** 
 
 #### Declaring the action
 
-Two forms are valid:
-
-**Preferred (Cedar 4.x+)** — empty `principal` list means "no principal applies":
-
-```cedar
-action "ReadArtifact" appliesTo {
-  principal: [],
-  resource: [Artifact],
-  context: Context
-};
-```
-
-**Legacy workaround** — declare a placeholder entity and reference it as the principal. This was needed before Cedar supported empty `principal` lists. Cedarling still accepts it for backward compatibility with older policy stores, but it is unnecessary with the current Cedar version and should not be used in new policy stores:
+Cedar's schema validator rejects an empty `principal` list (`for action '...', 'principal' is '[]', which is invalid`). To declare an action that runs without a principal, declare a placeholder entity type purely to satisfy the schema and reference it in `appliesTo`:
 
 ```cedar
 entity Any;
@@ -605,6 +593,8 @@ action "ReadArtifact" appliesTo {
   context: Context
 };
 ```
+
+No instance of `Any` is ever constructed at runtime. `authorize_multi_issuer` invokes the action with `principal: None` and Cedar's partial evaluator runs against the policies. The placeholder entity type exists only so the schema parses.
 
 #### Writing the policy
 
