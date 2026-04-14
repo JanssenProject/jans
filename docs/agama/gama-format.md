@@ -5,7 +5,7 @@ tags:
   - agama
 ---
 
-# The `.gama` file format
+# The .gama file format
 
 In practice, a web flow will make use of a bunch of artifacts, like UI pages, images, stylesheets, and source code. Actually, to solve a real-world problem several flows are needed to be able to keep flexibility and complexity at acceptable levels. Here is where the concept **project** emerges.
 
