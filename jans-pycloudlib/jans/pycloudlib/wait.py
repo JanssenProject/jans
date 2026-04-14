@@ -161,10 +161,10 @@ def wait_for_secret(manager: Manager, **kwargs: _t.Any) -> None:
             If set to `False` or omitted, this function will check secret entry.
     """
     conn_only = as_boolean(kwargs.get("conn_only", False))
-    ssl_cert = manager.secret.get("ssl_cert")
+    auth_keys = manager.secret.get("auth_jks_base64")
 
-    if not conn_only and not ssl_cert:
-        raise WaitError("Secret 'ssl_cert' is not available")
+    if not conn_only and not auth_keys:
+        raise WaitError("Secret 'auth_jks_base64' is not available")
 
 
 #: DN of admin group
