@@ -25,7 +25,9 @@ prepare_certs() {
 
     if [[ ! -f "$demo_templates_dir/ca.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/ca.key" 4096
-        chown 1000 "$demo_templates_dir/ca.key"
+        if [[ "$(id -u)" -eq 0 ]]; then
+            chown 1000:1000 "$demo_templates_dir/ca.key"
+        fi
     fi
 
     if [[ ! -f "$demo_templates_dir/ca.crt" ]]; then
@@ -35,7 +37,9 @@ prepare_certs() {
 
     if [[ ! -f "$demo_templates_dir/web_https.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/web_https.key" 2048
-        chown 1000 "$demo_templates_dir/web_https.key"
+        if [[ "$(id -u)" -eq 0 ]]; then
+            chown 1000:1000 "$demo_templates_dir/web_https.key"
+        fi
     fi
 
     if [[ ! -f "$demo_templates_dir/web_https.csr" ]]; then
@@ -440,8 +444,8 @@ prepare_jans_configuration() {
         "ssl_cert": "$ssl_cert",
         "ssl_key": "$ssl_key",
         "ssl_csr": "$ssl_csr",
-        "vault_role_id": "$(cat $demo_templates_dir/vault_role_id)",
-        "vault_secret_id": "$(cat $demo_templates_dir/vault_secret_id)"
+        "vault_role_id": "$(cat "$demo_templates_dir/vault_role_id")",
+        "vault_secret_id": "$(cat "$demo_templates_dir/vault_secret_id")"
     },
     "_configmap": {
         "city": "Austin",
@@ -563,8 +567,8 @@ prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
 prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP" "$LOG_TARGET" "$LOG_LEVEL"
 
-docker compose up -d
+docker compose -f "$basedir/compose.yaml" up -d
 echo "[I] Janssen is starting up!"
-echo "[I] Run 'docker compose logs -f' in separate terminal to check the progress"
+echo "[I] To check the progress, run 'docker compose -f $basedir/compose.yaml logs -f' in separate terminal"
 echo "[I] Checking if Janssen is ready to accept request (this may take a while) ..."
 check_jans_readiness "$JANS_FQDN"
