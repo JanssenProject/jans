@@ -97,9 +97,6 @@ public class UnsignedAuthzTest {
 
         AuthorizeResult result = adapter.authorizeUnsigned(
                 invalidPrincipals, action, resource, context);
-
-        //assertNotNull(result);
-        //assertFalse(result.getDecision(), "Authorization should DENY for invalid principals");
     }
 
     // ---------------------------

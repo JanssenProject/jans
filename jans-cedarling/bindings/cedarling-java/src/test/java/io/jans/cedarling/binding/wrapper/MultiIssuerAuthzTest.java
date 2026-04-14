@@ -97,9 +97,6 @@ public class MultiIssuerAuthzTest {
 
         MultiIssuerAuthorizeResult result =
                 adapter.authorizeMultiIssuer(tokens, action, resource, emptyContext());
-
-        //assertNotNull(result, "Result should not be null");
-        //assertFalse(result.getDecision(), "Authorization should DENY for invalid token");
     }
 
     @Test(expectedExceptions = uniffi.cedarling_uniffi.AuthorizeException.class)
