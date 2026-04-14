@@ -53,7 +53,7 @@ class PackageUtils(SetupUtils):
             print(f"Supported distributions: {supported}")
             sys.exit(1)
 
-        install_command, update_command, query_command, _ = self.get_install_commands()
+        install_command, update_command, _, _ = self.get_install_commands()
 
         dnf_command = shutil.which('dnf')
 
@@ -130,7 +130,7 @@ class PackageUtils(SetupUtils):
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
                     if base.os_type not in ('suse',):
-                        sout, serr = self.run(update_command, shell=True, get_stderr=True)
+                        self.run(update_command, shell=True, get_stderr=True)
                     self.installNetPackage(packages)
 
                 if 'openssl' in packages and not paths.cmd_openssl:
