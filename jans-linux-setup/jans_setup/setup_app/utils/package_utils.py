@@ -133,8 +133,10 @@ class PackageUtils(SetupUtils):
                         sout, serr = self.run(update_command, shell=True, get_stderr=True)
                     self.installNetPackage(packages)
 
-                if 'openssl' in packages:
-                    paths.cmd_openssl = shutil.which('openssl')
+                if 'openssl' in packages and not paths.cmd_openssl:
+                    cmd_openssl = shutil.which('openssl')
+                    if cmd_openssl:
+                        paths.cmd_openssl = shutil.which('openssl')
 
         if base.clone_type == 'deb':
             self.run('a2enmod ssl headers proxy proxy_http proxy_ajp', shell=True)
