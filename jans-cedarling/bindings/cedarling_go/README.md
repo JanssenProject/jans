@@ -169,20 +169,18 @@ resource := cedarling_go.EntityData{
 }
 ```
 
-**2. Define principals:**
+**2. Define the principal (optional — pass `nil` to run Cedar's partial evaluator; principal-dependent policies will fail closed to Deny):**
 
 ```go
-principals := []cedarling_go.EntityData{
-    {
-        CedarMapping: cedarling_go.CedarEntityMapping{
-            EntityType: "Jans::User",
-            ID:         "random_id",
-        },
-        Payload: map[string]any{
-            "role":    []string{"admin"},
-            "country": "US",
-            "sub":     "random_sub",
-        },
+principal := cedarling_go.EntityData{
+    CedarMapping: cedarling_go.CedarEntityMapping{
+        EntityType: "Jans::User",
+        ID:         "random_id",
+    },
+    Payload: map[string]any{
+        "role":    []string{"admin"},
+        "country": "US",
+        "sub":     "random_sub",
     },
 }
 ```
@@ -191,9 +189,9 @@ principals := []cedarling_go.EntityData{
 
 ```go
 request := cedarling_go.RequestUnsigned{
-    Principals: principals,
-    Action:     `Jans::Action::"Update"`,
-    Resource:   resource,
+    Principal: &principal,
+    Action:    `Jans::Action::"Update"`,
+    Resource:  resource,
 }
 ```
 
