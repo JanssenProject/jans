@@ -489,11 +489,10 @@ EOF
 }
 
 check_jans_readiness() {
-    fqdn=$1
     cid=""
     retries=1
 
-    echo "[I] Waiting 120 seconds for services to initialize before starting health checks..."
+    echo "[I] Waiting 120 seconds for services to initialize before starting health checks. Hang on..."
     sleep 120
 
     while [[ "$retries" -le 20 ]]; do
@@ -574,4 +573,4 @@ docker compose -f "$basedir/compose.yaml" up -d
 echo "[I] Janssen is starting up!"
 echo "[I] To check the progress, run 'docker compose -f $basedir/compose.yaml logs -f' in separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."
-check_jans_readiness "$JANS_FQDN"
+check_jans_readiness
