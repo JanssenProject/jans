@@ -16,44 +16,6 @@ use crate::{
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
-/// Policy store with a single policy that does not reference the principal,
-/// used to exercise the partial-eval code path when no principal is supplied.
-static POLICY_STORE_NO_PRINCIPAL_YAML: &str = r#"
-cedar_version: v4.0.0
-policy_stores:
-  no_principal_store:
-    cedar_version: v4.0.0
-    name: "Jans"
-    policies:
-      allow_all:
-        description: policy that allows the action regardless of principal
-        creation_date: '2025-03-18T17:22:39.996050'
-        policy_content:
-          encoding: none
-          content_type: cedar
-          body: |-
-            permit(
-                principal,
-                action in [Jans::Action::"OpenAction"],
-                resource
-            );
-    schema:
-      encoding: none
-      content_type: cedar
-      body: |-
-        namespace Jans {
-        entity Issue = {"country": String, "org_id": String};
-        entity Role;
-        entity User in [Role];
-        entity TestPrincipal1  = {"is_ok": Bool};
-        action "OpenAction" appliesTo {
-          principal: [TestPrincipal1],
-          resource: [Issue],
-          context: {}
-        };
-        }
-"#;
-
 /// Single principal, allow result.
 #[test]
 async fn test_authorize_unsigned_single_principal_allow() {
@@ -131,13 +93,13 @@ async fn test_authorize_unsigned_single_principal_deny() {
 #[test]
 async fn test_authorize_unsigned_no_principal_partial_eval() {
     let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::Yaml(POLICY_STORE_NO_PRINCIPAL_YAML.to_string()),
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |_| {},
     )
     .await;
 
     let request = create_test_unsigned_request(
-        "Jans::Action::\"OpenAction\"",
+        "Jans::Action::\"OpenPublicIssue\"",
         None,
         create_test_principal(
             "Jans::Issue",
@@ -155,6 +117,94 @@ async fn test_authorize_unsigned_no_principal_partial_eval() {
     assert!(
         result.decision,
         "partial eval should allow when policy does not depend on principal"
+    );
+}
+
+/// No principal and the only matching permit policy depends on `principal.is_ok`.
+/// The partial response cannot concretize, so `execute_authorize` must synthesize
+/// a Deny and include the residual policy id in the reason set (fail-closed).
+#[test]
+async fn test_authorize_unsigned_no_principal_residual_denies() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        None,
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
+        .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should be parsed without errors");
+
+    assert!(
+        !result.decision,
+        "residual (principal-dependent) policy must fail closed to Deny"
+    );
+    assert_eq!(
+        result.response.decision(),
+        Decision::Deny,
+        "synthesized cedar response should be Deny"
+    );
+
+    let reason_ids: Vec<String> = result
+        .response
+        .diagnostics()
+        .reason()
+        .map(ToString::to_string)
+        .collect();
+    assert!(
+        reason_ids.iter().any(|id| id == "5"),
+        "residual policy id should be reported in diagnostics reason set, got: {reason_ids:?}"
+    );
+}
+
+/// Exercises `get_matching_policies_unsigned` with `principal: Some(..)` and
+/// with `principal: None`, covering both arms of the `match principal {..}`
+/// branch introduced by the single-principal unsigned refactor.
+#[test]
+async fn test_get_matching_policies_unsigned_both_branches() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let principal = create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
+        .expect("principal should build");
+    let resource = create_test_principal(
+        "Jans::Issue",
+        "random_id",
+        json!({"org_id": "x", "country": "US"}),
+    )
+    .expect("resource should build");
+
+    let actions = vec!["Jans::Action::\"UpdateForTestPrincipals\"".to_string()];
+
+    let with_principal = cedarling
+        .get_matching_policies_unsigned(Some(&principal), &actions, std::slice::from_ref(&resource))
+        .expect("Some-principal branch should succeed");
+    assert!(
+        with_principal.iter().any(|p| p.id == "5"),
+        "policy 5 should match when principal type is provided, got: {with_principal:?}"
+    );
+
+    let no_principal = cedarling
+        .get_matching_policies_unsigned(None, &actions, std::slice::from_ref(&resource))
+        .expect("None-principal branch should succeed");
+    assert!(
+        no_principal.iter().any(|p| p.id == "5"),
+        "policy 5 should still match when principal is absent, got: {no_principal:?}"
     );
 }
 
