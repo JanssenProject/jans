@@ -201,29 +201,30 @@ impl Cedarling {
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
-    /// with the given principals, actions, and resources.
+    /// with the given principal, actions, and resources.
     ///
     /// This performs scope-level filtering only (principal/action/resource constraints).
     /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
     ///
-    /// :param principals: List of EntityData representing principal entities.
+    /// :param principal: Optional EntityData representing the principal entity. When
+    ///     `None`, policies are filtered assuming an unknown principal.
     /// :param actions: List of action strings (e.g., 'Jans::Action::"Read"').
     /// :param resources: List of EntityData representing resource entities.
     /// :returns: A list of PolicyMetadata objects for matching policies.
     /// :raises AuthorizeError: If policy matching fails.
+    #[pyo3(signature = (principal, actions, resources))]
     fn get_matching_policies_unsigned(
         &self,
-        principals: Vec<EntityData>,
+        principal: Option<EntityData>,
         actions: Vec<String>,
         resources: Vec<EntityData>,
     ) -> Result<Vec<PolicyMetadata>, PyErr> {
-        let principals: Vec<cedarling::EntityData> =
-            principals.into_iter().map(|p| p.into()).collect();
+        let principal: Option<cedarling::EntityData> = principal.map(|p| p.into());
         let resources: Vec<cedarling::EntityData> =
             resources.into_iter().map(|r| r.into()).collect();
         let result = self
             .inner
-            .get_matching_policies_unsigned(&principals, &actions, &resources)
+            .get_matching_policies_unsigned(principal.as_ref(), &actions, &resources)
             .map_err(authorize_error_to_py)?;
         Ok(result.into_iter().map(|pm| pm.into()).collect())
     }
