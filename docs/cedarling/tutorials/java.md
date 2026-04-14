@@ -113,14 +113,14 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 ### Authorization
 
-Cedarling provides authorization interfaces for evaluating access requests based on principals (entities), actions, resources, and context.
+Cedarling provides authorization interfaces for evaluating access requests based on a principal (entity), action, resource, and context.
 
-- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly without JWTs. This is useful when you need to authorize based on internal application data.
-- [**Custom Principal Authorization**](#custom-principal-authorization-unsigned) is an alternative approach for defining custom principals.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass a principal directly without JWTs. This is useful when you need to authorize based on internal application data.
+- [**Custom Principal Authorization**](#custom-principal-authorization-unsigned) is an alternative approach for defining a custom principal.
 
 #### Unsigned Authorization
 
-For unsigned authorization, use `authorizeUnsigned` which accepts principals directly without JWTs.
+For unsigned authorization, use `authorizeUnsigned` which accepts a principal directly without JWTs. The principal is optional — pass `null` to run the request with partial evaluation.
 
 **1. Define the resource:**
 
@@ -151,23 +151,21 @@ The _context_ represents additional data that may affect the authorization decis
     JSONObject context = new JSONObject();
 ```
 
-**4. Define Principals**
+**4. Define Principal**
 
 ```java
-    List<EntityData> principals = List.of(
-        EntityData.Companion.fromJson(new JSONObject()
-            .put("cedar_entity_mapping", new JSONObject()
-                .put("entity_type", "Jans::Workload")
-                .put("id", "workload_123"))
-            .put("client_id", "my_client")
-            .toString())
-    );
+    EntityData principal = EntityData.Companion.fromJson(new JSONObject()
+        .put("cedar_entity_mapping", new JSONObject()
+            .put("entity_type", "Jans::Workload")
+            .put("id", "workload_123"))
+        .put("client_id", "my_client")
+        .toString());
 ```
 
 **5. Authorize**
 
 ```java
-    AuthorizeResult result = adapter.authorizeUnsigned(principals, action, resource, context);
+    AuthorizeResult result = adapter.authorizeUnsigned(principal, action, resource, context);
     if(result.getDecision()) {
         System.out.println("Access granted");
     } else {
@@ -177,26 +175,17 @@ The _context_ represents additional data that may affect the authorization decis
 
 #### Custom Principal Authorization (Unsigned)
 
-**1. Define principals:**
+**1. Define principal:**
 
 ```java
-    String principals = """
-        const principals = [
-          {
-            "cedar_entity_mapping": {
-              "entity_type": "Jans::Workload",
-              "id": "some_workload_id"
-            },
-            "client_id": "some_client_id",
+    String principalJson = """
+        {
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::User",
+            "id": "random_user_id"
           },
-          {
-            "cedar_entity_mapping": {
-              "entity_type": "Jans::User",
-              "id": "random_user_id"
-            },
-            "role": ["admin", "manager"]
-          },
-        ];
+          "role": ["admin", "manager"]
+        }
         """;
 ```
 
@@ -204,12 +193,12 @@ Similarly, create and initialize String variables with action, resource, context
 
 **2. Authorize**
 
-Finally, call the `authorizeUnsigned` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorizeUnsigned` function to check whether the principal is allowed to perform the specified action on the resource.
 
 ```java
-        List<EntityData> principals = List.of(EntityData.Companion.fromJson(principals));
+        EntityData principal = EntityData.Companion.fromJson(principalJson);
 
-        AuthorizeResult result = adapter.authorizeUnsigned(principals, action, new JSONObject(resource), new JSONObject(context));
+        AuthorizeResult result = adapter.authorizeUnsigned(principal, action, new JSONObject(resource), new JSONObject(context));
         if(result.getDecision()) {
             System.out.println("Access granted");
         } else {
