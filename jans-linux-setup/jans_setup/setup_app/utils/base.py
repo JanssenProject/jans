@@ -102,7 +102,7 @@ else:
     httpd_name = 'apache2'
 
 def get_os_description():
-    desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'rocky': 'Rocky Linux' }
+    desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'debian': 'Debian', 'centos': 'CentOS', 'rocky': 'Rocky Linux' }
     descs = desc_dict.get(os_type, os_type)
     descs += ' ' + os_version
     if os_subversion:
