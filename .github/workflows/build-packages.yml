@@ -181,13 +181,13 @@ jobs:
         OS="${{ matrix.name }}"
         VERSION="${{ steps.previoustag.outputs.version }}"
         SUFFIX="${{ matrix.asset_suffix }}"
-        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/flex${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}"
-        cosign sign-blob --yes --bundle flex-${OS}-${VERSION}.bundle "${ARTIFACT}"
+        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}"
+        cosign sign-blob --yes --bundle jans-${OS}-${VERSION}.bundle "${ARTIFACT}"
 
     - name: Create checksum
       id: create_checksum
       run: |
-        cd flex/
+        cd jans/
         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" checksum.sh
         sudo ./checksum.sh
         ls ${{github.workspace}}/${{ matrix.asset_path }}
@@ -201,8 +201,8 @@ jobs:
         SUFFIX="${{ matrix.asset_suffix }}"
         
         gh release upload ${{ steps.previoustag.outputs.tag }} \
-          "${{github.workspace}}/${{ matrix.asset_path }}/flex${{ matrix.asset_prefix }}${VERSION}${SUFFIX}" \
-          "${{github.workspace}}/flex-${OS}-${VERSION}.bundle" \
+          "${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VERSION}${SUFFIX}" \
+          "${{github.workspace}}/jans-${OS}-${VERSION}.bundle" \
           --repo ${{ github.repository }} \
           --clobber
 
