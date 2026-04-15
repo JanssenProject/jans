@@ -45,7 +45,7 @@ def test_authorize_unsigned_single_principal_allow():
     )
 
     result = instance.authorize_unsigned(request)
-    assert result.decision is True
+    assert result.is_allowed()
 
 
 def test_authorize_unsigned_no_principal_public_action_allow():
@@ -61,7 +61,7 @@ def test_authorize_unsigned_no_principal_public_action_allow():
     )
 
     result = instance.authorize_unsigned(request)
-    assert result.decision is True
+    assert result.is_allowed()
 
 
 def test_authorize_unsigned_no_principal_principal_dependent_deny():
@@ -77,6 +77,6 @@ def test_authorize_unsigned_no_principal_principal_dependent_deny():
     )
 
     result = instance.authorize_unsigned(request)
-    assert result.decision is False
+    assert not result.is_allowed()
     reasons = result.response.diagnostics.reason
     assert "5" in reasons

@@ -502,7 +502,6 @@ class EntityData:
 
 @final
 class AuthorizeResult:
-    decision: bool
     response: AuthorizeResultResponse
 
     def is_allowed(self) -> bool: ...

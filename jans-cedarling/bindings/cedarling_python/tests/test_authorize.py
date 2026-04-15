@@ -47,4 +47,3 @@ def test_authorize_unsigned_ok():
 
     authorize_result = instance.authorize_unsigned(request)
     assert authorize_result.is_allowed()
-    assert authorize_result.decision is True

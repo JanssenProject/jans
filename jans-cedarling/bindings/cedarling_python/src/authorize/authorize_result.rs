@@ -30,12 +30,6 @@ impl AuthorizeResult {
         self.inner.decision
     }
 
-    /// The overall authorization decision.
-    #[getter]
-    fn decision(&self) -> bool {
-        self.inner.decision
-    }
-
     /// Returns the underlying cedar_policy `Response` for this request.
     #[getter]
     fn response(&self) -> AuthorizeResultResponse {
