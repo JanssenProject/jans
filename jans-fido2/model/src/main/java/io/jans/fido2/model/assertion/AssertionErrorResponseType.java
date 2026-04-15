@@ -21,11 +21,6 @@ public enum AssertionErrorResponseType implements IErrorType {
     UNSUPPORTED_AUTHENTICATION_TYPE("unsupported_authentication_type"),
 
     /**
-     * The request contains conflicts with Super Gluu parameters
-     */
-    CONFLICT_WITH_SUPER_GLUU("conflict_with_super_gluu"),
-
-    /**
      * Can't find associated key(s)
      */
     KEYS_NOT_FOUND("keys_not_found"),
