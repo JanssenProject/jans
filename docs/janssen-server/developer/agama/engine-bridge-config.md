@@ -65,7 +65,7 @@ This can be better explained with an example. Suppose the following configuratio
 
 - In case of `com.acmeMan`, no matches are found. KRYO is picked as in the previous case
 
-Please account additional behaviors:
+Please note these additional behaviors:
 
 - If the object's class is in the default package (unnamed package), KRYO is used
 - If the exact class name is found in one of the lists, the method represented by such list is employed
@@ -73,4 +73,4 @@ Please account additional behaviors:
 
 ## Bridge configuration
 
-Administrators can modify the behavior of the bridge by setting the `finish_userid_db_attribute` configuration property of the script. This is used to map the identity of the user to login in the case of sucessfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the `userId` passed in the `Finish` instruction of the flow.
+Administrators can modify the behavior of the bridge by setting the `finish_userid_db_attribute` configuration property of the script. This is used to map the identity of the user to login in the case of successfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the `userId` passed in the `Finish` instruction of the flow.
