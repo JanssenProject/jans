@@ -125,15 +125,17 @@ jobs:
     - name: Getting build dependencies
       id: get_dependencies
       run: |
-         mkdir -p jans/jans-src/opt/
-         cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
-         cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
-         sudo add-apt-repository -y ppa:deadsnakes/ppa
-         sudo apt-get update
-         sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm python3-dev libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog postgresql postgresql-contrib
-         sudo apt install -y python${{ matrix.python_version }}-distutils 2>/dev/null || sudo apt install -y python3-distutils 2>/dev/null || echo "distutils not available (Python 3.12+ bundles it)"
-         sudo python${{ matrix.python_version }} -m pip install --break-system-packages cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary || echo "pip install partially failed"
+        mkdir -p jans/jans-src/opt/
+        cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
+        cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
+        sudo add-apt-repository -y ppa:deadsnakes/ppa
+        sudo apt-get update
+        sudo apt-get install -y python${{ matrix.python_version }} python${{ matrix.python_version }}-dev python${{ matrix.python_version }}-distutils
+        sudo apt install -y build-essential devscripts debhelper rpm libpq-dev apache2 rsyslog postgresql postgresql-contrib
+        sudo python${{ matrix.python_version }} -m ensurepip || sudo apt-get install -y python3-pip
+        sudo PIP_BREAK_SYSTEM_PACKAGES=1 python${{ matrix.python_version }} -m pip install \
+        --ignore-installed \
+        cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary
     - name: Get tag and version
       id: previoustag
       run: |
@@ -176,27 +178,33 @@ jobs:
     - name: Sign package
       id: sign_package
       run: |
+        OS="${{ matrix.name }}"
+        VERSION="${{ steps.previoustag.outputs.version }}"
+        SUFFIX="${{ matrix.asset_suffix }}"
         ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}"
-        cosign sign-blob --yes --bundle cosign.bundle "${ARTIFACT}"
+        cosign sign-blob --yes --bundle jans-${OS}-${VERSION}.bundle "${ARTIFACT}"
 
-    - name: Upload binaries to release
-      id: upload_binaries
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
-      with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        tag: ${{ steps.previoustag.outputs.tag }}
-        overwrite: true
-    - name: Upload cosign bundle to release
-      id: upload_cosign_bundle
-      uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
-      with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/cosign.bundle
-        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sigstore.json
-        tag: ${{ steps.previoustag.outputs.tag }}
-        overwrite: true
+    - name: Create checksum
+      id: create_checksum
+      run: |
+        cd jans/
+        sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" checksum.sh
+        sudo ./checksum.sh
+        ls ${{github.workspace}}/${{ matrix.asset_path }}
+
+    - name: Upload assets to release
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+      run: |
+        OS="${{ matrix.name }}"
+        VERSION="${{ steps.previoustag.outputs.version }}"
+        SUFFIX="${{ matrix.asset_suffix }}"
+        
+        gh release upload ${{ steps.previoustag.outputs.tag }} \
+          "${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VERSION}${SUFFIX}" \
+          "${{github.workspace}}/jans-${OS}-${VERSION}.bundle" \
+          --repo ${{ github.repository }} \
+          --clobber
 
   build_and_upload_python_packages:
     if: |
@@ -589,7 +597,7 @@ jobs:
             fi
             echo "PROTOC=$PROTOC_PATH" >> $GITHUB_ENV
             echo "$(dirname "$PROTOC_PATH")" >> $GITHUB_PATH
-          fi      
+          fi
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
       - name: Install Golang dependencies
