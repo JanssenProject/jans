@@ -71,7 +71,7 @@ We need to initialize Cedarling first.
 
         try {
             CedarlingAdapter adapter = new CedarlingAdapter();
-            cedarlingAdapter.loadFromJson(bootstrapJsonStr);
+            adapter.loadFromJson(bootstrapJsonStr);
         } catch (CedarlingException e) {
             System.out.println("Unable to initialize Cedarling" + e.getMessage());
         } catch (Exception e) {
