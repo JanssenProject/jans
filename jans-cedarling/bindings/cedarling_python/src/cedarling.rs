@@ -244,8 +244,7 @@ impl Cedarling {
         actions: Vec<String>,
         resources: Vec<EntityData>,
     ) -> Result<Vec<PolicyMetadata>, PyErr> {
-        let tokens: Vec<cedarling::TokenInput> =
-            tokens.into_iter().map(|t| t.into()).collect();
+        let tokens: Vec<cedarling::TokenInput> = tokens.into_iter().map(|t| t.into()).collect();
         let resources: Vec<cedarling::EntityData> =
             resources.into_iter().map(|r| r.into()).collect();
         let result = self

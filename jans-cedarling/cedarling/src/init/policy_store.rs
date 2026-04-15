@@ -8,8 +8,8 @@ use std::time::Duration;
 use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
+use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 
@@ -63,7 +63,7 @@ fn extract_first_policy_store(
         .map(|(k, v)| PolicyStoreWithID {
             id: k.to_owned(),
             store: v.to_owned().into(), // Convert LegacyPolicyStore -> PolicyStore
-            metadata: None, // Legacy format doesn't include metadata
+            metadata: None,             // Legacy format doesn't include metadata
         })
         .next();
 

@@ -13,6 +13,7 @@ Cedarling supports both [Token-Based Access Control (TBAC)](../quick-start/cedar
 
 You can integrate Cedarling into your application using the following language libraries:
 
+- [C](./c.md)
 - [JavaScript](./javascript.md)
 - [Python](./python.md)
 - [Rust](./rust.md)
@@ -51,6 +52,21 @@ The initialization or `init` interface is how you will initialize Cedarling. Ini
 - Learn more in the [policy store guide](../reference/cedarling-policy-store.md).
 
 The bootstrap configuration and policy store directly influence how Cedarling performs [authorization](#authorization).
+
+=== "C"
+
+    ```c
+    #include "cedarling_c.h"
+    
+    // Initialize the library
+    cedarling_init();
+    
+    // Create instance with JSON config
+    const char* config = "{\"CEDARLING_APPLICATION_NAME\": \"My App\", ...}";
+    CedarlingInstanceResult result;
+    cedarling_new(config, &result);
+    uint64_t instance_id = result.INSTANCE_ID;
+    ```
 
 === "JavaScript"
 
@@ -183,6 +199,28 @@ See the language-specific tutorials for detailed examples of both authorization 
 ### Context Data API
 
 The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace. This enables dynamic, runtime-based authorization decisions.
+
+=== "C"
+
+    ```c
+    // Push data with optional TTL
+    const char* value = "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}";
+    CedarlingResult result;
+    cedarling_context_push(instance_id, "user:123", value, &result);
+    cedarling_free_result(&result);
+
+    // Get data
+    cedarling_context_get(instance_id, "user:123", &result);
+    if (result.DATA) {
+        printf("User data: %s\n", (char*)result.DATA);
+    }
+    cedarling_free_result(&result);
+
+    // Get statistics
+    cedarling_context_stats(instance_id, &result);
+    printf("Stats: %s\n", (char*)result.DATA);
+    cedarling_free_result(&result);
+    ```
 
 === "JavaScript"
 
