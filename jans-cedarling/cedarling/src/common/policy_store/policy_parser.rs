@@ -97,7 +97,6 @@ impl PolicyParser {
                 // fall back to scanning `@id(...)` in comments, then to the filename.
                 let id_str = policy
                     .annotation("id")
-                    .filter(|s| !s.is_empty())
                     .map(str::to_owned)
                     .or_else(|| Self::extract_id_annotation(content))
                     .or_else(|| Self::derive_id_from_filename(filename))
@@ -120,25 +119,21 @@ impl PolicyParser {
                 for policy in policies {
                     // In Cedar 4+, `@id("...")` is a policy annotation named `id`; the AST
                     // `PolicyId` defaults to `policy0`, `policy1`, ... until renamed.
-                    let id_str = policy
-                        .annotation("id")
-                        .filter(|s| !s.is_empty())
-                        .map(str::to_owned)
-                        .ok_or_else(|| {
-                            // Cedar's `policies()` iteration order is not guaranteed,
-                            // so `policy.id()` here (e.g. `policy0`) may not match file
-                            // order. Scan the source text to point at the first policy
-                            // start that has no preceding `@id(...)`.
-                            let (line, snippet) = Self::find_first_policy_without_id(content)
-                                .unwrap_or((0, String::new()));
-                            PolicyStoreError::CedarParsing {
-                                file: filename.to_string(),
-                                detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
-                                    line,
-                                    snippet,
-                                },
-                            }
-                        })?;
+                    let id_str = policy.annotation("id").map(str::to_owned).ok_or_else(|| {
+                        // Cedar's `policies()` iteration order is not guaranteed,
+                        // so `policy.id()` here (e.g. `policy0`) may not match file
+                        // order. Scan the source text to point at the first policy
+                        // start that has no preceding `@id(...)`.
+                        let (line, snippet) = Self::find_first_policy_without_id(content)
+                            .unwrap_or((0, String::new()));
+                        PolicyStoreError::CedarParsing {
+                            file: filename.to_string(),
+                            detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId {
+                                line,
+                                snippet,
+                            },
+                        }
+                    })?;
                     Self::validate_policy_id(&id_str, filename)
                         .map_err(PolicyStoreError::Validation)?;
                     if !seen_ids.insert(id_str.clone()) {
@@ -399,10 +394,22 @@ impl PolicyParser {
         // byte offset, not a char index, so recovering the quote via
         // `chars().nth(open_quote)` would pick the wrong character once any
         // multi-byte UTF-8 appears before the quote (e.g. `@id(🙂"x")`).
-        let (open_quote, quote_char) = after_id
-            .find('"')
-            .map(|i| (i, '"'))
-            .or_else(|| after_id.find('\'').map(|i| (i, '\'')))?;
+        // Prefer whichever opening quote appears first so a later `"` (e.g. in
+        // `User::"alice"`) does not steal parsing from an earlier `'...'`.
+        let dq = after_id.find('"');
+        let sq = after_id.find('\'');
+        let (open_quote, quote_char) = match (dq, sq) {
+            (Some(i), Some(j)) => {
+                if i < j {
+                    (i, '"')
+                } else {
+                    (j, '\'')
+                }
+            },
+            (Some(i), None) => (i, '"'),
+            (None, Some(j)) => (j, '\''),
+            (None, None) => return None,
+        };
         let after_open = &after_id[open_quote + 1..];
         let close_quote = after_open.find(quote_char)?;
         Some(after_open[..close_quote].to_string())
@@ -544,7 +551,29 @@ mod tests {
         let policy_map =
             result.expect("parse_policies should succeed for two separate policy files");
 
-        assert!(!policy_map.is_empty());
+        assert_eq!(
+            policy_map.len(),
+            2,
+            "expected exactly two policy ids in policy_map (one per file)"
+        );
+        assert_eq!(
+            policy_map
+                .get(&PolicyId::new("policy1"))
+                .map(String::as_str),
+            Some("policy1.cedar"),
+            "first file should contribute id policy1 mapped to policy1.cedar"
+        );
+        assert_eq!(
+            policy_map
+                .get(&PolicyId::new("policy2"))
+                .map(String::as_str),
+            Some("policy2.cedar"),
+            "second file should contribute id policy2 mapped to policy2.cedar"
+        );
+        assert!(
+            !policy_map.contains_key(&PolicyId::new("missing")),
+            "policy_map must not contain a synthetic id that was never parsed"
+        );
     }
 
     #[test]
@@ -570,7 +599,26 @@ mod tests {
         ";
 
         let id = PolicyParser::extract_id_annotation(policy_text);
-        assert_eq!(id, Some("another-policy-id".to_string()));
+        assert_eq!(
+            id,
+            Some("another-policy-id".to_string()),
+            "single-quoted @id in a comment line should be extracted as the policy id"
+        );
+    }
+
+    #[test]
+    fn test_extract_id_annotation_prefers_earlier_opening_quote() {
+        // A later ASCII `"` (e.g. in `User::"alice"`) must not be chosen as the
+        // opening delimiter when `@id('...')` appears first on the same logical line.
+        let policy_text =
+            r#"@id('quoted-id') permit(principal == User::"alice", action, resource);"#;
+
+        let id = PolicyParser::extract_id_annotation(policy_text);
+        assert_eq!(
+            id,
+            Some("quoted-id".to_string()),
+            "the opening quote for @id must be the earliest of ' or \", matching Cedar-style strings on the line"
+        );
     }
 
     #[test]
@@ -631,7 +679,11 @@ mod tests {
 
         let policy_set = PolicyParser::create_policy_set(policies, vec![])
             .expect("create_policy_set should succeed for permit+forbid policies");
-        assert!(!policy_set.is_empty());
+        assert_eq!(
+            policy_set.policies().count(),
+            2,
+            "permit and forbid from the combined text should both be present in the PolicySet"
+        );
     }
 
     #[test]
@@ -652,7 +704,16 @@ mod tests {
 
         let policy_set = PolicyParser::create_policy_set(parsed_policy, parsed_template)
             .expect("create_policy_set should succeed with one policy and one template");
-        assert!(!policy_set.is_empty());
+        assert_eq!(
+            policy_set.policies().count(),
+            1,
+            "create_policy_set should retain exactly one non-template policy"
+        );
+        assert_eq!(
+            policy_set.templates().count(),
+            1,
+            "create_policy_set should retain exactly one template"
+        );
     }
 
     #[test]

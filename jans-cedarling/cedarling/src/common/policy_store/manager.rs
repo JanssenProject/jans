@@ -523,8 +523,7 @@ mod tests {
             "expected both policy ids p1 and p2, got {policy_ids:?}"
         );
         assert!(
-            template_ids.contains(&"t1".to_string())
-                && template_ids.contains(&"t2".to_string()),
+            template_ids.contains(&"t1".to_string()) && template_ids.contains(&"t2".to_string()),
             "expected both template ids t1 and t2, got {template_ids:?}"
         );
     }
