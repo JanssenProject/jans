@@ -10,7 +10,6 @@ import (
 var bootstrapConfig string = `
 {
         "CEDARLING_APPLICATION_NAME": "TestApp",
-        "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_LOG_TYPE": "off",
@@ -352,7 +351,6 @@ func ExampleCedarling_GetLogsByTag() {
 func getMultiIssuerConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"CEDARLING_APPLICATION_NAME":                   "TestApp",
-		"CEDARLING_POLICY_STORE_ID":                    "a1bf93115de86de760ee0bea1d529b521489e5a11747",
 		"CEDARLING_JWT_SIG_VALIDATION":                 "disabled",
 		"CEDARLING_JWT_STATUS_VALIDATION":              "disabled",
 		"CEDARLING_POLICY_STORE_LOCAL_FN":              "../../test_files/policy-store-multi-issuer-test.yaml",

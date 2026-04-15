@@ -140,7 +140,6 @@ import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 // Example configuration (populate dynamically in production)
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "MyApp",
-    "CEDARLING_POLICY_STORE_ID":      "your-policy-store-id",
     "CEDARLING_LOG_LEVEL":            "INFO",
     "CEDARLING_LOG_TYPE":             "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
@@ -421,7 +420,6 @@ For testing scenarios, you may want to disable JWT validation:
 ```go
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "TestApp",
-    "CEDARLING_POLICY_STORE_ID":      "test-policy-store",
     "CEDARLING_JWT_SIG_VALIDATION":   "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
     "CEDARLING_LOG_TYPE":             "std_out",
