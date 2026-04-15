@@ -252,7 +252,11 @@ SSLCACertificateFile /etc/certs/mtlscert/example-ca.crt
 
 It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates
 is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client
-certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in `X-Forwarded-Client-Cert` or `X-ClientCert` header.
+certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in one of the following headers (in order of priority):
+
+1. `X-Forwarded-Client-Cert` - Used by Envoy/Istio (URL-encoded PEM format with metadata)
+2. `X-Forwarded-Tls-Client-Cert` - Used by Traefik (raw base64 without PEM delimiters)
+3. `X-ClientCert` - Legacy header (raw PEM format)
 
 ```
 <LocationMatch /jans-auth>
@@ -392,6 +396,20 @@ Above command will create the file: `example-cli.p12`.
 root@jans:/etc/certs/mtlscert# ls
 example-ca.crt  example-ca.key  example-cli.crt  example-cli.csr  example-cli.key  example-cli.p12  example.crt  example.csr  example.key
 ```
+
+## Configuring Traefik for mTLS
+
+Traefik uses the `X-Forwarded-Tls-Client-Cert` header to forward client certificates. This header contains the raw base64-encoded certificate without PEM delimiters.
+
+### Header Format Comparison
+
+| Proxy | Header Name | Format |
+|-------|-------------|--------|
+| Envoy/Istio | `X-Forwarded-Client-Cert` | `Hash=...;Cert="<URL_ENCODED_PEM>";Subject="...";URI=` |
+| Traefik | `X-Forwarded-Tls-Client-Cert` | Raw base64 (no PEM delimiters) |
+| Apache | `X-ClientCert` | Raw PEM with BEGIN/END markers |
+
+Jans Auth Server automatically detects and parses all three formats, checking them in the order listed above.
 
 ## mTLS testing
 
