@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import jakarta.ws.rs.WebApplicationException;
@@ -51,85 +50,8 @@ class ConfigurationControllerTest {
         verifyNoMoreInteractions(appConfiguration);
     }
 
-    //TODO: remove after fixing the issue concerning isAssertionOptionsGenerateEndpointEnabled
-    /*@ Test
-    void getConfiguration_ifEnableAssertionOptionsGenerateEndpointIsTrue_success() throws JsonProcessingException {
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
-        String issuer = "https://jans-test.org";
-        String baseEndpoint = issuer + "/fido";
-        when(appConfiguration.getIssuer()).thenReturn(issuer);
-        when(appConfiguration.getBaseEndpoint()).thenReturn(baseEndpoint);
-
-        Response response = configurationController.getConfiguration();
-        assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-
-        assertJsonNode(response, issuer, baseEndpoint, true, false);
-
-        verify(appConfiguration, times(2)).getFido2Configuration();
-        verify(appConfiguration).getBaseEndpoint();
-        verify(appConfiguration).getIssuer();
-        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
-        verify(dataMapperService, times(3)).createObjectNode();
-    }
-
-    @ Test
-    void getConfiguration_ifSuperGluuEnabledIsTrue_success() throws JsonProcessingException {
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
-        String issuer = "https://jans-test.org";
-        String baseEndpoint = issuer + "/fido";
-        when(appConfiguration.getIssuer()).thenReturn(issuer);
-        when(appConfiguration.getBaseEndpoint()).thenReturn(baseEndpoint);
-
-        Response response = configurationController.getConfiguration();
-        assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-
-        assertJsonNode(response, issuer, baseEndpoint, true, true);
-
-        verify(appConfiguration, times(2)).getFido2Configuration();
-        verify(appConfiguration).getBaseEndpoint();
-        verify(appConfiguration).getIssuer();
-        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verify(dataMapperService, times(3)).createObjectNode();
-    }
-
-    @ Test
-    void getConfiguration_happyPath_success() throws JsonProcessingException {
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(false);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(false);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
-        String issuer = "https://jans-test.org";
-        String baseEndpoint = issuer + "/fido";
-        when(appConfiguration.getIssuer()).thenReturn(issuer);
-        when(appConfiguration.getBaseEndpoint()).thenReturn(baseEndpoint);
-
-        Response response = configurationController.getConfiguration();
-        assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-
-        assertJsonNode(response, issuer, baseEndpoint, false, false);
-
-        verify(appConfiguration, times(2)).getFido2Configuration();
-        verify(appConfiguration).getBaseEndpoint();
-        verify(appConfiguration).getIssuer();
-        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verify(dataMapperService, times(3)).createObjectNode();
-    }
-*/
     private void assertJsonNode(Response response, String issuer, String baseEndpoint,
-                                boolean verifyAssertionOptionsGenerate, boolean verifySuperGluu) throws JsonProcessingException {
+                                boolean verifyAssertionOptionsGenerate) throws JsonProcessingException {
         JsonNode nodeEntity = mapper.readTree(response.getEntity().toString());
         assertTrue(nodeEntity.has("version"));
         assertEquals(nodeEntity.get("version").asText(), "1.1");
