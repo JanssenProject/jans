@@ -330,7 +330,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.copyFile("%s/hostname" % Config.output_dir, Config.etc_hostname)
                 self.run(['/bin/chmod', '-f', '644', Config.etc_hostname])
 
-            if Config.os_type in ['centos', 'red', 'fedora']:
+            if Config.os_type in ['centos', 'red', 'rocky']:
                 self.copyFile("%s/network" % Config.output_dir, Config.network)
 
             self.run(['/bin/hostname', Config.hostname])
