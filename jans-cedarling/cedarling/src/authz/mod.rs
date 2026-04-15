@@ -391,28 +391,46 @@ impl Authz {
                 parameters.entities,
             ))
         } else {
-            let partial = self.authorizer.is_authorized_partial(
-                &request,
-                self.config.policy_store.policies.get_set(),
-                parameters.entities,
-            );
+            Ok(self.is_authorized_partial(&request, parameters.entities))
+        }
+    }
 
-            // `decision()` is preferred over `concretize()`: it returns `Some` iff the partial
-            // response already has a concrete decision, letting us preserve the original
-            // diagnostics; only residual-dependent requests fall through to a synthesized Deny.
-            if partial.decision().is_some() {
-                Ok(partial.concretize())
-            } else {
-                let residual_ids: HashSet<cedar_policy::PolicyId> = partial
-                    .nontrivial_residuals()
-                    .map(|p| p.id().clone())
-                    .collect();
-                Ok(cedar_policy::Response::new(
-                    cedar_policy::Decision::Deny,
-                    residual_ids,
-                    Vec::new(),
-                ))
-            }
+    /// Run a partial Cedar authorization and convert the result to a concrete [`cedar_policy::Response`].
+    ///
+    /// When the partial evaluation already yields a concrete decision the original diagnostics are
+    /// preserved via [`cedar_policy::PartialResponse::concretize`].  When residuals remain (no
+    /// concrete decision), a fail-closed Deny is synthesized: the nontrivial-residual policy IDs
+    /// become the `reason` set and evaluation errors are extracted through `concretize()` — the
+    /// only public API in cedar-policy 4.9 that surfaces `AuthorizationError` objects from a
+    /// `PartialResponse`.
+    fn is_authorized_partial(
+        &self,
+        request: &cedar_policy::Request,
+        entities: &cedar_policy::Entities,
+    ) -> cedar_policy::Response {
+        let partial = self.authorizer.is_authorized_partial(
+            request,
+            self.config.policy_store.policies.get_set(),
+            entities,
+        );
+
+        // `decision()` is preferred over `concretize()`: it returns `Some` iff the partial
+        // response already has a concrete decision, letting us preserve the original
+        // diagnostics; only residual-dependent requests fall through to a synthesized Deny.
+        if partial.decision().is_some() {
+            partial.concretize()
+        } else {
+            let residual_ids: HashSet<cedar_policy::PolicyId> = partial
+                .nontrivial_residuals()
+                .map(|p| p.id().clone())
+                .collect();
+            let errors: Vec<cedar_policy::AuthorizationError> = partial
+                .concretize()
+                .diagnostics()
+                .errors()
+                .cloned()
+                .collect();
+            cedar_policy::Response::new(cedar_policy::Decision::Deny, residual_ids, errors)
         }
     }
 
