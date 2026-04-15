@@ -19,7 +19,7 @@ to install this Service along with other Janssen Server components. Post
 installation, to add Jans-Link component, use the following:
 
 ```bash
-python3 /opt/jans/jans-setup/setup.py --install-jans-link`
+python3 /opt/jans/jans-setup/setup.py --install-jans-link
 ```
 
 Jans LDAP link gets installed as a service that can be managed using below
