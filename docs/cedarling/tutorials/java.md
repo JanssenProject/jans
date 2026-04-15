@@ -70,7 +70,7 @@ We need to initialize Cedarling first.
         """;
 
         try {
-            CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
+            CedarlingAdapter adapter = new CedarlingAdapter();
             cedarlingAdapter.loadFromJson(bootstrapJsonStr);
         } catch (CedarlingException e) {
             System.out.println("Unable to initialize Cedarling" + e.getMessage());
@@ -240,48 +240,6 @@ The _context_ represents additional data that may affect the authorization decis
     } else {
         System.out.println("Access denied");
     }
-```
-
-#### Custom Principal Authorization (Unsigned)
-
-**1. Define principals:**
-
-```java
-    String principals = """
-        const principals = [
-          {
-            "cedar_entity_mapping": {
-              "entity_type": "Jans::Workload",
-              "id": "some_workload_id"
-            },
-            "client_id": "some_client_id",
-          },
-          {
-            "cedar_entity_mapping": {
-              "entity_type": "Jans::User",
-              "id": "random_user_id"
-            },
-            "role": ["admin", "manager"]
-          },
-        ];
-        """;
-```
-
-Similarly, create and initialize String variables with action, resource, context.
-
-**2. Authorize**
-
-Finally, call the `authorizeUnsigned` function to check whether the principals are allowed to perform the specified action on the resource.
-
-```java
-        List<EntityData> principals = List.of(EntityData.Companion.fromJson(principals));
-
-        AuthorizeResult result = adapter.authorizeUnsigned(principals, action, new JSONObject(resource), new JSONObject(context));
-        if(result.getDecision()) {
-            System.out.println("Access granted");
-        } else {
-            System.out.println("Access denied");
-        }
 ```
 
 ### Logging
