@@ -110,3 +110,5 @@ require (
 	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+replace github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go => ../bindings/cedarling_go

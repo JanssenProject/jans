@@ -2,7 +2,6 @@ package cedarlingopa
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -21,7 +20,6 @@ const PluginName = "cedarling_opa"
 type Config struct {
 	BootstrapConfig map[string]any `json:"bootstrap_config"`
 	Stderr          bool           `json:"stderr"` // false => stdout, true => stderr
-	PolicyStore     map[string]any `json:"policy_store"`
 }
 
 type CedarPlugin struct {
@@ -29,6 +27,17 @@ type CedarPlugin struct {
 	mtx     sync.Mutex
 	config  Config
 	cedar   *cedarling_go.Cedarling
+}
+
+var globalInstance *CedarPlugin = nil
+
+func GetCedarlingInstance() *cedarling_go.Cedarling {
+	if globalInstance == nil {
+		return nil
+	}
+	globalInstance.mtx.Lock()
+	defer globalInstance.mtx.Unlock()
+	return globalInstance.cedar
 }
 
 func logMessage(stderr bool, msg string) {
@@ -44,11 +53,6 @@ func buildBootstrapConfig(cfg Config) (map[string]any, error) {
 	for k, v := range cfg.BootstrapConfig {
 		newConfig[k] = v
 	}
-	policyStoreBytes, err := json.Marshal(cfg.PolicyStore)
-	if err != nil {
-		return nil, err
-	}
-	newConfig["CEDARLING_POLICY_STORE_LOCAL"] = string(policyStoreBytes)
 	return newConfig, nil
 }
 
@@ -69,6 +73,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	}
 	p.cedar = instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	globalInstance = p
 	return nil
 }
 
@@ -77,6 +82,7 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 	cedar := p.cedar
 	p.cedar = nil
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
+	globalInstance = nil
 	p.mtx.Unlock()
 	if cedar != nil {
 		cedar.ShutDown()
@@ -104,6 +110,7 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.config = cfg
 	p.cedar = new_instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	globalInstance = p
 	p.mtx.Unlock()
 	if old_cedar != nil {
 		old_cedar.ShutDown()
@@ -130,9 +137,6 @@ func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) 
 	}
 	if parsedConfig.BootstrapConfig == nil {
 		return nil, errors.New("Bootstrap config is required")
-	}
-	if parsedConfig.PolicyStore == nil {
-		return nil, errors.New("Policy store is required")
 	}
 	return parsedConfig, nil
 }

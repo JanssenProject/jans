@@ -23,7 +23,7 @@ all: native build
 .PHONY: native
 native:
 	@echo ">> Building Go Binding"
-	$(CARGO) build --release -p cedarling_go 
+	$(CARGO) build --release -p cedarling_go
 	cp ../target/release/$(LIB_FILE) $(LIB_DIR)/
 
 .PHONY: build
@@ -37,9 +37,15 @@ build: native
 
 .PHONY: clean
 clean:
-	@echo ">> Cleaning"
+	@echo ">> Cleaning artifacts"
 	rm -rf $(BUILD_DIR)
 	rm -f $(LIB_DIR)/$(LIB_FILE)
+
+	@echo ">> Cleaning Go cache"
+	$(GO) clean -cache -modcache -testcache
+
+	@echo ">> Cleaning Rust target (optional but recommended)"
+	$(CARGO) clean -p cedarling_go
 
 # ==============================
 # Debug Build
