@@ -103,6 +103,8 @@ public class SqlConnectionProvider {
 
 	private boolean validateAfterUpdate;
 
+	private boolean connectionPoolValidationEnabled;
+
 	protected SqlConnectionProvider() {
 	}
 
@@ -183,7 +185,7 @@ public class SqlConnectionProvider {
 
 		Integer cpMinEvictableIdleTimeMillis = StringHelper
 				.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
-		if (cpMaxWaitTimeMillis != null) {
+        if (cpMinEvictableIdleTimeMillis != null) {
 			objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
 		}
 
@@ -196,10 +198,30 @@ public class SqlConnectionProvider {
 		if (testOnReturn != null) {
 			objectPoolConfig.setTestOnReturn(testOnReturn);
 		}
+		Boolean connectionPoolValidationEnabled = StringHelper.toBoolean(props.getProperty("connection.pool.validation-enabled"), null);
+		this.connectionPoolValidationEnabled = (connectionPoolValidationEnabled == null) || connectionPoolValidationEnabled.booleanValue();
+        LOG.debug("Connection pool validation enabled: '{}'", this.connectionPoolValidationEnabled);
 
-		Boolean validateAfterUpdateProperty = StringHelper.toBoolean(props.getProperty("orm.validate-after-update"), null);
-		if (validateAfterUpdateProperty != null) {
-			this.validateAfterUpdate = validateAfterUpdateProperty.booleanValue();
+		Boolean testOnBorrow = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-borrow"), null);
+		if (testOnBorrow != null) {
+			objectPoolConfig.setTestOnBorrow(testOnBorrow);
+		} else {
+			objectPoolConfig.setTestOnBorrow(this.connectionPoolValidationEnabled);
+		}
+
+		Boolean testWhileIdle = StringHelper.toBoolean(props.getProperty("connection.pool.test-while-idle"), null);
+		if (testWhileIdle != null) {
+			objectPoolConfig.setTestWhileIdle(testWhileIdle);
+		}
+
+		Long timeBetweenEvictionRunsMillis = StringHelper.toLong(props.getProperty("connection.pool.time-between-eviction-runs-millis"), null);
+		if (timeBetweenEvictionRunsMillis != null) {
+			objectPoolConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+		}
+
+		Boolean validateAfterUpdate = StringHelper.toBoolean(props.getProperty("orm.validate-after-update"), null);
+		if (validateAfterUpdate != null) {
+			this.validateAfterUpdate = validateAfterUpdate.booleanValue();
 	        LOG.debug("ORM validate after update: '{}'", this.validateAfterUpdate);
 		}
 
@@ -419,6 +441,10 @@ public class SqlConnectionProvider {
 	private void open() {
 		ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(connectionUri, connectionProperties);
 		PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
+		if (connectionPoolValidationEnabled) {
+			poolableConnectionFactory.setValidationQuery("SELECT 1");
+			poolableConnectionFactory.setValidationQueryTimeout(5);
+		}
 		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory,
 				objectPoolConfig);
 
