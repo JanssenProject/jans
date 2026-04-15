@@ -56,6 +56,7 @@ public class MTLSServiceTest {
         BufferedReader requestReader = new BufferedReader(new StringReader(jsonRequest));
         when(httpServletRequest.getReader()).thenReturn(requestReader);
         when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn(null);
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Tls-Client-Cert"))).thenReturn(null);
         when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn(certPem);
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
@@ -87,12 +88,14 @@ public class MTLSServiceTest {
         BufferedReader requestReader = new BufferedReader(new StringReader(jsonRequest));
         when(httpServletRequest.getReader()).thenReturn(requestReader);
         when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn("ABC");
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Tls-Client-Cert"))).thenReturn(null);
+        when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn(null);
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
 
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
-        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
+        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert`, `X-Forwarded-Tls-Client-Cert` and `X-ClientCert` headers");
 
         verifyNoMoreInteractions(log);
     }
@@ -103,12 +106,15 @@ public class MTLSServiceTest {
         String jsonRequest = "{ \"tls_client_auth_subject_dn\":\"" + tlsClientAuthSubjectDn + "\" }";
         BufferedReader requestReader = new BufferedReader(new StringReader(jsonRequest));
         when(httpServletRequest.getReader()).thenReturn(requestReader);
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn(null);
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Tls-Client-Cert"))).thenReturn(null);
+        when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn(null);
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
 
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
-        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
+        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert`, `X-Forwarded-Tls-Client-Cert` and `X-ClientCert` headers");
 
         verifyNoMoreInteractions(log);
     }

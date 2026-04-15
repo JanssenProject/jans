@@ -74,7 +74,7 @@ public class AuditLogInterceptor {
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
                 // Log request without data
-                AUDIT_LOG.info("User:{} {} {} using client:{}", userInum, getAction(method),
+                AUDIT_LOG.error("User:{} {} {} using client:{}", userInum, getAction(method),
                         getResource(uriInfo.getPath()), client);
 
                 if (auditLogConf.isLogData()) {
@@ -112,14 +112,14 @@ public class AuditLogInterceptor {
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
-                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+                if (obj != null && !obj.toString().toUpperCase().contains("PASSWORD")
+                        && !obj.toString().toUpperCase().contains("SECRET")) {
                
 
                     LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",
                             ignoreObject(propertyName, obj, auditLogConf));
 
-                    AUDIT_LOG.info("{}:{}", propertyName, obj);
+                    AUDIT_LOG.error("{}:{}", propertyName, obj);
                 }
             }
         }
