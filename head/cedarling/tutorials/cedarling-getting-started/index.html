@@ -19,7 +19,7 @@
         <link rel="prev" href="../../quick-start/cedarling-quick-start/">
       
       
-        <link rel="next" href="../javascript/">
+        <link rel="next" href="../c/">
       
       
         
@@ -705,6 +705,8 @@
       
         
       
+        
+      
     
     
     
@@ -892,6 +894,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../c/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    C
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1500,6 +1530,7 @@
 <p>Cedarling supports both <a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">Token-Based Access Control (TBAC)</a> using JWTs and unsigned authorization requests. In both cases, it enforces policies locally for low-latency and consistent Zero Trust security.</p>
 <p>You can integrate Cedarling into your application using the following language libraries:</p>
 <ul>
+<li><a href="../c/">C</a></li>
 <li><a href="../javascript/">JavaScript</a></li>
 <li><a href="../python/">Python</a></li>
 <li><a href="../rust/">Rust</a></li>
@@ -1532,8 +1563,21 @@
 <li>Learn more in the <a href="../../reference/cedarling-policy-store/">policy store guide</a>.</li>
 </ul>
 <p>The bootstrap configuration and policy store directly influence how Cedarling performs <a href="#authorization">authorization</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">JavaScript</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">Rust</label><label for="__tabbed_1_4">Kotlin</label><label for="__tabbed_1_5">Swift</label><label for="__tabbed_1_6">Go</label><label for="__tabbed_1_7">Java</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:8"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><input id="__tabbed_1_8" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">C</label><label for="__tabbed_1_2">JavaScript</label><label for="__tabbed_1_3">Python</label><label for="__tabbed_1_4">Rust</label><label for="__tabbed_1_5">Kotlin</label><label for="__tabbed_1_6">Swift</label><label for="__tabbed_1_7">Go</label><label for="__tabbed_1_8">Java</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cedarling_c.h&quot;</span>
+
+<span class="c1">// Initialize the library</span>
+<span class="n">cedarling_init</span><span class="p">();</span>
+
+<span class="c1">// Create instance with JSON config</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">CEDARLING_APPLICATION_NAME</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">My App</span><span class="se">\&quot;</span><span class="s">, ...}&quot;</span><span class="p">;</span>
+<span class="n">CedarlingInstanceResult</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="n">cedarling_new</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="kt">uint64_t</span><span class="w"> </span><span class="n">instance_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">INSTANCE_ID</span><span class="p">;</span>
+</code></pre></div>
+</div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;/pkg/cedarling_wasm.js&quot;</span><span class="p">;</span>
 
@@ -1646,8 +1690,28 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 </ul>
 <h3 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h3>
 <p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace. This enables dynamic, runtime-based authorization decisions.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label><label for="__tabbed_2_7">Java</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:8"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><input id="__tabbed_2_8" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">C</label><label for="__tabbed_2_2">JavaScript</label><label for="__tabbed_2_3">Python</label><label for="__tabbed_2_4">Rust</label><label for="__tabbed_2_5">Kotlin</label><label for="__tabbed_2_6">Swift</label><label for="__tabbed_2_7">Go</label><label for="__tabbed_2_8">Java</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">role</span><span class="se">\&quot;</span><span class="s">:[</span><span class="se">\&quot;</span><span class="s">admin</span><span class="se">\&quot;</span><span class="s">,</span><span class="se">\&quot;</span><span class="s">editor</span><span class="se">\&quot;</span><span class="s">],</span><span class="se">\&quot;</span><span class="s">country</span><span class="se">\&quot;</span><span class="s">:</span><span class="se">\&quot;</span><span class="s">US</span><span class="se">\&quot;</span><span class="s">}&quot;</span><span class="p">;</span>
+<span class="n">CedarlingResult</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="n">cedarling_context_push</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="n">cedarling_free_result</span><span class="p">(</span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+
+<span class="c1">// Get data</span>
+<span class="n">cedarling_context_get</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">DATA</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;User data: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">result</span><span class="p">.</span><span class="n">DATA</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">cedarling_free_result</span><span class="p">(</span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+
+<span class="c1">// Get statistics</span>
+<span class="n">cedarling_context_stats</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Stats: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">result</span><span class="p">.</span><span class="n">DATA</span><span class="p">);</span>
+<span class="n">cedarling_free_result</span><span class="p">(</span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+</code></pre></div>
+</div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
 <span class="nx">cedarling</span><span class="p">.</span><span class="nx">push_data_ctx</span><span class="p">(</span><span class="s2">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
@@ -1840,7 +1904,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 15, 2026 10:24:22 UTC"><span class="timeago" datetime="2026-04-15T10:24:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 15, 2026 10:24:22 UTC">2026-04-15</span>
   </span>
 
     
