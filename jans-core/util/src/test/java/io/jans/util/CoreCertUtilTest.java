@@ -303,6 +303,35 @@ public class CoreCertUtilTest {
         assertTrue(result.contains(SAMPLE_BASE64_CERT));
     }
 
+    @Test
+    public void parseXftccHeader_withUrlEncodedBase64_shouldDecodeAndParse() {
+        // URL-encoded version of the sample cert (Traefik <2.9.4 behavior)
+        // Base64 uses +, /, = which get URL-encoded as %2B, %2F, %3D
+        String urlEncodedCert = SAMPLE_BASE64_CERT
+                .replace("+", "%2B")
+                .replace("/", "%2F")
+                .replace("=", "%3D");
+
+        String result = CoreCertUtil.parseXftccHeader(urlEncodedCert);
+
+        assertNotNull(result);
+        assertTrue(result.startsWith("-----BEGIN CERTIFICATE-----\n"));
+        assertTrue(result.endsWith("\n-----END CERTIFICATE-----"));
+        // The result should contain the decoded base64, not the URL-encoded version
+        assertTrue(result.contains(SAMPLE_BASE64_CERT));
+    }
+
+    @Test
+    public void parseXftccHeader_withPartiallyUrlEncodedBase64_shouldDecodeAndParse() {
+        // Simulate a partially encoded cert (only some special chars encoded)
+        String partiallyEncodedCert = SAMPLE_BASE64_CERT.replace("/", "%2F");
+
+        String result = CoreCertUtil.parseXftccHeader(partiallyEncodedCert);
+
+        assertNotNull(result);
+        assertTrue(result.contains(SAMPLE_BASE64_CERT));
+    }
+
     // ==================== getClientCert tests for XFTCC header ====================
 
     @Test

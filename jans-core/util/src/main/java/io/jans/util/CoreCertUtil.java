@@ -95,9 +95,10 @@ public class CoreCertUtil {
 
     /**
      * Parses the X-Forwarded-Tls-Client-Cert header (Traefik format).
-     * The header contains raw base64-encoded certificate without PEM delimiters.
+     * The header contains base64-encoded certificate without PEM delimiters.
+     * Traefik &lt;2.9.4 URL-encodes this header, while newer versions send raw base64.
      *
-     * @param headerValue raw base64 string
+     * @param headerValue base64 string (possibly URL-encoded)
      * @return PEM-formatted certificate or null if invalid
      */
     public static String parseXftccHeader(String headerValue) {
@@ -107,11 +108,23 @@ public class CoreCertUtil {
 
         String base64Content = headerValue.trim();
 
+        // URL-decode if needed (Traefik <2.9.4 URL-encodes this header)
+        // Check for URL-encoded characters (%, +encoded as %2B, etc.)
+        if (base64Content.contains("%")) {
+            try {
+                base64Content = URLDecoder.decode(base64Content, StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Failed to URL-decode X-Forwarded-Tls-Client-Cert header, trying as raw base64: {}", e.getMessage());
+                // Continue with original value - it might be raw base64 with literal % (unlikely but safe)
+                base64Content = headerValue.trim();
+            }
+        }
+
         // Validate it's valid base64 by attempting decode
         try {
             Base64.getDecoder().decode(base64Content);
         } catch (IllegalArgumentException e) {
-            LOG.error("Failed to decode X-Forwarded-Tls-Client-Cert header: {}", e.getMessage());
+            LOG.error("Failed to decode X-Forwarded-Tls-Client-Cert header as base64: {}", e.getMessage());
             return null;
         }
 
