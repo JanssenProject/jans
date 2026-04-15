@@ -9,7 +9,7 @@ tags:
 
 ## 1. Lifecycle Overview
 
-Our End of Life (EOL) policy is designed to provide a predictable schedule for support and upgrades. The lifecycle of any major version is calculated based on its original **General Availability (GA)** date. This is applicable for version 2.0.0 and later releases.
+Our End of Life (EOL) policy is designed to provide a predictable schedule for support and upgrades. The lifecycle of any major version is calculated based on its original **General Availability (GA)** date. This applies to version 2.0.0 and later releases.
 
 ### Key Milestones
 
