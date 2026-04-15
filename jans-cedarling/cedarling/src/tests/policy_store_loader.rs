@@ -190,7 +190,7 @@ async fn multi_policy_cjar_unsigned_decision(
         json!({"name": "Test Resource"}),
     )
     .expect("Failed to create resource");
-    let request = create_test_unsigned_request(action, vec![user], resource);
+    let request = create_test_unsigned_request(action, Some(user), resource);
     cedarling
         .authorize_unsigned(request)
         .await
