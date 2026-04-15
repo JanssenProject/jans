@@ -10,20 +10,10 @@ get_prometheus_opt() {
 
     if [ -n "${CN_PROMETHEUS_PORT}" ]; then
         prom_opt="
-            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent-${PROMETHEUS_AGENT_VERSION}.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
         "
     fi
     echo "${prom_opt}"
-}
-
-get_prometheus_lib() {
-    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
-        agent_version=${PROMETHEUS_AGENT_VERSION:-1.0.1}
-
-        if [ ! -f /opt/prometheus/jmx_prometheus_javaagent.jar ]; then
-            curl -sS "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${agent_version}/jmx_prometheus_javaagent-${agent_version}.jar" -o /opt/prometheus/jmx_prometheus_javaagent.jar
-        fi
-    fi
 }
 
 get_java_options() {
@@ -49,7 +39,6 @@ get_jetty_args() {
     fi
 }
 
-get_prometheus_lib
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/mod_context.py" jans-link

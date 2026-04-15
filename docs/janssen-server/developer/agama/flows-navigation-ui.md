@@ -18,7 +18,7 @@ Execution involves several steps which can be summarized as: location of templat
 !!! Note
     For convenience, references to the server directory `/opt/jans/jetty/jans-auth/agama` will be replaced by `<AGAMA-DIR>` from here onwards.
 
-A path is built by concatenating the `Basepath` of the flow this `RRF` belongs to and the actual template path, i.e. _path-to-UI-template_ as in the introductory parapraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the [engine configuration](./engine-bridge-config.md#engine-configuration) for the property `templatesPath`. Thus, in a default installation, the value to prepend would be `<AGAMA-DIR>/ftl`.
+A path is built by concatenating the `Basepath` of the flow this `RRF` belongs to and the actual template path, i.e. _path-to-UI-template_ as in the introductory paragraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the [engine configuration](./engine-bridge-config.md#engine-configuration) for the property `templatesPath`. Thus, in a default installation, the value to prepend would be `<AGAMA-DIR>/ftl`.
 
 If there is no such file, the flow will crash right away, otherwise, processing continues.
 
