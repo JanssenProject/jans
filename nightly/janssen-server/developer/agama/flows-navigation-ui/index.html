@@ -1296,7 +1296,7 @@
 <p class="admonition-title">Note</p>
 <p>For convenience, references to the server directory <code>/opt/jans/jetty/jans-auth/agama</code> will be replaced by <code>&lt;AGAMA-DIR&gt;</code> from here onwards.</p>
 </div>
-<p>A path is built by concatenating the <code>Basepath</code> of the flow this <code>RRF</code> belongs to and the actual template path, i.e. <em>path-to-UI-template</em> as in the introductory parapraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the <a href="../engine-bridge-config/#engine-configuration">engine configuration</a> for the property <code>templatesPath</code>. Thus, in a default installation, the value to prepend would be <code>&lt;AGAMA-DIR&gt;/ftl</code>.</p>
+<p>A path is built by concatenating the <code>Basepath</code> of the flow this <code>RRF</code> belongs to and the actual template path, i.e. <em>path-to-UI-template</em> as in the introductory paragraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the <a href="../engine-bridge-config/#engine-configuration">engine configuration</a> for the property <code>templatesPath</code>. Thus, in a default installation, the value to prepend would be <code>&lt;AGAMA-DIR&gt;/ftl</code>.</p>
 <p>If there is no such file, the flow will crash right away, otherwise, processing continues.</p>
 <h3 id="how-to-build-templates">How to build templates?<a class="headerlink" href="#how-to-build-templates" title="Permanent link">#</a></h3>
 <p>Templates are expected to be written using <a href="https://freemarker.apache.org/docs/index.html">Apache FreeMarker</a>. This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama should have the extension <code>ftlh</code>. Practically they will look and behave as regular HTML files.</p>
@@ -1343,7 +1343,7 @@ RRF &quot;pages/login.ftl&quot; obj
 <p><code>cache</code>. Allows developers to retrieve values already stored in the Jans configured cache, e.g. <code>${cache.myKey}</code>. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard <a href="https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing">expressions</a>. Note you cannot store/modify values in the cache from templates</p>
 </li>
 <li>
-<p><code>labels</code> and <code>msgs</code>. These give access to localized messages. They are useful when templates have to render different texts depening on user context, such as country and language. Learn more <a href="../advanced-usages/#localization-and-internationalization">here</a></p>
+<p><code>labels</code> and <code>msgs</code>. These give access to localized messages. They are useful when templates have to render different texts depending on user context, such as country and language. Learn more in <a href="../advanced-usages/#localization-and-internationalization">Localization and internationalization</a></p>
 </li>
 </ul>
 <h3 id="assets-handling">Assets handling<a class="headerlink" href="#assets-handling" title="Permanent link">#</a></h3>
@@ -1400,7 +1400,7 @@ credentials = RRF &quot;pages/login.ftl&quot; obj
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 15, 2026 08:16:34 UTC"><span class="timeago" datetime="2026-04-15T08:16:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 15, 2026 08:16:34 UTC">2026-04-15</span>
   </span>
 
     
