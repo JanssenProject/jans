@@ -65,7 +65,7 @@ We need to initialize Cedarling first.
             "CEDARLING_APPLICATION_NAME":   "MyApp",
             "CEDARLING_LOG_LEVEL":          "INFO",
             "CEDARLING_LOG_TYPE":           "std_out",
-            "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"
+            "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"
         }
         """;
 
