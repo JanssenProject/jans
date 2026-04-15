@@ -136,7 +136,7 @@ let resources = vec![EntityData {
 }];
 
 let policies = cedarling
-    .get_matching_policies_unsigned(principal.as_ref(), actions, resources)
+    .get_matching_policies_unsigned(principal.as_ref(), &actions, &resources)
     .expect("failed to get matching policies");
 
 for policy in &policies {
