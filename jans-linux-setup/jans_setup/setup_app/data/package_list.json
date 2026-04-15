@@ -1,5 +1,6 @@
 {
   "red 9": {
+    "aliases": ["rocky 9"],
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
@@ -10,6 +11,7 @@
     }
   },
   "red 10": {
+    "aliases": ["rocky 10"],
     "optional": "",
     "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {

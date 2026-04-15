@@ -16,7 +16,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.6
+ARG JETTY_VERSION=12.1.8
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -61,7 +61,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
+ENV JANS_SOURCE_VERSION=790df768a30a4059364ff5e9e1ff89dfe5d1e225
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -105,7 +105,15 @@ RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MAN
 # Prometheus
 # ==========
 
+WORKDIR /opt/prometheus
+
+ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
+RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+    && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
+
+WORKDIR /
 
 # =======
 # Cleanup

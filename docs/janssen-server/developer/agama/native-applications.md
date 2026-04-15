@@ -446,7 +446,7 @@ When a flow crashes, the error is reported in similar way the timeout is reporte
 
 ### Other errors
 
-There are a variety of miscelaneous errors. Here we describe the most common.
+There are a variety of miscellaneous errors. Here we describe the most common.
 
 #### Finished flows with problems of user identification
 
@@ -465,7 +465,7 @@ Content-Type: application/json
 
 #### Attempt to launch an unknown flow
 
-If the initial request references an inexisting flow or one that has been flagged as [not launchable directly](../../../agama/gama-format.md#metadata) by clients.
+If the initial request references a non-existent flow or one that has been flagged as [not launchable directly](../../../agama/gama-format.md#metadata) by clients.
 
 ```
 HTTP/1.1 500 Server Error
