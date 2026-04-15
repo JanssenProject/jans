@@ -174,7 +174,7 @@ Tokens are provided as a Map<String, String> with token type as key and its JWT 
 
 ```java
 
-    MultiIssuerAuthorizeResult result = adapter.authorizeMultiIssuer(tokens, action, resource, emptyContext());
+    MultiIssuerAuthorizeResult result = adapter.authorizeMultiIssuer(tokens, action, resource, context);
     
     if(result.getDecision()) {
         System.out.println("Access granted");
