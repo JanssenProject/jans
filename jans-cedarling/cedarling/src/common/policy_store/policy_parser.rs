@@ -415,27 +415,41 @@ impl PolicyParser {
         Some(after_open[..close_quote].to_string())
     }
 
+    /// Byte offset in `trimmed` of the first `permit` / `forbid` policy keyword,
+    /// or `None` if this line does not contain a policy statement start.
+    fn policy_keyword_byte_offset(trimmed: &str) -> Option<usize> {
+        const KEYWORDS: [&str; 4] = ["permit(", "forbid(", "permit ", "forbid "];
+        KEYWORDS.iter().filter_map(|kw| trimmed.find(kw)).min()
+    }
+
     /// Scan source text for the first `permit` / `forbid` policy whose preceding
     /// lines (back to the start of the file or the previous policy) contain no
     /// `@id(...)` annotation. Returns `(1-based line, trimmed-and-truncated snippet)`.
+    ///
+    /// Treats a line as containing a policy start if any of `permit(` / `forbid(` /
+    /// `permit ` / `forbid ` appears in the line after leading whitespace (e.g.
+    /// `@id("p1") permit(...)` on one line). The snippet starts at that keyword.
     fn find_first_policy_without_id(content: &str) -> Option<(usize, String)> {
         const MAX_SNIPPET: usize = 80;
         let lines: Vec<&str> = content.lines().collect();
         let mut window_start = 0usize;
         for (idx, line) in lines.iter().enumerate() {
             let trimmed = line.trim_start();
-            let is_start = trimmed.starts_with("permit(")
-                || trimmed.starts_with("forbid(")
-                || trimmed.starts_with("permit ")
-                || trimmed.starts_with("forbid ");
-            if !is_start {
+            let Some(token_off) = Self::policy_keyword_byte_offset(trimmed) else {
                 continue;
-            }
-            let has_id = lines[window_start..idx]
+            };
+            let has_id_on_prior_lines = lines[window_start..idx]
                 .iter()
                 .any(|l| Self::parse_id_from_line_trimmed(l.trim()).is_some());
+            let has_id_on_same_line_before_kw = if token_off == 0 {
+                false
+            } else {
+                Self::parse_id_from_line_trimmed(trimmed.get(..token_off).unwrap_or("").trim_end())
+                    .is_some()
+            };
+            let has_id = has_id_on_prior_lines || has_id_on_same_line_before_kw;
             if !has_id {
-                let mut snippet = trimmed.trim_end().to_string();
+                let mut snippet = trimmed[token_off..].trim_end().to_string();
                 if snippet.chars().count() > MAX_SNIPPET {
                     snippet = snippet.chars().take(MAX_SNIPPET).collect::<String>() + "...";
                 }
@@ -847,6 +861,57 @@ permit(
     }
 
     #[test]
+    fn test_parse_multi_template_file_duplicate_id() {
+        let template_text = r#"
+@id("dup")
+permit(principal == ?principal, action, resource);
+
+@id("dup")
+permit(principal == ?principal, action, resource);
+        "#;
+
+        let err = PolicyParser::parse_template(template_text, "dup-templates.cedar")
+            .expect_err("duplicate @id in one template file should fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::DuplicateTemplateIdInFile { id }
+                } if file == "dup-templates.cedar" && id == "dup"
+            ),
+            "expected DuplicateTemplateIdInFile for id dup, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_multi_template_file_missing_explicit_id() {
+        let template_text = r#"
+@id("with-id")
+permit(principal == ?principal, action, resource);
+
+permit(principal == ?principal, action, resource);
+        "#;
+
+        let err = PolicyParser::parse_template(template_text, "missing-id-templates.cedar")
+            .expect_err("second template without @id should fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::MultiTemplateMissingExplicitId { line, snippet }
+                } if file == "missing-id-templates.cedar"
+                    && *line > 0
+                    && (snippet.starts_with("permit(") || snippet.starts_with("permit "))
+            ),
+            "expected MultiTemplateMissingExplicitId with line and permit snippet, got: {err:?}"
+        );
+    }
+
+    #[test]
     fn test_parse_template_file_rejects_embedded_policy() {
         // A template file that also contains a non-template policy.
         let mixed_text = r#"
@@ -978,6 +1043,31 @@ permit(
                     && (snippet.starts_with("permit(") || snippet.starts_with("permit "))
             ),
             "expected MultiPolicyMissingExplicitId with line + permit snippet, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_multi_policy_file_missing_explicit_id_after_inline_first_policy() {
+        let policy_text = r#"
+@id("first") permit(principal, action, resource);
+
+permit(principal, action, resource);
+        "#;
+
+        let err = PolicyParser::parse_policy(policy_text, "inline-then-bare.cedar")
+            .expect_err("second policy on its own line without @id should fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing {
+                    file,
+                    detail: CedarParseErrorDetail::MultiPolicyMissingExplicitId { line, snippet }
+                } if file == "inline-then-bare.cedar"
+                    && *line > 0
+                    && (snippet.starts_with("permit(") || snippet.starts_with("permit "))
+            ),
+            "expected MultiPolicyMissingExplicitId after inline @id+permit line, got: {err:?}"
         );
     }
 }
