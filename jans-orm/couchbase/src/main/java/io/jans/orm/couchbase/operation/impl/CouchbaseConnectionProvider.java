@@ -34,6 +34,7 @@ import com.couchbase.client.java.env.ClusterEnvironment;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.manager.bucket.BucketManager;
 import com.couchbase.client.java.manager.bucket.BucketSettings;
+import com.couchbase.client.java.manager.bucket.GetBucketOptions;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
 import com.couchbase.client.java.query.QueryStatus;
@@ -160,7 +161,7 @@ public class CouchbaseConnectionProvider {
 
             try {
                 open(waitUntilReadyTimeSeconds);
-                if (isConnected()) {
+                if (isConnected(-1)) {
                 	break;
                 } else {
                     LOG.info("Failed to connect to Couchbase");
@@ -234,7 +235,7 @@ public class CouchbaseConnectionProvider {
     	return true;
     }
 
-    public boolean isConnected() {
+    public boolean isConnected(long timeoutSeconds) {
         if (cluster == null) {
             return false;
         }
@@ -242,7 +243,7 @@ public class CouchbaseConnectionProvider {
         boolean isConnected = true;
         try {
 	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-                if (!isConnected(bucketMapping)) {
+                if (!isConnected(bucketMapping, timeoutSeconds)) {
                     LOG.error("Bucket '{}' is in invalid state", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -256,44 +257,55 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    private boolean isConnected(BucketMapping bucketMapping) {
+    private boolean isConnected(BucketMapping bucketMapping, long timeoutSeconds) {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = this.cluster.buckets();
-        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name());
+        BucketSettings bucketSettings;
+        if (timeoutSeconds == -1) {
+        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions());
+        } else {
+        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions().timeout(Duration.ofSeconds(timeoutSeconds)));
+        }
 
         boolean result = true;
         if (com.couchbase.client.java.manager.bucket.BucketType.COUCHBASE == bucketSettings.bucketType()) {
-        	// Check indexes state
-        	QueryResult queryResult = cluster.query("SELECT state FROM system:indexes WHERE state != $1 AND keyspace_id = $2", QueryOptions.queryOptions().parameters(JsonArray.from("online", bucket.name())));
-            
+            // Check indexes state
+            QueryResult queryResult = cluster.query("SELECT state FROM system:indexes WHERE state != $1 AND keyspace_id = $2", QueryOptions.queryOptions().parameters(JsonArray.from("online", bucket.name())));
+        
             if (QueryStatus.SUCCESS == queryResult.metaData().status()) {
-            	result = queryResult.rowsAsObject().size() == 0;
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug("There are indexes which not online");
-            	}
+                result = queryResult.rowsAsObject().size() == 0;
+                if (!result) {
+                    LOG.warn("There are indexes which not online");
+                }
             } else {
-            	result = false;
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug("Faield to check indexes status");
-            	}
+                result = false;
+                LOG.error("Failed to check indexes status");
             }
         }
 
         if (result) {
-        	PingResult pingResult = bucket.ping();
-	    	for (Entry<ServiceType, List<EndpointPingReport>> pingResultEntry : pingResult.endpoints().entrySet()) {
-	    		for (EndpointPingReport endpointPingReport : pingResultEntry.getValue()) {
-		    		if (PingState.OK != endpointPingReport.state()) {
-		        		LOG.debug("Ping returns that service type {} is not online", endpointPingReport.type());
-		    			result = false;
-		    			break;
-		    		}
-	    		}
-	    	}
+            PingResult pingResult = bucket.ping();
+            for (Entry<ServiceType, List<EndpointPingReport>> pingResultEntry : pingResult.endpoints().entrySet()) {
+                for (EndpointPingReport endpointPingReport : pingResultEntry.getValue()) {
+                    if (PingState.OK != endpointPingReport.state()) {
+                        // For ephemeral buckets, DEGRADED state may indicate transient
+                        // KV rejections (e.g. 0xd TMPFAIL) due to memory pressure —
+                        // these are not fatal connectivity failures
+                        if (PingState.ERROR == endpointPingReport.state()) {
+                            LOG.error("Ping returns that service type {} is not online", endpointPingReport.type());
+                            result = false;
+                            break;
+                        } else {
+                            LOG.warn("Ping returns non-OK state {} for service type {} — treating as non-fatal",
+                                endpointPingReport.state(), endpointPingReport.type());
+                        }
+                    }
+                }
+            }
         }
- 
-    	return result;
+
+		return result;
 	}
 
 	public Cluster getCluster() {
