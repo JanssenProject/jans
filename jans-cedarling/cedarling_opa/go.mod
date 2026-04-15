@@ -3,7 +3,7 @@ module github.com/JanssenProject/jans/jans-cedarling/cedarling_opa
 go 1.25.1
 
 require (
-	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260303125924-27dd703ba1d4
+	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260415103048-da914933d4d5
 	github.com/open-policy-agent/opa v1.14.0
 )
 
@@ -110,5 +110,3 @@ require (
 	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go => ../bindings/cedarling_go

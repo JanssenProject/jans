@@ -1,5 +1,7 @@
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 h1:He8afgbRMd7mFxO99hRNu+6tazq8nFF9lIwo9JFroBk=
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6/go.mod h1:8o94RPi1/7XTJvwPpRSzSUedZrtlirdB3r9Z20bi2f8=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260415103048-da914933d4d5 h1:g3AOzeD0x6WOzfkWCk75rYs6ocR0jZ/ifRyrghiPOZk=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260415103048-da914933d4d5/go.mod h1:2X4SOXytZUvTkNu5dCLVZW4Jzk54agrWXklfiQ/5VJg=
 github.com/agnivade/levenshtein v1.2.1 h1:EHBY3UOn1gwdy/VbFwgo4cxecRznFk7fKWN1KOX7eoM=
 github.com/agnivade/levenshtein v1.2.1/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
