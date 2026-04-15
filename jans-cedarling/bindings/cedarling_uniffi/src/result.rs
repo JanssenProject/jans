@@ -3,13 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use cedarling::{self as core, bindings::cedar_policy};
 
 #[derive(Debug, uniffi::Record)]
 pub struct AuthorizeResult {
-    pub principals: HashMap<String, Response>,
+    pub response: Response,
     pub decision: bool,
     pub request_id: String,
 }
@@ -63,11 +61,7 @@ impl From<cedar_policy::Response> for Response {
 impl From<core::AuthorizeResult> for AuthorizeResult {
     fn from(result: core::AuthorizeResult) -> Self {
         AuthorizeResult {
-            principals: result
-                .principals
-                .into_iter()
-                .map(|(k, v)| (k.into(), v.into()))
-                .collect(),
+            response: result.response.into(),
             decision: result.decision,
             request_id: result.request_id,
         }
