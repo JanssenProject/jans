@@ -3,16 +3,12 @@
 ```declarative
 {
 "CEDARLING_APPLICATION_NAME": "Cedarling-Test-In-Custom-Script",
-"CEDARLING_POLICY_STORE_LOCAL_FN": "./custom/static/name_of_update_token_script.cjar",
+"CEDARLING_POLICY_STORE_LOCAL_FN": "./custom/static/update_token_script.cjar",
 "CEDARLING_LOG_LEVEL": "DEBUG",
 "CEDARLING_LOG_TYPE": "std_out",
-"CEDARLING_USER_AUTHZ": "disabled",
-"CEDARLING_WORKLOAD_AUTHZ": "enabled",
 "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
 "===": [{"var": "Jans::Workload"}, "ALLOW"]
-},
-"CEDARLING_JWT_SIG_VALIDATION": "disabled",
-"CEDARLING_JWT_STATUS_VALIDATION": "disabled"
+}
 }
 ```
 
