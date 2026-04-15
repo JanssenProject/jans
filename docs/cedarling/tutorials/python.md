@@ -195,7 +195,7 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to run the request with partial evaluation.
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to run the request with partial evaluation. If partial evaluation leaves unresolved residuals (i.e. the decision cannot be fully determined without a concrete principal), the request is **denied** (fail-closed). The unresolved residuals are surfaced in the diagnostics of the authorization result, so you can inspect which policies could not be evaluated to understand why the request was denied.
 
 **1. Define the Principal**
 
