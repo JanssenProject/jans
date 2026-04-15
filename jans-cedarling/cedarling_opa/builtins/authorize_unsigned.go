@@ -2,7 +2,6 @@ package builtins
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 	cedarlingopa "github.com/JanssenProject/jans/jans-cedarling/cedarling_opa/plugins/cedarling_opa"
@@ -10,6 +9,20 @@ import (
 	"github.com/open-policy-agent/opa/v1/rego"
 	"github.com/open-policy-agent/opa/v1/types"
 )
+
+func errorAsResult(err error) (*ast.Term, error) {
+	output := map[string]any{
+		"decision": false,
+		"reason":   map[string][]string{},
+		"errors": map[string][]string{
+			"builtin": {err.Error()},
+		},
+		"request_id": "",
+	}
+
+	val, _ := ast.InterfaceToValue(output)
+	return ast.NewTerm(val), nil
+}
 
 var authorizeUnsignedBuiltinDecl = &rego.Function{
 	Name: "cedarling_opa.authorize_unsigned",
@@ -26,15 +39,36 @@ func authorizeUnsignedBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*a
 	}
 	instance := cedarlingopa.GetCedarlingInstance()
 	if instance == nil {
-		return nil, fmt.Errorf("Cedarling not initialized; please check plugin status")
+		return errorAsResult(fmt.Errorf("Cedarling uninitialized"))
 	}
 	result, err := instance.AuthorizeUnsigned(in)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "DEBUG: %v\n", err)
-		return nil, err
+		return errorAsResult(fmt.Errorf("Authorize_unsigned failed: %w", err))
 	}
-	return_value := ast.NewObject()
-	return_value.Insert(ast.StringTerm("decision"), ast.BooleanTerm(result.Decision))
-	fmt.Fprintf(os.Stderr, "DEBUG: %v\n", result.Principals[in.Principals[0].CedarMapping.ID].Reason())
+	reasonMap := map[string][]string{}
+	errorsMap := map[string][]string{}
+
+	for key, value := range result.Principals {
+		reasons := value.Reason()
+		errors := value.Errors()
+		if reasons == nil {
+			reasons = []string{}
+		}
+		if errors == nil {
+			errors = []string{}
+		}
+		reasonMap[key] = reasons
+		errorsMap[key] = errors
+	}
+	output := map[string]any{
+		"decision":   result.Decision,
+		"reasons":    reasonMap,
+		"errors":     errorsMap,
+		"request_id": result.RequestID,
+	}
+	return_value, err := ast.InterfaceToValue(output)
+	if err != nil {
+		return errorAsResult(fmt.Errorf("Error in converting return value: %w", err))
+	}
 	return ast.NewTerm(return_value), nil
 }
