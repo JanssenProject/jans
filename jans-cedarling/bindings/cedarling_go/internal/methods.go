@@ -129,3 +129,27 @@ func CallGetStatsCtx(instance_id uint) Result {
 	result := G2R.get_stats_ctx(&instance_id)
 	return result
 }
+
+func CallIsTrustedIssuerLoadedByName(instance_id uint, issuerID string) bool {
+	return G2R.is_trusted_issuer_loaded_by_name(&instance_id, &issuerID)
+}
+
+func CallIsTrustedIssuerLoadedByIss(instance_id uint, issClaim string) bool {
+	return G2R.is_trusted_issuer_loaded_by_iss(&instance_id, &issClaim)
+}
+
+func CallTotalIssuers(instance_id uint) uint {
+	return G2R.total_issuers(&instance_id)
+}
+
+func CallLoadedTrustedIssuersCount(instance_id uint) uint {
+	return G2R.loaded_trusted_issuers_count(&instance_id)
+}
+
+func CallLoadedTrustedIssuerIds(instance_id uint) []string {
+	return G2R.loaded_trusted_issuer_ids(&instance_id)
+}
+
+func CallFailedTrustedIssuerIds(instance_id uint) []string {
+	return G2R.failed_trusted_issuer_ids(&instance_id)
+}

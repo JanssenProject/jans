@@ -144,7 +144,7 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
 
 #### Token-Based Authorization (Multi-Issuer)
@@ -336,7 +336,7 @@ let logs = cedarling.pop_logs();
 println!("{:#?}", logs);
 ```
 
-For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#log-retrieval).
+For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md).
 
 ## Example
 

@@ -239,3 +239,18 @@ try {
 
 Note: The `CedarlingAdapter` wrapper performs additional validation and may throw `DataException.InvalidKey()` for null or empty keys, or `DataException.SerializationException()` for null values before calling the underlying Rust implementation.
 ```
+
+## Trusted Issuer Loading Info
+
+`CedarlingAdapter` exposes trusted issuer loading status methods:
+
+```java
+boolean loadedByName = adapter.isTrustedIssuerLoadedByName("issuer_id");
+boolean loadedByIss = adapter.isTrustedIssuerLoadedByIss("https://issuer.example.org");
+long totalIssuers = adapter.totalIssuers();
+long loadedCount = adapter.loadedTrustedIssuersCount();
+List<String> loadedIds = adapter.loadedTrustedIssuerIds();
+List<String> failedIds = adapter.failedTrustedIssuerIds();
+```
+
+These methods are useful when your policy store includes `trusted-issuers/` definitions.

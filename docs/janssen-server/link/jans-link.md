@@ -19,7 +19,7 @@ to install this Service along with other Janssen Server components. Post
 installation, to add Jans-Link component, use the following:
 
 ```bash
-python3 /opt/jans/jans-setup/setup.py --install-jans-link`
+python3 /opt/jans/jans-setup/setup.py --install-jans-link
 ```
 
 Jans LDAP link gets installed as a service that can be managed using below
@@ -54,14 +54,14 @@ tasks.
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
     [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"

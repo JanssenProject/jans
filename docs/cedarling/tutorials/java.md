@@ -200,7 +200,7 @@ The _context_ represents additional data that may affect the authorization decis
         """;
 ```
 
-Similarly, create and initialize String variables with action, resource, context as done in [Token-Based Authorization](#token-based-authorization).
+Similarly, create and initialize String variables with action, resource, context.
 
 **2. Authorize**
 

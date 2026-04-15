@@ -844,3 +844,41 @@ func TestDataAPIInstanceIsolationCtx(t *testing.T) {
 		t.Error("Data should be present in instance1")
 	}
 }
+
+func TestTrustedIssuerLoadingInfoDefaults(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	if instance.IsTrustedIssuerLoadedByName("missing_issuer") {
+		t.Error("unknown issuer id should not be loaded")
+	}
+	if instance.IsTrustedIssuerLoadedByIss("https://missing.example.org") {
+		t.Error("unknown issuer iss should not be loaded")
+	}
+
+	total := instance.TotalIssuers()
+	loaded := instance.LoadedTrustedIssuersCount()
+	loadedIds := instance.LoadedTrustedIssuerIds()
+	if loaded > total {
+		t.Errorf("loaded count %d should not exceed total %d", loaded, total)
+	}
+	if uint(len(loadedIds)) != loaded {
+		t.Errorf(
+			"loaded_trusted_issuers_count %d should match len(loaded ids) %d",
+			loaded,
+			len(loadedIds),
+		)
+	}
+	for _, id := range loadedIds {
+		if !instance.IsTrustedIssuerLoadedByName(id) {
+			t.Errorf("loaded id %q should satisfy IsTrustedIssuerLoadedByName", id)
+		}
+	}
+}
