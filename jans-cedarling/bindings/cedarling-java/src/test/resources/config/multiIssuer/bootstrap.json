@@ -6,5 +6,5 @@
   "CEDARLING_LOG_LEVEL": "DEBUG",
   "CEDARLING_LOG_TYPE": "memory",
   "CEDARLING_LOG_TTL": 120,
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "./src/test/resources/config/multiIssuer/TestStore_multiIssuer.cjar"
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "./src/test/resources/config/multiIssuer/policy-store/policy-store.cjar"
 }
