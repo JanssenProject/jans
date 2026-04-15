@@ -36,7 +36,7 @@
     "@modelcontextprotocol/sdk": "^1.23.0",
     "@mui/icons-material": "^9.0.0",
     "@mui/material": "^9.0.0",
-    "@mui/x-date-pickers": "^8.27.2",
+    "@mui/x-date-pickers": "^9.0.0",
     "adm-zip": "^0.5.10",
     "autoprefixer": "^10.4.7",
     "axios": "^1.4.0",
