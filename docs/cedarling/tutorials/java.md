@@ -7,6 +7,9 @@ tags:
 
 # Getting Started with Cedarling Java
 
+- [Installation](#installation)
+- [Usage](#usage)
+
 ## Installation
 
 ### Using the package manager
@@ -115,8 +118,72 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides authorization interfaces for evaluating access requests based on principals (entities), actions, resources, and context.
 
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly without JWTs. This is useful when you need to authorize based on internal application data.
-- [**Custom Principal Authorization**](#custom-principal-authorization-unsigned) is an alternative approach for defining custom principals.
+
+#### Token-Based Authorization (Multi-Issuer)
+
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+
+**1. Prepare tokens**
+
+Tokens are provided as a Map<String, String> with token type as key and its JWT format as value:
+
+```java
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("Jans::Access_token", "<access_token_jwt>");
+    tokens.put("Jans::Id_token", "<id_token_jwt>");
+    tokens.put("Jans::Userinfo_token", "<userinfo_token_jwt>");
+```
+
+**2. Define the resource**
+
+```java
+    String resourceString = """
+            {
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Application", 
+                    "id": "app_id_001"
+                },
+                "name": "App Name",
+                "url": {
+                    "host": "example.com",
+                    "path": "/admin-dashboard",
+                    "protocol": "https"
+                }
+            }
+            """;
+    JSONObject resource = new JSONObject(resourceString);
+
+```
+
+**3. Define the action**
+
+```java
+    String action = "Jans::Action::\"Read\"";
+```
+
+**4. Define Context (optional)**
+
+```java
+    String contextString = "{}";
+    JSONObject context = new JSONObject(contextString);
+```
+
+**5. Authorize**
+
+```java
+
+    MultiIssuerAuthorizeResult result = adapter.authorizeMultiIssuer(tokens, action, resource, emptyContext());
+    
+    if(result.getDecision()) {
+        System.out.println("Access granted");
+    } else {
+            System.out.println("Access denied");
+    }
+```
+
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
