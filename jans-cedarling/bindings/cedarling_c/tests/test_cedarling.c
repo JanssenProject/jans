@@ -136,16 +136,15 @@ void test_authorization(){
     // Test valid unsigned authorization request with TestPrincipal1
     // Uses TestPrincipal1 entity type from policy-store_ok_2.yaml
     // Policy permits when principal.is_ok == true
+    // RequestUnsigned uses singular "principal" key (not "principals" array).
     const char* valid_request = "{\n"
-        "    \"principals\": [\n"
-        "        {\n"
-        "            \"cedar_entity_mapping\": {\n"
-        "                \"entity_type\": \"Jans::TestPrincipal1\",\n"
-        "                \"id\": \"test_principal_1\"\n"
-        "            },\n"
-        "            \"is_ok\": true\n"
-        "        }\n"
-        "    ],\n"
+        "    \"principal\": {\n"
+        "        \"cedar_entity_mapping\": {\n"
+        "            \"entity_type\": \"Jans::TestPrincipal1\",\n"
+        "            \"id\": \"test_principal_1\"\n"
+        "        },\n"
+        "        \"is_ok\": true\n"
+        "    },\n"
         "    \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
         "    \"resource\": {\n"
         "        \"cedar_entity_mapping\": {\n"
@@ -166,20 +165,17 @@ void test_authorization(){
     TEST_ASSERT(ret==0,"Authorization request executed successfully");
     if(ret==0){
        TEST_ASSERT(auth_result.data!=NULL,"Authorization result data provided");
-        
+
        char* result_str = auth_result.data;
         printf(" Authorization result: %.200s...\n", result_str);
-        
-        // Verify the response structure contains expected fields
-        // Note: The overall decision depends on principal_bool_operator config (not exposed to C)
-        // Default operator requires Jans::Workload AND Jans::User, so decision will be false
-        // when using TestPrincipal1. We verify the individual principal got "allow".
-        TEST_ASSERT(strstr(result_str, "\"decision\":false") != NULL,
-                   "Top-level decision should be false for this test policy setup");
+
+        // With is_ok=true the Cedar policy permits the request.
+        // AuthorizeResult is a single-response struct: top-level "decision":true and
+        // response.decision == "allow".  There is no per-principal breakdown.
+        TEST_ASSERT(strstr(result_str, "\"decision\":true") != NULL,
+                   "Top-level decision should be true (allow)");
         TEST_ASSERT(strstr(result_str, "\"decision\":\"allow\"") != NULL,
-                   "Individual principal decision should be allow");
-        TEST_ASSERT(strstr(result_str, "principals") != NULL,
-                   "Response should contain principals field");
+                   "Cedar response decision should be allow");
     }else{
        printf(" Authorization error: %s\n", auth_result.error_message ? auth_result.error_message : "unknown");
     }
