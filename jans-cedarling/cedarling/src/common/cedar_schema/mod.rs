@@ -132,8 +132,14 @@ mod tests {
             .to_string();
         assert_eq!(
             err_msg,
-            "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry",
-            "parsing a policy store entry without 'name' should produce this specific policy-store parse error"
+            concat!(
+                "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': ",
+                "missing required field 'name' in policy store entry",
+            ),
+            concat!(
+                "parsing a policy store entry without 'name' should produce this specific ",
+                "policy-store parse error",
+            ),
         );
     }
 }

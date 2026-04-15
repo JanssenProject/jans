@@ -657,8 +657,8 @@ async fn test_load_from_cjar_file_and_authorize_success() {
     );
 }
 
-/// Test that a single `.cedar` file containing two `@id(...)` policies inside a
-/// `.cjar` archive loads end-to-end and both policies apply during authorization.
+/// Test that a single `.cedar` file containing multiple `@id(...)` policies inside a
+/// `.cjar` archive loads end-to-end and those policies apply during authorization.
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_load_from_cjar_with_multi_policy_file() {
@@ -684,13 +684,21 @@ async fn test_load_from_cjar_with_multi_policy_file() {
 }
 "#,
         )
-        // A single file with two policies; each carries its own `@id`.
+        // One file with multiple policies: a general write permit plus a guest-only
+        // forbid, so missing `deny-write-guest` would incorrectly allow guests to write.
         .with_policy(
             "combined",
             r#"@id("allow-read")
 permit(
     principal,
     action == TestApp::Action::"read",
+    resource
+);
+
+@id("allow-write-all")
+permit(
+    principal,
+    action == TestApp::Action::"write",
     resource
 );
 
@@ -739,8 +747,35 @@ forbid(
         "Read should be allowed by the allow-read policy from the multi-policy file"
     );
 
-    // 2. Write by guest must be denied by `deny-write-guest` from the same file.
-    let write_request = create_test_unsigned_request(
+    // 2. Write by admin must be allowed by `allow-write-all` (proves multi-policy load).
+    let admin_write_request = create_test_unsigned_request(
+        "TestApp::Action::\"write\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "admin_user",
+                json!({"name": "Admin", "user_type": "admin"}),
+            )
+            .expect("Failed to create principal"),
+        ],
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .expect("Failed to create resource"),
+    );
+    let admin_write_result = cedarling
+        .authorize_unsigned(admin_write_request)
+        .await
+        .expect("Authorization should succeed");
+    assert!(
+        admin_write_result.decision,
+        "Write by admin should be explicitly permitted by allow-write-all from the multi-policy file"
+    );
+
+    // 3. Write by guest must still be denied by `deny-write-guest` (forbid overrides permit).
+    let guest_write_request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
         vec![
             create_test_principal(
@@ -757,13 +792,13 @@ forbid(
         )
         .expect("Failed to create resource"),
     );
-    let write_result = cedarling
-        .authorize_unsigned(write_request)
+    let guest_write_result = cedarling
+        .authorize_unsigned(guest_write_request)
         .await
         .expect("Authorization should succeed");
     assert!(
-        !write_result.decision,
-        "Write by guest should be denied by the deny-write-guest policy from the multi-policy file"
+        !guest_write_result.decision,
+        "Write by guest should be denied by deny-write-guest from the same multi-policy file"
     );
 }
 
