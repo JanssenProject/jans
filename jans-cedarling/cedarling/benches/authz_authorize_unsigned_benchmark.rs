@@ -168,7 +168,6 @@ fn prepare_unsigned_request() -> RequestUnsigned {
             "id": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0"
         },
         "country": "US",
-        "role": ["Admin"],
         "department": "engineering",
         "active": true,
         "suspended": false
@@ -188,7 +187,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
 
     RequestUnsigned {
         principal: Some(principal),
-        action: "Jans::Action::\"Update\"".to_string(),
+        action: "Jans::Action::\"Read\"".to_string(),
         context: json!({}),
         resource,
     }
