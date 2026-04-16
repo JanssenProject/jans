@@ -82,7 +82,7 @@ namespace Jans {
     user_agent?: String
   };
 
-  type Url = __cedar::String;
+  type Url = String;
 
   type email_address = {
     domain: String,
