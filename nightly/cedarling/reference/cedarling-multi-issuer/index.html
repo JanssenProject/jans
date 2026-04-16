@@ -779,8 +779,6 @@
       
         
       
-        
-      
     
     
     
@@ -1144,6 +1142,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#declaring-the-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declaring the action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#policy-store-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1433,34 +1470,6 @@
     
   
     Properties
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-principal-boolean-operations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Boolean Operations
   
 
     
@@ -1959,6 +1968,45 @@
     <span class="md-ellipsis">
       
         Updating Core Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#declaring-the-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declaring the action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the policy
       
     </span>
   </a>
@@ -2813,6 +2861,30 @@ type TokensContext = {
 </ul>
 <h4 id="updating-core-schema">Updating Core Schema<a class="headerlink" href="#updating-core-schema" title="Permanent link">#</a></h4>
 <p>If you're using the default <code>cedarling_core.cedarschema</code> from Agama Lab, it has been updated to support multi-issuer authorization. If you have a custom schema, make sure to apply these changes.</p>
+<h3 id="cedar-schema-for-multi-issuer-actions">Cedar Schema for Multi-Issuer Actions<a class="headerlink" href="#cedar-schema-for-multi-issuer-actions" title="Permanent link">#</a></h3>
+<p>Multi-issuer authorization runs Cedar's partial evaluator with <strong>no principal</strong> — <code>authorize_multi_issuer</code> does not accept one, and none is constructed internally. Actions used in multi-issuer requests must declare this in their <code>appliesTo</code>, and policies referencing those actions must leave the principal unconstrained.</p>
+<h4 id="declaring-the-action">Declaring the action<a class="headerlink" href="#declaring-the-action" title="Permanent link">#</a></h4>
+<p>Cedar's schema validator rejects an empty <code>principal</code> list (<code>for action '...', 'principal' is '[]', which is invalid</code>). To declare an action that runs without a principal, declare a placeholder entity type purely to satisfy the schema and reference it in <code>appliesTo</code>:</p>
+<div class="highlight"><pre><span></span><code>entity Any;
+
+action &quot;ReadArtifact&quot; appliesTo {
+  principal: [Any],
+  resource: [Artifact],
+  context: Context
+};
+</code></pre></div>
+<p>No instance of <code>Any</code> is ever constructed at runtime. <code>authorize_multi_issuer</code> invokes the action with <code>principal: None</code> and Cedar's partial evaluator runs against the policies. The placeholder entity type exists only so the schema parses.</p>
+<h4 id="writing-the-policy">Writing the policy<a class="headerlink" href="#writing-the-policy" title="Permanent link">#</a></h4>
+<p>Policies for multi-issuer actions must use the unconstrained <code>permit(principal, ...)</code> head — do not add <code>principal == ...</code> or <code>principal is ...</code>, because no principal exists at evaluation time:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Action::&quot;ReadArtifact&quot;,
+  resource == Artifact::&quot;doc-1&quot;
+) when {
+  context.tokens.AcmeCorp_access_token.scope.contains(&quot;read&quot;)
+};
+</code></pre></div>
+<p>If a policy does constrain the principal, Cedar's partial evaluator cannot fully evaluate it and emits a residual. Residual-dependent requests <strong>fail closed with Deny</strong> in Cedarling; the request's diagnostics list the residual policy ids so they can be located and fixed.</p>
 <h3 id="policy-store-configuration">Policy Store Configuration<a class="headerlink" href="#policy-store-configuration" title="Permanent link">#</a></h3>
 <p>Configure trusted issuers with the <code>name</code> field for predictable token naming:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -3114,7 +3186,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

@@ -1264,8 +1264,6 @@
       
         
       
-        
-      
     
     
     
@@ -1921,32 +1919,21 @@ cargo<span class="w"> </span>--version
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
-<p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
-<p><strong>1. Define the Principals</strong></p>
+<p>In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass <code>None</code> to evaluate the request with partial evaluation.</p>
+<p><strong>1. Define the Principal</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
 <span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
 <span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
-<span class="w">  </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">      </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some_workload_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
-<span class="w">      </span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;some_client_id&quot;</span><span class="p">)),</span>
-<span class="w">    </span><span class="p">]),</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">principal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random_user_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">      </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random_user_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
-<span class="w">      </span><span class="p">(</span><span class="s">&quot;role&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manager&quot;</span><span class="p">])),</span>
-<span class="w">    </span><span class="p">]),</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="p">]</span>
+<span class="w">  </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
+<span class="w">    </span><span class="p">(</span><span class="s">&quot;role&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manager&quot;</span><span class="p">])),</span>
+<span class="w">  </span><span class="p">]),</span>
+<span class="p">});</span>
 </code></pre></div>
 <p><strong>2. Define the Resource</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
@@ -1986,18 +1973,18 @@ cargo<span class="w"> </span>--version
 <span class="p">});</span>
 </code></pre></div>
 <p><strong>5. Build the Request</strong></p>
-<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principals</em>, <em>action</em>, and <em>context</em>.</p>
+<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principal</em>, <em>action</em>, and <em>context</em>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">principals</span><span class="p">,</span>
+<span class="w">    </span><span class="n">principal</span><span class="p">,</span>
 <span class="w">    </span><span class="n">action</span><span class="p">,</span>
 <span class="w">    </span><span class="n">resource</span><span class="p">,</span>
 <span class="w">    </span><span class="n">context</span><span class="p">,</span>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
+<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principal is allowed to perform the specified action on the resource.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
 
 <span class="k">match</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span><span class="w"> </span><span class="p">{</span>
@@ -2045,7 +2032,7 @@ for a complete code example.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

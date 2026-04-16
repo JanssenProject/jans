@@ -1236,8 +1236,6 @@
       
         
       
-        
-      
     
     
     
@@ -1805,24 +1803,15 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
-<p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
-<p><strong>1. Define the Principals</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">principals</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="n">EntityData</span><span class="p">(</span>
-    <span class="n">cedar_entity_mapping</span><span class="o">=</span><span class="n">CedarEntityMapping</span><span class="p">(</span>
-      <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">,</span>
-      <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;some_workload_id&quot;</span>
-    <span class="p">),</span>
-    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;some_client_id&quot;</span><span class="p">,</span>
+<p>In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass <code>None</code> to run the request with partial evaluation. If partial evaluation leaves unresolved residuals (i.e. the decision cannot be fully determined without a concrete principal), the request is <strong>denied</strong> (fail-closed). The unresolved residuals are surfaced in the diagnostics of the authorization result, so you can inspect which policies could not be evaluated to understand why the request was denied.</p>
+<p><strong>1. Define the Principal</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">principal</span> <span class="o">=</span> <span class="n">EntityData</span><span class="p">(</span>
+  <span class="n">cedar_entity_mapping</span><span class="o">=</span><span class="n">CedarEntityMapping</span><span class="p">(</span>
+    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;random_user_id&quot;</span>
   <span class="p">),</span>
-  <span class="n">EntityData</span><span class="p">(</span>
-    <span class="n">cedar_entity_mapping</span><span class="o">=</span><span class="n">CedarEntityMapping</span><span class="p">(</span>
-      <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-      <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;random_user_id&quot;</span>
-    <span class="p">),</span>
-    <span class="n">role</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;manager&quot;</span><span class="p">]</span>
-  <span class="p">),</span>
-<span class="p">]</span>
+  <span class="n">role</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;manager&quot;</span><span class="p">]</span>
+<span class="p">)</span>
 </code></pre></div>
 <p><strong>2. Define the Resource</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
@@ -1854,16 +1843,16 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>5. Build the Request</strong></p>
-<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principals</em>, <em>action</em>, and <em>context</em>.</p>
+<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principal</em>, <em>action</em>, and <em>context</em>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">request</span> <span class="o">=</span> <span class="n">RequestUnsigned</span><span class="p">(</span>
-  <span class="n">principals</span><span class="o">=</span><span class="n">principals</span><span class="p">,</span>
+  <span class="n">principal</span><span class="o">=</span><span class="n">principal</span><span class="p">,</span>
   <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
   <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
   <span class="n">context</span><span class="o">=</span><span class="n">context</span>
 <span class="p">)</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
+<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principal is allowed to perform the specified action on the resource.</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="multi-issuer-authorization">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization" title="Permanent link">#</a></h4>
@@ -1952,7 +1941,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 </tr>
 <tr>
 <td>Decision Access</td>
-<td><code>result.decision</code>, <code>result.principals</code> map</td>
+<td><code>result.decision</code>, <code>result.response</code></td>
 <td><code>result.decision</code> (boolean)</td>
 </tr>
 <tr>
@@ -2001,7 +1990,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

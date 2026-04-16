@@ -779,8 +779,6 @@
       
         
       
-        
-      
     
     
     
@@ -973,34 +971,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../cedarling-principal-boolean-operations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Boolean Operations
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../cedarling-jwt-validation/" class="md-nav__link">
         
   
@@ -1138,34 +1108,6 @@
     <span class="md-ellipsis">
       
         Example: Workload Principal
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#role-entity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Role Entity
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Role Entity">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rbac-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RBAC Support
       
     </span>
   </a>
@@ -1543,34 +1485,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#role-entity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Role Entity
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Role Entity">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rbac-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RBAC Support
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#token-entities" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1775,12 +1689,7 @@
 </tr>
 <tr>
 <td><a href="#principal-entities">Principal (User, Workload, etc.)</a></td>
-<td>Built from <code>EntityData</code></td>
-<td>Not created</td>
-</tr>
-<tr>
-<td><a href="#role-entity">Role</a></td>
-<td>Built as parent of principals</td>
+<td>Built from <code>EntityData</code> (optional)</td>
 <td>Not created</td>
 </tr>
 <tr>
@@ -1800,7 +1709,6 @@
 <p><strong><em>Notes</em></strong></p>
 <ul>
 <li>Attribute presence depends on the data provided and the Cedar schema in the policy store.</li>
-<li>Role inheritance simplifies <strong>user-role mapping</strong> for RBAC policy enforcement.</li>
 </ul>
 </blockquote>
 <h2 id="trusted-issuer">Trusted Issuer<a class="headerlink" href="#trusted-issuer" title="Permanent link">#</a></h2>
@@ -1811,11 +1719,11 @@
 <li><em>Entity ID:</em> Set using the issuer URL (corresponds to <code>iss</code> in tokens).</li>
 </ul>
 <h2 id="principal-entities">Principal Entities<a class="headerlink" href="#principal-entities" title="Permanent link">#</a></h2>
-<p>Principals are created only in the <code>authorize_unsigned</code> interface. The caller provides one or more principals as <code>EntityData</code>, each specifying the Cedar entity type, ID, and attributes explicitly.</p>
+<p>Principals are created only in the <code>authorize_unsigned</code> interface. The caller optionally provides a single principal as <code>EntityData</code>, specifying the Cedar entity type, ID, and attributes explicitly.</p>
 <p>There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include <code>User</code> and <code>Workload</code>, but these are just conventions defined in your schema.</p>
-<p>When multiple principals are provided, Cedarling evaluates each one independently and combines results using <a href="../cedarling-principal-boolean-operations/"><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></a>.</p>
+<p>The principal is optional. When omitted, Cedarling evaluates the request using Cedar's partial evaluator. See <a href="../cedarling-authz/#optional-principal-and-partial-evaluation">Optional principal and partial evaluation</a> in the authorization reference for the full semantics.</p>
 <h3 id="entitydata-structure">EntityData Structure<a class="headerlink" href="#entitydata-structure" title="Permanent link">#</a></h3>
-<p>Each principal is passed as an <code>EntityData</code>:</p>
+<p>The principal is passed as an <code>EntityData</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
@@ -1823,8 +1731,7 @@
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_123&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob@email.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob@email.com&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1836,19 +1743,16 @@
 <h3 id="example-user-principal">Example: User Principal<a class="headerlink" href="#example-user-principal" title="Permanent link">#</a></h3>
 <p>Given the following <code>authorize_unsigned</code> request with a User principal:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;principals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::User&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1880,51 +1784,37 @@ namespace Jans {
 
 // MyApp namespace: your business entities.
 namespace MyApp {
-  entity Role;
-  entity User in [Role] = {
+  entity User = {
     email?: Jans::email_address,
     phone_number?: String,
-    role: Set&lt;String&gt;,
     sub: String,
     &quot;username&quot;?: String,
   };
 };
 </code></pre></div>
-<p>Cedarling builds the following entities:</p>
+<p>Cedarling builds the following entity:</p>
 <p><strong>User entity:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::User&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
+<span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="p">}</span>
-</code></pre></div>
-<p><strong>Role entities</strong> (created automatically as parents):</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]}</span>
-<span class="p">]</span>
 </code></pre></div>
 <h3 id="example-workload-principal">Example: Workload Principal<a class="headerlink" href="#example-workload-principal" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;principals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Workload&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Backend Service&quot;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Workload&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Backend Service&quot;</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;...&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
@@ -1939,21 +1829,6 @@ namespace MyApp {
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="p">}</span>
-</code></pre></div>
-<h2 id="role-entity">Role Entity<a class="headerlink" href="#role-entity" title="Permanent link">#</a></h2>
-<p>Cedarling automatically creates <strong>Role</strong> entities when building principals in the <code>authorize_unsigned</code> interface.</p>
-<ul>
-<li><strong>Type Name:</strong> Configurable via <code>mapping_role</code> bootstrap property. Must match the Role entity type in your Cedar schema.</li>
-<li><strong>Entity ID:</strong> Extracted from the attribute configured in <code>unsigned_role_id_src</code> (defaults to <code>role</code>). The value can be a single string or an array of strings, each becoming a separate Role entity.</li>
-<li><strong>Relationship:</strong> Role entities are added as <strong>parents</strong> of the principal entity, enabling RBAC policies.</li>
-</ul>
-<h3 id="rbac-support">RBAC Support<a class="headerlink" href="#rbac-support" title="Permanent link">#</a></h3>
-<p>Since Role entities are automatically assigned as parents of principals, you can define RBAC policies like:</p>
-<div class="highlight"><pre><span></span><code>permit (
-   principal == MyApp::Role::&quot;Admin&quot;,
-   action in [MyApp::Action::&quot;Compare&quot;, MyApp::Action::&quot;Execute&quot;],
-   resource
-);
 </code></pre></div>
 <h2 id="token-entities">Token Entities<a class="headerlink" href="#token-entities" title="Permanent link">#</a></h2>
 <p>Token entities are created only in the <code>authorize_multi_issuer</code> interface. Cedarling builds one entity per JWT token provided in the request.</p>
@@ -2077,7 +1952,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

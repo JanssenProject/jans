@@ -777,8 +777,6 @@
       
         
       
-        
-      
     
     
     
@@ -2189,27 +2187,20 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">            </span><span class="n">jwt_status_validation</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span>
 <span class="w">            </span><span class="n">signature_algorithms_supported</span><span class="p">:</span><span class="w"> </span><span class="nc">HashSet</span><span class="p">::</span><span class="n">new</span><span class="p">(),</span>
 <span class="w">        </span><span class="p">}.</span><span class="n">allow_all_algorithms</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">authorization_config</span><span class="p">:</span><span class="w"> </span><span class="nc">AuthorizationConfig</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">principal_bool_operator</span><span class="p">:</span><span class="w"> </span><span class="nc">JsonRule</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="o">!</span><span class="p">(</span>
-<span class="w">                </span><span class="p">{</span><span class="s">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="s">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s">&quot;ALLOW&quot;</span><span class="p">]}</span>
-<span class="w">            </span><span class="p">)).</span><span class="n">unwrap</span><span class="p">(),</span>
-<span class="w">            </span><span class="o">..</span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">()</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="n">entity_builder_config</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityBuilderConfig</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">authorization_config</span><span class="p">:</span><span class="w"> </span><span class="nc">AuthorizationConfig</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">lock_config</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
 <span class="w">    </span><span class="p">}).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
 
 <span class="w">    </span><span class="c1">// Perform unsigned authorization</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">principal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">            </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test_user&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
-<span class="w">            </span><span class="p">(</span><span class="s">&quot;roles&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">])),</span>
 <span class="w">            </span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;admin@example.com&quot;</span><span class="p">)),</span>
 <span class="w">        </span><span class="p">]),</span>
-<span class="w">    </span><span class="p">}];</span>
+<span class="w">    </span><span class="p">});</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
@@ -2222,7 +2213,7 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">    </span><span class="p">};</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">principals</span><span class="p">,</span>
+<span class="w">        </span><span class="n">principal</span><span class="p">,</span>
 <span class="w">        </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="nc">r</span><span class="p">#</span><span class="s">&quot;Jans::Action::&quot;</span><span class="n">Read</span><span class="s">&quot;&quot;</span><span class="p">#.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">resource</span><span class="p">,</span>
 <span class="w">        </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">json</span><span class="o">!</span><span class="p">({}),</span>
@@ -2258,14 +2249,13 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">policy_store_config</span><span class="p">:</span><span class="w"> </span><span class="nc">PolicyStoreConfig</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">jwt_config</span><span class="p">:</span><span class="w"> </span><span class="nc">JwtConfig</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">authorization_config</span><span class="p">:</span><span class="w"> </span><span class="nc">AuthorizationConfig</span><span class="p">,</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">entity_builder_config</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityBuilderConfig</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">lock_config</span><span class="p">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">LockConfig</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <h4 id="requestunsigned"><code>RequestUnsigned</code><a class="headerlink" href="#requestunsigned" title="Permanent link">#</a></h4>
-<p>Unsigned authorization request.</p>
+<p>Unsigned authorization request. <code>principal</code> is optional — when <code>None</code>, Cedarling evaluates the request with Cedar's partial evaluator and fails closed on any residual policy that could otherwise permit the request.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">principals</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">EntityData</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">principal</span><span class="p">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">EntityData</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">resource</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityData</span><span class="p">,</span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="p">,</span>
@@ -2291,7 +2281,7 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">BootstrapConfig</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="bp">Self</span><span class="p">,</span><span class="w"> </span><span class="n">CedarlingError</span><span class="o">&gt;</span>
 </code></pre></div>
 <h4 id="authorize_unsigned"><code>authorize_unsigned()</code><a class="headerlink" href="#authorize_unsigned" title="Permanent link">#</a></h4>
-<p>Perform unsigned authorization with directly provided principals.</p>
+<p>Perform unsigned authorization with an optional directly-provided principal.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">authorize_unsigned</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="nc">RequestUnsigned</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">AuthorizeResult</span><span class="p">,</span><span class="w"> </span><span class="n">CedarlingError</span><span class="o">&gt;</span>
 </code></pre></div>
 <h4 id="authorize_multi_issuer"><code>authorize_multi_issuer()</code><a class="headerlink" href="#authorize_multi_issuer" title="Permanent link">#</a></h4>
@@ -2401,7 +2391,7 @@ cargo<span class="w"> </span>run<span class="w"> </span>--example<span class="w"
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

@@ -1275,8 +1275,6 @@
       
         
       
-        
-      
     
     
     
@@ -1905,7 +1903,7 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 <p>Cedarling provides two main interfaces for performing authorization checks:</p>
 <ul>
 <li><a href="#multi-issuer-authorization"><strong>Multi-Issuer Authorization</strong></a> processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on <code>token_metadata</code> configuration.</li>
-<li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.</li>
+<li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass a principal directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.</li>
 </ul>
 <h4 id="multi-issuer-authorization">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization" title="Permanent link">#</a></h4>
 <p><strong>1. Define the resource:</strong></p>
@@ -1949,27 +1947,25 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
-<p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
-<p><strong>1. Define the principals:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nx">principals</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
-<span class="w">            </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;role&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;admin&quot;</span><span class="p">},</span>
-<span class="w">            </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;sub&quot;</span><span class="p">:</span><span class="w">     </span><span class="s">&quot;random_sub&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="p">},</span>
+<p>In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — set it to <code>nil</code> to evaluate the request with partial evaluation.</p>
+<p><strong>1. Define the principal:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nx">principal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;random_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;role&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;admin&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;sub&quot;</span><span class="p">:</span><span class="w">     </span><span class="s">&quot;random_sub&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>2. Build the request:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">RequestUnsigned</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">Principals</span><span class="p">:</span><span class="w"> </span><span class="nx">principals</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">Action</span><span class="p">:</span><span class="w">     </span><span class="s">`Jans::Action::&quot;Update&quot;`</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">Resource</span><span class="p">:</span><span class="w">   </span><span class="nx">resource</span><span class="p">,</span><span class="w"> </span><span class="c1">// From previous example</span>
+<span class="w">    </span><span class="nx">Principal</span><span class="p">:</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Action</span><span class="p">:</span><span class="w">    </span><span class="s">`Jans::Action::&quot;Update&quot;`</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Resource</span><span class="p">:</span><span class="w">  </span><span class="nx">resource</span><span class="p">,</span><span class="w"> </span><span class="c1">// From previous example</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>3. Authorize:</strong></p>
@@ -2123,7 +2119,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     
