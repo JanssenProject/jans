@@ -4,12 +4,14 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 use std::time::Duration as StdDuration;
 
 use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
 use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
+
+use crate::authz::metrics::MetricsCollector;
 
 use super::config::{ConfigValidationError, DataStoreConfig};
 use super::entry::DataEntry;
@@ -40,6 +42,7 @@ const MAX_SAFE_DURATION_SECS: u64 = (i64::MAX / 1000) as u64;
 pub(crate) struct DataStore {
     storage: RwLock<SparKV<DataEntry>>,
     config: DataStoreConfig,
+    metrics: Arc<MetricsCollector>,
 }
 
 impl DataStore {
@@ -51,7 +54,10 @@ impl DataStore {
     /// - If `config.default_ttl` is `None`, uses 10 years (effectively infinite)
     ///
     /// Returns `ConfigValidationError` if the configuration is invalid.
-    pub(crate) fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
+    pub(crate) fn new(
+        config: DataStoreConfig,
+        metrics: Arc<MetricsCollector>,
+    ) -> Result<Self, ConfigValidationError> {
         // Validate configuration before creating the store
         config.validate()?;
 
@@ -80,6 +86,7 @@ impl DataStore {
                 size_calculator,
             )),
             config,
+            metrics,
         })
     }
 
@@ -105,6 +112,7 @@ impl DataStore {
     ) -> Result<(), DataError> {
         // Validate key
         if key.is_empty() {
+            self.metrics.increment_error("data.invalid_key");
             return Err(DataError::InvalidKey);
         }
 
@@ -113,6 +121,7 @@ impl DataStore {
             && let Some(max_ttl) = self.config.max_ttl
             && explicit_ttl > max_ttl
         {
+            self.metrics.increment_error("data.ttl_exceeded");
             return Err(DataError::TTLExceeded {
                 requested: explicit_ttl,
                 max: max_ttl,
@@ -134,10 +143,14 @@ impl DataStore {
 
         // Check entry size before storing (including metadata)
         let entry_size = serde_json::to_string(&entry)
-            .map_err(DataError::from)?
+            .map_err(|e| {
+                self.metrics.increment_error("data.serialization");
+                DataError::from(e)
+            })?
             .len();
 
         if self.config.max_entry_size > 0 && entry_size > self.config.max_entry_size {
+            self.metrics.increment_error("data.value_too_large");
             return Err(DataError::ValueTooLarge {
                 size: entry_size,
                 max: self.config.max_entry_size,
@@ -152,15 +165,21 @@ impl DataStore {
         storage
             .set_with_ttl(key, entry, chrono_ttl, &[])
             .map_err(|e| match e {
-                SparKVError::CapacityExceeded => DataError::StorageLimitExceeded {
-                    max: self.config.max_entries,
+                SparKVError::CapacityExceeded => {
+                    self.metrics.increment_error("data.storage_limit");
+                    DataError::StorageLimitExceeded {
+                        max: self.config.max_entries,
+                    }
                 },
-                SparKVError::ItemSizeExceeded => DataError::ValueTooLarge {
-                    size: entry_size,
-                    max: self.config.max_entry_size,
+                SparKVError::ItemSizeExceeded => {
+                    self.metrics.increment_error("data.value_too_large");
+                    DataError::ValueTooLarge {
+                        size: entry_size,
+                        max: self.config.max_entry_size,
+                    }
                 },
                 SparKVError::TTLTooLong => {
-                    // This shouldn't happen since we validated above, but handle it anyway
+                    self.metrics.increment_error("data.ttl_exceeded");
                     DataError::TTLExceeded {
                         requested: ttl.unwrap_or_default(),
                         max: self
@@ -171,6 +190,7 @@ impl DataStore {
                 },
             })?;
 
+        self.metrics.record_data_push();
         Ok(())
     }
 
@@ -179,7 +199,11 @@ impl DataStore {
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
     pub(crate) fn get(&self, key: &str) -> Option<Value> {
-        self.get_entry(key).map(|entry| entry.value)
+        let result = self.get_entry(key).map(|entry| entry.value);
+        if result.is_some() {
+            self.metrics.record_data_get();
+        }
+        result
     }
 
     /// Get a data entry with full metadata by key.
@@ -247,7 +271,11 @@ impl DataStore {
     /// Uses write lock for exclusive access.
     pub(crate) fn remove(&self, key: &str) -> bool {
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.pop(key).is_some()
+        let removed = storage.pop(key).is_some();
+        if removed {
+            self.metrics.record_data_remove();
+        }
+        removed
     }
 
     /// Clear all entries from the store.

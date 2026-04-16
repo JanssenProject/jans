@@ -165,18 +165,13 @@ fn log_json_to_proto(entry: LockServerLogEntry) -> LogEntry {
 fn telemetry_json_to_proto(entry: LockServerMetricsEntry) -> TelemetryEntry {
     TelemetryEntry {
         creation_date: parse_timestamp(&entry.creation_date),
-        event_time: parse_timestamp(&entry.event_time),
         service: entry.service.unwrap_or_default(),
         node_name: entry.node_name,
         status: entry.status,
-        last_policy_load_size: entry.last_policy_load_size,
-        policy_success_load_counter: entry.policy_success_load_counter,
-        policy_failed_load_counter: entry.policy_failed_load_counter,
-        last_policy_evaluation_time_ns: entry.last_policy_evaluation_time_ns,
-        avg_policy_evaluation_time_ns: entry.avg_policy_evaluation_time_ns,
-        memory_usage: entry.memory_usage,
-        evaluation_requests_count: entry.evaluation_requests_count,
         policy_stats: entry.policy_stats,
+        error_counters: entry.error_counters,
+        operational_stats: entry.operational_stats,
+        interval_secs: entry.interval_secs,
     }
 }
 

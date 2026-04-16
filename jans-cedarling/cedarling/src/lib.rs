@@ -36,6 +36,7 @@ mod tests;
 use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
+use crate::authz::metrics::MetricsCollector;
 pub use crate::common::json_rules::JsonRule;
 use crate::context_data_api::DataStore;
 pub use crate::context_data_api::{
@@ -158,11 +159,26 @@ impl Cedarling {
                 );
             })?;
 
-        // Initialize data store first so it can be passed to authz service
-        let data = Arc::new(DataStore::new(config.data_store_config.clone())?);
+        let policy_count = service_config
+            .policy_store
+            .policies
+            .get_set()
+            .num_of_policies();
+        let metrics = Arc::new(MetricsCollector::new(policy_count));
 
-        let mut service_factory =
-            ServiceFactory::new(config, service_config, log.clone(), data.clone());
+        // Initialize data store first so it can be passed to authz service
+        let data = Arc::new(DataStore::new(
+            config.data_store_config.clone(),
+            metrics.clone(),
+        )?);
+
+        let mut service_factory = ServiceFactory::new(
+            config,
+            service_config,
+            log.clone(),
+            data.clone(),
+            metrics.clone(),
+        );
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {

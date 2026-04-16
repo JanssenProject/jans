@@ -66,23 +66,18 @@ pub(super) struct LockServerLogEntry {
     pub context_information: Option<Value>,
 }
 
-/// Serializes into the lock server's expected metrics format
+/// Serializes into the lock server's expected telemetry format (3-map model).
 #[derive(Debug, Serialize)]
 pub(super) struct LockServerMetricsEntry {
     pub creation_date: String,
-    pub event_time: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub service: Option<String>,
     pub node_name: String,
     pub status: String,
-    pub last_policy_load_size: i64,
-    pub policy_success_load_counter: i64,
-    pub policy_failed_load_counter: i64,
-    pub last_policy_evaluation_time_ns: i64,
-    pub avg_policy_evaluation_time_ns: i64,
-    pub memory_usage: i64,
-    pub evaluation_requests_count: i64,
+    pub interval_secs: i64,
     pub policy_stats: HashMap<String, i64>,
+    pub error_counters: HashMap<String, i64>,
+    pub operational_stats: HashMap<String, i64>,
 }
 
 impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
@@ -135,19 +130,14 @@ impl TryFrom<CedarlingMetricsEntry> for LockServerMetricsEntry {
         let timestamp = value.metric.base.timestamp.unwrap_or_default();
 
         Ok(Self {
-            creation_date: timestamp.clone(),
-            event_time: timestamp,
+            creation_date: timestamp,
             service: (!value.application_id.is_empty()).then_some(value.application_id),
             node_name: value.pdp_id,
-            status: "ok".to_string(),
-            last_policy_load_size: value.metric.loaded_policies,
-            policy_success_load_counter: value.metric.total_allows,
-            policy_failed_load_counter: value.metric.total_denies,
-            last_policy_evaluation_time_ns: value.metric.last_decision_time,
-            avg_policy_evaluation_time_ns: value.metric.average_decision_time,
-            memory_usage: value.metric.memory_usage,
-            evaluation_requests_count: value.metric.evaluation_requests,
+            status: "running".to_string(),
+            interval_secs: value.metric.interval_secs,
             policy_stats: value.metric.policy_stats,
+            error_counters: value.metric.error_counters,
+            operational_stats: value.metric.operational_stats,
         })
     }
 }
@@ -331,19 +321,22 @@ mod test {
         let base = BaseLogEntry::new_metric(request_id);
 
         let mut policy_stats = std::collections::HashMap::new();
-        policy_stats.insert("stat_1".to_string(), 100);
-        policy_stats.insert("stat_2".to_string(), 3);
+        policy_stats.insert("allow_read_docs".to_string(), 340);
+        policy_stats.insert("deny_admin".to_string(), 12);
+
+        let mut operational_stats = std::collections::HashMap::new();
+        operational_stats.insert("authz.requests_total".to_string(), 1240);
+        operational_stats.insert("authz.decision_allow".to_string(), 1218);
+
+        let mut error_counters = std::collections::HashMap::new();
+        error_counters.insert("jwt.validation_failed".to_string(), 8);
 
         let metrics_entry = MetricsLogEntry {
             base,
-            loaded_policies: 1024,
-            total_allows: 100,
-            total_denies: 3,
-            last_decision_time: 100_000,
-            average_decision_time: 75_000,
-            evaluation_requests: 103,
-            memory_usage: 2_097_152,
             policy_stats,
+            error_counters,
+            operational_stats,
+            interval_secs: 60,
         };
 
         let pdp_id = PdpID::new();
@@ -357,35 +350,43 @@ mod test {
             serde_json::from_str(&json_str).expect("deserialize into CedarlingMetricsEntry");
 
         assert_eq!(cedarling_entry.metric.base.log_kind, LogType::Metric);
-        assert_eq!(cedarling_entry.metric.loaded_policies, 1024);
-        assert_eq!(cedarling_entry.metric.total_allows, 100);
-        assert_eq!(cedarling_entry.metric.total_denies, 3);
-        assert_eq!(cedarling_entry.metric.last_decision_time, 100_000);
-        assert_eq!(cedarling_entry.metric.average_decision_time, 75_000);
-        assert_eq!(cedarling_entry.metric.evaluation_requests, 103);
-        assert_eq!(cedarling_entry.metric.memory_usage, 2_097_152);
+        assert_eq!(cedarling_entry.metric.interval_secs, 60);
         assert_eq!(cedarling_entry.application_id, "jans-auth");
         assert_eq!(
-            cedarling_entry.metric.policy_stats.get("stat_1"),
-            Some(&100)
+            cedarling_entry.metric.policy_stats.get("allow_read_docs"),
+            Some(&340)
         );
-        assert_eq!(cedarling_entry.metric.policy_stats.get("stat_2"), Some(&3));
+        assert_eq!(
+            cedarling_entry
+                .metric
+                .error_counters
+                .get("jwt.validation_failed"),
+            Some(&8)
+        );
+        assert_eq!(
+            cedarling_entry
+                .metric
+                .operational_stats
+                .get("authz.requests_total"),
+            Some(&1240)
+        );
 
         let lock_entry = LockServerMetricsEntry::try_from(cedarling_entry)
             .expect("map to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service.as_deref(), Some("jans-auth"));
         assert_eq!(lock_entry.node_name, pdp_id.to_string());
-        assert_eq!(lock_entry.status, "ok");
-        assert_eq!(lock_entry.last_policy_load_size, 1024);
-        assert_eq!(lock_entry.policy_success_load_counter, 100);
-        assert_eq!(lock_entry.policy_failed_load_counter, 3);
-        assert_eq!(lock_entry.last_policy_evaluation_time_ns, 100_000);
-        assert_eq!(lock_entry.avg_policy_evaluation_time_ns, 75_000);
-        assert_eq!(lock_entry.memory_usage, 2_097_152);
-        assert_eq!(lock_entry.evaluation_requests_count, 103);
-        assert_eq!(lock_entry.policy_stats.get("stat_1"), Some(&100));
-        assert_eq!(lock_entry.policy_stats.get("stat_2"), Some(&3));
+        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.interval_secs, 60);
+        assert_eq!(lock_entry.policy_stats.get("allow_read_docs"), Some(&340));
+        assert_eq!(
+            lock_entry.error_counters.get("jwt.validation_failed"),
+            Some(&8)
+        );
+        assert_eq!(
+            lock_entry.operational_stats.get("authz.requests_total"),
+            Some(&1240)
+        );
     }
 
     #[test]
@@ -394,14 +395,10 @@ mod test {
 
         let metrics_entry = MetricsLogEntry {
             base,
-            loaded_policies: 2048,
-            total_allows: 250,
-            total_denies: 1,
-            last_decision_time: 85_000,
-            average_decision_time: 92_000,
-            evaluation_requests: 420,
-            memory_usage: 4_194_304,
             policy_stats: std::collections::HashMap::new(),
+            error_counters: std::collections::HashMap::new(),
+            operational_stats: std::collections::HashMap::new(),
+            interval_secs: 30,
         };
 
         let pdp_id = PdpID::new();
@@ -413,8 +410,9 @@ mod test {
             .expect("convert CedarlingMetricsEntry to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service, None);
-        assert_eq!(lock_entry.status, "ok");
-        assert_eq!(lock_entry.last_policy_load_size, 2048);
-        assert_eq!(lock_entry.policy_stats.len(), 0);
+        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.interval_secs, 30);
+        assert!(lock_entry.policy_stats.is_empty());
+        assert!(lock_entry.error_counters.is_empty());
     }
 }

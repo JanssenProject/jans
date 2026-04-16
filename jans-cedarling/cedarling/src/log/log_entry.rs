@@ -323,29 +323,22 @@ pub(crate) struct DecisionLogEntry {
     pub pushed_data: Option<PushedDataInfo>,
 }
 
-/// log entry for telemetry metrics
+/// Telemetry log entry following the 3-map model.
+///
+/// Contains per-policy evaluation counts, classified error counters, and
+/// operational statistics for a single telemetry interval.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct MetricsLogEntry {
-    /// base information of entry
-    /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
-    /// Number of policies loaded
-    pub loaded_policies: i64,
-    /// Total number of allowed requests
-    pub total_allows: i64,
-    /// Total number of denied requests
-    pub total_denies: i64,
-    /// Last policy evaluation time in nanoseconds
-    pub last_decision_time: i64,
-    /// Average policy evaluation time in nanoseconds
-    pub average_decision_time: i64,
-    /// Number of evaluation requests processed
-    pub evaluation_requests: i64,
-    /// Memory usage in bytes
-    pub memory_usage: i64,
-    /// Policy statistics
+    /// Per-policy evaluation counts (`policy_id` → count)
     pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters (`error_key` → count)
+    pub error_counters: HashMap<String, i64>,
+    /// Operational metrics (`stat_key` → value)
+    pub operational_stats: HashMap<String, i64>,
+    /// Duration of the collection interval in seconds
+    pub interval_secs: i64,
 }
 
 /// Information about pushed data injected into the authorization context

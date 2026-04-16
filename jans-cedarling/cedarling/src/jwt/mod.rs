@@ -87,6 +87,7 @@ use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
+use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
@@ -113,11 +114,11 @@ pub(crate) struct JwtService {
     validators: Arc<JwtValidatorCache>,
     key_service: Arc<KeyService>,
     issuer_configs: Arc<IssuerIndex>,
-    /// Trusted issuer validator for advanced validation scenarios
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
     loading_state: Arc<TrustedIssuerLoadingState>,
+    metrics: Arc<MetricsCollector>,
 }
 
 struct IssuerConfig {
@@ -136,7 +137,7 @@ impl JwtService {
     /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
     /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
     /// * `logger` - Optional logger for diagnostic messages
-    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 means no TTL limit — the token's `exp` claim is used instead)
+    /// * `metrics` - Shared metrics collector for telemetry
     ///
     /// # Errors
     ///
@@ -145,6 +146,7 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
+        metrics: Arc<MetricsCollector>,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
@@ -160,6 +162,7 @@ impl JwtService {
             jwt_config.token_cache_capacity,
             jwt_config.token_cache_earliest_expiration_eviction,
             logger.clone(),
+            metrics.clone(),
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
@@ -189,11 +192,29 @@ impl JwtService {
             logger,
             token_cache,
             loading_state,
+            metrics,
         })
     }
 
     /// Validates a single JWT and returns decoded claims and trusted issuer when valid.
     fn validate_single_token(
+        &self,
+        token_kind: &TokenKind,
+        jwt: &str,
+    ) -> Result<ValidatedJwt, ValidateJwtError> {
+        let result = self.validate_single_token_inner(token_kind, jwt);
+        match &result {
+            Ok(_) => {
+                self.metrics.record_jwt_validation(true);
+            },
+            Err(_) => {
+                self.metrics.record_jwt_validation(false);
+            },
+        }
+        result
+    }
+
+    fn validate_single_token_inner(
         &self,
         token_kind: &TokenKind,
         jwt: &str,
@@ -414,6 +435,7 @@ impl JwtService {
                                 Some(LogLevel::WARN),
                             ));
                         }
+                        self.increment_jwt_validation_error(&err);
                     },
                 }
             }
@@ -452,6 +474,41 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         Cow::Borrowed(entity_type_name)
+    }
+
+    fn increment_jwt_validation_error(&self, err: &ValidateJwtError) {
+        match err {
+            ValidateJwtError::DecodeJwt(_) => self.metrics.increment_error("jwt.decode_failed"),
+            ValidateJwtError::MissingValidationKey => {
+                self.metrics.increment_error("jwt.missing_key");
+            },
+            ValidateJwtError::MissingValidator(_) => {
+                self.metrics.increment_error("jwt.missing_validator");
+            },
+            ValidateJwtError::ValidateJwt(_) => {
+                self.metrics.increment_error("jwt.validation_failed");
+            },
+            ValidateJwtError::MissingClaims(_) => {
+                self.metrics.increment_error("jwt.missing_claims");
+            },
+            ValidateJwtError::GetJwtStatus(_) | ValidateJwtError::DeserializeStatusClaim(_) => {
+                self.metrics.increment_error("jwt.status_check_failed");
+            },
+            ValidateJwtError::RejectJwtStatus(_) => {
+                self.metrics.increment_error("jwt.status_rejected");
+            },
+            ValidateJwtError::MissingStatusList => {
+                self.metrics.increment_error("jwt.missing_status_list");
+            },
+            ValidateJwtError::TrustedIssuerValidation(e) => match e {
+                TrustedIssuerError::UntrustedIssuer(_) => {
+                    self.metrics.increment_error("jwt.untrusted_issuer");
+                },
+                TrustedIssuerError::MissingRequiredClaim { .. } | TrustedIssuerError::EmptyEntityTypeName { .. } => {
+                    self.metrics.increment_error("jwt.missing_required_claim");
+                },
+            },
+        }
     }
 }
 

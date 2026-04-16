@@ -13,6 +13,7 @@ use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
+use crate::entity_builder::BuildUnsignedEntityError;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -37,7 +38,7 @@ use uuid7::Uuid;
 mod authorize_result;
 mod build_ctx;
 mod errors;
-mod metrics;
+pub(crate) mod metrics;
 
 pub(crate) mod request;
 
@@ -53,6 +54,8 @@ pub(crate) struct AuthzConfig {
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
+    /// Shared metrics collector for telemetry
+    pub metrics: Arc<MetricsCollector>,
 }
 
 /// Authorization Service
@@ -61,7 +64,7 @@ pub(crate) struct AuthzConfig {
 pub(super) struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
-    metrics: MetricsCollector,
+    metrics: Arc<MetricsCollector>,
 }
 
 impl Authz {
@@ -76,12 +79,12 @@ impl Authz {
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
-        let policy_count = config.policy_store.policies.get_set().num_of_policies();
+        let metrics = config.metrics.clone();
 
         Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
-            metrics: MetricsCollector::new(policy_count),
+            metrics,
         }
     }
 
@@ -120,14 +123,39 @@ impl Authz {
         let request_id = gen_uuid7();
 
         // Validate the request structure
-        request.validate()?;
+        request.validate().inspect_err(|_| {
+            self.metrics
+                .increment_error("multi_issuer.token_input_invalid");
+            self.metrics.record_authz_error();
+        })?;
 
         let schema = &self.config.policy_store.schema;
 
         let validated_tokens = self
             .config
             .jwt_service
-            .validate_multi_issuer_tokens(&request.tokens)?;
+            .validate_multi_issuer_tokens(&request.tokens)
+            .inspect_err(|e| {
+                use crate::authz::errors::MultiIssuerValidationError;
+                match e {
+                    MultiIssuerValidationError::TokenInput(_) => self
+                        .metrics
+                        .increment_error("multi_issuer.token_input_invalid"),
+                    MultiIssuerValidationError::EmptyTokenArray => self
+                        .metrics
+                        .increment_error("multi_issuer.empty_token_array"),
+                    MultiIssuerValidationError::TokenValidationFailed => self
+                        .metrics
+                        .increment_error("multi_issuer.all_tokens_failed"),
+                    MultiIssuerValidationError::InvalidContextJson => {
+                        self.metrics.increment_error("multi_issuer.invalid_context");
+                    },
+                    MultiIssuerValidationError::MissingIssuer => {
+                        self.metrics.increment_error("multi_issuer.missing_issuer");
+                    },
+                }
+                self.metrics.record_authz_error();
+            })?;
 
         let entities_data = self
             .config
@@ -137,9 +165,17 @@ impl Authz {
                 &request.resource,
                 self.config.log_service.as_ref(),
             )
-            .map_err(AuthorizeError::MultiIssuerEntity)?;
+            .map_err(|e| {
+                self.metrics.increment_error("authz.entity_build");
+                self.metrics.record_authz_error();
+                AuthorizeError::MultiIssuerEntity(e)
+            })?;
 
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action =
+            cedar_policy::EntityUid::from_str(request.action.as_str()).inspect_err(|_| {
+                self.metrics.increment_error("authz.invalid_action");
+                self.metrics.record_authz_error();
+            })?;
 
         // Capture pushed data info for logging before context is built
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
@@ -150,21 +186,35 @@ impl Authz {
             &schema.schema,
             &action,
             &pushed_data,
-        )?;
+        )
+        .inspect_err(|_| {
+            self.metrics.increment_error("authz.context_build");
+            self.metrics.record_authz_error();
+        })?;
 
         let resource_uid = entities_data.resource.uid();
 
-        let entities = entities_data.entities(Some(&schema.schema))?;
+        let entities = entities_data
+            .entities(Some(&schema.schema))
+            .inspect_err(|_| {
+                self.metrics.increment_error("authz.entity_validation");
+                self.metrics.record_authz_error();
+            })?;
 
         // Multi-issuer authorization does not use a principal
         // Authorization is based solely on the context (tokens)
-        let authz_result = self.execute_authorize(ExecuteAuthorizeParameters {
-            entities: &entities,
-            principal: None,
-            action: action.clone(),
-            resource: resource_uid.clone(),
-            context,
-        })?;
+        let authz_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: None,
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .inspect_err(|_| {
+                self.metrics.increment_error("authz.request_validation");
+                self.metrics.record_authz_error();
+            })?;
 
         let authz_info = AuthorizeInfo {
             principal: "None (multi-issuer)".to_string(),
@@ -241,6 +291,22 @@ impl Authz {
         });
         self.config.log_service.log_fn(debug_log_fn);
 
+        // Collect policy decisions for metrics tracking
+        let decision = Decision::from(result.decision);
+        let policy_decisions = multi_diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        // Metric log
+        self.log_metrics(
+            request_id,
+            decision,
+            decision_time_micro_sec,
+            false,
+            policy_decisions,
+        );
+
         Ok(result)
     }
 
@@ -262,7 +328,11 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
         // Parse action UID.
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str()).map_err(|e| {
+            self.metrics.increment_error("authz.invalid_action");
+            self.metrics.record_authz_error();
+            AuthorizeError::from(e)
+        })?;
 
         let BuiltEntitiesUnsigned {
             principals,
@@ -272,7 +342,17 @@ impl Authz {
         } = self
             .config
             .entity_builder
-            .build_entities_unsigned(request)?;
+            .build_entities_unsigned(request)
+            .map_err(|e| {
+                match &e {
+                    BuildUnsignedEntityError::InvalidType(_)
+                    | BuildUnsignedEntityError::BuildEntity(_) => {
+                        self.metrics.increment_error("authz.entity_build");
+                    },
+                }
+                self.metrics.record_authz_error();
+                AuthorizeError::from(e)
+            })?;
         let principal_uids = principals
             .iter()
             .map(cedar_policy::Entity::uid)
@@ -289,24 +369,39 @@ impl Authz {
             &schema.schema,
             &action,
             &pushed_data,
-        )?;
+        )
+        .map_err(|e| {
+            self.metrics.increment_error("authz.context_build");
+            self.metrics.record_authz_error();
+            AuthorizeError::from(e)
+        })?;
 
         let entities = Entities::from_entities(
             principals.into_iter().chain(roles).chain([resource]),
             Some(&schema.schema),
         )
-        .map_err(Box::new)?;
+        .map_err(|e| {
+            self.metrics.increment_error("authz.entity_validation");
+            self.metrics.record_authz_error();
+            AuthorizeError::ValidateEntities(Box::new(e))
+        })?;
 
         let mut principal_responses = HashMap::new();
 
         for principal_uid in &principal_uids {
-            let auth_result = self.execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: Some(principal_uid.clone()),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
-            })?;
+            let auth_result = self
+                .execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: Some(principal_uid.clone()),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                })
+                .map_err(|e| {
+                    self.metrics.increment_error("authz.request_validation");
+                    self.metrics.record_authz_error();
+                    AuthorizeError::RequestValidation(e)
+                })?;
 
             principal_responses.insert(principal_uid.clone(), auth_result);
         }
@@ -315,7 +410,12 @@ impl Authz {
             &self.config.authorization.principal_bool_operator,
             principal_responses,
             request_id,
-        )?;
+        )
+        .map_err(|e| {
+            self.metrics.increment_error("authz.rule_execution");
+            self.metrics.record_authz_error();
+            AuthorizeError::from(e)
+        })?;
 
         // measure time how long request executes
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
@@ -379,6 +479,22 @@ impl Authz {
         if !result.decision {
             self.log_failed_diagnostics(&diagnostics, request_id);
         }
+
+        // Collect policy decisions for metrics tracking
+        let decision = Decision::from(result.decision);
+        let policy_decisions = diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        // Metric log
+        self.log_metrics(
+            request_id,
+            decision,
+            decision_time_micro_sec,
+            true,
+            policy_decisions,
+        );
 
         Ok(result)
     }
@@ -466,21 +582,6 @@ impl Authz {
             pushed_data: metadata.pushed_data.clone(),
         });
         self.config.log_service.log_fn(entry);
-
-        // Collect policy decisions for metrics tracking
-        let decision = Decision::from(metadata.decision);
-        let policy_decisions = metadata
-            .decision_diagnostics
-            .iter()
-            .flat_map(|d| d.reason.iter())
-            .map(|policy| (policy.id.as_str(), decision));
-
-        self.log_metrics(
-            request_id,
-            decision,
-            metadata.decision_time,
-            policy_decisions,
-        );
     }
 
     /// Records the evaluation into the collector and logs a snapshot of the collected metrics
@@ -489,24 +590,25 @@ impl Authz {
         request_id: Uuid,
         decision: Decision,
         decision_time_micro_sec: i64,
+        is_unsigned: bool,
         policy_decisions: impl Iterator<Item = (&'a str, Decision)>,
     ) {
-        self.metrics
-            .record_evaluation(decision_time_micro_sec, decision, policy_decisions);
+        self.metrics.record_evaluation(
+            decision_time_micro_sec,
+            decision,
+            is_unsigned,
+            policy_decisions,
+        );
 
         // Take snapshot and log
-        let snapshot = self.metrics.snapshot();
+        let snapshot = self.metrics.snapshot_and_reset();
 
         let metrics_entry = MetricsLogEntry {
             base: BaseLogEntry::new_metric(request_id),
-            loaded_policies: snapshot.last_policy_load_size,
-            total_allows: snapshot.total_allows,
-            total_denies: snapshot.total_denies,
-            last_decision_time: snapshot.last_policy_evaluation_time_ns,
-            average_decision_time: snapshot.avg_policy_evaluation_time_ns,
-            memory_usage: snapshot.memory_usage,
-            evaluation_requests: snapshot.evaluation_requests_count,
             policy_stats: snapshot.policy_stats,
+            error_counters: snapshot.error_counters,
+            operational_stats: snapshot.operational_stats,
+            interval_secs: snapshot.interval_secs,
         };
 
         self.config.log_service.log_any(metrics_entry);
