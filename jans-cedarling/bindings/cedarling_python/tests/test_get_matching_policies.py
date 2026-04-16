@@ -32,22 +32,20 @@ def test_get_matching_policies_unsigned_returns_matching():
     """Test that get_matching_policies_unsigned returns policies matching the given scope."""
     instance = create_instance()
 
-    principals = [
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1",
-                },
-                "is_ok": True,
-            }
-        )
-    ]
+    principal = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }
+    )
 
     actions = ['Jans::Action::"UpdateForTestPrincipals"']
     resources = [RESOURCE]
 
-    policies = instance.get_matching_policies_unsigned(principals, actions, resources)
+    policies = instance.get_matching_policies_unsigned(principal, actions, resources)
 
     assert len(policies) > 0, "should return at least one matching policy"
     for policy in policies:
@@ -64,20 +62,18 @@ def test_get_matching_policies_unsigned_effect_is_permit():
     """Test that the matching policy has a permit effect."""
     instance = create_instance()
 
-    principals = [
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1",
-                },
-                "is_ok": True,
-            }
-        )
-    ]
+    principal = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }
+    )
 
     policies = instance.get_matching_policies_unsigned(
-        principals,
+        principal,
         ['Jans::Action::"UpdateForTestPrincipals"'],
         [RESOURCE],
     )
@@ -90,20 +86,18 @@ def test_get_matching_policies_unsigned_no_match():
     """Test that non-matching action returns no policies."""
     instance = create_instance()
 
-    principals = [
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1",
-                },
-                "is_ok": True,
-            }
-        )
-    ]
+    principal = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }
+    )
 
     policies = instance.get_matching_policies_unsigned(
-        principals,
+        principal,
         ['Jans::Action::"NonExistentAction"'],
         [RESOURCE],
     )
@@ -111,58 +105,35 @@ def test_get_matching_policies_unsigned_no_match():
     assert len(policies) == 0, "should return no policies for non-matching action"
 
 
-def test_get_matching_policies_unsigned_multiple_principals():
-    """Test with multiple principals."""
+def test_get_matching_policies_unsigned_no_principal():
+    """With `principal=None`, filter policies assuming an unknown principal."""
     instance = create_instance()
 
-    principals = [
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1",
-                },
-                "is_ok": True,
-            }
-        ),
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "2",
-                },
-                "is_ok": True,
-            }
-        ),
-    ]
-
     policies = instance.get_matching_policies_unsigned(
-        principals,
+        None,
         ['Jans::Action::"UpdateForTestPrincipals"'],
         [RESOURCE],
     )
 
-    assert len(policies) > 0, "should return matching policies for multiple principals"
+    assert len(policies) > 0, "should return matching policies for unknown principal"
 
 
 def test_policy_metadata_repr():
     """Test that PolicyMetadata has a useful repr."""
     instance = create_instance()
 
-    principals = [
-        EntityData.from_dict(
-            {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1",
-                },
-                "is_ok": True,
-            }
-        )
-    ]
+    principal = EntityData.from_dict(
+        {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }
+    )
 
     policies = instance.get_matching_policies_unsigned(
-        principals,
+        principal,
         ['Jans::Action::"UpdateForTestPrincipals"'],
         [RESOURCE],
     )

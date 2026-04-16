@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, log_config::StdOutLoggerMode,
+    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned, log_config::StdOutLoggerMode,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -34,12 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
@@ -47,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     })
     .await?;
 
-    let principals = vec![EntityData {
+    let principal = EntityData {
         cedar_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "some_user".to_string(),
@@ -59,11 +54,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ("country".to_string(), json!("US")),
             ("role".to_string(), json!("SuperUser")),
         ]),
-    }];
+    };
 
     let result = cedarling
         .authorize_unsigned(RequestUnsigned {
-            principals,
+            principal: Some(principal),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {

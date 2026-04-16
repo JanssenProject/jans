@@ -217,27 +217,18 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — omit it (or pass `null`) to evaluate the request with partial evaluation.
 
-**1. Define the Principals**
+**1. Define the Principal**
 
 ```js
-const principals = [
-  {
-    cedar_entity_mapping: {
-      entity_type: "Jans::Workload",
-      id: "some_workload_id",
-    },
-    client_id: "some_client_id",
+const principal = {
+  cedar_entity_mapping: {
+    entity_type: "Jans::User",
+    id: "random_user_id",
   },
-  {
-    cedar_entity_mapping: {
-      entity_type: "Jans::User",
-      id: "random_user_id",
-    },
-    roles: ["admin", "manager"],
-  },
-];
+  roles: ["admin", "manager"],
+};
 ```
 
 **2. Define the Resource**
@@ -283,11 +274,11 @@ const context = {
 
 **5. Build the Request**
 
-Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
+Now you'll construct the **_request_** by including the _principal_, _action_, and _context_.
 
 ```js
 const request = {
-  principals: principals,
+  principal: principal,
   action: action,
   resource: resource,
   context: context,
@@ -296,7 +287,7 @@ const request = {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
 
 ```js
 const result = await cedarling.authorize_unsigned(request);
@@ -330,16 +321,9 @@ export class AuthorizeResult {
    */
   json_string(): string;
   /**
-   * Get the authorization result for a specific principal by entity type.
-   * @param principal - The entity type (e.g., "Jans::User", "Jans::Workload")
-   * @returns The authorization response for the specified principal, or undefined if not found
+   * The Cedar response for this authorization call.
    */
-  principal(principal: string): AuthorizeResultResponse | undefined;
-  /**
-   * Get the map of all principals and their authorization results.
-   * Keys are entity type strings (e.g., "Jans::User"), values are AuthorizeResultResponse.
-   */
-  get principals(): Map<string, AuthorizeResultResponse>;
+  readonly response: AuthorizeResultResponse;
   /**
    * Result of authorization
    * true means `ALLOW`
@@ -384,7 +368,7 @@ export class Cedarling {
    */
   static new_from_map(config: Map<any, any>): Promise<Cedarling>;
   /**
-   * Authorize request for unsigned principals.
+   * Authorize request for an unsigned (optional) principal.
    * makes authorization decision based on the [`RequestUnsigned`]
    */
   authorize_unsigned(request: any): Promise<AuthorizeResult>;
