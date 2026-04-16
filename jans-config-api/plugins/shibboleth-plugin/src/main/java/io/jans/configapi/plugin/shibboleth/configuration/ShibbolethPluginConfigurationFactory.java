@@ -43,7 +43,7 @@ import jakarta.inject.Named;
 @Priority(1)
 public class ShibbolethPluginConfigurationFactory {
 
-    public static final String SHIBBOLETH_CONFIGURATION_ENTRY_DN = "shibbolethPlugin_ConfigurationEntryDN";
+    public static final String SHIBBOLETH_CONFIGURATION_ENTRY_DN = "shibboleth_ConfigurationEntryDN";
 
     static {
         if (System.getProperty("jans.base") != null) {

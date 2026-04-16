@@ -1,4 +1,4 @@
-dn: ou=shibboleth-idp,ou=configuration,o=jans
+dn: ou=jans-shibboleth-idp,ou=configuration,o=jans
 objectClass: top
 objectClass: jansAppConf
 ou: shibboleth-idp

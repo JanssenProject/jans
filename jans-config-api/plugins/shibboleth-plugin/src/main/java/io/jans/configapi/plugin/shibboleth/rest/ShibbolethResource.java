@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.shibboleth.rest;
 
-
 import java.io.InputStream;
 
 import io.jans.configapi.core.model.ApiError;
@@ -8,6 +7,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 
+import io.jans.configapi.plugin.shibboleth.model.EntityType;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
@@ -34,7 +34,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-
 import java.lang.reflect.InvocationTargetException;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -58,6 +57,11 @@ public class ShibbolethResource extends BaseResource {
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP = "Trust Relationship";
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
+    private static final String DISPLAY_NAME = "Display Name";
+    private static final String TRUST_NATURE = "Trust Nature";
+    private static final String INVALID_TRUST_NATURE = "INVALID_TRUST_NATURE";
+    private static final String INVALID_TRUST_NATURE_MSG = "Trust Nature is invalid.";
+
     private static final String NAME_CONFLICT = "NAME_CONFLICT";
     private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
     private static final String DATA_NULL_CHK = "RESOURCE_IS_NULL";
@@ -71,10 +75,9 @@ public class ShibbolethResource extends BaseResource {
 
     @Inject
     private ShibbolethService shibbolethService;
-   
 
     @Operation(summary = "Gets trusted service providers", description = "Gets list of trusted service providers", operationId = "get-shibboleth-trust", tags = {
-            "Shibboleth IDP - Config Management" }, security = {
+            "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
@@ -105,25 +108,51 @@ public class ShibbolethResource extends BaseResource {
         searchReq.setPage(page);
 
         return Response.ok(this.doSearch(searchReq)).build();
-    }    
+    }
 
     @Operation(summary = "Adds trusted service provider", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
-            "Shibboleth IDP - Config Management" }, security = {
+            "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
-    public Response addTrustedServiceProvider(@MultipartForm TrustRelationshipForm trustRelationshipForm,
-            InputStream metadatafile) throws IOException  {
+    public Response addTrustRelationship(@MultipartForm TrustRelationship trustRelationship) throws IOException {
+        logger.info("POST /shibboleth/trust");
+
+        // validation
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+        validateTrustRelationship(trustRelationship);
+
+        shibbolethService.addTrustRelationship(trustRelationship);
+        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    }
+
+    @Operation(summary = "Update trusted service provider details", description = "Update trusted service provider details", operationId = "post-shibboleth-trust", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    @PUT
+    @Path(Constants.TRUST_RELATIONSHIP_METADATA_FILE)
+    public Response updateTrustRelationship(@MultipartForm TrustRelationshipForm trustRelationshipForm,
+            InputStream metadatafile) throws IOException {
         logger.info("POST /shibboleth/trust");
 
         // validation
@@ -131,15 +160,12 @@ public class ShibbolethResource extends BaseResource {
 
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
         validateTrustRelationship(trustRelationship);
-      
+
         shibbolethService.addTrustRelationship(trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
-   
-
-   
-    /*Helper methods*/
+    /* Helper methods */
 
     private TrustRelationshipPagedResult doSearch(SearchRequest searchReq) {
 
@@ -167,12 +193,31 @@ public class ShibbolethResource extends BaseResource {
         return pagedTrustRelationship;
 
     }
-    
+
     private void validateTrustRelationship(TrustRelationship trustRelationship) {
-        //Null check
+        // Null check
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationship.getDisplayName(), "Display Name");
-        
+
+        // mandatory attributes
+        List<String> missingAttributesList = new ArrayList<>();
+        if (StringUtils.isBlank(trustRelationship.getDisplayName())) {
+            missingAttributesList.add(DISPLAY_NAME);
+        }
+        if (trustRelationship.getEntityType() == null) {
+            missingAttributesList.add(TRUST_NATURE);
+        }
+
+        if (!missingAttributesList.isEmpty()) {
+            checkNotNull(missingAttributesList);
+        }
+
+        // check if Enity type is valid
+        if (EntityType.getByValue(trustRelationship.getEntityType().getValue()) == null) {
+            throwBadRequestException(INVALID_TRUST_NATURE,
+                    String.format(INVALID_TRUST_NATURE_MSG, trustRelationship.getEntityType()));
+
+        }
+
         // check if TrustRelationship with same name already exists
         List<TrustRelationship> existingTrustRelationship = shibbolethService
                 .getAllTrustRelationshipByDisplayName(trustRelationship.getDisplayName());

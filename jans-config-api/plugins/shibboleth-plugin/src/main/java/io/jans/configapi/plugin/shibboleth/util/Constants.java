@@ -6,6 +6,9 @@ public final class Constants {
     
     public static final String SHIBBOLETH_CONFIG = "/shibboleth-config";
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";
+    public static final String TRUST_RELATIONSHIP_METADATA_FILE = "/file";
+    
+    
     public static final String SP_MODULE = "sp-module";
     public static final String SP_METADATA_FILE_PATTERN = "%s_sp-metadata.xml";
     

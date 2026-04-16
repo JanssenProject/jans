@@ -68,7 +68,7 @@ public class ShibbolethPluginConfigResource extends BaseResource {
         return Response.ok(shibbolethPluginConfiguration).build();
     }
 
-    @Operation(summary = "Update Shibboleth Plugin properties", description = "Update Shibboleth Plugin properties", operationId = "put-shibboleth-plugin-config", tags = {
+    @Operation(summary = "Update Shibboleth Plugin properties", description = "Update Shibboleth Plugin properties", operationId = "update-shibboleth-plugin-config", tags = {
             "Shibboleth - Plugin Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_CONFIG_ADMIN_ACCESS }) })

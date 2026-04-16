@@ -39,13 +39,13 @@ public class TrustRelationshipForm implements Serializable {
     
   
 	//Metadata MANUAL 
-    @FormParam("spMetaData")
+    @FormParam("metaDataContent")
     @PartType(MediaType.TEXT_PLAIN)
     @Schema(implementation = String.class, format="text")
-    private String spMetaData;
+    private String metaDataContent;
     
     //Metadata FILE 
-    @FormParam("spMetaDataURL")
+    @FormParam("metaDataURL")
     @PartType(MediaType.APPLICATION_JSON)
     @Schema(implementation = String.class)
     private String spMetaDataURL;
