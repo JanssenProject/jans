@@ -3,168 +3,80 @@
 #
 # Copyright (c) 2024, Gluu, Inc.
 
-from cedarling_python import Cedarling
-from cedarling_python import EntityData, RequestUnsigned, authorize_errors
+"""Tests for authorize_unsigned covering the single-principal and no-principal
+(partial-evaluation) paths."""
+
+from cedarling_python import Cedarling, EntityData, RequestUnsigned
 from config import load_bootstrap_config, TEST_FILES_PATH
 from os.path import join
-import json
 
 
-# In python unit tests we not cover all possible scenarios, but most common.
-
-# in fixture `load_bootstrap_config` we use policy store `policy-store_ok.json`
-# The human-readable policy and schema file is located in next folder:
-# `test_files\policy-store_ok_2.yaml`
-
-POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
+# Policy store without trusted issuers. Contains:
+#   - policy 5: permit UpdateForTestPrincipals when principal.is_ok
+#   - policy 6: allow-all permit for OpenPublicIssue (action uses `principal: [Any]`).
+POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_no_trusted_issuers.yaml")
 
 
-# Create resouce with type "Jans::Issue" from cedar-policy schema.
 RESOURCE = EntityData.from_dict({
     "cedar_entity_mapping": {
         "entity_type": "Jans::Issue",
-        "id": "random_id"
+        "id": "random_id",
     },
     "org_id": "some_long_id",
-    "country": "US"
+    "country": "US",
 })
 
 
-def test_authorize_unsigned():
-    '''
-    Test create correct cedarling requst with unsigned request for different principals.
-    In this test we use in json rule cedar type name
-    '''
-
-    def config_cb(config: dict):
-        '''
-        Calback function to configure the bootstrap configuration
-        '''
-        json_rule = json.dumps({
-            "and": [
-                {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
-            ]
-        })
-
-        config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json_rule
-
-    instance = Cedarling(load_bootstrap_config(
-        POLICY_STORE_LOCATION, config_cb=config_cb))
+def test_authorize_unsigned_single_principal_allow():
+    """A concrete principal satisfying the `is_ok` guard should be allowed."""
+    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
 
     request = RequestUnsigned(
-        principals=[EntityData.from_dict({
+        principal=EntityData.from_dict({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::TestPrincipal1",
-                "id": "1"
+                "id": "1",
             },
-            "is_ok": True
+            "is_ok": True,
         }),
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "2"
-                },
-                "is_ok": True
-            }),
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "3"
-                },
-                "is_ok": False
-            })],
         action='Jans::Action::"UpdateForTestPrincipals"',
         context={},
         resource=RESOURCE,
     )
 
-    authorize_result = instance.authorize_unsigned(request)
-    assert authorize_result.is_allowed(), "request should be allowed"
-
-    # check by principal type
-    assert authorize_result.principal(
-        "Jans::TestPrincipal1").decision.value == "ALLOW"
-    assert authorize_result.principal(
-        "Jans::TestPrincipal2").decision.value == "ALLOW"
-    assert authorize_result.principal(
-        "Jans::TestPrincipal3").decision.value == "DENY"
-
-    # check by principal uid (type + id)
-    assert authorize_result.principal(
-        'Jans::TestPrincipal1::"1"').decision.value == "ALLOW"
-    assert authorize_result.principal(
-        'Jans::TestPrincipal2::"2"').decision.value == "ALLOW"
-    assert authorize_result.principal(
-        'Jans::TestPrincipal3::"3"').decision.value == "DENY"
+    result = instance.authorize_unsigned(request)
+    assert result.is_allowed()
 
 
-def test_authorize_unsigned_json_rule_by_uid():
-    '''
-    Test create correct cedarling requst with unsigned request for different principals.
-    In this test we use in json rule cedar type and id
-    '''
-
-    def config_cb(config: dict):
-        '''
-        Calback function to configure the bootstrap configuration
-        '''
-        json_rule = json.dumps({
-            "and": [
-                {"===": [{"var": 'Jans::TestPrincipal1::"1"'}, "ALLOW"]},
-                {"===": [{"var": 'Jans::TestPrincipal2::"2"'}, "ALLOW"]},
-                {"===": [{"var": 'Jans::TestPrincipal3::"3"'}, "DENY"]}
-            ]
-        })
-
-        config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json_rule
-
-    instance = Cedarling(load_bootstrap_config(
-        POLICY_STORE_LOCATION, config_cb=config_cb))
+def test_authorize_unsigned_no_principal_public_action_allow():
+    """With `principal=None` and an allow-all action (`principal: [Any]` in the
+    schema), partial evaluation resolves to Allow."""
+    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
 
     request = RequestUnsigned(
-        principals=[EntityData.from_dict({
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::TestPrincipal1",
-                "id": "1"
-            },
-            "is_ok": True
-        }),
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "2"
-                },
-                "is_ok": True
-            }),
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "3"
-                },
-                "is_ok": False
-            })],
+        action='Jans::Action::"OpenPublicIssue"',
+        context={},
+        resource=RESOURCE,
+        principal=None,
+    )
+
+    result = instance.authorize_unsigned(request)
+    assert result.is_allowed()
+
+
+def test_authorize_unsigned_no_principal_principal_dependent_deny():
+    """With `principal=None` against a principal-dependent policy, the request
+    fails closed and the residual policy id surfaces in the diagnostics."""
+    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
+
+    request = RequestUnsigned(
         action='Jans::Action::"UpdateForTestPrincipals"',
         context={},
         resource=RESOURCE,
+        principal=None,
     )
 
-    authorize_result = instance.authorize_unsigned(request)
-    assert authorize_result.is_allowed(), "request should be allowed"
-
-    # check by principal type
-    assert authorize_result.principal(
-        "Jans::TestPrincipal1").decision.value == "ALLOW"
-    assert authorize_result.principal(
-        "Jans::TestPrincipal2").decision.value == "ALLOW"
-    assert authorize_result.principal(
-        "Jans::TestPrincipal3").decision.value == "DENY"
-
-    # check by principal uid (type + id)
-    assert authorize_result.principal(
-        'Jans::TestPrincipal1::"1"').decision.value == "ALLOW"
-    assert authorize_result.principal(
-        'Jans::TestPrincipal2::"2"').decision.value == "ALLOW"
-    assert authorize_result.principal(
-        'Jans::TestPrincipal3::"3"').decision.value == "DENY"
+    result = instance.authorize_unsigned(request)
+    assert not result.is_allowed()
+    reasons = result.response.diagnostics.reason
+    assert "5" in reasons

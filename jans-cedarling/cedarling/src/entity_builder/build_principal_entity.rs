@@ -8,9 +8,9 @@ mod unsigned;
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::schema::AttrsShape;
 use super::{
-    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
-    BuiltEntities, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
-    RestrictedExpression, TokenPrincipalMappings, Value, build_cedar_entity, build_entity_attrs,
+    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuiltEntities, EntityBuilder,
+    EntityData, EntityUid, HashMap, PartitionResult, RestrictedExpression, TokenPrincipalMappings,
+    Value, build_cedar_entity, build_entity_attrs,
 };
 use cedar_policy::Entity;
 use smol_str::SmolStr;
@@ -83,9 +83,4 @@ fn extract_attrs_from_sources(
 struct ExtractedAttrsResult {
     attrs: Vec<HashMap<String, RestrictedExpression>>,
     errs: Vec<BuildAttrsErrorVec>,
-}
-
-pub(crate) struct BuiltPrincipalUnsigned {
-    pub principal: Entity,
-    pub parents: Vec<Entity>,
 }
