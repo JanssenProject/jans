@@ -27,36 +27,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
 
 
     public boolean init(Map < String, SimpleCustomProperty > configurationAttributes) {
-        log.info("UpdateTokenCedarling initialized!!!");
-        // Check if bootstrap JSON file path is configured
-        if (!configurationAttributes.containsKey("BOOTSTRAP_JSON_PATH")) {
-            log.error("Initialization. Property BOOTSTRAP_JSON_PATH is not specified.");
-            return false;
-        }
-        log.info("Initialize Cedarling...");
-
-        // Get bootstrap file path
-        String bootstrapFilePath = configurationAttributes.get("BOOTSTRAP_JSON_PATH").getValue2();
-
-        String bootstrapJson = null;
-        try {
-            // Read bootstrap JSON from file
-            bootstrapJson = readFile(bootstrapFilePath);
-            // Initialize Cedarling adapter
-            cedarlingAdapter = new CedarlingAdapter();
-            cedarlingAdapter.loadFromJson(bootstrapJson);
-        } catch (CedarlingException e) {
-            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
-            cedarlingAdapter = null;
-            return false;
-        } catch (Exception e) {
-            log.error("Unable to initialize Cedarling: {}", e.getMessage(), e);
-            cedarlingAdapter = null;
-            return false;
-        }
-        log.info("Cedarling Initialization successful...");
-
-        return true;
+        return init(null, configurationAttributes);
     }
 
     public boolean init(CustomScript customScript, Map < String, SimpleCustomProperty > configurationAttributes) {
