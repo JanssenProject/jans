@@ -46,10 +46,17 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName
     @Schema(description = "Metadata file source for Trust Relationship.")
     private MetadataSource metadataSource;
-
+    
     @AttributeName(name = "jansReleasedAttr")
-    @Schema(description = "Trust Relationship attributes that will be released.")
     private List<String> releasedAttributes;
+
+    @AttributeName(name = "jansEntityId")
+    @Schema(description = "Uniquely identifies the entity across federated systems.")
+    private List<String> entityIds;
+        
+    @AttributeName(name = "jansProfileConfiguration")
+    @Schema(description = "SAML profiles.")
+    private List<String> jansProfileConfiguration;
 
     @AttributeName(name = "jansStatus")
     private Status status;
@@ -57,10 +64,6 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansVersion")
     @Schema(description = "Trust Relationship version")
     private Integer version;
-
-    @AttributeName(name = "syncedVersion")
-    @Schema(description = "Trust Relationship last synced version")
-    private Integer lastSyncedVersion;
 
     public String getInum() {
         return inum;
@@ -102,12 +105,20 @@ public class TrustRelationship extends Entry implements Serializable {
         this.metadataSource = metadataSource;
     }
 
-    public List<String> getReleasedAttributes() {
-        return releasedAttributes;
+    public List<String> getEntityIds() {
+        return entityIds;
     }
 
-    public void setReleasedAttributes(List<String> releasedAttributes) {
-        this.releasedAttributes = releasedAttributes;
+    public void setEntityIds(List<String> entityIds) {
+        this.entityIds = entityIds;
+    }
+
+    public List<String> getJansProfileConfiguration() {
+        return jansProfileConfiguration;
+    }
+
+    public void setJansProfileConfiguration(List<String> jansProfileConfiguration) {
+        this.jansProfileConfiguration = jansProfileConfiguration;
     }
 
     public Status getStatus() {
@@ -126,20 +137,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.version = version;
     }
 
-    public Integer getLastSyncedVersion() {
-        return lastSyncedVersion;
-    }
-
-    public void setLastSyncedVersion(Integer lastSyncedVersion) {
-        this.lastSyncedVersion = lastSyncedVersion;
-    }
-
     @Override
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", releasedAttributes="
-                + releasedAttributes + ", status=" + status + ", version=" + version + ", lastSyncedVersion="
-                + lastSyncedVersion + "]";
+                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", entityIds=" + entityIds
+                + ", jansProfileConfiguration=" + jansProfileConfiguration + ", status=" + status + ", version="
+                + version + "]";
     }
-
+    
 }

@@ -52,32 +52,32 @@ public class ShibbolethConfigService {
         return getShibbolethPluginAppConf().getDynamicConf();
     }
 
-    public String getSpMetadataDir() {
+    public String getShibbolethMetadataDir() {
         final ShibbolethPluginAppConf shibbolethPluginAppConf = getShibbolethPluginAppConf();
         ShibbolethPluginConfiguration shibbolethPluginConfiguration = shibbolethPluginAppConf.getDynamicConf();
         String spMetadataDir = null;
         if (shibbolethPluginConfiguration != null) {
-            spMetadataDir = shibbolethPluginConfiguration.getSpMetadataDir();
+            spMetadataDir = shibbolethPluginConfiguration.getShibbolethMetadataDir();
         }
         return spMetadataDir;
     }
 
-    public String getSpMetadataFilePattern() {
+    public String getShibbolethMetadataFilePattern() {
         final ShibbolethPluginAppConf shibbolethPluginAppConf = getShibbolethPluginAppConf();
         ShibbolethPluginConfiguration shibbolethPluginConfiguration = shibbolethPluginAppConf.getDynamicConf();
         String spMetadataFilePattern = null;
         if (shibbolethPluginConfiguration != null) {
-            spMetadataFilePattern = shibbolethPluginConfiguration.getSpMetadataFilePattern();
+            spMetadataFilePattern = shibbolethPluginConfiguration.getShibbolethMetadataFilePattern();
         }
         return spMetadataFilePattern;
     }
 
-    public String getSpMetadataFile() {
+    public String getShibbolethMetadataFile() {
         final ShibbolethPluginAppConf shibbolethPluginAppConf = getShibbolethPluginAppConf();
         ShibbolethPluginConfiguration shibbolethPluginConfiguration = shibbolethPluginAppConf.getDynamicConf();
         String spMetadataFile = null;
         if (shibbolethPluginConfiguration != null) {
-            spMetadataFile = shibbolethPluginConfiguration.getSpMetadataFile();
+            spMetadataFile = shibbolethPluginConfiguration.getShibbolethMetadataFile();
         }
         return spMetadataFile;
     }

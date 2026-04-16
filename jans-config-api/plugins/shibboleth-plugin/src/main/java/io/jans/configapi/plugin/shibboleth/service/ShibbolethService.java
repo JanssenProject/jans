@@ -278,7 +278,7 @@ public class ShibbolethService {
         String relationshipInum = StringHelper.removePunctuation(inum);
         logger.info("inum after remove punctuation is:{}", relationshipInum);
 
-        return String.format(shibbolethConfigService.getSpMetadataFilePattern(), relationshipInum);
+        return String.format(shibbolethConfigService.getShibbolethMetadataFilePattern(), relationshipInum);
     }
 
     private String getSpMetadataFileName(TrustRelationship trustRel) {
@@ -290,14 +290,14 @@ public class ShibbolethService {
 
     private String getMetadataFileName(String inum) {
         String relationshipInum = StringHelper.removePunctuation(inum);
-        return String.format(shibbolethConfigService.getSpMetadataFilePattern(), relationshipInum);
+        return String.format(shibbolethConfigService.getShibbolethMetadataFilePattern(), relationshipInum);
     }
 
-    private String getSpMetadataDir() {
-        if (StringUtils.isBlank(shibbolethConfigService.getSpMetadataDir())) {
+    private String getShibbolethMetadataDir() {
+        if (StringUtils.isBlank(shibbolethConfigService.getShibbolethMetadataDir())) {
             throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
         }
-        return shibbolethConfigService.getSpMetadataDir() + File.separator;
+        return shibbolethConfigService.getShibbolethMetadataDir() + File.separator;
     }
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
@@ -308,9 +308,9 @@ public class ShibbolethService {
 
         InputStream targetStream = file;
         final String metadataFilePath = shibbolethDocumentService.saveMetadataFile(
-                shibbolethConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
+                shibbolethConfigService.getShibbolethMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
         logger.debug("targetStream: {}, spMetadataDir: {}, spMetadataFileName: {}", targetStream,
-                shibbolethConfigService.getSpMetadataDir(), spMetadataFileName);
+                shibbolethConfigService.getShibbolethMetadataDir(), spMetadataFileName);
 
         if (StringHelper.isNotEmpty(metadataFilePath)) {
             logger.debug("SP Metadata file ' {} ' saved.", spMetadataFileName);

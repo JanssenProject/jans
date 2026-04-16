@@ -8,12 +8,11 @@ public class ShibbolethPluginConfiguration implements Configuration {
 
     private String applicationName;
     private boolean enabled;
-
     private String trustRelationshipDn;
 
-    private String spMetadataDir;
-    private String spMetadataFile;
-    private String spMetadataFilePattern;
+    private String shibbolethMetadataDir;
+    private String shibbolethMetadataFile;
+    private String shibbolethMetadataFilePattern;
     
     public String getApplicationName() {
         return applicationName;
@@ -39,35 +38,37 @@ public class ShibbolethPluginConfiguration implements Configuration {
         this.trustRelationshipDn = trustRelationshipDn;
     }
     
-    public String getSpMetadataDir() {
-        return spMetadataDir;
+    public String getShibbolethMetadataDir() {
+        return shibbolethMetadataDir;
     }
     
-    public void setSpMetadataDir(String spMetadataDir) {
-        this.spMetadataDir = spMetadataDir;
+    public void setShibbolethMetadataDir(String shibbolethMetadataDir) {
+        this.shibbolethMetadataDir = shibbolethMetadataDir;
     }
     
-    public String getSpMetadataFile() {
-        return spMetadataFile;
+    public String getShibbolethMetadataFile() {
+        return shibbolethMetadataFile;
     }
     
-    public void setSpMetadataFile(String spMetadataFile) {
-        this.spMetadataFile = spMetadataFile;
+    public void setShibbolethMetadataFile(String shibbolethMetadataFile) {
+        this.shibbolethMetadataFile = shibbolethMetadataFile;
     }
-        
-    public String getSpMetadataFilePattern() {
-        return spMetadataFilePattern;
+    
+    public String getShibbolethMetadataFilePattern() {
+        return shibbolethMetadataFilePattern;
     }
-
-    public void setSpMetadataFilePattern(String spMetadataFilePattern) {
-        this.spMetadataFilePattern = spMetadataFilePattern;
+    
+    public void setShibbolethMetadataFilePattern(String shibbolethMetadataFilePattern) {
+        this.shibbolethMetadataFilePattern = shibbolethMetadataFilePattern;
     }
-
+    
     @Override
     public String toString() {
         return "ShibbolethPluginConfiguration [applicationName=" + applicationName + ", enabled=" + enabled
-                + ", trustRelationshipDn=" + trustRelationshipDn + ", spMetadataDir=" + spMetadataDir
-                + ", spMetadataFile=" + spMetadataFile + ", spMetadataFilePattern=" + spMetadataFilePattern + "]";
+                + ", trustRelationshipDn=" + trustRelationshipDn + ", shibbolethMetadataDir=" + shibbolethMetadataDir
+                + ", shibbolethMetadataFile=" + shibbolethMetadataFile + ", shibbolethMetadataFilePattern="
+                + shibbolethMetadataFilePattern + "]";
     }
+    
     
 }

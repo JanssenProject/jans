@@ -31,11 +31,24 @@ public class TrustRelationshipForm implements Serializable {
 	@PartType(MediaType.APPLICATION_JSON)
     private TrustRelationship trustRelationship;
 
-    @NotNull
+    //Metadata FILE    
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
     @Schema(implementation = String.class, format="binary")
     private InputStream  metaDataFile;
+    
+  
+	//Metadata MANUAL 
+    @FormParam("spMetaData")
+    @PartType(MediaType.TEXT_PLAIN)
+    @Schema(implementation = String.class, format="text")
+    private String spMetaData;
+    
+    //Metadata FILE 
+    @FormParam("spMetaDataURL")
+    @PartType(MediaType.APPLICATION_JSON)
+    @Schema(implementation = String.class)
+    private String spMetaDataURL;
 
     public TrustRelationship getTrustRelationship() {
         return trustRelationship;
