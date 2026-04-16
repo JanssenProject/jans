@@ -192,7 +192,7 @@ impl TokenCache {
             .expect("token cache mutex shouldn't be poisoned")
             .clear_expired();
         if cleared > 0 {
-            self.metrics.record_cache_eviction(cleared as i64);
+            self.metrics.record_cache_eviction(cleared);
         }
     }
 

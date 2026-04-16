@@ -213,9 +213,9 @@ impl MetricsCollector {
         self.token_cache_misses.fetch_add(1, Ordering::Relaxed);
     }
 
-    pub(crate) fn record_cache_eviction(&self, count: i64) {
+    pub(crate) fn record_cache_eviction(&self, count: usize) {
         self.token_cache_evictions
-            .fetch_add(count, Ordering::Relaxed);
+            .fetch_add(saturating_usize_to_i64(count), Ordering::Relaxed);
     }
 
     pub(crate) fn record_jwt_validation(&self, success: bool) {

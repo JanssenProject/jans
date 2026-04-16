@@ -504,7 +504,8 @@ impl JwtService {
                 TrustedIssuerError::UntrustedIssuer(_) => {
                     self.metrics.increment_error("jwt.untrusted_issuer");
                 },
-                TrustedIssuerError::MissingRequiredClaim { .. } | TrustedIssuerError::EmptyEntityTypeName { .. } => {
+                TrustedIssuerError::MissingRequiredClaim { .. }
+                | TrustedIssuerError::EmptyEntityTypeName { .. } => {
                     self.metrics.increment_error("jwt.missing_required_claim");
                 },
             },
@@ -546,11 +547,13 @@ mod test {
     use super::test_utils::*;
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
+    use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
+    use std::sync::Arc;
     use tokio::test;
 
     #[test]
@@ -612,6 +615,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -648,6 +652,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -674,6 +679,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -741,6 +747,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -807,6 +814,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -849,6 +857,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -877,6 +886,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");

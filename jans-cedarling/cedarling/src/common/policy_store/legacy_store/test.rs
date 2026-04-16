@@ -8,7 +8,9 @@ use std::str::FromStr;
 use base64::prelude::*;
 use serde_json::json;
 
-use super::{LegacyAgamaPolicyStore, LegacyPolicyStore, ParsePolicySetMessage, parse_maybe_cedar_version};
+use super::{
+    LegacyAgamaPolicyStore, LegacyPolicyStore, ParsePolicySetMessage, parse_maybe_cedar_version,
+};
 
 /// Tests successful deserialization of a valid policy store JSON.
 #[test]
@@ -40,7 +42,8 @@ fn test_policy_store_deserialization_success() {
         "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str()).expect("failed to deserialize LegacyPolicyStore from policy_store_json");
+    serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str())
+        .expect("failed to deserialize LegacyPolicyStore from policy_store_json");
 }
 
 #[test]
@@ -157,13 +160,15 @@ fn test_broken_policy_parsing_error_in_policy_store() {
 #[test]
 fn test_valid_version() {
     let valid_version = json!("1.2.3");
-    parse_maybe_cedar_version(&valid_version).expect("expected valid Cedar version '1.2.3' to parse");
+    parse_maybe_cedar_version(&valid_version)
+        .expect("expected valid Cedar version '1.2.3' to parse");
 }
 
 #[test]
 fn test_valid_version_with_v() {
     let valid_version_with_v = json!("v1.2.3");
-    parse_maybe_cedar_version(&valid_version_with_v).expect("expected valid Cedar version 'v1.2.3' to parse");
+    parse_maybe_cedar_version(&valid_version_with_v)
+        .expect("expected valid Cedar version 'v1.2.3' to parse");
 }
 
 #[test]
@@ -269,7 +274,6 @@ fn test_invalid_policy_store_entry() {
         "Error should mention missing policies field, got: {err}"
     );
 }
-
 
 #[test]
 fn test_invalid_schema_format() {

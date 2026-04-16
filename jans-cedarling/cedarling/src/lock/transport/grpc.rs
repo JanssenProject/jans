@@ -736,18 +736,20 @@ mod test {
                 "request_id": "019d6842-7577-7e43-adfd-46e2bb275405",
                 "timestamp": "2026-04-07T17:04:39.162Z",
                 "log_kind": "Metric",
-                "loaded_policies": 9,
-                "total_allows": 89,
-                "total_denies": 11,
-                "last_decision_time": 2381,
-                "average_decision_time": 2981,
-                "evaluation_requests": 100,
-                "memory_usage": 240,
                 "policy_stats": {
                     "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow": 6,
                     "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": 7,
                     "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny": 1
                 },
+                "error_counters": {
+                    "parse_error": 0,
+                    "validation_error": 0
+                },
+                "operational_stats": {
+                    "evaluation_requests": 100,
+                    "memory_usage": 240
+                },
+                "interval_secs": 60,
                 "application_id": "test_app",
                 "pdp_id": "node-1"
             })
