@@ -951,6 +951,27 @@
       "description": "",
       "defaultPermissionInToken": true,
       "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "uma",
+      "permission": "https://jans.io/oauth/config/uma.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "uma",
+      "permission": "https://jans.io/oauth/config/uma.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "uma",
+      "permission": "https://jans.io/oauth/config/uma.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
     }
   ],
   "rolePermissionMapping": [
@@ -1091,7 +1112,10 @@
         "https://jans.io/oauth/lock/read-all",
         "https://jans.io/oauth/config/database.readonly",
         "https://jans.io/oauth/config/ssa.readonly",
-        "https://jans.io/oauth/config/ssa.write"
+        "https://jans.io/oauth/config/ssa.write",
+        "https://jans.io/oauth/config/uma.readonly",
+        "https://jans.io/oauth/config/uma.write",
+        "https://jans.io/oauth/config/uma.admin"
       ]
     }
   ]

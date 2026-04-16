@@ -155,6 +155,54 @@ pub(crate) enum CedarParseErrorDetail {
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
 
+    /// A policy in a multi-policy file has no `@id("...")` annotation.
+    /// `line` is 1-based; `snippet` is the offending `permit` / `forbid` line.
+    #[error(
+        "Multi-policy .cedar files require @id(\"...\") on each policy; missing at line {line}: {snippet}"
+    )]
+    MultiPolicyMissingExplicitId { line: usize, snippet: String },
+
+    /// Two or more policies in the same file share the same `@id("...")` value
+    #[error("duplicate @id(\"{id}\") within a single .cedar file")]
+    DuplicatePolicyIdInFile { id: String },
+
+    /// A `.cedar` policy file contains one or more templates (slots like `?principal`).
+    /// Templates must live in the `templates/` directory, not mixed with policies.
+    #[error(
+        "policy file contains {count} template(s); templates must be placed in the `templates/` directory, not mixed with policies"
+    )]
+    TemplatesInPolicyFile { count: usize },
+
+    /// A `.cedar` template file contains one or more policies (no slots).
+    /// Policies must live in the `policies/` directory, not mixed with templates.
+    #[error(
+        "template file contains {count} policy/policies; policies must be placed in the `policies/` directory, not mixed with templates"
+    )]
+    PoliciesInTemplateFile { count: usize },
+
+    /// A template in a multi-template file has no `@id("...")` annotation.
+    #[error(
+        "Multi-template .cedar files require @id(\"...\") on each template; missing at line {line}: {snippet}"
+    )]
+    MultiTemplateMissingExplicitId { line: usize, snippet: String },
+
+    /// Two or more templates in the same file share the same `@id("...")` value.
+    #[error("duplicate @id(\"{id}\") within a single template .cedar file")]
+    DuplicateTemplateIdInFile { id: String },
+
+    /// The same policy/template id appears in two different files.
+    /// Cedar's `PolicySet` namespaces policies and templates together, so any
+    /// collision across files (policy↔policy, template↔template, or
+    /// policy↔template) is caught here with both file names.
+    #[error(
+        "duplicate @id(\"{id}\") across files: defined in both '{first_file}' and '{second_file}'"
+    )]
+    DuplicatePolicyIdAcrossFiles {
+        id: String,
+        first_file: String,
+        second_file: String,
+    },
+
     /// Failed to parse Cedar policy or template
     #[error("{0}")]
     ParseError(String),

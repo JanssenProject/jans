@@ -1,0 +1,17 @@
+[package]
+name = "cedarling_c"
+version = "0.1.0"
+edition = "2024"
+description = "C bindings for the Jans Cedarling authorization engine"
+
+[lib]
+name = "cedarling_c"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+cedarling = { path = "../../cedarling", features = ["blocking"] }
+
+[build-dependencies]
+cbindgen = "0.29.0"
