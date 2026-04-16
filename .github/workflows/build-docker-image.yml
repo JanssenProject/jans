@@ -108,7 +108,7 @@ jobs:
         docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
         with:
           egress-policy: audit
 
@@ -312,7 +312,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build
-        uses: docker/setup-qemu-action@76c0984808678992dc9f24265d45acf8c8fc8a96 # master
+        uses: docker/setup-qemu-action@f8607cc714a3191ccc4468d6004a37d0e5a9419a # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all

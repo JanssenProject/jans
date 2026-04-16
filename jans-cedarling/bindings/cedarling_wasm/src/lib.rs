@@ -12,7 +12,6 @@ use cedarling::{
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
-use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Duration;
 use wasm_bindgen::prelude::*;
@@ -161,8 +160,13 @@ impl Cedarling {
         Self::new(&conf_object).await
     }
 
-    /// Authorize request for unsigned principals.
-    /// makes authorization decision based on the [`RequestUnsigned`]
+    /// Authorize an unsigned request carrying an optional single principal.
+    /// Makes an authorization decision based on the [`RequestUnsigned`].
+    ///
+    /// When `principal` is omitted / `null` on the JS side the core uses Cedar
+    /// partial evaluation; residual-dependent requests fail closed with
+    /// `Decision::Deny` and surface residual policy ids in
+    /// `response.diagnostics.reason`.
     pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
         // if `request` is map convert to object
         let request_object: JsValue = if request.is_instance_of::<Map>() {
@@ -563,8 +567,9 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
 #[wasm_bindgen]
 #[derive(serde::Serialize)]
 pub struct AuthorizeResult {
-    #[wasm_bindgen(skip)]
-    pub principals: HashMap<String, AuthorizeResultResponse>,
+    /// Cedar authorization response for the request.
+    #[wasm_bindgen(getter_with_clone)]
+    pub response: AuthorizeResultResponse,
 
     /// Result of authorization
     /// true means `ALLOW`
@@ -584,20 +589,14 @@ impl AuthorizeResult {
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
-
-    pub fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
-        self.principals.get(principal).cloned()
-    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
     fn from(value: cedarling::AuthorizeResult) -> Self {
         Self {
-            principals: value
-                .principals
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), AuthorizeResultResponse { inner: Rc::new(v) }))
-                .collect(),
+            response: AuthorizeResultResponse {
+                inner: Rc::new(value.response),
+            },
             decision: value.decision,
             request_id: value.request_id,
         }

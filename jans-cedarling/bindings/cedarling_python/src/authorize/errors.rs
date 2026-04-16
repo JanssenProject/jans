@@ -74,13 +74,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    ExecuteRuleError,
-    AuthorizeError,
-    "Error encountered while executing the rule for principals"
-);
-
-create_exception!(
-    authorize_errors,
     BuildUnsignedRoleEntityError,
     AuthorizeError,
     "Error building Role entity for unsigned request"
@@ -159,7 +152,6 @@ errors_functions! {
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     BuildEntity => BuildEntityError,
-    ExecuteRule => ExecuteRuleError,
     BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
     MultiIssuerValidation => MultiIssuerValidationError,
     MultiIssuerEntity => MultiIssuerEntityError,

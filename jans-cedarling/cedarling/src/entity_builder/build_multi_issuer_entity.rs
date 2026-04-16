@@ -332,7 +332,6 @@ impl EntityBuilder {
             tokens: token_entities,
             workload: None,
             user: None,
-            roles: Vec::new(),
             resource,
             default_entities: self.default_entities.clone(),
         })
@@ -455,7 +454,6 @@ mod tests {
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::TrustedIssuerIndex;
-    use crate::entity_builder_config::{EntityBuilderConfig, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
@@ -464,11 +462,6 @@ mod tests {
     use url::Url;
 
     fn create_test_entity_builder() -> EntityBuilder {
-        let config = EntityBuilderConfig {
-            role_entity_name: "Role".to_string(),
-            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
-        };
-
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
@@ -508,7 +501,6 @@ mod tests {
         trusted_issuers.insert("company".to_string(), company_issuer);
 
         EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             None,
             DefaultEntities::default(),
@@ -764,11 +756,6 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let config = EntityBuilderConfig {
-            role_entity_name: "Role".to_string(),
-            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
-        };
-
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
@@ -777,7 +764,6 @@ mod tests {
         );
         let trusted_issuers = HashMap::from_iter(vec![("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -940,11 +926,6 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let config = EntityBuilderConfig {
-            role_entity_name: "Role".to_string(),
-            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
-        };
-
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
@@ -955,7 +936,6 @@ mod tests {
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),

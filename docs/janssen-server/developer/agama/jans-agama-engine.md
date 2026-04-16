@@ -97,7 +97,7 @@ The engine will use `info` when the level is not specified explicitly, as in `Lo
 
 ## RFAC and Callback URL
 
-Engine's callback URL is `https://<your-server-name>/jans-auth/fl/callback`. This resource is only be available for a given browser session while `RFAC` is in execution. Once the callback is visited or the flow times out (whichever occurs first), subsequent requests will respond with an HTTP 404 error.
+Engine's callback URL is `https://<your-server-name>/jans-auth/fl/callback`. This resource is only available for a given browser session while `RFAC` is in execution. Once the callback is visited or the flow times out (whichever occurs first), subsequent requests will respond with an HTTP 404 error.
 
 The mechanism used for redirection is a "302 Found" HTTP redirect that entails a subsequent GET request to the external site. In cases where a POST is expected, the 3-param version of [RRF](./flows-navigation-ui.md#3-param-variant) can be useful.
 
@@ -112,7 +112,7 @@ In the Jans Agama engine, Java or Groovy code can be called by means of the `Cal
 !!! Note
     Java language background is required for this section.
 
-The following exemplifies different kind of usages of Java from Agama code:
+The following exemplifies different kinds of usage of Java from Agama code:
 
 <table>
 	<tr><th>Example</th><th>Notes</th></tr>
