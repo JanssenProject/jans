@@ -113,14 +113,19 @@ public class UserSessionIdService {
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
         sessionAttributes.put("session_custom_state", "declined");
 
-        // TODO: Check if this not reset ttl and expiration. Check original SessionId service
         updateSessionId(entity);
     }
 
     public void updateSessionId(SessionId entity) {
-    	entity.setLastUsedAt(new Date());
+        entity.setLastUsedAt(new Date());
+        if (entity.getExpirationDate() != null) {
+            int remainingTtl = (int) ((entity.getExpirationDate().getTime() - System.currentTimeMillis()) / 1000);
+            if (remainingTtl > 0) {
+                entity.setTtl(remainingTtl);
+            }
+        }
         persistenceEntryManager.merge(entity);
-	}
+    }
 
     private SessionId getSessionId(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
