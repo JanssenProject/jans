@@ -957,8 +957,6 @@
       
         
       
-        
-      
     
     
     
@@ -1703,9 +1701,6 @@ use the policy stored in the store (from <a href="#step-1-create-the-cedar-polic
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -1714,10 +1709,6 @@ use the policy stored in the store (from <a href="#step-1-create-the-cedar-polic
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code> controls how per-principal decisions are combined in <code>authorize_unsigned</code>. Here it checks only the <code>Jans::User</code> principal. See <a href="../../reference/cedarling-principal-boolean-operations/">Principal Boolean Operations</a> for details.</p>
-</div>
 </li>
 <li>
 <p>Click on ✓ and <code>Save</code> to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
@@ -1731,18 +1722,16 @@ stage.</p>
 <li>Go to Tarp's <code>Cedarling</code> tab, click on <code>Cedarling Unsigned Authz Form</code></li>
 <li>Input the following in respective input boxes:</li>
 </ol>
-<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;Teacher&quot;</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Teacher&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Actions</span><pre><span></span><code><span class="err">Ja</span><span class="kc">ns</span><span class="p">::</span><span class="err">Ac</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">::</span><span class="s2">&quot;Read&quot;</span>
 </code></pre></div>
@@ -1767,16 +1756,14 @@ shown below.</p>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
 <p>Let's check a scenario where authorization is denied. Remove the role from the
 <code>Principal</code> entity and test the authorization.</p>
-<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>And click <code>Cedarling Authz Request</code> again. Cedarling will return a new result:</p>
 <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
@@ -1807,7 +1794,7 @@ shown below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 31, 2026 09:57:44 UTC"><span class="timeago" datetime="2026-03-31T09:57:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 31, 2026 09:57:44 UTC">2026-03-31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     

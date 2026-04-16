@@ -19,7 +19,7 @@
         <link rel="prev" href="../cedarling-policy-store/">
       
       
-        <link rel="next" href="../cedarling-principal-boolean-operations/">
+        <link rel="next" href="../cedarling-jwt-validation/">
       
       
         
@@ -779,8 +779,6 @@
       
         
       
-        
-      
     
     
     
@@ -1027,17 +1025,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties-for-authorize_unsigned-application-asserted-identity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_unsigned (application-asserted identity)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#properties-for-both-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1063,34 +1050,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-principal-boolean-operations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Boolean Operations
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1392,17 +1351,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties-for-authorize_unsigned-application-asserted-identity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_unsigned (application-asserted identity)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#properties-for-both-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1599,20 +1547,6 @@
 <ul>
 <li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : JWT claim name used to identify tokens in decision logs. Default is <code>jti</code>. Override with any claim name (e.g., <code>sub</code>, <code>sid</code>) if your tokens lack a <code>jti</code> claim or you need a different identifier.</li>
 </ul>
-<h2 id="properties-for-authorize_unsigned-application-asserted-identity">Properties for <code>authorize_unsigned</code> (application-asserted identity)<a class="headerlink" href="#properties-for-authorize_unsigned-application-asserted-identity" title="Permanent link">#</a></h2>
-<p>These properties are specifically relevant when using <code>authorize_unsigned</code> with raw entity data (no JWT validation).</p>
-<ul>
-<li>
-<p><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : JSON Logic rule that combines per-principal authorization decisions into a final result. Variable names must match the full Cedar principal type (e.g., <code>MyApp::User</code>, <code>MyApp::Workload</code>). Only applies to <code>authorize_unsigned</code>.
-  Use <code>{"===": [{"var": "MyApp::User"}, "ALLOW"]}</code> if you only want user authorization. Use <code>{"===": [{"var": "MyApp::Workload"}, "ALLOW"]}</code> if you only want workload authorization. <a href="../cedarling-principal-boolean-operations/">See here</a> for combining multiple principals.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_UNSIGNED_ROLE_ID_SRC</code></strong> : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to <code>"role"</code>.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity used when creating Role entities for principals. Default value: <code>Jans::Role</code>. Not used by <code>authorize_multi_issuer</code>.</p>
-</li>
-</ul>
 <h2 id="properties-for-both-methods">Properties for both methods<a class="headerlink" href="#properties-for-both-methods" title="Permanent link">#</a></h2>
 <p>These properties apply to both <code>authorize_multi_issuer</code> and <code>authorize_unsigned</code>.</p>
 <p><strong>Log behavior:</strong></p>
@@ -1690,7 +1624,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 8, 2026 07:02:39 UTC"><span class="timeago" datetime="2026-04-08T07:02:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 8, 2026 07:02:39 UTC">2026-04-08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
   </span>
 
     
