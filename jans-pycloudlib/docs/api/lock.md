@@ -4,8 +4,6 @@
 
 ::: jans.pycloudlib.lock.LockNotAcquired
 
-::: jans.pycloudlib.lock.LockAdapter
-
 ::: jans.pycloudlib.lock.LockRecord
 
 ::: jans.pycloudlib.lock.base_lock.BaseLock
