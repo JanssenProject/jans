@@ -76,26 +76,15 @@ def authorize_without_token():
     action = 'Jans::Action::"UpdateTestPrincipal"'
 
     request = RequestUnsigned(
-        principals=[
-            EntityData.from_dict(
-                {
-                    "cedar_entity_mapping": {
-                        "entity_type": "Jans::TestPrincipal1",
-                        "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                    },
-                    "is_ok": True,
-                }
-            ),
-            EntityData.from_dict(
-                {
-                    "cedar_entity_mapping": {
-                        "entity_type": "Jans::TestPrincipal2",
-                        "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1",
-                    },
-                    "is_ok": True,
-                }
-            ),
-        ],
+        principal=EntityData.from_dict(
+            {
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                },
+                "is_ok": True,
+            }
+        ),
         action=action,
         resource=resource,
         context=context,

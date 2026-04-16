@@ -110,12 +110,10 @@ Use `cedarling_authorize_unsigned` when you have custom principals (not derived 
 
 ```c
 const char* request = "{"
-    "\"principals\": ["
-    "    {"
-    "        \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"user123\"},"
-    "        \"is_ok\": true"
-    "    }"
-    "],"
+    "\"principal\": {"
+    "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"user123\"},"
+    "    \"is_ok\": true"
+    "},"
     "\"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\","
     "\"resource\": {"
     "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"random_id\"},"

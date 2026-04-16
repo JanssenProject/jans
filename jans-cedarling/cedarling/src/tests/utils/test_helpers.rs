@@ -32,16 +32,16 @@ pub(crate) fn create_test_principal(
     EntityData::deserialize(entity_json)
 }
 
-/// Creates a basic test request with the given action, principals, and resource
+/// Creates a basic test request with the given action, optional principal, and resource
 pub(crate) fn create_test_unsigned_request(
     action: &str,
-    principals: Vec<EntityData>,
+    principal: Option<EntityData>,
     resource: EntityData,
 ) -> RequestUnsigned {
     RequestUnsigned {
         action: action.to_string(),
         context: json!({}),
-        principals,
+        principal,
         resource,
     }
 }

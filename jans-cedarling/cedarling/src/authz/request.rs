@@ -10,11 +10,16 @@ use serde_json::Value;
 
 use super::errors::{MultiIssuerValidationError, TokenInputError};
 
-/// Box to store authorization data, with any additional principals
+/// Authorization request data with an optional principal.
+///
+/// When `principal` is `None`, the request is evaluated using Cedar's
+/// partial-evaluation mode: policies whose principal scope would be unknown
+/// can still produce a concrete decision provided they do not depend on the
+/// principal's attributes.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RequestUnsigned {
-    /// Contains the JWTs that will be used for the `AuthZ` request
-    pub principals: Vec<EntityData>,
+    /// Optional principal entity for the authorization request.
+    pub principal: Option<EntityData>,
     /// `cedar_policy` action
     pub action: String,
     /// `cedar_policy` resource data

@@ -116,7 +116,7 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 ### Authorization
 
-Cedarling provides authorization interfaces for evaluating access requests based on principals (entities), actions, resources, and context.
+Cedarling provides authorization interfaces for evaluating access requests based on a principal (entity), action, resource, and context.
 
 - [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly without JWTs. This is useful when you need to authorize based on internal application data.

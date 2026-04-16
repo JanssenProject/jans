@@ -125,39 +125,13 @@ fn extract_archive_to_temp_dir(archive_bytes: &[u8]) -> TempDir {
 }
 
 /// Creates a Cedarling instance from a directory path.
-///
-/// Disables default entity building (user, workload, roles) since we're using
-/// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
-    use crate::JsonRule;
-
-    get_cedarling_with_callback(PolicyStoreSource::Directory(path), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await
+    get_cedarling_with_callback(PolicyStoreSource::Directory(path), |_| {}).await
 }
 
 /// Creates a Cedarling instance from an archive file path.
-///
-/// Disables default entity building (user, workload, roles) since we're using
-/// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
-    use crate::JsonRule;
-
-    get_cedarling_with_callback(PolicyStoreSource::CjarFile(path), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await
+    get_cedarling_with_callback(PolicyStoreSource::CjarFile(path), |_| {}).await
 }
 
 /// Cedar schema for [`test_load_from_cjar_with_multi_policy_file`] (`TestApp` read/write).
@@ -216,7 +190,7 @@ async fn multi_policy_cjar_unsigned_decision(
         json!({"name": "Test Resource"}),
     )
     .expect("Failed to create resource");
-    let request = create_test_unsigned_request(action, vec![user], resource);
+    let request = create_test_unsigned_request(action, Some(user), resource);
     cedarling
         .authorize_unsigned(request)
         .await
@@ -237,10 +211,7 @@ fn create_jwt_cedarling_config_with_loader(
     async_loading: bool,
 ) -> BootstrapConfig {
     use crate::jwt_config::{JwtConfig, TrustedIssuerLoaderConfig, WorkersCount};
-    use crate::{
-        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, LogConfig,
-        LogTypeConfig,
-    };
+    use crate::{AuthorizationConfig, BootstrapConfig, LogConfig, LogTypeConfig};
 
     let trusted_issuer_loader = if async_loading {
         TrustedIssuerLoaderConfig::Async {
@@ -271,13 +242,7 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-
-            principal_bool_operator: JsonRule::new(json!({
-                "===": [{"var": "Jans::Workload"}, "ALLOW"]
-            }))
-            .expect("Failed to create principal bool operator"),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
@@ -415,14 +380,14 @@ async fn test_load_from_directory_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -638,14 +603,14 @@ async fn test_load_from_directory_deny_write_for_guest() {
     // Create an authorization request for write action with guest user_type
     let request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "guest_user",
                 json!({"name": "Guest User", "user_type": "guest"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -692,14 +657,14 @@ async fn test_load_from_cjar_file_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -942,14 +907,14 @@ permit(
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"access\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "alice",
                 json!({"name": "Alice", "department": "engineering"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "doc1",
@@ -1047,10 +1012,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 1: Read should be allowed for any user
     let read_request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -1065,10 +1030,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 2: Write should be allowed only for admin
     let write_admin_request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -1086,10 +1051,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 3: Write should be denied for non-admin
     let write_viewer_request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -1107,10 +1072,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 4: Delete should be denied for everyone
     let delete_request = create_test_unsigned_request(
         "TestApp::Action::\"delete\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -1136,7 +1101,6 @@ async fn test_load_directory_with_multiple_policies() {
 /// which works in both native and WASM environments.
 #[test]
 async fn test_load_from_cjar_url_and_authorize_success() {
-    use crate::JsonRule;
     use mockito::Server;
 
     // Build archive bytes
@@ -1158,14 +1122,7 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     let cjar_url = format!("{}/policy-store.cjar", server.url());
 
     // Create Cedarling from CjarUrl
-    let cedarling = get_cedarling_with_callback(PolicyStoreSource::CjarUrl(cjar_url), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await;
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::CjarUrl(cjar_url), |_| {}).await;
 
     // Verify the mock was called
     mock.assert_async().await;
@@ -1173,14 +1130,14 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",

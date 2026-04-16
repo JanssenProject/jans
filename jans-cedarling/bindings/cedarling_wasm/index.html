@@ -46,7 +46,7 @@
 
             let instance = await init(BOOTSTRAP_CONFIG);
             
-            // Unsigned authorization (principals provided as entity data)
+            // Unsigned authorization (optional single principal provided as entity data)
             let result = await instance.authorize_unsigned(REQUEST_UNSIGNED);
             console.log("Unsigned authorization result:", result);
             
