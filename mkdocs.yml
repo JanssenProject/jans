@@ -599,7 +599,6 @@ nav:
     - Interfaces: cedarling/reference/cedarling-interfaces.md
     - Policy Store: cedarling/reference/cedarling-policy-store.md
     - Properties: cedarling/reference/cedarling-properties.md
-    - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
     - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
     - Entities: cedarling/reference/cedarling-entities.md
     - Logs: cedarling/reference/cedarling-logs.md

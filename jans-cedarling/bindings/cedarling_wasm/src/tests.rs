@@ -39,26 +39,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-            "and": [
-                {
-                    "===": [
-                        {
-                            "var": "Jans::Workload"
-                        },
-                        "ALLOW"
-                    ]
-                },
-                {
-                    "===": [
-                        {
-                            "var": "Jans::User"
-                        },
-                        "ALLOW"
-                    ]
-                }
-            ]
-        },
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -70,26 +50,29 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
         "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-            "and": [
-                {
-                    "===": [
-                        {
-                            "var": "Jans::Workload"
-                        },
-                        "ALLOW"
-                    ]
-                },
-                {
-                    "===": [
-                        {
-                            "var": "Jans::User"
-                        },
-                        "ALLOW"
-                    ]
-                }
-            ]
-        },
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
+    })
+});
+
+// Policy store without trusted issuers for no-principal / partial-eval tests.
+// Policy 5: `permit(..., action UpdateForTestPrincipals) when { principal.is_ok }` (principal-dependent).
+// Policy 6: allow-all for action `OpenPublicIssue` (schema declares `entity Any;` + `principal: [Any]`).
+static NO_ISSUERS_POLICY_STORE_YAML: &str =
+    include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
+
+static NO_ISSUERS_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
+    let yaml_value: serde_yml::Value = serde_yml::from_str(NO_ISSUERS_POLICY_STORE_YAML)
+        .expect("no-issuers policy store YAML should be valid");
+    serde_json::to_string(&yaml_value).expect("no-issuers policy store should convert to JSON")
+});
+
+static NO_ISSUERS_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
+    json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_LOCAL": NO_ISSUERS_POLICY_STORE_JSON.as_str(),
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -163,11 +146,7 @@ async fn test_init_conf_as_object() {
 ///    permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
 #[wasm_bindgen_test]
 async fn test_run_cedarling() {
-    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
-    // Require only Jans::User so a single User principal that ALLOWs yields overall ALLOW
-    bootstrap_config_json["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
-        "and": [{"===": [{"var": "Jans::User"}, "ALLOW"]}]
-    });
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -179,14 +158,16 @@ async fn test_run_cedarling() {
         .expect("init function should be initialized with js map");
 
     let request = RequestUnsigned {
-        principals: vec![EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::User",
-                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-            },
-            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-        }))
-        .expect("Principal EntityData should be deserialized correctly")],
+        principal: Some(
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            }))
+            .expect("Principal EntityData should be deserialized correctly"),
+        ),
         context: json!({
             "current_time": 1735349685,
             "device_health": ["Healthy"],
@@ -235,26 +216,6 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_TYPE": "memory",
         "CEDARLING_LOG_TTL": 120,
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-            "and": [
-                {
-                    "===": [
-                        {
-                            "var": "Jans::Workload"
-                        },
-                        "ALLOW"
-                    ]
-                },
-                {
-                    "===": [
-                        {
-                            "var": "Jans::User"
-                        },
-                        "ALLOW"
-                    ]
-                }
-            ]
-        },
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
@@ -269,14 +230,16 @@ async fn test_memory_log_interface() {
         .expect("init function should be initialized with js map");
 
     let request = RequestUnsigned {
-        principals: vec![EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::User",
-                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-            },
-            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-        }))
-        .expect("Principal EntityData should be deserialized correctly")],
+        principal: Some(
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            }))
+            .expect("Principal EntityData should be deserialized correctly"),
+        ),
         context: json!({
             "current_time": 1735349685,
             "device_health": ["Healthy"],
@@ -354,35 +317,21 @@ async fn test_memory_log_interface() {
     );
 }
 
-/// Test authorize_unsigned function with unsigned request.
+/// Test authorize_unsigned with a concrete single principal satisfying the
+/// `principal.is_ok` guard of policy 5 in `policy-store_no_trusted_issuers.yaml`.
 #[wasm_bindgen_test]
-async fn test_authorize_unsigned() {
-    let mut bootstrap_config = BOOTSTRAP_CONFIG.clone();
-    bootstrap_config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
-        "and": [
-            {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
-            {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
-            {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
-        ]
-    });
-    static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
-    let policy_store_yaml: serde_yml::Value =
-        serde_yml::from_str(POLICY_STORE_RAW_YAML).expect("policy store raw yaml should be valid");
-
-    bootstrap_config["CEDARLING_POLICY_STORE_LOCAL"] = json!(json!(policy_store_yaml).to_string());
-
+async fn test_authorize_unsigned_single_principal_allow() {
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
         .expect("serde json value should be converted to JsValue");
-
     let conf_object =
         Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
-
     let instance = init(conf_object.into())
         .await
         .expect("init function should be initialized with js map");
 
     let request = RequestUnsigned {
-        principals: vec![
+        principal: Some(
             EntityData::deserialize(json!({
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal1",
@@ -391,23 +340,7 @@ async fn test_authorize_unsigned() {
                 "is_ok": true
             }))
             .expect("EntityData should be deserialized correctly"),
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "2"
-                },
-                "is_ok": true
-            }))
-            .expect("EntityData should be deserialized correctly"),
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "3"
-                },
-                "is_ok": false
-            }))
-            .expect("EntityData should be deserialized correctly"),
-        ],
+        ),
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
@@ -428,52 +361,99 @@ async fn test_authorize_unsigned() {
         .await
         .expect("authorize_unsigned should be executed successfully");
 
-    assert!(result.decision, "Decision should be Allow");
+    assert!(result.decision, "decision should be Allow");
+    assert!(
+        result.response.decision(),
+        "underlying response decision should be Allow"
+    );
+}
 
-    // check by principal type
-    assert!(
-        result
-            .principal("Jans::TestPrincipal1")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal1 should be Allow"
-    );
-    assert!(
-        result
-            .principal("Jans::TestPrincipal2")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal2 should be Allow"
-    );
-    assert!(
-        !result
-            .principal("Jans::TestPrincipal3")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal3 should be Deny"
-    );
+/// `principal = None` with an allow-all action (schema uses `entity Any;` +
+/// `principal: [Any]`, policy 6 permits unconditionally). Partial evaluation
+/// should resolve to Allow.
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned_no_principal_public_action_allow() {
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
 
-    // check by principal uid (type + id)
+    let request = RequestUnsigned {
+        principal: None,
+        action: "Jans::Action::\"OpenPublicIssue\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("ResourceData should be deserialized correctly"),
+        context: json!({}),
+    };
+
+    let result = instance
+        .authorize_unsigned(
+            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+        )
+        .await
+        .expect("authorize_unsigned should be executed successfully");
+
     assert!(
-        result
-            .principal("Jans::TestPrincipal1::\"1\"")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal1::\"1\" should be Allow"
+        result.decision,
+        "decision should be Allow via partial evaluation"
     );
+}
+
+/// `principal = None` against a principal-dependent policy (policy 5 guards on
+/// `principal.is_ok`). Request must fail closed (Deny) and the residual policy
+/// id `"5"` must surface in `response.diagnostics().reason()`.
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned_no_principal_principal_dependent_deny() {
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let request = RequestUnsigned {
+        principal: None,
+        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("ResourceData should be deserialized correctly"),
+        context: json!({}),
+    };
+
+    let result = instance
+        .authorize_unsigned(
+            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+        )
+        .await
+        .expect("authorize_unsigned should be executed successfully");
+
     assert!(
-        result
-            .principal("Jans::TestPrincipal2::\"2\"")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal2::\"2\" should be Allow"
+        !result.decision,
+        "residual-dependent request must fail closed with Deny"
     );
+    let reasons = result.response.diagnostics().reason();
     assert!(
-        !result
-            .principal("Jans::TestPrincipal3::\"3\"")
-            .expect("Should get principal decision")
-            .decision(),
-        "Decision for Jans::TestPrincipal3::\"3\" should be Deny"
+        reasons.iter().any(|r| r == "5"),
+        "residual policy id \"5\" should surface in diagnostics.reason(), got: {reasons:?}"
     );
 }
 

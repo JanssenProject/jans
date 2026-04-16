@@ -14,8 +14,7 @@ Cedarling creates Cedar entities automatically based on the authorization interf
 | Entity Type | `authorize_unsigned` | `authorize_multi_issuer` |
 | --- | --- | --- |
 | [Trusted Issuer](#trusted-issuer) | Created at startup | Created at startup |
-| [Principal (User, Workload, etc.)](#principal-entities) | Built from `EntityData` | Not created |
-| [Role](#role-entity) | Built as parent of principals | Not created |
+| [Principal (User, Workload, etc.)](#principal-entities) | Built from `EntityData` (optional) | Not created |
 | [Token (JWT)](#token-entities) | Not created | Built from JWT claims |
 | [Resource](#resource-entity) | Built from `EntityData` | Built from `EntityData` |
 
@@ -24,7 +23,6 @@ The entity type names are defined in the Cedar schema within the policy store.
 > ***Notes***
 >
 > - Attribute presence depends on the data provided and the Cedar schema in the policy store.
-> - Role inheritance simplifies **user-role mapping** for RBAC policy enforcement.
 
 ## Trusted Issuer
 
@@ -36,15 +34,15 @@ Cedarling creates a Trusted Issuer entity at startup for each trusted issuer def
 
 ## Principal Entities
 
-Principals are created only in the `authorize_unsigned` interface. The caller provides one or more principals as `EntityData`, each specifying the Cedar entity type, ID, and attributes explicitly.
+Principals are created only in the `authorize_unsigned` interface. The caller optionally provides a single principal as `EntityData`, specifying the Cedar entity type, ID, and attributes explicitly.
 
 There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include `User` and `Workload`, but these are just conventions defined in your schema.
 
-When multiple principals are provided, Cedarling evaluates each one independently and combines results using [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md).
+The principal is optional. When omitted, Cedarling evaluates the request using Cedar's partial evaluator. See [Optional principal and partial evaluation](./cedarling-authz.md#optional-principal-and-partial-evaluation) in the authorization reference for the full semantics.
 
 ### EntityData Structure
 
-Each principal is passed as an `EntityData`:
+The principal is passed as an `EntityData`:
 
 ```json
 {
@@ -54,8 +52,7 @@ Each principal is passed as an `EntityData`:
   },
   "attributes": {
     "sub": "user_123",
-    "email": "bob@email.com",
-    "role": ["Admin", "Editor"]
+    "email": "bob@email.com"
   }
 }
 ```
@@ -70,19 +67,16 @@ Given the following `authorize_unsigned` request with a User principal:
 
 ```json
 {
-  "principals": [
-    {
-      "cedar_mapping": {
-        "entity_type": "MyApp::User",
-        "id": "some_sub"
-      },
-      "attributes": {
-        "sub": "some_sub",
-        "email": {"domain": "email.com", "uid": "bob"},
-        "role": ["Admin", "Editor"]
-      }
+  "principal": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::User",
+      "id": "some_sub"
+    },
+    "attributes": {
+      "sub": "some_sub",
+      "email": {"domain": "email.com", "uid": "bob"}
     }
-  ],
+  },
   "action": "MyApp::Action::\"Read\"",
   "resource": {
     "cedar_mapping": {
@@ -117,18 +111,16 @@ namespace Jans {
 
 // MyApp namespace: your business entities.
 namespace MyApp {
-  entity Role;
-  entity User in [Role] = {
+  entity User = {
     email?: Jans::email_address,
     phone_number?: String,
-    role: Set<String>,
     sub: String,
     "username"?: String,
   };
 };
 ```
 
-Cedarling builds the following entities:
+Cedarling builds the following entity:
 
 **User entity:**
 
@@ -137,41 +129,26 @@ Cedarling builds the following entities:
   "uid": {"type": "MyApp::User", "id": "some_sub"},
   "attrs": {
     "sub": "some_sub",
-    "email": {"domain": "email.com", "uid": "bob"},
-    "role": ["Admin", "Editor"]
+    "email": {"domain": "email.com", "uid": "bob"}
   },
-  "parents": [
-    {"type": "MyApp::Role", "id": "Admin"},
-    {"type": "MyApp::Role", "id": "Editor"}
-  ]
+  "parents": []
 }
-```
-
-**Role entities** (created automatically as parents):
-
-```json
-[
-  {"uid": {"type": "MyApp::Role", "id": "Admin"}, "attrs": {}, "parents": []},
-  {"uid": {"type": "MyApp::Role", "id": "Editor"}, "attrs": {}, "parents": []}
-]
 ```
 
 ### Example: Workload Principal
 
 ```json
 {
-  "principals": [
-    {
-      "cedar_mapping": {
-        "entity_type": "MyApp::Workload",
-        "id": "my_client"
-      },
-      "attributes": {
-        "client_id": "my_client",
-        "name": "Backend Service"
-      }
+  "principal": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::Workload",
+      "id": "my_client"
+    },
+    "attributes": {
+      "client_id": "my_client",
+      "name": "Backend Service"
     }
-  ],
+  },
   "action": "MyApp::Action::\"Read\"",
   "resource": { "..." : "..." },
   "context": {}
@@ -189,26 +166,6 @@ Cedarling builds:
   },
   "parents": []
 }
-```
-
-## Role Entity
-
-Cedarling automatically creates **Role** entities when building principals in the `authorize_unsigned` interface.
-
-- **Type Name:** Configurable via `mapping_role` bootstrap property. Must match the Role entity type in your Cedar schema.
-- **Entity ID:** Extracted from the attribute configured in `unsigned_role_id_src` (defaults to `role`). The value can be a single string or an array of strings, each becoming a separate Role entity.
-- **Relationship:** Role entities are added as **parents** of the principal entity, enabling RBAC policies.
-
-### RBAC Support
-
-Since Role entities are automatically assigned as parents of principals, you can define RBAC policies like:
-
-```cedar
-permit (
-   principal == MyApp::Role::"Admin",
-   action in [MyApp::Action::"Compare", MyApp::Action::"Execute"],
-   resource
-);
 ```
 
 ## Token Entities

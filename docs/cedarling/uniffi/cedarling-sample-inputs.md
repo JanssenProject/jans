@@ -19,14 +19,6 @@
     "CEDARLING_LOG_LEVEL": "DEBUG",
     "CEDARLING_LOG_TYPE": "std_out",
     "CEDARLING_POLICY_STORE_URI": "./custom/static/policy-store.json",
-    "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-    "===": [
-            {
-            "var": "Jans::Workload"
-            },
-            "ALLOW"
-        ]
-    },
     "id": "7a962b6e-aa45-4418-a94a-ee382d20a723"
 }
 ```
@@ -182,15 +174,15 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             JSONObject resourceJson = buildResourceJson(grantTypes);
 
             // Convert principal JSON to EntityData
-            List < EntityData > principalEntities =
-                List.of(EntityData.Companion.fromJson(principalJson.toString()));
+            EntityData principalEntity =
+                EntityData.Companion.fromJson(principalJson.toString());
 
             // Empty context (placeholder for future extension)
             JSONObject contextJson = new JSONObject("{}");
 
             // Call Cedarling authorization
             AuthorizeResult result = cedarlingAdapter.authorizeUnsigned(
-                principalEntities,
+                principalEntity,
                 "Jans::Action::\"Execute\"",
                 resourceJson,
                 contextJson

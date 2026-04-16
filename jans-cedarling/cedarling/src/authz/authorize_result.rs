@@ -5,23 +5,19 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedar_policy::{Decision, EntityUid};
-use serde::ser::{SerializeMap, SerializeStruct};
+use cedar_policy::Decision;
+use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use smol_str::{SmolStr, ToSmolStr};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use uuid7::Uuid;
 
-use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
-
 /// Result of authorization and evaluation cedar policy
-/// based on the policy store and principal(s) from the request
+/// based on the policy store and an optional principal from the request.
 #[derive(Debug, Clone, Serialize)]
 pub struct AuthorizeResult {
-    /// Result of authorization for all principals.
-    /// Maps principal type names to their Cedar authorization responses.
-    #[serde(serialize_with = "serialize_hashmap_response")]
-    pub principals: HashMap<SmolStr, cedar_policy::Response>,
+    /// Cedar authorization response for the request.
+    #[serde(serialize_with = "serialize_response")]
+    pub response: cedar_policy::Response,
 
     /// Result of authorization
     /// true means `ALLOW`
@@ -32,22 +28,6 @@ pub struct AuthorizeResult {
 
     /// Request ID, generated per each request call, is used to get logs from memory logger
     pub request_id: String,
-}
-
-/// Custom serializer for principals map
-fn serialize_hashmap_response<S>(
-    value: &HashMap<SmolStr, cedar_policy::Response>,
-    serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    let mut map = serializer.serialize_map(Some(value.len()))?;
-    for (key, value) in value {
-        map.serialize_entry(key, &CedarResponse(value))?;
-    }
-
-    map.end()
 }
 
 struct CedarResponse<'a>(&'a cedar_policy::Response);
@@ -122,33 +102,14 @@ impl MultiIssuerAuthorizeResult {
 }
 
 impl AuthorizeResult {
-    /// Builder function for [`AuthorizeResult`]
-    pub(crate) fn new_for_many_principals(
-        principal_bool_operator: &JsonRule,
-        principal_responses: HashMap<EntityUid, cedar_policy::Response>,
-        request_id: Uuid,
-    ) -> Result<Self, ApplyRuleError> {
-        let mut principals_decision_info = HashMap::new();
-        let mut principals_response: HashMap<SmolStr, cedar_policy::Response> = HashMap::new();
-
-        for (principal_uid, response) in principal_responses {
-            let principal_typename = principal_uid.type_name().to_smolstr();
-            let principal_id = principal_uid.to_smolstr();
-            principals_decision_info.insert(principal_typename.clone(), response.decision().into());
-            principals_decision_info.insert(principal_id.clone(), response.decision().into());
-
-            principals_response.insert(principal_typename.clone(), response.clone());
-            principals_response.insert(principal_id, response);
-        }
-
-        let decision =
-            RuleApplier::new(principal_bool_operator, &principals_decision_info).apply()?;
-
-        Ok(Self {
+    /// Create a new [`AuthorizeResult`] from a single Cedar response.
+    pub(crate) fn new(response: cedar_policy::Response, request_id: Uuid) -> Self {
+        let decision = response.decision() == Decision::Allow;
+        Self {
+            response,
             decision,
-            principals: principals_response,
             request_id: request_id.to_string(),
-        })
+        }
     }
 
     /// Decision of result
