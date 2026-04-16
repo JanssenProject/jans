@@ -10,7 +10,6 @@ mod utils;
 mod authorize_multi_issuer;
 mod authorize_unsigned;
 mod context_data_api;
-mod json_logic;
 mod policy_store_loader;
 mod ssa_validation_integration;
 mod success_test_json;

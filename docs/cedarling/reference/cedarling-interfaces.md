@@ -48,9 +48,11 @@ These methods are called to create an authorization request, run authorization, 
 
     **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
 
-- `RequestUnsigned(principals, action, resource, context)`
+- `RequestUnsigned(principal, action, resource, context)`
 
     Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.
+
+  - `principal`: Optional `EntityData`. When omitted, Cedarling evaluates the request with Cedar's partial evaluator. See [Optional principal and partial evaluation](./cedarling-authz.md#optional-principal-and-partial-evaluation).
 
 - `TokenInput(mapping, payload)`
 
@@ -82,11 +84,11 @@ These methods return metadata about policies that are potentially applicable to 
 
 Both methods perform scope-level filtering only (principal/action/resource constraints). Policies with `when`/`unless` conditions may still not apply at evaluation time — the returned set is a superset of truly applicable policies.
 
-- `get_matching_policies_unsigned(principals, actions, resources)`
+- `get_matching_policies_unsigned(principal, actions, resources)`
 
-    Returns metadata for all policies whose scope constraints are compatible with the given principals, actions, and resources.
+    Returns metadata for all policies whose scope constraints are compatible with the given principal, actions, and resources.
 
-  - `principals`: Array of `EntityData` objects — their `entity_type` is matched against policy principal constraints
+  - `principal`: Optional `EntityData` — its `entity_type` is matched against policy principal constraints. Pass `None`/`null` to match policies regardless of principal type.
   - `actions`: Array of action strings (e.g., `Jans::Action::"Read"`) — matched against policy action constraints
   - `resources`: Array of `EntityData` objects — their `entity_type` is matched against policy resource constraints
 
@@ -115,13 +117,13 @@ Each returned `PolicyMetadata` object contains:
 ```rust
 use cedarling::{Cedarling, EntityData, CedarEntityMapping, PolicyMetadata};
 
-let principals = vec![EntityData {
+let principal = Some(EntityData {
     cedar_mapping: CedarEntityMapping {
         entity_type: "Jans::User".to_string(),
         id: "user1".to_string(),
     },
     attributes: Default::default(),
-}];
+});
 
 let actions = vec![r#"Jans::Action::"Read""#.to_string()];
 
@@ -134,8 +136,7 @@ let resources = vec![EntityData {
 }];
 
 let policies = cedarling
-    .get_matching_policies_unsigned(principals, actions, resources)
-    .await
+    .get_matching_policies_unsigned(principal.as_ref(), &actions, &resources)
     .expect("failed to get matching policies");
 
 for policy in &policies {
@@ -152,14 +153,14 @@ The following methods are called on the result obtained from the authorization c
 
 - `decision`
 
-    A boolean field representing the overall authorization decision (`true` = allow, `false` = deny). The decision is computed by applying the `principal_bool_operator` across all principal results.
+    A boolean field representing the authorization decision (`true` = allow, `false` = deny).
 
-- `principals`
+- `response`
 
-    A map of principal type names and entity UIDs to their Cedar `Response` objects. Each response provides:
+    The Cedar `Response` object for this authorization call:
 
-  - `decision()`: Whether this principal was allowed or denied
-  - `diagnostics()`: Detailed information including `reason()` (set of policy IDs) and `errors()` (list of evaluation errors)
+  - `decision()`: Cedar `Decision` (`Allow` or `Deny`)
+  - `diagnostics()`: Detailed information including `reason()` (set of policy IDs — for partial-evaluation Deny outcomes this includes the residual policy IDs) and `errors()` (list of evaluation errors)
 
 - `request_id`
 
