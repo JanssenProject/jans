@@ -6,6 +6,7 @@
 use std::borrow::Cow;
 use std::collections::HashSet;
 
+use crate::authz::metrics::ErrorMetricKey;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
@@ -402,6 +403,22 @@ pub enum ValidateJwtError {
     DeserializeStatusClaim(#[from] serde_json::Error),
     #[error("failed to validate the JWT's trusted issuer: {0}")]
     TrustedIssuerValidation(#[source] TrustedIssuerError),
+}
+
+impl ErrorMetricKey for ValidateJwtError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            Self::DecodeJwt(_) => "jwt.decode_failed",
+            Self::MissingValidationKey => "jwt.missing_key",
+            Self::MissingValidator(_) => "jwt.missing_validator",
+            Self::ValidateJwt(_) => "jwt.validation_failed",
+            Self::MissingClaims(_) => "jwt.missing_claims",
+            Self::GetJwtStatus(_) | Self::DeserializeStatusClaim(_) => "jwt.status_check_failed",
+            Self::RejectJwtStatus(_) => "jwt.status_rejected",
+            Self::MissingStatusList => "jwt.missing_status_list",
+            Self::TrustedIssuerValidation(e) => e.metric_key(),
+        }
+    }
 }
 
 #[cfg(test)]

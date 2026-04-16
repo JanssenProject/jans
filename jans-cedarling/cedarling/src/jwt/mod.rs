@@ -202,23 +202,6 @@ impl JwtService {
         token_kind: &TokenKind,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        let result = self.validate_single_token_inner(token_kind, jwt);
-        match &result {
-            Ok(_) => {
-                self.metrics.record_jwt_validation(true);
-            },
-            Err(_) => {
-                self.metrics.record_jwt_validation(false);
-            },
-        }
-        result
-    }
-
-    fn validate_single_token_inner(
-        &self,
-        token_kind: &TokenKind,
-        jwt: &str,
-    ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
 
         // Get decoding key
@@ -376,6 +359,7 @@ impl JwtService {
                 // Validate JWT using existing single token validation
                 match self.validate_single_token(&token_kind, &token.payload) {
                     Ok(validated_jwt) => {
+                        self.metrics.record_jwt_validation(true);
                         // Extract issuer for non-deterministic check
                         let issuer = validated_jwt
                             .claims
@@ -429,13 +413,14 @@ impl JwtService {
                         }
                     },
                     Err(err) => {
+                        self.metrics.record_jwt_validation(false);
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
                                 format!("Token validation failed at index {index}: {err}"),
                                 Some(LogLevel::WARN),
                             ));
                         }
-                        self.increment_jwt_validation_error(&err);
+                        self.metrics.record_error(&err);
                     },
                 }
             }
@@ -474,42 +459,6 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         Cow::Borrowed(entity_type_name)
-    }
-
-    fn increment_jwt_validation_error(&self, err: &ValidateJwtError) {
-        match err {
-            ValidateJwtError::DecodeJwt(_) => self.metrics.increment_error("jwt.decode_failed"),
-            ValidateJwtError::MissingValidationKey => {
-                self.metrics.increment_error("jwt.missing_key");
-            },
-            ValidateJwtError::MissingValidator(_) => {
-                self.metrics.increment_error("jwt.missing_validator");
-            },
-            ValidateJwtError::ValidateJwt(_) => {
-                self.metrics.increment_error("jwt.validation_failed");
-            },
-            ValidateJwtError::MissingClaims(_) => {
-                self.metrics.increment_error("jwt.missing_claims");
-            },
-            ValidateJwtError::GetJwtStatus(_) | ValidateJwtError::DeserializeStatusClaim(_) => {
-                self.metrics.increment_error("jwt.status_check_failed");
-            },
-            ValidateJwtError::RejectJwtStatus(_) => {
-                self.metrics.increment_error("jwt.status_rejected");
-            },
-            ValidateJwtError::MissingStatusList => {
-                self.metrics.increment_error("jwt.missing_status_list");
-            },
-            ValidateJwtError::TrustedIssuerValidation(e) => match e {
-                TrustedIssuerError::UntrustedIssuer(_) => {
-                    self.metrics.increment_error("jwt.untrusted_issuer");
-                },
-                TrustedIssuerError::MissingRequiredClaim { .. }
-                | TrustedIssuerError::EmptyEntityTypeName { .. } => {
-                    self.metrics.increment_error("jwt.missing_required_claim");
-                },
-            },
-        }
     }
 }
 

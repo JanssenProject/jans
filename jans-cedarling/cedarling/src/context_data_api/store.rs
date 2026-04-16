@@ -112,8 +112,9 @@ impl DataStore {
     ) -> Result<(), DataError> {
         // Validate key
         if key.is_empty() {
-            self.metrics.increment_error("data.invalid_key");
-            return Err(DataError::InvalidKey);
+            let err = DataError::InvalidKey;
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         // Validate explicit TTL against max_ttl before calculating effective TTL
@@ -121,11 +122,12 @@ impl DataStore {
             && let Some(max_ttl) = self.config.max_ttl
             && explicit_ttl > max_ttl
         {
-            self.metrics.increment_error("data.ttl_exceeded");
-            return Err(DataError::TTLExceeded {
+            let err = DataError::TTLExceeded {
                 requested: explicit_ttl,
                 max: max_ttl,
-            });
+            };
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         // Calculate effective TTL using the helper function
@@ -144,17 +146,19 @@ impl DataStore {
         // Check entry size before storing (including metadata)
         let entry_size = serde_json::to_string(&entry)
             .map_err(|e| {
-                self.metrics.increment_error("data.serialization");
-                DataError::from(e)
+                let err = DataError::from(e);
+                self.metrics.record_error(&err);
+                err
             })?
             .len();
 
         if self.config.max_entry_size > 0 && entry_size > self.config.max_entry_size {
-            self.metrics.increment_error("data.value_too_large");
-            return Err(DataError::ValueTooLarge {
+            let err = DataError::ValueTooLarge {
                 size: entry_size,
                 max: self.config.max_entry_size,
-            });
+            };
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         let chrono_ttl = effective_ttl_chrono;
@@ -164,30 +168,25 @@ impl DataStore {
         // Use empty index keys since we don't need indexing for data store
         storage
             .set_with_ttl(key, entry, chrono_ttl, &[])
-            .map_err(|e| match e {
-                SparKVError::CapacityExceeded => {
-                    self.metrics.increment_error("data.storage_limit");
-                    DataError::StorageLimitExceeded {
+            .map_err(|e| {
+                let err = match e {
+                    SparKVError::CapacityExceeded => DataError::StorageLimitExceeded {
                         max: self.config.max_entries,
-                    }
-                },
-                SparKVError::ItemSizeExceeded => {
-                    self.metrics.increment_error("data.value_too_large");
-                    DataError::ValueTooLarge {
+                    },
+                    SparKVError::ItemSizeExceeded => DataError::ValueTooLarge {
                         size: entry_size,
                         max: self.config.max_entry_size,
-                    }
-                },
-                SparKVError::TTLTooLong => {
-                    self.metrics.increment_error("data.ttl_exceeded");
-                    DataError::TTLExceeded {
+                    },
+                    SparKVError::TTLTooLong => DataError::TTLExceeded {
                         requested: ttl.unwrap_or_default(),
                         max: self
                             .config
                             .max_ttl
                             .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64)),
-                    }
-                },
+                    },
+                };
+                self.metrics.record_error(&err);
+                err
             })?;
 
         self.metrics.record_data_push();

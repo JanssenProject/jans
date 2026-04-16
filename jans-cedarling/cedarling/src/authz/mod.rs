@@ -13,7 +13,6 @@ use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
-use crate::entity_builder::BuildUnsignedEntityError;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -123,9 +122,8 @@ impl Authz {
         let request_id = gen_uuid7();
 
         // Validate the request structure
-        request.validate().inspect_err(|_| {
-            self.metrics
-                .increment_error("multi_issuer.token_input_invalid");
+        request.validate().inspect_err(|e| {
+            self.metrics.record_error(e);
             self.metrics.record_authz_error();
         })?;
 
@@ -136,24 +134,7 @@ impl Authz {
             .jwt_service
             .validate_multi_issuer_tokens(&request.tokens)
             .inspect_err(|e| {
-                use crate::authz::errors::MultiIssuerValidationError;
-                match e {
-                    MultiIssuerValidationError::TokenInput(_) => self
-                        .metrics
-                        .increment_error("multi_issuer.token_input_invalid"),
-                    MultiIssuerValidationError::EmptyTokenArray => self
-                        .metrics
-                        .increment_error("multi_issuer.empty_token_array"),
-                    MultiIssuerValidationError::TokenValidationFailed => self
-                        .metrics
-                        .increment_error("multi_issuer.all_tokens_failed"),
-                    MultiIssuerValidationError::InvalidContextJson => {
-                        self.metrics.increment_error("multi_issuer.invalid_context");
-                    },
-                    MultiIssuerValidationError::MissingIssuer => {
-                        self.metrics.increment_error("multi_issuer.missing_issuer");
-                    },
-                }
+                self.metrics.record_error(e);
                 self.metrics.record_authz_error();
             })?;
 
@@ -166,14 +147,15 @@ impl Authz {
                 self.config.log_service.as_ref(),
             )
             .map_err(|e| {
-                self.metrics.increment_error("authz.entity_build");
+                self.metrics.record_error(&e);
                 self.metrics.record_authz_error();
                 AuthorizeError::MultiIssuerEntity(e)
             })?;
 
-        let action =
-            cedar_policy::EntityUid::from_str(request.action.as_str()).inspect_err(|_| {
-                self.metrics.increment_error("authz.invalid_action");
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.metrics.record_error(e);
                 self.metrics.record_authz_error();
             })?;
 
@@ -187,8 +169,8 @@ impl Authz {
             &action,
             &pushed_data,
         )
-        .inspect_err(|_| {
-            self.metrics.increment_error("authz.context_build");
+        .inspect_err(|e| {
+            self.metrics.record_error(e);
             self.metrics.record_authz_error();
         })?;
 
@@ -196,8 +178,9 @@ impl Authz {
 
         let entities = entities_data
             .entities(Some(&schema.schema))
-            .inspect_err(|_| {
-                self.metrics.increment_error("authz.entity_validation");
+            .map_err(AuthorizeError::ValidateEntities)
+            .inspect_err(|e| {
+                self.metrics.record_error(e);
                 self.metrics.record_authz_error();
             })?;
 
@@ -211,8 +194,9 @@ impl Authz {
                 resource: resource_uid.clone(),
                 context,
             })
-            .inspect_err(|_| {
-                self.metrics.increment_error("authz.request_validation");
+            .map_err(AuthorizeError::RequestValidation)
+            .inspect_err(|e| {
+                self.metrics.record_error(e);
                 self.metrics.record_authz_error();
             })?;
 
@@ -328,11 +312,12 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
         // Parse action UID.
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str()).map_err(|e| {
-            self.metrics.increment_error("authz.invalid_action");
-            self.metrics.record_authz_error();
-            AuthorizeError::from(e)
-        })?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.metrics.record_error(e);
+                self.metrics.record_authz_error();
+            })?;
 
         let BuiltEntitiesUnsigned {
             principal,
@@ -342,15 +327,9 @@ impl Authz {
             .config
             .entity_builder
             .build_entities_unsigned(request)
-            .map_err(|e| {
-                match &e {
-                    BuildUnsignedEntityError::InvalidType(_)
-                    | BuildUnsignedEntityError::BuildEntity(_) => {
-                        self.metrics.increment_error("authz.entity_build");
-                    },
-                }
+            .inspect_err(|e| {
+                self.metrics.record_error(e);
                 self.metrics.record_authz_error();
-                AuthorizeError::from(e)
             })?;
         let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
@@ -366,20 +345,19 @@ impl Authz {
             &action,
             &pushed_data,
         )
-        .map_err(|e| {
-            self.metrics.increment_error("authz.context_build");
+        .inspect_err(|e| {
+            self.metrics.record_error(e);
             self.metrics.record_authz_error();
-            AuthorizeError::from(e)
         })?;
 
         let entities = Entities::from_entities(
             principal.into_iter().chain([resource]),
             Some(&schema.schema),
         )
-        .map_err(|e| {
-            self.metrics.increment_error("authz.entity_validation");
+        .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
+        .inspect_err(|e| {
+            self.metrics.record_error(e);
             self.metrics.record_authz_error();
-            AuthorizeError::ValidateEntities(Box::new(e))
         })?;
 
         let response = self.execute_authorize(ExecuteAuthorizeParameters {

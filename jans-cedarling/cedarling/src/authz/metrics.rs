@@ -23,6 +23,13 @@ use std::{
 
 use crate::log::Decision;
 
+/// Trait for error types that map to a telemetry metric key.
+pub(crate) trait ErrorMetricKey {
+    /// Returns the dot-separated metric key for this error variant
+    /// (e.g., `"jwt.decode_failed"`, `"data.invalid_key"`).
+    fn metric_key(&self) -> &'static str;
+}
+
 /// Per-policy statistics tracking evaluation outcomes
 #[derive(Debug, Default)]
 pub(crate) struct PolicyStats {
@@ -196,7 +203,12 @@ impl MetricsCollector {
         self.authz_errors_total.fetch_add(1, Ordering::Relaxed);
     }
 
-    /// Increments a classified error counter by key (e.g., `"jwt.validation_failed"`).
+    /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
+    pub(crate) fn record_error(&self, err: &impl ErrorMetricKey) {
+        self.increment_error(err.metric_key());
+    }
+
+    /// Increments a classified error counter by raw key string.
     pub(crate) fn increment_error(&self, key: &str) {
         let mut counters = self
             .error_counters

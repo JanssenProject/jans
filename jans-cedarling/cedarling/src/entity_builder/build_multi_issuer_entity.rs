@@ -45,6 +45,12 @@ pub enum MultiIssuerEntityError {
     BuildAttrs(#[from] BuildAttrsErrorVec),
 }
 
+impl crate::authz::metrics::ErrorMetricKey for MultiIssuerEntityError {
+    fn metric_key(&self) -> &'static str {
+        "authz.entity_build"
+    }
+}
+
 /// Sanitize issuer name for Cedar compatibility
 fn sanitize_issuer_name(name: &str) -> String {
     name.replace(['.', ' ', '-'], "_").to_lowercase()

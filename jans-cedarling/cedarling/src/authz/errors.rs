@@ -7,6 +7,7 @@ use cedar_policy::{ContextJsonError, ParseErrors, RequestValidationError};
 use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
+use crate::authz::metrics::ErrorMetricKey;
 use crate::entity_builder::MultiIssuerEntityError;
 use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
 use crate::jwt::JwtProcessingError;
@@ -29,6 +30,18 @@ pub enum MultiIssuerValidationError {
 
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
+}
+
+impl ErrorMetricKey for MultiIssuerValidationError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            Self::TokenInput(_) => "multi_issuer.token_input_invalid",
+            Self::EmptyTokenArray => "multi_issuer.empty_token_array",
+            Self::TokenValidationFailed => "multi_issuer.all_tokens_failed",
+            Self::InvalidContextJson => "multi_issuer.invalid_context",
+            Self::MissingIssuer => "multi_issuer.missing_issuer",
+        }
+    }
 }
 
 /// Error type for token input validation
@@ -92,6 +105,26 @@ pub enum AuthorizeError {
     MultiIssuerEntity(MultiIssuerEntityError),
 }
 
+impl ErrorMetricKey for AuthorizeError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            Self::ProcessTokens(_) => "authz.process_tokens",
+            Self::Action(_) => "authz.invalid_action",
+            Self::IdentifierParsing(_) => "authz.identifier_parsing",
+            Self::CreateContext(_) => "authz.invalid_context",
+            Self::InvalidPrincipal(_) => "authz.invalid_principal",
+            Self::RequestValidation(_) => "authz.request_validation",
+            Self::ValidateEntities(_) => "authz.entity_validation",
+            Self::EntitiesToJson(_) => "authz.entities_to_json",
+            Self::BuildContext(e) => e.metric_key(),
+            Self::BuildEntity(_) => "authz.entity_build",
+            Self::BuildUnsignedRoleEntity(e) => e.metric_key(),
+            Self::MultiIssuerValidation(e) => e.metric_key(),
+            Self::MultiIssuerEntity(e) => e.metric_key(),
+        }
+    }
+}
+
 impl From<ParseErrors> for AuthorizeError {
     fn from(err: ParseErrors) -> Self {
         Self::Action(Box::new(err))
@@ -127,6 +160,12 @@ pub enum BuildContextError {
     /// Error encountered while creating Cedar context
     #[error("failed to create Cedar context: {0}")]
     ContextCreation(String),
+}
+
+impl ErrorMetricKey for BuildContextError {
+    fn metric_key(&self) -> &'static str {
+        "authz.context_build"
+    }
 }
 
 impl From<ContextJsonError> for BuildContextError {

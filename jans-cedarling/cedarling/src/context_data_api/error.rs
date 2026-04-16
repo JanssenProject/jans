@@ -5,6 +5,8 @@
 
 use std::time::Duration;
 
+use crate::authz::metrics::ErrorMetricKey;
+
 /// Errors that can occur during data store operations.
 #[derive(Debug, thiserror::Error)]
 pub enum DataError {
@@ -47,6 +49,19 @@ pub enum DataError {
     /// Serialization error
     #[error("serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
+}
+
+impl ErrorMetricKey for DataError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            Self::InvalidKey => "data.invalid_key",
+            Self::KeyNotFound { .. } => "data.key_not_found",
+            Self::StorageLimitExceeded { .. } => "data.storage_limit",
+            Self::TTLExceeded { .. } => "data.ttl_exceeded",
+            Self::ValueTooLarge { .. } => "data.value_too_large",
+            Self::SerializationError(_) => "data.serialization",
+        }
+    }
 }
 
 /// Errors that can occur during value mapping operations.
