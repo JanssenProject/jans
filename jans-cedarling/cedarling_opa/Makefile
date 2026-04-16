@@ -27,7 +27,7 @@ native:
 	cp ../target/release/$(LIB_FILE) $(LIB_DIR)/
 
 .PHONY: build
-build: native
+build:
 	@echo ">> Building Go binary"
 	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) \
@@ -40,9 +40,6 @@ clean:
 	@echo ">> Cleaning artifacts"
 	rm -rf $(BUILD_DIR)
 	rm -f $(LIB_DIR)/$(LIB_FILE)
-
-	@echo ">> Cleaning Go cache"
-	$(GO) clean -cache -modcache -testcache
 
 	@echo ">> Cleaning Rust target (optional but recommended)"
 	$(CARGO) clean -p cedarling_go
