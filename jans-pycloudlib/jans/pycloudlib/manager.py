@@ -163,11 +163,10 @@ class ConfigManager(BaseConfiguration):
             ValueError: If the value of `CN_CONFIG_ADAPTER` environment variable is not supported.
 
         Examples:
-
-        ```py
-        os.environ["CN_CONFIG_ADAPTER"] = "consul"
-        ConfigManager().adapter  # returns an instance of adapter class
-        ```
+            ```py
+            os.environ["CN_CONFIG_ADAPTER"] = "consul"
+            ConfigManager().adapter  # returns an instance of adapter class
+            ```
 
         The adapter name is pre-populated from `CN_CONFIG_ADAPTER` environment variable.
 
@@ -216,11 +215,10 @@ class SecretManager(BaseConfiguration):
             ValueError: If the value of `CN_SECRET_ADAPTER` environment variable is not supported.
 
         Examples:
-
-        ```py
-        os.environ["CN_SECRET_ADAPTER"] = "vault"
-        SecretManager().adapter  # returns an instance of adapter class
-        ```
+            ```py
+            os.environ["CN_SECRET_ADAPTER"] = "vault"
+            SecretManager().adapter  # returns an instance of adapter class
+            ```
 
         The adapter name is pre-populated from `CN_SECRET_ADAPTER` environment variable (i.e. `CN_SECRET_ADAPTER=vault`).
 
@@ -262,23 +260,22 @@ class SecretManager(BaseConfiguration):
             binary_mode: Write the file as binary.
 
         Examples:
+            ```py
+            # assuming there is secret with key `server_cert` that stores
+            # server cert needed to be fetched as `/etc/certs/server.crt`
+            # file.
+            SecretManager().to_file("server_cert", "/etc/certs/server.crt")
 
-        ```py
-        # assuming there is secret with key `server_cert` that stores
-        # server cert needed to be fetched as `/etc/certs/server.crt`
-        # file.
-        SecretManager().to_file("server_cert", "/etc/certs/server.crt")
-
-        # assuming there is secret with key `server_jks` that stores
-        # server keystore needed to be fetched as `/etc/certs/server.jks`
-        # file.
-        SecretManager().to_file(
-            "server_jks",
-            "/etc/certs/server.jks",
-            decode=True,
-            binary_mode=True,
-        )
-        ```
+            # assuming there is secret with key `server_jks` that stores
+            # server keystore needed to be fetched as `/etc/certs/server.jks`
+            # file.
+            SecretManager().to_file(
+                "server_jks",
+                "/etc/certs/server.jks",
+                decode=True,
+                binary_mode=True,
+            )
+            ```
         """
         mode = "w"
         if binary_mode:
@@ -313,21 +310,20 @@ class SecretManager(BaseConfiguration):
             binary_mode: Read the file as binary.
 
         Examples:
+            ```py
+            # assuming there is file `/etc/certs/server.crt` need to be save
+            # as `server_crt` secret.
+            SecretManager().from_file("server_cert", "/etc/certs/server.crt")
 
-        ```py
-        # assuming there is file `/etc/certs/server.crt` need to be save
-        # as `server_crt` secret.
-        SecretManager().from_file("server_cert", "/etc/certs/server.crt")
-
-        # assuming there is file `/etc/certs/server.jks` need to be save
-        # as `server_jks` secret.
-        SecretManager().from_file(
-            "server_jks",
-            "/etc/certs/server.jks",
-            encode=True,
-            binary_mode=True,
-        )
-        ```
+            # assuming there is file `/etc/certs/server.jks` need to be save
+            # as `server_jks` secret.
+            SecretManager().from_file(
+                "server_jks",
+                "/etc/certs/server.jks",
+                encode=True,
+                binary_mode=True,
+            )
+            ```
         """
         mode = "r"
         if binary_mode:
@@ -392,7 +388,17 @@ class Manager:
                 with open(path, "w") as f:
                     f.write(contents)
 
-    def bootstrap(self):
+    def bootstrap(self) -> None:
+        """Boostrap required assets.
+
+        This method should be called after instantiating `Manager` class.
+
+        Examples:
+            ```py
+            manager = Manager()
+            manager.bootstrap()
+            ```
+        """
         for adapter_name in [self.config.remote_adapter_name, self.secret.remote_adapter_name]:
             self._bootstrap_assets(adapter_name)
 
@@ -403,7 +409,7 @@ class Manager:
         ttl: int = 10,
         retry_delay: float = 5.0,
         max_start_delay: float = 0.0,
-    ):
+    ) -> LockRecord:
         """Create lock object.
 
         Args:
@@ -428,7 +434,6 @@ class Manager:
 
     @property
     def lock(self):  # pragma: no cover
-        # backward-compat for .lock attribute
         ns = SimpleNamespace()
         ns.create_lock = self.create_lock
         logger.warning("Accessing %s.lock attribute is deprecated", self.__class__.__name__)
