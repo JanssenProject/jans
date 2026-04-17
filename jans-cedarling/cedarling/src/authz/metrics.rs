@@ -181,7 +181,7 @@ impl MetricsCollector {
             let mut times = self
                 .eval_times_us
                 .write()
-                .expect("eval_times_us lock should not be poisoned");
+                .expect("eval_times_us lock poisoned");
             times.push(decision_time_us);
         }
 
@@ -214,7 +214,7 @@ impl MetricsCollector {
         let mut counters = self
             .error_counters
             .write()
-            .expect("error_counters lock should not be poisoned");
+            .expect("error_counters lock poisoned");
         *counters.entry(key.to_string()).or_insert(0) += 1;
     }
 
@@ -267,7 +267,7 @@ impl MetricsCollector {
             let mut start = self
                 .interval_start
                 .lock()
-                .expect("interval_start lock should not be poisoned");
+                .expect("interval_start lock poisoned");
             let duration = now.signed_duration_since(*start);
             *start = now;
             duration.num_seconds()
@@ -277,15 +277,15 @@ impl MetricsCollector {
             let mut map = self
                 .policy_stats
                 .write()
-                .expect("policy_stats lock should not be poisoned");
+                .expect("policy_stats lock poisoned");
             let snapshot = map
                 .iter()
                 .flat_map(|(id, stats)| {
                     let snap = stats.snapshot();
                     [
                         (id.clone(), snap.evaluations),
-                        (format!("{id}_allow"), snap.allow_count),
-                        (format!("{id}_deny"), snap.deny_count),
+                        (format!("{id}.allow"), snap.allow_count),
+                        (format!("{id}.deny"), snap.deny_count),
                     ]
                 })
                 .collect();
@@ -298,19 +298,22 @@ impl MetricsCollector {
             let mut counters = self
                 .error_counters
                 .write()
-                .expect("error_counters lock should not be poisoned");
+                .expect("error_counters lock poisoned");
             std::mem::take(&mut *counters)
         };
 
         // Compute percentiles from eval times, then clear buffer
         let times_snapshot = {
-            let mut times = self.eval_times_us.write().expect("eval_time lock poisoned");
+            let mut times = self
+                .eval_times_us
+                .write()
+                .expect("eval_times_us lock poisoned");
             std::mem::take(&mut *times)
         };
         let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
 
         // Build operational_stats map from atomic fields
-        let mut ops = HashMap::with_capacity(36);
+        let mut ops = HashMap::new();
 
         insert_swap(&mut ops, "authz.requests_total", &self.authz_requests_total);
         insert_swap(
@@ -404,7 +407,7 @@ fn compute_percentiles(times: Vec<i64>) -> (i64, i64, i64, i64) {
     let mut times = times;
     times.sort_unstable();
     let len = times.len();
-    let idx = |pct: usize| ((len - 1) * pct / 100).min(len - 1);
+    let idx = |pct: usize| (len - 1) * pct / 100;
     (
         times[idx(50)],
         times[idx(95)],
@@ -415,4 +418,320 @@ fn compute_percentiles(times: Vec<i64>) -> (i64, i64, i64, i64) {
 
 fn saturating_usize_to_i64(value: usize) -> i64 {
     i64::try_from(value).unwrap_or(i64::MAX)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct TestError(&'static str);
+    impl ErrorMetricKey for TestError {
+        fn metric_key(&self) -> &'static str {
+            self.0
+        }
+    }
+
+    #[test]
+    fn record_evaluation_increments_authz_counters() {
+        let collector = MetricsCollector::new(5);
+
+        collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
+        collector.record_evaluation(200, Decision::Deny, true, std::iter::empty());
+        collector.record_evaluation(300, Decision::Allow, false, std::iter::empty());
+
+        let snap = collector.snapshot_and_reset();
+
+        assert_eq!(
+            snap.operational_stats.get("authz.requests_total"),
+            Some(&3),
+            "total requests must be 3"
+        );
+        assert_eq!(
+            snap.operational_stats.get("authz.requests_unsigned"),
+            Some(&1),
+            "unsigned requests must be 1"
+        );
+        assert_eq!(
+            snap.operational_stats.get("authz.requests_multi_issuer"),
+            Some(&2),
+            "multi-issuer requests must be 2"
+        );
+        assert_eq!(
+            snap.operational_stats.get("authz.decision_allow"),
+            Some(&2),
+            "allow decisions must be 2"
+        );
+        assert_eq!(
+            snap.operational_stats.get("authz.decision_deny"),
+            Some(&1),
+            "deny decisions must be 1"
+        );
+    }
+
+    #[test]
+    fn record_evaluation_updates_policy_stats() {
+        let collector = MetricsCollector::new(3);
+
+        collector.record_evaluation(
+            50,
+            Decision::Allow,
+            false,
+            vec![("policy_a", Decision::Allow), ("policy_b", Decision::Deny)].into_iter(),
+        );
+        collector.record_evaluation(
+            60,
+            Decision::Deny,
+            false,
+            vec![("policy_a", Decision::Allow), ("policy_b", Decision::Deny)].into_iter(),
+        );
+
+        let snap = collector.snapshot_and_reset();
+
+        assert_eq!(
+            snap.policy_stats.get("policy_a"),
+            Some(&2),
+            "policy_a evaluations must be 2"
+        );
+        assert_eq!(
+            snap.policy_stats.get("policy_a.allow"),
+            Some(&2),
+            "policy_a allow count must be 2"
+        );
+        assert_eq!(
+            snap.policy_stats.get("policy_b"),
+            Some(&2),
+            "policy_b evaluations must be 2"
+        );
+        assert_eq!(
+            snap.policy_stats.get("policy_b.deny"),
+            Some(&2),
+            "policy_b deny count must be 2"
+        );
+    }
+
+    #[test]
+    fn record_error_aggregates_by_metric_key() {
+        use crate::authz::MultiIssuerValidationError;
+
+        let collector = MetricsCollector::new(0);
+
+        collector.record_error(&TestError("jwt.decode_failed"));
+        collector.record_error(&TestError("jwt.decode_failed"));
+        collector.record_error(&TestError("data.invalid_key"));
+        collector.record_error(&MultiIssuerValidationError::EmptyTokenArray);
+        collector.record_error(&MultiIssuerValidationError::MissingIssuer);
+        collector.increment_error("data.invalid_key");
+
+        let snap = collector.snapshot_and_reset();
+
+        assert_eq!(
+            snap.error_counters.get("jwt.decode_failed"),
+            Some(&2),
+            "jwt.decode_failed count must be 2"
+        );
+        assert_eq!(
+            snap.error_counters.get("data.invalid_key"),
+            Some(&2),
+            "data.invalid_key count must be 2"
+        );
+        assert_eq!(
+            snap.error_counters.get("multi_issuer.empty_token_array"),
+            Some(&1),
+            "multi_issuer.empty_token_array count must be 1"
+        );
+        assert_eq!(
+            snap.error_counters.get("multi_issuer.missing_issuer"),
+            Some(&1),
+            "multi_issuer.missing_issuer count must be 1"
+        );
+    }
+
+    #[test]
+    fn snapshot_and_reset_zeros_counters_preserves_gauges() {
+        let collector = MetricsCollector::new(10);
+        collector.record_evaluation(500, Decision::Allow, false, std::iter::empty());
+        collector.record_cache_hit();
+        collector.record_jwt_validation(true);
+
+        let snap1 = collector.snapshot_and_reset();
+
+        assert_eq!(
+            snap1.operational_stats.get("authz.requests_total"),
+            Some(&1),
+            "first snapshot has 1 request"
+        );
+        assert_eq!(
+            snap1.operational_stats.get("token_cache.hits"),
+            Some(&1),
+            "token_cache hit must be 1"
+        );
+        assert_eq!(
+            snap1.operational_stats.get("instance.policy_count"),
+            Some(&10),
+            "policy_count gauge must be 10"
+        );
+
+        let snap2 = collector.snapshot_and_reset();
+        assert_eq!(
+            snap2.operational_stats.get("authz.requests_total"),
+            Some(&0),
+            "counters zeroed after reset"
+        );
+        assert_eq!(
+            snap2.operational_stats.get("token_cache.hits"),
+            Some(&0),
+            "token_cache hits zeroed"
+        );
+        assert_eq!(
+            snap2.operational_stats.get("instance.policy_count"),
+            Some(&10),
+            "policy_count gauge preserved"
+        );
+    }
+
+    #[test]
+    fn compute_percentiles_empty_returns_zeros() {
+        let (p50, p95, p99, max) = compute_percentiles(vec![]);
+        assert_eq!(p50, 0, "p50 must be 0 for empty");
+        assert_eq!(p95, 0, "p95 must be 0 for empty");
+        assert_eq!(p99, 0, "p99 must be 0 for empty");
+        assert_eq!(max, 0, "max must be 0 for empty");
+    }
+
+    #[test]
+    fn compute_percentiles_single_element() {
+        let (p50, p95, p99, max) = compute_percentiles(vec![42]);
+        assert_eq!(p50, 42, "p50 must be 42");
+        assert_eq!(p95, 42, "p95 must be 42");
+        assert_eq!(p99, 42, "p99 must be 42");
+        assert_eq!(max, 42, "max must be 42");
+    }
+
+    #[test]
+    fn compute_percentiles_multiple_elements() {
+        let times = vec![10, 20, 30, 33, 40, 70, 49, 55, 55, 90, 110];
+        let (p50, p95, p99, max) = compute_percentiles(times);
+        assert_eq!(p50, 49, "p50 must be median");
+        assert_eq!(p95, 90, "p95 index (10*95/100)=9");
+        assert_eq!(p99, 90, "p99 index (10*99/100)=9");
+        assert_eq!(max, 110, "max must be 110");
+    }
+
+    #[test]
+    fn saturating_usize_to_i64_normal_value() {
+        assert_eq!(saturating_usize_to_i64(0), 0);
+        assert_eq!(saturating_usize_to_i64(100), 100);
+        assert_eq!(saturating_usize_to_i64(usize::MAX), i64::MAX);
+    }
+
+    #[test]
+    fn policy_stats_snapshot_fields() {
+        let stats = PolicyStats::default();
+        stats.record(Decision::Allow);
+        stats.record(Decision::Allow);
+        stats.record(Decision::Deny);
+
+        let snap = stats.snapshot();
+        assert_eq!(snap.evaluations, 3, "evaluations must be 3");
+        assert_eq!(snap.allow_count, 2, "allow_count must be 2");
+        assert_eq!(snap.deny_count, 1, "deny_count must be 1");
+    }
+
+    #[test]
+    fn record_evaluation_clears_eval_times_after_snapshot() {
+        let collector = MetricsCollector::new(0);
+        collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
+        collector.record_evaluation(200, Decision::Allow, false, std::iter::empty());
+
+        let snap1 = collector.snapshot_and_reset();
+        assert_eq!(
+            snap1.operational_stats.get("authz.eval_time_p50_us"),
+            Some(&100),
+            "p50 must be computed from collected times"
+        );
+
+        let snap2 = collector.snapshot_and_reset();
+        assert_eq!(
+            snap2.operational_stats.get("authz.eval_time_p50_us"),
+            Some(&0),
+            "eval times must be cleared after snapshot"
+        );
+    }
+
+    #[test]
+    fn record_cache_operations() {
+        let collector = MetricsCollector::new(0);
+        collector.record_cache_hit();
+        collector.record_cache_hit();
+        collector.record_cache_miss();
+        collector.record_cache_eviction(5);
+
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats.get("token_cache.hits"),
+            Some(&2),
+            "cache hits must be 2"
+        );
+        assert_eq!(
+            snap.operational_stats.get("token_cache.misses"),
+            Some(&1),
+            "cache misses must be 1"
+        );
+        assert_eq!(
+            snap.operational_stats.get("token_cache.evictions"),
+            Some(&5),
+            "cache evictions must be 5"
+        );
+    }
+
+    #[test]
+    fn record_jwt_validations() {
+        let collector = MetricsCollector::new(0);
+        collector.record_jwt_validation(true);
+        collector.record_jwt_validation(true);
+        collector.record_jwt_validation(false);
+
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats.get("jwt.validations_total"),
+            Some(&3),
+            "total validations must be 3"
+        );
+        assert_eq!(
+            snap.operational_stats.get("jwt.validations_success"),
+            Some(&2),
+            "successful validations must be 2"
+        );
+        assert_eq!(
+            snap.operational_stats.get("jwt.validations_failed"),
+            Some(&1),
+            "failed validations must be 1"
+        );
+    }
+
+    #[test]
+    fn record_data_operations() {
+        let collector = MetricsCollector::new(0);
+        collector.record_data_push();
+        collector.record_data_get();
+        collector.record_data_get();
+        collector.record_data_remove();
+
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats.get("data.push_ops"),
+            Some(&1),
+            "push ops must be 1"
+        );
+        assert_eq!(
+            snap.operational_stats.get("data.get_ops"),
+            Some(&2),
+            "get ops must be 2"
+        );
+        assert_eq!(
+            snap.operational_stats.get("data.remove_ops"),
+            Some(&1),
+            "remove ops must be 1"
+        );
+    }
 }
