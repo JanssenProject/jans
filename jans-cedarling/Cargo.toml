@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "http_utils", "sparkv", "test_utils"]
+members = ["bindings/*", "cedarling", "cedarling_pg", "http_utils", "sparkv", "test_utils"]
 exclude = ["bindings/cedarling-java", "custom-lints"]
 
 [workspace.dependencies]
