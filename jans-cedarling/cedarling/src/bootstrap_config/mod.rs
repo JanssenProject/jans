@@ -10,8 +10,6 @@ mod decode;
 
 /// Authorization config module
 pub mod authorization_config;
-/// Entity builder config module
-pub mod entity_builder_config;
 /// JWT config module
 pub mod jwt_config;
 /// Lock config module
@@ -32,7 +30,6 @@ use crate::context_data_api::DataStoreConfig;
 
 // Re-export types that need to be public
 pub use authorization_config::AuthorizationConfig;
-pub use entity_builder_config::{EntityBuilderConfig, UnsignedRoleIdSrc};
 pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
@@ -54,8 +51,6 @@ pub struct BootstrapConfig {
     pub jwt_config: JwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
-    /// A set of properties used to configure the JWTs to Cedar Entity mappings
-    pub entity_builder_config: EntityBuilderConfig,
     /// Lock service configuration.
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
@@ -89,7 +84,6 @@ impl Default for BootstrapConfig {
             },
             jwt_config: JwtConfig::new_without_validation(),
             authorization_config: AuthorizationConfig::default(),
-            entity_builder_config: EntityBuilderConfig::default(),
             lock_config: None,
             max_default_entities: None,
             max_base64_size: None,

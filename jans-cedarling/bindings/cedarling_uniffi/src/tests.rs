@@ -36,30 +36,24 @@ fn test_authorize_unsigned_success() {
         .expect("EntityData should be correctly parsed"),
     );
 
-    let principals = [
-        json!({
-          "cedar_entity_mapping": {
-            "entity_type": "Jans::TestPrincipal1",
-            "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-          },
-          "is_ok": true
-        }),
-        json!({
-          "cedar_entity_mapping": {
-            "entity_type": "Jans::TestPrincipal2",
-            "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYkt1"
-          },
-          "is_ok": true
-        }),
-    ];
+    let principals = vec![Arc::new(
+        EntityData::from_json(
+            json!({
+              "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+              },
+              "is_ok": true
+            })
+            .to_string(),
+        )
+        .unwrap(),
+    )];
 
     //execute authz
     let result = cedarling
         .authorize_unsigned(
-            principals
-                .into_iter()
-                .map(|json_value| Arc::new(EntityData::from_json(json_value.to_string()).unwrap()))
-                .collect(),
+            principals,
             r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
             resource,
             JsonValue("{}".to_string()),

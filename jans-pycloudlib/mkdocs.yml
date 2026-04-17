@@ -14,7 +14,7 @@ plugins:
           #
           # ref: https://mkdocstrings.github.io/python/usage/#finding-modules
           # paths: ["."]
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
             - https://cryptography.io/en/latest/objects.inv
             - https://requests.readthedocs.io/en/latest/objects.inv
@@ -38,12 +38,13 @@ markdown_extensions:
 
 nav:
   - "Introduction": index.md
-  - "User's Guides":
+  - "User Guides":
       - "Installation": guides/install.md
-      - "Developing Container Application": guides/container_app.md
       - "CLI": guides/cli.md
+      - "Cloud SQL Connector": guides/cloudsql_connector.md
   - "API Reference":
       - "Manager": api/manager.md
+      - "Lock": api/lock.md
       - "Config": api/config.md
       - "Secret": api/secret.md
       - "Persistence":

@@ -219,35 +219,24 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to evaluate the request with partial evaluation.
 
-**1. Define the Principals**
+**1. Define the Principal**
 
 ```rust
 use cedarling::*;
 use std::collections::HashMap;
 use serde_json::json;
 
-let principals = vec![
-  EntityData {
-    cedar_mapping: CedarEntityMapping {
-      entity_type: "Jans::Workload".to_string(),
-      id: "some_workload_id".to_string(),
-    },
-    attributes: HashMap::from_iter([
-      ("client_id".to_string(), json!("some_client_id")),
-    ]),
+let principal = Some(EntityData {
+  cedar_mapping: CedarEntityMapping {
+    entity_type: "Jans::User".to_string(),
+    id: "random_user_id".to_string(),
   },
-  EntityData {
-    cedar_mapping: CedarEntityMapping {
-      entity_type: "Jans::User".to_string(),
-      id: "random_user_id".to_string(),
-    },
-    attributes: HashMap::from_iter([
-      ("role".to_string(), json!(["admin", "manager"])),
-    ]),
-  },
-]
+  attributes: HashMap::from_iter([
+    ("role".to_string(), json!(["admin", "manager"])),
+  ]),
+});
 ```
 
 **2. Define the Resource**
@@ -301,13 +290,13 @@ let context = json!({
 
 **5. Build the Request**
 
-Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
+Now you'll construct the **_request_** by including the _principal_, _action_, and _context_.
 
 ```rust
 use std::collections::HashMap;
 
 let request = RequestUnsigned {
-    principals,
+    principal,
     action,
     resource,
     context,
@@ -316,7 +305,7 @@ let request = RequestUnsigned {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
 
 ```rust
 let result = cedarling.authorize_unsigned(request).await?;

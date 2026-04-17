@@ -15,11 +15,13 @@ use serde_pyobject::from_pyobject;
 /// =======
 ///
 /// A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
-/// authorization data for unsigned authorization requests for many principals.
+/// authorization data for an unsigned authorization request for an optional single
+/// principal.
 ///
 /// Attributes
 /// ----------
-/// :param principals: A list of `EntityData` objects representing the principals.
+/// :param principal: Optional `EntityData` representing the principal. When `None`,
+///     the core performs partial evaluation of the policies.
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
@@ -28,11 +30,11 @@ use serde_pyobject::from_pyobject;
 /// -------
 /// ```python
 /// # Create a request for authorization
-/// request = RequestUnsigned(principals=[principal], action="read", resource=resource, context={})
+/// request = RequestUnsigned(principal=principal, action="read", resource=resource, context={})
 /// ```
 #[pyclass(get_all, set_all)]
 pub struct RequestUnsigned {
-    pub principals: Vec<EntityData>,
+    pub principal: Option<EntityData>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -44,15 +46,15 @@ pub struct RequestUnsigned {
 #[pymethods]
 impl RequestUnsigned {
     #[new]
-    #[pyo3(signature = (principals, action, resource, context))]
+    #[pyo3(signature = (action, resource, context, principal=None))]
     fn new(
-        principals: Vec<EntityData>,
         action: String,
         resource: EntityData,
         context: Py<PyDict>,
+        principal: Option<EntityData>,
     ) -> Self {
         Self {
-            principals,
+            principal,
             action,
             resource,
             context,
@@ -62,11 +64,7 @@ impl RequestUnsigned {
 
 impl RequestUnsigned {
     pub fn to_cedarling(&self) -> Result<cedarling::RequestUnsigned, PyErr> {
-        let principals = self
-            .principals
-            .iter()
-            .map(|p| p.to_owned().into())
-            .collect();
+        let principal = self.principal.clone().map(|p| p.into());
 
         let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
@@ -76,7 +74,7 @@ impl RequestUnsigned {
         })?;
 
         Ok(cedarling::RequestUnsigned {
-            principals,
+            principal,
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

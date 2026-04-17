@@ -30,26 +30,6 @@ const BOOTSTRAP_CONFIG = {
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_LEVEL: "DEBUG",
   CEDARLING_LOG_TTL: 120,
-  CEDARLING_PRINCIPAL_BOOLEAN_OPERATION: {
-    and: [
-      {
-        "===": [
-          {
-            var: "Jans::Workload",
-          },
-          "ALLOW",
-        ],
-      },
-      {
-        "===": [
-          {
-            var: "Jans::User",
-          },
-          "ALLOW",
-        ],
-      },
-    ],
-  },
   CEDARLING_LOCAL_JWKS: null,
   CEDARLING_POLICY_STORE_LOCAL_FN: null,
   CEDARLING_JWT_SIG_VALIDATION: "disabled",
@@ -154,15 +134,14 @@ let ID_TOKEN =
 let USERINFO_TOKEN =
   "eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGUiOlsiQ2FzYUFkbWluIl0sImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsImdpdmVuX25hbWUiOiJBZG1pbiIsIm1pZGRsZV9uYW1lIjoiQWRtaW4iLCJpbnVtIjoiYTZhNzAzMDEtYWY0OS00OTAxLTk2ODctMGJjZGNmNGUzNGZhIiwiY2xpZW50X2lkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwiYXVkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwidXBkYXRlZF9hdCI6MTczMTY5ODEzNSwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsIm5pY2tuYW1lIjoiQWRtaW4iLCJmYW1pbHlfbmFtZSI6IlVzZXIiLCJqdGkiOiJPSW4zZzFTUFNEU0tBWUR6RU5Wb3VnIiwiZW1haWwiOiJhZG1pbkBqYW5zLnRlc3QiLCJqYW5zQWRtaW5VSVJvbGUiOlsiYXBpLWFkbWluIl19.CIahQtRpoTkIQx8KttLPIKH7gvGG8OmYCMzz7wch6k792DVYQG1R7q3sS9Ema1rO5Fm_GgjOsR0yTTMKsyhHDLBwkDd3cnMLgsh2AwVFZvxtpafTlUAPfjvMAy9YTtkPcY6rNUhsYLSSOA83kt6pHdIv5nI-G6ybqgg-bLBRpwZDoOV0TulRhmuukdiuugTXHT6Bb-K3ZeYs8CwewztnxoFTSDghSzq7VZIraV8SLTBLx5_xswn9mefamyB2XNN3o6vXuMyf4BEbYSCuJ3pu6YtNgfyWwt9cF8PYe4PVLoXZuJKN-cy4qrtgy43QXPCg96jSQUJqgLb5ZL5_3udm2Q";
 
-// Unsigned request: principals as entity data (no JWT tokens).
-// Matches policies that permit principal is Jans::User or Jans::Workload with resource Jans::Application name "Some Application".
+// Unsigned request: optional single principal as entity data (no JWT tokens).
+// Matches policies that permit principal is Jans::User with resource Jans::Application name "Some Application".
+// Set `principal: null` (or omit the key) to use core partial evaluation.
 const REQUEST_UNSIGNED = {
-  principals: [
-    {
-      cedar_entity_mapping: { entity_type: "Jans::User", id: "demo_user_id" },
-      sub: "demo_user_id",
-    },
-  ],
+  principal: {
+    cedar_entity_mapping: { entity_type: "Jans::User", id: "demo_user_id" },
+    sub: "demo_user_id",
+  },
   action: 'Jans::Action::"Read"',
   resource: {
     cedar_entity_mapping: {

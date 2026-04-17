@@ -33,11 +33,6 @@
       "uri": null
     },
     {
-      "id": "conflict_with_super_gluu",
-      "description": "The request contains conflicts with Super Gluu parameters",
-      "uri": null
-    },
-    {
       "id": "keys_not_found",
       "description": "Can't find associated key(s)",
       "uri": null

@@ -50,9 +50,9 @@ func (e *EntityData) UnmarshalJSON(data []byte) error {
 
 // Represents the result of an authorization request
 type AuthorizeResult struct {
-	Principals map[string]CedarResponse `json:"principals"`
-	Decision   bool                     `json:"decision"`
-	RequestID  string                   `json:"request_id"`
+	Response  CedarResponse `json:"response"`
+	Decision  bool          `json:"decision"`
+	RequestID string        `json:"request_id"`
 }
 
 // Represents the authorization decision
@@ -150,12 +150,14 @@ func (r CedarResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-// Represents an unsigned authorization request
+// Represents an unsigned authorization request.
+// Principal is optional; when nil the request is evaluated via Cedar's partial
+// evaluator and any residual (principal-dependent) policies fail closed to Deny.
 type RequestUnsigned struct {
-	Principals []EntityData
-	Action     string
-	Resource   EntityData
-	Context    any
+	Principal *EntityData
+	Action    string
+	Resource  EntityData
+	Context   any
 }
 
 func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
@@ -165,15 +167,15 @@ func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
 	}
 
 	aux := struct {
-		Principals []EntityData `json:"principals"`
-		Action     string       `json:"action"`
-		Resource   EntityData   `json:"resource"`
-		Context    any          `json:"context"`
+		Principal *EntityData `json:"principal,omitempty"`
+		Action    string      `json:"action"`
+		Resource  EntityData  `json:"resource"`
+		Context   any         `json:"context"`
 	}{
-		Principals: r.Principals,
-		Action:     r.Action,
-		Resource:   r.Resource,
-		Context:    context,
+		Principal: r.Principal,
+		Action:    r.Action,
+		Resource:  r.Resource,
+		Context:   context,
 	}
 	return json.Marshal(aux)
 
@@ -222,23 +224,23 @@ type MultiIssuerAuthorizeResult struct {
 
 // DataEntry represents a single entry in the data store with metadata
 type DataEntry struct {
-	Key         string `json:"key"`
-	Value       any    `json:"value"`
-	DataType    string `json:"data_type"`
-	CreatedAt   string `json:"created_at"`
+	Key         string  `json:"key"`
+	Value       any     `json:"value"`
+	DataType    string  `json:"data_type"`
+	CreatedAt   string  `json:"created_at"`
 	ExpiresAt   *string `json:"expires_at,omitempty"`
 	AccessCount uint64  `json:"access_count"`
 }
 
 // DataStoreStats represents statistics about the data store
 type DataStoreStats struct {
-	EntryCount            uint64  `json:"entry_count"`
-	MaxEntries            uint64  `json:"max_entries"`
-	MaxEntrySize          uint64  `json:"max_entry_size"`
-	MetricsEnabled        bool    `json:"metrics_enabled"`
-	TotalSizeBytes        uint64  `json:"total_size_bytes"`
-	AvgEntrySizeBytes     uint64  `json:"avg_entry_size_bytes"`
-	CapacityUsagePercent  float64 `json:"capacity_usage_percent"`
-	MemoryAlertThreshold  float64 `json:"memory_alert_threshold"`
-	MemoryAlertTriggered  bool    `json:"memory_alert_triggered"`
+	EntryCount           uint64  `json:"entry_count"`
+	MaxEntries           uint64  `json:"max_entries"`
+	MaxEntrySize         uint64  `json:"max_entry_size"`
+	MetricsEnabled       bool    `json:"metrics_enabled"`
+	TotalSizeBytes       uint64  `json:"total_size_bytes"`
+	AvgEntrySizeBytes    uint64  `json:"avg_entry_size_bytes"`
+	CapacityUsagePercent float64 `json:"capacity_usage_percent"`
+	MemoryAlertThreshold float64 `json:"memory_alert_threshold"`
+	MemoryAlertTriggered bool    `json:"memory_alert_triggered"`
 }

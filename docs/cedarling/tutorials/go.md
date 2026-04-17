@@ -180,7 +180,7 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 Cedarling provides two main interfaces for performing authorization checks:
 
 - [**Multi-Issuer Authorization**](#multi-issuer-authorization) processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on `token_metadata` configuration.
-- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass a principal directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.
 
 #### Multi-Issuer Authorization
 
@@ -239,22 +239,20 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — set it to `nil` to evaluate the request with partial evaluation.
 
-**1. Define the principals:**
+**1. Define the principal:**
 
 ```go
-principals := []cedarling_go.EntityData{
-    {
-        CedarMapping: cedarling_go.CedarMapping{
-            EntityType: "Jans::User",
-            ID:         "random_id",
-        },
-        Payload: map[string]any{
-            "role":    []string{"admin"},
-            "country": "US",
-            "sub":     "random_sub",
-        },
+principal := &cedarling_go.EntityData{
+    CedarMapping: cedarling_go.CedarMapping{
+        EntityType: "Jans::User",
+        ID:         "random_id",
+    },
+    Payload: map[string]any{
+        "role":    []string{"admin"},
+        "country": "US",
+        "sub":     "random_sub",
     },
 }
 ```
@@ -263,9 +261,9 @@ principals := []cedarling_go.EntityData{
 
 ```go
 request := cedarling_go.RequestUnsigned{
-    Principals: principals,
-    Action:     `Jans::Action::"Update"`,
-    Resource:   resource, // From previous example
+    Principal: principal,
+    Action:    `Jans::Action::"Update"`,
+    Resource:  resource, // From previous example
 }
 ```
 

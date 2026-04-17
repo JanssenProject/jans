@@ -8,7 +8,6 @@
 from cedarling_python import Cedarling, EntityData, RequestUnsigned, authorize_errors
 from config import load_bootstrap_config, TEST_FILES_PATH
 from os.path import join
-import json
 
 
 POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
@@ -30,25 +29,17 @@ def test_authorize_errors_exist():
 
 
 def test_authorize_unsigned_ok():
-    """Test authorize_unsigned with a minimal request (same policy store as test_authorize_unsigned)."""
-    def config_cb(config: dict):
-        json_rule = json.dumps({
-            "===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]
-        })
-        config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json_rule
-
-    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION, config_cb=config_cb))
+    """Test authorize_unsigned with a minimal single-principal request."""
+    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
 
     request = RequestUnsigned(
-        principals=[
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1"
-                },
-                "is_ok": True
-            })
-        ],
+        principal=EntityData.from_dict({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }),
         action='Jans::Action::"UpdateForTestPrincipals"',
         context={},
         resource=RESOURCE,
