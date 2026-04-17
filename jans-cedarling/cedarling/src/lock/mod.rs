@@ -153,7 +153,7 @@ struct WorkerSenderAndHandle {
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
-    telemetry_ticker: Option<crate::http::JoinHandle<()>>,
+    telemetry_ticker: Option<(CancellationToken, crate::http::JoinHandle<()>)>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
 }
@@ -240,7 +240,7 @@ impl LockService {
             _ => None,
         };
 
-        let (telemetry_worker, telemetry_ticker) = match (
+        let telemetry_worker = match (
             bootstrap_conf.telemetry_interval,
             lock_config.audit_endpoints.telemetry,
         ) {
@@ -254,17 +254,14 @@ impl LockService {
                     cancel_tkn.clone(),
                 )?;
 
-                let ticker = TelemetryTicker::spawn(
-                    metrics,
-                    logger.clone(),
-                    telemetry_interval,
-                    &cancel_tkn,
-                );
-
-                (Some(worker), Some(ticker))
+                Some(worker)
             },
-            _ => (None, None),
+            _ => None,
         };
+
+        let telemetry_ticker = bootstrap_conf.telemetry_interval.map(|telemetry_interval| {
+            TelemetryTicker::spawn(metrics, logger.clone(), telemetry_interval)
+        });
 
         Ok(Self {
             log_worker,
@@ -277,14 +274,15 @@ impl LockService {
 
     pub(crate) async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
+        if let Some((cancel_tkn, handle)) = self.telemetry_ticker.take() {
+            cancel_tkn.cancel();
+            () = handle.await_result().await;
+        }
         if let Some(worker) = self.log_worker.take() {
             () = worker.handle.await_result().await;
         }
         if let Some(worker) = self.telemetry_worker.take() {
             () = worker.handle.await_result().await;
-        }
-        if let Some(handle) = self.telemetry_ticker.take() {
-            () = handle.await_result().await;
         }
     }
 }

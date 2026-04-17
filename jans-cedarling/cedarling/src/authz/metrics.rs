@@ -304,10 +304,7 @@ impl MetricsCollector {
 
         // Compute percentiles from eval times, then clear buffer
         let times_snapshot = {
-            let mut times = self
-                .eval_times_us
-                .write()
-                .expect("eval_times_us lock poisoned");
+            let mut times = self.eval_times_us.write().expect("eval_time lock poisoned");
             std::mem::take(&mut *times)
         };
         let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);

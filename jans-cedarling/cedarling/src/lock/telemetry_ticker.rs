@@ -25,15 +25,15 @@ impl TelemetryTicker {
         metrics: Arc<MetricsCollector>,
         logger: Option<LoggerWeak>,
         interval: Duration,
-        cancel_tkn: &CancellationToken,
-    ) -> JoinHandle<()> {
+    ) -> (CancellationToken, JoinHandle<()>) {
+        let cancel_tkn = CancellationToken::new();
         let ticker = Self {
             metrics,
             logger,
             interval,
         };
-
-        spawn_task(ticker.run(cancel_tkn.clone()))
+        let handle = spawn_task(ticker.run(cancel_tkn.clone()));
+        (cancel_tkn, handle)
     }
 
     pub(crate) async fn run(self, cancel_tkn: CancellationToken) {
