@@ -68,6 +68,8 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
   --server --config-file ./demo/opa-config.json \\ # configuration
   ./demo/rego # rego file(s)
 ```
+OPA will boot with the provided configuration, read the rego files, and start server mode at `127.0.0.1:8181`.
+
 ## Docker
 A Dockerfile is provided to allow building a docker image embedded with the bootstrap configuration and rego files. To build and run this image:
 
@@ -81,4 +83,6 @@ docker build . -t opa-cedarling:latest
 ```
 docker run -p 8181:8181 opa-cedarling:latest
 ```
-OPA will boot with the provided configuration, read the rego files, and start server mode at `127.0.0.1:8181`.
+
+## Demo
+The `demo` folder provides a set of defaults to demonstrate the plugin. The configuration file contains a bootstrap for Cedarling where the policy store is configured for unsigned authorization. The `rego` folder contains two example Rego files, one for unsigned and one for multi issuer authorization. Since the policy store does not contain any trusted issuers, multi-issuer authorization is not available with this policy store.
