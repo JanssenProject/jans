@@ -1,5 +1,6 @@
 ARG BUILDPLATFORM="linux/amd64"
 ARG BUILDERIMAGE="golang:1.25-trixie"
+ARG JANS_VERSION="nightly"
 # Use distroless as minimal base image to package the manager binary
 ARG BASEIMAGE="gcr.io/distroless/cc-debian12:nonroot"
 
@@ -14,7 +15,9 @@ RUN wget -q "https://github.com/JanssenProject/jans/releases/download/nightly/li
 FROM $BASEIMAGE
 WORKDIR /app
 COPY --from=builder /src/build/opa-cedarling /app/
-COPY --from=builder /src/opa-config.json /app/
+COPY --from=builder /src/demo /app/demo
 COPY --from=builder /src/plugins/cedarling_opa/libcedarling_go.so /usr/local/lib/
 ENV LD_LIBRARY_PATH=/usr/local/lib
-ENTRYPOINT ["/app/opa-cedarling", "run", "--server","--config-file", "/app/opa-config.json"]
+EXPOSE 8181
+ENTRYPOINT ["/app/opa-cedarling"]
+CMD ["run", "--server", "--addr", "0.0.0.0:8181", "--config-file", "/app/demo/opa-config.json", "/app/demo/rego"]

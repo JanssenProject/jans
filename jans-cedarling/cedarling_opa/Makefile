@@ -41,8 +41,8 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(LIB_DIR)/$(LIB_FILE)
 
-	@echo ">> Cleaning Rust target (optional but recommended)"
-	$(CARGO) clean -p cedarling_go
+	@echo ">> Cleaning Rust target"
+	$(CARGO) clean
 
 # ==============================
 # Debug Build
