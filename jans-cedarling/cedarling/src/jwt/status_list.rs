@@ -62,9 +62,8 @@ impl StatusList {
 
         let bit_idx = u8::try_from(index % scale)?;
 
-        let status = get_status_from_byte(*byte, self.bit_size, bit_idx);
-
-        Ok(status.into())
+        let raw_status = get_status_from_byte(*byte, self.bit_size, bit_idx)?;
+        Ok(JwtStatus::from(raw_status))
     }
 }
 
@@ -138,32 +137,37 @@ impl TryFrom<ValidatedJwt> for StatusList {
     }
 }
 
-/// Retrieves the status byte from the given byte.
+/// Retrieves the status nibble/byte value from the given list byte.
 ///
-/// [`StatusBitSize`] only allows `1`, `2`, `4`, or `8`; any other value is treated as
-/// corrupt encoding and maps to `0` (spec status "valid") so callers never hit
-/// `unreachable`/`unimplemented` traps in release WASM builds.
-fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
+/// [`StatusBitSize`] is normally only constructed with `1`, `2`, `4`, or `8` via
+/// [`TryFrom`]. If the invariant is violated, this returns
+/// [`JwtStatusError::InvalidStatusListEncoding`] so callers fail closed instead of
+/// treating corrupt data as valid.
+fn get_status_from_byte(
+    byte: u8,
+    bit_size: StatusBitSize,
+    bit_idx: u8,
+) -> Result<u8, JwtStatusError> {
     match bit_size {
-        StatusBitSize(8) => byte,
+        StatusBitSize(8) => Ok(byte),
         StatusBitSize(1) => {
-            let offset = bit_idx * 1;
-            (byte >> offset) & 0b0000_0001
+            let offset = bit_idx;
+            Ok((byte >> offset) & 0b0000_0001)
         },
         StatusBitSize(2) => {
             let offset = bit_idx * 2;
-            (byte >> offset) & 0b0000_0011
+            Ok((byte >> offset) & 0b0000_0011)
         },
         StatusBitSize(4) => {
             let offset = bit_idx * 4;
-            (byte >> offset) & 0b0000_1111
+            Ok((byte >> offset) & 0b0000_1111)
         },
         StatusBitSize(_) => {
             debug_assert!(
                 false,
                 "status bit size can only be 1, 2, 4, or 8; see https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
             );
-            0
+            Err(JwtStatusError::InvalidStatusListEncoding)
         },
     }
 }
