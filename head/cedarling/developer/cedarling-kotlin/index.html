@@ -1034,13 +1034,41 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-the-cedarling-java-binding-in-custom-scripts" class="md-nav__link">
+  <a href="#using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use the Cedarling Java binding in custom scripts
+        Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1411,13 +1439,41 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-the-cedarling-java-binding-in-custom-scripts" class="md-nav__link">
+  <a href="#using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use the Cedarling Java binding in custom scripts
+        Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1570,21 +1626,74 @@ cp<span class="w"> </span>./target/release/<span class="o">{</span>build_file<sp
 </li>
 </ul>
 <h2 id="recipes">Recipes<a class="headerlink" href="#recipes" title="Permanent link">#</a></h2>
-<h3 id="use-the-cedarling-java-binding-in-custom-scripts">Use the Cedarling Java binding in custom scripts<a class="headerlink" href="#use-the-cedarling-java-binding-in-custom-scripts" title="Permanent link">#</a></h3>
-<p>Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has <code>authorization_code</code> grant-type. We will use below policy for this:</p>
-<div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;Allow if the grant type is authorization_code&quot;</span><span class="o">)</span>
-permit<span class="w"> </span><span class="o">(</span>
-<span class="w">  </span>principal<span class="w"> </span>is<span class="w"> </span>Jans::Workload,
-<span class="w">  </span><span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>Jans::Action::<span class="s2">&quot;Execute&quot;</span>,
-<span class="w">  </span>resource<span class="w"> </span>is<span class="w"> </span>Jans::Application
-<span class="o">)</span>
-when<span class="w"> </span><span class="o">{</span>
-<span class="w">  </span>principal.grantTypes.contains<span class="o">(</span><span class="s2">&quot;authorization_code&quot;</span><span class="o">)</span>
-<span class="o">}</span><span class="p">;</span>
+<h3 id="using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation">Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).<a class="headerlink" href="#using-the-cedarling-java-binding-in-custom-scripts-on-the-janssen-auth-server-vm-installation" title="Permanent link">#</a></h3>
+<p>Here is a simple recipe to add scopes to the access token using the update_token script only when the requesting client uses the authorization_code grant type. We will use <a href="https://cloud.gluu.org/agama-lab">Agama Lab's</a> Policy Designer to create a simple Policy Store with the following policies and schema.</p>
+<h5 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">#</a></h5>
+<div class="highlight"><pre><span></span><code>@id(&quot;Allow_authorization_code&quot;)
+permit (
+  principal is Jans::Workload,
+  action == Jans::Action::&quot;Execute&quot;,
+  resource is Jans::Application
+)
+when {
+  principal.grantTypes.contains(&quot;authorization_code&quot;)
+};
+</code></pre></div>
+<h5 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">#</a></h5>
+<div class="highlight"><pre><span></span><code>namespace Jans {
+  type Context = {
+    current_time?: Long,
+    device_health?: Set&lt;String&gt;,
+    fraud_indicators?: Set&lt;String&gt;,
+    geolocation?: Set&lt;String&gt;,
+    network?: String,
+    network_type?: String,
+    operating_system?: String,
+    user_agent?: String
+  };
+
+  type Url = String;
+
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+
+  entity Application = {
+    grantTypes: Set&lt;String&gt;
+  };
+
+  entity Role;
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+
+  entity User in [Role] = {
+    email?: email_address,
+    role: Set&lt;String&gt;,
+    sub?: String
+  };
+
+  entity Workload = {
+    client_id: String,
+    grantTypes: Set&lt;String&gt;,
+    iss?: TrustedIssuer,
+    name?: String,
+    rp_id?: String,
+    spiffe_id?: String
+  };
+
+  action &quot;Execute&quot; appliesTo {
+    principal: [Workload],
+    resource: [Application],
+    context: Context
+  };
+}
 </code></pre></div>
 <p><strong>Steps:</strong></p>
 <ul>
-<li>Upload <a href="../../uniffi/cedarling-sample-inputs/#bootstrapjson">bootstrap.json</a> and <a href="../../uniffi/cedarling-sample-inputs/#policy-storejson">policy-store.json</a> at <code>/opt/jans/jetty/jans-auth/custom/static</code> location of the auth server. The <a href="https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen">Asset Screen</a> can be used to upload assets.</li>
+<li>Upload <a href="../../uniffi/cedarling-sample-inputs/#bootstrapjson">bootstrap.json</a> and policy-store file (with .cjar extension released from the Agama Lab) at <code>/opt/jans/jetty/jans-auth/custom/static</code> location of the auth server. The <a href="https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen">Asset Screen</a> can be used to upload assets.</li>
 <li>Upload the generate <code>cedarling-java-{version}.jar</code> at <code>/opt/jans/jetty/jans-auth/custom/libs</code> location of the auth server.</li>
 </ul>
 <div class="admonition note">
@@ -1690,7 +1799,7 @@ The method will execute the steps for Cedarling initialization with a sample boo
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 17, 2026 06:12:23 UTC"><span class="timeago" datetime="2026-04-17T06:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 17, 2026 06:12:23 UTC">2026-04-17</span>
   </span>
 
     
