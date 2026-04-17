@@ -138,27 +138,34 @@ impl TryFrom<ValidatedJwt> for StatusList {
     }
 }
 
-/// Retrieves the status byte from the given byte
+/// Retrieves the status byte from the given byte.
 ///
-/// # Panics
-///
-/// This function panics if the `bit_size` is invalid... though that shouldn't happen
-/// if [`StatusBitSize`] is initialized properly.
+/// [`StatusBitSize`] only allows `1`, `2`, `4`, or `8`; any other value is treated as
+/// corrupt encoding and maps to `0` (spec status "valid") so callers never hit
+/// `unreachable`/`unimplemented` traps in release WASM builds.
 fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
-    let bit_size = bit_size.0;
-    let mask = match bit_size {
-        1 => 0b0000_0001,
-        2 => 0b0000_0011,
-        4 => 0b0000_1111,
-        8 => return byte,
-        _ => unimplemented!(
-            "status bit size can only be 1, 2, 4, or 8. See: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
-        ),
-    };
-
-    let offset = bit_idx * bit_size;
-
-    (byte >> offset) & mask
+    match bit_size {
+        StatusBitSize(8) => byte,
+        StatusBitSize(1) => {
+            let offset = bit_idx * 1;
+            (byte >> offset) & 0b0000_0001
+        },
+        StatusBitSize(2) => {
+            let offset = bit_idx * 2;
+            (byte >> offset) & 0b0000_0011
+        },
+        StatusBitSize(4) => {
+            let offset = bit_idx * 4;
+            (byte >> offset) & 0b0000_1111
+        },
+        StatusBitSize(_) => {
+            debug_assert!(
+                false,
+                "status bit size can only be 1, 2, 4, or 8; see https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
+            );
+            0
+        },
+    }
 }
 
 /// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>
