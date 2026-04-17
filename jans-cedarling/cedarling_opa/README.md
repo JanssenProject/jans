@@ -43,28 +43,25 @@ Output locations:
 export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
 ```
 
-2. Create or edit the plugin configuration file (full example provided in [opa-config.json](./opa-config.json))
+2. Create or edit the plugin configuration file (full example provided in [opa-config.json](./demo/opa-config.json))
 
 ```json
 
 {
-    "decision_logs": {
-        "plugin": "cedarling_opa"
-    },
     "plugins": {
         "cedarling_opa": {
             "stderr": false,
-            "bootstrap_config": {},
-            "policy_store": {}
+            "bootstrap_config": {}
         }
     }
 }
 ```
 
-Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/). 
+Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
 
-3. Finally, run the binary with the plugin:
+3. Finally, run the binary with the plugin and provided rego examples:
 
 ```
-./build/opa-cedarling run --server --config-file opa-config.json
+./build/opa-cedarling run --server --config-file ./demo/opa-config.json ./demo/rego
 ```
+## Docker

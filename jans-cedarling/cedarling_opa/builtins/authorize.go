@@ -38,12 +38,7 @@ func authorizeBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*ast.Term,
 	if errors == nil {
 		errors = []string{}
 	}
-	output := map[string]any{
-		"decision":   result.Decision,
-		"reasons":    reasons,
-		"errors":     errors,
-		"request_id": result.RequestID,
-	}
+	output := buildAuthzOutput(result.Decision, result.Response.Reason(), result.Response.Errors(), result.RequestID)
 	return_value, err := ast.InterfaceToValue(output)
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Error in converting return value: %w", err))

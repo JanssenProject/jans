@@ -31,27 +31,15 @@ func authorizeUnsignedBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*a
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Authorize_unsigned failed: %w", err))
 	}
-	reasonMap := map[string][]string{}
-	errorsMap := map[string][]string{}
-
-	for key, value := range result.Principals {
-		reasons := value.Reason()
-		errors := value.Errors()
-		if reasons == nil {
-			reasons = []string{}
-		}
-		if errors == nil {
-			errors = []string{}
-		}
-		reasonMap[key] = reasons
-		errorsMap[key] = errors
+	reasons := result.Response.Reason()
+	if reasons == nil {
+		reasons = []string{}
 	}
-	output := map[string]any{
-		"decision":   result.Decision,
-		"reasons":    reasonMap,
-		"errors":     errorsMap,
-		"request_id": result.RequestID,
+	errors := result.Response.Errors()
+	if errors == nil {
+		errors = []string{}
 	}
+	output := buildAuthzOutput(result.Decision, result.Response.Reason(), result.Response.Errors(), result.RequestID)
 	return_value, err := ast.InterfaceToValue(output)
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Error in converting return value: %w", err))
