@@ -66,7 +66,7 @@ impl Default for DataStoreConfig {
             max_entries: 10_000,
             max_entry_size: 1_048_576, // 1MB
             default_ttl: None,
-            max_ttl: Some(Duration::from_secs(3600)), // 1 hour
+            max_ttl: Some(Duration::from_hours(1)), // 1 hour
             enable_metrics: true,
             memory_alert_threshold: 80.0, // 80%
         }
@@ -126,7 +126,7 @@ mod tests {
         assert_eq!(config.max_entries, 10_000);
         assert_eq!(config.max_entry_size, 1_048_576);
         assert_eq!(config.default_ttl, None);
-        assert_eq!(config.max_ttl, Some(Duration::from_secs(3600)));
+        assert_eq!(config.max_ttl, Some(Duration::from_hours(1)));
         assert!(config.enable_metrics);
         assert!(
             (config.memory_alert_threshold - 80.0).abs() < f64::EPSILON,
@@ -137,8 +137,8 @@ mod tests {
     #[test]
     fn test_valid_config() {
         let config = DataStoreConfig {
-            default_ttl: Some(Duration::from_secs(300)),
-            max_ttl: Some(Duration::from_secs(3600)),
+            default_ttl: Some(Duration::from_mins(5)),
+            max_ttl: Some(Duration::from_hours(1)),
             ..Default::default()
         };
         assert!(
@@ -150,8 +150,8 @@ mod tests {
     #[test]
     fn test_default_ttl_exceeds_max() {
         let config = DataStoreConfig {
-            default_ttl: Some(Duration::from_secs(7200)), // 2 hours
-            max_ttl: Some(Duration::from_secs(3600)),     // 1 hour
+            default_ttl: Some(Duration::from_hours(2)), // 2 hours
+            max_ttl: Some(Duration::from_hours(1)),     // 1 hour
             ..Default::default()
         };
         assert!(
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn test_only_default_ttl_is_valid() {
         let config = DataStoreConfig {
-            default_ttl: Some(Duration::from_secs(300)),
+            default_ttl: Some(Duration::from_mins(5)),
             max_ttl: None,
             ..Default::default()
         };
@@ -193,7 +193,7 @@ mod tests {
     fn test_only_max_ttl_is_valid() {
         let config = DataStoreConfig {
             default_ttl: None,
-            max_ttl: Some(Duration::from_secs(3600)),
+            max_ttl: Some(Duration::from_hours(1)),
             ..Default::default()
         };
         assert!(

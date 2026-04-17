@@ -160,7 +160,7 @@ async fn test_authorization_with_pushed_data_allows_access() {
         .push_data_ctx(
             "user_level",
             json!("premium"),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -215,7 +215,7 @@ async fn test_authorization_with_wrong_data_value_denies_access() {
 
     // Push data with wrong value
     cedarling
-        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_secs(60)))
+        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_mins(1)))
         .expect("push_data_ctx should succeed");
 
     let request = create_test_request("AccessPremiumContent");
@@ -243,7 +243,7 @@ async fn test_authorization_with_boolean_flag() {
         .push_data_ctx(
             "feature_enabled",
             json!(true),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -272,7 +272,7 @@ async fn test_authorization_with_nested_data() {
         .push_data_ctx(
             "config",
             json!({"enabled": true}),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -331,7 +331,7 @@ async fn test_multiple_instances_have_isolated_data() {
         .push_data_ctx(
             "user_level",
             json!("premium"),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -388,7 +388,7 @@ async fn test_data_removal_affects_authorization() {
         .push_data_ctx(
             "user_level",
             json!("premium"),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -428,14 +428,14 @@ async fn test_data_clear_affects_authorization() {
         .push_data_ctx(
             "user_level",
             json!("premium"),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "feature_enabled",
             json!(true),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx should succeed");
 
@@ -476,7 +476,7 @@ async fn test_data_update_affects_authorization() {
 
     // Push initial data (basic user)
     cedarling
-        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_secs(60)))
+        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_mins(1)))
         .expect("push_data_ctx should succeed");
 
     // Authorization should fail (not premium)
@@ -492,7 +492,7 @@ async fn test_data_update_affects_authorization() {
         .push_data_ctx(
             "user_level",
             json!("premium"),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push_data_ctx update should succeed");
 
@@ -518,17 +518,17 @@ async fn test_data_list_and_stats() {
 
     // Push multiple entries
     cedarling
-        .push_data_ctx("key1", json!("value1"), Some(Duration::from_secs(60)))
+        .push_data_ctx("key1", json!("value1"), Some(Duration::from_mins(1)))
         .expect("push should succeed");
     cedarling
         .push_data_ctx(
             "key2",
             json!({"nested": true}),
-            Some(Duration::from_secs(60)),
+            Some(Duration::from_mins(1)),
         )
         .expect("push should succeed");
     cedarling
-        .push_data_ctx("key3", json!([1, 2, 3]), Some(Duration::from_secs(60)))
+        .push_data_ctx("key3", json!([1, 2, 3]), Some(Duration::from_mins(1)))
         .expect("push should succeed");
 
     // Check stats
@@ -568,7 +568,7 @@ async fn test_get_data_entry_ctx_with_metadata() {
         .push_data_ctx(
             "test_key",
             json!("test_value"),
-            Some(Duration::from_secs(300)),
+            Some(Duration::from_mins(5)),
         )
         .expect("push should succeed");
 
