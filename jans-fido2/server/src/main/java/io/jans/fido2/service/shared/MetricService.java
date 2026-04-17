@@ -525,33 +525,52 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Extract IP address from HTTP request, checking proxy headers first
-     * Handles X-Forwarded-For, Proxy-Client-IP, and other common proxy headers
-     * 
-     * SECURITY NOTE: This method trusts proxy headers without validation. In production,
-     * ensure the application is behind a trusted reverse proxy (e.g., nginx, Apache, load balancer)
-     * that strips or validates these headers. If the application is directly exposed to the internet,
-     * clients can spoof these headers to mask their real IP address.
-     * 
-     * For enhanced security, consider:
-     * 1. Only trusting proxy headers when behind a known reverse proxy
-     * 2. Validating the source IP is from a trusted proxy before trusting forwarded headers
-     * 3. Making proxy header trust configurable via application configuration
-     * 
+     * Extract the client IP address from an HTTP request.
+     *
+     * <p>Behaviour is governed by {@code trustedProxyEnabled} in {@link AppConfiguration}:
+     * <ul>
+     *   <li><b>null (unset)</b> — legacy mode: proxy headers are trusted unconditionally
+     *       (identical to the behaviour before this change, so existing deployments are unaffected).
+     *   <li><b>false</b> — proxy headers are never read; {@code remoteAddr} is returned directly.
+     *   <li><b>true, empty {@code trustedProxyIpRanges}</b> — proxy headers are trusted from any
+     *       source IP (equivalent to the legacy unconfigured mode, but explicitly opted-in).
+     *   <li><b>true, non-empty {@code trustedProxyIpRanges}</b> — proxy headers are only trusted
+     *       when the direct {@code remoteAddr} falls within one of the configured CIDR ranges.
+     *       Requests from outside those ranges fall back to {@code remoteAddr}.
+     * </ul>
+     *
      * @param request HTTP servlet request
-     * @return Client IP address (may be spoofed if not behind trusted proxy)
+     * @return resolved client IP address
      */
     private String extractIpAddress(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
-        
-        // Get the direct remote address first (most trustworthy)
+
         String directRemoteAddr = request.getRemoteAddr();
-        
-        // List of proxy headers to check (in order of preference)
-        // Only check these if we're behind a trusted proxy (validation should be added in production)
-        String[] proxyHeadersToTry = {
+        Boolean trustedProxyEnabled = appConfiguration.getTrustedProxyEnabled();
+
+        // Proxy header trust explicitly disabled — return the wire address immediately.
+        if (Boolean.FALSE.equals(trustedProxyEnabled)) {
+            return directRemoteAddr;
+        }
+
+        // Proxy header trust is enabled (or unconfigured = legacy behaviour).
+        // When ranges are configured, validate the connecting IP before trusting any header.
+        if (Boolean.TRUE.equals(trustedProxyEnabled)) {
+            List<String> trustedRanges = appConfiguration.getTrustedProxyIpRanges();
+            if (trustedRanges != null && !trustedRanges.isEmpty()
+                    && !isFromTrustedProxy(directRemoteAddr, trustedRanges)) {
+                log.debug("Ignoring proxy headers: remoteAddr '{}' is not in any trusted proxy range",
+                        directRemoteAddr);
+                return directRemoteAddr;
+            }
+        }
+        // trustedProxyEnabled == null  → legacy: fall through and read headers unconditionally.
+        // trustedProxyEnabled == true with empty ranges → trust from any IP: fall through.
+        // trustedProxyEnabled == true with matching range → trust: fall through.
+
+        String[] proxyHeaders = {
             "X-Forwarded-For",
             "Proxy-Client-IP",
             "WL-Proxy-Client-IP",
@@ -562,63 +581,112 @@ public class MetricService extends io.jans.service.metric.MetricService {
             "HTTP_FORWARDED_FOR",
             "HTTP_FORWARDED"
         };
-        
-        // Check proxy headers (trusted only if behind reverse proxy)
-        // TODO: Add configuration option to enable/disable proxy header trust
-        // TODO: Add validation to ensure request came from trusted proxy IP range
-        for (String header : proxyHeadersToTry) {
+
+        for (String header : proxyHeaders) {
             String ip = request.getHeader(header);
             if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                // X-Forwarded-For can contain multiple IPs; take the first one
+                // X-Forwarded-For may contain a comma-separated chain; the leftmost is the client.
                 int commaIndex = ip.indexOf(',');
                 if (commaIndex > 0) {
                     ip = ip.substring(0, commaIndex).trim();
                 }
-                // Basic validation: check if it looks like a valid IP
                 if (isValidIpAddress(ip)) {
                     return ip;
                 }
             }
         }
-        
-        // Fallback to direct remote address (most secure)
+
         return directRemoteAddr;
     }
-    
+
     /**
-     * Basic validation for IP address format
-     * @param ip IP address string to validate
-     * @return true if format appears valid, false otherwise
+     * Returns true if {@code remoteAddr} falls within at least one of the given CIDR ranges.
+     *
+     * @param remoteAddr direct connecting IP address
+     * @param trustedRanges list of CIDR notations (e.g. {@code "10.0.0.0/8"})
+     * @return true when the address is inside a trusted range
+     */
+    private boolean isFromTrustedProxy(String remoteAddr, List<String> trustedRanges) {
+        if (remoteAddr == null || remoteAddr.trim().isEmpty()) {
+            return false;
+        }
+        for (String cidr : trustedRanges) {
+            try {
+                if (isIpInCidr(remoteAddr.trim(), cidr.trim())) {
+                    return true;
+                }
+            } catch (Exception e) {
+                log.warn("Invalid trusted proxy CIDR '{}': {}", cidr, e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Pure-Java CIDR membership test that works for both IPv4 and IPv6.
+     * No external library required — uses only {@link java.net.InetAddress}.
+     *
+     * @param ip   IP address to test (dotted-decimal or colon-hex notation)
+     * @param cidr CIDR block, e.g. {@code "192.168.0.0/16"} or {@code "::1/128"}
+     * @return true when {@code ip} is within {@code cidr}
+     */
+    private boolean isIpInCidr(String ip, String cidr) {
+        try {
+            String[] parts = cidr.split("/", 2);
+            java.net.InetAddress cidrAddress = java.net.InetAddress.getByName(parts[0]);
+            java.net.InetAddress testAddress = java.net.InetAddress.getByName(ip);
+
+            byte[] cidrBytes = cidrAddress.getAddress();
+            byte[] testBytes = testAddress.getAddress();
+
+            // IPv4 and IPv6 addresses have different byte-array lengths; they can never match.
+            if (cidrBytes.length != testBytes.length) {
+                return false;
+            }
+
+            int prefixLength = (parts.length == 2) ? Integer.parseInt(parts[1]) : (cidrBytes.length * 8);
+            int remainingBits = prefixLength;
+
+            for (int i = 0; i < cidrBytes.length; i++) {
+                if (remainingBits >= 8) {
+                    if (cidrBytes[i] != testBytes[i]) {
+                        return false;
+                    }
+                    remainingBits -= 8;
+                } else if (remainingBits > 0) {
+                    int mask = 0xFF << (8 - remainingBits);
+                    if ((cidrBytes[i] & mask) != (testBytes[i] & mask)) {
+                        return false;
+                    }
+                    remainingBits = 0;
+                } else {
+                    break; // remaining bits are host bits — not compared
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            log.debug("CIDR check failed for ip='{}' cidr='{}': {}", ip, cidr, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates that a string is a well-formed IPv4 or IPv6 address.
+     *
+     * @param ip candidate IP string
+     * @return true if the format is valid
      */
     private boolean isValidIpAddress(String ip) {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
-        
-        // Check for loopback addresses first
-        if (ip.equals("localhost") || ip.equals("127.0.0.1") || ip.equals("::1")) {
+        try {
+            // InetAddress.getByName handles both IPv4 and IPv6 including edge cases.
+            java.net.InetAddress.getByName(ip);
             return true;
+        } catch (java.net.UnknownHostException e) {
+            return false;
         }
-        
-        // Validate IPv4: each octet must be 0-255
-        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
-        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
-            return true;
-        }
-        
-        // Validate IPv6: simplified check for colons (full validation would be more complex)
-        // This is a basic check - for production, consider using InetAddress.getByName()
-        if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
-            // Additional validation: try parsing with InetAddress for more robust check
-            try {
-                java.net.InetAddress.getByName(ip);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        
-        return false;
     }
 
     /**
