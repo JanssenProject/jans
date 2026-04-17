@@ -128,8 +128,7 @@ impl VfsFileSystem for PhysicalVfs {
 
     fn exists(&self, path: &str) -> bool {
         self.get_path(path)
-            .map(|p| p.exists().unwrap_or(false))
-            .unwrap_or(false)
+            .is_ok_and(|p| p.exists().unwrap_or(false))
     }
 
     fn is_dir(&self, path: &str) -> bool {
@@ -243,8 +242,7 @@ impl VfsFileSystem for MemoryVfs {
 
     fn exists(&self, path: &str) -> bool {
         self.get_path(path)
-            .map(|p| p.exists().unwrap_or(false))
-            .unwrap_or(false)
+            .is_ok_and(|p| p.exists().unwrap_or(false))
     }
 
     fn is_dir(&self, path: &str) -> bool {

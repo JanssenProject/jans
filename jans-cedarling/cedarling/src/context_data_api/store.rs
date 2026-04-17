@@ -78,7 +78,7 @@ impl DataStore {
 
         // Calculate size based on the serialized DataEntry
         let size_calculator: Option<fn(&DataEntry) -> usize> =
-            Some(|entry| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0));
+            Some(|entry| serde_json::to_string(entry).map_or(0, |s| s.len()));
 
         Ok(Self {
             storage: RwLock::new(SparKV::with_config_and_sizer(
@@ -353,7 +353,7 @@ impl DataStore {
         storage
             .iter()
             .filter(|(_, entry)| !entry.is_expired(now))
-            .map(|(_, entry)| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0))
+            .map(|(_, entry)| serde_json::to_string(entry).map_or(0, |s| s.len()))
             .sum()
     }
 }
@@ -622,7 +622,7 @@ mod tests {
     #[test]
     fn test_max_ttl() {
         let config = DataStoreConfig {
-            max_ttl: Some(StdDuration::from_secs(60)),
+            max_ttl: Some(StdDuration::from_mins(1)),
             ..Default::default()
         };
         let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
@@ -634,7 +634,7 @@ mod tests {
             .expect("failed to push value with valid TTL");
 
         // TTL exceeding limit should fail
-        let result = store.push("key2", json!("value2"), Some(StdDuration::from_secs(120)));
+        let result = store.push("key2", json!("value2"), Some(StdDuration::from_mins(2)));
         assert!(
             matches!(result, Err(DataError::TTLExceeded { .. })),
             "push with TTL exceeding max_ttl should fail with TTLExceeded"
@@ -791,7 +791,7 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1", json!("value1"), Some(StdDuration::from_secs(60)))
+            .push("key1", json!("value1"), Some(StdDuration::from_mins(1)))
             .expect("failed to push value");
 
         let entry = store.get_entry("key1").expect("entry should exist");
@@ -897,8 +897,8 @@ mod tests {
     fn test_config_validation() {
         // Valid config
         let valid_config = DataStoreConfig {
-            default_ttl: Some(StdDuration::from_secs(300)),
-            max_ttl: Some(StdDuration::from_secs(3600)),
+            default_ttl: Some(StdDuration::from_mins(5)),
+            max_ttl: Some(StdDuration::from_hours(1)),
             ..Default::default()
         };
         assert!(
@@ -908,8 +908,8 @@ mod tests {
 
         // Invalid config: default_ttl > max_ttl
         let invalid_config = DataStoreConfig {
-            default_ttl: Some(StdDuration::from_secs(7200)),
-            max_ttl: Some(StdDuration::from_secs(3600)),
+            default_ttl: Some(StdDuration::from_hours(2)),
+            max_ttl: Some(StdDuration::from_hours(1)),
             ..Default::default()
         };
         assert!(
