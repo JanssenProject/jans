@@ -1,10 +1,10 @@
 # OPA Cedarling Plugin
 
-A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling.
+A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows.
 
 ## Building
 
-To build an OPA binary that includes the plugin, you need the following:
+To compile OPA with the Cedarling plugin, you need the following:
 
 - Go 1.25+
 - Rust toolchain 1.56+
@@ -35,9 +35,11 @@ Output locations:
 
 - Library: `plugins/cedarling_opa/libcedarling_go.so`
 
+To clean up build artifacts, run `make clean`
+
 ## Running
 
-1. Set the library path so the plugin can find the Rust binding:
+1. Set the library path so the plugin can find the Rust binding by running this from the `cedarling_opa` directory:
 
 ```
 export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
@@ -56,12 +58,27 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
     }
 }
 ```
-
-Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
+- `stderr`: Whether or not the **plugin** emits errors to stdout or stderr
+- `bootstrap`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
 
 3. Finally, run the binary with the plugin and provided rego examples:
 
-```
-./build/opa-cedarling run --server --config-file ./demo/opa-config.json ./demo/rego
+```bash
+./build/opa-cedarling run \\ 
+  --server --config-file ./demo/opa-config.json \\ # configuration
+  ./demo/rego # rego file(s)
 ```
 ## Docker
+A Dockerfile is provided to allow building a docker image embedded with the bootstrap configuration and rego files. To build and run this image:
+
+- Edit `demo/opa-config.json` to your specification
+- Place your rego files in `demo/rego`
+- Build:
+```
+docker build . -t opa-cedarling:latest
+```
+- And run:
+```
+docker run -p 8181:8181 opa-cedarling:latest
+```
+OPA will boot with the provided configuration, read the rego files, and start server mode at `127.0.0.1:8181`.
