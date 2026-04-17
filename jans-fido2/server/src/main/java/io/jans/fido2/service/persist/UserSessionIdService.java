@@ -117,12 +117,13 @@ public class UserSessionIdService {
     }
 
     public void updateSessionId(SessionId entity) {
-        entity.setLastUsedAt(new Date());
-        refreshSessionExpiration(entity);
+        Date now = new Date();
+        entity.setLastUsedAt(now);
+        refreshSessionExpiration(entity, now);
         persistenceEntryManager.merge(entity);
     }
 
-    private void refreshSessionExpiration(SessionId entity) {
+    private void refreshSessionExpiration(SessionId entity, Date now) {
         if (entity.getExpirationDate() == null || entity.getCreationDate() == null) {
             log.warn("Session '{}' is missing creationDate or expirationDate; skipping TTL refresh", entity.getId());
             return;
@@ -134,7 +135,7 @@ public class UserSessionIdService {
             return;
         }
         // Extend expiration from now (sliding window) and refresh LDAP TTL
-        entity.setExpirationDate(new Date(System.currentTimeMillis() + sessionLifetimeMs));
+        entity.setExpirationDate(new Date(now.getTime() + sessionLifetimeMs));
         entity.setTtl(sessionLifetimeSeconds);
     }
 
