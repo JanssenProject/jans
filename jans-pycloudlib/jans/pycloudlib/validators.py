@@ -31,6 +31,7 @@ def validate_persistence_sql_dialect(dialect: str) -> None:
     Supported dialects:
 
     - `mysql`
+    - `pgsql`
 
     Args:
         dialect: Dialect of SQL.

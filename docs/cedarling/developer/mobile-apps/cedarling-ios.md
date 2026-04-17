@@ -16,18 +16,15 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    ```
 
 2. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
-
    ```bash
    rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
    ```
 
 3. Run below command to build and import binding into iOS project:
-
    ```bash
    make ios
    ```
-   
-Use `make ios BUILD_TYPE=release` or `make ios BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
+   Use `make ios BUILD_TYPE=release` or `make ios BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
    
 4. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
