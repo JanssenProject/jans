@@ -46,12 +46,15 @@ can also build it from source.
 
 ## Recipes
 
-### Use the Cedarling Java binding in custom scripts
+### Using the Cedarling Java binding in custom scripts on the Janssen Auth Server (VM installation).
 
-Here is a simple recipe to add scopes in access-token using update_token script only if the requesting client has `authorization_code` grant-type. We will use below policy for this:
+Here is a simple recipe to add scopes to the access token using the update_token script only when the requesting client uses the authorization_code grant type. We will use [Agama Lab's](https://cloud.gluu.org/agama-lab) Policy Designer to create a simple Policy Store with the following policies and schema.
 
-```bash
-@id("Allow if the grant type is authorization_code")
+##### Policies
+
+```declarative
+
+@id("Allow_authorization_code")
 permit (
   principal is Jans::Workload,
   action == Jans::Action::"Execute",
@@ -60,11 +63,69 @@ permit (
 when {
   principal.grantTypes.contains("authorization_code")
 };
+
+```
+
+##### Schema
+
+```declarative
+
+namespace Jans {
+  type Context = {
+    current_time?: Long,
+    device_health?: Set<String>,
+    fraud_indicators?: Set<String>,
+    geolocation?: Set<String>,
+    network?: String,
+    network_type?: String,
+    operating_system?: String,
+    user_agent?: String
+  };
+
+  type Url = String;
+
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+
+  entity Application = {
+    grantTypes: Set<String>
+  };
+
+  entity Role;
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+
+  entity User in [Role] = {
+    email?: email_address,
+    role: Set<String>,
+    sub?: String
+  };
+
+  entity Workload = {
+    client_id: String,
+    grantTypes: Set<String>,
+    iss?: TrustedIssuer,
+    name?: String,
+    rp_id?: String,
+    spiffe_id?: String
+  };
+
+  action "Execute" appliesTo {
+    principal: [Workload],
+    resource: [Application],
+    context: Context
+  };
+}
+
 ```
 
 **Steps:**
 
-- Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md/#bootstrapjson) and [policy-store.json](../uniffi/cedarling-sample-inputs.md/#policy-storejson) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+- Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md/#bootstrapjson) and policy-store file (with .cjar extension released from the Agama Lab) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
 
 !!! note
