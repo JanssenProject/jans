@@ -232,7 +232,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
             {(data === undefined || data?.length == 0) ? '' :
                 <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                     <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}>
                             <Box>
                                 <Typography variant="h6" sx={{ fontWeight: 650 }}>
                                     Cedarling Multi-Issuer Authorization
@@ -241,7 +241,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                     Build an authz request from tokens, action, resource, and context — then run authorization.
                                 </Typography>
                             </Box>
-                            <Stack direction="row" spacing={1} alignItems="center">
+                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                 <Chip size="small" label={isSubmitting ? "Running..." : "Ready"} color={isSubmitting ? "warning" : "success"} variant="outlined" />
                                 {isSubmitting && <CircularProgress size={18} />}
                             </Stack>
@@ -271,7 +271,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                             <Typography variant="subtitle2" sx={{ mb: 1 }}>
                                                 Add tokens from Auth Flow
                                             </Typography>
-                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'flex-start', sm: 'center' } }}>
                                                 <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
                                                 <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
                                                 <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="ID Token" />
@@ -431,11 +431,11 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
 
                                 <Divider />
 
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }}>
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between' }}>
                                     <Typography variant="caption" color="text.secondary">
                                         Required: tokens + action + resource
                                     </Typography>
-                                    <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}>
+                                    <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
                                         <Button
                                             variant="outlined"
                                             color="inherit"
@@ -474,7 +474,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                     aria-controls="panel-result-content"
                                     id="panel-result-header"
                                 >
-                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }} justifyContent="space-between">
+                                    <Stack direction="row" spacing={1} sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <Typography component="span" sx={{ fontWeight: 600 }}>Result</Typography>
                                         <Tooltip title="Copy result JSON/text">
                                             <IconButton
@@ -534,9 +534,9 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                     aria-controls="panel-logs-content"
                                     id="panel-logs-header"
                                 >
-                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }} justifyContent="space-between">
+                                    <Stack direction="row" spacing={1} sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between'}} >
                                         <Typography component="span" sx={{ fontWeight: 600 }}>Logs</Typography>
-                                        <Stack direction="row" spacing={0.5} alignItems="center">
+                                        <Stack direction="row" spacing={0.5} sx={{alignItems:'center'}}>
                                             <Tooltip title="Copy logs">
                                                 <IconButton
                                                     size="small"
@@ -562,8 +562,10 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                                         fullWidth
                                         variant="outlined"
                                         value={authzLogs}
-                                        InputProps={{
-                                            sx: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }
+                                        sx={{
+                                            '& .MuiInputBase-input': {
+                                                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+                                            }
                                         }}
                                     />
                                     <Button

@@ -65,16 +65,10 @@ const theme = createTheme({
           fontWeight: 600,
           borderRadius: 8,
         },
-        containedPrimary: {
+        contained: {
           boxShadow: '0 2px 8px rgba(21, 101, 192, 0.35)',
           '&:hover': {
             boxShadow: '0 4px 12px rgba(21, 101, 192, 0.45)',
-          },
-        },
-        containedSuccess: {
-          boxShadow: '0 2px 8px rgba(46, 125, 50, 0.35)',
-          '&:hover': {
-            boxShadow: '0 4px 12px rgba(46, 125, 50, 0.45)',
           },
         },
       },
