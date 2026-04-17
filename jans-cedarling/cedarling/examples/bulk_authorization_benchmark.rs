@@ -7,8 +7,8 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -92,7 +92,6 @@ async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>>
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig::default(),
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
@@ -245,7 +244,7 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
         let grad_year = 2020 + (i % 7); // 2020-2026
         let gpa = (i as f64 * 0.001) % 5.0; // 0-5 GPA
 
-        let principals = vec![EntityData {
+        let principal = EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::User".to_string(),
                 id: format!("user_{i}"),
@@ -262,10 +261,10 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
                 ("gpa".to_string(), json!(gpa)),
                 ("grad_year".to_string(), json!(grad_year)),
             ]),
-        }];
+        };
 
         let document = RequestUnsigned {
-            principals,
+            principal: Some(principal),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: EntityData {

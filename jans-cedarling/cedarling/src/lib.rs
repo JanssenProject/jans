@@ -36,7 +36,6 @@ mod tests;
 use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
-pub use crate::common::json_rules::JsonRule;
 use crate::context_data_api::DataStore;
 pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
@@ -208,12 +207,12 @@ impl Cedarling {
     /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
     pub fn get_matching_policies_unsigned(
         &self,
-        principals: &[EntityData],
+        principal: Option<&EntityData>,
         actions: &[String],
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.authz
-            .get_matching_policies_unsigned(principals, actions, resources)
+            .get_matching_policies_unsigned(principal, actions, resources)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible

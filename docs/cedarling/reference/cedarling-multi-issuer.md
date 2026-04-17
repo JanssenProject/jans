@@ -576,6 +576,42 @@ All token entity attributes (except the core multi-issuer fields) must be option
 
 If you're using the default `cedarling_core.cedarschema` from Agama Lab, it has been updated to support multi-issuer authorization. If you have a custom schema, make sure to apply these changes.
 
+### Cedar Schema for Multi-Issuer Actions
+
+Multi-issuer authorization runs Cedar's partial evaluator with **no principal** — `authorize_multi_issuer` does not accept one, and none is constructed internally. Actions used in multi-issuer requests must declare this in their `appliesTo`, and policies referencing those actions must leave the principal unconstrained.
+
+#### Declaring the action
+
+Cedar's schema validator rejects an empty `principal` list (`for action '...', 'principal' is '[]', which is invalid`). To declare an action that runs without a principal, declare a placeholder entity type purely to satisfy the schema and reference it in `appliesTo`:
+
+```cedar
+entity Any;
+
+action "ReadArtifact" appliesTo {
+  principal: [Any],
+  resource: [Artifact],
+  context: Context
+};
+```
+
+No instance of `Any` is ever constructed at runtime. `authorize_multi_issuer` invokes the action with `principal: None` and Cedar's partial evaluator runs against the policies. The placeholder entity type exists only so the schema parses.
+
+#### Writing the policy
+
+Policies for multi-issuer actions must use the unconstrained `permit(principal, ...)` head — do not add `principal == ...` or `principal is ...`, because no principal exists at evaluation time:
+
+```cedar
+permit(
+  principal,
+  action == Action::"ReadArtifact",
+  resource == Artifact::"doc-1"
+) when {
+  context.tokens.AcmeCorp_access_token.scope.contains("read")
+};
+```
+
+If a policy does constrain the principal, Cedar's partial evaluator cannot fully evaluate it and emits a residual. Residual-dependent requests **fail closed with Deny** in Cedarling; the request's diagnostics list the residual policy ids so they can be located and fixed.
+
 ### Policy Store Configuration
 
 Configure trusted issuers with the `name` field for predictable token naming:
