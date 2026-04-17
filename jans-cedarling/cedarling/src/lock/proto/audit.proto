@@ -55,15 +55,13 @@ message BulkLogRequest {
 // Telemetry Entry Message
 message TelemetryEntry {
   google.protobuf.Timestamp creation_date = 1;
-  // field 2 removed: event_time not applicable for telemetry (covers a time range)
-  string service = 3;
-  string node_name = 4;
-  string status = 5;
-  // fields 6-12 removed: migrated to operational_stats map for extensibility
-  map<string, int64> policy_stats = 13;
-  map<string, int64> error_counters = 14;
-  map<string, int64> operational_stats = 15;
-  int64 interval_secs = 16;
+  string service = 2;
+  string node_name = 3;
+  string status = 4;
+  map<string, int64> policy_stats = 5;
+  map<string, int64> error_counters = 6;
+  map<string, int64> operational_stats = 7;
+  int64 interval_secs = 8;
 }
 
 message TelemetryRequest {

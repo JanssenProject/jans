@@ -260,6 +260,13 @@ impl MetricsCollector {
     ///
     /// Counters are zeroed. Gauges retain their current values. The eval times
     /// buffer is cleared after computing percentiles.
+    ///
+    /// # Consistency
+    ///
+    /// [`MetricsCollector::snapshot_and_reset`] swaps/resets atomics one at a time without a
+    /// global lock. A concurrent [`MetricsCollector::record_evaluation`] that lands between two
+    /// swaps can cause derived invariants to be off by one within a single snapshot
+    /// (e.g. `authz.requests_total` may not equal `authz.decision_allow + authz.decision_deny`).
     pub(crate) fn snapshot_and_reset(&self) -> MetricsSnapshot {
         // Compute interval duration and reset start time
         let now = Utc::now();
@@ -616,9 +623,21 @@ mod tests {
 
     #[test]
     fn saturating_usize_to_i64_normal_value() {
-        assert_eq!(saturating_usize_to_i64(0), 0);
-        assert_eq!(saturating_usize_to_i64(100), 100);
-        assert_eq!(saturating_usize_to_i64(usize::MAX), i64::MAX);
+        assert_eq!(
+            saturating_usize_to_i64(0),
+            0,
+            "values must pass through unchanged"
+        );
+        assert_eq!(
+            saturating_usize_to_i64(100),
+            100,
+            "values must pass through unchanged"
+        );
+        assert_eq!(
+            saturating_usize_to_i64(usize::MAX),
+            i64::MAX,
+            "usize::MAX must saturate to i64::MAX",
+        );
     }
 
     #[test]

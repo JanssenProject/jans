@@ -6,7 +6,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use tokio::time::interval;
+use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
 use crate::authz::metrics::MetricsCollector;
@@ -38,6 +38,7 @@ impl TelemetryTicker {
 
     pub(crate) async fn run(self, cancel_tkn: CancellationToken) {
         let mut ticker = interval(self.interval);
+        ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
         ticker.tick().await;
         loop {
             tokio::select! {

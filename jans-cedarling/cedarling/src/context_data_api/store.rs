@@ -198,11 +198,7 @@ impl DataStore {
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
     pub(crate) fn get(&self, key: &str) -> Option<Value> {
-        let result = self.get_entry(key).map(|entry| entry.value);
-        if result.is_some() {
-            self.metrics.record_data_get();
-        }
-        result
+        self.get_entry(key).map(|entry| entry.value)
     }
 
     /// Get a data entry with full metadata by key.
@@ -247,6 +243,7 @@ impl DataStore {
             };
 
             let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
+            self.metrics.record_data_get();
             Some(entry)
         } else {
             // Fast path: use read lock when metrics are disabled
@@ -260,6 +257,7 @@ impl DataStore {
                 return None;
             }
 
+            self.metrics.record_data_get();
             Some(entry)
         }
     }

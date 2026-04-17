@@ -70,24 +70,37 @@ pub(super) fn deserialize_entries<T, S>(
 where
     T: TryFrom<S>,
     S: serde::de::DeserializeOwned,
+    <T as TryFrom<S>>::Error: std::fmt::Display,
 {
+    if entries.is_empty() {
+        return Ok(Vec::new());
+    }
+
     let parsed: Vec<T> = entries
         .iter()
-        .filter_map(|v| {
-            serde_json::from_str::<S>(v)
-                .ok()
-                .and_then(|s| T::try_from(s).ok())
+        .enumerate()
+        .filter_map(|(idx, v)| match serde_json::from_str::<S>(v) {
+            Ok(s) => match T::try_from(s) {
+                Ok(t) => Some(t),
+                Err(e) => {
+                    log_warn(format!(
+                        "failed to convert {label} entry[{idx}]: {e}"
+                    ));
+                    None
+                }
+            },
+            Err(e) => {
+                log_warn(format!(
+                    "failed to parse {label} entry[{idx}]: {e}"
+                ));
+                None
+            }
         })
         .collect();
 
-    let skipped = entries.len() - parsed.len();
-    if skipped > 0 {
-        log_warn(format!("skipped {skipped} malformed {label} entries"));
-    }
-
     if parsed.is_empty() {
         return Err(TransportError::Serialization(format!(
-            "all {skipped} {label} entries were malformed, nothing to send"
+            "all {label} entries were malformed, nothing to send"
         )));
     }
 
