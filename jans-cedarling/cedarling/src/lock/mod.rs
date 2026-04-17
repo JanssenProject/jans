@@ -108,6 +108,7 @@ mod log_entry;
 mod log_worker;
 mod register_client;
 pub(crate) mod ssa_validation;
+mod telemetry_ticker;
 mod transport;
 
 #[cfg(feature = "grpc")]
@@ -119,7 +120,9 @@ mod proto {
 }
 
 use crate::app_types::PdpID;
+use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
+use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::interface::Loggable;
 use crate::log::{LogType, LoggerWeak};
 use crate::{LockServiceConfig, LockTransport, LogWriter};
@@ -150,6 +153,7 @@ struct WorkerSenderAndHandle {
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
+    telemetry_ticker: Option<crate::http::JoinHandle<()>>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
 }
@@ -184,6 +188,7 @@ impl LockService {
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
         logger: Option<LoggerWeak>,
+        metrics: Arc<MetricsCollector>,
     ) -> Result<Self, InitLockServiceError> {
         // Get lock config from the config uri endpoint first
         let lock_config = LockConfig::get(
@@ -235,7 +240,7 @@ impl LockService {
             _ => None,
         };
 
-        let telemetry_worker = match (
+        let (telemetry_worker, telemetry_ticker) = match (
             bootstrap_conf.telemetry_interval,
             lock_config.audit_endpoints.telemetry,
         ) {
@@ -248,14 +253,23 @@ impl LockService {
                     logger.clone(),
                     cancel_tkn.clone(),
                 )?;
-                Some(worker)
+
+                let ticker = TelemetryTicker::spawn(
+                    metrics,
+                    logger.clone(),
+                    telemetry_interval,
+                    &cancel_tkn,
+                );
+
+                (Some(worker), Some(ticker))
             },
-            _ => None,
+            _ => (None, None),
         };
 
         Ok(Self {
             log_worker,
             telemetry_worker,
+            telemetry_ticker,
             logger,
             cancel_tkn,
         })
@@ -268,6 +282,9 @@ impl LockService {
         }
         if let Some(worker) = self.telemetry_worker.take() {
             () = worker.handle.await_result().await;
+        }
+        if let Some(handle) = self.telemetry_ticker.take() {
+            () = handle.await_result().await;
         }
     }
 }
@@ -475,7 +492,8 @@ mod test {
         };
 
         // Test startup
-        let logger = LockService::new(pdp_id, &config, None)
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let logger = LockService::new(pdp_id, &config, None, metrics)
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();
@@ -534,7 +552,8 @@ mod test {
         };
 
         // Test startup without SSA
-        let logger = LockService::new(pdp_id, &config, None)
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let logger = LockService::new(pdp_id, &config, None, metrics)
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();
@@ -589,7 +608,8 @@ mod test {
         };
 
         // Test startup with invalid SSA should fail
-        let result = LockService::new(pdp_id, &config, None).await;
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let result = LockService::new(pdp_id, &config, None, metrics).await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),

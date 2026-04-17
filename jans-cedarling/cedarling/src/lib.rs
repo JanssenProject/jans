@@ -128,11 +128,14 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
 
-        let log = log::init_logger(
+        let metrics = Arc::new(MetricsCollector::new(0));
+
+        let log = crate::log::init_logger(
             &config.log_config,
             pdp_id,
             app_name,
             config.lock_config.as_ref(),
+            metrics.clone(),
         )
         .await?;
 
@@ -163,7 +166,7 @@ impl Cedarling {
             .policies
             .get_set()
             .num_of_policies();
-        let metrics = Arc::new(MetricsCollector::new(policy_count));
+        metrics.set_policy_count(policy_count);
 
         // Initialize data store first so it can be passed to authz service
         let data = Arc::new(DataStore::new(

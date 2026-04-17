@@ -185,16 +185,17 @@ impl MetricsCollector {
             times.push(decision_time_us);
         }
 
-        let mut stats = self
-            .policy_stats
-            .write()
-            .expect("policy_stats lock should not be poisoned");
-
-        for (policy_id, decision) in evaluated_policies {
-            stats
-                .entry(policy_id.to_string())
-                .or_default()
-                .record(decision);
+        {
+            let mut stats = self
+                .policy_stats
+                .write()
+                .expect("policy_stats lock poisoned");
+            for (policy_id, pol_decision) in evaluated_policies {
+                stats
+                    .entry(policy_id.to_string())
+                    .or_default()
+                    .record(pol_decision);
+            }
         }
     }
 
@@ -250,6 +251,11 @@ impl MetricsCollector {
         self.data_remove_ops.fetch_add(1, Ordering::Relaxed);
     }
 
+    pub(crate) fn set_policy_count(&self, count: usize) {
+        self.policy_count
+            .store(saturating_usize_to_i64(count), Ordering::Relaxed);
+    }
+
     /// Captures a snapshot of all metrics and resets counters for the next interval.
     ///
     /// Counters are zeroed. Gauges retain their current values. The eval times
@@ -267,20 +273,25 @@ impl MetricsCollector {
             duration.num_seconds()
         };
 
-        let policy_stats = self
-            .policy_stats
-            .read()
-            .expect("policy_stats lock should not be poisoned")
-            .iter()
-            .flat_map(|(id, stats)| {
-                let snap = stats.snapshot();
-                [
-                    (id.clone(), snap.evaluations),
-                    (format!("{id}_allow"), snap.allow_count),
-                    (format!("{id}_deny"), snap.deny_count),
-                ]
-            })
-            .collect();
+        let policy_stats = {
+            let mut map = self
+                .policy_stats
+                .write()
+                .expect("policy_stats lock should not be poisoned");
+            let snapshot = map
+                .iter()
+                .flat_map(|(id, stats)| {
+                    let snap = stats.snapshot();
+                    [
+                        (id.clone(), snap.evaluations),
+                        (format!("{id}_allow"), snap.allow_count),
+                        (format!("{id}_deny"), snap.deny_count),
+                    ]
+                })
+                .collect();
+            map.clear();
+            snapshot
+        };
 
         // Take and reset error_counters
         let error_counters = {
@@ -292,15 +303,11 @@ impl MetricsCollector {
         };
 
         // Compute percentiles from eval times, then clear buffer
-        let (p50, p95, p99, max_time) = {
-            let mut times = self
-                .eval_times_us
-                .write()
-                .expect("eval_times_us lock should not be poisoned");
-            let result = compute_percentiles(&mut times);
-            times.clear();
-            result
+        let times_snapshot = {
+            let mut times = self.eval_times_us.write().expect("eval_time lock poisoned");
+            std::mem::take(&mut *times)
         };
+        let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
 
         // Build operational_stats map from atomic fields
         let mut ops = HashMap::with_capacity(36);
@@ -321,7 +328,7 @@ impl MetricsCollector {
         insert_swap(&mut ops, "authz.errors_total", &self.authz_errors_total);
 
         // Authorization latency (gauges, swap)
-        insert_swap(&mut ops, "authz.last_eval_time_us", &self.last_eval_time_us);
+        insert_load(&mut ops, "authz.last_eval_time_us", &self.last_eval_time_us);
         insert_val(&mut ops, "authz.eval_time_p50_us", p50);
         insert_val(&mut ops, "authz.eval_time_p95_us", p95);
         insert_val(&mut ops, "authz.eval_time_p99_us", p99);
@@ -390,10 +397,11 @@ fn insert_val(map: &mut HashMap<String, i64>, key: &str, value: i64) {
 
 /// Computes percentiles from a mutable slice using nearest-rank method.
 /// Sorts in place. Returns `(p50, p95, p99, max)`. All zeros if empty.
-fn compute_percentiles(times: &mut [i64]) -> (i64, i64, i64, i64) {
+fn compute_percentiles(times: Vec<i64>) -> (i64, i64, i64, i64) {
     if times.is_empty() {
         return (0, 0, 0, 0);
     }
+    let mut times = times;
     times.sort_unstable();
     let len = times.len();
     let idx = |pct: usize| ((len - 1) * pct / 100).min(len - 1);

@@ -91,7 +91,7 @@ where
             return;
         }
 
-        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(..).collect();
+        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(0..batch_size).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
