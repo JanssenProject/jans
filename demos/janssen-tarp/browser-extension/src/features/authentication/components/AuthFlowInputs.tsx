@@ -283,6 +283,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               width: '75ch',
             }}
             spacing={2}
+            component="form"
           >
             {(!!errorMessage || errorMessage !== '') ?
               <Alert severity="error">{errorMessage}</Alert> : ''
