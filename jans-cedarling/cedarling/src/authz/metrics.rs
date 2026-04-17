@@ -12,13 +12,13 @@
 //!
 //! All counters reset at each telemetry interval. Gauges reflect point-in-time snapshots.
 
+use chrono::{DateTime, Utc};
 use std::{
     collections::HashMap,
     sync::{
         Mutex, RwLock,
         atomic::{AtomicI64, Ordering},
     },
-    time::Instant,
 };
 
 use crate::log::Decision;
@@ -86,7 +86,7 @@ pub(crate) struct MetricsSnapshot {
 #[derive(Debug)]
 pub(crate) struct MetricsCollector {
     // -- Interval tracking --
-    interval_start: Mutex<Instant>,
+    interval_start: Mutex<DateTime<Utc>>,
 
     authz_requests_total: AtomicI64,
     authz_requests_unsigned: AtomicI64,
@@ -110,7 +110,7 @@ pub(crate) struct MetricsCollector {
     data_get_ops: AtomicI64,
     data_remove_ops: AtomicI64,
 
-    init_time: Instant,
+    init_time: DateTime<Utc>,
     policy_count: AtomicI64,
 
     policy_stats: RwLock<HashMap<String, PolicyStats>>,
@@ -120,7 +120,7 @@ pub(crate) struct MetricsCollector {
 impl MetricsCollector {
     /// Creates a new metrics collector with the given initial policy count.
     pub(crate) fn new(initial_policy_count: usize) -> Self {
-        let now = Instant::now();
+        let now = Utc::now();
         Self {
             interval_start: Mutex::new(now),
             init_time: now,
@@ -256,15 +256,15 @@ impl MetricsCollector {
     /// buffer is cleared after computing percentiles.
     pub(crate) fn snapshot_and_reset(&self) -> MetricsSnapshot {
         // Compute interval duration and reset start time
+        let now = Utc::now();
         let interval_secs = {
             let mut start = self
                 .interval_start
                 .lock()
                 .expect("interval_start lock should not be poisoned");
-            let now = Instant::now();
-            let duration = now.duration_since(*start);
+            let duration = now.signed_duration_since(*start);
             *start = now;
-            duration.as_secs().cast_signed()
+            duration.num_seconds()
         };
 
         let policy_stats = self
@@ -360,7 +360,7 @@ impl MetricsCollector {
         insert_val(
             &mut ops,
             "instance.uptime_secs",
-            self.init_time.elapsed().as_secs().cast_signed(),
+            now.signed_duration_since(self.init_time).num_seconds(),
         );
         insert_load(&mut ops, "instance.policy_count", &self.policy_count);
 
