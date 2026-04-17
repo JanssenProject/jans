@@ -411,6 +411,8 @@ fn get_effective_ttl(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::duration_suboptimal_units)]
+
     use super::*;
     use serde_json::json;
     #[cfg(not(target_arch = "wasm32"))]
@@ -622,7 +624,7 @@ mod tests {
     #[test]
     fn test_max_ttl() {
         let config = DataStoreConfig {
-            max_ttl: Some(StdDuration::from_mins(1)),
+            max_ttl: Some(StdDuration::from_secs(60)),
             ..Default::default()
         };
         let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
@@ -634,7 +636,7 @@ mod tests {
             .expect("failed to push value with valid TTL");
 
         // TTL exceeding limit should fail
-        let result = store.push("key2", json!("value2"), Some(StdDuration::from_mins(2)));
+        let result = store.push("key2", json!("value2"), Some(StdDuration::from_secs(120)));
         assert!(
             matches!(result, Err(DataError::TTLExceeded { .. })),
             "push with TTL exceeding max_ttl should fail with TTLExceeded"
@@ -791,7 +793,7 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1", json!("value1"), Some(StdDuration::from_mins(1)))
+            .push("key1", json!("value1"), Some(StdDuration::from_secs(60)))
             .expect("failed to push value");
 
         let entry = store.get_entry("key1").expect("entry should exist");
@@ -897,8 +899,8 @@ mod tests {
     fn test_config_validation() {
         // Valid config
         let valid_config = DataStoreConfig {
-            default_ttl: Some(StdDuration::from_mins(5)),
-            max_ttl: Some(StdDuration::from_hours(1)),
+            default_ttl: Some(StdDuration::from_secs(300)),
+            max_ttl: Some(StdDuration::from_secs(3600)),
             ..Default::default()
         };
         assert!(
@@ -908,8 +910,8 @@ mod tests {
 
         // Invalid config: default_ttl > max_ttl
         let invalid_config = DataStoreConfig {
-            default_ttl: Some(StdDuration::from_hours(2)),
-            max_ttl: Some(StdDuration::from_hours(1)),
+            default_ttl: Some(StdDuration::from_secs(7200)),
+            max_ttl: Some(StdDuration::from_secs(3600)),
             ..Default::default()
         };
         assert!(

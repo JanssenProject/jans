@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![allow(clippy::duration_suboptimal_units)]
+
 //! Benchmarks for `DataStore` operations.
 //!
 //! Tests performance of:
@@ -144,7 +146,7 @@ fn bench_push_data_ctx(c: &mut Criterion) {
                 .push_data_ctx(
                     black_box(&key),
                     black_box(json!("small_value")),
-                    black_box(Some(Duration::from_mins(1))),
+                    black_box(Some(Duration::from_secs(60))),
                 )
                 .expect("push should succeed");
         });
@@ -168,7 +170,7 @@ fn bench_push_data_ctx(c: &mut Criterion) {
                 .push_data_ctx(
                     black_box(&key),
                     black_box(medium_value.clone()),
-                    black_box(Some(Duration::from_mins(1))),
+                    black_box(Some(Duration::from_secs(60))),
                 )
                 .expect("push should succeed");
         });
@@ -191,7 +193,7 @@ fn bench_push_data_ctx(c: &mut Criterion) {
                 .push_data_ctx(
                     black_box(&key),
                     black_box(large_value.clone()),
-                    black_box(Some(Duration::from_mins(1))),
+                    black_box(Some(Duration::from_secs(60))),
                 )
                 .expect("push should succeed");
         });
@@ -213,7 +215,7 @@ fn bench_get_data_ctx(c: &mut Criterion) {
             .push_data_ctx(
                 &format!("key_{i}"),
                 json!({"index": i, "data": "test_data"}),
-                Some(Duration::from_mins(5)),
+                Some(Duration::from_secs(300)),
             )
             .expect("push should succeed");
     }
@@ -262,7 +264,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
             .push_data_ctx(
                 &format!("key_{i}"),
                 json!({"index": i}),
-                Some(Duration::from_mins(5)),
+                Some(Duration::from_secs(300)),
             )
             .expect("push should succeed");
     }
@@ -280,7 +282,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
                     .push_data_ctx(
                         black_box(&key),
                         black_box(json!({"counter": counter})),
-                        black_box(Some(Duration::from_mins(1))),
+                        black_box(Some(Duration::from_secs(60))),
                     )
                     .expect("push should succeed");
             } else {
@@ -312,7 +314,7 @@ fn bench_authorization_with_data(c: &mut Criterion) {
 
     // Push data that enables the policy
     cedarling
-        .push_data_ctx("enabled", json!(true), Some(Duration::from_mins(5)))
+        .push_data_ctx("enabled", json!(true), Some(Duration::from_secs(300)))
         .expect("push should succeed");
 
     let request = RequestUnsigned {
@@ -386,7 +388,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
 
         // Push the schema-defined "enabled" key
         cedarling
-            .push_data_ctx("enabled", json!(true), Some(Duration::from_mins(5)))
+            .push_data_ctx("enabled", json!(true), Some(Duration::from_secs(300)))
             .expect("push should succeed");
 
         let request = RequestUnsigned {
