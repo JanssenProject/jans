@@ -345,7 +345,7 @@ mod tests {
         let entry = DataEntry::new(
             "key1".to_string(),
             json!("value1"),
-            Some(StdDuration::from_mins(1)),
+            Some(StdDuration::from_secs(60)),
         );
         assert!(entry.expires_at.is_some());
         assert!(entry.expires_at.unwrap() > entry.created_at);
@@ -383,7 +383,7 @@ mod tests {
         let entry = DataEntry::new(
             "key1".to_string(),
             json!("value1"),
-            Some(StdDuration::from_hours(1)),
+            Some(StdDuration::from_secs(3600)),
         );
         let serialized = serde_json::to_string(&entry).expect("should serialize");
         let deserialized: DataEntry =
