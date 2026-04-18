@@ -27,7 +27,7 @@ pub(super) type SerializedAuditEntry = Box<str>;
 pub(super) type TransportResult<T> = Result<T, TransportError>;
 
 /// Discriminates between audit channels and carries the target URL.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum AuditKind {
     Log(Url),
     Telemetry(Url),
@@ -83,18 +83,14 @@ where
             Ok(s) => match T::try_from(s) {
                 Ok(t) => Some(t),
                 Err(e) => {
-                    log_warn(format!(
-                        "failed to convert {label} entry[{idx}]: {e}"
-                    ));
+                    log_warn(format!("failed to convert {label} entry[{idx}]: {e}"));
                     None
-                }
+                },
             },
             Err(e) => {
-                log_warn(format!(
-                    "failed to parse {label} entry[{idx}]: {e}"
-                ));
+                log_warn(format!("failed to parse {label} entry[{idx}]: {e}"));
                 None
-            }
+            },
         })
         .collect();
 

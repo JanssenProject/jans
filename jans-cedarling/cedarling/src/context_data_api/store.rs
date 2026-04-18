@@ -409,8 +409,6 @@ fn get_effective_ttl(
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::duration_suboptimal_units)]
-
     use super::*;
     use serde_json::json;
     #[cfg(not(target_arch = "wasm32"))]

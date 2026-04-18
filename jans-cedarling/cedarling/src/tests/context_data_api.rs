@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-#![allow(clippy::duration_suboptimal_units)]
-
 //! Integration tests for the Data API.
 //!
 //! These tests verify:

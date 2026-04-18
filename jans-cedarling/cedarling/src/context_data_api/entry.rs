@@ -313,8 +313,6 @@ impl DataEntry {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::duration_suboptimal_units)]
-
     use super::*;
     use serde_json::json;
 

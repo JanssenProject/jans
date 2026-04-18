@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-#![allow(clippy::duration_suboptimal_units)]
-
 //! Benchmarks for `DataStore` operations.
 //!
 //! Tests performance of:

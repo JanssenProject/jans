@@ -67,7 +67,6 @@ impl Default for DataStoreConfig {
             max_entry_size: 1_048_576, // 1MB
             default_ttl: None,
             // This suppression is added because of mismatched usage of toolchain in CI
-            #[allow(clippy::duration_suboptimal_units)]
             max_ttl: Some(Duration::from_secs(3600)), // 1 hour
             enable_metrics: true,
             memory_alert_threshold: 80.0, // 80%
@@ -120,8 +119,6 @@ impl DataStoreConfig {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::duration_suboptimal_units)]
-
     use super::*;
 
     #[test]
