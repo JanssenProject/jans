@@ -35,7 +35,7 @@ sudo SUSEConnect -p PackageHub/15.5/x86_64
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):

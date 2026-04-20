@@ -21,7 +21,7 @@ sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.
 sudo yum -y module enable mod_auth_openidc 
 ```
 
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
@@ -42,7 +42,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-el9-replace-janssen-version.bundle jans-replace-janssen-version-stable.el9.x86_64.rpm
+        cosign verify-blob --bundle ~/jans-el9-replace-janssen-version.bundle ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -79,7 +79,7 @@ sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10
 sudo yum -y module enable mod_auth_openidc 
 ```
 
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```

@@ -14,7 +14,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ### Debian 13 (Trixie)
 
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"

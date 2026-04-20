@@ -14,7 +14,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ### Ubuntu 24.04
 
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
@@ -71,7 +71,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 
 ### Ubuntu 22.04
 
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
