@@ -13,12 +13,12 @@
 //! All counters reset at each telemetry interval. Gauges reflect point-in-time snapshots.
 
 use chrono::{DateTime, Utc};
-use rand::{rngs::SmallRng, RngExt, SeedableRng};
+use rand::{RngExt, SeedableRng, rngs::SmallRng};
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicI64, Ordering},
         Mutex, RwLock,
+        atomic::{AtomicI64, Ordering},
     },
 };
 
@@ -194,13 +194,19 @@ impl IntervalState {
     /// (eval-time percentiles, uptime, policy count).
     fn to_operational_stats(
         &self,
-        p50: i64,
-        p95: i64,
-        p99: i64,
-        max_time: i64,
-        uptime_secs: i64,
-        policy_count: i64,
+        now: DateTime<Utc>,
+        init_time: DateTime<Utc>,
+        policy_count_atomic: &AtomicI64,
     ) -> HashMap<String, i64> {
+        let times_snapshot = self
+            .eval_times_us
+            .lock()
+            .expect(EVAL_TIMES_LOCK_POISONED)
+            .drain();
+        let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
+        let uptime_secs = now.signed_duration_since(init_time).num_seconds();
+        let policy_count = policy_count_atomic.load(Ordering::Relaxed);
+
         let load = |a: &AtomicI64| a.load(Ordering::Relaxed);
         HashMap::from([
             (
@@ -504,16 +510,7 @@ impl MetricsCollector {
             .expect(ERROR_COUNTERS_LOCK_POISONED)
             .clone();
 
-        let times_snapshot = old
-            .eval_times_us
-            .lock()
-            .expect(EVAL_TIMES_LOCK_POISONED)
-            .drain();
-        let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
-
-        let uptime_secs = now.signed_duration_since(self.init_time).num_seconds();
-        let policy_count = self.policy_count.load(Ordering::Relaxed);
-        let ops = old.to_operational_stats(p50, p95, p99, max_time, uptime_secs, policy_count);
+        let ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
 
         MetricsSnapshot {
             policy_stats,
