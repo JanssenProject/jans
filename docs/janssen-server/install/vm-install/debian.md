@@ -41,7 +41,11 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-debian13-replace-janssen-version.bundle jans_replace-janssen-version~debian13_amd64.deb
+        cosign verify-blob \
+          --bundle jans-debian13-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans_replace-janssen-version~debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:

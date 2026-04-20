@@ -52,7 +52,11 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-suse16-replace-janssen-version.bundle jans-replace-janssen-version-stable.suse16.x86_64.rpm
+        cosign verify-blob \
+          --bundle jans-suse16-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans-replace-janssen-version-stable.suse16.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -79,6 +83,19 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 ```
 sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
+
+!!! note "Expected zypper prompt during install"
+    zypper will display a warning that the package header is not GPG-signed:
+
+    ```text
+    jans-...: Package header is not signed!
+    Signature verification failed [6-File is unsigned]
+    Abort, retry, ignore? [a/r/i] (a):
+    ```
+
+    This is expected. Janssen uses keyless cosign signing (verified in the step
+    above) rather than embedding a GPG signature in the RPM header. Enter `i`
+    to ignore this prompt and proceed with the installation.
 
 ## Run the setup script
 

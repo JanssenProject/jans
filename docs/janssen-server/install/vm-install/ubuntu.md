@@ -41,7 +41,11 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-ubuntu24-replace-janssen-version.bundle jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+        cosign verify-blob \
+          --bundle jans-ubuntu24-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -98,7 +102,11 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-ubuntu22-replace-janssen-version.bundle jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+        cosign verify-blob \
+          --bundle jans-ubuntu22-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
