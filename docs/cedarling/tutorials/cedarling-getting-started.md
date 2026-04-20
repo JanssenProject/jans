@@ -180,10 +180,9 @@ Cedarling provides two authorization methods. Not sure which to use? See the [qu
 
 **Unsigned Authorization**
 
-- Uses `authorize_unsigned` to accept **Principals** directly without requiring JWTs.
-- This makes authorization decisions by passing a set of **Principals** directly.
+- Uses `authorize_unsigned` to accept a **Principal** directly without requiring JWTs.
 - The **Context** is passed in as-is in a map-like structure.
-- When using multiple principals, configure [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](../reference/cedarling-principal-boolean-operations.md) to control how per-principal decisions are combined.
+- The principal is optional. When omitted, Cedarling runs Cedar's partial evaluator, allowing policies that don't depend on the principal to resolve, and failing closed on residuals. See [Optional principal and partial evaluation](../reference/cedarling-authz.md#optional-principal-and-partial-evaluation).
 - Use when your application has already authenticated the principal, for testing, or for service-to-service calls with upstream verification.
 
 See the language-specific tutorials for detailed examples of both authorization methods:

@@ -56,7 +56,6 @@ mod test {
     #[test]
     fn can_build_entity() {
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),
@@ -102,7 +101,6 @@ mod test {
     #[test]
     fn can_build_entity_with_optional_attr() {
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),

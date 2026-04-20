@@ -89,12 +89,14 @@ The implementation uses:
 The Cloud SQL Connector functionality is implemented using a shared mixin pattern:
 
 - **`CloudSqlConnectorMixin`**: Base mixin class that provides:
-  - Connector lifecycle management (`_ensure_connector`, `close`)
-  - Instance name validation (`_get_instance_connection_name`)
-  - Connection creator factory (`get_cloudsql_connection_creator`)
-  - `cloudsql_connector_enabled` property
+
+    - Connector lifecycle management (`_ensure_connector`, `close`)
+    - Instance name validation (`_get_instance_connection_name`)
+    - Connection creator factory (`get_cloudsql_connection_creator`)
+    - `cloudsql_connector_enabled` property
 
 - **`PostgresqlAdapter`**: Inherits from `CloudSqlConnectorMixin`, sets `cloudsql_driver = "pg8000"`
+
 - **`MysqlAdapter`**: Inherits from `CloudSqlConnectorMixin`, sets `cloudsql_driver = "pymysql"`
 
 This design eliminates code duplication while allowing each adapter to specify its driver.
@@ -240,11 +242,13 @@ None of the certificate's DNS or IP Subject Alternative Name entries matched the
 ```
 
 This happens because:
+
 1. Cloud SQL's SSL certificates have SANs for DNS names, not internal IPs
 2. The JDBC driver tries to verify the certificate against the IP address
 3. Verification fails because the IP isn't in the certificate's SANs
 
 The Cloud SQL JDBC Socket Factory solves this by:
+
 1. Establishing a secure tunnel to Cloud SQL
 2. Handling SSL/TLS encryption automatically
 3. Using Google's Application Default Credentials (ADC) for authentication to the Cloud SQL Admin API
@@ -270,80 +274,81 @@ Before deploying your Cloud Run service with Cloud SQL Connector, ensure all the
 
 ### IAM Requirements
 
-- [ ] **Cloud SQL Client Role**: The Cloud Run service account must have the `roles/cloudsql.client` IAM role on the Cloud SQL instance.
+- **Cloud SQL Client Role**: The Cloud Run service account must have the `roles/cloudsql.client` IAM role on the Cloud SQL instance.
 
-```bash
-gcloud projects add-iam-policy-binding PROJECT_ID \
-  --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
-  --role="roles/cloudsql.client"
-```
+    ```bash
+    gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
+    --role="roles/cloudsql.client"
+    ```
 
-- [ ] **Cloud SQL Instance User Role** (Optional but recommended): For IAM database authentication, grant `roles/cloudsql.instanceUser`.
+- **Cloud SQL Instance User Role** (Optional but recommended): For IAM database authentication, grant `roles/cloudsql.instanceUser`.
 
-```bash
-gcloud projects add-iam-policy-binding PROJECT_ID \
-  --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
-  --role="roles/cloudsql.instanceUser"
-```
+    ```bash
+    gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
+    --role="roles/cloudsql.instanceUser"
+    ```
 
-- [ ] **Service Account Configured**: The Cloud Run service is configured to use a service account with the above roles (not the default compute service account in production).
+- **Service Account Configured**: The Cloud Run service is configured to use a service account with the above roles (not the default compute service account in production).
 
 ### VPC Connector Requirements
 
-- [ ] **VPC Network Created**: A VPC network exists that can reach the Cloud SQL instance's Private IP.
+- **VPC Network Created**: A VPC network exists that can reach the Cloud SQL instance's Private IP.
 
-- [ ] **Serverless VPC Access Connector Created**: A VPC Access connector is created in the same region as your Cloud Run service.
+- **Serverless VPC Access Connector Created**: A VPC Access connector is created in the same region as your Cloud Run service.
 
-```bash
-gcloud compute networks vpc-access connectors create CONNECTOR_NAME \
-  --region=REGION \
-  --network=VPC_NETWORK \
-  --range=IP_RANGE  # e.g., 10.8.0.0/28
-```
+    ```bash
+    gcloud compute networks vpc-access connectors create CONNECTOR_NAME \
+    --region=REGION \
+    --network=VPC_NETWORK \
+    --range=IP_RANGE  # e.g., 10.8.0.0/28
+    ```
 
-- [ ] **Cloud Run Service Configured with VPC Connector**: The Cloud Run service is deployed with the VPC connector.
+- **Cloud Run Service Configured with VPC Connector**: The Cloud Run service is deployed with the VPC connector.
 
-```bash
-gcloud run deploy SERVICE_NAME \
-  --image=IMAGE_URL \
-  --vpc-connector=CONNECTOR_NAME \
-  --vpc-egress=private-ranges-only
-```
+    ```bash
+    gcloud run deploy SERVICE_NAME \
+    --image=IMAGE_URL \
+    --vpc-connector=CONNECTOR_NAME \
+    --vpc-egress=private-ranges-only
+    ```
 
 ### Cloud SQL Instance Requirements
 
-- [ ] **Private IP Enabled**: The Cloud SQL instance has Private IP enabled.
+- **Private IP Enabled**: The Cloud SQL instance has Private IP enabled.
 
-  ```bash
-  gcloud sql instances patch INSTANCE_NAME \
-    --network=VPC_NETWORK \
-    --no-assign-ip  # Optional: disable public IP
-  ```
+    ```bash
+    gcloud sql instances patch INSTANCE_NAME \
+        --network=VPC_NETWORK \
+        --no-assign-ip  # Optional: disable public IP
+    ```
 
-- [ ] **Private Services Access Configured**: Private services access is configured for the VPC network.
+- **Private Services Access Configured**: Private services access is configured for the VPC network.
 
-  ```bash
-  gcloud compute addresses create google-managed-services-NETWORK \
-    --global \
-    --purpose=VPC_PEERING \
-    --prefix-length=16 \
-    --network=VPC_NETWORK
+    ```bash
+    gcloud compute addresses create google-managed-services-NETWORK \
+        --global \
+        --purpose=VPC_PEERING \
+        --prefix-length=16 \
+        --network=VPC_NETWORK
 
-  gcloud services vpc-peerings connect \
-    --service=servicenetworking.googleapis.com \
-    --ranges=google-managed-services-NETWORK \
-    --network=VPC_NETWORK
-  ```
+    gcloud services vpc-peerings connect \
+        --service=servicenetworking.googleapis.com \
+        --ranges=google-managed-services-NETWORK \
+        --network=VPC_NETWORK
+    ```
 
-- [ ] **Database User Created**: A database user exists with the credentials specified in environment variables.
+- **Database User Created**: A database user exists with the credentials specified in environment variables.
 
 ### Network Firewall Rules
 
-- [ ] **Egress Allowed**: The VPC network allows egress traffic to the Cloud SQL instance's Private IP on the appropriate port:
-  - PostgreSQL: Port 5432
-  - MySQL: Port 3306
+- **Egress Allowed**: The VPC network allows egress traffic to the Cloud SQL instance's Private IP on the appropriate port:
 
-- [ ] **No Conflicting Firewall Rules**: No firewall rules block traffic from the VPC connector's IP range to the Cloud SQL instance.
+    - PostgreSQL: Port 5432
+    - MySQL: Port 3306
+
+- **No Conflicting Firewall Rules**: No firewall rules block traffic from the VPC connector's IP range to the Cloud SQL instance.
 
 ### Verification Steps
 
@@ -353,18 +358,18 @@ gcloud run deploy SERVICE_NAME \
 
 3. **Verify IAM Bindings**:
 
-```bash
-gcloud projects get-iam-policy PROJECT_ID \
-  --flatten="bindings[].members" \
-  --filter="bindings.role:roles/cloudsql.client"
-```
+    ```bash
+    gcloud projects get-iam-policy PROJECT_ID \
+    --flatten="bindings[].members" \
+    --filter="bindings.role:roles/cloudsql.client"
+    ```
 
 4. **Verify VPC Connector Status**:
 
-```bash
-gcloud compute networks vpc-access connectors describe CONNECTOR_NAME \
-  --region=REGION
-```
+    ```bash
+    gcloud compute networks vpc-access connectors describe CONNECTOR_NAME \
+    --region=REGION
+    ```
 
 ---
 
@@ -384,18 +389,22 @@ To migrate to Cloud SQL Connector:
 ### Common Issues
 
 1. **"Permission denied" or IAM errors**
-   - Verify the service account has `roles/cloudsql.client` role
-   - Check that the correct service account is attached to Cloud Run
+
+    - Verify the service account has `roles/cloudsql.client` role
+    - Check that the correct service account is attached to Cloud Run
 
 2. **Connection timeout**
-   - Verify the VPC connector is properly configured
-   - Check that the Cloud SQL instance has Private IP enabled
-   - Ensure firewall rules allow egress to the instance
+
+    - Verify the VPC connector is properly configured
+    - Check that the Cloud SQL instance has Private IP enabled
+    - Ensure firewall rules allow egress to the instance
 
 3. **"Could not connect to Cloud SQL instance"**
-   - Verify `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` format: `project:region:instance`
-   - Check that the instance exists and is running
+
+    - Verify `CN_SQL_CLOUDSQL_INSTANCE_CONNECTION_NAME` format: `project:region:instance`
+    - Check that the instance exists and is running
 
 4. **MySQL strict mode errors**
-   - The Cloud SQL Connector still applies MySQL strict mode settings
-   - Check your data for compatibility with strict mode
+
+    - The Cloud SQL Connector still applies MySQL strict mode settings
+    - Check your data for compatibility with strict mode

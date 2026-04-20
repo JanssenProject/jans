@@ -104,8 +104,11 @@ export class Cedarling {
    */
   static new_from_map(config: Map<any, any>): Promise<Cedarling>;
   /**
-   * Authorize request for unsigned principals.
-   * makes authorization decision based on the [`RequestUnsigned`]
+   * Authorize an unsigned request carrying an optional single principal.
+   * Makes an authorization decision based on the [`RequestUnsigned`].
+   * When `principal` is omitted / `null` the core uses Cedar partial evaluation;
+   * residual-dependent requests fail closed with `Decision::Deny` and surface
+   * residual policy ids in `response.diagnostics.reason`.
    */
   authorize_unsigned(request: any): Promise<AuthorizeResult>;
   /**
@@ -261,13 +264,9 @@ export class AuthorizeResult {
    */
   json_string(): string;
   /**
-   * Get authorization responses for all principals
+   * Cedar authorization response for the request.
    */
-  principals: Record<string, AuthorizeResultResponse>;
-  /**
-   * Get result for a specific principal
-   */
-  principal(principal: string): AuthorizeResultResponse | undefined;
+  response: AuthorizeResultResponse;
   /**
    * Result of authorization
    * true means `ALLOW`

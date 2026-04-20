@@ -140,7 +140,6 @@ import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 // Example configuration (populate dynamically in production)
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "MyApp",
-    "CEDARLING_POLICY_STORE_ID":      "your-policy-store-id",
     "CEDARLING_LOG_LEVEL":            "INFO",
     "CEDARLING_LOG_TYPE":             "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
@@ -169,20 +168,18 @@ resource := cedarling_go.EntityData{
 }
 ```
 
-**2. Define principals:**
+**2. Define the principal (optional — pass `nil` to run Cedar's partial evaluator; principal-dependent policies will fail closed to Deny):**
 
 ```go
-principals := []cedarling_go.EntityData{
-    {
-        CedarMapping: cedarling_go.CedarEntityMapping{
-            EntityType: "Jans::User",
-            ID:         "random_id",
-        },
-        Payload: map[string]any{
-            "role":    []string{"admin"},
-            "country": "US",
-            "sub":     "random_sub",
-        },
+principal := cedarling_go.EntityData{
+    CedarMapping: cedarling_go.CedarEntityMapping{
+        EntityType: "Jans::User",
+        ID:         "random_id",
+    },
+    Payload: map[string]any{
+        "role":    []string{"admin"},
+        "country": "US",
+        "sub":     "random_sub",
     },
 }
 ```
@@ -191,9 +188,9 @@ principals := []cedarling_go.EntityData{
 
 ```go
 request := cedarling_go.RequestUnsigned{
-    Principals: principals,
-    Action:     `Jans::Action::"Update"`,
-    Resource:   resource,
+    Principal: &principal,
+    Action:    `Jans::Action::"Update"`,
+    Resource:  resource,
 }
 ```
 
@@ -423,7 +420,6 @@ For testing scenarios, you may want to disable JWT validation:
 ```go
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "TestApp",
-    "CEDARLING_POLICY_STORE_ID":      "test-policy-store",
     "CEDARLING_JWT_SIG_VALIDATION":   "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
     "CEDARLING_LOG_TYPE":             "std_out",

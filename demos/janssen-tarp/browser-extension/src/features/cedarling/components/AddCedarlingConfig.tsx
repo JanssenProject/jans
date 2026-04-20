@@ -181,12 +181,6 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-          },
-        }}
         className="form-container"
       >
         <DialogTitle>Add Cedarling Configuration</DialogTitle>
