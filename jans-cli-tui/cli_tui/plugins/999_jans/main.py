@@ -1,4 +1,11 @@
+import os
+import json
 import asyncio
+
+import jwt
+
+from urllib.parse import urlparse
+
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.dimension import D
@@ -7,8 +14,17 @@ from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 
 from utils.multi_lang import _
 from cli import config_cli
+from utils.utils import DialogUtils
+from utils.static import cli_style, common_strings
+from wui_components.jans_cli_dialog import JansGDialog
 
-class Plugin:
+
+class SSAError(Exception):
+    """Exception raised if there is an issue with SSA."""
+    pass
+
+
+class Plugin(DialogUtils):
     """This is a general class for plugins 
     """
     def __init__(
@@ -29,6 +45,8 @@ class Plugin:
                                 Button(text=_("Exit Jans TUI"), handler=self.exit_cli),
                                 Button(text=_("Logout and Exit Jans TUI"), handler=self.logout_exit_cli),
                                 Button(text=_("Configure Jans TUI"), handler=self.configure_cli),
+                                Button(text=_("Create client with SSA"), handler=self.create_ssa_client_window),
+                                Button(text=_("Clear Configuration and Exit"), handler=self.clear_config),
                                 Button(text=_("Application Versions"), handler=self.app_versions),
                             ],
                             width=D()
@@ -50,9 +68,16 @@ class Plugin:
         """
         self.app.exit(result=False)
 
-    def logout_exit_cli(self) -> None:
+    def logout_exit_cli(self, clear_all=False) -> None:
         """Removes auth token and exits
         """
+
+        if clear_all:
+            config_cli.config.remove_section('DEFAULT')
+        else:
+            config_cli.config['DEFAULT'].pop('access_token_enc', None)
+            config_cli.config['DEFAULT'].pop('user_data', None)
+        config_cli.write_config()
 
         async def coroutine():
             self.app.start_progressing()
@@ -61,9 +86,6 @@ class Plugin:
 
         asyncio.ensure_future(coroutine())
 
-        config_cli.config['DEFAULT'].pop('access_token_enc', None)
-        config_cli.config['DEFAULT'].pop('user_data', None)
-        config_cli.write_config()
         self.exit_cli()
 
     def configure_cli(self) -> None:
@@ -106,3 +128,139 @@ class Plugin:
                 )
 
         asyncio.ensure_future(coroutine())
+
+
+    def get_iss_from_ssa(self, ssa):
+
+        try:
+            decoded = jwt.decode(ssa, options={"verify_signature": False, "verify_exp": True})
+        except jwt.DecodeError:
+            raise SSAError(_("Cant't decode SSA. Please check if it is valid jwt SSA"))
+        except jwt.ExpiredSignatureError:
+            raise SSAError(_("SSA was expired. Please ask admin to provide a new one."))
+
+        ssa_grant_types = decoded.get('grant_types') or []
+        missing_grant_types = list({'authorization_code', 'refresh_token', 'client_credentials', 'urn:ietf:params:oauth:grant-type:device_code'} - set(ssa_grant_types))
+
+        if missing_grant_types:
+            raise SSAError(_("SSA is missing these grant types: {}").format(', '.join(missing_grant_types)))
+
+        iss = decoded.get('iss') or ''
+        if not iss:
+            raise SSAError(_("There is no iss in SSA"))
+
+        parsed_iss = urlparse(iss)
+
+        if not parsed_iss.netloc:
+            raise SSAError(_("There is no valid iss in SSA"))
+
+        return parsed_iss.netloc
+
+
+    def create_ssa_cli(self, dialog):
+        dialog_data = self.make_data_from_dialog({'ssa': dialog.body})
+        ssa = dialog_data['ssa']
+        if not ssa:
+            self.app.show_message(_(common_strings.error), _("No SSA was entered"), tobefocused=self.menu_container)
+            return
+
+        try:
+            iss = self.get_iss_from_ssa(ssa)
+        except SSAError as e:
+            self.app.show_message(_(common_strings.error), str(e), tobefocused=self.menu_container)
+            return
+
+        client_creation_data = {
+          "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
+          "redirect_uris": [
+            f"https://{iss}/admin"
+          ],
+          "software_statement": ssa,
+          "grant_types": [
+            "authorization_code",
+            "refresh_token",
+            "client_credentials",
+            "urn:ietf:params:oauth:grant-type:device_code"
+          ],
+          "userinfo_signed_response_alg": "RS256",
+          "access_token_lifetime": 2592000,
+          "scope": "jans_stat offline_access profile email openid https://jans.io/auth/ssa.admin",
+          "run_introspection_script_before_jwt_creation": False,
+          "update_token_script_dns": ["inum=2D3E.5A04,ou=scripts,o=jans"]
+        }
+
+        async def coroutine():
+            self.app.start_progressing(_("Creating client..."))
+
+            try:
+                response = config_cli.session.post(
+                    url=f"https://{iss}/jans-auth/restv1/register",
+                    data=json.dumps(client_creation_data),
+                    headers={'Content-Type': 'application/json'},
+                    verify=False,
+                )
+            except Exception as e:
+                self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}").format(e), tobefocused=self.menu_container)
+                self.app.stop_progressing()
+                return
+
+            self.app.stop_progressing()
+
+            if response.status_code not in (200, 201):
+                self.app.show_message(_(common_strings.error), _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(iss, response.status_code, response.text), tobefocused=self.menu_container)
+                return
+
+            try:
+                cli_info = response.json()
+            except json.JSONDecodeError as e:
+                self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}\nResponse was {}").format(e, response.text), tobefocused=self.menu_container)
+                return
+
+            jca_client_id = cli_info.get('client_id')
+            jca_client_secret = cli_info.get('client_secret')
+
+            if not (jca_client_id and jca_client_secret):
+                self.app.show_message(_(common_strings.error), _("client_id or client_secret is not in server response"), tobefocused=self.menu_container)
+                return
+
+            creds_info = {
+                'jans_host': iss,
+                'jca_client_id': jca_client_id,
+                'jca_client_secret': jca_client_secret
+                }
+
+            self.app.save_creds(creds_info)
+            self.app.create_cli()
+
+        asyncio.ensure_future(coroutine())
+
+
+    def create_ssa_client_window(self, dialog=None):
+
+        body = HSplit([
+            self.app.getTitledText(
+                title=_("SSA"),
+                name='ssa',
+                height=8,
+                jans_help=_("SSA for creating TUI Client"),
+                style=cli_style.edit_text_required
+            ),
+        ])
+
+        create_client_button_label = _("Create Client")
+        buttons = [
+            Button(create_client_button_label, handler=self.create_ssa_cli, width=len(create_client_button_label)+4),
+            Button(_("Cancel"))
+        ]
+        dialog = JansGDialog(self.app, title=_("SSA for Creating Client"), body= body, buttons=buttons)
+        self.app.show_jans_dialog(dialog)
+
+    def clear_config(self):
+        def do_clear_config(dialog):
+            self.logout_exit_cli(clear_all=True)
+
+        confirm_dialog = self.app.get_confirm_dialog(
+            message=_("Are you sure clearing TUI configuration? You will permenantly lose session and configurations."),
+            confirm_handler=do_clear_config
+        )
+        self.app.show_jans_dialog(confirm_dialog)
