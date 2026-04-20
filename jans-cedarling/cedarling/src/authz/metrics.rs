@@ -13,12 +13,12 @@
 //! All counters reset at each telemetry interval. Gauges reflect point-in-time snapshots.
 
 use chrono::{DateTime, Utc};
-use rand::{RngExt, SeedableRng, rngs::SmallRng};
+use rand::{rngs::SmallRng, RngExt, SeedableRng};
 use std::{
     collections::HashMap,
     sync::{
-        Mutex, RwLock,
         atomic::{AtomicI64, Ordering},
+        Mutex, RwLock,
     },
 };
 
@@ -26,6 +26,12 @@ use crate::log::Decision;
 
 /// Maximum number of eval-time samples retained between snapshots
 const EVAL_TIME_RESERVOIR_SIZE: usize = 1024;
+
+const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
+const EVAL_TIMES_LOCK_POISONED: &str = "eval_times_us lock poisoned";
+const POLICY_STATS_READ_LOCK_POISONED: &str = "policy_stats read lock poisoned";
+const POLICY_STATS_WRITE_LOCK_POISONED: &str = "policy_stats write lock poisoned";
+const ERROR_COUNTERS_LOCK_POISONED: &str = "error_counters lock poisoned";
 
 /// Trait for error types that map to a telemetry metric key.
 pub(crate) trait ErrorMetricKey {
@@ -122,15 +128,13 @@ pub(crate) struct MetricsSnapshot {
     pub interval_secs: i64,
 }
 
-/// Thread-safe telemetry metrics collector.
+/// All state that resets at each telemetry interval.
 ///
-/// Uses atomic operations for hot-path counters (lock-free). Cold-path maps
-/// (`policy_stats`, `error_counters`) use `RwLock`. Eval time tracking uses
-/// a `RwLock<Vec>` for percentile computation via sort at snapshot time.
+/// Swapped atomically in [`MetricsCollector::snapshot_and_reset`], so any new
+/// counter added here is guaranteed to be reset — no manual zeroing required.
 #[derive(Debug)]
-pub(crate) struct MetricsCollector {
-    // -- Interval tracking --
-    interval_start: Mutex<DateTime<Utc>>,
+struct IntervalState {
+    start: DateTime<Utc>,
 
     authz_requests_total: AtomicI64,
     authz_requests_unsigned: AtomicI64,
@@ -154,11 +158,128 @@ pub(crate) struct MetricsCollector {
     data_get_ops: AtomicI64,
     data_remove_ops: AtomicI64,
 
+    policy_stats: RwLock<HashMap<String, PolicyStats>>,
+    error_counters: RwLock<HashMap<String, i64>>,
+}
+
+impl IntervalState {
+    fn new(start: DateTime<Utc>) -> Self {
+        Self {
+            start,
+            authz_requests_total: AtomicI64::new(0),
+            authz_requests_unsigned: AtomicI64::new(0),
+            authz_requests_multi_issuer: AtomicI64::new(0),
+            authz_decision_allow: AtomicI64::new(0),
+            authz_decision_deny: AtomicI64::new(0),
+            authz_errors_total: AtomicI64::new(0),
+            eval_times_us: Mutex::new(ReservoirSampler::new(EVAL_TIME_RESERVOIR_SIZE)),
+            last_eval_time_us: AtomicI64::new(0),
+            token_cache_hits: AtomicI64::new(0),
+            token_cache_misses: AtomicI64::new(0),
+            token_cache_evictions: AtomicI64::new(0),
+            jwt_validations_total: AtomicI64::new(0),
+            jwt_validations_success: AtomicI64::new(0),
+            jwt_validations_failed: AtomicI64::new(0),
+            data_push_ops: AtomicI64::new(0),
+            data_get_ops: AtomicI64::new(0),
+            data_remove_ops: AtomicI64::new(0),
+            policy_stats: RwLock::new(HashMap::new()),
+            error_counters: RwLock::new(HashMap::new()),
+        }
+    }
+
+    /// Builds the `operational_stats` map from all counters in this interval.
+    ///
+    /// Accepts pre-computed values that require context outside `IntervalState`
+    /// (eval-time percentiles, uptime, policy count).
+    fn to_operational_stats(
+        &self,
+        p50: i64,
+        p95: i64,
+        p99: i64,
+        max_time: i64,
+        uptime_secs: i64,
+        policy_count: i64,
+    ) -> HashMap<String, i64> {
+        let load = |a: &AtomicI64| a.load(Ordering::Relaxed);
+        HashMap::from([
+            (
+                "authz.requests_total".to_string(),
+                load(&self.authz_requests_total),
+            ),
+            (
+                "authz.requests_unsigned".to_string(),
+                load(&self.authz_requests_unsigned),
+            ),
+            (
+                "authz.requests_multi_issuer".to_string(),
+                load(&self.authz_requests_multi_issuer),
+            ),
+            (
+                "authz.decision_allow".to_string(),
+                load(&self.authz_decision_allow),
+            ),
+            (
+                "authz.decision_deny".to_string(),
+                load(&self.authz_decision_deny),
+            ),
+            (
+                "authz.errors_total".to_string(),
+                load(&self.authz_errors_total),
+            ),
+            (
+                "authz.last_eval_time_us".to_string(),
+                load(&self.last_eval_time_us),
+            ),
+            ("authz.eval_time_p50_us".to_string(), p50),
+            ("authz.eval_time_p95_us".to_string(), p95),
+            ("authz.eval_time_p99_us".to_string(), p99),
+            ("authz.eval_time_max_us".to_string(), max_time),
+            ("token_cache.hits".to_string(), load(&self.token_cache_hits)),
+            (
+                "token_cache.misses".to_string(),
+                load(&self.token_cache_misses),
+            ),
+            (
+                "token_cache.evictions".to_string(),
+                load(&self.token_cache_evictions),
+            ),
+            (
+                "jwt.validations_total".to_string(),
+                load(&self.jwt_validations_total),
+            ),
+            (
+                "jwt.validations_success".to_string(),
+                load(&self.jwt_validations_success),
+            ),
+            (
+                "jwt.validations_failed".to_string(),
+                load(&self.jwt_validations_failed),
+            ),
+            ("data.push_ops".to_string(), load(&self.data_push_ops)),
+            ("data.get_ops".to_string(), load(&self.data_get_ops)),
+            ("data.remove_ops".to_string(), load(&self.data_remove_ops)),
+            ("instance.uptime_secs".to_string(), uptime_secs),
+            ("instance.policy_count".to_string(), policy_count),
+        ])
+    }
+}
+
+/// Thread-safe telemetry metrics collector.
+///
+/// Uses atomic operations for hot-path counters (lock-free within each interval).
+/// `record_*` methods acquire a read lock on the current [`IntervalState`] so
+/// they can proceed concurrently. `snapshot_and_reset` acquires a write lock
+/// once per interval and swaps the entire state for a fresh instance, guaranteeing
+/// every counter is reset by construction.
+#[derive(Debug)]
+pub(crate) struct MetricsCollector {
+    /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
 
-    policy_stats: RwLock<HashMap<String, PolicyStats>>,
-    error_counters: RwLock<HashMap<String, i64>>,
+    /// Swapped wholesale on each snapshot; read lock for record_*, write lock for snapshot
+    interval: RwLock<Box<IntervalState>>,
 }
 
 impl MetricsCollector {
@@ -166,33 +287,9 @@ impl MetricsCollector {
     pub(crate) fn new(initial_policy_count: usize) -> Self {
         let now = Utc::now();
         Self {
-            interval_start: Mutex::new(now),
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
-
-            authz_requests_total: AtomicI64::new(0),
-            authz_requests_unsigned: AtomicI64::new(0),
-            authz_requests_multi_issuer: AtomicI64::new(0),
-            authz_decision_allow: AtomicI64::new(0),
-            authz_decision_deny: AtomicI64::new(0),
-            authz_errors_total: AtomicI64::new(0),
-
-            eval_times_us: Mutex::new(ReservoirSampler::new(EVAL_TIME_RESERVOIR_SIZE)),
-            last_eval_time_us: AtomicI64::new(0),
-
-            token_cache_hits: AtomicI64::new(0),
-            token_cache_misses: AtomicI64::new(0),
-            token_cache_evictions: AtomicI64::new(0),
-
-            jwt_validations_total: AtomicI64::new(0),
-            jwt_validations_success: AtomicI64::new(0),
-            jwt_validations_failed: AtomicI64::new(0),
-
-            data_push_ops: AtomicI64::new(0),
-            data_get_ops: AtomicI64::new(0),
-            data_remove_ops: AtomicI64::new(0),
-            policy_stats: RwLock::new(HashMap::new()),
-            error_counters: RwLock::new(HashMap::new()),
+            interval: RwLock::new(Box::new(IntervalState::new(now))),
         }
     }
 
@@ -204,40 +301,51 @@ impl MetricsCollector {
         is_unsigned: bool,
         evaluated_policies: impl Iterator<Item = (&'a str, Decision)>,
     ) {
-        self.authz_requests_total.fetch_add(1, Ordering::Relaxed);
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+
+        interval
+            .authz_requests_total
+            .fetch_add(1, Ordering::Relaxed);
 
         if is_unsigned {
-            self.authz_requests_unsigned.fetch_add(1, Ordering::Relaxed);
+            interval
+                .authz_requests_unsigned
+                .fetch_add(1, Ordering::Relaxed);
         } else {
-            self.authz_requests_multi_issuer
+            interval
+                .authz_requests_multi_issuer
                 .fetch_add(1, Ordering::Relaxed);
         }
 
         match decision {
-            Decision::Allow => self.authz_decision_allow.fetch_add(1, Ordering::Relaxed),
-            Decision::Deny => self.authz_decision_deny.fetch_add(1, Ordering::Relaxed),
+            Decision::Allow => interval
+                .authz_decision_allow
+                .fetch_add(1, Ordering::Relaxed),
+            Decision::Deny => interval.authz_decision_deny.fetch_add(1, Ordering::Relaxed),
         };
 
-        self.last_eval_time_us
+        interval
+            .last_eval_time_us
             .store(decision_time_us, Ordering::Relaxed);
 
-        self.eval_times_us
+        interval
+            .eval_times_us
             .lock()
-            .expect("eval_times_us lock poisoned")
+            .expect(EVAL_TIMES_LOCK_POISONED)
             .insert(decision_time_us);
 
         let policies: Vec<(&str, Decision)> = evaluated_policies.collect();
         let untracked_policies: Vec<(&str, Decision)> = {
-            let stats = self
+            let stats = interval
                 .policy_stats
                 .read()
-                .expect("policy_stats read lock poisoned");
+                .expect(POLICY_STATS_READ_LOCK_POISONED);
             policies
                 .iter()
                 .filter_map(|(id, pol_decision)| {
                     if let Some(entry) = stats.get(*id) {
                         entry.record(*pol_decision);
-                        None // handled
+                        None
                     } else {
                         Some((*id, *pol_decision))
                     }
@@ -246,10 +354,10 @@ impl MetricsCollector {
         };
 
         if !untracked_policies.is_empty() {
-            let mut stats = self
+            let mut stats = interval
                 .policy_stats
                 .write()
-                .expect("policy_stats write lock poisoned");
+                .expect(POLICY_STATS_WRITE_LOCK_POISONED);
             for (id, pol_decision) in untracked_policies {
                 stats
                     .entry(id.to_string())
@@ -261,7 +369,11 @@ impl MetricsCollector {
 
     /// Increments `authz.errors_total` counter.
     pub(crate) fn record_authz_error(&self) {
-        self.authz_errors_total.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .authz_errors_total
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
@@ -271,44 +383,76 @@ impl MetricsCollector {
 
     /// Increments a classified error counter by raw key string.
     pub(crate) fn increment_error(&self, key: &str) {
-        let mut counters = self
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        let mut counters = interval
             .error_counters
             .write()
-            .expect("error_counters lock poisoned");
+            .expect(ERROR_COUNTERS_LOCK_POISONED);
         *counters.entry(key.to_string()).or_insert(0) += 1;
     }
 
     pub(crate) fn record_cache_hit(&self) {
-        self.token_cache_hits.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .token_cache_hits
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     pub(crate) fn record_cache_miss(&self) {
-        self.token_cache_misses.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .token_cache_misses
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     pub(crate) fn record_cache_eviction(&self, count: usize) {
-        self.token_cache_evictions
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .token_cache_evictions
             .fetch_add(saturating_usize_to_i64(count), Ordering::Relaxed);
     }
 
     pub(crate) fn record_jwt_validation(&self, success: bool) {
-        self.jwt_validations_total.fetch_add(1, Ordering::Relaxed);
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        interval
+            .jwt_validations_total
+            .fetch_add(1, Ordering::Relaxed);
         if success {
-            self.jwt_validations_success.fetch_add(1, Ordering::Relaxed);
+            interval
+                .jwt_validations_success
+                .fetch_add(1, Ordering::Relaxed);
         } else {
-            self.jwt_validations_failed.fetch_add(1, Ordering::Relaxed);
+            interval
+                .jwt_validations_failed
+                .fetch_add(1, Ordering::Relaxed);
         }
     }
+
     pub(crate) fn record_data_push(&self) {
-        self.data_push_ops.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .data_push_ops
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     pub(crate) fn record_data_get(&self) {
-        self.data_get_ops.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .data_get_ops
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     pub(crate) fn record_data_remove(&self) {
-        self.data_remove_ops.fetch_add(1, Ordering::Relaxed);
+        self.interval
+            .read()
+            .expect(INTERVAL_LOCK_POISONED)
+            .data_remove_ops
+            .fetch_add(1, Ordering::Relaxed);
     }
 
     pub(crate) fn set_policy_count(&self, count: usize) {
@@ -318,35 +462,31 @@ impl MetricsCollector {
 
     /// Captures a snapshot of all metrics and resets counters for the next interval.
     ///
-    /// Counters are zeroed. Gauges retain their current values. The eval times
-    /// reservoir is drained after computing percentiles.
+    /// The entire [`IntervalState`] is swapped for a fresh instance under a write lock,
+    /// guaranteeing every counter starts from zero — no per-field reset needed.
     ///
     /// # Consistency
     ///
-    /// [`MetricsCollector::snapshot_and_reset`] swaps/resets atomics one at a time without a
-    /// global lock. A concurrent [`MetricsCollector::record_evaluation`] that lands between two
-    /// swaps can cause derived invariants to be off by one within a single snapshot
-    /// (e.g. `authz.requests_total` may not equal `authz.decision_allow + authz.decision_deny`).
+    /// A concurrent [`MetricsCollector::record_evaluation`] that lands between acquiring
+    /// the write lock and completing the swap will block until the swap finishes, then
+    /// record into the new interval. Derived invariants (e.g. `requests_total ==
+    /// decision_allow + decision_deny`) may still be off by one across a snapshot boundary.
     pub(crate) fn snapshot_and_reset(&self) -> MetricsSnapshot {
-        // Compute interval duration and reset start time
         let now = Utc::now();
-        let interval_secs = {
-            let mut start = self
-                .interval_start
-                .lock()
-                .expect("interval_start lock poisoned");
-            let duration = now.signed_duration_since(*start);
-            *start = now;
-            duration.num_seconds()
+
+        let old = {
+            let mut guard = self.interval.write().expect(INTERVAL_LOCK_POISONED);
+            std::mem::replace(&mut *guard, Box::new(IntervalState::new(now)))
         };
 
+        let interval_secs = now.signed_duration_since(old.start).num_seconds();
+
         let policy_stats = {
-            let mut map = self
+            let map = old
                 .policy_stats
-                .write()
-                .expect("policy_stats lock poisoned");
-            let snapshot = map
-                .iter()
+                .read()
+                .expect(POLICY_STATS_READ_LOCK_POISONED);
+            map.iter()
                 .flat_map(|(id, stats)| {
                     let snap = stats.snapshot();
                     [
@@ -355,89 +495,25 @@ impl MetricsCollector {
                         (format!("{id}.deny"), snap.deny_count),
                     ]
                 })
-                .collect();
-            map.clear();
-            snapshot
+                .collect()
         };
 
-        // Take and reset error_counters
-        let error_counters = {
-            let mut counters = self
-                .error_counters
-                .write()
-                .expect("error_counters lock poisoned");
-            std::mem::take(&mut *counters)
-        };
+        let error_counters = old
+            .error_counters
+            .read()
+            .expect(ERROR_COUNTERS_LOCK_POISONED)
+            .clone();
 
-        // Drain bounded reservoir and compute percentiles
-        let times_snapshot = self
+        let times_snapshot = old
             .eval_times_us
             .lock()
-            .expect("eval_times_us lock poisoned")
+            .expect(EVAL_TIMES_LOCK_POISONED)
             .drain();
         let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
 
-        // Build operational_stats map from atomic fields
-        let mut ops = HashMap::new();
-
-        insert_swap(&mut ops, "authz.requests_total", &self.authz_requests_total);
-        insert_swap(
-            &mut ops,
-            "authz.requests_unsigned",
-            &self.authz_requests_unsigned,
-        );
-        insert_swap(
-            &mut ops,
-            "authz.requests_multi_issuer",
-            &self.authz_requests_multi_issuer,
-        );
-        insert_swap(&mut ops, "authz.decision_allow", &self.authz_decision_allow);
-        insert_swap(&mut ops, "authz.decision_deny", &self.authz_decision_deny);
-        insert_swap(&mut ops, "authz.errors_total", &self.authz_errors_total);
-
-        // Authorization latency (gauges, swap)
-        insert_load(&mut ops, "authz.last_eval_time_us", &self.last_eval_time_us);
-        insert_val(&mut ops, "authz.eval_time_p50_us", p50);
-        insert_val(&mut ops, "authz.eval_time_p95_us", p95);
-        insert_val(&mut ops, "authz.eval_time_p99_us", p99);
-        insert_val(&mut ops, "authz.eval_time_max_us", max_time);
-
-        // Token cache (counters swap, gauge load)
-        insert_swap(&mut ops, "token_cache.hits", &self.token_cache_hits);
-        insert_swap(&mut ops, "token_cache.misses", &self.token_cache_misses);
-        insert_swap(
-            &mut ops,
-            "token_cache.evictions",
-            &self.token_cache_evictions,
-        );
-
-        // JWT validation (counters swap)
-        insert_swap(
-            &mut ops,
-            "jwt.validations_total",
-            &self.jwt_validations_total,
-        );
-        insert_swap(
-            &mut ops,
-            "jwt.validations_success",
-            &self.jwt_validations_success,
-        );
-        insert_swap(
-            &mut ops,
-            "jwt.validations_failed",
-            &self.jwt_validations_failed,
-        );
-
-        insert_swap(&mut ops, "data.push_ops", &self.data_push_ops);
-        insert_swap(&mut ops, "data.get_ops", &self.data_get_ops);
-        insert_swap(&mut ops, "data.remove_ops", &self.data_remove_ops);
-
-        insert_val(
-            &mut ops,
-            "instance.uptime_secs",
-            now.signed_duration_since(self.init_time).num_seconds(),
-        );
-        insert_load(&mut ops, "instance.policy_count", &self.policy_count);
+        let uptime_secs = now.signed_duration_since(self.init_time).num_seconds();
+        let policy_count = self.policy_count.load(Ordering::Relaxed);
+        let ops = old.to_operational_stats(p50, p95, p99, max_time, uptime_secs, policy_count);
 
         MetricsSnapshot {
             policy_stats,
@@ -446,21 +522,6 @@ impl MetricsCollector {
             interval_secs,
         }
     }
-}
-
-/// Inserts a counter value by swapping the atomic to 0.
-fn insert_swap(map: &mut HashMap<String, i64>, key: &str, atomic: &AtomicI64) {
-    map.insert(key.to_string(), atomic.swap(0, Ordering::Relaxed));
-}
-
-/// Inserts a gauge value by loading (not resetting) the atomic.
-fn insert_load(map: &mut HashMap<String, i64>, key: &str, atomic: &AtomicI64) {
-    map.insert(key.to_string(), atomic.load(Ordering::Relaxed));
-}
-
-/// Inserts a pre-computed value.
-fn insert_val(map: &mut HashMap<String, i64>, key: &str, value: i64) {
-    map.insert(key.to_string(), value);
 }
 
 /// Computes percentiles from a mutable slice using nearest-rank method.
@@ -819,7 +880,6 @@ mod tests {
             sampler.insert(i);
         }
 
-        // Memory is bounded regardless of input size
         assert_eq!(
             sampler.samples.len(),
             10,
