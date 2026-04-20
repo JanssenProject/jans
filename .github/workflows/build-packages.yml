@@ -360,7 +360,7 @@ jobs:
       run: |
         rustup default stable
         rustup target add wasm32-unknown-unknown
-        cargo install wasm-pack
+        cargo install wasm-pack --locked
         echo "--- rustc version ---"
         rustc --version
         echo "--- cargo version ---"
@@ -389,7 +389,7 @@ jobs:
         sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
         echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
   
-        wasm-pack build --release --target web --scope janssenproject
+        wasm-pack build --release --target web --scope janssenproject -- --locked
         cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
@@ -401,7 +401,7 @@ jobs:
         NODEJS_VERSION="${VERSION_TO_PUBLISH}-nodejs"
         sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
         echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
-        wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
+        wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs -- --locked
         cd pkg-nodejs
         npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
           echo "npm publish (nodejs) failed (may already be published), continuing..."
@@ -525,7 +525,7 @@ jobs:
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
-        args: --release -i python3.11
+        args: --release -i python3.11 --locked
         maturin-version: "1.9.4"
 
     - name: Sign and upload Cedarling Python wheels
@@ -624,7 +624,7 @@ jobs:
             TAG="0.0.0"
           fi
           
-          cargo build -r -p cedarling_go
+          cargo build -r -p cedarling_go --locked
           
           case "${{ matrix.name }}" in
             ubuntu22)
@@ -793,7 +793,7 @@ jobs:
           TAG="0.0.0"
         fi
         
-        cargo build -r -p cedarling_uniffi
+        cargo build -r -p cedarling_uniffi --locked
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
@@ -814,8 +814,8 @@ jobs:
           TAG="0.0.0"
         fi
         
-        cargo build -r -p cedarling_uniffi
-        cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
+        cargo build -r -p cedarling_uniffi --locked
+        cargo run --locked --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
         zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
