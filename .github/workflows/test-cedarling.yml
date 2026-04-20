@@ -223,7 +223,7 @@ jobs:
     - name: Build Rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        cargo build -r -p cedarling_go --locked
+        cargo build -r --locked -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
@@ -255,7 +255,7 @@ jobs:
     - name: Build Rust C library
       working-directory: jans-cedarling/bindings/cedarling_c
       run: |
-        cargo build --release -p cedarling_c --locked
+        cargo build --release --locked -p cedarling_c
         test -f target/include/cedarling_c.h || (echo "header missing" && exit 1)
     - name: Build and run C tests
       working-directory: jans-cedarling/bindings/cedarling_c
