@@ -801,10 +801,6 @@
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/head/janssen-server/config-guide/link-configuration/</loc>
-         <lastmod>2026-04-20</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/head/janssen-server/config-guide/session/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
@@ -1105,6 +1101,10 @@
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/head/janssen-server/install/vm-install/debian/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/head/janssen-server/install/vm-install/dynamic-download/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
@@ -1174,14 +1174,6 @@
     </url>
     <url>
          <loc>https://docs.jans.io/head/janssen-server/kubernetes-ops/upgrade/</loc>
-         <lastmod>2026-04-20</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/head/janssen-server/link/</loc>
-         <lastmod>2026-04-20</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/head/janssen-server/link/jans-link/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
@@ -1561,10 +1553,6 @@
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/head/janssen-server/usermgmt/usermgmt-jans-link/</loc>
-         <lastmod>2026-04-20</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/head/janssen-server/usermgmt/usermgmt-scim/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
@@ -1706,10 +1694,6 @@
     </url>
     <url>
          <loc>https://docs.jans.io/head/script-catalog/introspection/introspection/</loc>
-         <lastmod>2026-04-20</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/head/script-catalog/link_interception/link-interception/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
