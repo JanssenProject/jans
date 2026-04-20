@@ -3,22 +3,22 @@ tags:
 - administration
 - installation
 - vm
-- ubuntu
+- debian
 ---
 
-# Ubuntu Janssen Installation
+# Debian Janssen Installation
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-### Ubuntu 24.04
+### Debian 13 (Trixie)
 
 - Download the release package from the GitHub Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -35,17 +35,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu24-replace-janssen-version.bundle \
+          --bundle jans-debian13-replace-janssen-version.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+          jans_replace-janssen-version~debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -57,95 +57,21 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum -P /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb.sha256sum -P /tmp
+    sha256sum -c jans_replace-janssen-version~debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
+    jans_replace-janssen-version~debian13_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+sudo apt install ./jans_replace-janssen-version~debian13_amd64.deb
 ```
-
-### Ubuntu 22.04
-
-- Download the release package from the GitHub Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases/latest)
-
-    ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
-    ```
-
-- Go to `/tmp` directory:
-
-    ```bash title="Command"
-    cd /tmp
-    ```
-
-- Verify the cryptographic signature using cosign (primary verification):
-
-    !!! Note
-        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
-
-    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
-
-        ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version.bundle -P /tmp
-        ```
-
-    - Verify the signature:
-
-        ```bash title="Command"
-        cosign verify-blob \
-          --bundle jans-ubuntu22-replace-janssen-version.bundle \
-          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
-          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
-        ```
-
-        Output similar to below confirms the package was signed by the Janssen CI pipeline:
-
-        ```text title="Output"
-        Verified OK
-        ```
-
-- Optionally, verify integrity using the published checksum file (secondary check):
-
-    ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum -P /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
-    ```
-
-    Output similar to below should confirm the integrity of the downloaded package.
-
-    ```text title="Output"
-    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
-    ```
-
-- Install the package
-
-```shell title="Command"
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
-```
-
-Or,
-
-```shell title="Command"
-dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
-```
-
-### Ubuntu 20.04
-
-!!! warning "Ubuntu 20.04 is end-of-life and no longer supported"
-    Ubuntu 20.04 reached end-of-life in April 2025. Janssen packages and
-    cosign-signed bundles are no longer published for this version.
-    Please upgrade to [Ubuntu 22.04](#ubuntu-2204) or [Ubuntu 24.04](#ubuntu-2404).
 
 ## Run the setup script
 
@@ -177,6 +103,7 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
 
 ## Let's Encrypt
+
 To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
 
 To generate Let's Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
@@ -253,6 +180,6 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (replace-janssen-version~ubuntu20.04) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```

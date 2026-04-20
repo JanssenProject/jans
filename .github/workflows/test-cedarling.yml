@@ -33,12 +33,12 @@ jobs:
         workspaces: jans-cedarling
     - name: Run Tests (without default features)
       working-directory: jans-cedarling/cedarling
-      run: cargo test --no-default-features
+      run: cargo test --locked --no-default-features
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
-      run: cargo test --workspace
+      run: cargo test --locked --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
       run: cargo +stable clippy --workspace --all-targets -- -D warnings
@@ -189,6 +189,10 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: "1.95.0"
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
       run: tox
@@ -219,7 +223,7 @@ jobs:
     - name: Build Rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        cargo build -r -p cedarling_go
+        cargo build -r -p cedarling_go --locked
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
@@ -251,7 +255,7 @@ jobs:
     - name: Build Rust C library
       working-directory: jans-cedarling/bindings/cedarling_c
       run: |
-        cargo build --release -p cedarling_c
+        cargo build --release -p cedarling_c --locked
         test -f target/include/cedarling_c.h || (echo "header missing" && exit 1)
     - name: Build and run C tests
       working-directory: jans-cedarling/bindings/cedarling_c
