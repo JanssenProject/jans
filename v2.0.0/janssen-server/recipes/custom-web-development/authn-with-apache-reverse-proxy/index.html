@@ -1,0 +1,1214 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.0.0/janssen-server/recipes/custom-web-development/authn-with-apache-reverse-proxy/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Auth With Apache Reverse Proxy - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#auth-with-apache-reverse-proxy" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Auth With Apache Reverse Proxy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../cedarling/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contents:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contents:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-janssen-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Janssen server
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-protected-resource" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure protected resource
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-openidc-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure openidc module
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure openidc module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-mod-auth-openidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install mod-auth-openidc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-mod-auth-openidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure mod-auth-openidc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-complete-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Complete Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">apache</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">custom-web-development</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">mod-auth-openidc</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">proxy</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">recipes</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="auth-with-apache-reverse-proxy">Auth With Apache Reverse Proxy<a class="headerlink" href="#auth-with-apache-reverse-proxy" title="Permanent link">#</a></h1>
+<h2 id="contents">Contents:<a class="headerlink" href="#contents" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="#component-setup">Component Setup</a></li>
+<li><a href="#configure-janssen-server">Configure Janssen server</a></li>
+<li><a href="#configure-protected-resource">Configure Protected Resource</a></li>
+<li><a href="#configure-openidc-module">Configure openidc module</a></li>
+<li><a href="#test-complete-flow">Test Complete Flow</a></li>
+</ul>
+<p>This guide describes steps to enable authentication for web applications using the Janssen server which is an OpenID Connect Provider (OP).</p>
+<p>In the process of setting up a working environment, we will see how to use the command-line tool <code>jans-cli</code> to manually register an OpenID Connect client with the Janssen server. We will also see how to configure Relying Party to communicate with the Janssen server.</p>
+<h4 id="hardware-configuration">Hardware configuration<a class="headerlink" href="#hardware-configuration" title="Permanent link">#</a></h4>
+<p>For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer <a href="https://github.com/JanssenProject/jans/wiki#janssen-installation">installation guide</a>.</p>
+<h4 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h4>
+<ul>
+<li>Installed Apache reverse proxy that is SSL enabled</li>
+<li>Installed Janssen server. Refer to <a href="https://github.com/JanssenProject/jans/wiki#janssen-installation">Janssen Installation Guide</a> for instructions.</li>
+</ul>
+<h2 id="component-setup">Component Setup<a class="headerlink" href="#component-setup" title="Permanent link">#</a></h2>
+<p><img alt="Component Diagram" src="../../../../assets/image-howto-mod-auth-comp-04222022.png" /></p>
+<p>In this setup, we have four important components.
+- <strong>Protected resource</strong> is a resource that we need to protect using authentication. A web application for example. 
+- <strong>User workstation</strong> is from where the user will use a browser(i.e user agent) to access the protected resource
+- <strong>Apache reverse proxy with mod_auth_openidc</strong> is our reverse proxy server and relying party.
+  - <em>Reverse Proxy</em>: In our setup protected resources will be accessible through the proxy's FQDN <code>https://test.apache.rp.io</code>. For simplicity, we will use a CGI script as a protected resource and host it on the Apache proxy itself. In a typical production setup, protected resources are usually hosted on a separate server. 
+  - <em>Relying Party</em>: We will use Apache module <a href="https://github.com/zmartzone/mod_auth_openidc">mod_auth_openidc</a> to provide relying party(RP) functionality. RP implements authentication flows from OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If the request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
+- <strong>Janssen server</strong> is our open-id connect provider (OP). We will assume that the Janssen server is accessible at FQDN <code>https://janssen.op.io/</code></p>
+<h2 id="configure-janssen-server">Configure Janssen server<a class="headerlink" href="#configure-janssen-server" title="Permanent link">#</a></h2>
+<p>In this section, we will register a new OpenID Connect client on Janssen server. In our setup, the relying party (Apache with mod_auth-openidc) is the OIDC client. There are two ways you can register OIDC client with Janssen server.
+1. Manual Client Registration
+2. Dynamic Client Registration (DCR)</p>
+<p>Here we will use manual client registration.</p>
+<p>To register a new OpenID connect client on the Janssen server, we will use <code>jans-cli</code> tool provided by the Janssen server. <code>jans-cli</code> has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to <a href="../../../config-guide/config-tools/jans-cli/">jans-cli documentation</a>.</p>
+<ul>
+<li>
+<p>Run the command below on Janssen server to enter interactive mode. </p>
+<blockquote>
+<p>Note: </br> <code>jans-cli</code> has to be authenticated and authorized with the respective Janssen server. If <code>jans-cli</code> is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for <a href="../../../config-guide/config-tools/jans-cli/#cli-authorization">jans-cli authorization</a> to continue running the command.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py
+</code></pre></div>
+<p>Running above command will bring up main menu as shown in sample below:</p>
+<p><img alt="CLI-main-menu" src="../../../../assets/image-howto-mod-auth-cli-main-menu-04292022.png" /></p>
+<p>To register a new OpenID Connect client, select <code>OAuth OpenID Connect - Clients</code> option (<code>16</code> in above sample). Selecting an appropriate option will bring up related sub-menu. </p>
+</li>
+<li>
+<p>From sub-menu, select option for <code>Create new OpenId connect client</code>. Upon selecting this option, CLI will prompt for inputs required to register a new OpenID connect client.</p>
+</li>
+<li>
+<p>Provide inputs for the following properties:</p>
+<div class="highlight"><pre><span></span><code>displayName: &lt;name-of-choice&gt;
+application Type: web
+includeClaimsInIdToken  [false]: 
+Populate optional fields? y
+clientSecret: &lt;secret-of-your-choice&gt;
+subjectType: public
+tokenEndpointAuthMethod: client_secret_basic
+redirectUris: https://test.apache.rp.io/callback
+scopes: email_,openid_,profile
+responseTypes: code
+grantTypes: authorization_code
+</code></pre></div>
+</li>
+<li>
+<p>Once values for all the above properties are provided, input <code>c</code> at the prompt to instruct <code>jans-cli</code> to create schema using inputs provided till now. At this time, <code>jans-cli</code> will show the schema(JSON) that will be used to create a new OpenID Connect client on Janssen server. Verify that schema has captured all the provided inputs correctly.</p>
+</li>
+<li>Now next step is for <code>jans-cli</code> to post this JSON schema to Janssen server to actually register new client. To do this, input <code>y</code> on the prompt.</li>
+<li>
+<p>If the client is successfully registered then we will receive JSON data back. This data describes newly registered client. Some of these values from this JSON response, like <code>inum</code> and <code>clientSecret</code>, will be required when we configure <code>mod_auth_openidc</code> as a client. So keep this reponse JSON handy. See a sample of JSON response below:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;dn&quot;: &quot;inum=165bdf95-f15e-44f0-bdd7-cdac71fda8e0,ou=clients,o=jans&quot;,
+  &quot;inum&quot;: &quot;165bdf95-f15e-44f0-bdd7-cdac71fda8e0&quot;,
+  &quot;displayName&quot;: &quot;dm&quot;,
+  &quot;clientSecret&quot;: &quot;a9894ba8-eb01-4a26-a69d-026f10a49272&quot;,
+  &quot;frontChannelLogoutUri&quot;: null,
+  &quot;frontChannelLogoutSessionRequired&quot;: false,
+  &quot;registrationAccessToken&quot;: null,
+  &quot;clientIdIssuedAt&quot;: null,
+  &quot;clientSecretExpiresAt&quot;: null,
+  &quot;redirectUris&quot;: null,
+  &quot;claimRedirectUris&quot;: null,
+  &quot;responseTypes&quot;: null,
+  &quot;grantTypes&quot;: [],
+  &quot;applicationType&quot;: &quot;web&quot;,
+  &quot;contacts&quot;: null,
+  &quot;clientName&quot;: &quot;dm&quot;,
+  &quot;idTokenTokenBindingCnf&quot;: null,
+  &quot;logoUri&quot;: null,
+  &quot;clientUri&quot;: null,
+  &quot;policyUri&quot;: null,
+  &quot;tosUri&quot;: null,
+  &quot;jwksUri&quot;: null,
+  &quot;jwks&quot;: null,
+  &quot;sectorIdentifierUri&quot;: null,
+  &quot;subjectType&quot;: &quot;public&quot;,
+  &quot;idTokenSignedResponseAlg&quot;: null,
+  &quot;idTokenEncryptedResponseAlg&quot;: null,
+  &quot;idTokenEncryptedResponseEnc&quot;: null,
+  &quot;userInfoSignedResponseAlg&quot;: null,
+  &quot;userInfoEncryptedResponseAlg&quot;: null,
+  &quot;userInfoEncryptedResponseEnc&quot;: null,
+  &quot;requestObjectSigningAlg&quot;: null,
+  &quot;requestObjectEncryptionAlg&quot;: null,
+  &quot;requestObjectEncryptionEnc&quot;: null,
+  &quot;tokenEndpointAuthMethod&quot;: null,
+  &quot;tokenEndpointAuthSigningAlg&quot;: null,
+  &quot;defaultMaxAge&quot;: null,
+  &quot;requireAuthTime&quot;: false,
+  &quot;defaultAcrValues&quot;: null,
+  &quot;initiateLoginUri&quot;: null,
+  &quot;postLogoutRedirectUris&quot;: null,
+  &quot;requestUris&quot;: null,
+  &quot;scopes&quot;: null,
+  &quot;claims&quot;: null,
+  &quot;trustedClient&quot;: false,
+  &quot;lastAccessTime&quot;: null,
+  &quot;lastLogonTime&quot;: null,
+  &quot;persistClientAuthorizations&quot;: false,
+  &quot;includeClaimsInIdToken&quot;: false,
+  &quot;refreshTokenLifetime&quot;: null,
+  &quot;accessTokenLifetime&quot;: null,
+  &quot;customAttributes&quot;: [],
+  &quot;customObjectClasses&quot;: null,
+  &quot;rptAsJwt&quot;: false,
+  &quot;accessTokenAsJwt&quot;: false,
+  &quot;accessTokenSigningAlg&quot;: null,
+  &quot;disabled&quot;: false,
+  &quot;authorizedOrigins&quot;: null,
+  &quot;softwareId&quot;: null,
+  &quot;softwareVersion&quot;: null,
+  &quot;softwareStatement&quot;: null,
+  &quot;attributes&quot;: {
+    &quot;tlsClientAuthSubjectDn&quot;: null,
+    &quot;runIntrospectionScriptBeforeJwtCreation&quot;: false,
+    &quot;keepClientAuthorizationAfterExpiration&quot;: false,
+    &quot;allowSpontaneousScopes&quot;: false,
+    &quot;spontaneousScopes&quot;: null,
+    &quot;spontaneousScopeScriptDns&quot;: null,
+    &quot;backchannelLogoutUri&quot;: null,
+    &quot;backchannelLogoutSessionRequired&quot;: false,
+    &quot;additionalAudience&quot;: null,
+    &quot;postAuthnScripts&quot;: null,
+    &quot;consentGatheringScripts&quot;: null,
+    &quot;introspectionScripts&quot;: null,
+    &quot;rptClaimsScripts&quot;: null
+  },
+  &quot;backchannelTokenDeliveryMode&quot;: null,
+  &quot;backchannelClientNotificationEndpoint&quot;: null,
+  &quot;backchannelAuthenticationRequestSigningAlg&quot;: null,
+  &quot;backchannelUserCodeParameter&quot;: null,
+  &quot;expirationDate&quot;: null,
+  &quot;deletable&quot;: false,
+  &quot;jansId&quot;: null
+}
+</code></pre></div>
+</li>
+</ul>
+<h2 id="configure-protected-resource">Configure protected resource<a class="headerlink" href="#configure-protected-resource" title="Permanent link">#</a></h2>
+<p>As mentioned under <a href="#component-setup">component setup</a>, our protected resource will be hosted on Apache reverse proxy itself. It is a simple Python based cgi script that will print request header information and can be accessed through <code>https://test.apache.rp.io/cgi-bin/printHeaders.py</code>. Execute the steps below on Apache host to set up the protected resource:</p>
+<ol>
+<li>Create script file <code>printHeaders.py</code>
+    <div class="highlight"><pre><span></span><code>vi /usr/lib/cgi-bin/printHeaders.py
+</code></pre></div>
+    with content as below
+    <div class="highlight"><pre><span></span><code>#!/usr/bin/python3
+
+import os
+
+d = os.environ
+k = d.keys()
+
+print &quot;Content-type: text/html\n\n&quot;
+
+print &quot;&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;printHeaders.cgi&lt;/TITLE&gt;&lt;/Head&gt;&lt;BODY&gt;&quot;
+print &quot;&lt;h1&gt;Environment Variables&lt;/H1&gt;&quot;
+for item in k:
+  print &quot;&lt;p&gt;&lt;B&gt;%s&lt;/B&gt;: %s &lt;/p&gt;&quot; % (item, d[item])
+print &quot;&lt;/BODY&gt;&lt;/HTML&gt;&quot;
+</code></pre></div></li>
+<li>Add Apache <code>cgi</code> module to enable execution of CGI
+    <div class="highlight"><pre><span></span><code>a2enmod cgi
+</code></pre></div></li>
+<li>Change permissions for CGI script so that it can be executed by Apache
+    <div class="highlight"><pre><span></span><code>chown www-data:www-data /usr/lib/cgi-bin/printHeaders.py
+chmod ug+x /usr/lib/cgi-bin/printHeaders.py
+</code></pre></div></li>
+</ol>
+<p>At this point, <code>printHeaders.py</code> should be accessible at <code>https://test.apache.rp.io/cgi-bin/printHeaders.py</code> without requiring any authentication.</p>
+<h2 id="configure-openidc-module">Configure openidc module<a class="headerlink" href="#configure-openidc-module" title="Permanent link">#</a></h2>
+<h4 id="install-mod-auth-openidc">Install <em>mod-auth-openidc</em><a class="headerlink" href="#install-mod-auth-openidc" title="Permanent link">#</a></h4>
+<p>On Apache reverse proxy host, add <em>mod-auth-openidc</em> using commands below
+<div class="highlight"><pre><span></span><code>apt-get install libapache2-mod-auth-openidc
+a2enmod auth_openidc
+service apache2 restart
+</code></pre></div></p>
+<h4 id="configure-mod-auth-openidc">Configure <em>mod-auth-openidc</em><a class="headerlink" href="#configure-mod-auth-openidc" title="Permanent link">#</a></h4>
+<ul>
+<li>Open <code>/etc/apache2/sites-available/default-ssl.conf</code></li>
+<li>Add <em>mod-auth-openidc</em> configuration parameters given below for virtual host <code>_default_:443</code>. Find more configuration options for <em>mod-auth-openidc</em> <a href="https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf">here</a>. </li>
+<li>This configuration will enable authentication for any resource under <code>/</code> context root.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>OIDCProviderMetadataURL https://janssen.op.io/jans-auth/.well-known/openid-configuration
+OIDCClientID &lt;inum-as-received-in-client-registration-response&gt;
+OIDCClientSecret &lt;as-provided-in-client-registration-request&gt;
+OIDCResponseType code
+OIDCScope &quot;openid email profile&quot;
+OIDCProviderTokenEndpointAuth client_secret_basic
+OIDCSSLValidateServer Off
+OIDCProviderIssuer https://janssen.op.io
+OIDCRedirectURI https://test.apache.rp.io/callback
+OIDCCryptoPassphrase &lt;crypto-passphrase-of-choice&gt;
+&lt;Location &quot;/&quot;&gt;
+    Require valid-user
+    AuthType openid-connect
+&lt;/Location&gt;
+</code></pre></div>
+<p>Restart Apache service.
+<div class="highlight"><pre><span></span><code>service apache2 restart
+</code></pre></div></p>
+<h2 id="test-complete-flow">Test Complete Flow<a class="headerlink" href="#test-complete-flow" title="Permanent link">#</a></h2>
+<ul>
+<li>Accessing <code>https://test.apache.rp.io/cgi-bin/printHeaders.py</code> should redirect to the Janssen authentication screen.</li>
+<li>Upon valid authentication, Janssen will present the user with a consent screen where the user will be able to allow user attributes that can be provided to the app</li>
+<li>If allowed, the user will be successfully taken to the <code>printHeaders.py</code> page. In the process, <code>mod_auth_openidc</code> also requests user claims (i.e attributes) from the <code>/userinfo</code> endpoint of the Janssen server. And makes these claims available as environment variables to the application.</li>
+<li><code>printHeaders.py</code> prints all the environment variables, along with user claims received from the Janssen server. The application can use this information to identify the user and also enforce access policies. Sample output below shows some of this user information and token information printed as part of environment variables:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Environment Variables
+
+OIDC_CLAIM_sub: e205be81-6a85-4d83-9126
+
+OIDC_CLAIM_email_verified: 1
+
+OIDC_CLAIM_name: Default myname User
+
+OIDC_CLAIM_nickname: myname
+
+OIDC_CLAIM_given_name: myname
+
+OIDC_CLAIM_middle_name: myname
+
+OIDC_CLAIM_family_name: User
+
+OIDC_CLAIM_email: myname@mydomain.io
+
+OIDC_access_token: d6a12cce-f196-4da3-ba17
+
+OIDC_access_token_expires: 165493257
+
+HTTPS: on
+
+SSL_TLS_SNI: test.apache.rp.io
+</code></pre></div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 18, 2025 10:21:52 UTC"><span class="timeago" datetime="2025-12-18T10:21:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 18, 2025 10:21:52 UTC">2025-12-18</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 16, 2022 08:00:42 UTC"><span class="timeago" datetime="2022-06-16T08:00:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 16, 2022 08:00:42 UTC">2022-06-16</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../../js/timeago.min.js"></script>
+      
+        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,2429 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.0.0/cedarling/reference/cedarling-authz/">
+      
+      
+        <link rel="prev" href="../../tutorials/swift/">
+      
+      
+        <link rel="next" href="../cedarling-multi-issuer/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Authorization - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#authorization-using-cedarling" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Authorization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#which-authorization-method-should-i-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which authorization method should I use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-issuer-authorization-authorize_multi_issuer-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Issuer Authorization (authorize_multi_issuer) — Recommended">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-collection-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Collection Naming Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatically Adding Entity References to the Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automatically Adding Entity References to the Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization-authorize_unsigned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unsigned Authorization (authorize_unsigned)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unsigned Authorization (authorize_unsigned)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-principal-and-partial-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional principal and partial evaluation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-multi-issuer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Issuer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-policy-store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-lock-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../integrations/cedarling-krakend/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#which-authorization-method-should-i-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which authorization method should I use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-issuer-authorization-authorize_multi_issuer-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Issuer Authorization (authorize_multi_issuer) — Recommended">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-collection-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Collection Naming Convention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatically Adding Entity References to the Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automatically Adding Entity References to the Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization-authorize_unsigned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unsigned Authorization (authorize_unsigned)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unsigned Authorization (authorize_unsigned)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-principal-and-partial-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional principal and partial evaluation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">lock</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="authorization-using-cedarling">Authorization Using Cedarling<a class="headerlink" href="#authorization-using-cedarling" title="Permanent link">#</a></h1>
+<p>The <strong>Policy Store</strong> contains the Cedar Policies, Cedar Schema, and optionally, a list of the
+Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
+or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
+a Jans Lock Server OAuth protected endpoint.</p>
+<p>Developers need to define Cedar Schema that makes sense for their application. For example, a
+developer writing a customer support application might define an "Issue" Resource and Actions like
+"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine
+grain access controls needed to implement the business rules of their application. The easiest way
+to define schema and policies is to use the <a href="https://cloud.gluu.org/agama-lab">AgamaLab</a> Policy
+Designer. This is a free developer tool hosted by <a href="https://gluu.org">Gluu</a>.</p>
+<p><img alt="Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context" src="../../../assets/lock-cedarling-diagram-2.jpg" /></p>
+<p>The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
+User, Workload, and Role entities based on token claims.</p>
+<p>The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
+of saying "User can perform action", we can say "Role can perform action"--a convenient way to
+implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
+domain may use the <code>role</code> user claim of the OpenID Userinfo token; another domain may use the
+<code>memberOf</code> claim in the OIDC id_token.</p>
+<p>Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC
+conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a
+"private" Resource from the private network, during business hours. In this case "Admins" is the role,
+but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
+"slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.</p>
+<p>The OIDC <code>id_token</code> JWT represents a Person authentication event. The access token JWT represents a
+Workload authentication event. These tokens contain other interesting contextual data. The <code>id_token</code>
+tells you who authenticated, when they authenticated, how they authenticated, and optionally other
+claims like the User's roles. An OAuth access token can tell you information about the Workload that
+obtained the JWT, its extent of access as defined by the OAuth Authorization Server (<em>i.e.</em> the
+values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
+contain business specific data needed for policy evaluation.</p>
+<h2 id="which-authorization-method-should-i-use">Which authorization method should I use?<a class="headerlink" href="#which-authorization-method-should-i-use" title="Permanent link">#</a></h2>
+<p>Cedarling provides two authorization methods. Choose the one that fits your deployment:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>authorize_multi_issuer</code></th>
+<th><code>authorize_unsigned</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>When to use</strong></td>
+<td>You have JWT tokens from trusted IDPs and want Cedarling to validate them</td>
+<td>Your application has already authenticated the principal and wants to pass raw entity data directly</td>
+</tr>
+<tr>
+<td><strong>JWT validation</strong></td>
+<td>Yes — full signature, expiration, and status validation</td>
+<td>No — accepts raw entity data as-is</td>
+</tr>
+<tr>
+<td><strong>Principal source</strong></td>
+<td>Derived from JWT token claims</td>
+<td>Supplied directly by the application</td>
+</tr>
+<tr>
+<td><strong>Typical scenarios</strong></td>
+<td>Production apps with OIDC/OAuth IDPs, federation, API gateways</td>
+<td>Custom auth flows, testing, service-to-service with upstream verification</td>
+</tr>
+<tr>
+<td><strong>Security model</strong></td>
+<td>Higher — Cedarling independently verifies token authenticity</td>
+<td>Lower — trusts the calling application</td>
+</tr>
+<tr>
+<td><strong>Recommended for</strong></td>
+<td>Most production deployments</td>
+<td>Prototyping, or when authentication is handled externally</td>
+</tr>
+</tbody>
+</table>
+<h2 id="multi-issuer-authorization-authorize_multi_issuer-recommended">Multi-Issuer Authorization (authorize_multi_issuer) — Recommended<a class="headerlink" href="#multi-issuer-authorization-authorize_multi_issuer-recommended" title="Permanent link">#</a></h2>
+<p>The <code>authorize_multi_issuer</code> method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. This is the recommended method for most production deployments.</p>
+<p>This method does <strong>not</strong> use a principal entity — authorization decisions are based solely on token claims placed in the context. Each validated token becomes a Cedar entity accessible via <code>context.tokens.{issuer_name}_{token_type}</code>.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token Sources</td>
+<td>Multiple issuers supported</td>
+</tr>
+<tr>
+<td>Token Types</td>
+<td>Flexible with explicit mapping</td>
+</tr>
+<tr>
+<td>Context Structure</td>
+<td>Individual token entities in <code>context.tokens</code></td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Federation, API gateways, multi-issuer apps</td>
+</tr>
+<tr>
+<td>Policy Context Access</td>
+<td><code>context.tokens.{issuer}_{token_type}</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Token Input</strong>: Developers provide an array of <code>TokenInput</code> objects, each containing:</li>
+<li><code>mapping</code>: The Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")</li>
+<li>
+<p><code>payload</code>: The JWT token string</p>
+</li>
+<li>
+<p><strong>Token Validation</strong>: Each token is validated using the existing Cedarling JWT validation capabilities:</p>
+</li>
+<li>Signature verification</li>
+<li>Expiration and time-based validation</li>
+<li>Status list validation (if configured)</li>
+<li>
+<p>Only tokens from trusted issuers are processed</p>
+</li>
+<li>
+<p><strong>Entity Creation</strong>: Each valid token becomes a Cedar entity with:</p>
+</li>
+<li>Token metadata (type, jti, issuer, exp, validated_at)</li>
+<li>JWT claims stored as entity tags</li>
+<li>
+<p>All claims stored as Sets of strings by default for consistency</p>
+</li>
+<li>
+<p><strong>Context Building</strong>: Valid tokens are organized into a <code>tokens</code> collection with predictable naming:</p>
+</li>
+<li>Field naming: <code>{issuer_name}_{token_type}</code></li>
+<li>Example: <code>context.tokens.acme_access_token</code>, <code>context.tokens.google_id_token</code></li>
+<li>
+<p>Issuer name comes from trusted issuer metadata or JWT iss claim</p>
+</li>
+<li>
+<p><strong>Policy Evaluation</strong>: Policies evaluate based on token entities in context without requiring a principal</p>
+</li>
+</ol>
+<h3 id="example-usage">Example Usage<a class="headerlink" href="#example-usage" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">bootstrap_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{...};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">bootstrap_config</span><span class="p">);</span>
+
+<span class="c1">// Create tokens array with explicit mappings</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGciOiJIUzI1NiIs...&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGciOiJFZERTQSIs...&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme::DolphinToken&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ey1b6cfMef21084633a7...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">];</span>
+
+<span class="c1">// Create multi-issuer request</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Document&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;doc-123&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">owner</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;alice@example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">classification</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;confidential&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// Execute authorization</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
+
+<span class="c1">// Check result — single decision (no per-principal breakdown)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">decision</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Access allowed&quot;</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Access denied&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="policy-examples">Policy Examples<a class="headerlink" href="#policy-examples" title="Permanent link">#</a></h3>
+<p>Policies for multi-issuer authorization reference tokens directly in the context:</p>
+<div class="highlight"><pre><span></span><code>// Policy checking token from specific issuer with claim
+permit(
+  principal,
+  action == Jans::Action::&quot;Read&quot;,
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &amp;&amp;
+  context.tokens.acme_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+  context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:documents&quot;)
+};
+
+// Policy requiring tokens from multiple issuers
+permit(
+  principal,
+  action == TradeAssociation::Action::&quot;Vote&quot;,
+  resource in TradeAssociation::Resource::&quot;Elections&quot;
+) when {
+  // Require token from trade association
+  context has tokens.trade_association_access_token &amp;&amp;
+  context.tokens.trade_association_access_token.hasTag(&quot;member_status&quot;) &amp;&amp;
+  context.tokens.trade_association_access_token.getTag(&quot;member_status&quot;).contains(&quot;Corporate Member&quot;) &amp;&amp;
+  // AND require token from company
+  context has tokens.nexo_access_token &amp;&amp;
+  context.tokens.nexo_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+  context.tokens.nexo_access_token.getTag(&quot;scope&quot;).contains(&quot;trade_association_rep&quot;)
+};
+
+// Policy with custom token type
+permit(
+  principal,
+  action == Acme::Action::&quot;SwimWithDolphin&quot;,
+  resource == Acme::Resource::&quot;MiamiAcquarium&quot;
+) when {
+  context has tokens.dolphin_dolphintoken &amp;&amp;
+  context.tokens.dolphin_dolphintoken.hasTag(&quot;waiver&quot;) &amp;&amp;
+  context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;)
+};
+</code></pre></div>
+<h3 id="token-collection-naming-convention">Token Collection Naming Convention<a class="headerlink" href="#token-collection-naming-convention" title="Permanent link">#</a></h3>
+<p>The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always <strong>lowercase</strong> and uses only <strong>underscores</strong> as separators, making it a valid Cedar identifier.</p>
+<p><strong>Pattern</strong>: <code>{issuer_name}_{token_type}</code></p>
+<p>Both components are individually normalized, then joined with a single underscore.</p>
+<p><strong>Step 1 — Issuer Name Resolution</strong>:</p>
+<ol>
+<li>Look up the JWT's <code>iss</code> claim in the trusted issuer configuration from the policy store</li>
+<li>If a matching trusted issuer is found, use its <code>name</code> field (e.g., <code>"Acme"</code>)</li>
+<li>If no trusted issuer matches, extract the hostname from the <code>iss</code> URL:<ul>
+<li>Strip the protocol (<code>https://</code>, <code>http://</code>)</li>
+<li>Take everything before the first <code>/</code></li>
+<li>Strip port numbers (everything after <code>:</code>)</li>
+<li>Example: <code>https://unknown.issuer.com:8080/auth</code> → <code>unknown.issuer.com</code></li>
+</ul>
+</li>
+<li><strong>Sanitize</strong>: replace all <code>.</code> (dots), <code></code> (spaces), and <code>-</code> (hyphens) with <code>_</code>, then convert to <strong>lowercase</strong></li>
+</ol>
+<p><strong>Step 2 — Token Type Simplification</strong>:</p>
+<ol>
+<li>Take the <code>mapping</code> field from the <code>TokenInput</code> (e.g., <code>"Jans::Access_Token"</code>)</li>
+<li>Split by the Cedar namespace separator <code>::</code> and take only the <strong>last segment</strong></li>
+<li>Convert to <strong>lowercase</strong></li>
+<li>Underscores within the token type name are preserved</li>
+</ol>
+<p><strong>Step 3 — Combine</strong>:</p>
+<p>Join the sanitized issuer name and simplified token type with <code>_</code>:</p>
+<div class="highlight"><pre><span></span><code>{sanitized_issuer}_{simplified_token_type}
+</code></pre></div>
+<p><strong>Examples</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>JWT <code>iss</code> claim</th>
+<th>Trusted issuer <code>name</code></th>
+<th>Token <code>mapping</code></th>
+<th>Resulting key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://idp.acme.com/auth</code></td>
+<td><code>"Acme"</code></td>
+<td><code>Jans::Access_Token</code></td>
+<td><code>acme_access_token</code></td>
+</tr>
+<tr>
+<td><code>https://idp.acme.com/auth</code></td>
+<td><code>"Acme"</code></td>
+<td><code>Jans::Id_Token</code></td>
+<td><code>acme_id_token</code></td>
+</tr>
+<tr>
+<td><code>https://idp.dolphin.sea/auth</code></td>
+<td><code>"Dolphin"</code></td>
+<td><code>Jans::Access_Token</code></td>
+<td><code>dolphin_access_token</code></td>
+</tr>
+<tr>
+<td><code>https://idp.dolphin.sea/auth</code></td>
+<td><code>"Dolphin"</code></td>
+<td><code>Acme::DolphinToken</code></td>
+<td><code>dolphin_dolphintoken</code></td>
+</tr>
+<tr>
+<td><code>https://unknown.issuer.com/auth</code></td>
+<td><em>(not configured)</em></td>
+<td><code>Custom::Employee_Token</code></td>
+<td><code>unknown_issuer_com_employee_token</code></td>
+</tr>
+<tr>
+<td><code>https://login.microsoftonline.com/tenant</code></td>
+<td><code>"Microsoft"</code></td>
+<td><code>Jans::Id_Token</code></td>
+<td><code>microsoft_id_token</code></td>
+</tr>
+</tbody>
+</table>
+<p>Tokens are then accessible in Cedar policies as <code>context.tokens.{key}</code>, e.g.:</p>
+<div class="highlight"><pre><span></span><code>context.tokens.acme_access_token.hasTag(&quot;scope&quot;)
+</code></pre></div>
+<h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">#</a></h3>
+<p><strong>Graceful Token Validation Failures</strong>:</p>
+<ul>
+<li>Invalid tokens are ignored and logged</li>
+<li>Authorization continues with remaining valid tokens</li>
+<li>At least one valid token is required for authorization to proceed</li>
+</ul>
+<p><strong>Non-Deterministic Token Detection</strong>:</p>
+<ul>
+<li>System rejects requests with multiple tokens of the same type from the same issuer</li>
+<li>Example: Two "Jans::Access_Token" from "Acme" issuer will fail</li>
+<li>This prevents ambiguous policy evaluation</li>
+</ul>
+<h3 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Federation Scenarios</strong>: Applications accepting tokens from multiple identity providers</li>
+<li><strong>API Gateways</strong>: Validating tokens from various upstream services in a single authorization check</li>
+<li><strong>Multi-Organization Access</strong>: Requiring tokens from different organizations for collaborative workflows</li>
+<li><strong>Capability-Based Authorization</strong>: Decisions based on capabilities asserted by different issuers rather than single user identity</li>
+<li><strong>Zero Trust Architectures</strong>: Each token represents a verification from a different trust boundary</li>
+</ol>
+<h2 id="automatically-adding-entity-references-to-the-context">Automatically Adding Entity References to the Context<a class="headerlink" href="#automatically-adding-entity-references-to-the-context" title="Permanent link">#</a></h2>
+<p>Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The entities that are auto-added depend on which authorization method you use.</p>
+<p><strong>For <code>authorize_unsigned</code>:</strong></p>
+<p>Entities are added based on the Cedar schema's context requirements for the requested action. If the schema defines that an action's context includes a <code>user</code> field of type <code>User</code>, Cedarling will automatically populate it from the built entities. Typically:</p>
+<ul>
+<li>User Entity</li>
+<li>Workload Entity</li>
+<li>Resource Entity</li>
+</ul>
+<p><strong>For <code>authorize_multi_issuer</code>:</strong></p>
+<p>All validated token entities are placed under the <code>context.tokens</code> namespace. Each token is accessible via <code>context.tokens.{issuer_name}_{token_type}</code>. Additionally:</p>
+<ul>
+<li><code>context.tokens.total_token_count</code> — the number of validated tokens</li>
+</ul>
+<p><strong>Both methods</strong> also include:</p>
+<ul>
+<li>Any <a href="../cedarling-policy-store/#default-entities">default entities</a> defined in the policy store</li>
+<li>Any data pushed via the <a href="../../tutorials/cedarling-getting-started/#context-data-api">Context Data API</a> under <code>context.data</code></li>
+</ul>
+<p><strong>Entity merging automatically resolves conflicts</strong>, ensuring that request entities take precedence over default entities when UIDs match.</p>
+<h3 id="example-policy">Example Policy<a class="headerlink" href="#example-policy" title="Permanent link">#</a></h3>
+<p>Below is an example policy schema that illustrates how entities are used:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+}
+
+// Acme namespace: trusted issuer and token entities for the Acme IDP.
+// Token entities use `tags Set&lt;String&gt;` for claim-based access in policies.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    aud?: String,
+    exp?: Long,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    jti?: String,
+    scope?: Set&lt;String&gt;,
+    token_type?: String,
+    validated_at?: Long
+  } tags Set&lt;String&gt;;
+
+  entity id_token = {
+    acr?: String,
+    aud?: Set&lt;String&gt;,
+    exp?: Long,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    jti?: String,
+    sub?: String,
+    role?: Set&lt;String&gt;,
+    token_type?: String,
+    validated_at?: Long
+  } tags Set&lt;String&gt;;
+}
+
+// MyApp namespace: your business entities, principals, resources, and actions.
+namespace MyApp {
+  entity Role;
+
+  entity User in [Role] = {
+    country: String,
+    email: String,
+    sub: String,
+    username: String
+  };
+
+  entity Workload = {
+    client_id: String,
+    iss: Acme::TrustedIssuer,
+    name: String,
+    org_id: String
+  };
+
+  entity Issue = {
+    country: String,
+    org_id: String
+  };
+
+  action &quot;Update&quot; appliesTo {
+    principal: [Role, Workload, User],
+    resource: [Issue],
+    context: {
+      access_token: Acme::Access_token,
+      time: Long,
+      user: User,
+      workload: Workload
+    }
+  };
+
+  action &quot;View&quot; appliesTo {
+    principal: [Role, Workload, User],
+    resource: [Issue],
+    context: {
+      access_token: Acme::Access_token,
+      time: Long,
+      user: User,
+      workload: Workload
+    }
+  };
+}
+</code></pre></div>
+<p>This example uses three namespaces to illustrate how they can be organized:</p>
+<ul>
+<li><strong><code>Jans</code></strong> — shared infrastructure types (<code>Url</code>) managed by Cedarling</li>
+<li><strong><code>Acme</code></strong> — trusted issuer and token entities for a specific IDP. Token entities use <code>tags Set&lt;String&gt;</code> to enable claim-based access in policies (e.g., <code>hasTag("scope")</code>, <code>getTag("scope")</code>)</li>
+<li><strong><code>MyApp</code></strong> — your application's business entities (<code>User</code>, <code>Role</code>, <code>Issue</code>), principals, resources, and actions</li>
+</ul>
+<p>Cross-namespace references use fully qualified names (e.g., <code>Jans::Url</code>, <code>Acme::TrustedIssuer</code>, <code>Acme::Access_token</code>). You can use as many namespaces as makes sense for your domain.</p>
+<p>With this schema, you only need to provide the fields that are not automatically included. For instance, to define the <code>time</code> in the context:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610</span><span class="p">,</span>
+<span class="p">};</span>
+</code></pre></div>
+<h2 id="unsigned-authorization-authorize_unsigned">Unsigned Authorization (authorize_unsigned)<a class="headerlink" href="#unsigned-authorization-authorize_unsigned" title="Permanent link">#</a></h2>
+<p>The <code>authorize_unsigned</code> method allows making authorization decisions without JWT token verification. Use this when:</p>
+<ul>
+<li>Your application has already verified the principals through other means</li>
+<li>You need to make authorization decisions for non-token-based scenarios</li>
+<li>You're implementing custom authentication flows</li>
+<li>You're testing or prototyping without an IDP</li>
+</ul>
+<p>Example usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">principal</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;View\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">owner</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
+</code></pre></div>
+<p>The <code>principal</code> field uses <code>cedar_entity_mapping</code> to define its Cedar entity type and ID. All other fields become entity attributes.</p>
+<p>The result contains a single Cedar response:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">decision</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">           </span><span class="c1">// Boolean decision (Allow = true, Deny = false)</span>
+<span class="w">  </span><span class="nx">request_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w">        </span><span class="c1">// Tracing ID</span>
+<span class="w">  </span><span class="nx">response</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">         </span><span class="c1">// Cedar Response with decision() and diagnostics()</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="optional-principal-and-partial-evaluation">Optional principal and partial evaluation<a class="headerlink" href="#optional-principal-and-partial-evaluation" title="Permanent link">#</a></h3>
+<p>The <code>principal</code> field is optional. When omitted, Cedarling uses Cedar's partial evaluator to evaluate the request against all policies.</p>
+<ul>
+<li>Policies whose scope and conditions do not depend on the principal can still resolve to <code>Allow</code> even without a principal.</li>
+<li>Policies that do depend on the principal produce <em>residuals</em> — partially-evaluated expressions that cannot decide without the missing principal information.</li>
+<li>If any residual policy could otherwise permit the request, Cedarling <strong>fails closed</strong> and returns <code>Decision::Deny</code>. The IDs of the residual policies are surfaced in <code>diagnostics().reason()</code> so the caller can see which policies were blocked by the missing principal.</li>
+</ul>
+<p>This is useful for evaluating purely context- or resource-driven policies (for example, token-based decisions handed off by an upstream layer) without forcing the caller to synthesize a placeholder principal. The same partial-evaluation path is used internally by <code>authorize_multi_issuer</code>.</p>
+<p>Example without a principal:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// principal is omitted</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;View\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">owner</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
+</code></pre></div>
+<p>In Rust, pass <code>principal: None</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">principal</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
+<span class="w">    </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Action::</span><span class="se">\&quot;</span><span class="s">View</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">resource</span><span class="p">:</span><span class="w"> </span><span class="nc">issue_entity</span><span class="p">,</span>
+<span class="w">    </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">json</span><span class="o">!</span><span class="p">({</span><span class="w"> </span><span class="s">&quot;ip_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;54.9.21.201&quot;</span><span class="w"> </span><span class="p">}),</span>
+<span class="p">};</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
+</code></pre></div>
+<p>The corresponding schema action must declare a placeholder principal entity type in its <code>appliesTo</code> (Cedar rejects an empty <code>principal: []</code> list at schema parse time), and policies must not constrain the principal. See the <a href="../cedarling-multi-issuer/#cedar-schema-for-multi-issuer-actions">multi-issuer schema notes</a> for details — the same rules apply.</p>
+<h2 id="policy-introspection">Policy Introspection<a class="headerlink" href="#policy-introspection" title="Permanent link">#</a></h2>
+<p>Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request <strong>without executing authorization</strong>. This is useful for:</p>
+<ul>
+<li>Showing operators which policies are relevant before authorization</li>
+<li>Supporting policy auditing and review workflows</li>
+<li>Debugging unexpected authorization outcomes by listing candidate policies</li>
+</ul>
+<p>Two methods are available, corresponding to the two authorization methods:</p>
+<ul>
+<li><code>get_matching_policies_unsigned(principal, actions, resources)</code> — for unsigned authorization. <code>principal</code> is optional (pass <code>None</code>/<code>null</code>) to list policies that match on action and resource regardless of principal.</li>
+<li><code>get_matching_policies_multi_issuer(tokens, actions, resources)</code> — for multi-issuer authorization</li>
+</ul>
+<p>Both return a list of <code>PolicyMetadata</code> objects containing the policy <code>id</code>, <code>annotations</code>, and <code>source</code> code.</p>
+<p><strong>Important:</strong> These methods perform scope-level filtering only (principal type, action, resource type). Policies with <code>when</code>/<code>unless</code> body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.</p>
+<p>See the <a href="../cedarling-interfaces/#policy-introspection">Interfaces</a> reference for full API details and examples.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 8, 2024 06:55:54 UTC"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 8, 2024 06:55:54 UTC">2024-10-08</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,14 @@
+Flow io.jans.inbound.GenericProvider
+    Basepath ""
+    Inputs providerInfo
+
+confProc = Call io.jans.inbound.ConfigProcessor#getInstance
+//Complete missing configuration, if any
+oauthParams = Call confProc exec providerInfo
+
+obj = Trigger io.jans.inbound.oauth2.AuthzCodeWithUserInfo oauthParams
+When obj.success is true
+    //Modify profile data here if needed. Note attribute mapping takes place at ExternalSiteLogin
+    obj.data = obj.data.profile     //Token stuff left aside
+
+Finish obj

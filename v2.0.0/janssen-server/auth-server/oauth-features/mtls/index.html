@@ -1,0 +1,3597 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.0.0/janssen-server/auth-server/oauth-features/mtls/">
+      
+      
+        <link rel="prev" href="../dpop/">
+      
+      
+        <link rel="next" href="../par/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>MTLS - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mtls-mutual-transport-layer-security" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              MTLS
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../cedarling/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Janssen Server
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Concepts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate & Authenticate
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrate & Authenticate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth 2.0
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3_2" id="__nav_1_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    OAuth 2.0
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../auth-code-grant/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grants & Flows
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_3_2_3" id="__nav_1_3_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Extensions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_3_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security Extensions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pkce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PKCE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dpop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DPoP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MTLS
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MTLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is mTLS?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-is-mtls-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Is mTLS Useful?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mtls-in-jans-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mTLS in Jans Auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-apache-for-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuring Apache for mTLS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-signed-ssl-certs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Signed SSL Certs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Self-Signed SSL Certs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-side-mtls-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server-Side mTLS setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server-Side mTLS setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-open-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Open Terminal.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-a-new-directory-to-generate-certificates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create a new directory to generate certificates.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-generate-self-signed-ca-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Generate Self-Signed CA Cert.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-generate-private-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Generate private key.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generate-a-server-csr-certificate-signing-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generate a server CSR (Certificate Signing Request):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-sign-the-csr-examplecsr-we-just-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Sign the CSR example.csr we just generated.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-configure-apache2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Configure Apache2.
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-side-mtls-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-Side mTLS setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client-Side mTLS setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generate-private-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generate private key.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-generate-a-client-csr-certificate-signing-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Generate a client CSR (Certificate Signing Request).
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-sign-the-csr-example-clicsr-we-just-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Sign the CSR example-cli.csr we just generated.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-generate-pkcs12-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Generate PKCS12 cert
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-traefik-for-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuring Traefik for mTLS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuring Traefik for mTLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#header-format-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Header Format Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mtls-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mTLS testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mTLS testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#google-chrome-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Chrome Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firefox-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firefox Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-the-curl-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solving the curl problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-register-new-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Register new client
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Register new client">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p12-to-jwks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P12 to JWKS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-call-authorize-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Call authorize endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-call-token-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Call token endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-call-introspection-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Call introspection endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#specification-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specification document
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../par/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PAR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cimd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client ID Metadata Document
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tokens/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tokens
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authz-details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rich Authorization Requests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../openid-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenID Connect
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../fido/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FIDO2 / Passkeys
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../shibboleth-idp/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../uma-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UMA
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../recipes/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes & How-To
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../config-guide/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Identity
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../test-debug/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test & Debug
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy & Operate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../CHANGELOG/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Releases
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is mTLS?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-is-mtls-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Is mTLS Useful?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mtls-in-jans-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mTLS in Jans Auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-apache-for-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuring Apache for mTLS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-signed-ssl-certs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Signed SSL Certs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Self-Signed SSL Certs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-side-mtls-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server-Side mTLS setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server-Side mTLS setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-open-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Open Terminal.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-a-new-directory-to-generate-certificates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create a new directory to generate certificates.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-generate-self-signed-ca-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Generate Self-Signed CA Cert.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-generate-private-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Generate private key.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generate-a-server-csr-certificate-signing-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generate a server CSR (Certificate Signing Request):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-sign-the-csr-examplecsr-we-just-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Sign the CSR example.csr we just generated.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-configure-apache2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Configure Apache2.
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-side-mtls-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-Side mTLS setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client-Side mTLS setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generate-private-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generate private key.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-generate-a-client-csr-certificate-signing-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Generate a client CSR (Certificate Signing Request).
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-sign-the-csr-example-clicsr-we-just-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Sign the CSR example-cli.csr we just generated.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-generate-pkcs12-cert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Generate PKCS12 cert
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-traefik-for-mtls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuring Traefik for mTLS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuring Traefik for mTLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#header-format-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Header Format Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mtls-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mTLS testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mTLS testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#google-chrome-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Chrome Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firefox-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firefox Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-the-curl-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solving the curl problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-register-new-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Register new client
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Register new client">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p12-to-jwks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P12 to JWKS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-call-authorize-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Call authorize endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-call-token-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Call token endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-call-introspection-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Call introspection endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#specification-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specification document
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../../getting-started/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Janssen Server
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Integrate & Authenticate
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    OAuth 2.0
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../pkce/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Security Extensions
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">auth-server</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">feature</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">mtls</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">mutual TLS</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">oauth</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="mtls-mutual-transport-layer-security">mTLS (Mutual Transport Layer Security)<a class="headerlink" href="#mtls-mutual-transport-layer-security" title="Permanent link">#</a></h1>
+<h2 id="what-is-mtls">What Is mTLS?<a class="headerlink" href="#what-is-mtls" title="Permanent link">#</a></h2>
+<p><strong>mTLS</strong> is a process that establishes an encrypted <a href="https://wikipedia.org/wiki/Transport_Layer_Security">TLS</a>
+connection in which both parties use X.509 digital certificates
+to authenticate each other. <strong>mTLS</strong> can help mitigate the risk of moving services to the cloud and can help prevent
+malicious third parties from imitating genuine apps.</p>
+<h2 id="where-is-mtls-useful">Where Is mTLS Useful?<a class="headerlink" href="#where-is-mtls-useful" title="Permanent link">#</a></h2>
+<p>Mutual client certificate authentication can be used any time the server needs to ensure the authenticity and validity
+of either a specific user or a specific device. For example, a client certificate can be issued to a company-owned
+laptop to identify and authorize it on a corporate network. Alternatively, a client certificate could be issued to an
+employee and stored on a smart card, which then allows the employee to gain access to applications or restricted areas
+of a building.</p>
+<p>In practice, mTLS can identify and authorize the following:</p>
+<ul>
+<li>Devices onto a corporate network.</li>
+<li>Users into applications.</li>
+<li>Content delivery network (CDNs) or cloud security services to back-end web servers.</li>
+<li>Business-to-business (B2B) data exchanges that use APIs.</li>
+<li>Internet of Things (IoT) sensors, such as remote traffic cameras.</li>
+<li>Microservice architectures in which each microservice must ensure that each component it communicates with is valid
+  and not tampered with.</li>
+</ul>
+<p><img alt="mtls1.png" src="../../../../assets/mtls1.png" /></p>
+<h2 id="mtls-in-jans-auth">mTLS in Jans Auth<a class="headerlink" href="#mtls-in-jans-auth" title="Permanent link">#</a></h2>
+<p><strong>Jans Auth</strong> supports <strong>mTLS</strong>, and to configure it we must take these considerations into account:</p>
+<ul>
+<li>During DCR client registration, the <code>token_endpoint_auth_method</code> field can receive 2 new values:<ol>
+<li><code>tls_client_auth</code>: indicates that client authentication to the authorization server will occur with mutual TLS
+   utilizing the PKI method of associating a certificate to a client.</li>
+<li><code>self_signed_tls_client_auth</code>: Indicates that client authentication to the authorization server will occur using
+   mutual TLS with the client utilizing a self-signed certificate.</li>
+</ol>
+</li>
+<li>There is new client property <code>tls_client_auth_subject_dn</code> used to compare Subject DN of the certificate with
+  configured value of client entry when authentication method is set to <code>tls_client_auth</code> (saved in
+  tls_client_auth_subject_dn or oxAttributes on persistence layer).</li>
+<li>If MTLS Authentication is used then <code>access_token</code> automatically saves certificate <code>S256</code> hash of certificates which
+  can be validated by RP. If <code>access_token</code> is JWT then <code>x5t#S256</code> claim is added to payload of the token. Otherwise,
+  token can be introspected.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>{
+  &quot;active&quot;: true,
+  &quot;iss&quot;: &quot;https://server.example.com&quot;,
+  &quot;sub&quot;: &quot;ty.webb@example.com&quot;,
+  &quot;exp&quot;: 1493726400,
+  &quot;nbf&quot;: 1493722800,
+  &quot;cnf&quot;: {
+    &quot;x5t#S256&quot;: &quot;bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2&quot;
+  },
+  ...,
+  ...
+}
+</code></pre></div>
+<h2 id="configuring-apache-for-mtls">Configuring Apache for mTLS<a class="headerlink" href="#configuring-apache-for-mtls" title="Permanent link">#</a></h2>
+<p>The information below belongs to <code>apache</code> and web client (usually web browser) mutual authentication setup method. This
+also includes basic checks to be performed for the setup.</p>
+<p>Is <code>mod_ssl</code> installed: Run below command to confirm if the ssl module is installed.</p>
+<div class="highlight"><pre><span></span><code>apachectl<span class="w"> </span>-M<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ssl
+</code></pre></div>
+<p>If we get <code>ssl_module</code> related output, then we're good to proceed. The output could look like:</p>
+<div class="highlight"><pre><span></span><code>root@jans:~# apachectl -M | grep ssl
+ssl_module (shared)
+</code></pre></div>
+<p>Usually third party or Certbot SSL certs are used for web server ssl connections. In that case no extra configuration is
+necessary. But if we want to use self-signed certs, then follow on.</p>
+<h2 id="self-signed-ssl-certs">Self-Signed SSL Certs<a class="headerlink" href="#self-signed-ssl-certs" title="Permanent link">#</a></h2>
+<h3 id="server-side-mtls-setup">Server-Side mTLS setup<a class="headerlink" href="#server-side-mtls-setup" title="Permanent link">#</a></h3>
+<p>Now, we're covering the case if you want to deploy your own CA Cert.</p>
+<h4 id="1-open-terminal">1. Open Terminal.<a class="headerlink" href="#1-open-terminal" title="Permanent link">#</a></h4>
+<h4 id="2-create-a-new-directory-to-generate-certificates">2. Create a new directory to generate certificates.<a class="headerlink" href="#2-create-a-new-directory-to-generate-certificates" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>/etc/certs/mtlscert
+</code></pre></div>
+<p>Change to the directory created.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/etc/certs/mtlscert
+</code></pre></div>
+<h4 id="3-generate-self-signed-ca-cert">3. Generate Self-Signed CA Cert.<a class="headerlink" href="#3-generate-self-signed-ca-cert" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span>-nodes<span class="w"> </span>-keyform<span class="w"> </span>PEM<span class="w"> </span>-keyout<span class="w"> </span>example-ca.key<span class="w"> </span>-x509<span class="w"> </span>-days<span class="w"> </span><span class="m">3650</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example-ca.crt
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout example-ca.key -x509 -days 3650 -outform PEM -out example-ca.crt
+Generating a RSA private key
+.........................................+++++
+.........................................+++++
+writing new private key to &#39;example-ca.key&#39;
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter &#39;.&#39;, the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:US
+State or Province Name (full name) [Some-State]:Austin
+Locality Name (eg, city) []:TX
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Janssen Org.
+Organizational Unit Name (eg, section) []:IT
+Common Name (e.g. server FQDN or YOUR name) []:yourdomain.com
+Email Address []:youremail@yourdomain.com
+</code></pre></div>
+<p>Above command will create two files: <code>example-ca.key</code> and <code>example-ca.crt</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key
+</code></pre></div>
+<h4 id="4-generate-private-key">4. Generate private key.<a class="headerlink" href="#4-generate-private-key" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>example.key<span class="w"> </span><span class="m">2048</span>
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl genrsa -out example.key 2048
+Generating RSA private key, 2048 bit long modulus (2 primes)
+......................................+++++
+..........................................................................................................+++++
+e is 65537 (0x010001)
+</code></pre></div>
+<p>Above command creates: <code>example.key</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example.key
+</code></pre></div>
+<h4 id="5-generate-a-server-csr-certificate-signing-request">5. Generate a server CSR (Certificate Signing Request):<a class="headerlink" href="#5-generate-a-server-csr-certificate-signing-request" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>example.key<span class="w"> </span>-out<span class="w"> </span>example.csr
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -new -key example.key -out example.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter &#39;.&#39;, the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:US
+State or Province Name (full name) [Some-State]:Austin
+Locality Name (eg, city) []:TX
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Janssen Org.
+Organizational Unit Name (eg, section) []:IT
+Common Name (e.g. server FQDN or YOUR name) []:yourdomain.com
+Email Address []:youremail@yourdomain.com
+
+Please enter the following &#39;extra&#39; attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+</code></pre></div>
+<p>Above command will create the file: <code>example.csr</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example.csr  example.key
+</code></pre></div>
+<h4 id="6-sign-the-csr-examplecsr-we-just-generated">6. Sign the CSR <code>example.csr</code> we just generated.<a class="headerlink" href="#6-sign-the-csr-examplecsr-we-just-generated" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-in<span class="w"> </span>example.csr<span class="w"> </span>-CA<span class="w"> </span>example-ca.crt<span class="w"> </span>-CAkey<span class="w"> </span>example-ca.key<span class="w"> </span>-set_serial<span class="w"> </span><span class="m">100</span><span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example.crt
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl x509 -req -in example.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 100 -days 365 -outform PEM -out example.crt
+Signature ok
+subject=C = US, ST = Austin, L = TX, O = Janssen Org., OU = IT, CN = yourdomain.com, emailAddress = youremail@yourdomain.com
+Getting CA Private Key
+</code></pre></div>
+<p>Above command will create the file: <code>example.crt</code> for 365 days.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example.crt  example.csr  example.key
+</code></pre></div>
+<h4 id="7-configure-apache2">7. Configure Apache2.<a class="headerlink" href="#7-configure-apache2" title="Permanent link">#</a></h4>
+<p>Add the following lines in the <code>/etc/apache2/sites-available/https_jans.conf</code> file.</p>
+<div class="highlight"><pre><span></span><code>SSLEngine On
+SSLCertificateFile /etc/certs/mtlscert/example.crt
+SSLCertificateKeyFile /etc/certs/mtlscert/example.key
+SSLCACertificateFile /etc/certs/mtlscert/example-ca.crt
+</code></pre></div>
+<p>It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates
+is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client
+certificate forward to <code>jans-auth</code> application. <code>jans-auth</code> (AS) expects certificate in one of the following headers (in order of priority):</p>
+<ol>
+<li><code>X-Forwarded-Client-Cert</code> - Used by Envoy/Istio (URL-encoded PEM format with metadata)</li>
+<li><code>X-Forwarded-Tls-Client-Cert</code> - Used by Traefik (raw base64 without PEM delimiters)</li>
+<li><code>X-ClientCert</code> - Legacy header (raw PEM format)</li>
+</ol>
+<div class="highlight"><pre><span></span><code>&lt;LocationMatch /jans-auth&gt;
+    SSLVerifyClient require
+    SSLVerifyDepth 10
+    SSLOptions -StdEnvVars +ExportCertData
+
+    # Forward certificate to destination server (oxauth)
+    RequestHeader set X-ClientCert %{SSL_CLIENT_CERT}s
+&lt;/LocationMatch&gt;
+</code></pre></div>
+<p>Now we must restart the Apache2 server.</p>
+<div class="highlight"><pre><span></span><code>service<span class="w"> </span>apache2<span class="w"> </span>restart
+</code></pre></div>
+<p>To check if SSL cert on apache works:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>yourdomain.com:443
+</code></pre></div>
+<h3 id="client-side-mtls-setup">Client-Side mTLS setup<a class="headerlink" href="#client-side-mtls-setup" title="Permanent link">#</a></h3>
+<h4 id="1-generate-private-key">1. Generate private key.<a class="headerlink" href="#1-generate-private-key" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>example-cli.key<span class="w"> </span><span class="m">2048</span>
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl genrsa -out example-cli.key 2048
+Generating RSA private key, 2048 bit long modulus (2 primes)
+...........................................+++++
+.............................................+++++
+e is 65537 (0x010001)
+</code></pre></div>
+<p>Above command will create the file: <code>example-cli.key</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example-cli.key  example.crt  example.csr  example.key
+</code></pre></div>
+<h4 id="2-generate-a-client-csr-certificate-signing-request">2. Generate a client CSR (Certificate Signing Request).<a class="headerlink" href="#2-generate-a-client-csr-certificate-signing-request" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>example-cli.key<span class="w"> </span>-out<span class="w"> </span>example-cli.csr
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -new -key example-cli.key -out example-cli.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter &#39;.&#39;, the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:US
+State or Province Name (full name) [Some-State]:Austin
+Locality Name (eg, city) []:TX
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Janssen Client Org.
+Organizational Unit Name (eg, section) []:IT
+Common Name (e.g. server FQDN or YOUR name) []:yourdomain.com
+Email Address []:youremail@yourdomain.com
+
+Please enter the following &#39;extra&#39; attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+</code></pre></div>
+<p>Above command will create the file: <code>example-cli.csr</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example-cli.csr  example-cli.key  example.crt  example.csr  example.key
+</code></pre></div>
+<h4 id="3-sign-the-csr-example-clicsr-we-just-generated">3. Sign the CSR <code>example-cli.csr</code> we just generated.<a class="headerlink" href="#3-sign-the-csr-example-clicsr-we-just-generated" title="Permanent link">#</a></h4>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-in<span class="w"> </span>example-cli.csr<span class="w"> </span>-CA<span class="w"> </span>example-ca.crt<span class="w"> </span>-CAkey<span class="w"> </span>example-ca.key<span class="w"> </span>-set_serial<span class="w"> </span><span class="m">101</span><span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example-cli.crt
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl x509 -req -in example-cli.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 101 -days 365 -outform PEM -out example-cli.crt
+Signature ok
+subject=C = US, ST = Austin, L = TX, O = Janssen Client Org., OU = IT, CN = yourdomain.com, emailAddress = youremail@yourdomain.com
+Getting CA Private Key
+</code></pre></div>
+<p>Above command will create the file: <code>example-cli.crt</code> for 365 days.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example-cli.crt  example-cli.csr  example-cli.key  example.crt  example.csr  example.key
+</code></pre></div>
+<h4 id="4-generate-pkcs12-cert">4. Generate PKCS12 cert<a class="headerlink" href="#4-generate-pkcs12-cert" title="Permanent link">#</a></h4>
+<p>Some browsers need client certs to be in the format <code>pkcs12</code>.</p>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>pkcs12<span class="w"> </span>-export<span class="w"> </span>-inkey<span class="w"> </span>example-cli.key<span class="w"> </span>-in<span class="w"> </span>example-cli.crt<span class="w"> </span>-out<span class="w"> </span>example-cli.p12
+</code></pre></div>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl pkcs12 -export -inkey example-cli.key -in example-cli.crt -out example-cli.p12
+Enter Export Password:
+Verifying - Enter Export Password:
+</code></pre></div>
+<p>Above command will create the file: <code>example-cli.p12</code>.</p>
+<div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# ls
+example-ca.crt  example-ca.key  example-cli.crt  example-cli.csr  example-cli.key  example-cli.p12  example.crt  example.csr  example.key
+</code></pre></div>
+<h2 id="configuring-traefik-for-mtls">Configuring Traefik for mTLS<a class="headerlink" href="#configuring-traefik-for-mtls" title="Permanent link">#</a></h2>
+<p>Traefik uses the <code>X-Forwarded-Tls-Client-Cert</code> header to forward client certificates. This header contains the raw base64-encoded certificate without PEM delimiters.</p>
+<h3 id="header-format-comparison">Header Format Comparison<a class="headerlink" href="#header-format-comparison" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Proxy</th>
+<th>Header Name</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Envoy/Istio</td>
+<td><code>X-Forwarded-Client-Cert</code></td>
+<td><code>Hash=...;Cert="&lt;URL_ENCODED_PEM&gt;";Subject="...";URI=</code></td>
+</tr>
+<tr>
+<td>Traefik</td>
+<td><code>X-Forwarded-Tls-Client-Cert</code></td>
+<td>Raw base64 (no PEM delimiters)</td>
+</tr>
+<tr>
+<td>Apache</td>
+<td><code>X-ClientCert</code></td>
+<td>Raw PEM with BEGIN/END markers</td>
+</tr>
+</tbody>
+</table>
+<p>Jans Auth Server automatically detects and parses all three formats, checking them in the order listed above.</p>
+<h2 id="mtls-testing">mTLS testing<a class="headerlink" href="#mtls-testing" title="Permanent link">#</a></h2>
+<p>We are going to run an mTLS example where we will perform the following flow:</p>
+<ol>
+<li>Register new client.</li>
+<li>Call <code>authorize</code> endpoint.</li>
+<li>Call <code>token</code> endpoint.</li>
+<li>Call <code>introspection</code> endpoint.</li>
+</ol>
+<p>Previously we need to configure the client's certificate in the browser of your choice.</p>
+<h3 id="google-chrome-settings">Google Chrome Settings<a class="headerlink" href="#google-chrome-settings" title="Permanent link">#</a></h3>
+<ul>
+<li>In the search bar go to <code>chrome://settings/certificates</code>.</li>
+<li>In the <code>Your Certificates</code> section, click on <code>Import</code> button.</li>
+<li>Select the certificate <code>example-cli.p12</code> and enter the password you set when generating it.</li>
+</ul>
+<p><img alt="mtls2.png" src="../../../../assets/mtls2.png" /></p>
+<h3 id="firefox-settings">Firefox Settings<a class="headerlink" href="#firefox-settings" title="Permanent link">#</a></h3>
+<ul>
+<li>In the search bar go to <code>about:preferences#privacy</code>.</li>
+<li>Click on <code>View Certificates</code>.</li>
+<li>In the <code>Your Certificates</code> section, click on <code>Import</code> button.</li>
+<li>Select the certificate <code>example-cli.p12</code> and enter the password you set when generating it.</li>
+</ul>
+<p><img alt="mtls3.png" src="../../../../assets/mtls3.png" /></p>
+<p><img alt="mtls4.png" src="../../../../assets/mtls4.png" /></p>
+<h3 id="solving-the-curl-problem">Solving the <code>curl</code> problem<a class="headerlink" href="#solving-the-curl-problem" title="Permanent link">#</a></h3>
+<p>If you have <code>openssl</code> version <code>3.x.x</code>, most likely when you are trying to consume
+the <code>/.well-known/openid-configuration</code> endpoint.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;</span>
+</code></pre></div>
+<p>You will get the following error:</p>
+<div class="highlight"><pre><span></span><code>root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location &#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;
+curl: (58) could not parse PKCS12 file, check password, OpenSSL error error:0308010C:digital envelope routines::unsupported
+</code></pre></div>
+<p>To fix this error, edit the file <code>/etc/ssl/openssl.cnf</code> and make sure that these lines are uncommented and if they are
+not, add them:</p>
+<div class="highlight"><pre><span></span><code>openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+legacy = legacy_sect
+
+[default_sect]
+activate = 1
+
+[legacy_sect]
+activate = 1
+</code></pre></div>
+<p>Once this change is done, you should be able to consume the <code>/.well-known/openid-configuration</code> endpoint without any
+problems</p>
+<div class="highlight"><pre><span></span><code>root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location &#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;
+{
+  &quot;request_parameter_supported&quot; : true,
+  &quot;pushed_authorization_request_endpoint&quot; : &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/par&quot;,
+  &quot;introspection_endpoint&quot; : &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/introspection&quot;,
+  &quot;claims_parameter_supported&quot; : true,
+  &quot;issuer&quot; : &quot;https://&lt;YOUR_DOMAIN&gt;&quot;,
+  &quot;userinfo_encryption_enc_values_supported&quot; : [ &quot;A128CBC+HS256&quot;, &quot;A256CBC+HS512&quot;, &quot;A128GCM&quot;, &quot;A256GCM&quot; ],
+  &quot;id_token_encryption_enc_values_supported&quot; : [ &quot;A128CBC+HS256&quot;, &quot;A256CBC+HS512&quot;, &quot;A128GCM&quot;, &quot;A256GCM&quot; ],
+  &quot;access_token_signing_alg_values_supported&quot; : [ &quot;none&quot;, &quot;HS256&quot;, &quot;HS384&quot;, &quot;HS512&quot;, &quot;RS256&quot;, &quot;RS384&quot;, &quot;RS512&quot;, &quot;ES256&quot;, &quot;ES384&quot;, &quot;ES512&quot;, &quot;PS256&quot;, &quot;PS384&quot;, &quot;PS512&quot; ],
+  &quot;authorization_endpoint&quot; : &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/authorize&quot;,
+  ...,
+  ...,
+  ...
+}
+</code></pre></div>
+<h3 id="1-register-new-client">1. Register new client<a class="headerlink" href="#1-register-new-client" title="Permanent link">#</a></h3>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;client_name&quot;: &quot;Test Client mTLS&quot;,</span>
+<span class="s1">  &quot;application_type&quot;: &quot;web&quot;,</span>
+<span class="s1">  &quot;access_token_as_jwt&quot;: true,</span>
+<span class="s1">  &quot;token_endpoint_auth_method&quot;: &quot;self_signed_tls_client_auth&quot;,</span>
+<span class="s1">  &quot;jwks&quot;: {</span>
+<span class="s1">    &quot;keys&quot;: [</span>
+<span class="s1">      {</span>
+<span class="s1">        &quot;kid&quot;: &quot;YOUR_KID&quot;,</span>
+<span class="s1">        &quot;kty&quot;: &quot;RSA&quot;,</span>
+<span class="s1">        &quot;alg&quot;: &quot;RS256&quot;,</span>
+<span class="s1">        &quot;use&quot;: &quot;sig&quot;,</span>
+<span class="s1">        &quot;e&quot;: &quot;AQAB&quot;,</span>
+<span class="s1">        &quot;n&quot;: &quot;5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ&quot;</span>
+<span class="s1">      }</span>
+<span class="s1">    ]</span>
+<span class="s1">  },</span>
+<span class="s1">  &quot;scope&quot;: [</span>
+<span class="s1">    &quot;openid&quot;,</span>
+<span class="s1">    &quot;profile&quot;,</span>
+<span class="s1">    &quot;email&quot;</span>
+<span class="s1">  ],</span>
+<span class="s1">  &quot;grant_types&quot;: [</span>
+<span class="s1">    &quot;authorization_code&quot;</span>
+<span class="s1">  ],</span>
+<span class="s1">  &quot;response_types&quot;: [</span>
+<span class="s1">    &quot;code&quot;,</span>
+<span class="s1">    &quot;token&quot;,</span>
+<span class="s1">    &quot;id_token&quot;</span>
+<span class="s1">  ],</span>
+<span class="s1">  &quot;redirect_uris&quot;: [</span>
+<span class="s1">    https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm</span>
+<span class="s1">  ]</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>Response:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;e&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQAB&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-kid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register?client_id=d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;93a52334-bf79-4414-bc9a-983b6921597c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;self_signed_tls_client_auth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email openid profile&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e1c9e9df-e542-4225-adb4-d0590f85d97d&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698114939</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Client mTLS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;implicit&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;authorization_code&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;additional_token_endpoint_auth_methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;redirect_uris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201339</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;code&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;token&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p><strong>NOTE:</strong> To obtain the <code>jwks</code> field data, follow the next step.</p>
+</blockquote>
+<h4 id="p12-to-jwks">P12 to JWKS<a class="headerlink" href="#p12-to-jwks" title="Permanent link">#</a></h4>
+<p>To get the fields from <code>jwks</code> you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>example-cli.p12<span class="w"> </span>-pubkey<span class="w"> </span>-noout<span class="w"> </span><span class="p">|</span><span class="w"> </span>pem-jwk<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;{kid: &quot;your-kid&quot;, kty: .kty , alg: &quot;RS256&quot; , use: &quot;sig&quot;, e: .e, n: .n }&#39;</span>
+</code></pre></div>
+<p>Make sure you have <code>pem-jwk</code> installed, use the command: <code>npm install -g pem-jwk</code> or <code>yarn global add pem-jwk</code>.</p>
+<p>Below is a sample run of the command.</p>
+<div class="highlight"><pre><span></span><code>root@jans:~# openssl x509 -in example-cli.p12 -pubkey -noout | pem-jwk | jq &#39;{kid: &quot;your-kid&quot;, kty: .kty , alg: &quot;RS256&quot; , use: &quot;sig&quot;, e: .e, n: .n }&#39;
+Enter pass phrase for PKCS12 import pass phrase:
+{
+  &quot;kid&quot;: &quot;your-kid&quot;,
+  &quot;kty&quot;: &quot;RSA&quot;,
+  &quot;alg&quot;: &quot;RS256&quot;,
+  &quot;use&quot;: &quot;sig&quot;,
+  &quot;e&quot;: &quot;AQAB&quot;,
+  &quot;n&quot;: &quot;5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ&quot;
+}
+</code></pre></div>
+<h3 id="2-call-authorize-endpoint">2. Call <code>authorize</code> endpoint<a class="headerlink" href="#2-call-authorize-endpoint" title="Permanent link">#</a></h3>
+<p>From your browser of choice call the following url:</p>
+<div class="highlight"><pre><span></span><code>https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/authorize?response_type=code&amp;client_id=d16994c2-313c-4440-9713-25290fbb89a9&amp;scope=openid+profil+email&amp;redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&amp;state=f9bb35cb-3485-4ae4-aa8e-63e9a97b6e5d&amp;nonce=4a2f07cb-521b-465c-8b06-0c17711a96a7
+</code></pre></div>
+<p>URL parameters:</p>
+<ul>
+<li><code>response_type=code</code></li>
+<li><code>client_id=d16994c2-313c-4440-9713-25290fbb89a9</code></li>
+<li><code>scope=openid+profil+email</code></li>
+<li><code>redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm</code></li>
+<li><code>state=f9bb35cb-3485-4ae4-aa8e-63e9a97b6e5d</code></li>
+<li><code>nonce=4a2f07cb-521b-465c-8b06-0c17711a96a7</code></li>
+</ul>
+<p>The field we need to obtain is the <code>code</code>.</p>
+<p><img alt="mtls5.png" src="../../../../assets/mtls5.png" /></p>
+<h3 id="3-call-token-endpoint">3. Call <code>token</code> endpoint<a class="headerlink" href="#3-call-token-endpoint" title="Permanent link">#</a></h3>
+<p>Previously we have obtained the <code>code</code> field, we will use this value to call the endpoint <code>token</code>.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/token&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;grant_type=authorization_code&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;client_id=d16994c2-313c-4440-9713-25290fbb89a9&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;client_secret=&lt;YOUR_CLIENT_SECRET&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;code=&lt;YOUR_CODE&gt;&#39;</span>
+</code></pre></div>
+<p>Response:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJNSGdqa2hnTktmZWF4ZUVEY0wycEt5c1EwVUQ4RDk1QUd5NFBGXzI2cmlnIiwiY29kZSI6ImE0NWE5ODI5LTFkMDQtNGQxNS05NjllLWRiMjk3Mzk4ZTdjMyIsImlzcyI6Imh0dHBzOi8vbWlsdG9uLWNoLWhhcmR5LW1pdGUuZ2x1dS5pbmZvIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImF1ZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImFjciI6ImJhc2ljIiwieDV0I1MyNTYiOiJPeHRJQXRBMEMwTkwteTR2UmZLeDd6TExFZXhfWG1DelduUWJ4ejZUem5ZIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTY5ODE5NDczNiwiZXhwIjoxNjk4Mjc4MDQzLCJpYXQiOjE2OTgxOTY4MzIsInVzZXJuYW1lIjoiRGVmYXVsdCBBZG1pbiBVc2VyIn0.JpK7JYy6Avui3LNbxTKBYJW9fqjEIqijCXPw9fvqEO1kqO7AUozOEof00hPKzJo1Dh7VgGpY89MiAduDUoU3QCemtFsNSd1DCyExl2s3w5OF2mUm6nMzjaS377ZQQ39DAq91OGFFq_ISt4JIhWRf7_xUEvlLRAttTqxE5qp1ZYvgAYu07jbVJX8WqJvxYz3rZ3J-4kq2FLREunRf5KxYaHO-oKzrmhRVPTc_cj1vqwSfu8vRjLmx4P-eN7SgVNa0XmZ8WClLnmchucGBH6rYq3bXZWsOKixwLhno_2vPe1MmbK3XnNNBu_fm_bL2N5kgAwr9b-upoBJc08IyCje1vA&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1e58e2c9-4175-4b3f-8170-65544b1a7c48&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoib1NoVDE4YUdRVHdtNXBjT255dkNMUSIsInN1YiI6Ik1IZ2praGdOS2ZlYXhlRURjTDJwS3lzUTBVRDhEOTVBR3k0UEZfMjZyaWciLCJhbXIiOlsiMTAiXSwiaXNzIjoiaHR0cHM6Ly9taWx0b24tY2gtaGFyZHktbWl0ZS5nbHV1LmluZm8iLCJub25jZSI6ImMxNGQ2Y2RlLWQ5NTYtNDM4Zi04Mzk5LTQ3MzdkNWZlOTkyOSIsInNpZCI6IjI2ZTM4YTJmLTEzZTktNGY4Yi05MzdjLTQ3M2ViMjdlNzFkNiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiNWQ4MzU0MDctMWVmMy00NDFkLThhZTYtNmJiZGQ1NzI3NmNjIiwicmFuZG9tIjoiMjVhZDViMmUtMGNkMi00Mjg3LTg1M2ItZWY3NWRhZjMzNWMwIiwiYWNyIjoiYmFzaWMiLCJjX2hhc2giOiJwM2ZJVHlGT09fd0tRZW9QT1VkWWF3IiwiYXV0aF90aW1lIjoxNjk4MTk0NzM2LCJleHAiOjE2OTgyMDA0MzIsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNjk4MTk2ODMyfQ.GMXkiFGcCy6dXI8gPPuCLd977Gs_rkG1w3FrNx_HlSnmcDUSsEQHvPxpA99Y3L8Z82uLHYCbP5Vga6iCEOmBBHnu9jEsmYgp-TSrB31HV-5g7-o4ZWJG05SdL9KgSP3PyDXRqcE0VFxBJ-uJSyvI-htQ4GUXMIhqVhbJJynPNosXtZvvDVIw1NBThupmqx58cozf5tIdnwaeiuN_Ce2XQrjZBiachI6KWFa-Mstrsdw1E6Ny_4bP-1UmeNgScd6pmIUemGsfclxIAgO0lACqgbGh7wo0PljbhEkGU_i9kP--0KJHkBkUxflULW3aAqdYtG9hEr_JEIddHVxXbi1c_w&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">81210</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Once we have obtained the <code>access_token</code> in <code>jwt(json web token)</code> format, we will do the last step.</p>
+<h3 id="4-call-introspection-endpoint">4. Call <code>introspection</code> endpoint<a class="headerlink" href="#4-call-introspection-endpoint" title="Permanent link">#</a></h3>
+<p>Run below command:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/introspection&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Authorization: Bearer &lt;ACCESS_TOKEN&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;token=&lt;ACCESS_TOKEN&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;response_as_jwt=false&#39;</span>
+</code></pre></div>
+<p>Response:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MHgjkhgNKfeaxeEDcL2pKysQ0UD8D95AGy4PF_26rig&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5d835407-1ef3-441d-8ae6-6bbdd57276cc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;basic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile email&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698194736</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;x5t#S256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OxtIAtA0C0NL-y4vRfKx7zLLEex_XmCzWnQbxz6TznY&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698278043</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201265</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="specification-document">Specification document<a class="headerlink" href="#specification-document" title="Permanent link">#</a></h2>
+<p>For more details of the specification, you can have a look at the following
+link <a href="https://datatracker.ietf.org/doc/html/rfc8705">OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens</a></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 15, 2026 08:58:43 UTC"><span class="timeago" datetime="2026-04-15T08:58:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 15, 2026 08:58:43 UTC">2026-04-15</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../../js/timeago.min.js"></script>
+      
+        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

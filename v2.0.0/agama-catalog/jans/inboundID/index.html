@@ -1,0 +1,1408 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.0.0/agama-catalog/jans/inboundID/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Inbound identity with Agama - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#inbound-identity-with-agama" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Inbound identity with Agama
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../cedarling/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terminology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flows-involved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flows involved
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flows involved">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-agama-inbound-jar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add agama-inbound jar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#make-a-gama-archive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make a gama archive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-the-archive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy the archive
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#collect-providers-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Collect providers configurations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supply-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supply configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supply configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attribute-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribute mappings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import configurations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-add-another-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to add another provider?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-your-own-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing your own mapping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appendix-integrating-sign-in-with-apple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Appendix: integrating "Sign In With Apple"
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Appendix: integrating &#34;Sign In With Apple&#34;">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-journey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected journey
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+
+  
+  
+
+
+<h1 id="inbound-identity-with-agama">Inbound identity with Agama<a class="headerlink" href="#inbound-identity-with-agama" title="Permanent link">#</a></h1>
+<p>Using Agama administrators can delegate authorization to external services like social sites and enterprise access management solutions, e.g. Microsoft Entra ID, Oracle Access Management, etc. In a typical setting users are presented a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.</p>
+<p>This process is usually referred to as "inbound identity". In this document the steps required to setup inbound identity in your Janssen server are presented.</p>
+<h2 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h2>
+<ul>
+<li>A Janssen server with config-api installed</li>
+<li>Starter knowledge of <a href="https://www.ietf.org/rfc/rfc6749">OAuth2</a>/<a href="https://openid.net/developers/how-connect-works/">OpenId Connect</a> and the Java programming language</li>
+</ul>
+<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Provider: An external identity provider, often a social site. Every provider is associated with a unique identifier</p>
+</li>
+<li>
+<p>Provider preselection: A process that designates the provider to employ for authentication without the end-user  making a explicit decision, i.e. without a "Sign in with" button. Here the provider may be inferred from contextual data elicited at earlier stages, for instance.</p>
+</li>
+</ul>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">#</a></h2>
+<p>There is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers (includes OpendId Connect), more specifically those supporting the <code>code</code> authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however organizations would have to engage in extra development efforts in this case.</p>
+<p>If the providers of interest already support the <code>code</code> authorization grant, the amount of work is significantly reduced.</p>
+<h2 id="flows-involved">Flows involved<a class="headerlink" href="#flows-involved" title="Permanent link">#</a></h2>
+<h3 id="provider">Provider<a class="headerlink" href="#provider" title="Permanent link">#</a></h3>
+<p>For every provider to support there has to be an Agama flow that must:</p>
+<ul>
+<li>Redirect the browser to the provider's site for the user to enter his login credentials</li>
+<li>Return profile data of the given user</li>
+</ul>
+<p>To facilitate administrators' work, the following providers are already implemented:</p>
+<ul>
+<li>Apple</li>
+<li>Facebook, Github, Google (through the "Generic provider" flow)</li>
+</ul>
+<h3 id="main-flow">Main flow<a class="headerlink" href="#main-flow" title="Permanent link">#</a></h3>
+<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/code/io.jans.inbound.ExternalSiteLogin.flow">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
+<ol>
+<li>
+<p>A provider selection page is displayed. The list includes all (<em>enabled</em>) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)</p>
+</li>
+<li>
+<p>The flow associated to the selected provider is launched. Actually, if the main flow was passed a provider identifier as parameter, step 1 is skipped and the given flow is launched directly  </p>
+</li>
+<li>
+<p>If the flow triggered at step 2 did not finish successfully, the main flow finishes likewise. Else, the profile data returned is transformed using the applicable attribute mapping for the provider. More on attribute mappings <a href="#attribute-mappings">here</a></p>
+</li>
+<li>
+<p>If the resulting profile data lacks a value for e-mail, and the provider was configured to require it, a form is displayed where the user can enter his e-mail address</p>
+</li>
+<li>
+<p>User provisioning takes place, in other words, a local user entry is created in the Janssen server database. If an entry already exists, it is updated as long as the provider is configured to allow so</p>
+</li>
+<li>
+<p>The flow finishes successfully and the user gets access to the target application</p>
+</li>
+</ol>
+<p>Note the above design does not involve communication protocols. It is responsability of the concrete provider flow how to implement this aspect. The main flow can remain unmodified regardless of any change in existing flows or when new ones are added.</p>
+<p>Feel free to modify this flow or create one based on it if customizations are required.</p>
+<h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">#</a></h2>
+<p>To start, ensure the Agama engine and bridge are enabled. More info <a href="https://docs.jans.io/head/admin/developer/agama/engine-bridge-config/#availability">here</a>.</p>
+<h3 id="add-agama-inbound-jar">Add agama-inbound jar<a class="headerlink" href="#add-agama-inbound-jar" title="Permanent link">#</a></h3>
+<p>Let's add the required libraries to the authentication server:</p>
+<ul>
+<li>Visit <a href="https://maven.jans.io/maven/io/jans/agama-inbound/">this</a> page, navigate to the folder matching your Janssen server version, and download the jar file</li>
+<li>SSH to the server. Transfer the file to directory <code>/opt/jans/jetty/jans-auth/custom/libs</code></li>
+<li>Restart the server, e.g. <code>systemctl restart jans-auth</code></li>
+</ul>
+<h3 id="make-a-gama-archive">Make a <code>gama</code> archive<a class="headerlink" href="#make-a-gama-archive" title="Permanent link">#</a></h3>
+<p><a href="https://docs.jans.io/head/agama/gama-format/">gama files</a> are deployable units in the Agama engine. To create one, simply zip the contents of <code>project</code> subdirectory. The resulting archive must have three folders at top-level: <code>web</code>, <code>lib</code>, and <code>code</code>. The file extension does not matter in the end.</p>
+<p>To quickly collect the contents of <code>project</code>, you can do the following:</p>
+<div class="highlight"><pre><span></span><code>git clone --depth 1 https://github.com/JanssenProject/jans.git
+cd jans/docs/agama-catalog/jans/inboundID/project
+</code></pre></div>
+<h3 id="deploy-the-archive">Deploy the archive<a class="headerlink" href="#deploy-the-archive" title="Permanent link">#</a></h3>
+<p>Transfer the archive to your server, and then run <code>/opt/jans/jans-cli/jans_cli_tui.py</code>. Follow the prompts and then enter the Agama menu (<code>Alt + m</code>). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file.</p>
+<p>Wait 30 seconds and press the <code>d</code> key. This will show the result of the deployment. Ensure no errors are reported.</p>
+<h2 id="configuration-handling">Configuration handling<a class="headerlink" href="#configuration-handling" title="Permanent link">#</a></h2>
+<h3 id="collect-providers-configurations">Collect providers configurations<a class="headerlink" href="#collect-providers-configurations" title="Permanent link">#</a></h3>
+<p>For every provider collect OAuth 2.0 configurations - or OpenId Connect if supported. Instructions to do this vary across different social sites. For the case of Facebook, for instance, this is approximately what needs to be done:</p>
+<ul>
+<li>Login to Facebook and <a href="https://developers.facebook.com/docs/development/register">register</a> as developer</li>
+<li>Create an application with Facebook login capabilities</li>
+<li>In the Facebook login settings add <code>https://&lt;your-host&gt;/jans-auth/fl/callback</code> as a valid OAuth redirect URI</li>
+<li>Finally grab the app Id and secret from the app settings page</li>
+</ul>
+<p>For Apple, some guidelines are included at the end of this document.</p>
+<h3 id="supply-configurations">Supply configurations<a class="headerlink" href="#supply-configurations" title="Permanent link">#</a></h3>
+<p>Still in TUI, press the <code>c</code> key and then choose to export the sample configurations locally. Inspect the generated file. It provides "dummy" placeholders to supply the actual configurations.</p>
+<p>The configuration is held in a JSON object whose keys are identifiers of identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
+<p>This is an example of a configuration for a couple of identity providers:</p>
+<div class="highlight"><pre><span></span><code>{
+
+&quot;github&quot;: {
+  &quot;flowQname&quot;: &quot;io.jans.inbound.GenericProvider&quot;,
+  &quot;displayName&quot;: &quot;Github&quot;,
+  &quot;mappingClassField&quot;: &quot;io.jans.inbound.Mappings.GITHUB&quot;,
+  &quot;oauthParams&quot;: { ... }
+},
+
+&quot;google&quot;: {
+  &quot;flowQname&quot;: &quot;io.jans.inbound.GenericProvider&quot;,
+  &quot;displayName&quot;: &quot;Google&quot;,
+  &quot;mappingClassField&quot;: &quot;io.jans.inbound.Mappings.GOOGLE&quot;
+  &quot;enabled&quot;: false,
+  &quot;skipProfileUpdate&quot;: true,
+  &quot;oauthParams&quot;: { ... }
+}
+
+}
+</code></pre></div>
+<p>The table below explains the meaning of properties:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Mandatory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flowQname</code></td>
+<td>The qualified name of the Agama flow associated to this provider (must exist in <code>code</code> directory)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>displayName</code></td>
+<td>Short name of the provider (will be shown in the selector page)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>oauthParams</code></td>
+<td>The actual OAuth configuration for the given provider. See below</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>openIdParams</code></td>
+<td>OpenId connect configuration. See notes below</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>mappingClassField</code></td>
+<td>The qualified name of the <a href="#attribute-mappings">attribute mapping</a> for this provider</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>logoImg</code></td>
+<td>Relative path to the logo image (will be shown in the selector page)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>enabled</code></td>
+<td>A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is <code>true</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>skipProfileUpdate</code></td>
+<td>Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is <code>false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>cumulativeUpdate</code></td>
+<td>When <code>true</code>, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is <code>false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>requestForEmail</code></td>
+<td>Whether to prompt the user to enter his e-mail if the data supplied by the identity provider does not contain one. Default value is <code>false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>emailLinkingSafe</code></td>
+<td>Determines if an existing account with the same e-mail of the user about to be provisioned can be treated as the same person</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><code>logoImg</code> path is relative to the base path of the main flow, i.e. <code>inboundID</code></li>
+<li>Set <code>emailLinkingSafe</code> to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to <code>true</code> when <code>requestForEmail</code> is also <code>true</code></li>
+</ul>
+<p>Property <code>oauthParams</code> adheres to the following structure:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authzEndpoint</code></td>
+<td>The authorization endpoint as in section 3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>tokenEndpoint</code></td>
+<td>The token endpoint as in section 3.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>userInfoEndpoint</code></td>
+<td>The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification</td>
+</tr>
+<tr>
+<td><code>clientId</code></td>
+<td>The identifier of the client to use, see section 1.1 and 2.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>. This client is assumed to be <em>confidential</em> as in section 2.1</td>
+</tr>
+<tr>
+<td><code>clientSecret</code></td>
+<td>Secret associated to the client</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td>A JSON array of strings that represent the scopes of the access tokens to retrieve</td>
+</tr>
+<tr>
+<td><code>redirectUri</code></td>
+<td>Redirect URI as in section 3.1.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>clientCredsInRequestBody</code></td>
+<td><code>true</code> indicates the client authenticates at the token endpoint by including the credentials in the body of the request, otherwise, HTTP Basic authentication is assumed. See section 2.3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>custParamsAuthReq</code></td>
+<td>A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired</td>
+</tr>
+<tr>
+<td><code>custParamsTokenReq</code></td>
+<td>A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired</td>
+</tr>
+</tbody>
+</table>
+<p>Edit the properties you consider relevant for every provider. Generally, from the above table, the first six are the only needed.</p>
+<p>Section <code>openIdParams</code> can be used when the provider supports OpenId Connect too. This will reduce considerably the amount of properties you will need to supply in section  <code>oauthParams</code>. Here's the structure:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>The URL of the provider, e.g. <code>https://may.hem</code></td>
+</tr>
+<tr>
+<td><code>useDCR</code></td>
+<td>If the provider supports <em>dynamic client registration</em> set this to <code>true</code>. It will be a time saver</td>
+</tr>
+<tr>
+<td><code>useCachedClient</code></td>
+<td>Once client registration occurs for the first time, no more registration attempts will be made until the client is about to expire. Set this to <code>false</code> to force registration every time authentication is about to take place</td>
+</tr>
+</tbody>
+</table>
+<p>When providing <code>openIdParams</code>, the <code>host</code> will be used to grab the endpoints mentioned in the <code>oauthParams</code> section automatically, namely, authorization, token, and userInfo endpoints.  When <code>useDCR</code> is set to <code>true</code>, a client will be registered so there is no need to supply <code>clientId</code> and <code>clientSecret</code>. Under these circumstances, most of times only <code>scopes</code> will be needed under the <code>oauthParams</code> section.</p>
+<h4 id="attribute-mappings">Attribute mappings<a class="headerlink" href="#attribute-mappings" title="Permanent link">#</a></h4>
+<p>This is the process through which the raw user profile data received by an identity provider is transformed into an object suitable for being stored in the Janssen's user database. Here, developers have the opportunity to "map" or "transform" the incoming data to one compatible with the data types, formats, and names required by the database.</p>
+<p>As an example suppose a provider returned the following:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;id&quot;: dfsg2-3bui2.2.5+ld1,
+  &quot;email&quot;: &quot;moe@doedoe.co&quot;,
+  &quot;last_name&quot;: &quot;Doe&quot;,
+  &quot;first_name&quot;: &quot;Moe&quot;
+}
+</code></pre></div>
+<p>None of this attributes exist in Janssen; database adheres to LDAP naming. Conformant names would be <code>uid</code>, <code>mail</code>, <code>sn</code>, and <code>givenName</code>. Also, let's assume you want to set <code>displayName</code> to a string composed by the first and last names separated by a white space. Writing a mapping is required.</p>
+<p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, that is, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>.</p>
+<p>Note property <code>mappingClassField</code> of every provider defined in the main flow points to the fully qualified name of a mapping. Not all mappings have to belong to the same class.</p>
+<h3 id="import-configurations">Import configurations<a class="headerlink" href="#import-configurations" title="Permanent link">#</a></h3>
+<p>Once the JSON file you have been editing is ready, hit <code>c</code> key again in TUI. This time choose to import the configuration and select the file.</p>
+<h2 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h2>
+<p>Launch the main flow (learn about this topic <a href="https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described <a href="#main-flow">earlier</a>.</p>
+<h2 id="how-to-add-another-provider">How to add another provider?<a class="headerlink" href="#how-to-add-another-provider" title="Permanent link">#</a></h2>
+<p><strong>Note</strong>: If you want to integrate Apple Sign In, skip this section: guidelines are included at the end of this document.</p>
+<p>In practice most identity providers adhere to the OAuth2 <code>code</code> grant and require configurations similar to the sample provided. Follow these steps:</p>
+<ol>
+<li>In your local machine, create a new project with the required layout: directories <code>web</code>, <code>code</code> and <code>lib</code></li>
+<li>Place the logo inside <code>web</code></li>
+<li>If an <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">existing</a> attribute mapping cannot be reused, <a href="#writing-your-own-mapping">implement</a> one for this provider and put the source (Java/Groovy) in <code>lib</code> directory </li>
+<li>Create the archive and deploy it in the server using TUI</li>
+<li>Include the configuration for the new provider in the main's flow (<code>io.jans.inbound.ExternalSiteLogin</code>) config, for instance:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>&quot;new-provider-ID&quot;: {
+  &quot;flowQname&quot;: &quot;io.jans.inbound.GenericProvider&quot;,
+  &quot;displayName&quot;: &quot;...&quot;,
+  &quot;mappingClassField&quot;: &quot;Qualified name of the attribute mapping&quot;,
+  &quot;logoImg&quot;: &quot;path to the logo image relative to the base path of the main flow (you can use things like ../)&quot;
+  &quot;oauthParams&quot;: { ... }
+}
+</code></pre></div>
+<p>Do your tests. If you consider the "generic" provider flow does not cope, add a new flow to the recently created project (in folder <code>code</code>) to better suit the provider requirements. Redeploy and test again.</p>
+<h2 id="writing-your-own-mapping">Writing your own mapping<a class="headerlink" href="#writing-your-own-mapping" title="Permanent link">#</a></h2>
+<p>Ensure you went through <a href="#attribute-mappings">this</a> already. Some important considerations:</p>
+<ul>
+<li>A mapping has to be declared as a public field in a public class</li>
+<li>Several providers can use the same mapping</li>
+</ul>
+<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the <code>lib</code> directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in <code>lib</code> corresponding to your class package.</p>
+<p>A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension and edit the body of the lambda expression.</p>
+<!--
+Also you have to update the main flow as follows:
+
+- Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the provider flow body (`.flow` file) for the class to be effectively reloaded when the file is modified
+- Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
+
+From there onwards, you only need to re-upload the file as many times as needed.
+-->
+
+<p>If you use <code>DEBUG</code> level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".</p>
+<h2 id="appendix-integrating-sign-in-with-apple">Appendix: integrating "Sign In With Apple"<a class="headerlink" href="#appendix-integrating-sign-in-with-apple" title="Permanent link">#</a></h2>
+<p>Integrating this provider requires a good amount of work. In the following we provide a summary.</p>
+<p>Ensure you have an Apple developer account to start. <a href="https://github.com/ananay/apple-auth/blob/master/SETUP.md">This tutorial</a> does a great job at explaining the necessary steps. As you go with it, please collect the following elements:</p>
+<ul>
+<li>A service ID</li>
+<li>A team ID</li>
+<li>A key ID and a key file </li>
+</ul>
+<p>You will be prompted to provide a domain name and a return URL. Provide <code>&lt;your-jans-host&gt;</code> and <code>https://&lt;your-jans-host&gt;/jans-auth/fl/callback</code> respectively, ensuring the changes are effectively saved in the developer's portal.</p>
+<p>The configuration for this provider would look like:</p>
+<div class="highlight"><pre><span></span><code>&quot;apple&quot;: {
+  &quot;flowQname&quot;: &quot;io.jans.inbound.Apple&quot;,
+  &quot;displayName&quot;: &quot;Apple&quot;,
+  &quot;mappingClassField&quot;: &quot;io.jans.inbound.Mappings.APPLE&quot;,
+  &quot;logoImg&quot;: &quot;apple.png&quot;,
+  &quot;oauthParams&quot;: {
+      &quot;authzEndpoint&quot;: &quot;https://appleid.apple.com/auth/authorize&quot;,
+      &quot;tokenEndpoint&quot;: &quot;https://appleid.apple.com/auth/token&quot;,
+      &quot;clientId&quot;: &quot;&lt;SERVICE ID&gt;&quot;,
+      &quot;key&quot;: &quot;&lt;ONE-LINER CONTENTS OF KEY FILE&gt;&quot;,
+      &quot;keyId&quot;: &quot;&lt;KEY ID&gt;&quot;,
+      &quot;teamId&quot;: &quot;&lt;TEAM ID&gt;&quot;,
+      &quot;scopes&quot;: [&quot;email&quot;, &quot;name&quot;],
+      &quot;custParamsAuthReq&quot;: { &quot;response_mode&quot;: &quot;form_post&quot; },
+      &quot;clientCredsInRequestBody&quot;: true
+  }
+}
+</code></pre></div>
+<p>For <code>key</code>, remove the lines regarding begin/end of the private key entirely. Also remove any line breaks: a one-liner is required.</p>
+<h3 id="expected-journey">Expected journey<a class="headerlink" href="#expected-journey" title="Permanent link">#</a></h3>
+<p>The accompanying images illustrate the steps end-users will go through when using the inbound identity flow taking the Apple route:</p>
+<ol>
+<li>
+<p>Initial provider selector page</p>
+<p><img alt="provider selector" src="apple/provider_selector.png" /></p>
+</li>
+<li>
+<p>Prompt for credentials at Apple website</p>
+<p><img alt="prompt credentials" src="apple/SIWA_creds.png" /></p>
+</li>
+<li>
+<p>Prompt for a second factor, e.g. SMS (optional)</p>
+<p><img alt="prompt second factor" src="apple/SIWA_MFA.png" /></p>
+</li>
+<li>
+<p>Prompt for browser trust</p>
+<p><img alt="browser trust" src="apple/SIWA_trust.png" /></p>
+</li>
+<li>
+<p>Prompt before returning to original site</p>
+<p><img alt="prompt continue" src="apple/SIWA_proceed.png" /></p>
+</li>
+</ol>
+<p>Finally, the user should land at the target application.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 22, 2022 21:20:01 UTC"><span class="timeago" datetime="2022-08-22T21:20:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 22, 2022 21:20:01 UTC">2022-08-22</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>
