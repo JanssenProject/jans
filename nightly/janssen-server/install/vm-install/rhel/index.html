@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/install/vm-install/rhel/">
       
       
-        <link rel="prev" href="../ubuntu/">
+        <link rel="prev" href="../debian/">
       
       
         <link rel="next" href="../suse/">
@@ -844,8 +844,6 @@
       
         
       
-        
-      
     
     
     
@@ -1108,6 +1106,8 @@
       
         
       
+        
+      
     
     
     
@@ -1222,6 +1222,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../debian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1292,6 +1320,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Install the Package">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rhel-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RHEL 9
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rhel-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RHEL 10
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1890,66 +1946,6 @@
   
   
   
-    <a href="../../../link/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Link (User Sync)
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
     <a href="../../../lock/" class="md-nav__link">
       
   
@@ -2241,6 +2237,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Install the Package">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rhel-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RHEL 9
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rhel-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RHEL 10
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2447,49 +2471,115 @@
 <h1 id="red-hat-el-janssen-installation">Red Hat EL Janssen Installation<a class="headerlink" href="#red-hat-el-janssen-installation" title="Permanent link">#</a></h1>
 <p>Before you install, check the <a href="../vm-requirements/">VM system requirements</a>.</p>
 <h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
+<h3 id="rhel-9">RHEL 9<a class="headerlink" href="#rhel-9" title="Permanent link">#</a></h3>
 <ul>
 <li>Install EPEL and mod-auth-openidc as dependencies</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+<div class="highlight"><pre><span></span><code>sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 sudo yum -y module enable mod_auth_openidc 
 </code></pre></div>
 <ul>
-<li>Download the GPG key zip file , unzip and import GPG key</li>
-</ul>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>automation-jans-public-gpg.zip
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rpm<span class="w"> </span>-import<span class="w"> </span>automation-jans-public-gpg.asc
-</code></pre></div>
-<ul>
-<li>Download the release package from the Github Janssen Project
+<li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
-<p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
+<p>Verify the cryptographic signature using cosign (primary verification):</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Install the <a href="https://docs.sigstore.dev/cosign/system_config/installation/">cosign CLI</a> if not already installed.</p>
+</div>
 <ul>
 <li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans-0.0.0-nightly.el8.x86_64.rpm</code> file:</p>
+<p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+</code></pre></div>
 </li>
 <li>
-<p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-0.0.0-nightly.el8.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans-0.0.0-nightly.el8.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-0.0.0-nightly.el8.x86_64.rpm.sha256sum
-</code></pre></div></p>
+<p>Verify the signature:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el9-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>~/jans-replace-janssen-version-stable.el9.x86_64.rpm
+</code></pre></div>
+<p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
+</code></pre></div>
 </li>
 </ul>
+</li>
+<li>
+<p>Optionally, verify integrity using the published checksum file (secondary check):</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
+sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
+</code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-0.0.0-nightly.el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-0.0.0-nightly.el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
+</code></pre></div>
+<h3 id="rhel-10">RHEL 10<a class="headerlink" href="#rhel-10" title="Permanent link">#</a></h3>
+<ul>
+<li>Install EPEL and mod-auth-openidc as dependencies</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+sudo yum -y module enable mod_auth_openidc 
+</code></pre></div>
+<ul>
+<li>Download the release package from the GitHub Janssen Project
+  <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
+</ul>
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
+</code></pre></div>
+<ul>
+<li>
+<p>Verify the cryptographic signature using cosign (primary verification):</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Install the <a href="https://docs.sigstore.dev/cosign/system_config/installation/">cosign CLI</a> if not already installed.</p>
+</div>
+<ul>
+<li>
+<p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+</code></pre></div>
+</li>
+<li>
+<p>Verify the signature:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>jans-el10-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans-replace-janssen-version-stable.el10.x86_64.rpm
+</code></pre></div>
+<p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
+</code></pre></div>
+</li>
+</ul>
+</li>
+<li>
+<p>Optionally, verify integrity using the published checksum file (secondary check):</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
+sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
+</code></pre></div>
+<p>Output similar to below should confirm the integrity of the downloaded package.</p>
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
+</code></pre></div>
+</li>
+<li>
+<p>Install the package</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -2616,7 +2706,7 @@ the removal of all the unused dependencies.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 20, 2026 11:46:24 UTC"><span class="timeago" datetime="2026-04-20T11:46:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 20, 2026 11:46:24 UTC">2026-04-20</span>
   </span>
 
     

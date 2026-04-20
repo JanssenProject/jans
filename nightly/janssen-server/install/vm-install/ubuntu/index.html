@@ -19,7 +19,7 @@
         <link rel="prev" href="../vm-requirements/">
       
       
-        <link rel="next" href="../rhel/">
+        <link rel="next" href="../debian/">
       
       
         
@@ -844,8 +844,6 @@
       
         
       
-        
-      
     
     
     
@@ -1096,6 +1094,8 @@
       
         
           
+        
+      
         
       
         
@@ -1365,6 +1365,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../debian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1877,66 +1905,6 @@
     
   
     Terraform & IaC
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../link/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Link (User Sync)
   
 
     
@@ -2524,22 +2492,13 @@
 
 <h1 id="ubuntu-janssen-installation">Ubuntu Janssen Installation<a class="headerlink" href="#ubuntu-janssen-installation" title="Permanent link">#</a></h1>
 <p>Before you install, check the <a href="../vm-requirements/">VM system requirements</a>.</p>
-<ul>
-<li>Download the GPG key zip file , unzip and import GPG key</li>
-</ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
-</code></pre></div>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>unzip<span class="w"> </span>automation-jans-public-gpg.zip
-</code></pre></div>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>gpg<span class="w"> </span>--import<span class="w"> </span>automation-jans-public-gpg.asc<span class="p">;</span>
-</code></pre></div>
 <h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
 <h3 id="ubuntu-2404">Ubuntu 24.04<a class="headerlink" href="#ubuntu-2404" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Download the release package from the Github Janssen Project
+<p>Download the release package from the GitHub Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -2548,29 +2507,52 @@
 </code></pre></div>
 </li>
 <li>
-<p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.  </p>
+<p>Verify the cryptographic signature using cosign (primary verification):</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Install the <a href="https://docs.sigstore.dev/cosign/system_config/installation/">cosign CLI</a> if not already installed.</p>
+</div>
 <ul>
-<li>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu24.04_amd64.deb</code> file:</li>
-<li>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
-</code></pre></div></li>
+<li>
+<p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>/tmp
+</code></pre></div>
+</li>
+<li>
+<p>Verify the signature:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>jans-ubuntu24-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+</code></pre></div>
+<p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
+</code></pre></div>
+</li>
 </ul>
+</li>
+<li>
+<p>Optionally, verify integrity using the published checksum file (secondary check):</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum<span class="w"> </span>-P<span class="w"> </span>/tmp
+sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+</code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2204">Ubuntu 22.04<a class="headerlink" href="#ubuntu-2204" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Download the release package from the Github Janssen Project
+<p>Download the release package from the GitHub Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -2579,65 +2561,56 @@
 </code></pre></div>
 </li>
 <li>
-<p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
+<p>Verify the cryptographic signature using cosign (primary verification):</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Install the <a href="https://docs.sigstore.dev/cosign/system_config/installation/">cosign CLI</a> if not already installed.</p>
+</div>
 <ul>
 <li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu22.04_amd64.deb</code> file:</p>
+<p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>/tmp
+</code></pre></div>
 </li>
 <li>
-<p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+<p>Verify the signature:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>jans-ubuntu22-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
-Output similar to below should confirm the integrity of the downloaded package.</p>
+<p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
+</code></pre></div>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+</li>
+<li>
+<p>Optionally, verify integrity using the published checksum file (secondary check):</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum<span class="w"> </span>-P<span class="w"> </span>/tmp
+sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
+</code></pre></div>
+<p>Output similar to below should confirm the integrity of the downloaded package.</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
 <p>Or,</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>dpkg<span class="w"> </span>-i<span class="w"> </span>jans_1.4.0-stable.ubuntu22.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2004">Ubuntu 20.04<a class="headerlink" href="#ubuntu-2004" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Download the release package from the Github Janssen Project
-<a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
-</code></pre></div>
-</li>
-<li>
-<p>Go to <code>/tmp</code> directory:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/tmp
-</code></pre></div>
-</li>
-<li>
-<p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
-<ul>
-<li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans_0.0.0-nightly.ubuntu20.04_amd64.deb</code> file:</p>
-</li>
-<li>
-<p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans_0.0.0-nightly.ubuntu20.04_amd64.deb&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans_0.0.0-nightly.ubuntu20.04_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_0.0.0-nightly.ubuntu20.04_amd64.deb.sha256sum
-</code></pre></div></p>
-</li>
-</ul>
-<p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_0.0.0-nightly.ubuntu20.04_amd64.deb: OK
-</code></pre></div>
-</li>
-<li>
-<p>Install the package</p>
-</li>
-</ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w">  </span>./jans_0.0.0-nightly.ubuntu20.04_amd64.deb
-</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Ubuntu 20.04 is end-of-life and no longer supported</p>
+<p>Ubuntu 20.04 reached end-of-life in April 2025. Janssen packages and
+cosign-signed bundles are no longer published for this version.
+Please upgrade to <a href="#ubuntu-2204">Ubuntu 22.04</a> or <a href="#ubuntu-2404">Ubuntu 24.04</a>.</p>
+</div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
 <li>Run the setup script in interactive mode:</li>
@@ -2658,7 +2631,7 @@ interactive mode.</p>
 <p>If you have selected casa during installation you can access casa using url <code>https://&lt;host&gt;/jans-casa</code></p>
 <h2 id="lets-encrypt">Let's Encrypt<a class="headerlink" href="#lets-encrypt" title="Permanent link">#</a></h2>
 <p>To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.</p>
-<p>To generate Let’s Encrypt CA certificate follow this <a href="https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt">let's encrypt</a>.</p>
+<p>To generate Let's Encrypt CA certificate follow this <a href="https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt">let's encrypt</a>.</p>
 <h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
 <p>Uninstall process involves two steps and removes all the Janssen Server components.</p>
 <div class="admonition note">
@@ -2720,7 +2693,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 </code></pre></div>
 
@@ -2745,7 +2718,7 @@ Checking to make sure service is down...
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 20, 2026 11:46:24 UTC"><span class="timeago" datetime="2026-04-20T11:46:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 20, 2026 11:46:24 UTC">2026-04-20</span>
   </span>
 
     
