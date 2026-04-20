@@ -3,40 +3,29 @@ tags:
 - administration
 - installation
 - vm
-- SUSE
-- SLES
-- Leap
+- debian
 ---
 
-# SUSE Janssen Installation
+# Debian Janssen Installation
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-- If the server firewall is running, make sure you allow `https`, which is
-needed for OpenID and FIDO.
+### Debian 13 (Trixie)
 
-```shell
-sudo firewall-cmd --permanent --zone=public --add-service=https
-```
+- Download the release package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-```shell
-sudo firewall-cmd --reload
-```
+    ```shell title="Command"
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb -P /tmp
+    ```
 
-- for SLES, we need to enable PackageHub as per OSversion and architecture
-```
-sudo SUSEConnect -p PackageHub/15.5/x86_64
+- Go to `/tmp` directory:
 
-```
-
-- Download the release package from the GitHub Janssen Project
-  [Releases](https://github.com/JanssenProject/jans/releases/latest)
-
-```shell
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm
-```
+    ```bash title="Command"
+    cd /tmp
+    ```
 
 - Verify the cryptographic signature using cosign (primary verification):
 
@@ -46,13 +35,13 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
-        cosign verify-blob --bundle jans-suse16-replace-janssen-version.bundle jans-replace-janssen-version-stable.suse16.x86_64.rpm
+        cosign verify-blob --bundle jans-debian13-replace-janssen-version.bundle jans_replace-janssen-version~debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -64,27 +53,27 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
-    sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb.sha256sum -P /tmp
+    sha256sum -c jans_replace-janssen-version~debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
-      ```text
-      jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
-      ```
+    ```text title="Output"
+    jans_replace-janssen-version~debian13_amd64.deb: OK
+    ```
 
 - Install the package
 
-```
-sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
+```shell title="Command"
+sudo apt install ./jans_replace-janssen-version~debian13_amd64.deb
 ```
 
 ## Run the setup script
 
 - Run the setup script in interactive mode:
 
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
@@ -93,17 +82,15 @@ confused how to answer any of the questions, for details about command line
 arguments, or you would prefer to use a properties file instead of
 interactive mode.
 
-
 ## Verify the Installation
 
-After the successful completion of setup process,
-[verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
+After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
 ## Log in to Text User Interface (TUI)
 
 Begin configuration by accessing the TUI with the following command:
 
-```bash
+```shell title="Command"
 jans tui
 ```
 
@@ -111,30 +98,11 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 
 If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
 
-## Enabling HTTPS
+## Let's Encrypt
 
-To enable communication with Janssen Server over TLS (https) in a production
-environment, Janssen Server needs details about CA certificate. Update the
-HTTPS cofiguration file `https_jans.conf` as shown below:
+To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
 
-!!! Note
-    Want to use `Let's Encrypt` to get a certificate? Follow [this guide](../../../contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
-
-- Open `https_jans.conf`
-  ```bash
-  sudo vi /etc/apache2/vhosts.d/_https_jans.conf
-  ```
-
-- Update `SSLCertificateFile` and `SSLCertificateKeyFile` parameters values
-  ```bash
-  SSLCertificateFile location_of_fullchain.pem
-  SSLCertificateKeyFile location_of_privkey.pem
-  ```
-
-- Restart `httpd` service for changes to take effect
-  ```bash
-  sudo /usr/sbin/rcapache2 restart
-  ```
+To generate Let's Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
 
 ## Uninstall
 
@@ -143,21 +111,18 @@ Uninstall process involves two steps and removes all the Janssen Server componen
 !!! Note
     For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
 
-1. Uninstall Janssen Server
-2. Remove and purge the `jans` package
+1. Delete files installed by Janssen
+1. Remove and purge the `jans` package
 
-If you have not run the Jans setup script, you can skip step 1 and just remove
-the package.
+Use the command below to uninstall the Janssen server
 
-First, run command below to uninstall the Janssen server
-
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:
 
-```
+```text title="Output"
 This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -176,7 +141,6 @@ Removing /etc/default/jans-auth
 Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
-Stopping OpenDj Server
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans
@@ -185,17 +149,33 @@ Executing rm -r -f /opt/jre
 Executing rm -r -f /opt/node*
 Executing rm -r -f /opt/jetty*
 Executing rm -r -f /opt/jython*
-Executing rm -r -f /opt/opendj
 Executing rm -r -f /opt/dist
 Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
-
 ```
 
-Second uninstall the package:
+The command below removes and purges the `jans` package
 
-```
-rpm -qa | grep jans
+```shell title="Command"
+apt-get --purge remove jans
 ```
 
-And then use `zypper remove <package>`
+Which should result in the following:
+
+```text title="Output"
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap liblua5.3-0 postgresql postgresql-contrib python3-pymysql python3-ruamel.yaml
+  python3-ruamel.yaml.clib
+Use 'apt autoremove' to remove them.
+The following packages will be REMOVED:
+  jans*
+0 upgraded, 0 newly installed, 1 to remove and 2 not upgraded.
+After this operation, 1631 MB disk space will be freed.
+Do you want to continue? [Y/n] y
+(Reading database ... 166839 files and directories currently installed.)
+Removing jans (replace-janssen-version~debian13_amd64) ...
+Checking to make sure service is down...
+```

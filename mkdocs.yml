@@ -476,6 +476,7 @@ nav:
         - janssen-server/install/vm-install/README.md
         - VM Requirements: janssen-server/install/vm-install/vm-requirements.md
         - Ubuntu: janssen-server/install/vm-install/ubuntu.md
+        - Debian: janssen-server/install/vm-install/debian.md
         - RHEL: janssen-server/install/vm-install/rhel.md
         - Suse: janssen-server/install/vm-install/suse.md
         - Dynamic Download: janssen-server/install/vm-install/dynamic-download.md

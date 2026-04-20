@@ -18,6 +18,10 @@ The Janssen Project currently provides packages for these Linux distros:
  * Ubuntu 22.04
  * Ubuntu 20.04
 
+### Debian
+
+ * Debian 13 (Trixie)
+
 ### RHEL
 
  * Red Hat Enterprise Linux 8 (RHEL 8)

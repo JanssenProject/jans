@@ -10,21 +10,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-
-- Download the GPG key zip file , unzip and import GPG key
-
-```shell title="Command"
-wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
-```
-
-```shell title="Command"
-unzip automation-jans-public-gpg.zip
-```
-
-```shell title="Command"
-sudo gpg --import automation-jans-public-gpg.asc;
-```
-
 ## Install the Package
 
 ### Ubuntu 24.04
@@ -42,12 +27,34 @@ sudo gpg --import automation-jans-public-gpg.asc;
     cd /tmp
     ```
 
-- Verify integrity of the downloaded package by verifying published `sha256sum`.  
-   
-    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb` file:
-    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+- Verify the cryptographic signature using cosign (primary verification):
+
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
+
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
+
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version.bundle -P /tmp
+        ```
+
+    - Verify the signature:
+
+        ```bash title="Command"
+        cosign verify-blob --bundle jans-ubuntu24-replace-janssen-version.bundle jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+        ```
+
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
+
+        ```text title="Output"
+        Verified OK
+        ```
+
+- Optionally, verify integrity using the published checksum file (secondary check):
+
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum -P /tmp
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -77,18 +84,36 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     cd /tmp
     ```
 
+- Verify the cryptographic signature using cosign (primary verification):
 
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
 
-- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
-   
-    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb` file:
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version.bundle -P /tmp
+        ```
 
+    - Verify the signature:
 
-    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+        ```bash title="Command"
+        cosign verify-blob --bundle jans-ubuntu22-replace-janssen-version.bundle jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+        ```
+
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
+
+        ```text title="Output"
+        Verified OK
+        ```
+
+- Optionally, verify integrity using the published checksum file (secondary check):
+
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum -P /tmp
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
+
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
@@ -109,42 +134,10 @@ dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 
 ### Ubuntu 20.04
 
-- Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases/latest)
-
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
-    ```
-
-- Go to `/tmp` directory:
-
-    ```bash title="Command"
-    cd /tmp
-    ```
-
-
-
-- Verify integrity of the downloaded package by verifying published `sha256sum`.   
-   
-    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb` file:
-
-
-    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
-    ```bash title="Command"
-    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb' | sed 's/^sha256://' > jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
-    ```
-
-    Output similar to below should confirm the integrity of the downloaded package.
-
-    ```text title="Output"
-    jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb: OK
-    ```
-
-- Install the package
-
-```shell title="Command"
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
-```
+!!! warning "Ubuntu 20.04 is end-of-life and no longer supported"
+    Ubuntu 20.04 reached end-of-life in April 2025. Janssen packages and
+    cosign-signed bundles are no longer published for this version.
+    Please upgrade to [Ubuntu 22.04](#ubuntu-2204) or [Ubuntu 24.04](#ubuntu-2404).
 
 ## Run the setup script
 
@@ -178,7 +171,7 @@ If you have selected casa during installation you can access casa using url ```h
 ## Let's Encrypt
 To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
 
-To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+To generate Let's Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
 
 ## Uninstall
 
