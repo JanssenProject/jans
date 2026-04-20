@@ -35,6 +35,7 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
 

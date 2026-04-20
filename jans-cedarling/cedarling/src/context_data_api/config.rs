@@ -66,7 +66,6 @@ impl Default for DataStoreConfig {
             max_entries: 10_000,
             max_entry_size: 1_048_576, // 1MB
             default_ttl: None,
-            // This suppression is added because of mismatched usage of toolchain in CI
             max_ttl: Some(Duration::from_secs(3600)), // 1 hour
             enable_metrics: true,
             memory_alert_threshold: 80.0, // 80%

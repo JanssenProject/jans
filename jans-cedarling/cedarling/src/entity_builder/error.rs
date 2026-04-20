@@ -150,9 +150,3 @@ pub enum BuildUnsignedEntityError {
     #[error(transparent)]
     BuildEntity(#[from] Box<BuildEntityError>),
 }
-
-impl crate::authz::metrics::ErrorMetricKey for BuildUnsignedEntityError {
-    fn metric_key(&self) -> &'static str {
-        "authz.unsigned_role_build"
-    }
-}

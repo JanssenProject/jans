@@ -22,9 +22,9 @@ use std::{
     },
 };
 
-use crate::log::Decision;
+use crate::{authz::error_metrics::ErrorMetricKey, log::Decision};
 
-/// Maximum number of eval-time samples retained between snapshots
+/// Capacity of the reservoir sampler used to collect evaluation time samples
 const EVAL_TIME_RESERVOIR_SIZE: usize = 1024;
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
@@ -32,13 +32,6 @@ const EVAL_TIMES_LOCK_POISONED: &str = "eval_times_us lock poisoned";
 const POLICY_STATS_READ_LOCK_POISONED: &str = "policy_stats read lock poisoned";
 const POLICY_STATS_WRITE_LOCK_POISONED: &str = "policy_stats write lock poisoned";
 const ERROR_COUNTERS_LOCK_POISONED: &str = "error_counters lock poisoned";
-
-/// Trait for error types that map to a telemetry metric key.
-pub(crate) trait ErrorMetricKey {
-    /// Returns the dot-separated metric key for this error variant
-    /// (e.g., `"jwt.decode_failed"`, `"data.invalid_key"`).
-    fn metric_key(&self) -> &'static str;
-}
 
 /// Fixed-capacity reservoir sampler
 #[derive(Debug)]

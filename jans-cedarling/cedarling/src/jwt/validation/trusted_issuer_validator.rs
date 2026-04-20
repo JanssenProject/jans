@@ -21,7 +21,6 @@ use std::sync::Arc;
 use serde_json::Value as JsonValue;
 use thiserror::Error;
 
-use crate::authz::metrics::ErrorMetricKey;
 use crate::common::{
     issuer_utils::IssClaim,
     policy_store::{TokenEntityMetadata, TrustedIssuer},
@@ -51,17 +50,6 @@ pub enum TrustedIssuerError {
         /// The token type with empty `entity_type_name`
         token_type: String,
     },
-}
-
-impl ErrorMetricKey for TrustedIssuerError {
-    fn metric_key(&self) -> &'static str {
-        match self {
-            Self::UntrustedIssuer(_) => "jwt.untrusted_issuer",
-            Self::MissingRequiredClaim { .. } | Self::EmptyEntityTypeName { .. } => {
-                "jwt.missing_required_claim"
-            },
-        }
-    }
 }
 
 /// Result type for trusted issuer validation operations.

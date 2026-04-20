@@ -81,7 +81,7 @@ pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
 pub(crate) use token::{Token, TokenClaims};
 pub(crate) use token_cache::TokenCache;
-pub(crate) use validation::TrustedIssuerError;
+pub(crate) use validation::{TrustedIssuerError, ValidateJwtError};
 
 use crate::JwtConfig;
 use crate::LogLevel;
@@ -106,7 +106,7 @@ use std::sync::Arc;
 use trusted_issuers_loader::TrustedIssuerLoader;
 use validation::{
     JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
-    ValidateJwtError, ValidatedJwt, ValidatorInfo, validate_required_claims,
+    ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
 /// Handles JWT validation
