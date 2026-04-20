@@ -481,7 +481,15 @@ class SSA(DialogUtils):
                 self.app.getTitledCheckBoxList(
                     title=_("Grant Types"),
                     name='grant_types',
-                    values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')],
+                    values=[
+                    ('authorization_code', 'Authorization Code'),
+                    ('refresh_token', 'Refresh Token'),
+                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
+                    ('client_credentials', 'Client Credentials'),
+                    ('password', 'Password'),
+                    ('implicit', 'Implicit'),
+                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
+                    ],
                     current_values=data.get('grant_types', []),
                     style=cli_style.check_box,
                 ),
