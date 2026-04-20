@@ -36,7 +36,7 @@ fn test_authorize_unsigned_success() {
         .expect("EntityData should be correctly parsed"),
     );
 
-    let principals = vec![Arc::new(
+    let principal = Some(Arc::new(
         EntityData::from_json(
             json!({
               "cedar_entity_mapping": {
@@ -48,12 +48,12 @@ fn test_authorize_unsigned_success() {
             .to_string(),
         )
         .unwrap(),
-    )];
+    ));
 
     //execute authz
     let result = cedarling
         .authorize_unsigned(
-            principals,
+            principal,
             r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
             resource,
             JsonValue("{}".to_string()),

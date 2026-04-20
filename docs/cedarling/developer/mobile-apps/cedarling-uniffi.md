@@ -83,11 +83,11 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    #[uniffi::method]
         pub fn authorize_unsigned(
             &self,
-            principal: Option<EntityData>,
+            principal: Option<Arc<EntityData>>,
             action: String,
-            resource: EntityData,
-            context: String,
-        ) -> Result<AuthorizeResult, AuthorizeError> 
+            resource: Arc<EntityData>,
+            context: JsonValue,
+        ) -> Result<AuthorizeResult, AuthorizeError>
    ```
 
    **Usage in Swift:**
@@ -101,6 +101,8 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
   ```declarative
   val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntity, "Jans::Action::\"Update\"", resourceEntity, "{}")
   ```
+
+  Pass `null` for `principal` in Kotlin or `nil` in Swift when omitting the asserted principal (partial evaluation).
 
 - **Cedarling::pop_logs**
 

@@ -41,6 +41,11 @@ cp ./target/release/{build_file} ./bindings/cedarling-java/src/main/resources
  mvn clean install
 ```
 
+### Unsigned authorization (`CedarlingAdapter`)
+
+- `authorizeUnsigned(String principalJson, ...)` — `principalJson` may be `null` for evaluation without an asserted principal (Cedar partial mode), matching core `RequestUnsigned.principal == None`.
+- `authorizeUnsignedEntity(EntityData principal, ...)` — use when you already have `EntityData`; `principal` may be `null`. This name avoids Java overload ambiguity with the `String` overload when passing `null`.
+
 ### Using Cedarling-java Maven dependency
 
 To use Cedarling Java bindings in Java Maven Project add following `repository` and `dependency` in pom.xml of the project

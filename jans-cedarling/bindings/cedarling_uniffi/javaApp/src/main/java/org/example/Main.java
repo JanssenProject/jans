@@ -7,7 +7,6 @@ import uniffi.cedarling_uniffi.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -17,13 +16,17 @@ public class Main {
             String bootstrapJson = AppUtils.readFile("./src/main/resources/config/bootstrap.json");
             Cedarling cedarling = Cedarling.Companion.loadFromJson(bootstrapJson);
 
-            // Read principals from JSON array
+            // Optional principal: use first entry from principals.json if present (matches single-principal API)
             String principalsJson = AppUtils.readFile("./src/main/resources/config/principals.json");
-            List<EntityData> principals = new ArrayList<>();
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode array = mapper.readTree(principalsJson);
-            for (JsonNode element : array) {
-                principals.add(EntityData.Companion.fromJson(mapper.writeValueAsString(element)));
+            JsonNode principalsRoot = mapper.readTree(principalsJson);
+            EntityData principal = null;
+            if (principalsRoot.isArray() && principalsRoot.size() > 0) {
+                principal =
+                        EntityData.Companion.fromJson(
+                                mapper.writeValueAsString(principalsRoot.get(0)));
+            } else if (principalsRoot.isObject()) {
+                principal = EntityData.Companion.fromJson(principalsJson);
             }
 
             // Read input files for authorization
@@ -34,8 +37,8 @@ public class Main {
             // Build EntityData from resource JSON
             EntityData resource = EntityData.Companion.fromJson(resourceJson);
 
-            // Perform authorization (unsigned: principals + action + resource + context)
-            AuthorizeResult result = cedarling.authorizeUnsigned(principals, action, resource, contextJson);
+            // Perform authorization (unsigned: optional principal + action + resource + context)
+            AuthorizeResult result = cedarling.authorizeUnsigned(principal, action, resource, contextJson);
 
             // Print decision and full result as pretty-formatted JSON
             System.out.println("Decision:\n" + JsonUtil.toPrettyJson(result.getDecision()));

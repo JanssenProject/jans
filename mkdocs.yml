@@ -156,7 +156,6 @@ nav:
         - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
         - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
         - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
-        - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
         - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
         - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
         - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
@@ -302,7 +301,6 @@ nav:
       - janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
-      - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
     - SCIM:
       - janssen-server/scim/README.md
       - Configuration: janssen-server/scim/config.md
@@ -353,7 +351,6 @@ nav:
         - UMA Claims Gathering: script-catalog/uma_claims_gathering/uma-claims-web.md
         - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
         - Update Token: script-catalog/update_token/update-token.md
-        - Link Interception: script-catalog/link_interception/link-interception.md
         - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
     - Auth Server Settings:
       - Server Configuration: janssen-server/auth-server/config.md
@@ -400,7 +397,6 @@ nav:
     - Additional Settings:
       - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
       - Hash Passwords: janssen-server/config-guide/hash-password.md
-      - Link Configuration: janssen-server/config-guide/link-configuration.md
       - Custom Assets: janssen-server/config-guide/custom-assets-configuration.md
       - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
 
@@ -531,9 +527,6 @@ nav:
         - Operations: janssen-server/reference/database/pgsql-ops.md
     - Terraform & IaC:
       - janssen-server/terraform/README.md
-    - Link (User Sync):
-      - janssen-server/link/README.md
-      - Jans LDAP Link: janssen-server/link/jans-link.md
     - Lock:
       - janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
