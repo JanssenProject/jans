@@ -14,7 +14,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import initWasm, { init, Cedarling, MultiIssuerAuthorizeResult } from '@janssenproject/cedarling_wasm';
+import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from '../../../options/Utils';
 import Stack from '@mui/material/Stack';
 import Tooltip from "@mui/material/Tooltip";
@@ -109,7 +109,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                 }
                 await initWasm();
                 instance = await init(config);
-                const result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
+                const result: AuthorizeResult = await instance.authorize(reqObj);
                 setAuthzResult(result.json_string());
 
                 try {
