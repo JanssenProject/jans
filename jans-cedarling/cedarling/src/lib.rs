@@ -468,11 +468,7 @@ impl DataApi for Cedarling {
         let config = self.data.config();
         let entry_count = self.data.count();
         let total_size_bytes = self.data.total_size();
-        let avg_entry_size_bytes = if entry_count > 0 {
-            total_size_bytes / entry_count
-        } else {
-            0
-        };
+        let avg_entry_size_bytes = total_size_bytes.checked_div(entry_count).unwrap_or(0);
 
         // Calculate capacity usage percentage
         let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(

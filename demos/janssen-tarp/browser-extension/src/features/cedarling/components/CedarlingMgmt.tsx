@@ -135,7 +135,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }: 
                             </Button> : ''}
                     </Stack>
                     {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ? '' :
-                        <Box maxWidth="md">
+                        <Box sx={{ maxWidth: 'md' }}>
                             <ToggleButtonGroup
                                 color="primary"
                                 value={screenType}
