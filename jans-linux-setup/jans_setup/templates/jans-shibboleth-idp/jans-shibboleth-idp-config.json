@@ -1,7 +1,7 @@
 {
   "applicationName": "shibboleth-plugin",
   "enabled": true,
-  "trustRelationshipDn": "ou=trustRelationships,o=jans", 
+  "trustRelationshipDn": "ou=trustRelationships,o=jans",
   "shibbolethMetadataDir": "/opt/shibboleth-idp/metadata",
   "shibbolethMetadataFile": "sp-metadata.xml",
   "shibbolethMetadataFilePattern": "%s_sp-metadata.xml"

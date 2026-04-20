@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 
-@Path(Constants.SHIBBOLETH_CONFIG)
+@Path(Constants.SHIBBOLETH_PLUGIN_CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ShibbolethPluginConfigResource extends BaseResource {
