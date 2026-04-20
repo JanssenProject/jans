@@ -11,12 +11,12 @@ default = ["grpc"]
 blocking = ["tokio/rt-multi-thread"]
 # gRPC transport for Lock Server communication (enabled by default)
 grpc = [
-	"dep:tonic",
-	"dep:prost",
-	"dep:prost-types",
-	"dep:tonic-prost",
-	"dep:tonic-prost-build",
-	"dep:tonic-web-wasm-client"
+        "dep:tonic",
+        "dep:prost",
+        "dep:prost-types",
+        "dep:tonic-prost",
+        "dep:tonic-prost-build",
+        "dep:tonic-web-wasm-client"
 ]
 
 [dependencies]
@@ -67,7 +67,23 @@ vfs = "0.12"
 hex = "0.4.3"
 sha1 = "0.10.6"
 sha2 = "0.10.8"
-zip = "8.1.0"
+# aes-crypto is intentionally excluded from zip default features.
+# zip's aes-crypto pulls in constant_time_eq@^0.4 (MSRV = 1.95.0), which is
+# incompatible with the nightly-2025-09-18 toolchain used by the dylint CI job.
+# cedarling only reads/writes zip archives with Deflated compression;
+# AES-encrypted zip support is not required.
+# If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
+# update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
+zip = { version = "= 8.1.0", default-features = false, features = [
+    "bzip2",
+    "deflate64",
+    "deflate",
+    "lzma",
+    "ppmd",
+    "time",
+    "zstd",
+    "xz",
+] }
 prost = { version = "0.14.3", optional = true }
 prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.3", optional = true }
