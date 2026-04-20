@@ -81,7 +81,7 @@ jobs:
       working-directory: jans-cedarling/custom-lints
       run: |
         export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        cargo +nightly-2025-09-18 test --locked
+        cargo +nightly-2025-09-18 test
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
@@ -189,6 +189,10 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: "1.95.0"
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
       run: tox
