@@ -48,10 +48,12 @@ import org.json.JSONObject;
  * A reference store is {@code jans-cedarling/test_files/policy-store-multi-issuer-test.yaml}.</p>
  *
  * <p>If you have pre-validated / unsigned entity data instead of JWTs, use
- * {@code authorizeUnsigned} — no UniFFI imports needed:</p>
+ * {@code authorizeUnsigned} (nullable principal JSON) or {@code authorizeUnsignedEntity}
+ * (nullable {@code EntityData}) — no UniFFI imports needed for the JSON overload:</p>
  * <pre>{@code
  *   AuthorizeResult result =
  *       adapter.authorizeUnsigned(principalJsonString, action, resource, context);
+ *   // principalJsonString may be null for partial evaluation without an asserted principal.
  * }</pre>
  */
 public class PostAuthn implements PostAuthnType {

@@ -86,7 +86,7 @@ Use `make java BUILD_TYPE=release` or `make java BUILD_TYPE=debug` to build in `
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization using `authorizeUnsigned` with sample principals, resource and context inputs, and call the log interface to print authorization logs on the console. The sample `principals`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization using `authorizeUnsigned` with an optional principal (first entry from the sample `principals.json` array if present), resource and context inputs, and call the log interface to print authorization logs on the console. The sample `principals`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
 
 ## Configuration
 
@@ -181,10 +181,10 @@ let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
 
 The UniFFI binding exposes two authorization methods:
 
-- **`authorizeUnsigned`**: Pass a list of principal entity data, action, resource, and context. Use when you have principal attributes (e.g. from your app or session) and no JWTs.
+- **`authorizeUnsigned`**: Pass an optional principal (`EntityData?` in Kotlin), action, resource, and context (`JsonValue`, a JSON string). Use when you have at most one principal from your app or session and no JWTs; pass null for the principal for Cedar partial evaluation without an asserted principal.
 - **`authorizeMultiIssuer`**: Pass a list of token inputs (mapping + JWT payload), action, resource, and optional context. Use when you have multiple JWTs from different issuers.
 
-`AuthorizeResult` contains `principals` (per-principal decisions), `decision`, and `requestId` (for log correlation). The legacy token-based `authorize` API has been removed.
+`AuthorizeResult` contains `response` (Cedar decision and diagnostics), `decision`, and `requestId` (for log correlation). The legacy token-based `authorize` API has been removed.
 
 ### Testing Configuration
 

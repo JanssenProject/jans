@@ -143,16 +143,17 @@ public class UpdateTokenCedarling implements UpdateTokenType {
             JSONObject principalJson = buildPrincipalJson(context.getClient().getClientId(), grantTypes);
             JSONObject resourceJson = buildResourceJson(grantTypes);
 
-            // Convert principal JSON to EntityData
-            List < EntityData > principalEntities =
-                    List.of(EntityData.Companion.fromJson(principalJson.toString()));
+            // Convert principal JSON to EntityData (omit or pass null for partial evaluation without a principal)
+            EntityData principalEntity =
+                    EntityData.Companion.fromJson(principalJson.toString());
 
             // Empty context (placeholder for future extension)
             JSONObject contextJson = new JSONObject("{}");
 
             // Call Cedarling authorization
-            AuthorizeResult result = cedarlingAdapter.authorizeUnsigned(
-                    principalEntities,
+            AuthorizeResult result =
+                    cedarlingAdapter.authorizeUnsignedEntity(
+                    principalEntity,
                     "Jans::Action::\"Execute\"",
                     resourceJson,
                     contextJson

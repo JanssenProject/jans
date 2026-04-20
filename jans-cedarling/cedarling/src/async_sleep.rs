@@ -24,6 +24,7 @@ pub(crate) async fn sleep(duration: Duration) {
     #[cfg(target_family = "wasm")]
     {
         let millis = duration.as_millis().min(u128::from(u32::MAX));
+        #[allow(clippy::cast_possible_truncation)]
         let millis: u32 = millis as u32;
         gloo_timers::future::TimeoutFuture::new(millis).await;
     }

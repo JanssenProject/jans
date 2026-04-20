@@ -617,6 +617,7 @@ dependencies = [
  "getrandom 0.2.17",
  "getrandom 0.3.4",
  "getrandom 0.4.2",
+ "gloo-timers",
  "hex",
  "http_utils",
  "jsonwebkey",
@@ -975,9 +976,9 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "cpp_demangle"
-version = "0.5.1"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0667304c32ea56cb4cd6d2d7c0cfe9a2f8041229db8c033af7f8d69492429def"
+checksum = "f2bb79cb74d735044c972aae58ed0aaa9a837e85b01106a54c39e42e97f62253"
 dependencies = [
  "cfg-if",
 ]
@@ -1731,6 +1732,18 @@ name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
+
+[[package]]
+name = "gloo-timers"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "482ce8a491a501da4cd806bd190275363d674f2845005c6ddbd5d3e1dd54495d"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "js-sys",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "goblin"
@@ -4486,9 +4499,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "symbolic-common"
-version = "12.18.1"
+version = "12.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f3cdeaae6779ecba2567f20bf7716718b8c4ce6717c9def4ced18786bb11ea"
+checksum = "4bbc8b4f883265fb2207a0d6ce67095f4bd6cf13e5f9183eb8b3e73fa1b2466a"
 dependencies = [
  "debugid",
  "memmap2",
@@ -4498,9 +4511,9 @@ dependencies = [
 
 [[package]]
 name = "symbolic-demangle"
-version = "12.18.1"
+version = "12.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "672c6ad9cb8fce6a1283cc9df9070073cccad00ae241b80e3686328a64e3523b"
+checksum = "8eda470a26ea40eb5cafc35487718e23a2f19153d3a589affb9e8f7fa1aa73b3"
 dependencies = [
  "cpp_demangle",
  "rustc-demangle",
