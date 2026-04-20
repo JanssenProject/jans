@@ -449,7 +449,7 @@ config-api:
   readinessProbe:
     # -- http readiness probe endpoint
     httpGet:
-      path: jans-config-api/api/v1/health/ready
+      path: /jans-config-api/api/v1/health/ready
       port: 8074
     initialDelaySeconds: 25
     periodSeconds: 25
@@ -1552,7 +1552,7 @@ shibboleth-idp:
     # -- Image to use for deploying.
     repository: ghcr.io/janssenproject/jans/shibboleth
     # -- Image tag to use for deploying.
-    tag: 5.1.6_dev
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
