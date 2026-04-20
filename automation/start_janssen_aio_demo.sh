@@ -541,8 +541,9 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
     exit 1
 fi
 
+# reference to image version (e.g. 0.0.0-nightly, 2.0.0-1), not the actual release version
 if [[ -z $JANS_VERSION ]]; then
-    JANS_VERSION="2.0.0"
+    JANS_VERSION="2.0.0-1"
 fi
 
 LOG_TARGET="FILE"

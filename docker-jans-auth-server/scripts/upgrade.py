@@ -258,7 +258,9 @@ class Upgrade:
         try:
             entry.attrs["jansConfPolicy"] = json.loads(entry.attrs["jansConfPolicy"])
             should_update = False
-        except json.decoder.JSONDecodeError:
+        except (json.decoder.JSONDecodeError, TypeError):
+            # handle invalid/empty policy, especially when upgrading from previously
+            # unstable jans-lock plugin prior to v2.x
             should_update = True
             entry.attrs["jansConfPolicy"] = {}
 
