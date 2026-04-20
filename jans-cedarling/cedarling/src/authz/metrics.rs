@@ -13,6 +13,7 @@
 //! All counters reset at each telemetry interval. Gauges reflect point-in-time snapshots.
 
 use chrono::{DateTime, Utc};
+use rand::{RngExt, SeedableRng, rngs::SmallRng};
 use std::{
     collections::HashMap,
     sync::{
@@ -23,11 +24,54 @@ use std::{
 
 use crate::log::Decision;
 
+/// Maximum number of eval-time samples retained between snapshots
+const EVAL_TIME_RESERVOIR_SIZE: usize = 1024;
+
 /// Trait for error types that map to a telemetry metric key.
 pub(crate) trait ErrorMetricKey {
     /// Returns the dot-separated metric key for this error variant
     /// (e.g., `"jwt.decode_failed"`, `"data.invalid_key"`).
     fn metric_key(&self) -> &'static str;
+}
+
+/// Fixed-capacity reservoir sampler
+#[derive(Debug)]
+struct ReservoirSampler {
+    samples: Vec<i64>,
+    capacity: usize,
+    /// Total number of items seen
+    count: usize,
+    rng: SmallRng,
+}
+
+impl ReservoirSampler {
+    fn new(capacity: usize) -> Self {
+        Self {
+            samples: Vec::with_capacity(capacity),
+            capacity,
+            count: 0,
+            rng: SmallRng::from_rng(&mut rand::rng()),
+        }
+    }
+
+    /// Insert a value, replacing a random earlier sample once the reservoir is full
+    fn insert(&mut self, value: i64) {
+        self.count += 1;
+        if self.samples.len() < self.capacity {
+            self.samples.push(value);
+        } else {
+            let j = self.rng.random_range(0..self.count);
+            if j < self.capacity {
+                self.samples[j] = value;
+            }
+        }
+    }
+
+    /// Drain all retained samples, resetting the sampler for the next interval.
+    fn drain(&mut self) -> Vec<i64> {
+        self.count = 0;
+        self.samples.drain(..).collect()
+    }
 }
 
 /// Per-policy statistics tracking evaluation outcomes
@@ -95,7 +139,7 @@ pub(crate) struct MetricsCollector {
     authz_decision_deny: AtomicI64,
     authz_errors_total: AtomicI64,
 
-    eval_times_us: RwLock<Vec<i64>>,
+    eval_times_us: Mutex<ReservoirSampler>,
     last_eval_time_us: AtomicI64,
 
     token_cache_hits: AtomicI64,
@@ -133,7 +177,7 @@ impl MetricsCollector {
             authz_decision_deny: AtomicI64::new(0),
             authz_errors_total: AtomicI64::new(0),
 
-            eval_times_us: RwLock::new(Vec::new()),
+            eval_times_us: Mutex::new(ReservoirSampler::new(EVAL_TIME_RESERVOIR_SIZE)),
             last_eval_time_us: AtomicI64::new(0),
 
             token_cache_hits: AtomicI64::new(0),
@@ -177,22 +221,38 @@ impl MetricsCollector {
         self.last_eval_time_us
             .store(decision_time_us, Ordering::Relaxed);
 
-        {
-            let mut times = self
-                .eval_times_us
-                .write()
-                .expect("eval_times_us lock poisoned");
-            times.push(decision_time_us);
-        }
+        self.eval_times_us
+            .lock()
+            .expect("eval_times_us lock poisoned")
+            .insert(decision_time_us);
 
-        {
+        let policies: Vec<(&str, Decision)> = evaluated_policies.collect();
+        let untracked_policies: Vec<(&str, Decision)> = {
+            let stats = self
+                .policy_stats
+                .read()
+                .expect("policy_stats read lock poisoned");
+            policies
+                .iter()
+                .filter_map(|(id, pol_decision)| {
+                    if let Some(entry) = stats.get(*id) {
+                        entry.record(*pol_decision);
+                        None // handled
+                    } else {
+                        Some((*id, *pol_decision))
+                    }
+                })
+                .collect()
+        };
+
+        if !untracked_policies.is_empty() {
             let mut stats = self
                 .policy_stats
                 .write()
-                .expect("policy_stats lock poisoned");
-            for (policy_id, pol_decision) in evaluated_policies {
+                .expect("policy_stats write lock poisoned");
+            for (id, pol_decision) in untracked_policies {
                 stats
-                    .entry(policy_id.to_string())
+                    .entry(id.to_string())
                     .or_default()
                     .record(pol_decision);
             }
@@ -259,7 +319,7 @@ impl MetricsCollector {
     /// Captures a snapshot of all metrics and resets counters for the next interval.
     ///
     /// Counters are zeroed. Gauges retain their current values. The eval times
-    /// buffer is cleared after computing percentiles.
+    /// reservoir is drained after computing percentiles.
     ///
     /// # Consistency
     ///
@@ -309,11 +369,12 @@ impl MetricsCollector {
             std::mem::take(&mut *counters)
         };
 
-        // Compute percentiles from eval times, then clear buffer
-        let times_snapshot = {
-            let mut times = self.eval_times_us.write().expect("eval_time lock poisoned");
-            std::mem::take(&mut *times)
-        };
+        // Drain bounded reservoir and compute percentiles
+        let times_snapshot = self
+            .eval_times_us
+            .lock()
+            .expect("eval_times_us lock poisoned")
+            .drain();
         let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
 
         // Build operational_stats map from atomic fields
@@ -749,5 +810,33 @@ mod tests {
             Some(&1),
             "remove ops must be 1"
         );
+    }
+
+    #[test]
+    fn reservoir_sampler_bounded_memory() {
+        let mut sampler = ReservoirSampler::new(10);
+        for i in 0..10_000i64 {
+            sampler.insert(i);
+        }
+
+        // Memory is bounded regardless of input size
+        assert_eq!(
+            sampler.samples.len(),
+            10,
+            "reservoir must not exceed capacity"
+        );
+        assert_eq!(sampler.count, 10_000, "total count must be tracked");
+    }
+
+    #[test]
+    fn reservoir_sampler_drain_resets_state() {
+        let mut sampler = ReservoirSampler::new(5);
+        for i in 0..5i64 {
+            sampler.insert(i);
+        }
+        let drained = sampler.drain();
+        assert_eq!(drained.len(), 5);
+        assert_eq!(sampler.samples.len(), 0);
+        assert_eq!(sampler.count, 0);
     }
 }

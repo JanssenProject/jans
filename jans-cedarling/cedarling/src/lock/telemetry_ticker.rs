@@ -54,6 +54,12 @@ impl TelemetryTicker {
     }
 
     fn emit_snapshot(&self) {
+        // Attempt upgrade before resetting, so we don't discard data
+        // if the logger is gone.
+        let Some(logger) = self.logger.as_ref().and_then(std::sync::Weak::upgrade) else {
+            return;
+        };
+
         let snapshot = self.metrics.snapshot_and_reset();
         let entry = MetricsLogEntry {
             base: BaseLogEntry::new_metric_opt_request_id(None),
@@ -62,6 +68,7 @@ impl TelemetryTicker {
             operational_stats: snapshot.operational_stats,
             interval_secs: snapshot.interval_secs,
         };
-        self.logger.log_any(entry);
+
+        logger.log_any(entry);
     }
 }
