@@ -125,7 +125,7 @@ impl KeyService {
 
         let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
 
-        for key in keys {
+        for (key, raw_alg) in keys {
             // We will no support keys with unspecified algorithms
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
@@ -140,11 +140,12 @@ impl KeyService {
             // `jsonwebtoken::Algorithm`
             let algorithm = match cast_to_algorithm(key_algorithm) {
                 Ok(alg) => alg,
-                Err(alg) => {
+                Err(_) => {
+                    let alg_display = raw_alg.as_deref().unwrap_or("UNKNOWN");
                     let err_msg = format!(
                         "skipping building a validation key for unsupported algorithm from '{}': {}",
                         openid_config.issuer.as_str(),
-                        alg,
+                        alg_display,
                     );
                     logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
                     continue;
@@ -188,14 +189,18 @@ pub(super) struct JwkSet {
 }
 
 impl JwkSet {
-    fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
+    fn unwrap_keys(self) -> (Vec<(Jwk, Option<String>)>, Vec<serde_json::Error>) {
         let mut keys = Vec::new();
         let mut errs = Vec::new();
 
-        for key in self.keys {
-            let result = serde_json::from_value::<Jwk>(key);
-            match result {
-                Ok(jwk) => keys.push(jwk),
+        for raw_key in self.keys {
+            let raw_alg = raw_key
+                .get("alg")
+                .and_then(|v| v.as_str())
+                .map(str::to_owned);
+
+            match serde_json::from_value::<Jwk>(raw_key) {
+                Ok(jwk) => keys.push((jwk, raw_alg)),
                 Err(err) => errs.push(err),
             }
         }
