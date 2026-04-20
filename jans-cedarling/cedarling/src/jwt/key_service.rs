@@ -138,18 +138,15 @@ impl KeyService {
 
             // We need to cast from `jsonwebtoken::jwk::KeyAlgorithm` into
             // `jsonwebtoken::Algorithm`
-            let algorithm = match cast_to_algorithm(key_algorithm) {
-                Ok(alg) => alg,
-                Err(_) => {
-                    let alg_display = raw_alg.as_deref().unwrap_or("UNKNOWN");
-                    let err_msg = format!(
-                        "skipping building a validation key for unsupported algorithm from '{}': {}",
-                        openid_config.issuer.as_str(),
-                        alg_display,
-                    );
-                    logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
-                    continue;
-                },
+            let Ok(algorithm) = cast_to_algorithm(key_algorithm) else {
+                let alg_display = raw_alg.as_deref().unwrap_or("UNKNOWN");
+                let err_msg = format!(
+                    "skipping building a validation key for unsupported algorithm '{}' from '{}'",
+                    alg_display,
+                    openid_config.issuer.as_str(),
+                );
+                logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
+                continue;
             };
 
             let decoding_key =
