@@ -1549,40 +1549,49 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         authenticationAttempts:
           type: integer
           format: int64
-        registrationFailures:
+        authenticationSuccesses:
           type: integer
           format: int64
         registrationSuccessRate:
           type: number
           format: double
+        registrationFailures:
+          type: integer
+          format: int64
         authenticationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationSuccesses:
           type: integer
           format: int64
         registrationAvgDuration:
           type: number
           format: double
-        performanceMetrics:
+        period:
+          type: string
+        fallbackEvents:
+          type: integer
+          format: int64
+        metricsData:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         errorCounts:
           type: object
           additionalProperties:
@@ -1593,15 +1602,6 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        period:
-          type: string
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

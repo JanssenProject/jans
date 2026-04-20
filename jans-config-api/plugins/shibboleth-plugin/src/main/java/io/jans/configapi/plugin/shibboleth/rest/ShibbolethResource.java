@@ -2,12 +2,14 @@ package io.jans.configapi.plugin.shibboleth.rest;
 
 import java.io.InputStream;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 
 import io.jans.configapi.plugin.shibboleth.model.EntityType;
+import io.jans.configapi.plugin.shibboleth.model.MetadataSource;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
@@ -36,8 +38,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.*;
@@ -57,6 +58,7 @@ public class ShibbolethResource extends BaseResource {
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP = "Trust Relationship";
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
+    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_INUM = "Trust Relationship inum";
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TRUST_NATURE = "Trust Nature";
     private static final String INVALID_TRUST_NATURE = "INVALID_TRUST_NATURE";
@@ -129,13 +131,13 @@ public class ShibbolethResource extends BaseResource {
 
         // validation
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
-        validateTrustRelationship(trustRelationship);
+        validateTrustRelationship(trustRelationship, false);
 
         shibbolethService.addTrustRelationship(trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
-    @Operation(summary = "Update trusted service provider details", description = "Update trusted service provider details", operationId = "post-shibboleth-trust", tags = {
+    @Operation(summary = "Update trusted service Metadata file details", description = "Update trusted service Metadata file details", operationId = "put-shibboleth-trust-file", tags = {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
@@ -150,19 +152,83 @@ public class ShibbolethResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     @PUT
-    @Path(Constants.TRUST_RELATIONSHIP_METADATA_FILE)
-    public Response updateTrustRelationship(@MultipartForm TrustRelationshipForm trustRelationshipForm,
-            InputStream metadatafile) throws IOException {
-        logger.info("POST /shibboleth/trust");
-
+    @Path(Constants.INUM_PATH_PARAM + Constants.SOURCE + Constants.FILE)
+    public Response updateFileTrustRelationship(
+            @Parameter(description = "TrustRelationship inum") @PathParam(Constants.INUM) @NotNull String inum,
+            @MultipartForm TrustRelationshipForm trustRelationshipForm, InputStream metadatafile) throws IOException {
+        logger.info("POST /shibboleth/trust/FILE");
+        if (logger.isInfoEnabled()) {
+            logger.info("Update TrustRelationship identified by inum:{}", escapeLog(inum));
+        }
         // validation
         checkResourceNotNull(trustRelationshipForm, SHIBBOLETH_TRUST_RELATIONSHIP_FORM);
 
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
-        validateTrustRelationship(trustRelationship);
+        validateTrustRelationship(trustRelationship, true);
+        validateFileMetaDataSourceType(trustRelationshipForm, metadatafile);
+        shibbolethService.updateTrustRelationship(trustRelationship);
+        return Response.status(Response.Status.OK).entity(trustRelationship).build();
+    }
 
-        shibbolethService.addTrustRelationship(trustRelationship);
-        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    @Operation(summary = "Update Trust Relationship Manual Metadata", description = "Update Trust Relationship Manual Metadata", operationId = "put-shibboleth-trust-manual", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    @PUT
+    @Path(Constants.INUM_PATH_PARAM + Constants.SOURCE + Constants.MANUAL)
+    public Response updateManualMetadataTrustRelationship(
+            @Parameter(description = "TrustRelationship inum") @PathParam(Constants.INUM) @NotNull String inum,
+            TrustRelationship trustRelationship, String metadataText) throws IOException {
+        logger.info("POST /shibboleth/trust/MANUAL");
+        if (logger.isInfoEnabled()) {
+            logger.info("Update TrustRelationship identified by inum:{}", escapeLog(inum));
+        }
+        // validation
+        validateTrustRelationship(trustRelationship, true);
+        validateManualMetaDataSourceType(trustRelationship, metadataText);
+        shibbolethService.updateTrustRelationship(trustRelationship);
+        return Response.status(Response.Status.OK).entity(trustRelationship).build();
+    }
+
+    @Operation(summary = "Update Trust Relationship Metadata", description = "Update Trust Relationship Metadata", operationId = "put-shibboleth-trust-manual", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    @PUT
+    @Path(Constants.INUM_PATH_PARAM)
+    public Response updateTrustRelationshipMetadata(
+            @Parameter(description = "TrustRelationship inum") @PathParam(Constants.INUM) @NotNull String inum,
+            @MultipartForm TrustRelationshipForm trustRelationshipForm,
+            InputStream metadatafile) throws IOException {
+        logger.info("POST /shibboleth/trust");
+        if (logger.isInfoEnabled()) {
+            logger.info("Update TrustRelationship identified by inum:{}", escapeLog(inum));
+        }
+        // validation - To do
+        //validateTrustRelationship(trustRelationship, true);
+        //validateManualMetaDataSourceType(trustRelationship, metadataText);
+        //shibbolethService.updateTrustRelationship(trustRelationship);
+        return Response.status(Response.Status.OK).entity("trustRelationship").build();
     }
 
     /* Helper methods */
@@ -194,7 +260,7 @@ public class ShibbolethResource extends BaseResource {
 
     }
 
-    private void validateTrustRelationship(TrustRelationship trustRelationship) {
+    private void validateTrustRelationship(TrustRelationship trustRelationship, boolean isUpdate) {
         // Null check
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
@@ -218,14 +284,76 @@ public class ShibbolethResource extends BaseResource {
 
         }
 
-        // check if TrustRelationship with same name already exists
-        List<TrustRelationship> existingTrustRelationship = shibbolethService
-                .getAllTrustRelationshipByDisplayName(trustRelationship.getDisplayName());
-        logger.debug(" existingTrustRelationship:{} ", existingTrustRelationship);
-        if (existingTrustRelationship != null && !existingTrustRelationship.isEmpty()) {
-            throwBadRequestException(NAME_CONFLICT,
-                    String.format(NAME_CONFLICT_MSG, trustRelationship.getDisplayName()));
+        // inum - if update
+        final String inum = trustRelationship.getInum();
+        if (isUpdate) {
+            checkNotNull(inum, SHIBBOLETH_TRUST_RELATIONSHIP_INUM);
         }
+
+        // check if TrustRelationship with same name already exists
+        List<TrustRelationship> existingTrustRelationshipList = shibbolethService
+                .getAllTrustRelationshipByDisplayName(trustRelationship.getDisplayName());
+        logger.debug(" existingTrustRelationship:{} ", existingTrustRelationshipList);
+        if (existingTrustRelationshipList != null && !existingTrustRelationshipList.isEmpty()) {
+            List<TrustRelationship> list = null;
+            if (isUpdate) {
+                List<String> inumList = existingTrustRelationshipList.stream().map(TrustRelationship::getInum)
+                        .collect(Collectors.toList());
+                logger.info("TrustRelationship's with name:{}, inumList:{}", trustRelationship.getDisplayName(),
+                        inumList);
+                list = existingTrustRelationshipList.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
+                        .collect(Collectors.toList());
+                logger.info("Other TrustRelationship's with same name:{} list:{}", trustRelationship.getDisplayName(),
+                        list);
+
+            }
+            if ((!isUpdate) || (isUpdate && list != null && !list.isEmpty())) {
+                throwBadRequestException(NAME_CONFLICT,
+                        String.format(NAME_CONFLICT_MSG, trustRelationship.getDisplayName()));
+            }
+
+        }
+
+    }
+
+    private void validateFileMetaDataSourceType(TrustRelationshipForm trustRelationshipForm, InputStream metaDataFile)
+            throws IOException {
+        logger.info("validateSpMetaDataSourceType trustRelationshipForm:{}", trustRelationshipForm);
+
+        checkResourceNotNull(trustRelationshipForm, SHIBBOLETH_TRUST_RELATIONSHIP_FORM);
+        TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
+        logger.info("Validate trustRelationship.getMetadataSource():{}", trustRelationship.getMetadataSource());
+
+        if (!trustRelationship.getMetadataSource().equals(MetadataSource.FILE)) {
+            throwBadRequestException("MetadataSource", "MetadataSource should be 'FILE'");
+        }
+
+        // If MetaDataSourceType==FILE and it is not Update flow
+        if ((metaDataFile == null || metaDataFile.available() <= 0)) {
+            throwBadRequestException(DATA_NULL_CHK, String.format(DATA_NULL_MSG, "MetaData File"));
+        }
+    }
+
+    private void validateManualMetaDataSourceType(TrustRelationship trustRelationship, String metadataStr)
+            throws IOException {
+        logger.info("validateManualMetaDataSourceType trustRelationship:{}, metadataStr:{}", trustRelationship,
+                metadataStr);
+
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+        checkNotNull(metadataStr, "'TrustRelationship SP MetaData String'");
+        logger.info("Validate trustRelationship.getMetadataSource():{}", trustRelationship.getMetadataSource());
+
+        if (!trustRelationship.getMetadataSource().equals(MetadataSource.MANUAL)) {
+            throwBadRequestException("MetadataSource", "MetadataSource should be 'MANUAL'");
+
+        }
+
+        InputStream metaDataInputStream = new ByteArrayInputStream(metadataStr.getBytes());
+        if ((metaDataInputStream == null || metaDataInputStream.available() <= 0)) {
+            throwBadRequestException(DATA_NULL_CHK,
+                    String.format(DATA_NULL_MSG, "SP MetaData String should be provided"));
+        }
+
     }
 
 }

@@ -13,7 +13,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.service.document.store.model.Document;
+import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -59,7 +59,9 @@ public class ShibbolethService {
     @Inject
     ShibbolethDocumentService shibbolethDocumentService;
 
-   
+    @Inject
+    ConfigHttpService configHttpService;
+
     public int getRecordMaxCount() {
         logger.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
                 configurationFactory.getApiAppConfiguration().getMaxCount(), ApiConstants.DEFAULT_MAX_COUNT);
@@ -233,21 +235,26 @@ public class ShibbolethService {
 
     }
 
+    public boolean urlExists(String urlPath) {
+        return this.configHttpService.urlExists(urlPath);
+    }
+
     /* Helper methods */
 
     private TrustRelationship setTrustRelationshipDefaultValue(TrustRelationship trustRelationship, boolean isUpdate) {
         logger.debug("trustRelationship:{}, isUpdate:{}", trustRelationship, isUpdate);
-     
-        if(!isUpdate) {
-            trustRelationship.setStatus(Status.DRAFT); //Initial state 
+
+        if (!isUpdate) {
+            trustRelationship.setStatus(Status.DRAFT); // Initial state
         }
-        updateVersion(trustRelationship,isUpdate);
-    
+        updateVersion(trustRelationship, isUpdate);
+
         return trustRelationship;
     }
-    
+
     private TrustRelationship updateVersion(TrustRelationship trustRelationship, boolean isUpdate) {
-        logger.debug("Update trustRelationship version - trustRelationship:{}, isUpdate:{}", trustRelationship, isUpdate);
+        logger.debug("Update trustRelationship version - trustRelationship:{}, isUpdate:{}", trustRelationship,
+                isUpdate);
         try {
             if (trustRelationship == null) {
                 return trustRelationship;
@@ -260,7 +267,8 @@ public class ShibbolethService {
                 version = version + 1;
             }
             trustRelationship.setVersion(version);
-            logger.info("Updated trustRelationship revision to trustRelationship.getJansRevision():{}", trustRelationship.getVersion());
+            logger.info("Updated trustRelationship revision to trustRelationship.getJansRevision():{}",
+                    trustRelationship.getVersion());
 
         } catch (Exception ex) {
             logger.error("Exception while updating trustRelationship revision is - ", ex);
@@ -308,7 +316,8 @@ public class ShibbolethService {
 
         InputStream targetStream = file;
         final String metadataFilePath = shibbolethDocumentService.saveMetadataFile(
-                shibbolethConfigService.getShibbolethMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
+                shibbolethConfigService.getShibbolethMetadataDir(), spMetadataFileName, Constants.SP_MODULE,
+                targetStream);
         logger.debug("targetStream: {}, spMetadataDir: {}, spMetadataFileName: {}", targetStream,
                 shibbolethConfigService.getShibbolethMetadataDir(), spMetadataFileName);
 

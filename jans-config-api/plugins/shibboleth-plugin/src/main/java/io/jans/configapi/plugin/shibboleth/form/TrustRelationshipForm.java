@@ -39,10 +39,10 @@ public class TrustRelationshipForm implements Serializable {
     
   
 	//Metadata MANUAL 
-    @FormParam("metaDataContent")
+    @FormParam("metaData")
     @PartType(MediaType.TEXT_PLAIN)
     @Schema(implementation = String.class, format="text")
-    private String metaDataContent;
+    private String metaData;
     
     //Metadata FILE 
     @FormParam("metaDataURL")
@@ -66,14 +66,26 @@ public class TrustRelationshipForm implements Serializable {
         this.metaDataFile = metaDataFile;
     }
 
-    @Override
-    public String toString() {
-        return "TrustRelationshipForm ["
-                + "trustRelationship=" + trustRelationship
-                + "metaDataFile=" + metaDataFile 
-                + "]";
+    public String getMetaData() {
+        return metaData;
     }
 
-  
+    public void setMetaData(String metaData) {
+        this.metaData = metaData;
+    }
+
+    public String getSpMetaDataURL() {
+        return spMetaDataURL;
+    }
+
+    public void setSpMetaDataURL(String spMetaDataURL) {
+        this.spMetaDataURL = spMetaDataURL;
+    }
+
+    @Override
+    public String toString() {
+        return "TrustRelationshipForm [trustRelationship=" + trustRelationship + ", metaDataFile=" + metaDataFile
+                + ", metaData=" + metaData + ", spMetaDataURL=" + spMetaDataURL + "]";
+    }
     
 }
