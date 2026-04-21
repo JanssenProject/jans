@@ -25,6 +25,7 @@ cedarling = { path = "../cedarling", default-features = false, features = [
 ] }
 pgrx = "=0.18.0"
 serde_json = { workspace = true }
+thiserror = { workspace = true }
 
 [dependencies.pgrx-bench]
 version = "=0.18.0"

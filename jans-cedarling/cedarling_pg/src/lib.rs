@@ -6,12 +6,20 @@
 //! `PostgreSQL` extension (`cedarling_pg`) for Cedarling-backed authorization.
 
 mod guc_config;
+mod resource;
+mod token_sql;
 mod validate;
 
 use pgrx::prelude::*;
 
 /// Compile-time anchor so the `cedarling` blocking API is linked; full integration comes later.
 const _: usize = core::mem::size_of::<cedarling::blocking::Cedarling>();
+
+// Keep resource parsers reachable for `dead_code` when the cdylib is built without `cfg(test)`.
+const _: fn(&str) -> Result<cedarling::EntityData, resource::ResourceEntityDataError> =
+    resource::resource_entity_data_from_json_str;
+const _: fn(serde_json::Value) -> Result<cedarling::EntityData, resource::ResourceEntityDataError> =
+    resource::resource_entity_data_from_json_value;
 
 ::pgrx::pg_module_magic!(name, version);
 
@@ -62,6 +70,35 @@ mod tests {
         Spi::run(r#"SET cedarling.tokens = '{"access_token":"x"}'"#)
             .expect("valid JSON object should be accepted for cedarling.tokens");
         Spi::run("RESET cedarling.tokens").expect("RESET cedarling.tokens should succeed");
+    }
+
+    #[pg_test]
+    fn test_token_sql_helpers_roundtrip() {
+        use pgrx::datum::JsonB;
+        use serde_json::json;
+
+        crate::token_sql::cedarling_clear_tokens().expect("clear tokens should succeed");
+        assert!(
+            crate::token_sql::cedarling_current_tokens().is_none(),
+            "after clear, current tokens should be NULL"
+        );
+
+        let payload = json!({"access_token": "t1", "id_token": "t2"});
+        crate::token_sql::cedarling_set_tokens(JsonB(payload.clone()))
+            .expect("cedarling_set_tokens should succeed");
+
+        let current =
+            crate::token_sql::cedarling_current_tokens().expect("current tokens expected");
+        assert_eq!(
+            current.0, payload,
+            "cedarling_current_tokens should round-trip set value"
+        );
+
+        crate::token_sql::cedarling_clear_tokens().expect("second clear should succeed");
+        assert!(
+            crate::token_sql::cedarling_current_tokens().is_none(),
+            "after second clear, current tokens should be NULL"
+        );
     }
 }
 
