@@ -133,12 +133,12 @@ deny_reasons := result.reasons
 ## Building
 
 !!! note
-    The FFI binding and OPA plugin can be built on Windows, Mac OS and Linux, but building on Linux is recommended and documented below. To build on Windows or Mac OS, simply follow the build instructions without Makefile and replace the binding library name as such:
+    The FFI binding and OPA plugin can be built on Windows, macOS and Linux, but building on Linux is recommended and documented below. To build on Windows or macOS, simply follow the build instructions without Makefile and replace the binding library name as such:
 
     - Windows: `cedarling_go.dll`, `cedarling_go.dll.lib`
-    - Mac OS: `libcedarling_go.dylib`
+    - macOS: `libcedarling_go.dylib`
     
-    For instructions on dynamic linking on Windows and Mac OS, please refer to the binding [documentation](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_go#build-your-go-application-with-dynamic-linking).
+    For instructions on dynamic linking on Windows and macOS, please refer to the binding [documentation](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_go#build-your-go-application-with-dynamic-linking).
 
 Required:
 
