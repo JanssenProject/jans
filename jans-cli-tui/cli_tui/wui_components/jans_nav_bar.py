@@ -197,7 +197,7 @@ class JansNavBar():
             self.selection_changed(self.navbar_entries[self.cur_navbar_selection][0])
 
     def set_selected_item(self, selected: int) -> None:
-        self.cur_navbar_selection = selected
+        self.cur_navbar_selection = selected % len(self.navbar_entries)
         get_app().invalidate()
 
     def get_nav_bar_key_bindings(self)-> KeyBindingsBase:

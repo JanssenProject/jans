@@ -220,9 +220,7 @@ class JansCliApp(Application):
         self.current_page = None
         self.jans_help = get_help_with()
 
-        self.not_implemented = Frame(
-            body=HSplit([Label(text=_("Please wait for center frame to be populated..."))], width=D()),
-            height=D())
+        self.not_implemented = HSplit([Label(text=_("Please wait for center frame to be populated..."))], width=D())
 
         self.yes_button = Button(text=_("Yes"), handler=accept_yes)
         self.no_button = Button(text=_("No"), handler=accept_no)
@@ -561,12 +559,15 @@ class JansCliApp(Application):
 
         config_plugin = self.get_plugin_by_id('jans-menu')
 
-        cretate_client_button_label = _("Create Client with SSA")
-        buttons = [
-            Button(_("Save"), handler=self.save_creds_via_dialog),
-            Button(cretate_client_button_label, width=len(cretate_client_button_label)+4, handler=config_plugin.create_ssa_client_window),
-            Button(_("Cancel"), handler=self.stay_in_config_menu)
-            ]
+        create_client_button_label = _("Create Client with SSA")
+        buttons = [Button(_("Save"), handler=self.save_creds_via_dialog)]
+        if config_plugin is not None:
+            buttons.append(Button(
+                create_client_button_label,
+                width=len(create_client_button_label) + 4,
+                handler=config_plugin.create_ssa_client_window,
+            ))
+        buttons.append(Button(_("Cancel"), handler=self.stay_in_config_menu))
 
         dialog = JansGDialog(self, title=_("Janssen Config Api Client Credentials"), body=body, buttons=buttons)
 
@@ -1034,6 +1035,12 @@ class JansCliApp(Application):
 
         return result
 
+    def get_first_focusable_child(self, element):
+        for child in element.children:
+            if isinstance(child, Window):
+                return child
+
+
     def show_jans_dialog(self, dialog: Dialog, focus=None, tobefocused=None) -> None:
 
         async def coroutine():
@@ -1044,7 +1051,7 @@ class JansCliApp(Application):
                 try:
                     self.layout.focus(focused_before)
                 except Exception:
-                    self.layout.focus(self.center_frame)
+                    self.layout.focus(self.get_first_focusable_child(self.center_container))
 
             return result
 

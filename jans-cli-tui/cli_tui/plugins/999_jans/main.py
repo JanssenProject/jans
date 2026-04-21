@@ -73,7 +73,8 @@ class Plugin(DialogUtils):
         """
 
         if clear_all:
-            config_cli.config.remove_section('DEFAULT')
+            for key in list(config_cli.config['DEFAULT'].keys()):
+                config_cli.config.remove_option('DEFAULT', key)
         else:
             config_cli.config['DEFAULT'].pop('access_token_enc', None)
             config_cli.config['DEFAULT'].pop('user_data', None)
@@ -134,10 +135,10 @@ class Plugin(DialogUtils):
 
         try:
             decoded = jwt.decode(ssa, options={"verify_signature": False, "verify_exp": True})
-        except jwt.DecodeError:
-            raise SSAError(_("Cant't decode SSA. Please check if it is valid jwt SSA"))
-        except jwt.ExpiredSignatureError:
-            raise SSAError(_("SSA was expired. Please ask admin to provide a new one."))
+        except jwt.DecodeError as e:
+            raise SSAError(_("Can't decode SSA. Please check if it is valid jwt SSA")) from e
+        except jwt.ExpiredSignatureError as e:
+            raise SSAError(_("SSA was expired. Please ask admin to provide a new one.")) from e
 
         ssa_grant_types = decoded.get('grant_types') or []
         missing_grant_types = list({'authorization_code', 'refresh_token', 'client_credentials', 'urn:ietf:params:oauth:grant-type:device_code'} - set(ssa_grant_types))
@@ -160,6 +161,8 @@ class Plugin(DialogUtils):
     def create_ssa_cli(self, dialog):
         dialog_data = self.make_data_from_dialog({'ssa': dialog.body})
         ssa = dialog_data['ssa']
+        dialog.close()
+
         if not ssa:
             self.app.show_message(_(common_strings.error), _("No SSA was entered"), tobefocused=self.menu_container)
             return
@@ -197,7 +200,7 @@ class Plugin(DialogUtils):
                     url=f"https://{iss}/jans-auth/restv1/register",
                     data=json.dumps(client_creation_data),
                     headers={'Content-Type': 'application/json'},
-                    verify=False,
+                    verify=False if config_cli.args.noverify else True,
                 )
             except Exception as e:
                 self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}").format(e), tobefocused=self.menu_container)
@@ -235,7 +238,7 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def create_ssa_client_window(self, dialog=None):
+    def create_ssa_client_window(self, *_):
 
         body = HSplit([
             self.app.getTitledText(
@@ -252,8 +255,8 @@ class Plugin(DialogUtils):
             Button(create_client_button_label, handler=self.create_ssa_cli, width=len(create_client_button_label)+4),
             Button(_("Cancel"))
         ]
-        dialog = JansGDialog(self.app, title=_("SSA for Creating Client"), body= body, buttons=buttons)
-        self.app.show_jans_dialog(dialog)
+        mydialog = JansGDialog(self.app, title=_("SSA for Creating Client"), body= body, buttons=buttons)
+        self.app.show_jans_dialog(mydialog)
 
     def clear_config(self):
         def do_clear_config(dialog):
