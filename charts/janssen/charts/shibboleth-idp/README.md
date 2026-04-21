@@ -1,6 +1,6 @@
 # shibboleth-idp
 
-![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.1.6](https://img.shields.io/badge/AppVersion-5.1.6-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.1.6](https://img.shields.io/badge/AppVersion-5.1.6-informational?style=flat-square)
 
 Shibboleth Identity Provider 5.1.6 for SAML SSO, integrated with Janssen Auth Server for authentication.
 
@@ -38,7 +38,7 @@ Kubernetes: `>=v1.23.0-0`
 | hpa.targetCPUUtilizationPercentage | int | `80` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"ghcr.io/janssenproject/jans/shibboleth"` |  |
-| image.tag | string | `"0.0.0-nightly"` |  |
+| image.tag | string | `"2.0.0-1"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.enabled | bool | `true` |  |

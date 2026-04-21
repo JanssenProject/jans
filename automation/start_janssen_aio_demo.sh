@@ -542,7 +542,7 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
 fi
 
 if [[ -z $JANS_VERSION ]]; then
-    JANS_VERSION="0.0.0-nightly"
+    JANS_VERSION="2.0.0"
 fi
 
 LOG_TARGET="FILE"

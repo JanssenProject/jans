@@ -4,7 +4,7 @@ fullnameOverride: ""
 image:
   repository: ghcr.io/janssenproject/jans/shibboleth
   pullPolicy: IfNotPresent
-  tag: "0.0.0-nightly"
+  tag: "2.0.0-1"
 
 replicaCount: 1
 
