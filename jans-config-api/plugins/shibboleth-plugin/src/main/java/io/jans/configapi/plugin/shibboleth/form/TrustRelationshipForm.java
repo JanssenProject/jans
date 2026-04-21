@@ -36,18 +36,6 @@ public class TrustRelationshipForm implements Serializable {
     @Schema(implementation = String.class, format = "binary")
     private InputStream metaDataFile;
 
-    // Metadata MANUAL
-    @FormParam("metadataStr")
-    @PartType(MediaType.TEXT_PLAIN)
-    @Schema(implementation = String.class, format = "text")
-    private String metadataStr;
-
-    // Metadata URI
-    @FormParam("metadataURL")
-    @PartType(MediaType.APPLICATION_JSON)
-    @Schema(implementation = String.class)
-    private String metadataURL;
-
     public TrustRelationship getTrustRelationship() {
         return trustRelationship;
     }
@@ -64,26 +52,9 @@ public class TrustRelationshipForm implements Serializable {
         this.metaDataFile = metaDataFile;
     }
 
-    public String getMetadataStr() {
-        return metadataStr;
-    }
-
-    public void setMetadataStr(String metadataStr) {
-        this.metadataStr = metadataStr;
-    }
-
-    public String getMetadataURL() {
-        return metadataURL;
-    }
-
-    public void setMetadataURL(String metadataURL) {
-        this.metadataURL = metadataURL;
-    }
-
     @Override
     public String toString() {
-        return "TrustRelationshipForm [trustRelationship=" + trustRelationship + ", metaDataFile=" + metaDataFile
-                + ", metadataStr=" + metadataStr + ", metadataURL=" + metadataURL + "]";
+        return "TrustRelationshipForm [trustRelationship=" + trustRelationship + ", metaDataFile=" + metaDataFile + "]";
     }
 
 }

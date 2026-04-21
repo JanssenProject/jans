@@ -6,71 +6,51 @@
 
 package io.jans.configapi.plugin.shibboleth.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import io.jans.orm.annotation.AttributeEnum;
+import java.io.Serializable;
+import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Metadata source type
+ * Metadata source details
  * 
  */
-public enum MetadataSource implements AttributeEnum {
+public class MetadataSource implements Serializable{
 
-    NONE("none", "None",0), FILE("file", "File",1), URI("uri", "URI",2), UPSTREAM("upstream", "Upstream",3), MANUAL("manual", "Manual",4), MDQ("mdq", "MDQ",5);
+    private static final long serialVersionUID = 1L;
 
-    private final String value;
-    private final String displayName;
-    private final int rank; // used for ordering 
-
-    private static final Map<String, MetadataSource> mapByValues = new HashMap<String, MetadataSource>();
-    static {
-        for (MetadataSource enumType : values()) {
-            mapByValues.put(enumType.getValue(), enumType);
-        }
+    @NotNull
+    @Schema(description = "Metadata Source Type", implementation = MetadataSourceType.class )
+    private MetadataSourceType metadataSourceType = MetadataSourceType.NONE; //default
+    
+    @Schema(description = "Metadata Source Details")
+    private String metadataStr;
+   
+    public MetadataSourceType getMetadataSourceType() {
+        return metadataSourceType;
     }
-
-    private MetadataSource(String value, String displayName,int rank) {
-        this.value = value;
-        this.displayName = displayName;
-        this.rank = rank;
+   
+    public void setMetadataSourceType(MetadataSourceType metadataSourceType) {
+        this.metadataSourceType = metadataSourceType;
     }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public int getRank() {
-
-        return this.rank;
-    }
-
-    public static MetadataSource getByValue(String value) {
-        return mapByValues.get(value);
-    }
-
-    @Override
-    public Enum<? extends AttributeEnum> resolveByValue(String value) {
-        return getByValue(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
+   
+    public String getMetadataStr() {
+        return metadataStr;
     }
     
-    public static boolean contains(String name) {
-        boolean result = false;
-        for (MetadataSource direction : values()) {
-            if (direction.name().equalsIgnoreCase(name)) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+    public void setMetadataStr(String metadataStr) {
+        this.metadataStr = metadataStr;
     }
+    
+    
+    @Override
+    public String toString() {
+        return "MetadataSource [metadataSourceType=" + metadataSourceType + ", metadataStr=" + metadataStr + "]";
+    }
+   
+    
+    
 }

@@ -44,8 +44,8 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @NotNull
     @AttributeName
-    @Schema(description = "Metadata file source for Trust Relationship.")
-    private MetadataSource metadataSource = MetadataSource.NONE;
+    @Schema(description = "Metadata source for Trust Relationship.")
+    private MetadataSource metadataSource;
     
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
