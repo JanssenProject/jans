@@ -238,7 +238,7 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def create_ssa_client_window(self, *_):
+    def create_ssa_client_window(self, dialog=None):
 
         body = HSplit([
             self.app.getTitledText(
