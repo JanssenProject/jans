@@ -1138,10 +1138,11 @@ class JansCliApp(Application):
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
 
-        if 'jca_client_secret' in config_cli.config['DEFAULT']:
+        if config_cli.config['DEFAULT'].get('jca_client_secret'):
             config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
         else:
-            config_cli.client_secret = config_cli.unobscure(config_cli.config['DEFAULT']['jca_client_secret_enc'])
+            enc = config_cli.config['DEFAULT'].get('jca_client_secret_enc', '')
+            config_cli.client_secret = config_cli.unobscure(enc) if enc else ''
         config_cli.access_token = None
 
         log_dir = config_cli.config['DEFAULT'].get('log_dir')
