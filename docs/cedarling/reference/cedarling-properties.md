@@ -10,10 +10,10 @@ tags:
 
 # Cedarling Properties
 
-Cedarling bootstrap properties control application's behavior. 
+Cedarling bootstrap properties control the application's behavior.
 Properties common and specific to different authorization methods are described below.
 
-!!! Tip
+!!! tip
     Not sure which authorization method to use? See the [decision guide](./cedarling-authz.md#which-authorization-method-should-i-use).
 
 ## Common properties
@@ -24,9 +24,9 @@ These properties are effective regardless of which authorization method is in us
 
 - **`CEDARLING_APPLICATION_NAME`** : Human-friendly identifier for this Cedarling instance.
 
-**Loading the policy store:**
+### Loading the policy store
 
-To load the policy store, one of the following property must be set.
+To load the policy store, one of the following properties must be set.
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
