@@ -62,9 +62,8 @@ impl StatusList {
 
         let bit_idx = u8::try_from(index % scale)?;
 
-        let status = get_status_from_byte(*byte, self.bit_size, bit_idx);
-
-        Ok(status.into())
+        let raw_status = get_status_from_byte(*byte, self.bit_size, bit_idx)?;
+        Ok(JwtStatus::from(raw_status))
     }
 }
 
@@ -138,27 +137,39 @@ impl TryFrom<ValidatedJwt> for StatusList {
     }
 }
 
-/// Retrieves the status byte from the given byte
+/// Retrieves the status nibble/byte value from the given list byte.
 ///
-/// # Panics
-///
-/// This function panics if the `bit_size` is invalid... though that shouldn't happen
-/// if [`StatusBitSize`] is initialized properly.
-fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
-    let bit_size = bit_size.0;
-    let mask = match bit_size {
-        1 => 0b0000_0001,
-        2 => 0b0000_0011,
-        4 => 0b0000_1111,
-        8 => return byte,
-        _ => unimplemented!(
-            "status bit size can only be 1, 2, 4, or 8. See: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
-        ),
-    };
-
-    let offset = bit_idx * bit_size;
-
-    (byte >> offset) & mask
+/// [`StatusBitSize`] is normally only constructed with `1`, `2`, `4`, or `8` via
+/// [`TryFrom`]. If the invariant is violated, this returns
+/// [`JwtStatusError::InvalidStatusListEncoding`] so callers fail closed instead of
+/// treating corrupt data as valid.
+fn get_status_from_byte(
+    byte: u8,
+    bit_size: StatusBitSize,
+    bit_idx: u8,
+) -> Result<u8, JwtStatusError> {
+    match bit_size {
+        StatusBitSize(8) => Ok(byte),
+        StatusBitSize(1) => {
+            let offset = bit_idx;
+            Ok((byte >> offset) & 0b0000_0001)
+        },
+        StatusBitSize(2) => {
+            let offset = bit_idx * 2;
+            Ok((byte >> offset) & 0b0000_0011)
+        },
+        StatusBitSize(4) => {
+            let offset = bit_idx * 4;
+            Ok((byte >> offset) & 0b0000_1111)
+        },
+        StatusBitSize(_) => {
+            debug_assert!(
+                false,
+                "status bit size can only be 1, 2, 4, or 8; see https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
+            );
+            Err(JwtStatusError::InvalidStatusListEncoding)
+        },
+    }
 }
 
 /// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>

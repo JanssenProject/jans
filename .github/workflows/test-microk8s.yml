@@ -19,7 +19,7 @@ on:
       jans_version:
         description: 'Janssen helm chart version'
         required: true
-        default: '0.0.0-nightly'
+        default: '2.0.0'
 permissions:
   contents: read
 
@@ -39,11 +39,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JANS_FQDN: ci-${{ github.run_id }}.jans.test
-      JANS_VERSION: ${{ github.event.inputs.jans_version || '0.0.0-nightly' }}
+      JANS_VERSION: ${{ github.event.inputs.jans_version || '2.0.0' }}
       KUBECONFIG: /home/runner/.kube/config
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
 
