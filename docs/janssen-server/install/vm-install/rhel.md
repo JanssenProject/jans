@@ -108,7 +108,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
           --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-replace-janssen-version-stable.el10.x86_64.rpm
+         ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
