@@ -23,10 +23,11 @@ func authorizeUnsignedBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*a
 	if err := ast.As(input.Value, &in); err != nil {
 		return nil, err
 	}
-	instance := cedarlingopa.GetCedarlingInstance()
+	instance, release := cedarlingopa.GetCedarlingInstance()
 	if instance == nil {
 		return errorAsResult(fmt.Errorf("Cedarling uninitialized"))
 	}
+	defer release()
 	result, err := instance.AuthorizeUnsigned(in)
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Authorize_unsigned failed: %w", err))

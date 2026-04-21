@@ -17,6 +17,12 @@ func errorAsResult(err error) (*ast.Term, error) {
 }
 
 func buildAuthzOutput(decision bool, reasons []string, errors []string, requestID string) map[string]any {
+	if reasons == nil {
+		reasons = []string{}
+	}
+	if errors == nil {
+		errors = []string{}
+	}
 	output := map[string]any{
 		"decision":   decision,
 		"reasons":    reasons,

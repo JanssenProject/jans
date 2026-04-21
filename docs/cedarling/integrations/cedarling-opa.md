@@ -202,7 +202,7 @@ Optional:
 
 1. Finally, run the binary with the plugin and provided rego examples:
     ```bash
-    ./build/opa-cedarling run --server --config-file ./demo/opa-config.json
+    ./build/opa-cedarling run --server --config-file ./demo/opa-config.json ./demo/rego
     ```
 OPA will boot with the provided configuration, read the rego files, and start server mode at `127.0.0.1:8181`.
 

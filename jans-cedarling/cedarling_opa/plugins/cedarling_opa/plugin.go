@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"sync"
 
@@ -24,20 +25,41 @@ type Config struct {
 
 type CedarPlugin struct {
 	manager *plugins.Manager
-	mtx     sync.Mutex
+	mtx     sync.RWMutex
 	config  Config
 	cedar   *cedarling_go.Cedarling
 }
 
-var globalInstance *CedarPlugin = nil
+var globalInstanceMu sync.RWMutex
+var globalInstance *CedarPlugin
 
-func GetCedarlingInstance() *cedarling_go.Cedarling {
-	if globalInstance == nil {
-		return nil
+func setGlobalInstance(p *CedarPlugin) {
+	globalInstanceMu.Lock()
+	defer globalInstanceMu.Unlock()
+	globalInstance = p
+}
+
+func clearGlobalInstance(p *CedarPlugin) {
+	globalInstanceMu.Lock()
+	defer globalInstanceMu.Unlock()
+	if globalInstance == p {
+		globalInstance = nil
 	}
-	globalInstance.mtx.Lock()
-	defer globalInstance.mtx.Unlock()
-	return globalInstance.cedar
+}
+
+func GetCedarlingInstance() (*cedarling_go.Cedarling, func()) {
+	globalInstanceMu.RLock()
+	p := globalInstance
+	globalInstanceMu.RUnlock()
+	if p == nil {
+		return nil, func() {}
+	}
+	p.mtx.RLock()
+	if p.cedar == nil {
+		p.mtx.RUnlock()
+		return nil, func() {}
+	}
+	return p.cedar, p.mtx.RUnlock
 }
 
 func logMessage(stderr bool, msg string) {
@@ -50,9 +72,7 @@ func logMessage(stderr bool, msg string) {
 
 func buildBootstrapConfig(cfg Config) (map[string]any, error) {
 	newConfig := make(map[string]any)
-	for k, v := range cfg.BootstrapConfig {
-		newConfig[k] = v
-	}
+	maps.Copy(newConfig, cfg.BootstrapConfig)
 	return newConfig, nil
 }
 
@@ -73,7 +93,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	}
 	p.cedar = instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
-	globalInstance = p
+	setGlobalInstance(p)
 	return nil
 }
 
@@ -82,7 +102,7 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 	cedar := p.cedar
 	p.cedar = nil
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
-	globalInstance = nil
+	clearGlobalInstance(p)
 	p.mtx.Unlock()
 	if cedar != nil {
 		cedar.ShutDown()
@@ -110,7 +130,7 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.config = cfg
 	p.cedar = new_instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
-	globalInstance = p
+	setGlobalInstance(p)
 	p.mtx.Unlock()
 	if old_cedar != nil {
 		old_cedar.ShutDown()

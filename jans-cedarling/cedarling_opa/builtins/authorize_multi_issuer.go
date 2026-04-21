@@ -22,7 +22,7 @@ func authorizeBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*ast.Term,
 	if err := ast.As(input.Value, &in); err != nil {
 		return nil, err
 	}
-	instance := cedarlingopa.GetCedarlingInstance()
+	instance, release := cedarlingopa.GetCedarlingInstance()
 	if instance == nil {
 		return errorAsResult(fmt.Errorf("Cedarling uninitialized"))
 	}
@@ -30,6 +30,7 @@ func authorizeBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*ast.Term,
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Authorize failed: %w", err))
 	}
+	defer release()
 	reasons := result.Response.Reason()
 	if reasons == nil {
 		reasons = []string{}
