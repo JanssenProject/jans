@@ -105,7 +105,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-el10-replace-janssen-version-stable.bundle \
+          --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           jans-replace-janssen-version-stable.el10.x86_64.rpm
