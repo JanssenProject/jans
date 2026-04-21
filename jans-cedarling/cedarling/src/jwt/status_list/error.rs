@@ -38,6 +38,8 @@ pub enum JwtStatusError {
     StatusListIdxOutOfBounds,
     #[error("failed to convert bit index: {0}")]
     BitIndexConversion(#[from] std::num::TryFromIntError),
+    #[error("corrupt or unsupported status list bit-size encoding")]
+    InvalidStatusListEncoding,
     #[error("status list for {0} is missing")]
     MissingStatusList(Url),
     #[error("status list for {0} needs to be updated")]

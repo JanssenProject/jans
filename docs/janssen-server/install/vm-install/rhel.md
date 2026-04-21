@@ -12,54 +12,128 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
+### RHEL 9
+
 - Install EPEL and mod-auth-openidc as dependencies
 
 ```
-sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 sudo yum -y module enable mod_auth_openidc 
 ```
 
-- Download the GPG key zip file , unzip and import GPG key
-
-```shell
-wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
-```
-
-```shell
-unzip automation-jans-public-gpg.zip
-```
-
-```shell
-sudo rpm -import automation-jans-public-gpg.asc
-```
-
-- Download the release package from the Github Janssen Project
+- Download the release package from the GitHub Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
-- Verify integrity of the downloaded package using published `sha256sum`.
+- Verify the cryptographic signature using cosign (primary verification):
 
-    * Go to the [Janssen Project Releases page](https://github.com/JanssenProject/jans/releases/latest) and copy the `sha256sum` value for the `jans-replace-janssen-version-stable.el8.x86_64.rpm` file:
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
 
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
-    * Replace `paste-release-sha256sum` in the command below with the actual checksum you copied from the release page, and run the following command:
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version.bundle -P ~/
+        ```
+
+    - Verify the signature:
+
+        ```bash title="Command"
+        cosign verify-blob \
+          --bundle ~/jans-el9-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
+        ```
+
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
+
+        ```text title="Output"
+        Verified OK
+        ```
+
+- Optionally, verify integrity using the published checksum file (secondary check):
+
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el8.x86_64.rpm' | sed 's/^sha256://' > jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum -P ~/
+    sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-replace-janssen-version-stable.el8.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
+```
+
+### RHEL 10
+
+- Install EPEL and mod-auth-openidc as dependencies
+
+```
+sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+sudo yum -y module enable mod_auth_openidc 
+```
+
+- Download the release package from the GitHub Janssen Project
+  [Releases](https://github.com/JanssenProject/jans/releases/latest)
+
+```
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
+```
+
+- Verify the cryptographic signature using cosign (primary verification):
+
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
+
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
+
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version.bundle -P ~/
+        ```
+
+    - Verify the signature:
+
+        ```bash title="Command"
+        cosign verify-blob \
+          --bundle jans-el10-replace-janssen-version.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans-replace-janssen-version-stable.el10.x86_64.rpm
+        ```
+
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
+
+        ```text title="Output"
+        Verified OK
+        ```
+
+- Optionally, verify integrity using the published checksum file (secondary check):
+
+    ```bash title="Command"
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum -P ~/
+    sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+
+      ```text
+      jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
+      ```
+
+- Install the package
+
+```
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
