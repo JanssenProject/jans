@@ -1,11 +1,11 @@
 ARG BUILDPLATFORM="linux/amd64"
 ARG BUILDERIMAGE="golang:1.25-trixie"
-ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
 # Use distroless as minimal base image to package the manager binary
 ARG BASEIMAGE="gcr.io/distroless/cc-debian12:nonroot"
 
 # Stage 1: Rust build
 FROM rust:1.95-slim-bookworm AS rust-builder
+ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
 RUN apt-get update \
     && apt-get install -y git protobuf-compiler \
     && rm -rf /var/cache/apt

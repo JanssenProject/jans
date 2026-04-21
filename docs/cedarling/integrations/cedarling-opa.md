@@ -191,7 +191,7 @@ Optional:
         "plugins": {
             "cedarling_opa": {
                 "stderr": false,
-                "bootstrap_config": {}
+                "bootstrap_config": {} // fill with values
             }
         }
     }
