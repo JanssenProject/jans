@@ -1039,7 +1039,7 @@ class JansCliApp(Application):
         for child in element.children:
             if isinstance(child, Window):
                 return child
-
+        return None
 
     def show_jans_dialog(self, dialog: Dialog, focus=None, tobefocused=None) -> None:
 
