@@ -7,7 +7,7 @@ A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicya
 To compile OPA with the Cedarling plugin, you need the following:
 
 - Go 1.25+
-- Rust toolchain 1.56+
+- Rust toolchain 1.95+
 - Make (for building the plugin. This build process is currently Linux only).
 
 1. Clone the Janssen repository:
@@ -59,14 +59,12 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
 }
 ```
 - `stderr`: Whether or not the **plugin** emits errors to stdout or stderr
-- `bootstrap`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
+- `bootstrap_config`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
 
 3. Finally, run the binary with the plugin and provided rego examples:
 
 ```bash
-./build/opa-cedarling run \\ 
-  --server --config-file ./demo/opa-config.json \\ # configuration
-  ./demo/rego # rego file(s)
+./build/opa-cedarling run --server --config-file ./demo/opa-config.json ./demo/rego
 ```
 OPA will boot with the provided configuration, read the rego files, and start server mode at `127.0.0.1:8181`.
 
