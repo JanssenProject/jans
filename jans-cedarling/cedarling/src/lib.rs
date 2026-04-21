@@ -129,7 +129,10 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
 
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new(
+            0,
+            config.authorization_config.metric_reservoir_size,
+        ));
 
         let log = crate::log::init_logger(
             &config.log_config,

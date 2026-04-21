@@ -24,9 +24,6 @@ use std::{
 
 use crate::{authz::error_metrics::ErrorMetricKey, log::Decision};
 
-/// Capacity of the reservoir sampler used to collect evaluation time samples
-const EVAL_TIME_RESERVOIR_SIZE: usize = 1024;
-
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
 const EVAL_TIMES_LOCK_POISONED: &str = "eval_times_us lock poisoned";
 const POLICY_STATS_READ_LOCK_POISONED: &str = "policy_stats read lock poisoned";
@@ -49,7 +46,8 @@ impl ReservoirSampler {
             samples: Vec::with_capacity(capacity),
             capacity,
             count: 0,
-            rng: SmallRng::from_rng(&mut rand::rng()),
+            rng: SmallRng::try_from_rng(&mut rand::rngs::SysRng)
+                .expect("failed to seed SmallRng from OS RNG"),
         }
     }
 
@@ -156,7 +154,7 @@ struct IntervalState {
 }
 
 impl IntervalState {
-    fn new(start: DateTime<Utc>) -> Self {
+    fn new(start: DateTime<Utc>, metric_reservoir_size: usize) -> Self {
         Self {
             start,
             authz_requests_total: AtomicI64::new(0),
@@ -165,7 +163,7 @@ impl IntervalState {
             authz_decision_allow: AtomicI64::new(0),
             authz_decision_deny: AtomicI64::new(0),
             authz_errors_total: AtomicI64::new(0),
-            eval_times_us: Mutex::new(ReservoirSampler::new(EVAL_TIME_RESERVOIR_SIZE)),
+            eval_times_us: Mutex::new(ReservoirSampler::new(metric_reservoir_size)),
             last_eval_time_us: AtomicI64::new(0),
             token_cache_hits: AtomicI64::new(0),
             token_cache_misses: AtomicI64::new(0),
@@ -276,19 +274,21 @@ pub(crate) struct MetricsCollector {
     /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
+    metric_reservoir_size: usize,
 
     /// Swapped wholesale on each snapshot; read lock for record_*, write lock for snapshot
     interval: RwLock<Box<IntervalState>>,
 }
 
 impl MetricsCollector {
-    /// Creates a new metrics collector with the given initial policy count.
-    pub(crate) fn new(initial_policy_count: usize) -> Self {
+    /// Creates a new metrics collector with the given initial policy count and reservoir size.
+    pub(crate) fn new(initial_policy_count: usize, metric_reservoir_size: usize) -> Self {
         let now = Utc::now();
         Self {
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
-            interval: RwLock::new(Box::new(IntervalState::new(now))),
+            metric_reservoir_size,
+            interval: RwLock::new(Box::new(IntervalState::new(now, metric_reservoir_size))),
         }
     }
 
@@ -475,7 +475,10 @@ impl MetricsCollector {
 
         let old = {
             let mut guard = self.interval.write().expect(INTERVAL_LOCK_POISONED);
-            std::mem::replace(&mut *guard, Box::new(IntervalState::new(now)))
+            std::mem::replace(
+                &mut *guard,
+                Box::new(IntervalState::new(now, self.metric_reservoir_size)),
+            )
         };
 
         let interval_secs = now.signed_duration_since(old.start).num_seconds();
@@ -549,7 +552,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_increments_authz_counters() {
-        let collector = MetricsCollector::new(5);
+        let collector = MetricsCollector::new(5, 100);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Deny, true, std::iter::empty());
@@ -586,7 +589,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_updates_policy_stats() {
-        let collector = MetricsCollector::new(3);
+        let collector = MetricsCollector::new(3, 100);
 
         collector.record_evaluation(
             50,
@@ -629,7 +632,7 @@ mod tests {
     fn record_error_aggregates_by_metric_key() {
         use crate::authz::MultiIssuerValidationError;
 
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(0, 100);
 
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("jwt.decode_failed"));
@@ -664,7 +667,7 @@ mod tests {
 
     #[test]
     fn snapshot_and_reset_zeros_counters_preserves_gauges() {
-        let collector = MetricsCollector::new(10);
+        let collector = MetricsCollector::new(10, 100);
         collector.record_evaluation(500, Decision::Allow, false, std::iter::empty());
         collector.record_cache_hit();
         collector.record_jwt_validation(true);
@@ -767,7 +770,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_clears_eval_times_after_snapshot() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(0, 100);
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Allow, false, std::iter::empty());
 
@@ -788,7 +791,7 @@ mod tests {
 
     #[test]
     fn record_cache_operations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(0, 100);
         collector.record_cache_hit();
         collector.record_cache_hit();
         collector.record_cache_miss();
@@ -814,7 +817,7 @@ mod tests {
 
     #[test]
     fn record_jwt_validations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(0, 100);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(false);
@@ -839,7 +842,7 @@ mod tests {
 
     #[test]
     fn record_data_operations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(0, 100);
         collector.record_data_push();
         collector.record_data_get();
         collector.record_data_get();

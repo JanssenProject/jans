@@ -38,7 +38,7 @@ impl Default for TokenCache {
             100,
             true,
             Some(TEST_LOGGER.clone()),
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(0, 256)),
         )
     }
 }

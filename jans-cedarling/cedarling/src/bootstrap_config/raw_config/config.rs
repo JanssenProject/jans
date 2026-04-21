@@ -8,7 +8,7 @@ use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
     default_jti, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
+    default_metric_reservoir_size, default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
@@ -269,6 +269,14 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+
+    /// Capacity of the reservoir sampler used to collect evaluation time samples for metrics.
+    /// Default is 1024.
+    #[serde(
+        rename = "CEDARLING_METRIC_RESERVOIR_SIZE",
+        default = "default_metric_reservoir_size"
+    )]
+    pub metric_reservoir_size: usize,
 
     // =========================================================================
     // Data Store Configuration

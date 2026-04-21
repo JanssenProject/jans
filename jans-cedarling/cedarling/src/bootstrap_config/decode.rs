@@ -127,6 +127,7 @@ impl BootstrapConfig {
 
         let authorization_config = AuthorizationConfig {
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
+            metric_reservoir_size: raw.metric_reservoir_size,
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified

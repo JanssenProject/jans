@@ -242,6 +242,7 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
+            metric_reservoir_size: 512,
         },
         lock_config: None,
         max_default_entities: None,

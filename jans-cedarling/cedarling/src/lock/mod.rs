@@ -490,7 +490,7 @@ mod test {
         };
 
         // Test startup
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new(0, 100));
         let logger = LockService::new(pdp_id, &config, None, metrics)
             .await
             .expect("build lock logger");
@@ -550,7 +550,7 @@ mod test {
         };
 
         // Test startup without SSA
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new(0, 100));
         let logger = LockService::new(pdp_id, &config, None, metrics)
             .await
             .expect("build lock logger");
@@ -606,7 +606,7 @@ mod test {
         };
 
         // Test startup with invalid SSA should fail
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new(0, 100));
         let result = LockService::new(pdp_id, &config, None, metrics).await;
         assert!(result.is_err());
         assert!(matches!(
