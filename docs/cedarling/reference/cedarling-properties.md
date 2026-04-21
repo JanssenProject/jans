@@ -22,11 +22,11 @@ These properties are effective regardless of which authorization method is in us
 
 ### Required properties
 
-- **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this Cedarling instance.
+- **`CEDARLING_APPLICATION_NAME`** : Human-friendly identifier for this Cedarling instance.
 
 **Loading the policy store:**
 
-To load policy store one of the following property must be set.
+To load the policy store, one of the following property must be set.
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
@@ -100,7 +100,7 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 ## authorize_multi_issuer method properties
 
 These properties are relevant only when using `authorize_multi_issuer` with signed JWT tokens from trusted identity providers. 
-Also called Token Based Access Control (TBAC). This is the recommended authorization method for most production deployments.
+Also called Token-based Access Control (TBAC). This is the recommended authorization method for most production deployments.
 
 **JWT and cryptographic behavior:**
 
