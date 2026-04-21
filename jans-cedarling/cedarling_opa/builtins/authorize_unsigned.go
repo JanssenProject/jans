@@ -11,7 +11,7 @@ import (
 )
 
 var authorizeUnsignedBuiltinDecl = &rego.Function{
-	Name: "cedarling_opa.authorize_unsigned",
+	Name: "cedarling.opa.authorize_unsigned",
 	Decl: types.NewFunction(
 		types.Args(types.A),
 		types.A,
