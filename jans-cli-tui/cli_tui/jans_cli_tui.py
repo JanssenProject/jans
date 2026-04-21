@@ -1036,9 +1036,21 @@ class JansCliApp(Application):
         return result
 
     def get_first_focusable_child(self, element):
-        for child in element.children:
-            if isinstance(child, Window):
-                return child
+        if element is None:
+            return None
+        if isinstance(element, Window):
+            return element
+        if hasattr(element, 'window'):
+            return element.window
+        for attr in ('body', 'content'):
+            child = getattr(element, attr, None)
+            focusable = self.get_first_focusable_child(child)
+            if focusable is not None:
+                return focusable
+        for child in getattr(element, 'children', []):
+            focusable = self.get_first_focusable_child(child)
+            if focusable is not None:
+                return focusable
         return None
 
     def show_jans_dialog(self, dialog: Dialog, focus=None, tobefocused=None) -> None:
@@ -1051,7 +1063,8 @@ class JansCliApp(Application):
                 try:
                     self.layout.focus(focused_before)
                 except Exception:
-                    self.layout.focus(self.get_first_focusable_child(self.center_container))
+                    fallback = self.get_first_focusable_child(self.center_container)
+                    self.layout.focus(fallback or self.nav_bar.nav_window)
 
             return result
 
@@ -1116,7 +1129,6 @@ class JansCliApp(Application):
                     del config_cli.config['DEFAULT']['jca_client_secret']
             else:
                 config_cli.config['DEFAULT'][prop_name] = prop_val
-            config_cli.write_config()
 
         for key in ('user_data', 'access_token_enc', 'access_token'):
             config_cli.config['DEFAULT'][key] = ''
