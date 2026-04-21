@@ -47,7 +47,7 @@ sequenceDiagram
 The plugin provides two new Rego functions:
 
 - `cedarling.opa.authorize_multi_issuer(input)`: Calls the [multi-issuer authorization](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer-recommended) interface.
-    ```json title="Input interface"
+    ```json title="OPA Query Payload"
     {
       "input": {
         "tokens": [
@@ -72,7 +72,7 @@ The plugin provides two new Rego functions:
     }
     ```
 - `cedarling.opa.authorize_unsigned(input)`: Calls the [unsigned authorization](../reference/cedarling-authz.md#unsigned-authorization-authorize_unsigned) interface.
-    ```json title="Input interface"
+    ```json title="OPA Query Payload"
     {
       "input": {
         "principal": {
@@ -179,7 +179,7 @@ Optional:
 
 1. Set the library path so the plugin can find the Rust binding by running this from the `cedarling_opa` directory:
 
-    ```
+    ```bash
     export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
     ```
 
@@ -299,10 +299,10 @@ A Dockerfile is provided to allow building a docker image embedded with the boot
 - Edit `demo/opa-config.json` to your specification
 - Place your rego files in `demo/rego`
 - Build:
-```
+```bash
 docker build . -t opa-cedarling:latest
 ```
 - And run:
-```
+```bash
 docker run -p 8181:8181 opa-cedarling:latest
 ```
