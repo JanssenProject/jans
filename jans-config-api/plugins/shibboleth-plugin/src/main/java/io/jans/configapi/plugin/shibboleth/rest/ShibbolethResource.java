@@ -9,7 +9,6 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 
 import io.jans.configapi.plugin.shibboleth.model.EntityType;
-import io.jans.configapi.plugin.shibboleth.model.MetadataSource;
 import io.jans.configapi.plugin.shibboleth.model.MetadataSourceType;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
@@ -31,13 +30,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.lang.reflect.InvocationTargetException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

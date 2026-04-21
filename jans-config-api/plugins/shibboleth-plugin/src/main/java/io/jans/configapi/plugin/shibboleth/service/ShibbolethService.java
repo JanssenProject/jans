@@ -192,24 +192,18 @@ public class ShibbolethService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file)
-            throws IOException {
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+        return addTrustRelationship(trustRelationship, null);
+    }
+
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file) {
         logger.info("Add new trustRelationship:{}, file:{}", trustRelationship, file);
 
         setTrustRelationshipDefaultValue(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
 
-        if (file != null && file.available() > 0) {
-            saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
-        }
-
-        persistenceEntryManager.merge(trustRelationship);
         logger.info("After saving new trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
-    }
-
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
-        return addTrustRelationship(trustRelationship, null);
     }
 
     public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship) throws IOException {
