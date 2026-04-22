@@ -555,6 +555,140 @@ SSA is validated based on `softwareStatementValidationType` which is enum.
 1. **softwareStatementValidationType**=*jwks*, allows to specify jwks claim name from software_statement. Claim name specified by `softwareStatementValidationClaimName` configuration property.
 1. **softwareStatementValidationType**=*none*, no validation.
 
+### Debugging DCR
+
+When Dynamic Client Registration fails, especially with signed DCR or SSA validation, it can be challenging to identify the root cause. This section provides guidance on debugging DCR issues.
+
+#### Enabling Detailed Error Reasons
+
+By default, error responses from the Authorization Server do not include detailed reasons to avoid leaking sensitive information. For debugging purposes, you can enable detailed error reasons by setting the `errorReasonEnabled` configuration property to `true`.
+
+```bash
+curl -X PATCH -H 'Content-Type: application/json-patch+json' \
+  -H "Authorization: Bearer <token>" \
+  'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
+  --data '[{"op": "replace", "path": "/errorReasonEnabled", "value": true}]'
+```
+
+When enabled, error responses will include a `reason` field with specific details:
+
+```json
+{
+  "error": "invalid_client_metadata",
+  "error_description": "The value of one of the Client Metadata fields is invalid.",
+  "reason": "The sector_identifier_uri must contain all redirect_uris."
+}
+```
+
+**Important:** Disable `errorReasonEnabled` in production environments as it may expose internal details that could be useful to attackers.
+
+#### Enabling Debug Logging
+
+To get detailed information about DCR processing, enable debug logging for the registration package:
+
+1. **Via Jans TUI or Config API**, set the logging level to `TRACE`.
+
+2. **Check the logs** at `/opt/jans/jetty/jans-auth/logs/jans-auth.log` (or your configured log location).
+
+Key log messages to look for:
+- `Attempting to register client` - Start of DCR processing
+- `Validating DCR signature` - JWT signature validation
+- `Validating software statement` - SSA validation
+- `DCR validation successful` / `DCR validation failed` - Validation result
+
+#### Common Error Responses
+
+| Error | Description | Troubleshooting |
+|-------|-------------|-----------------|
+| `invalid_client_metadata` | Client metadata validation failed | Check that all required fields are present and valid |
+| `invalid_software_statement` | SSA validation failed | Verify SSA signature, issuer, and expiration |
+| `invalid_redirect_uri` | Redirect URI validation failed | Ensure redirect URIs match allowed patterns |
+| `access_denied` | Authorization failed | Check if DCR is enabled and credentials are valid |
+
+Example error response:
+```json
+{
+  "error": "invalid_software_statement",
+  "error_description": "Software statement validation failed. Reason: Unable to find matching SSA issuer. Issuers from config: [https://trusted.issuer.com], SSA issuer: https://other.issuer.com"
+}
+```
+
+#### Troubleshooting Signed DCR Validation
+
+If signed DCR validation fails, follow these steps:
+
+1. **Decode and inspect the JWT**
+
+   Use a tool like [jwt.io](https://jwt.io) or command line to decode the DCR JWT.
+
+   Note: JWTs use base64url encoding, which must be converted to standard base64 before decoding:
+   ```bash
+   # Extract header (convert base64url to base64, add padding, decode)
+   echo "<JWT>" | cut -d'.' -f1 | tr '_-' '/+' | awk '{print $0"=="}' | base64 -d 2>/dev/null | jq .
+
+   # Extract payload (convert base64url to base64, add padding, decode)
+   echo "<JWT>" | cut -d'.' -f2 | tr '_-' '/+' | awk '{print $0"=="}' | base64 -d 2>/dev/null | jq .
+   ```
+
+2. **Verify the JWT header**
+   - Check `alg` matches the expected signing algorithm
+   - Check `kid` (key ID) matches a key in the configured JWKS
+
+3. **Verify the JWT claims**
+   - `iss` (issuer) must match an entry in `dcrSsaValidationConfigs` or `trustedSsaIssuers`
+   - `exp` (expiration) must be in the future
+   - `iat` (issued at) should be recent
+   - `aud` (audience) should match your AS issuer URL
+
+4. **Verify the signature**
+
+   Ensure the JWKS URI is accessible and contains the signing key:
+   ```bash
+   curl -s <jwks_uri> | jq '.keys[] | select(.kid=="<kid_from_jwt>")'
+   ```
+
+5. **Check configuration**
+   - Verify `dcrSignatureValidationEnabled` is `true`
+   - Verify `dcrSsaValidationConfigs` contains an entry for the DCR issuer
+   - For SSA validation, verify `softwareStatementValidationType` is set correctly
+
+#### Troubleshooting SSA Validation
+
+If the software statement inside DCR fails validation:
+
+1. **Extract and decode the SSA** from the DCR payload's `software_statement` claim
+
+2. **Check SSA issuer** matches configuration:
+   - For `softwareStatementValidationType=builtin`: issuer must be in `dcrSsaValidationConfigs` with `type=SSA`
+   - For `softwareStatementValidationType=script`: script must return valid JWKS for the issuer
+
+3. **Verify SSA signature** using the appropriate JWKS:
+   - If using `jwks_uri` claim in SSA, ensure the URI is accessible
+   - If using `jwks` claim in SSA, verify the inline JWKS is valid JSON
+
+#### Debug Configuration Example
+
+For comprehensive debugging, configure the following:
+
+```json
+{
+  "loggingLevel": "TRACE",
+  "loggingLayout": "text",
+  "enabledComponents": ["DCR"]
+}
+```
+
+These can be set via Config API using JSON Patch. The following example patches all the fields shown above:
+```bash
+curl -X PATCH -H 'Content-Type: application/json-patch+json' \
+  -H "Authorization: Bearer <token>" \
+  'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
+  --data '[
+    {"op": "replace", "path": "/loggingLevel", "value": "TRACE"},
+    {"op": "replace", "path": "/loggingLayout", "value": "text"},
+    {"op": "replace", "path": "/enabledComponents", "value": ["DCR"]}
+  ]'
+```
 
 ### Customizing the behavior of the AS using Interception script
 Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
