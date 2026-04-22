@@ -231,6 +231,30 @@ public class ConfigHttpService implements Serializable {
         return HttpClients.custom().setSSLSocketFactory(sslConSocFactory)
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
                 .setConnectionManager(connectionManager).build();
+    }    
+    
+    public boolean urlExists(String urlPath) {
+        boolean isUrlExists = false;
+        if (StringHelper.isEmpty(urlPath)) {
+            throw new WebApplicationException("Please provide url to check");
+
+        }
+        HttpServiceResponse httpServiceResponse = executeGet(urlPath, null, null);
+        if (httpServiceResponse != null) {
+
+            HttpResponse httpResponse = httpServiceResponse.getHttpResponse();
+            if (httpResponse != null) {
+                HttpEntity entity = httpResponse.getEntity();
+
+                int statusCode = httpResponse.getStatusLine() != null ? httpResponse.getStatusLine().getStatusCode()
+                        : Status.INTERNAL_SERVER_ERROR.getStatusCode();
+                log.debug("entity:{}, statusCode:{}", entity, statusCode);
+
+                isUrlExists = statusCode >= 200 && statusCode < 400;
+                log.debug("urlPath:{}, isUrlExists:{}", urlPath, isUrlExists);
+            }
+        }
+        return isUrlExists;
     }
 
     /**

@@ -49,7 +49,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -132,7 +132,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value.
@@ -312,8 +312,6 @@ config:
     cnSecretKubernetesSecret: cn
     # -- Load balancer address for AWS if the FQDN is not registered.
     lbAddr: ""
-    # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
-    quarkusTransactionEnableRecovery: true
     # -- Message type (one of POSTGRES, REDIS, or DISABLED)
     cnMessageType: DISABLED
   # -- Country code. Used for certificate creation.
@@ -324,7 +322,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -422,7 +420,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -451,7 +449,7 @@ config-api:
   readinessProbe:
     # -- http readiness probe endpoint
     httpGet:
-      path: jans-config-api/api/v1/health/ready
+      path: /jans-config-api/api/v1/health/ready
       port: 8074
     initialDelaySeconds: 25
     periodSeconds: 25
@@ -531,7 +529,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -645,7 +643,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -715,10 +713,6 @@ global:
     # -- Add custom secret envs to the service.
     # variable1: value1
     secret: {}
-  alb:
-    # -- Activates ALB ingress
-    ingress: false
-
   auth-server:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -768,6 +762,10 @@ global:
       lockLogTarget: "STDOUT"
       # -- jans-lock.log level
       lockLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to jans-auth.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     authSigKeys: "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
     # -- space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
@@ -786,10 +784,6 @@ global:
       uma2ConfigEnabled: true
       # -- Enable endpoint /.well-known/webfinger
       webfingerEnabled: true
-      # -- Enable endpoint /.well-known/simple-web-discovery
-      webdiscoveryEnabled: true
-      # -- Enable endpoint /.well-known/fido-configuration
-      u2fConfigEnabled: true
       # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
       # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
@@ -824,14 +818,6 @@ global:
       webfingerLabels: { }
       # -- webfinger ingress resource additional annotations.
       webfingerAdditionalAnnotations: { }
-      # -- webdiscovery ingress resource labels. key app is taken
-      webdiscoveryLabels: { }
-      # -- webdiscovery ingress resource additional annotations.
-      webdiscoveryAdditionalAnnotations: { }
-      # -- u2f config ingress resource labels. key app is taken
-      u2fConfigLabels: { }
-      # -- u2f config ingress resource additional annotations.
-      u2fAdditionalAnnotations: { }
       # -- authzen config ingress resource labels. key app is taken
       authzenConfigLabels: { }
       # -- authzen config ingress resource additional annotations.
@@ -885,6 +871,10 @@ global:
       timerLogTarget: "FILE"
       # -- casa timer log level
       timerLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to casa.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Name of the casa service. Please keep it as default.
     casaServiceName: casa
     # -- Boolean flag to enable/disable the casa chart.
@@ -959,18 +949,22 @@ global:
       configApiLogTarget: "STDOUT"
       # -- configapi.log level
       configApiLogLevel: "INFO"
-      # -- config-api_persistence.log target
+      # -- configapi_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- config-api_persistence.log level
+      # -- configapi_persistence.log level
       persistenceLogLevel: "INFO"
-      # -- config-api_persistence_duration.log target
+      # -- configapi_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
-      # -- config-api_persistence_duration.log level
+      # -- configapi_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- config-api_script.log target
+      # -- configapi_script.log target
       scriptLogTarget: "FILE"
-      # -- config-api_script.log level
+      # -- configapi_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to configapi.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # Enable config API endpoints /jans-config-api
@@ -1020,6 +1014,10 @@ global:
       scriptLogTarget: "FILE"
       # -- fido2_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to fido2.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
@@ -1096,22 +1094,26 @@ global:
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
       enableStdoutLogPrefix: "true"
-      # -- jans-scim.log target
+      # -- scim.log target
       scimLogTarget: "STDOUT"
-      # -- jans-scim.log level
+      # -- scim.log level
       scimLogLevel: "INFO"
-      # -- jans-scim_persistence.log target
+      # -- scim_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- jans-scim_persistence.log level
+      # -- scim_persistence.log level
       persistenceLogLevel: "INFO"
-      # -- jans-scim_persistence_duration.log target
+      # -- scim_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
-      # -- jans-scim_persistence_duration.log level
+      # -- scim_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-scim_script.log target
+      # -- scim_script.log target
       scriptLogTarget: "FILE"
-      # -- jans-scim_script.log level
+      # -- scim_script.log level
       scriptLogLevel: "INFO"
+      # -- root log target (if set to FILE, logs will be redirected to scim.log)
+      rootLogTarget: "STDOUT"
+      # -- root log level
+      rootLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/scim-configuration
@@ -1227,7 +1229,11 @@ gateway-api:
   # -- Additional configuration for Specific Gateway API implementation
   additionalConfig:
     # -- Configuration for NGINX Fabric.
-    nginx: {}
+    nginx:
+      # -- Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`.
+      # Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500).
+      # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup.
+      enableAuditGrpcRewriteSnippets: false
     # -- Configuration for Traefik.
     traefik: {}
     # -- Configuration for Istio.
@@ -1296,7 +1302,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1386,7 +1392,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1471,7 +1477,7 @@ cleanup:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1546,7 +1552,7 @@ shibboleth-idp:
     # -- Image to use for deploying.
     repository: ghcr.io/janssenproject/jans/shibboleth
     # -- Image tag to use for deploying.
-    tag: 5.1.6_dev
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.

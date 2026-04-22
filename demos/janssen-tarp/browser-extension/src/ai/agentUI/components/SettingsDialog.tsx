@@ -28,7 +28,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import CloudIcon from '@mui/icons-material/Cloud';
-import { LLM_PROVIDERS } from '../constants';
+import { LLM_PROVIDERS, getConnectionStatusText } from '../constants';
 import { LLMProvider, ConnectionStatus } from '../types';
 
 interface SettingsDialogProps {
@@ -95,15 +95,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     }
   };
 
-  const getConnectionStatusText = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'Connected';
-      case 'connecting': return 'Connecting...';
-      case 'disconnected': return 'Disconnected';
-      default: return 'Unknown';
-    }
-  };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
@@ -144,7 +135,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     }}
                   >
                     {providerOption.icon}
-                    <Typography variant="body2" fontWeight="medium">
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                       {providerOption.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -313,7 +304,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   backgroundColor: getConnectionStatusColor() 
                 }} />
                 <Typography variant="body2">
-                  Status: {getConnectionStatusText()}
+                  Status: {getConnectionStatusText(connectionStatus)}
                 </Typography>
               </Box>
               </>

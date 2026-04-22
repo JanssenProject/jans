@@ -131,27 +131,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
         }.allow_all_algorithms(),
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            )).unwrap(),
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default(),
+        authorization_config: AuthorizationConfig::default(),
         lock_config: None,
     }).await?;
 
     // Perform unsigned authorization
-    let principals = vec![EntityData {
+    let principal = Some(EntityData {
         cedar_entity_mapping: CedarEntityMapping {
             entity_type: "Jans::User".to_string(),
             id: "test_user".to_string(),
         },
         attributes: HashMap::from_iter([
-            ("roles".to_string(), json!(["admin"])),
             ("email".to_string(), json!("admin@example.com")),
         ]),
-    }];
+    });
 
     let resource = EntityData {
         cedar_entity_mapping: CedarEntityMapping {
@@ -164,7 +157,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let request = RequestUnsigned {
-        principals,
+        principal,
         action: r#"Jans::Action::"Read""#.to_string(),
         resource,
         context: json!({}),
@@ -206,18 +199,17 @@ pub struct BootstrapConfig {
     pub policy_store_config: PolicyStoreConfig,
     pub jwt_config: JwtConfig,
     pub authorization_config: AuthorizationConfig,
-    pub entity_builder_config: EntityBuilderConfig,
     pub lock_config: Option<LockConfig>,
 }
 ```
 
 #### `RequestUnsigned`
 
-Unsigned authorization request.
+Unsigned authorization request. `principal` is optional — when `None`, Cedarling evaluates the request with Cedar's partial evaluator and fails closed on any residual policy that could otherwise permit the request.
 
 ```rust
 pub struct RequestUnsigned {
-    pub principals: Vec<EntityData>,
+    pub principal: Option<EntityData>,
     pub action: String,
     pub resource: EntityData,
     pub context: serde_json::Value,
@@ -258,7 +250,7 @@ pub async fn new(config: &BootstrapConfig) -> Result<Self, CedarlingError>
 
 #### `authorize_unsigned()`
 
-Perform unsigned authorization with directly provided principals.
+Perform unsigned authorization with an optional directly-provided principal.
 
 ```rust
 pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<AuthorizeResult, CedarlingError>

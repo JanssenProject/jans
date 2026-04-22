@@ -510,11 +510,13 @@ class SqlClient(SqlSchemaMixin):
         *args: Positional arguments.
         **kwargs: Keyword arguments.
 
-    Example:
-        >>> with SqlClient(manager) as client:
-        ...     if client.connected():
-        ...         print("Connected to database")
+    Examples:
+        ```py
         # Resources are automatically cleaned up when exiting the context
+        with SqlClient(manager) as client:
+            if client.connected():
+                print("Connected to database")
+        ```
     """
 
     def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
@@ -560,13 +562,14 @@ class SqlClient(SqlSchemaMixin):
     def engine(self) -> Engine:
         """Lazy init of engine instance object.
 
-        When CN_SQL_CLOUDSQL_CONNECTOR_ENABLED is set to 'true', the engine uses
+        When `CN_SQL_CLOUDSQL_CONNECTOR_ENABLED` is set to `true`, the engine uses
         Cloud SQL Python Connector with:
+
         - LAZY refresh strategy for token refresh
         - PRIVATE IP for connecting to Cloud SQL instance
-        - pg8000 driver for PostgreSQL, pymysql for MySQL
+        - `pg8000` driver for PostgreSQL, `pymysql` for MySQL
 
-        Otherwise, uses the standard connection method with psycopg2/pymysql.
+        Otherwise, uses the standard connection method with `psycopg2`/`pymysql`.
         """
         if not self._engine:
             if self._use_cloudsql_connector():

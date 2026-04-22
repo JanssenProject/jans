@@ -8,8 +8,8 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, TokenInput,
+    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, TokenInput,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -107,11 +107,7 @@ async fn init_cedarling_multi_issuer(
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
             ..Default::default()
         },
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::default(),
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default(),
+        authorization_config: AuthorizationConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,

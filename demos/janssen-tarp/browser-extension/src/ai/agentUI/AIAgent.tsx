@@ -24,6 +24,7 @@ import SettingsDialog from './components/SettingsDialog';
 import StatusPanel from './components/StatusPanel';
 import AIResponse from './components/AIResponse';
 import { AIAgentProps } from './types';
+import { getProviderColor } from './constants';
 
 const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -67,8 +68,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
   const handleSend = useCallback(async () => {
     try {
       await send();
-    } catch (err) {
-      if (err.message.includes("configure your API key") || err.message.includes("configure MCP server")) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("configure your API key") || message.includes("configure MCP server")) {
         setSettingsOpen(true);
       }
     }
@@ -89,15 +91,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
     if (modelConfig) return modelConfig.label;
     return model;
   }, [getCurrentProviderConfig, model]);
-
-  const getProviderColor = useCallback(() => {
-    switch (provider) {
-      case 'openai': return '#2196f3';
-      case 'gemini': return '#ff9800';
-      case 'deepseek': return '#4caf50';
-      default: return 'primary';
-    }
-  }, [provider]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -133,7 +126,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
       </Stack>
       
       {/* Input Section */}
-      <Box className="box" sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <TextField
           fullWidth
           id="outlined-multiline-flexible"
@@ -148,31 +141,33 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
           placeholder={apiKeyValid && connectionStatus === 'connected' 
             ? `Describe what you want to accomplish... (using ${getCurrentProviderConfig().label} - ${getCurrentModelName()})` 
             : "Configure settings to start using the assistant"}
-          InputProps={{
-            startAdornment: !apiKeyValid && (
-              <InputAdornment position="start">
-                <KeyIcon sx={{ color: amber[500] }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton 
-                  aria-label="Send" 
-                  onClick={handleSend}
-                  disabled={loading || !query.trim() || !apiKeyValid || connectionStatus !== 'connected'}
-                  sx={{ 
-                    color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor() : 'action.disabled',
-                    '&:hover': { backgroundColor: apiKeyValid ? green[50] : 'transparent' }
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    <AirplanemodeActiveOutlinedIcon />
-                  )}
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: !apiKeyValid && (
+                <InputAdornment position="start">
+                  <KeyIcon sx={{ color: amber[500] }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton 
+                    aria-label="Send" 
+                    onClick={handleSend}
+                    disabled={loading || !query.trim() || !apiKeyValid || connectionStatus !== 'connected'}
+                    sx={{ 
+                      color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor(provider) : 'action.disabled',
+                      '&:hover': { backgroundColor: apiKeyValid ? green[50] : 'transparent' }
+                    }}
+                  >
+                    {loading ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      <AirplanemodeActiveOutlinedIcon />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }
           }}
           sx={{
             '& .MuiOutlinedInput-root': {

@@ -353,6 +353,17 @@ class SSA(DialogUtils):
 
     def edit_ssa_dialog(self, data=None):
 
+        # check if SSA flag is enabled
+        enabled_flags = self.app.app_configuration.get('featureFlags') or []
+        if 'ssa' not in enabled_flags:
+            self.app.show_message(
+                title=_(common_strings.oops),
+                message=HTML(_("Auth Server's SSA flag should be enabled. Please navigate <b>Auth Server</b> -> <b>Properties</b>, search for <b>featureFlags</b> and enable.")),
+                tobefocused=self.working_container
+                )
+            return
+
+
         if data:
             title = _("Edit SSA")
         else:
@@ -470,7 +481,15 @@ class SSA(DialogUtils):
                 self.app.getTitledCheckBoxList(
                     title=_("Grant Types"),
                     name='grant_types',
-                    values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')],
+                    values=[
+                    ('authorization_code', 'Authorization Code'),
+                    ('refresh_token', 'Refresh Token'),
+                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
+                    ('client_credentials', 'Client Credentials'),
+                    ('password', 'Password'),
+                    ('implicit', 'Implicit'),
+                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
+                    ],
                     current_values=data.get('grant_types', []),
                     style=cli_style.check_box,
                 ),

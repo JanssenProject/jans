@@ -30,3 +30,17 @@
         - get_all
         - set
         - set_all
+
+::: jans.pycloudlib.config.aws_config.AwsConfig
+    options:
+      members:
+        - get
+        - get_all
+        - set
+        - set_all
+
+::: jans.pycloudlib.config.file_config.FileConfig
+    options:
+      members:
+        - get
+        - get_all

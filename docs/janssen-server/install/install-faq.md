@@ -104,7 +104,7 @@ Check [logs](#where-can-i-find-janssen-server-logs) for errors
 
 ## How can I see status of Janssen OS platform services?
 
-### Ubuntu
+### Ubuntu / Debian
 
 ```commandline
 systemctl list-units --all "jans*"

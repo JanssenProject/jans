@@ -12,7 +12,7 @@ tags:
 
 These Bootstrap Properties control default application-level behavior. Properties are grouped below by which authorization method they apply to, so you can quickly find what you need for your chosen approach.
 
-Not sure which authorization method to use? See the [decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
+Not sure which authorization method to use? See the [decision guide](./cedarling-authz.md#which-authorization-method-should-i-use).
 
 ## Required properties (both methods)
 
@@ -68,17 +68,6 @@ These properties are relevant when using `authorize_multi_issuer` with signed JW
 **Decision logging for tokens:**
 
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim or you need a different identifier.
-
-## Properties for `authorize_unsigned` (application-asserted identity)
-
-These properties are specifically relevant when using `authorize_unsigned` with raw entity data (no JWT validation).
-
-- **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : JSON Logic rule that combines per-principal authorization decisions into a final result. Variable names must match the full Cedar principal type (e.g., `MyApp::User`, `MyApp::Workload`). Only applies to `authorize_unsigned`.
-  Use `{"===": [{"var": "MyApp::User"}, "ALLOW"]}` if you only want user authorization. Use `{"===": [{"var": "MyApp::Workload"}, "ALLOW"]}` if you only want workload authorization. [See here](./cedarling-principal-boolean-operations.md) for combining multiple principals.
-
-- **`CEDARLING_UNSIGNED_ROLE_ID_SRC`** : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to `"role"`.
-
-- **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity used when creating Role entities for principals. Default value: `Jans::Role`. Not used by `authorize_multi_issuer`.
 
 ## Properties for both methods
 

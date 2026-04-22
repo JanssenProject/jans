@@ -362,9 +362,6 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_LOG_LEVEL": "INFO",
        "CEDARLING_USER_AUTHZ": "enabled",
        "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-       "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-         "===": [{"var": "Jans::User"}, "ALLOW"]
-       },
        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
@@ -373,9 +370,6 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
    }
    ```
-
-    !!! note
-        `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` controls how per-principal decisions are combined in `authorize_unsigned`. Here it checks only the `Jans::User` principal. See [Principal Boolean Operations](../reference/cedarling-principal-boolean-operations.md) for details.
 
 4. Click on ✓ and `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
 initialization.
@@ -390,18 +384,16 @@ stage.
 2. Input the following in respective input boxes:
 
    ```JSON title="Principal"
-   [
-     {
-       "cedar_entity_mapping": {
-         "entity_type": "Jans::User",
-         "id": "some_id"
-       },
-       "sub": "some_sub",
-       "role": [
-         "Teacher"
-       ]
-     }
-   ]
+   {
+     "cedar_entity_mapping": {
+       "entity_type": "Jans::User",
+       "id": "some_id"
+     },
+     "sub": "some_sub",
+     "role": [
+       "Teacher"
+     ]
+   }
    ```
 
    ```JSON title="Actions"
@@ -438,16 +430,14 @@ Let's check a scenario where authorization is denied. Remove the role from the
 `Principal` entity and test the authorization.
 
 ```JSON title="Principal"
-[
-  {
-    "cedar_entity_mapping": {
-      "entity_type": "Jans::User",
-      "id": "some_id"
-    },
-    "sub": "some_sub",
-    "role": []
-  }
-]
+{
+  "cedar_entity_mapping": {
+    "entity_type": "Jans::User",
+    "id": "some_id"
+  },
+  "sub": "some_sub",
+  "role": []
+}
 ```
 
 And click `Cedarling Authz Request` again. Cedarling will return a new result:

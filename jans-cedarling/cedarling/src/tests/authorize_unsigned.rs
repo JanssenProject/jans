@@ -3,15 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::LazyLock;
-
 use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
 use crate::log::interface::LogStorage;
 use crate::{
-    JsonRule, cmp_decision, cmp_policy,
     tests::utils::cedarling_util::get_cedarling_with_callback,
     tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request},
 };
@@ -19,277 +16,196 @@ use crate::{
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
-static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
-    JsonRule::new(json!({
-        "and" : [
-            {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
-            {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
-            {"===": [{"var": "Jans::TestPrincipal3"}, "ALLOW"]}
-        ]
-    }))
-    .unwrap()
-});
-
-/// Check if action executes for next principals: `TestPrincipal1`, `TestPrincipal2`, `TestPrincipal3`
+/// Single principal, allow result.
 #[test]
-async fn test_authorize_unsigned_for_all_principals_success() {
+async fn test_authorize_unsigned_single_principal_allow() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
+        |_| {},
     )
     .await;
 
     let request = create_test_unsigned_request(
         "Jans::Action::\"UpdateForTestPrincipals\"",
-        vec![
-            create_test_principal("Jans::TestPrincipal1", "random_id", json!({"is_ok": true}))
-                .unwrap(),
-            create_test_principal("Jans::TestPrincipal2", "random_id", json!({"is_ok": true}))
-                .unwrap(),
-            create_test_principal("Jans::TestPrincipal3", "random_id", json!({"is_ok": true}))
-                .unwrap(),
-        ],
+        Some(
+            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
+                .expect("principal should build"),
+        ),
         create_test_principal(
             "Jans::Issue",
             "random_id",
             json!({"org_id": "some_long_id", "country": "US"}),
         )
-        .unwrap(),
+        .expect("resource should build"),
     );
 
     let result = cedarling
         .authorize_unsigned(request)
         .await
         .expect("request should be parsed without errors");
-
-    let test_principal_1_result = result
-        .principals
-        .get("Jans::TestPrincipal1")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_2_result = result
-        .principals
-        .get("Jans::TestPrincipal2")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_3_result = result
-        .principals
-        .get("Jans::TestPrincipal3")
-        .map(std::borrow::ToOwned::to_owned);
-
-    cmp_decision!(
-        test_principal_1_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal1"
-    );
-    cmp_policy!(
-        test_principal_1_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal1"
-    );
-
-    cmp_decision!(
-        test_principal_2_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal2"
-    );
-
-    cmp_policy!(
-        test_principal_2_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal2"
-    );
-
-    cmp_decision!(
-        test_principal_3_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal3"
-    );
-
-    cmp_policy!(
-        test_principal_3_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal3"
-    );
 
     assert!(result.decision, "request result should be allowed");
+    assert_eq!(
+        result.response.decision(),
+        Decision::Allow,
+        "cedar response should allow"
+    );
 }
 
-/// Check if action executes for same type of principals but different ids
+/// Single principal, deny result (`principal.is_ok` = false).
 #[test]
-async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_type() {
+async fn test_authorize_unsigned_single_principal_deny() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-                "and" : [
-                    {"===": [{"var": "Jans::TestPrincipal1::\"id1\""}, "ALLOW"]},
-                    {"===": [{"var": "Jans::TestPrincipal1::\"id2\""}, "ALLOW"]},
-                    {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "ALLOW"]}
-                ]
-            }))
-            .unwrap();
-        },
+        |_| {},
     )
     .await;
 
     let request = create_test_unsigned_request(
         "Jans::Action::\"UpdateForTestPrincipals\"",
-        vec![
-            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true})).unwrap(),
-            create_test_principal("Jans::TestPrincipal1", "id2", json!({"is_ok": true})).unwrap(),
-            create_test_principal("Jans::TestPrincipal1", "id3", json!({"is_ok": true})).unwrap(),
-        ],
+        Some(
+            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": false}))
+                .expect("principal should build"),
+        ),
         create_test_principal(
             "Jans::Issue",
             "random_id",
             json!({"org_id": "some_long_id", "country": "US"}),
         )
-        .unwrap(),
+        .expect("resource should build"),
     );
 
     let result = cedarling
         .authorize_unsigned(request)
         .await
         .expect("request should be parsed without errors");
-
-    let test_principal_1_result = result
-        .principals
-        .get("Jans::TestPrincipal1::\"id1\"")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_2_result = result
-        .principals
-        .get("Jans::TestPrincipal1::\"id2\"")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_3_result = result
-        .principals
-        .get("Jans::TestPrincipal1::\"id3\"")
-        .map(std::borrow::ToOwned::to_owned);
-
-    cmp_decision!(
-        test_principal_1_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal1"
-    );
-    cmp_policy!(
-        test_principal_1_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal1"
-    );
-
-    cmp_decision!(
-        test_principal_2_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal2"
-    );
-
-    cmp_policy!(
-        test_principal_2_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal2"
-    );
-
-    cmp_decision!(
-        test_principal_3_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal3"
-    );
-
-    cmp_policy!(
-        test_principal_3_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal3"
-    );
-
-    assert!(result.decision, "request result should be allowed");
-}
-
-#[test]
-async fn test_authorize_unsigned_for_all_principals_failure() {
-    let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
-    )
-    .await;
-
-    let request = create_test_unsigned_request(
-        "Jans::Action::\"UpdateForTestPrincipals\"",
-        vec![
-            create_test_principal("Jans::TestPrincipal1", "random_id", json!({"is_ok": false}))
-                .unwrap(),
-            create_test_principal("Jans::TestPrincipal2", "random_id", json!({"is_ok": true}))
-                .unwrap(),
-            create_test_principal("Jans::TestPrincipal3", "random_id", json!({"is_ok": false}))
-                .unwrap(),
-        ],
-        create_test_principal(
-            "Jans::Issue",
-            "random_id",
-            json!({"org_id": "some_long_id", "country": "US"}),
-        )
-        .unwrap(),
-    );
-
-    let result = cedarling
-        .authorize_unsigned(request)
-        .await
-        .expect("request should be parsed without errors");
-
-    let empty_vec: Vec<&str> = Vec::new();
-
-    let test_principal_1_result = result
-        .principals
-        .get("Jans::TestPrincipal1")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_2_result = result
-        .principals
-        .get("Jans::TestPrincipal2")
-        .map(std::borrow::ToOwned::to_owned);
-
-    let test_principal_3_result = result
-        .principals
-        .get("Jans::TestPrincipal3")
-        .map(std::borrow::ToOwned::to_owned);
-
-    cmp_decision!(
-        test_principal_1_result,
-        Decision::Deny,
-        "request result should be denied for TestPrincipal1"
-    );
-    cmp_policy!(
-        test_principal_1_result,
-        empty_vec,
-        "reason of permit workload should be empty for TestPrincipal1"
-    );
-
-    cmp_decision!(
-        test_principal_2_result,
-        Decision::Allow,
-        "request result should be allowed for TestPrincipal2"
-    );
-
-    cmp_policy!(
-        test_principal_2_result,
-        ["5"],
-        "reason of permit should be '5' for TestPrincipal2"
-    );
-
-    cmp_decision!(
-        test_principal_3_result,
-        Decision::Deny,
-        "request result should be denied for TestPrincipal3"
-    );
-
-    cmp_policy!(
-        test_principal_3_result,
-        empty_vec,
-        "reason of permit should be empty for TestPrincipal3"
-    );
 
     assert!(!result.decision, "request result should be denied");
+    assert_eq!(
+        result.response.decision(),
+        Decision::Deny,
+        "cedar response should deny"
+    );
+}
+
+/// No principal, partial-eval concretizes because the policy does not depend
+/// on the principal attributes.
+#[test]
+async fn test_authorize_unsigned_no_principal_partial_eval() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"OpenPublicIssue\"",
+        None,
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
+        .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should be parsed without errors");
+
+    assert!(
+        result.decision,
+        "partial eval should allow when policy does not depend on principal"
+    );
+}
+
+/// No principal and the only matching permit policy depends on `principal.is_ok`.
+/// The partial response cannot concretize, so `execute_authorize` must synthesize
+/// a Deny and include the residual policy id in the reason set (fail-closed).
+#[test]
+async fn test_authorize_unsigned_no_principal_residual_denies() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        None,
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
+        .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should be parsed without errors");
+
+    assert!(
+        !result.decision,
+        "residual (principal-dependent) policy must fail closed to Deny"
+    );
+    assert_eq!(
+        result.response.decision(),
+        Decision::Deny,
+        "synthesized cedar response should be Deny"
+    );
+
+    let reason_ids: Vec<String> = result
+        .response
+        .diagnostics()
+        .reason()
+        .map(ToString::to_string)
+        .collect();
+    assert!(
+        reason_ids.iter().any(|id| id == "5"),
+        "residual policy id should be reported in diagnostics reason set, got: {reason_ids:?}"
+    );
+}
+
+/// Exercises `get_matching_policies_unsigned` with `principal: Some(..)` and
+/// with `principal: None`, covering both arms of the `match principal {..}`
+/// branch introduced by the single-principal unsigned refactor.
+#[test]
+async fn test_get_matching_policies_unsigned_both_branches() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let principal = create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
+        .expect("principal should build");
+    let resource = create_test_principal(
+        "Jans::Issue",
+        "random_id",
+        json!({"org_id": "x", "country": "US"}),
+    )
+    .expect("resource should build");
+
+    let actions = vec!["Jans::Action::\"UpdateForTestPrincipals\"".to_string()];
+
+    let with_principal = cedarling
+        .get_matching_policies_unsigned(Some(&principal), &actions, std::slice::from_ref(&resource))
+        .expect("Some-principal branch should succeed");
+    assert!(
+        with_principal.iter().any(|p| p.id == "5"),
+        "policy 5 should match when principal type is provided, got: {with_principal:?}"
+    );
+
+    let no_principal = cedarling
+        .get_matching_policies_unsigned(None, &actions, std::slice::from_ref(&resource))
+        .expect("None-principal branch should succeed");
+    assert!(
+        no_principal.iter().any(|p| p.id == "5"),
+        "policy 5 should still match when principal is absent, got: {no_principal:?}"
+    );
 }
 
 /// Test policy evaluation errors are logged for unsigned authorization
@@ -297,31 +213,25 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
 async fn test_policy_evaluation_errors_logging_unsigned() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
+        |_| {},
     )
     .await;
-    let create_principal = |id: &str, role: &str| {
-        create_test_principal(
-            "Jans::User",
-            id,
-            json!({"country": "US", "role": [role], "sub": id}),
-        )
-        .unwrap()
-    };
 
-    let principals = vec![
-        create_principal("user1", "Admin"),
-        create_principal("user1", "Admin"),
-    ];
+    let principal = create_test_principal(
+        "Jans::User",
+        "user1",
+        json!({"country": "US", "role": ["Admin"], "sub": "user1"}),
+    )
+    .expect("principal should build");
     let resource = create_test_principal(
         "Jans::Issue",
         "issue1",
         json!({"org_id": "invalid", "country": "US"}),
     )
-    .unwrap();
+    .expect("resource should build");
 
     let request =
-        create_test_unsigned_request("Jans::Action::\"AlwaysDeny\"", principals, resource);
+        create_test_unsigned_request("Jans::Action::\"AlwaysDeny\"", Some(principal), resource);
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -342,78 +252,32 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         "Should have logs for the request ID"
     );
 
-    // Verify that logs contain expected content
     for log in &logs_with_request_id {
-        // Verify basic log structure
         assert!(log.get("id").is_some(), "Log should have an id field");
         assert!(
             log.get("timestamp").is_some(),
             "Log should have a timestamp field"
         );
-        assert!(
-            log.get("log_kind").is_some(),
-            "Log should have a log_kind field"
-        );
-
-        // Verify log kind is valid
-        let log_kind = log.get("log_kind").unwrap();
+        let log_kind = log.get("log_kind").expect("log_kind should exist");
         assert!(
             log_kind == "Decision" || log_kind == "System",
             "Log kind should be Decision or System, got: {log_kind:?}"
         );
 
-        // For Decision logs, verify they have required fields
         if log_kind == "Decision" {
-            assert!(
-                log.get("action").is_some(),
-                "Decision log should have an action field"
-            );
-            assert!(
-                log.get("resource").is_some(),
-                "Decision log should have a resource field"
-            );
-            assert!(
-                log.get("decision").is_some(),
-                "Decision log should have a decision field"
-            );
-            assert!(
-                log.get("diagnostics").is_some(),
-                "Decision log should have a diagnostics field"
-            );
-
-            // Verify the action matches what we requested
-            let log_action = log.get("action").unwrap();
+            let log_action = log.get("action").expect("Decision log should have action");
             assert_eq!(
                 log_action,
                 &serde_json::json!("Jans::Action::\"AlwaysDeny\""),
                 "Decision log should have the correct action"
             );
-
-            // Verify the decision is DENY
-            let log_decision = log.get("decision").unwrap();
+            let log_decision = log
+                .get("decision")
+                .expect("Decision log should have decision");
             assert_eq!(
                 log_decision,
                 &serde_json::json!("DENY"),
                 "Decision log should show DENY decision"
-            );
-
-            // Verify diagnostics structure
-            let diagnostics = log.get("diagnostics").unwrap();
-            assert!(
-                diagnostics.get("reason").is_some(),
-                "Diagnostics should have a reason field"
-            );
-            assert!(
-                diagnostics.get("errors").is_some(),
-                "Diagnostics should have an errors field"
-            );
-
-            // Verify no policy evaluation errors (since AlwaysDeny just denies, doesn't cause errors)
-            let errors = diagnostics.get("errors").unwrap();
-            assert_eq!(
-                errors,
-                &serde_json::json!([]),
-                "Diagnostics should show no errors when there are no policy evaluation errors"
             );
         }
     }
@@ -430,7 +294,6 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
-            // Enable JWT signature validation but don't provide trusted issuers
             config.jwt_config = JwtConfig {
                 jwks: None,
                 jwt_sig_validation: true,
@@ -445,19 +308,18 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
     )
     .await;
 
-    // Verify unsigned authorization works
     let request = create_test_unsigned_request(
         "Jans::Action::\"UpdateForTestPrincipals\"",
-        vec![
+        Some(
             create_test_principal("Jans::TestPrincipal1", "test_id", json!({"is_ok": true}))
-                .unwrap(),
-        ],
+                .expect("principal should build"),
+        ),
         create_test_principal(
             "Jans::Issue",
             "issue1",
             json!({"org_id": "some_id", "country": "US"}),
         )
-        .unwrap(),
+        .expect("resource should build"),
     );
 
     let result = cedarling
@@ -465,17 +327,11 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
         .await
         .expect("unsigned authorization should work without trusted issuers");
 
-    // Verify the request was processed successfully
-    assert!(
-        result.principals.contains_key("Jans::TestPrincipal1"),
-        "Should have result for TestPrincipal1"
-    );
+    assert!(result.decision, "authorization should be allowed");
 
-    // Verify logs were created
     let logs = cedarling.pop_logs();
     assert!(!logs.is_empty(), "Should have created logs");
 
-    // Verify there's a warning about signed authorization being unavailable
     let warning_logs: Vec<&serde_json::Value> = logs
         .iter()
         .filter(|log| {

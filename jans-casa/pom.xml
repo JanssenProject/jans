@@ -5,7 +5,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>casa-base</artifactId>
-	<version>0.0.0-nightly</version>
+	<version>2.0.0</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
@@ -27,13 +27,13 @@
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
         <pf4j.version>3.15.0</pf4j.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
         <jackson.version>2.21.2</jackson.version>
         <zk.version>10.1.0-jakarta</zk.version>
-        <ldapsdk.version>7.0.3</ldapsdk.version>
+        <ldapsdk.version>7.0.4</ldapsdk.version>
         <resteasy.version>6.2.12.Final</resteasy.version>
         <tika.version>3.2.3</tika.version>
-        <bc.version>1.83</bc.version>
+        <bc.version>1.84</bc.version>
         <!-- SonarCloud integration properties -->
         <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -223,12 +223,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.3.1</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -246,7 +246,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.8.2</version>
+                    <version>4.9.8.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

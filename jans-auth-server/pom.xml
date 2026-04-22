@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.0-nightly</version>
+	<version>2.0.0</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -30,7 +30,7 @@
 		<jans-fido2.version>${project.version}</jans-fido2.version>
 
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
-		<activemq.version>5.16.8</activemq.version>
+		<activemq.version>5.19.4</activemq.version>
 
 		<jettison.version>1.5.4</jettison.version>
 
@@ -237,7 +237,7 @@
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr-runtime</artifactId>
-				<version>3.1.1</version>
+				<version>3.5.3</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-net</groupId>
@@ -359,7 +359,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-testng</artifactId>
-				<version>0.4.8</version>
+				<version>0.5.4</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -421,7 +421,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.5.0</version>
 					<executions>
 						<execution>
 							<goals>
@@ -451,7 +451,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.2.1</version>
+					<version>3.4.0</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -495,7 +495,7 @@
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>
-					<version>3.8.0</version>
+					<version>3.12.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
@@ -510,7 +510,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -531,7 +531,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.12.0</version>
 			</plugin>
 
 			<!-- OWASP plugin -->

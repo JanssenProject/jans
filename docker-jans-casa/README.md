@@ -91,7 +91,9 @@ The following key-value pairs are the defaults:
     "casa_log_target": "STDOUT",
     "casa_log_level": "INFO",
     "timer_log_target": "FILE",
-    "timer_log_level": "INFO"
+    "timer_log_level": "INFO",
+    "root_log_target": "STDOUT",
+    "root_log_level": "INFO"
 }
 ```
 

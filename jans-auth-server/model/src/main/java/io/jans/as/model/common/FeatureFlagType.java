@@ -1,5 +1,6 @@
 package io.jans.as.model.common;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.doc.annotation.DocFeatureFlag;
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +87,10 @@ public enum FeatureFlagType {
     RATE_LIMIT("rate_limit"),
     @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
             defaultValue = "Enabled")
-    SSA("ssa");
+    SSA("ssa"),
+    @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
+            defaultValue = "Disabled")
+    CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document");
 
     private final String value;
 
@@ -128,5 +132,11 @@ public enum FeatureFlagType {
             }
         }
         return result;
+    }
+	
+    @Override
+    @JsonValue
+    public String toString() {
+        return value;
     }
 }

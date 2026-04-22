@@ -123,7 +123,6 @@ class Cedarling:
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
             BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
             BuildUnsignedRoleEntityError: Error building Role entity for unsigned request.
             RequestValidationError: Error encountered while validating the request.
             RuntimeError: If JSON conversion of context fails.
@@ -152,11 +151,62 @@ class Cedarling:
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
             BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
             MultiIssuerValidationError: Error encountered during multi-issuer token validation.
             MultiIssuerEntityError: Error encountered while building multi-issuer entities.
             RequestValidationError: Error encountered while validating the request.
             RuntimeError: If JSON conversion of context fails.
+        """
+        ...
+
+    def get_matching_policies_unsigned(
+        self,
+        principal: Optional[EntityData],
+        actions: List[str],
+        resources: List[EntityData],
+    ) -> List["PolicyMetadata"]:
+        """
+        Returns metadata for all policies whose scope constraints are compatible
+        with the given principal, actions, and resources.
+
+        This performs scope-level filtering only (principal/action/resource constraints).
+        Policies with `when`/`unless` conditions may still not apply at evaluation time.
+
+        Args:
+            principal: Optional EntityData representing the principal entity. When
+                ``None``, policies are filtered assuming an unknown principal.
+            actions: List of action strings (e.g., 'Jans::Action::"Read"').
+            resources: List of EntityData representing resource entities.
+
+        Returns:
+            A list of PolicyMetadata objects for matching policies.
+
+        Raises:
+            AuthorizeError: If policy matching fails.
+        """
+        ...
+
+    def get_matching_policies_multi_issuer(
+        self,
+        tokens: List[TokenInput],
+        actions: List[str],
+        resources: List[EntityData],
+    ) -> List["PolicyMetadata"]:
+        """
+        Returns metadata for all policies whose scope constraints are compatible
+        with the given token-derived principals, actions, and resources.
+
+        Tokens are validated and their mapping types used as principal entity types.
+
+        Args:
+            tokens: List of TokenInput representing JWT tokens with mapping types.
+            actions: List of action strings (e.g., 'Jans::Action::"Read"').
+            resources: List of EntityData representing resource entities.
+
+        Returns:
+            A list of PolicyMetadata objects for matching policies.
+
+        Raises:
+            AuthorizeError: If token validation or policy matching fails.
         """
         ...
 
@@ -408,17 +458,17 @@ class Cedarling:
 
 @final
 class RequestUnsigned:
-    principals: List[EntityData]
+    principal: Optional[EntityData]
     action: str
     resource: EntityData
     context: Dict[str, Any]
 
     def __init__(
         self,
-        principals: List[EntityData],
         action: str,
         resource: EntityData,
         context: Dict[str, Any],
+        principal: Optional[EntityData] = None,
     ) -> None: ...
 
 @final
@@ -452,8 +502,9 @@ class EntityData:
 
 @final
 class AuthorizeResult:
+    response: AuthorizeResultResponse
+
     def is_allowed(self) -> bool: ...
-    def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
     def request_id(self) -> str: ...
 
 @final
@@ -595,3 +646,39 @@ class CedarType(Enum):
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
     def __eq__(self, other: "CedarType") -> bool: ...
+
+class PolicyEffect(Enum):
+    """
+    Represents the effect of a Cedar policy.
+
+    This is an enum with the following variants:
+        - Permit: The policy permits the request.
+        - Forbid: The policy forbids the request.
+    """
+
+    Permit = "Permit"
+    Forbid = "Forbid"
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: "PolicyEffect") -> bool: ...
+
+@final
+class PolicyMetadata:
+    """
+    Metadata about a Cedar policy, including its ID, effect, annotations, and source code.
+
+    Attributes:
+        id: The policy ID string.
+        effect: The policy effect as a PolicyEffect enum value.
+        annotations: Dictionary of policy annotations.
+        source: The Cedar policy source code.
+    """
+
+    id: str
+    effect: PolicyEffect
+    annotations: Dict[str, str]
+    source: str
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...

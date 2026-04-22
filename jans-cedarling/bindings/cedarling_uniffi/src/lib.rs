@@ -33,6 +33,8 @@ pub enum AuthorizeError {
     AuthorizationFailed { error_msg: String },
     #[error("Invalid context json data provided")]
     InvalidContext,
+    #[error("Invalid input: {error_msg}")]
+    InvalidInput { error_msg: String },
 }
 
 // Enum representing logging errors
@@ -353,18 +355,17 @@ impl Cedarling {
     #[uniffi::method]
     pub fn authorize_unsigned(
         &self,
-        principals: Vec<Arc<EntityData>>,
+        principal: Option<Arc<EntityData>>,
         action: String,
         resource: Arc<EntityData>,
         context: JsonValue,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        let core_principals: Vec<core::EntityData> =
-            principals.into_iter().map(|v| v.inner.clone()).collect();
+        let core_principal: Option<core::EntityData> = principal.map(|p| p.inner.clone());
 
         let core_resource = resource.inner.clone();
 
         let core_request = core::RequestUnsigned {
-            principals: core_principals,
+            principal: core_principal,
             action,
             resource: core_resource,
             context: context

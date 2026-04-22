@@ -138,8 +138,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Load balancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
-  quarkusTransactionEnableRecovery: true
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 nameOverride: ""
@@ -152,9 +150,6 @@ config:
 persistence:
   # -- Boolean flag to enable/disable the persistence job.
   enabled: true
-alb:
-  # -- switches the service to Nodeport for ALB ingress
-  ingress: false
 # -- Parameters used globally across all services helm charts.
 auth-server:
   # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
@@ -193,6 +188,10 @@ auth-server:
     lockLogTarget: "STDOUT"
     # -- jans-lock.log level
     lockLogLevel: "INFO"
+    # -- root log target (if set to FILE, logs will be redirected to jans-auth.log)
+    rootLogTarget: "STDOUT"
+    # -- root log level
+    rootLogLevel: "INFO"
   # -- space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
   authSigKeys: "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
   # -- space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
@@ -211,10 +210,6 @@ auth-server:
     uma2ConfigEnabled: true
     # -- Enable endpoint /.well-known/webfinger
     webfingerEnabled: true
-    # -- Enable endpoint /.well-known/simple-web-discovery
-    webdiscoveryEnabled: true
-    # -- Enable endpoint /.well-known/fido-configuration
-    u2fConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
     # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
@@ -247,14 +242,6 @@ auth-server:
     webfingerLabels: { }
     # -- webfinger ingress resource additional annotations.
     webfingerAdditionalAnnotations: { }
-    # -- webdiscovery ingress resource labels. key app is taken
-    webdiscoveryLabels: { }
-    # -- webdiscovery ingress resource additional annotations.
-    webdiscoveryAdditionalAnnotations: { }
-    # -- u2f config ingress resource labels. key app is taken
-    u2fConfigLabels: { }
-    # -- u2f config ingress resource additional annotations.
-    u2fAdditionalAnnotations: { }
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
     # -- authzen config ingress resource labels. key app is taken
@@ -288,7 +275,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value.
@@ -354,6 +341,10 @@ casa:
     timerLogTarget: "FILE"
     # -- casa timer log level
     timerLogLevel: "INFO"
+    # -- root log target (if set to FILE, logs will be redirected to casa.log)
+    rootLogTarget: "STDOUT"
+    # -- root log level
+    rootLogLevel: "INFO"
   # -- Name of the casa service. Please keep it as default.
   casaServiceName: casa
   # -- Boolean flag to enable/disable the casa chart.
@@ -385,18 +376,22 @@ config-api:
     configApiLogTarget: "STDOUT"
     # -- configapi.log level
     configApiLogLevel: "INFO"
-    # -- config-api_persistence.log target
+    # -- configapi_persistence.log target
     persistenceLogTarget: "FILE"
-    # -- config-api_persistence.log level
+    # -- configapi_persistence.log level
     persistenceLogLevel: "INFO"
-    # -- config-api_persistence_duration.log target
+    # -- configapi_persistence_duration.log target
     persistenceDurationLogTarget: "FILE"
-    # -- config-api_persistence_duration.log level
+    # -- configapi_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- config-api_script.log target
+    # -- configapi_script.log target
     scriptLogTarget: "FILE"
-    # -- config-api_script.log level
+    # -- configapi_script.log level
     scriptLogLevel: "INFO"
+    # -- root log target (if set to FILE, logs will be redirected to configapi.log)
+    rootLogTarget: "STDOUT"
+    # -- root log level
+    rootLogLevel: "INFO"
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
     # Enable config API endpoints /jans-config-api
@@ -434,6 +429,10 @@ fido2:
     scriptLogTarget: "FILE"
     # -- fido2_script.log level
     scriptLogLevel: "INFO"
+    # -- root log target (if set to FILE, logs will be redirected to fido2.log)
+    rootLogTarget: "STDOUT"
+    # -- root log level
+    rootLogLevel: "INFO"
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
     # -- Enable endpoint /.well-known/fido2-configuration
@@ -465,22 +464,26 @@ scim:
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
     enableStdoutLogPrefix: "true"
-    # -- jans-scim.log target
+    # -- scim.log target
     scimLogTarget: "STDOUT"
-    # -- jans-scim.log level
+    # -- scim.log level
     scimLogLevel: "INFO"
-    # -- jans-scim_persistence.log target
+    # -- scim_persistence.log target
     persistenceLogTarget: "FILE"
-    # -- jans-scim_persistence.log level
+    # -- scim_persistence.log level
     persistenceLogLevel: "INFO"
-    # -- jans-scim_persistence_duration.log target
+    # -- scim_persistence_duration.log target
     persistenceDurationLogTarget: "FILE"
-    # -- jans-scim_persistence_duration.log level
+    # -- scim_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- jans-scim_script.log target
+    # -- scim_script.log target
     scriptLogTarget: "FILE"
-    # -- jans-scim_script.log level
+    # -- scim_script.log level
     scriptLogLevel: "INFO"
+    # -- root log target (if set to FILE, logs will be redirected to scim.log)
+    rootLogTarget: "STDOUT"
+    # -- root log level
+    rootLogLevel: "INFO"
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
     # -- Enable endpoint /.well-known/scim-configuration
@@ -495,22 +498,6 @@ scim:
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
     scimAdditionalAnnotations: { }
-saml:
-  # -- Name of the saml service. Please keep it as default.
-  samlServiceName: saml
-  # -- Boolean flag to enable/disable the saml chart.
-  enabled: false
-  # -- passing custom java options to saml. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
-  cnCustomJavaOptions: ""
-  # -- Enable endpoints in either istio or nginx ingress depending on users choice
-  ingress:
-    # Enable saml endpoints /kc
-    samlEnabled: false
-    # -- SAML config ingress resource labels. key app is taken
-    samlLabels: { }
-    # -- SAML ingress resource additional annotations.
-    samlAdditionalAnnotations: { }
-
 shibboleth:
   # -- Name of the shibboleth service. Please keep it as default.
   shibbolethServiceName: shibboleth-idp
@@ -754,7 +741,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 2.0.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -815,70 +802,6 @@ customScripts: [ ]
 customCommand: []
 # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
 nodeSelector: {}
-
-# -- Responsible for synchronizing Keycloak SAML clients
-kc-scheduler:
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/cloudtools
-    # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 300m
-      # -- Memory limit.
-      memory: 300Mi
-    requests:
-      # -- CPU request.
-      cpu: 300m
-      # -- Memory request.
-      memory: 300Mi
-  # -- Interval of running the scheduler (in minutes)
-  interval: 10
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  # Actions on lifecycle events such as postStart and preStop
-  # Example
-  # lifecycle:
-  #   postStart:
-  #     exec:
-  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
-  lifecycle: {}
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: {}
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: []
-  # -- Add custom job's command. If passed, it will override the default conditional command.
-  customCommand: []
-  # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
-  enabled: false
-  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
-  nodeSelector: {}
-
 # -- Cleanup expired entries in persistence
 cleanup:
   # -- Add custom normal and secret envs to the service
@@ -899,7 +822,7 @@ cleanup:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

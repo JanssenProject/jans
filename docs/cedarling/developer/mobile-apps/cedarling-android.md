@@ -11,21 +11,19 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 ## Building
 
 1. Ask toolchain manager to install support for compiling Rust code for aarch64-linux, armv7-linux, i686-linux and x86_64-linux.
-
-```bash
-	rustup target add \
-		aarch64-linux-android \
-		armv7-linux-androideabi \
-		i686-linux-android \
-		x86_64-linux-android
-```
+    ```bash
+        rustup target add \
+            aarch64-linux-android \
+            armv7-linux-androideabi \
+            i686-linux-android \
+            x86_64-linux-android
+    ```
 
 2.  Run below command to build and import binding into Android project.
     ```bash
     make android
     ```
-
-Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
+    Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
   
 3. We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
 

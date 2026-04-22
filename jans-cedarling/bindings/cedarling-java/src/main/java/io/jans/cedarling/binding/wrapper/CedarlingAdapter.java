@@ -2,9 +2,32 @@ package io.jans.cedarling.binding.wrapper;
 
 import uniffi.cedarling_uniffi.*;
 import org.json.JSONObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * High-level wrapper around the Cedarling UniFFI binding.
+ *
+ * <p>This adapter hides the UniFFI-generated types from application code by
+ * providing convenience methods that accept standard Java types ({@code Map},
+ * {@code String}, {@code JSONObject}).  The lower-level overloads that accept
+ * {@link EntityData} and {@link TokenInput} directly are still available for
+ * advanced use cases.</p>
+ *
+ * <h3>Migration from v16.0</h3>
+ * <p>The legacy {@code authorize(Map&lt;String,String&gt; tokens, ...)} method
+ * has been replaced by two dedicated methods:</p>
+ * <ul>
+ *   <li>{@link #authorizeMultiIssuer(Map, String, JSONObject, JSONObject)} –
+ *       drop-in replacement that takes a token map, validates JWTs, and evaluates
+ *       policies.</li>
+ *   <li>{@link #authorizeUnsigned(String, String, JSONObject, JSONObject)} and
+ *       {@link #authorizeUnsignedEntity(EntityData, String, JSONObject, JSONObject)} –
+ *       for pre-validated / unsigned entity data (omit the principal or pass null
+ *       for partial evaluation when no asserted principal is supplied).</li>
+ * </ul>
+ */
 public class CedarlingAdapter implements AutoCloseable {
 
     Cedarling cedarling;
@@ -19,19 +42,119 @@ public class CedarlingAdapter implements AutoCloseable {
         this.cedarling = Cedarling.Companion.loadFromFile(path);
     }
 
-    public AuthorizeResult authorizeUnsigned(List<EntityData> principals, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
-        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        return cedarling.authorizeUnsigned(principals, action, resourceObj, context.toString());
+    // ── authorize_multi_issuer ──────────────────────────────────────────
+
+    /**
+     * Authorize using JWT tokens from multiple issuers.
+     *
+     * <p>This is the recommended replacement for the removed
+     * {@code authorize(Map&lt;String,String&gt;, ...)} method.  Each map entry
+     * is a token mapping name (e.g. {@code "Jans::Access_Token"}) to the raw
+     * JWT string.</p>
+     *
+     * @param tokens  mapping name → JWT string (must not be null; no null keys or values)
+     * @param action  Cedar action (e.g. {@code "Jans::Action::\"Read\""})
+     * @param resource resource as JSONObject (must not be null)
+     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
+     * @return authorization result
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            Map<String, String> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        if (tokens == null) {
+            throw new IllegalArgumentException("tokens must not be null");
+        }
+        List<TokenInput> tokenInputs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("tokens map must not contain a null key");
+            }
+            if (entry.getValue() == null) {
+                throw new IllegalArgumentException(
+                        "tokens map must not contain a null value for key: " + entry.getKey());
+            }
+            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
+        }
+        return authorizeMultiIssuer(tokenInputs, action, resource, context);
     }
 
-    public MultiIssuerAuthorizeResult authorizeMultiIssuer(List<TokenInput> tokens, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
+    /**
+     * Authorize using pre-built {@link TokenInput} objects.
+     *
+     * @param resource resource as JSONObject (must not be null)
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            List<TokenInput> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        if (resource == null) {
+            throw new IllegalArgumentException("resource must not be null");
+        }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : null;
+        String contextStr = context != null ? context.toString() : "{}";
         return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
+    }
+
+    // ── authorize_unsigned ──────────────────────────────────────────────
+
+    /**
+     * Authorize with an optional principal provided as a JSON string.
+     *
+     * <p>This is the simplest way to call {@code authorizeUnsigned} without
+     * importing any UniFFI types. When {@code principalJson} is non-null it is
+     * parsed into {@link EntityData}; when null, the engine runs without an asserted
+     * principal (partial evaluation / Cedar partial mode), matching core
+     * {@code RequestUnsigned.principal == None}.</p>
+     *
+     * @param principalJson principal as a JSON string, or null for no asserted principal
+     * @param action  Cedar action
+     * @param resource resource as JSONObject (must not be null)
+     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
+     * @return authorization result
+     */
+    public AuthorizeResult authorizeUnsigned(
+            String principalJson,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        EntityData principal =
+                principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
+        return authorizeUnsignedEntity(principal, action, resource, context);
+    }
+
+    /**
+     * Authorize with an optional pre-built {@link EntityData} principal.
+     *
+     * <p>Use this when you already have an {@link EntityData} instance (e.g. from UniFFI
+     * or advanced integration code). Pass null for {@code principal} when no asserted
+     * principal should be supplied. A null {@code context} is sent as an empty JSON
+     * object to the engine.</p>
+     *
+     * <p>This method is named {@code authorizeUnsignedEntity} (rather than an overload of
+     * {@link #authorizeUnsigned(String, String, JSONObject, JSONObject)}) so that a null
+     * principal does not make overload resolution ambiguous in Java.</p>
+     *
+     * @param principal optional principal entity, or null for partial evaluation without one
+     * @param resource resource as JSONObject (must not be null)
+     */
+    public AuthorizeResult authorizeUnsignedEntity(
+            EntityData principal,
+            String action,
+            JSONObject resource,
+            JSONObject context) throws AuthorizeException, EntityException {
+
+        if (resource == null) {
+            throw new IllegalArgumentException("resource must not be null");
+        }
+        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
+        String contextStr = context != null ? context.toString() : "{}";
+        return cedarling.authorizeUnsigned(principal, action, resourceObj, contextStr);
     }
 
     public String getLogById(String id) throws LogException {

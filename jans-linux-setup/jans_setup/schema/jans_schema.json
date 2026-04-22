@@ -4700,6 +4700,61 @@
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Resource entity type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "entityType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Resource metadata source",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "metadataSource"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Resource type version",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "version"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Resource type version",
+      "equality": "integerMatch",
+      "names": [
+        "jansVersion"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML Profile Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansProfileConfiguration"
+      ],
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -5945,38 +6000,15 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
-        "owner",
-        "name",
         "displayName",
         "description",
-        "rootUrl",
-        "baseUrl",
-        "adminUrl",
-        "surrogateAuthRequired",
-        "jansEnabled",
-        "displayInConsole",
-        "jansPreferredMethod",
-        "jansClntSecret",
-        "jansRegistrationAccessTkn",
-        "jansRedirectURI",
-        "jansWebOrigins",
-        "consentRequired",
-        "samlMetadata",
-        "jansSAMLMetaDataFilter",
-        "jansSAMLspMetaDataSourceTyp",
-        "jansSAMLspMetaDataFN",
-        "jansSAMLspMetaDataURL",
-        "jansMetaLocation",
-        "jansIsFed",
-        "jansEntityTyp",
-        "jansProfileConf",
+        "entityType",
+        "metadataSource",
         "jansReleasedAttr",
-        "url",
-        "jansPostLogoutRedirectURI",
-        "protocol",
+        "entityIds",
+        "jansProfileConfiguration",
         "jansStatus",
-        "jansValidationStatus",
-        "jansValidationLog"
+        "jansVersion"
       ],
       "must": [
         "objectclass"
