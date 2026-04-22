@@ -123,7 +123,6 @@ class Cedarling:
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
             BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
             BuildUnsignedRoleEntityError: Error building Role entity for unsigned request.
             RequestValidationError: Error encountered while validating the request.
             RuntimeError: If JSON conversion of context fails.
@@ -152,7 +151,6 @@ class Cedarling:
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
             BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
             MultiIssuerValidationError: Error encountered during multi-issuer token validation.
             MultiIssuerEntityError: Error encountered while building multi-issuer entities.
             RequestValidationError: Error encountered while validating the request.
@@ -162,19 +160,20 @@ class Cedarling:
 
     def get_matching_policies_unsigned(
         self,
-        principals: List[EntityData],
+        principal: Optional[EntityData],
         actions: List[str],
         resources: List[EntityData],
     ) -> List["PolicyMetadata"]:
         """
         Returns metadata for all policies whose scope constraints are compatible
-        with the given principals, actions, and resources.
+        with the given principal, actions, and resources.
 
         This performs scope-level filtering only (principal/action/resource constraints).
         Policies with `when`/`unless` conditions may still not apply at evaluation time.
 
         Args:
-            principals: List of EntityData representing principal entities.
+            principal: Optional EntityData representing the principal entity. When
+                ``None``, policies are filtered assuming an unknown principal.
             actions: List of action strings (e.g., 'Jans::Action::"Read"').
             resources: List of EntityData representing resource entities.
 
@@ -459,17 +458,17 @@ class Cedarling:
 
 @final
 class RequestUnsigned:
-    principals: List[EntityData]
+    principal: Optional[EntityData]
     action: str
     resource: EntityData
     context: Dict[str, Any]
 
     def __init__(
         self,
-        principals: List[EntityData],
         action: str,
         resource: EntityData,
         context: Dict[str, Any],
+        principal: Optional[EntityData] = None,
     ) -> None: ...
 
 @final
@@ -503,8 +502,9 @@ class EntityData:
 
 @final
 class AuthorizeResult:
+    response: AuthorizeResultResponse
+
     def is_allowed(self) -> bool: ...
-    def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
     def request_id(self) -> str: ...
 
 @final

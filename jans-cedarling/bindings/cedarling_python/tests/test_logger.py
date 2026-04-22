@@ -6,7 +6,6 @@
 from cedarling_python import Cedarling, EntityData, RequestUnsigned
 from config import load_bootstrap_config, TEST_FILES_PATH
 from os.path import join
-import json
 
 POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
 
@@ -33,13 +32,8 @@ def test_invalid_log_config():
 
 
 def test_memory_logger():
-    def config_cb(config: dict):
-        config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json.dumps(
-            {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]}
-        )
-
     config = load_bootstrap_config(
-        POLICY_STORE_LOCATION, config_cb=config_cb, log_type="memory", log_ttl=60
+        POLICY_STORE_LOCATION, log_type="memory", log_ttl=60
     )
 
     cedarling = Cedarling(config)
@@ -64,15 +58,13 @@ def test_memory_logger():
     assert len(cedarling.pop_logs()) == 0
 
     request = RequestUnsigned(
-        principals=[
-            EntityData.from_dict({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "1"
-                },
-                "is_ok": True
-            })
-        ],
+        principal=EntityData.from_dict({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::TestPrincipal1",
+                "id": "1",
+            },
+            "is_ok": True,
+        }),
         action='Jans::Action::"UpdateForTestPrincipals"',
         context={},
         resource=RESOURCE,

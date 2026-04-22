@@ -15,10 +15,9 @@ use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::JwtConfig;
-use crate::common::json_rules::JsonRule;
+use crate::LockTransport;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
-use crate::{LockTransport, UnsignedRoleIdSrc};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -106,39 +105,6 @@ pub struct BootstrapConfigRaw {
         default = "default_jti"
     )]
     pub decision_log_default_jwt_id: String,
-
-    /// Specifies what boolean operation to use when combining per-principal
-    /// authorization decisions in `authorize_unsigned`.
-    ///
-    /// This setting only applies to [`authorize_unsigned`] — the
-    /// `authorize_multi_issuer` method does not use principals and ignores
-    /// this configuration entirely.
-    ///
-    /// Use [JsonLogic](https://jsonlogic.com/).
-    /// Variable names must match the full Cedar principal type identifier
-    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
-    /// against the strings `"ALLOW"` or `"DENY"`.
-    ///
-    /// Default value:
-    /// ```json
-    /// {
-    ///     "and" : [
-    ///         {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-    ///         {"===": [{"var": "Jans::User"}, "ALLOW"]}
-    ///     ]
-    /// }
-    /// ```
-    #[serde(rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub principal_bool_operation: JsonRule,
-
-    /// Mapping name of cedar schema Role entity.
-    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
-    pub mapping_role: Option<String>,
-
-    /// Source attribute for unsigned role entity ID.
-    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
-    pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -493,11 +459,6 @@ mod tests {
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"
-            );
-            assert_eq!(
-                config.principal_bool_operation,
-                JsonRule::default(),
-                "Default user-workload boolean operator should default"
             );
             assert_eq!(
                 config.lock_transport,

@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineRounded from '@mui/icons-material/CheckCircleOutlineRounded';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import HelpDrawer from '../../../options/helpDrawer';
 import Alert from '@mui/material/Alert';
@@ -114,7 +114,7 @@ function Row(props: { row: ClientDetails, notifyOnDataChange: () => void }) {
                     </Tooltip>
                 </TableCell>
                 <TableCell align="left" component="th" scope="row">
-                    {row.showClientExpiry ? (!(lifetime <= 0) ? <CheckCircleOutlineIcon sx={{ color: green[500] }} /> : <HighlightOffIcon sx={{ color: pink[500] }} />) : <CheckCircleOutlineIcon sx={{ color: green[500] }} />}
+                    {row.showClientExpiry ? (!(lifetime <= 0) ? <CheckCircleOutlineRounded sx={{ color: green[500] }} /> : <HighlightOffIcon sx={{ color: pink[500] }} />) : <CheckCircleOutlineRounded sx={{ color: green[500] }} />}
                 </TableCell>
                 <TableCell component="th" scope="row">
                     <Tooltip title="Trigger authentication flow">
@@ -158,9 +158,7 @@ export default function OIDCClients({ data, notifyOnDataChange }: OIDCClientsPro
             <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
                 <Stack
                     direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 1, justifyContent: 'space-between', alignItems: 'center' }}
                 >
                     <div>
                         <Typography variant="h6" sx={{ mb: 0.5 }}>

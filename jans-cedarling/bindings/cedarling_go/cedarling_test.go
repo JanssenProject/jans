@@ -3,7 +3,6 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -11,7 +10,6 @@ import (
 var bootstrapConfig string = `
 {
         "CEDARLING_APPLICATION_NAME": "TestApp",
-        "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_LOG_TYPE": "off",
@@ -116,27 +114,19 @@ func loadTestConfig(configUpdate func(conf map[string]any)) (map[string]any, err
 	return config, nil
 }
 
-func BenchmarkAuthorizeUnsigned(b *testing.B) {
-	config, err := loadTestConfig(func(conf map[string]any) {
-		conf["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = `{
-            "and": [
-                {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
-            ]
-        }`
-		conf["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store_ok_2.yaml"
+// loadUnsignedTestConfig loads bootstrap config pointing at the policy store
+// used by the single-principal and partial-evaluation tests below. That store
+// contains:
+//   - policy 5: permit UpdateForTestPrincipals when principal.is_ok
+//   - policy 6: allow-all permit for OpenPublicIssue (action uses `principal: [Any]`).
+func loadUnsignedTestConfig() (map[string]any, error) {
+	return loadTestConfig(func(conf map[string]any) {
+		conf["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store_no_trusted_issuers.yaml"
 	})
-	if err != nil {
-		b.Fatalf("Failed to load test config: %v", err)
-	}
+}
 
-	instance, err := NewCedarling(config)
-	if err != nil {
-		b.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
+func unsignedTestResource() EntityData {
+	return EntityData{
 		CedarMapping: CedarEntityMapping{
 			EntityType: "Jans::Issue",
 			ID:         "random_id",
@@ -146,152 +136,116 @@ func BenchmarkAuthorizeUnsigned(b *testing.B) {
 			"country": "US",
 		},
 	}
-
-	principals := []EntityData{
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal1",
-				ID:         "1",
-			},
-			Payload: map[string]any{
-				"is_ok": true,
-			},
-		},
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal2",
-				ID:         "2",
-			},
-			Payload: map[string]any{
-				"is_ok": true,
-			},
-		},
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal3",
-				ID:         "3",
-			},
-			Payload: map[string]any{
-				"is_ok": false,
-			},
-		},
-	}
-	b.ResetTimer()
-	request := RequestUnsigned{
-		Principals: principals,
-		Action:     "Jans::Action::\"UpdateForTestPrincipals\"",
-		Resource:   resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-
-	result, err := instance.AuthorizeUnsigned(request)
-	if err != nil {
-		b.Fatalf("Authorization failed: %v", err)
-	}
-	if !result.Decision {
-		b.Fatalf("Decision false")
-	}
 }
-func TestAuthorizeUnsignedSuccess(t *testing.T) {
-	config, err := loadTestConfig(func(conf map[string]any) {
-		conf["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = `{
-            "and": [
-                {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
-                {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
-            ]
-        }`
-		conf["CEDARLING_POLICY_STORE_LOCAL_FN"] = "../../test_files/policy-store_ok_2.yaml"
-	})
+
+// TestAuthorizeUnsignedSinglePrincipalAllow exercises the happy path where a
+// concrete principal satisfying the `is_ok` guard is allowed.
+func TestAuthorizeUnsignedSinglePrincipalAllow(t *testing.T) {
+	config, err := loadUnsignedTestConfig()
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
 	}
-
 	instance, err := NewCedarling(config)
 	if err != nil {
 		t.Fatalf("Failed to create Cedarling instance: %v", err)
 	}
+	defer instance.ShutDown()
 
-	resource := EntityData{
+	principal := EntityData{
 		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
+			EntityType: "Jans::TestPrincipal1",
+			ID:         "1",
 		},
 		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	principals := []EntityData{
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal1",
-				ID:         "1",
-			},
-			Payload: map[string]any{
-				"is_ok": true,
-			},
-		},
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal2",
-				ID:         "2",
-			},
-			Payload: map[string]any{
-				"is_ok": true,
-			},
-		},
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::TestPrincipal3",
-				ID:         "3",
-			},
-			Payload: map[string]any{
-				"is_ok": false,
-			},
+			"is_ok": true,
 		},
 	}
 
 	request := RequestUnsigned{
-		Principals: principals,
-		Action:     "Jans::Action::\"UpdateForTestPrincipals\"",
-		Resource:   resource,
-		// will be mapped to {}
-		Context: nil,
+		Principal: &principal,
+		Action:    "Jans::Action::\"UpdateForTestPrincipals\"",
+		Resource:  unsignedTestResource(),
+		Context:   nil,
 	}
 
 	result, err := instance.AuthorizeUnsigned(request)
 	if err != nil {
 		t.Fatalf("Authorization failed: %v", err)
 	}
-
 	if !result.Decision {
 		t.Errorf("Expected allow decision, got %v", result.Decision)
 	}
+}
 
-	if !result.Principals["Jans::TestPrincipal1"].IsAllowed() {
-		t.Errorf("Expected allow decision for Jans::TestPrincipal1, got %s", result.Principals["Jans::TestPrincipal1"].Decision().ToString())
+// TestAuthorizeUnsignedNoPrincipalPublicActionAllow exercises partial
+// evaluation: with principal=nil against an allow-all action the decision
+// should still be Allow.
+func TestAuthorizeUnsignedNoPrincipalPublicActionAllow(t *testing.T) {
+	config, err := loadUnsignedTestConfig()
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
 	}
-	if !reflect.DeepEqual(result.Principals["Jans::TestPrincipal1"].Reason(), []string{"5"}) {
-		t.Errorf("Expected Reason 5 for Jans::TestPrincipal1, got %s", result.Principals["Jans::TestPrincipal1"].Reason())
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	request := RequestUnsigned{
+		Principal: nil,
+		Action:    "Jans::Action::\"OpenPublicIssue\"",
+		Resource:  unsignedTestResource(),
+		Context:   nil,
 	}
 
-	if !result.Principals["Jans::TestPrincipal2"].IsAllowed() {
-		t.Errorf("Expected allow decision for Jans::TestPrincipal2, got %s", result.Principals["Jans::TestPrincipal2"].Decision().ToString())
+	result, err := instance.AuthorizeUnsigned(request)
+	if err != nil {
+		t.Fatalf("Authorization failed: %v", err)
 	}
-	if !reflect.DeepEqual(result.Principals["Jans::TestPrincipal2"].Reason(), []string{"5"}) {
-		t.Errorf("Expected Reason 6 for Jans::TestPrincipal2, got %s", result.Principals["Jans::TestPrincipal2"].Reason())
+	if !result.Decision {
+		t.Errorf("Expected allow decision, got %v", result.Decision)
+	}
+}
+
+// TestAuthorizeUnsignedNoPrincipalPrincipalDependentDeny exercises fail-closed
+// behavior: principal=nil against a principal-dependent policy returns Deny
+// and the residual policy id surfaces in the diagnostics reason.
+func TestAuthorizeUnsignedNoPrincipalPrincipalDependentDeny(t *testing.T) {
+	config, err := loadUnsignedTestConfig()
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	request := RequestUnsigned{
+		Principal: nil,
+		Action:    "Jans::Action::\"UpdateForTestPrincipals\"",
+		Resource:  unsignedTestResource(),
+		Context:   nil,
 	}
 
-	if result.Principals["Jans::TestPrincipal3"].IsAllowed() {
-		t.Errorf("Expected DENY decision for Jans::TestPrincipal3, got %s", result.Principals["Jans::TestPrincipal3"].Decision().ToString())
+	result, err := instance.AuthorizeUnsigned(request)
+	if err != nil {
+		t.Fatalf("Authorization failed: %v", err)
 	}
-	if !reflect.DeepEqual(result.Principals["Jans::TestPrincipal3"].Reason(), []string{}) {
-		t.Errorf("Expected empty reason  for Jans::TestPrincipal3, got %s", result.Principals["Jans::TestPrincipal3"].Reason())
+	if result.Decision {
+		t.Errorf("Expected deny decision, got %v", result.Decision)
 	}
 
+	found := false
+	for _, r := range result.Response.Reason() {
+		if r == "5" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("Expected residual policy id \"5\" in reason, got %v", result.Response.Reason())
+	}
 }
 
 func ExampleNewCedarling() {
@@ -339,22 +293,20 @@ func ExampleCedarling_AuthorizeUnsigned() {
 		},
 	}
 
-	principals := []EntityData{
-		{
-			CedarMapping: CedarEntityMapping{
-				EntityType: "Jans::Principal",
-				ID:         "1",
-			},
-			Payload: map[string]any{
-				"is_ok": true,
-			},
+	principal := EntityData{
+		CedarMapping: CedarEntityMapping{
+			EntityType: "Jans::Principal",
+			ID:         "1",
+		},
+		Payload: map[string]any{
+			"is_ok": true,
 		},
 	}
 
 	request := RequestUnsigned{
-		Principals: principals,
-		Action:     "Jans::Action::\"Update\"",
-		Resource:   resource,
+		Principal: &principal,
+		Action:    "Jans::Action::\"Update\"",
+		Resource:  resource,
 		// will be mapped to {}
 		Context: nil,
 	}
@@ -399,7 +351,6 @@ func ExampleCedarling_GetLogsByTag() {
 func getMultiIssuerConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"CEDARLING_APPLICATION_NAME":                   "TestApp",
-		"CEDARLING_POLICY_STORE_ID":                    "a1bf93115de86de760ee0bea1d529b521489e5a11747",
 		"CEDARLING_JWT_SIG_VALIDATION":                 "disabled",
 		"CEDARLING_JWT_STATUS_VALIDATION":              "disabled",
 		"CEDARLING_POLICY_STORE_LOCAL_FN":              "../../test_files/policy-store-multi-issuer-test.yaml",

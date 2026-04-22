@@ -77,30 +77,32 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
 
 - **Cedarling::authorizeUnsigned**
 
-   Handles unsigned authorization requests with directly provided principals.
+   Handles unsigned authorization requests with a directly provided (optional) principal.
     
    ```declarative
    #[uniffi::method]
         pub fn authorize_unsigned(
             &self,
-            principals: Vec<EntityData>,
+            principal: Option<Arc<EntityData>>,
             action: String,
-            resource: EntityData,
-            context: String,
-        ) -> Result<AuthorizeResult, AuthorizeError> 
+            resource: Arc<EntityData>,
+            context: JsonValue,
+        ) -> Result<AuthorizeResult, AuthorizeError>
    ```
 
    **Usage in Swift:**
 
    ```declarative
-   let result = try cedarling.authorizeUnsigned(principals: principalEntities, action: "Jans::Action::\"Update\"", resource: resourceEntity, context: "{}")
+   let result = try cedarling.authorizeUnsigned(principal: principalEntity, action: "Jans::Action::\"Update\"", resource: resourceEntity, context: "{}")
    ```
 
   **Usage in Kotlin:**
 
   ```declarative
-  val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntities, "Jans::Action::\"Update\"", resourceEntity, "{}")
+  val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntity, "Jans::Action::\"Update\"", resourceEntity, "{}")
   ```
+
+  Pass `null` for `principal` in Kotlin or `nil` in Swift when omitting the asserted principal (partial evaluation).
 
 - **Cedarling::pop_logs**
 

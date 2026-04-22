@@ -135,7 +135,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     }}
                   >
                     {providerOption.icon}
-                    <Typography variant="body2" fontWeight="medium">
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                       {providerOption.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">

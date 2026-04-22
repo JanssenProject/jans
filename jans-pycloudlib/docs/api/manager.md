@@ -1,4 +1,4 @@
-::: jans.pycloudlib.manager.get_manager
+::: jans.pycloudlib.manager.AdapterProtocol
 
 ::: jans.pycloudlib.manager.Manager
 
@@ -7,10 +7,8 @@
       filters:
         - "!^all"
 
-::: jans.pycloudlib.manager.ConfigAdapter
-
 ::: jans.pycloudlib.manager.ConfigManager
 
-::: jans.pycloudlib.manager.SecretAdapter
-
 ::: jans.pycloudlib.manager.SecretManager
+
+::: jans.pycloudlib.manager.get_manager

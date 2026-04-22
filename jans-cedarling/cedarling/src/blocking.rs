@@ -71,13 +71,13 @@ impl Cedarling {
     /// with the given principals, actions, and resources.
     pub fn get_matching_policies_unsigned(
         &self,
-        principals: &[EntityData],
+        principal: Option<&EntityData>,
         actions: &[String],
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
-            .get_matching_policies_unsigned(principals, actions, resources)
+            .get_matching_policies_unsigned(principal, actions, resources)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible

@@ -778,8 +778,7 @@ impl DataValidator {
 
             // Parse as f64 to validate numeric format (but we've already rejected exponents)
             value.parse::<f64>()
-                .map(f64::is_finite) // Reject NaN and infinity
-                .unwrap_or(false)
+                .is_ok_and(f64::is_finite) // Reject NaN and infinity
         } else {
             false
         }
