@@ -328,14 +328,13 @@ public class AuditLogResource extends ConfigBaseResource {
             if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)
                     && ((logEntryLocalDate.isEqual(startLocalDate) || logEntryLocalDate.isAfter(startLocalDate))
                             && (logEntryLocalDate.isEqual(endLocalDate) || logEntryLocalDate.isBefore(endLocalDate)))) {
-                isValid = true; log.debug(" \n\n block 1 - logEntryLocalDate:{}, startDate:{}, endDate:{}", logEntryLocalDate, startDate, endDate);
+                isValid = true;
             } else if ((StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)
                     && (logEntryLocalDate.isEqual(startLocalDate) || logEntryLocalDate.isAfter(startLocalDate)))
 
                     || (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)
                             && (logEntryLocalDate.isEqual(endLocalDate) || logEntryLocalDate.isBefore(endLocalDate)))) {
                 isValid = true;
-                log.debug(" \n\n block 2 - logEntryLocalDate:{}, startDate:{}, endDate:{}", logEntryLocalDate, startDate, endDate);
             }
         }
         return isValid;
