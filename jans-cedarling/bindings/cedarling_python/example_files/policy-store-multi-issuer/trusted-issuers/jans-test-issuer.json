@@ -1,0 +1,25 @@
+{
+  "name": "JansTestIssuer",
+  "description": "Test issuer for multi-issuer authorization examples",
+  "configuration_endpoint": "https://test.jans.org/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_Token",
+      "token_id": "jti",
+      "principal_mapping": ["Jans::Workload"]
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Id_Token",
+      "token_id": "jti",
+      "principal_mapping": ["Jans::User"]
+    },
+    "userinfo_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Userinfo_Token",
+      "token_id": "jti",
+      "principal_mapping": ["Jans::User"]
+    }
+  }
+}

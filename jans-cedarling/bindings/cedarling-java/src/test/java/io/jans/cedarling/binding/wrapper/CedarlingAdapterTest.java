@@ -49,32 +49,30 @@ public class CedarlingAdapterTest {
         String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
         String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
 
-        List<EntityData> principals = List.of(EntityData.Companion.fromJson(principalsString));
+        EntityData principal = EntityData.Companion.fromJson(principalsString);
 
         JSONObject resource = new JSONObject(resourceJson);
         JSONObject context = new JSONObject(contextJson);
 
-        AuthorizeResult result = adapter.authorizeUnsigned(principals, action, resource, context);
+        AuthorizeResult result = adapter.authorizeUnsignedEntity(principal, action, resource, context);
         assertNotNull(result);
-        assertNotNull(result.getPrincipals());
-        assertEquals(result.getDecision(), false);
+        assertNotNull(result.getResponse());
+        assertFalse(result.getRequestId().isEmpty(), "request id should be set for log correlation");
     }
 
     @Test
-    public void testAuthorizeUnsignedFromJsonList() throws Exception {
+    public void testAuthorizeUnsignedWithNullPrincipalJson() throws Exception {
         String action = AppUtils.readFile(ACTION_FILE_PATH);
         String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
         String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
-        String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
 
         JSONObject resource = new JSONObject(resourceJson);
         JSONObject context = new JSONObject(contextJson);
 
-        List<String> principalJsonList = List.of(principalsString);
-        AuthorizeResult result = adapter.authorizeUnsignedFromJson(principalJsonList, action, resource, context);
+        AuthorizeResult result = adapter.authorizeUnsigned(null, action, resource, context);
         assertNotNull(result);
-        assertNotNull(result.getPrincipals());
-        assertEquals(result.getDecision(), false);
+        assertNotNull(result.getResponse());
+        assertFalse(result.getRequestId().isEmpty(), "request id should be set for log correlation");
     }
 
     @Test
@@ -89,8 +87,8 @@ public class CedarlingAdapterTest {
 
         AuthorizeResult result = adapter.authorizeUnsigned(principalsString, action, resource, context);
         assertNotNull(result);
-        assertNotNull(result.getPrincipals());
-        assertEquals(result.getDecision(), false);
+        assertNotNull(result.getResponse());
+        assertFalse(result.getRequestId().isEmpty(), "request id should be set for log correlation");
     }
 
     @Test
@@ -103,8 +101,8 @@ public class CedarlingAdapterTest {
 
         AuthorizeResult result = adapter.authorizeUnsigned(principalsString, action, resource, null);
         assertNotNull(result);
-        assertNotNull(result.getPrincipals());
-        assertEquals(result.getDecision(), false);
+        assertNotNull(result.getResponse());
+        assertFalse(result.getRequestId().isEmpty(), "request id should be set for log correlation");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -153,8 +151,10 @@ public class CedarlingAdapterTest {
         String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
         String contextJson = AppUtils.readFile(CONTEXT_FILE_PATH);
         String principalsString = AppUtils.readFile(PRINCIPALS_FILE_PATH);
-        List<EntityData> principals = List.of(EntityData.Companion.fromJson(principalsString));
-        AuthorizeResult result = adapter.authorizeUnsigned(principals, action, new JSONObject(resourceJson), new JSONObject(contextJson));
+        EntityData principal = EntityData.Companion.fromJson(principalsString);
+        AuthorizeResult result =
+                adapter.authorizeUnsignedEntity(
+                        principal, action, new JSONObject(resourceJson), new JSONObject(contextJson));
         assertNotNull(result);
         List<String> logEntrys = adapter.getLogIds();
         if (!logEntrys.isEmpty()) {

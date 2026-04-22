@@ -1,0 +1,18 @@
+namespace Jans {
+  entity Issue = {"country": String, "org_id": String};
+  entity Role;
+  entity User in [Role];
+  entity TestPrincipal1 = {"is_ok": Bool};
+  entity TestPrincipal2 = {"is_ok": Bool};
+  entity TestPrincipal3 = {"is_ok": Bool};
+  action "UpdateForTestPrincipals" appliesTo {
+    principal: [TestPrincipal1, TestPrincipal2, TestPrincipal3],
+    resource: [Issue],
+    context: {}
+  };
+  action "AlwaysDeny" appliesTo {
+    principal: [User],
+    resource: [Issue],
+    context: {}
+  };
+}

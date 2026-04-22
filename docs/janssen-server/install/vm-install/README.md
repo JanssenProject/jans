@@ -17,8 +17,15 @@ After this process, you should have the Janssen Project software running,
 and you'll be ready to start registering OAUTH clients, customizing
 your login pages, and doing all the other stuff that Janssen enables.
 
-You can check Github for the latest [Releases](https://github.com/JanssenProject/jans/releases/latest). The instructions for the various packages also give you a shortcut
+You can check GitHub for the latest [Releases](https://github.com/JanssenProject/jans/releases/latest). The instructions for the various packages also give you a shortcut
 using `wget` and `curl` to get the latest bits for your distro.
+
+Supported Linux distributions include:
+
+- [Ubuntu](ubuntu.md)
+- [Debian 13 (Trixie)](debian.md)
+- [RHEL](rhel.md)
+- [SUSE](suse.md)
 
 Use the left navigation to get started and pick the Janssen Project VM flavor
 of your choice!
