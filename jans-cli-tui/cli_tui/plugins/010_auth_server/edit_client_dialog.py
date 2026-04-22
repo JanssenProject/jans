@@ -350,8 +350,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.getTitledCheckBoxList(
                 _("Grant"),
                 name='grantTypes',
-                values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket',
-                                                                                                           'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')],
+                values=[
+                    ('authorization_code', 'Authorization Code'),
+                    ('refresh_token', 'Refresh Token'),
+                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
+                    ('client_credentials', 'Client Credentials'),
+                    ('password', 'Password'),
+                    ('implicit', 'Implicit'),
+                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
+                    ],
                 current_values=self.data.get('grantTypes', []),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'grantTypes'),

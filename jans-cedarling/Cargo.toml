@@ -29,6 +29,8 @@ mockito = "1.5.0"
 
 [workspace.lints.clippy]
 pedantic = "warn"
+# duration_suboptimal_units suggests from_hours/from_mins which are unstable on stable Rust
+duration-suboptimal-units = { level = "allow", priority = 1 }
 
 
 [profile.release]

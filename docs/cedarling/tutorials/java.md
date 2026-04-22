@@ -187,7 +187,7 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-For unsigned authorization, use `authorizeUnsigned` which accepts principals directly without JWTs.
+For unsigned authorization, use `authorizeUnsigned` (JSON principal string, nullable for no asserted principal) or `authorizeUnsignedEntity` (optional `EntityData`) directly without JWTs.
 
 **1. Define the resource:**
 
@@ -218,23 +218,24 @@ The _context_ represents additional data that may affect the authorization decis
 JSONObject context = new JSONObject();
 ```
 
-**4. Define Principals**
+**4. Define the principal (optional)**
 
 ```java
-List<EntityData> principals = List.of(
+EntityData principal =
     EntityData.Companion.fromJson(new JSONObject()
         .put("cedar_entity_mapping", new JSONObject()
             .put("entity_type", "Jans::Workload")
             .put("id", "workload_123"))
         .put("client_id", "my_client")
-        .toString())
-);
+        .toString());
+// Or pass null to `authorizeUnsignedEntity` / null principal JSON to `authorizeUnsigned`
+// when using partial evaluation without an asserted principal.
 ```
 
 **5. Authorize**
 
 ```java
-AuthorizeResult result = adapter.authorizeUnsigned(principals, action, resource, context);
+AuthorizeResult result = adapter.authorizeUnsignedEntity(principal, action, resource, context);
 if(result.getDecision()) {
     System.out.println("Access granted");
 } else {

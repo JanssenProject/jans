@@ -443,6 +443,7 @@ spec:
   {{- end }}
 {{- end }}
 
+---
 
 {{ if .Values.global.fido2.ingress.fido2ConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}

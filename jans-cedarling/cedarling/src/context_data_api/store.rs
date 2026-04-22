@@ -72,7 +72,7 @@ impl DataStore {
 
         // Calculate size based on the serialized DataEntry
         let size_calculator: Option<fn(&DataEntry) -> usize> =
-            Some(|entry| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0));
+            Some(|entry| serde_json::to_string(entry).map_or(0, |s| s.len()));
 
         Ok(Self {
             storage: RwLock::new(SparKV::with_config_and_sizer(
@@ -326,7 +326,7 @@ impl DataStore {
         storage
             .iter()
             .filter(|(_, entry)| !entry.is_expired(now))
-            .map(|(_, entry)| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0))
+            .map(|(_, entry)| serde_json::to_string(entry).map_or(0, |s| s.len()))
             .sum()
     }
 }
