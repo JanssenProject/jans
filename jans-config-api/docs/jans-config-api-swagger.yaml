@@ -15691,17 +15691,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -18556,6 +18556,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18566,8 +18568,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
