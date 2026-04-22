@@ -568,10 +568,45 @@ public class MetricService extends io.jans.service.metric.MetricService {
                         directRemoteAddr);
                 return directRemoteAddr;
             }
-        }
-        // trustedProxyEnabled == null  → legacy: fall through and read headers unconditionally.
-        // trustedProxyEnabled == true with matching range → trust: fall through.
 
+            // The connecting IP is a trusted proxy. Parse X-Forwarded-For right-to-left:
+            // skip hops that are themselves trusted proxies and return the first untrusted
+            // valid IP — that is the real client. Left-to-right (leftmost) is unsafe here
+            // because a client can inject arbitrary values before the trusted proxy appends.
+            String xForwardedFor = request.getHeader("X-Forwarded-For");
+            if (xForwardedFor != null && !xForwardedFor.trim().isEmpty()) {
+                String[] hops = xForwardedFor.split(",");
+                for (int i = hops.length - 1; i >= 0; i--) {
+                    String hop = hops[i].trim();
+                    if (!hop.isEmpty() && !"unknown".equalsIgnoreCase(hop)
+                            && isValidIpAddress(hop)
+                            && !isFromTrustedProxy(hop, trustedRanges)) {
+                        return hop;
+                    }
+                }
+            }
+
+            // No usable X-Forwarded-For — check single-value proxy headers.
+            String[] singleValueHeaders = {
+                "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR",
+                "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP",
+                "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED"
+            };
+            for (String header : singleValueHeaders) {
+                String ip = request.getHeader(header);
+                if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                    ip = ip.trim();
+                    if (isValidIpAddress(ip)) {
+                        return ip;
+                    }
+                }
+            }
+
+            return directRemoteAddr;
+        }
+
+        // Legacy path: trustedProxyEnabled == null — read headers unconditionally,
+        // taking the leftmost value to preserve existing behaviour.
         String[] proxyHeaders = {
             "X-Forwarded-For",
             "Proxy-Client-IP",
