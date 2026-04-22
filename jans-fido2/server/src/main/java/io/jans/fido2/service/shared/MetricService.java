@@ -556,18 +556,20 @@ public class MetricService extends io.jans.service.metric.MetricService {
         }
 
         // Proxy header trust is enabled (or unconfigured = legacy behaviour).
-        // When ranges are configured, validate the connecting IP before trusting any header.
+        // When enabled, always validate the connecting IP — empty ranges means no proxy is trusted.
         if (Boolean.TRUE.equals(trustedProxyEnabled)) {
             List<String> trustedRanges = appConfiguration.getTrustedProxyIpRanges();
-            if (trustedRanges != null && !trustedRanges.isEmpty()
-                    && !isFromTrustedProxy(directRemoteAddr, trustedRanges)) {
+            if (trustedRanges == null || trustedRanges.isEmpty()) {
+                log.warn("trustedProxyEnabled=true but trustedProxyIpRanges is empty — ignoring proxy headers to avoid header spoofing");
+                return directRemoteAddr;
+            }
+            if (!isFromTrustedProxy(directRemoteAddr, trustedRanges)) {
                 log.debug("Ignoring proxy headers: remoteAddr '{}' is not in any trusted proxy range",
                         directRemoteAddr);
                 return directRemoteAddr;
             }
         }
         // trustedProxyEnabled == null  → legacy: fall through and read headers unconditionally.
-        // trustedProxyEnabled == true with empty ranges → trust from any IP: fall through.
         // trustedProxyEnabled == true with matching range → trust: fall through.
 
         String[] proxyHeaders = {
