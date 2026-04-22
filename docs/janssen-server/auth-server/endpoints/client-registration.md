@@ -670,7 +670,7 @@ For comprehensive debugging, configure the following:
 
 ```json
 {
-  "loggingLevel": "DEBUG",
+  "loggingLevel": "TRACE",
   "loggingLayout": "text",
   "externalLoggerConfiguration": "",
   "enabledComponents": ["DCR"]
@@ -682,7 +682,7 @@ This can be set via Config API:
 curl -X PATCH -H 'Content-Type: application/json-patch+json' \
   -H "Authorization: Bearer <token>" \
   'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
-  --data '[{"op": "replace", "path": "/loggingLevel", "value": "DEBUG"}]'
+  --data '[{"op": "replace", "path": "/loggingLevel", "value": "TRACE"}]'
 ```
 
 ### Customizing the behavior of the AS using Interception script
