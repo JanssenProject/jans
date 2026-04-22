@@ -1196,6 +1196,8 @@ public class AddressClaimsTest extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -1209,6 +1211,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1228,17 +1231,27 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+        List<Claim> idTokenClaims = Arrays.asList(
+                new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true))
+        );
+        List<Claim> userInfoClaims = Arrays.asList(
+                new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true))
+        );
+
+        String authJwt = TestCryptoContext.createNestedJwe(
                 authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getRs256KeyId(),
                 KeyEncryptionAlgorithm.A128KW,
                 BlockEncryptionAlgorithm.A128GCM,
-                clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                clientSecret,
+                cryptoContext.getCryptoProvider(),
+                idTokenClaims,
+                userInfoClaims);
+
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -1282,6 +1295,7 @@ public class AddressClaimsTest extends BaseTest {
         showTitle("authorizationRequestAlgA256KWEncA256GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -1296,6 +1310,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1315,17 +1330,26 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+        List<Claim> idTokenClaims = Arrays.asList(
+                new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true))
+        );
+        List<Claim> userInfoClaims = Arrays.asList(
+                new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)),
+                new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true))
+        );
+
+        String authJwt = TestCryptoContext.createNestedJwe(
                 authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getRs256KeyId(),
                 KeyEncryptionAlgorithm.A256KW,
                 BlockEncryptionAlgorithm.A256GCM,
-                clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_STREET_ADDRESS, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                clientSecret,
+                cryptoContext.getCryptoProvider(),
+                idTokenClaims,
+                userInfoClaims);
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
