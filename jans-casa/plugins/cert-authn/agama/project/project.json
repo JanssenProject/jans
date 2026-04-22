@@ -1,6 +1,6 @@
 {
     "projectName": "cert-authn",
-    "version": "2.0.0",
+    "version": "0.0.0-nightly",
     "author": "jgomer2001",
     "description": "This project bundles flows for certificate authentication and enrollment",
     "noDirectLaunch": [ "io.jans.casa.authn.cert", "io.jans.casa.cert.promptAndValidate" ],

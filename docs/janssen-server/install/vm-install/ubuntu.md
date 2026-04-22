@@ -35,14 +35,14 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu24-replace-janssen-version.bundle \
+          --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
@@ -96,14 +96,14 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu22-replace-janssen-version.bundle \
+          --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
