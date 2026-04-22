@@ -19,7 +19,7 @@ on:
       jans_version:
         description: 'Janssen helm chart version'
         required: true
-        default: '2.0.0'
+        default: '0.0.0-nightly'
 permissions:
   contents: read
 
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JANS_FQDN: ci-${{ github.run_id }}.jans.test
-      JANS_VERSION: ${{ github.event.inputs.jans_version || '2.0.0' }}
+      JANS_VERSION: ${{ github.event.inputs.jans_version || '0.0.0-nightly' }}
       KUBECONFIG: /home/runner/.kube/config
     steps:
     - name: Harden Runner
