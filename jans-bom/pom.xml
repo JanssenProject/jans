@@ -33,7 +33,7 @@
 		<org.omnifaces.omnifaces.version>4.0</org.omnifaces.omnifaces.version>
 		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
 		<org.hibernate.validator.version>7.0.5.Final</org.hibernate.validator.version>
-		<org.hibernate.validator.cdi.version>7.0.5.Final</org.hibernate.validator.cdi.version>
+		<org.hibernate.validator.cdi.version>8.0.3.Final</org.hibernate.validator.cdi.version>
 		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
