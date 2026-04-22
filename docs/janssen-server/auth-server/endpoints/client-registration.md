@@ -619,13 +619,15 @@ If signed DCR validation fails, follow these steps:
 
 1. **Decode and inspect the JWT**
 
-   Use a tool like [jwt.io](https://jwt.io) or command line to decode the DCR JWT:
-   ```bash
-   # Extract header
-   echo "<JWT>" | cut -d'.' -f1 | base64 -d 2>/dev/null | jq .
+   Use a tool like [jwt.io](https://jwt.io) or command line to decode the DCR JWT.
 
-   # Extract payload
-   echo "<JWT>" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq .
+   Note: JWTs use base64url encoding, which must be converted to standard base64 before decoding:
+   ```bash
+   # Extract header (convert base64url to base64, add padding, decode)
+   echo "<JWT>" | cut -d'.' -f1 | tr '_-' '/+' | awk '{print $0"=="}' | base64 -d 2>/dev/null | jq .
+
+   # Extract payload (convert base64url to base64, add padding, decode)
+   echo "<JWT>" | cut -d'.' -f2 | tr '_-' '/+' | awk '{print $0"=="}' | base64 -d 2>/dev/null | jq .
    ```
 
 2. **Verify the JWT header**
