@@ -56,7 +56,7 @@ The plugin provides two new Rego functions:
             "payload": "<base64url-encoded JWT>"
           },
           {
-            "mapping": "Google::id_token",
+            "mapping": "Jans::id_token",
             "payload": "<base64url-encoded JWT>"
           }
         ],
@@ -67,7 +67,10 @@ The plugin provides two new Rego functions:
             "id": "f865a1c0b8f37b0b5506be23de923d60"
           }
         },
-        "context": {}
+        "context": {
+          "network": "127.0.0.1",
+          "current_time": 1776826458
+        }
       }
     }
     ```
@@ -92,7 +95,10 @@ The plugin provides two new Rego functions:
             "id": "1d096225ac65fc42dff462f910df1eee"
           }
         },
-        "context": {}
+        "context": {
+          "network": "127.0.0.1",
+          "current_time": 1776826458
+        }
       }
     }
     ```
@@ -259,7 +265,10 @@ $ curl -X POST http://localhost:8181/v1/data/cedarling_opa/result \
             "id": "bcd6e035ce2aabad2db27fb963facd41"
           }
         },
-        "context": {}
+        "context": {
+          "network": "127.0.0.1",
+          "current_time": 1776826458
+        }
       }
     }'
 ```
