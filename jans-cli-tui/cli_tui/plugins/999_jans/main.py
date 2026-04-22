@@ -1,7 +1,7 @@
 import os
 import json
 import asyncio
-
+import ssl
 import jwt
 
 from urllib.parse import urlparse
@@ -131,14 +131,48 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def get_iss_from_ssa(self, ssa):
+    def validate_ssa(self, ssa, iss):
+
+        # get openid configuration
+        open_id_url = f"https://{iss}/{config_cli.AUTH_DISCOVERY_ENDPOINT}"
+        try:
+            response = config_cli.session.get(
+                url=open_id_url,
+                verify=False if config_cli.args.noverify else True,
+                )
+        except Exception as e:
+            raise SSAError(_("Error while retreiving openID Configuration from {}").format(open_id_url)) from e
 
         try:
-            decoded = jwt.decode(ssa, options={"verify_signature": False, "verify_exp": True})
-        except jwt.DecodeError as e:
-            raise SSAError(_("Can't decode SSA. Please check if it is valid jwt SSA")) from e
-        except jwt.ExpiredSignatureError as e:
-            raise SSAError(_("SSA was expired. Please ask admin to provide a new one.")) from e
+            open_id_configuration = response.json()
+        except json.JSONDecodeError as e:
+            raise SSAError(_("Error while retreiving OpenID Configuration from {}").format(open_id_url)) from e
+
+        jwks_uri = open_id_configuration.get('jwks_uri')
+
+        if not jwks_uri:
+            raise SSAError(_("jwks_uri is not found in OpenID Configuration"))
+
+        ssl_context = ssl._create_unverified_context()
+
+
+        if config_cli.args.noverify:
+            ssl_context = ssl._create_unverified_context()
+        else:
+            ssl_context = ssl.create_default_context()
+
+        jwks_client = jwt.PyJWKClient(jwks_uri, ssl_context=ssl_context)
+
+        try:
+            signing_key = jwks_client.get_signing_key_from_jwt(ssa)
+            decoded = jwt.decode(
+                ssa,
+                signing_key.key,
+                algorithms=["RS256"],
+                issuer=f"https://{iss}"
+            )
+        except jwt.exceptions.PyJWTError as e:
+            raise SSAError(_("SSA validation failed: {}").format(e)) from e
 
         ssa_grant_types = decoded.get('grant_types') or []
         missing_grant_types = list({'authorization_code', 'refresh_token', 'client_credentials', 'urn:ietf:params:oauth:grant-type:device_code'} - set(ssa_grant_types))
@@ -146,29 +180,33 @@ class Plugin(DialogUtils):
         if missing_grant_types:
             raise SSAError(_("SSA is missing these grant types: {}").format(', '.join(missing_grant_types)))
 
-        iss = decoded.get('iss') or ''
-        if not iss:
-            raise SSAError(_("There is no iss in SSA"))
-
-        parsed_iss = urlparse(iss)
-
-        if not parsed_iss.netloc:
-            raise SSAError(_("There is no valid iss in SSA"))
-
-        return parsed_iss.netloc
+        return decoded
 
 
     def create_ssa_cli(self, dialog):
         dialog_data = self.make_data_from_dialog({'ssa': dialog.body})
         ssa = dialog_data['ssa']
-        dialog.close()
+        iss = dialog_data['iss']
 
-        if not ssa:
-            self.app.show_message(_(common_strings.error), _("No SSA was entered"), tobefocused=self.menu_container)
+        if not iss:
+            self.app.show_message(_(common_strings.error), _("Issuer was not entered"), tobefocused=dialog.buttons[0])
             return
 
+        parsed_iss = urlparse(iss)
+
+        if not parsed_iss.netloc:
+            self.app.show_message(_(common_strings.error), _("Please enter valid issuer"), tobefocused=dialog.buttons[0])
+            return
+
+        if not ssa:
+            self.app.show_message(_(common_strings.error), _("No SSA was entered"), tobefocused=dialog.buttons[0])
+            return
+
+        dialog.close()
+        self.set_center_frame()
+
         try:
-            iss = self.get_iss_from_ssa(ssa)
+            self.validate_ssa(ssa, parsed_iss.netloc)
         except SSAError as e:
             self.app.show_message(_(common_strings.error), str(e), tobefocused=self.menu_container)
             return
@@ -176,7 +214,7 @@ class Plugin(DialogUtils):
         client_creation_data = {
           "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
           "redirect_uris": [
-            f"https://{iss}/admin"
+            f"https://{parsed_iss.netloc}/admin"
           ],
           "software_statement": ssa,
           "grant_types": [
@@ -197,7 +235,7 @@ class Plugin(DialogUtils):
 
             try:
                 response = config_cli.session.post(
-                    url=f"https://{iss}/jans-auth/restv1/register",
+                    url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
                     data=json.dumps(client_creation_data),
                     headers={'Content-Type': 'application/json'},
                     verify=False if config_cli.args.noverify else True,
@@ -227,7 +265,7 @@ class Plugin(DialogUtils):
                 return
 
             creds_info = {
-                'jans_host': iss,
+                'jans_host': parsed_iss.netloc,
                 'jca_client_id': jca_client_id,
                 'jca_client_secret': jca_client_secret
                 }
@@ -242,6 +280,12 @@ class Plugin(DialogUtils):
 
         body = HSplit([
             self.app.getTitledText(
+                title=_("Issuer"),
+                name='iss',
+                jans_help=_("Issuer of SSA"),
+                style=cli_style.edit_text_required
+            ),
+            self.app.getTitledText(
                 title=_("SSA"),
                 name='ssa',
                 height=8,
@@ -251,8 +295,10 @@ class Plugin(DialogUtils):
         ])
 
         create_client_button_label = _("Create Client")
+        create_client_button = Button(create_client_button_label, handler=self.create_ssa_cli, width=len(create_client_button_label)+4)
+        create_client_button.keep_dialog = True
         buttons = [
-            Button(create_client_button_label, handler=self.create_ssa_cli, width=len(create_client_button_label)+4),
+            create_client_button,
             Button(_("Cancel"))
         ]
         mydialog = JansGDialog(self.app, title=_("SSA for Creating Client"), body= body, buttons=buttons)
