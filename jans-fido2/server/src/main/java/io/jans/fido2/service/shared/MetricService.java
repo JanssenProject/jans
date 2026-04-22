@@ -91,6 +91,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private static final long USER_ID_CACHE_TTL_MS = 3600000L; // 1 hour
     private static final int USER_ID_CACHE_MAX_SIZE = 10000; // Maximum cache entries
     private final java.util.Map<String, CacheEntry> userIdCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    // Guards the "empty trusted-proxy ranges" warning so it fires only once per instance,
+    // not on every request — prevents log flooding when the server is misconfigured.
+    private final java.util.concurrent.atomic.AtomicBoolean emptyRangesWarnLogged =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
     
     /**
      * Cache entry for username-to-userId mapping
@@ -560,7 +565,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
         if (Boolean.TRUE.equals(trustedProxyEnabled)) {
             List<String> trustedRanges = appConfiguration.getTrustedProxyIpRanges();
             if (trustedRanges == null || trustedRanges.isEmpty()) {
-                log.warn("trustedProxyEnabled=true but trustedProxyIpRanges is empty — ignoring proxy headers to avoid header spoofing");
+                if (emptyRangesWarnLogged.compareAndSet(false, true)) {
+                    log.warn("trustedProxyEnabled=true but trustedProxyIpRanges is empty — ignoring proxy headers to avoid header spoofing");
+                }
                 return directRemoteAddr;
             }
             if (!isFromTrustedProxy(directRemoteAddr, trustedRanges)) {
