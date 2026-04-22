@@ -7,7 +7,6 @@ use cedar_policy::{ContextJsonError, ParseErrors, RequestValidationError};
 use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
-use crate::common::json_rules::ApplyRuleError;
 use crate::entity_builder::MultiIssuerEntityError;
 use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
 use crate::jwt::JwtProcessingError;
@@ -82,9 +81,6 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildEntityError),
-    /// Error encountered while executing the rule for principals
-    #[error(transparent)]
-    ExecuteRule(#[from] ApplyRuleError),
     #[error("failed to build role entities for unsigned request: {0}")]
     /// Error encountered while building Role entity in an unsigned request
     BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),

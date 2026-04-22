@@ -48,9 +48,7 @@ Alternatively, you may add cedarling [bootstrap configuration](../docs/cedarling
 APP_MODE=development
 SIDECAR_DEBUG_RESPONSE=False
 CEDARLING_APPLICATION_NAME=MyApp
-CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_WORKLOAD_AUTHZ=enabled
 ```
 
 In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`.
@@ -87,9 +85,7 @@ Not yet implemented
     -e APP_MODE='development' \
     -e SIDECAR_DEBUG_RESPONSE=True \
     -e CEDARLING_APPLICATION_NAME=MyApp \
-    -e CEDARLING_POLICY_STORE_ID=abcdef \
     -e CEDARLING_POLICY_STORE_URI=https://gluu.org \
-    -e CEDARLING_WORKLOAD_AUTHZ=enabled \
     -p 5000:5000 \
     ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
@@ -144,9 +140,7 @@ Not yet implemented
 APP_MODE=development
 SIDECAR_DEBUG_RESPONSE=True
 CEDARLING_APPLICATION_NAME=MyApp
-CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_WORKLOAD_AUTHZ=enabled
 ...
 ```
 
