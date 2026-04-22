@@ -490,7 +490,6 @@ nav:
         - Post-Installation: janssen-server/install/helm-install/post-install.md
       - Docker:
         - Quick Start: janssen-server/install/docker-install/quick-start.md
-        - Docker Compose: janssen-server/install/docker-install/compose.md
       - Setup Instructions: janssen-server/install/setup.md
     - Kubernetes Operations:
       - janssen-server/kubernetes-ops/README.md
