@@ -22,7 +22,7 @@ pub(super) fn default_token_cache_capacity() -> usize {
 }
 
 pub(super) fn default_metric_reservoir_size() -> usize {
-    AuthorizationConfig::default().metric_reservoir_size
+    AuthorizationConfig::DEFAULT_METRIC_RESERVOIR_SIZE
 }
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -271,6 +271,7 @@ impl IntervalState {
 /// every counter is reset by construction.
 #[derive(Debug)]
 pub(crate) struct MetricsCollector {
+    enabled: bool,
     /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
@@ -285,10 +286,22 @@ impl MetricsCollector {
     pub(crate) fn new(initial_policy_count: usize, metric_reservoir_size: usize) -> Self {
         let now = Utc::now();
         Self {
+            enabled: true,
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
             metric_reservoir_size,
             interval: RwLock::new(Box::new(IntervalState::new(now, metric_reservoir_size))),
+        }
+    }
+
+    /// Creates a disabled metrics collector that does nothing
+    pub(crate) fn disabled() -> Self {
+        Self {
+            enabled: false,
+            init_time: Utc::now(),
+            policy_count: AtomicI64::new(0),
+            metric_reservoir_size: 0,
+            interval: RwLock::new(Box::new(IntervalState::new(Utc::now(), 0))),
         }
     }
 
@@ -300,6 +313,10 @@ impl MetricsCollector {
         is_unsigned: bool,
         evaluated_policies: impl Iterator<Item = (&'a str, Decision)>,
     ) {
+        if !self.enabled {
+            return;
+        }
+
         let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
 
         interval
@@ -368,6 +385,10 @@ impl MetricsCollector {
 
     /// Increments `authz.errors_total` counter.
     pub(crate) fn record_authz_error(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -377,11 +398,18 @@ impl MetricsCollector {
 
     /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
     pub(crate) fn record_error(&self, err: &impl ErrorMetricKey) {
+        if !self.enabled {
+            return;
+        }
         self.increment_error(err.metric_key());
     }
 
     /// Increments a classified error counter by raw key string.
     pub(crate) fn increment_error(&self, key: &str) {
+        if !self.enabled {
+            return;
+        }
+
         let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
         let mut counters = interval
             .error_counters
@@ -391,6 +419,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_hit(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -399,6 +431,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_miss(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -407,6 +443,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_eviction(&self, count: usize) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -415,6 +455,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_jwt_validation(&self, success: bool) {
+        if !self.enabled {
+            return;
+        }
+
         let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
         interval
             .jwt_validations_total
@@ -431,6 +475,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_push(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -439,6 +487,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_get(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -447,6 +499,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_remove(&self) {
+        if !self.enabled {
+            return;
+        }
+
         self.interval
             .read()
             .expect(INTERVAL_LOCK_POISONED)
@@ -455,6 +511,10 @@ impl MetricsCollector {
     }
 
     pub(crate) fn set_policy_count(&self, count: usize) {
+        if !self.enabled {
+            return;
+        }
+
         self.policy_count
             .store(saturating_usize_to_i64(count), Ordering::Relaxed);
     }
@@ -462,7 +522,7 @@ impl MetricsCollector {
     /// Captures a snapshot of all metrics and resets counters for the next interval.
     ///
     /// The entire [`IntervalState`] is swapped for a fresh instance under a write lock,
-    /// guaranteeing every counter starts from zero — no per-field reset needed.
+    /// guaranteeing every counter is reset by construction.
     ///
     /// # Consistency
     ///
@@ -891,5 +951,35 @@ mod tests {
         assert_eq!(drained.len(), 5);
         assert_eq!(sampler.samples.len(), 0);
         assert_eq!(sampler.count, 0);
+    }
+
+    #[test]
+    fn disabled_collector_noops() {
+        let collector = MetricsCollector::disabled();
+
+        collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
+        collector.record_authz_error();
+        collector.record_cache_hit();
+        collector.record_cache_miss();
+        collector.record_cache_eviction(5);
+        collector.record_jwt_validation(true);
+        collector.record_data_push();
+        collector.record_data_get();
+        collector.record_data_remove();
+        collector.set_policy_count(10);
+
+        let snap = collector.snapshot_and_reset();
+        assert!(
+            snap.operational_stats.values().all(|&v| v == 0),
+            "all counters must be 0 when disabled"
+        );
+        assert!(
+            snap.policy_stats.is_empty(),
+            "policy_stats must be empty when disabled"
+        );
+        assert!(
+            snap.error_counters.is_empty(),
+            "error_counters must be empty when disabled"
+        );
     }
 }
