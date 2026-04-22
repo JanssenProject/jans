@@ -674,17 +674,20 @@ For comprehensive debugging, configure the following:
 {
   "loggingLevel": "TRACE",
   "loggingLayout": "text",
-  "externalLoggerConfiguration": "",
   "enabledComponents": ["DCR"]
 }
 ```
 
-This can be set via Config API:
+These can be set via Config API using JSON Patch. The following example patches all the fields shown above:
 ```bash
 curl -X PATCH -H 'Content-Type: application/json-patch+json' \
   -H "Authorization: Bearer <token>" \
   'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
-  --data '[{"op": "replace", "path": "/loggingLevel", "value": "TRACE"}]'
+  --data '[
+    {"op": "replace", "path": "/loggingLevel", "value": "TRACE"},
+    {"op": "replace", "path": "/loggingLayout", "value": "text"},
+    {"op": "replace", "path": "/enabledComponents", "value": ["DCR"]}
+  ]'
 ```
 
 ### Customizing the behavior of the AS using Interception script
