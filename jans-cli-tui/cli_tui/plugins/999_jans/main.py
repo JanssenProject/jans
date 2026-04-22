@@ -139,6 +139,7 @@ class Plugin(DialogUtils):
             response = config_cli.session.get(
                 url=open_id_url,
                 verify=False if config_cli.args.noverify else True,
+                timeout=30,
                 )
         except Exception as e:
             raise SSAError(_("Error while retreiving openID Configuration from {}").format(open_id_url)) from e
@@ -202,12 +203,6 @@ class Plugin(DialogUtils):
         dialog.close()
         self.set_center_frame()
 
-        try:
-            self.validate_ssa(ssa, parsed_iss.netloc)
-        except SSAError as e:
-            self.app.show_message(_(common_strings.error), str(e), tobefocused=self.menu_container)
-            return
-
         client_creation_data = {
           "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
           "redirect_uris": [
@@ -231,14 +226,24 @@ class Plugin(DialogUtils):
             self.app.start_progressing(_("Creating client..."))
 
             try:
-                response = config_cli.session.post(
-                    url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
-                    data=json.dumps(client_creation_data),
-                    headers={'Content-Type': 'application/json'},
-                    verify=False if config_cli.args.noverify else True,
+                await self.app.loop.run_in_executor(
+                    self.app.executor,
+                    self.validate_ssa,
+                    ssa,
+                    parsed_iss.netloc,
                 )
-            except Exception as e:
-                self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}").format(e), tobefocused=self.menu_container)
+                response = await self.app.loop.run_in_executor(
+                    self.app.executor,
+                    lambda: config_cli.session.post(
+                        url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
+                        data=json.dumps(client_creation_data),
+                        headers={'Content-Type': 'application/json'},
+                        verify=False if config_cli.args.noverify else True,
+                        timeout=30,
+                    ),
+                )
+            except SSAError as e:
+                self.app.show_message(_(common_strings.error), str(e), tobefocused=self.menu_container)
                 self.app.stop_progressing()
                 return
 
