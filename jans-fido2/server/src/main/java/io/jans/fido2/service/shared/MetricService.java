@@ -636,6 +636,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
             java.net.InetAddress cidrAddress = java.net.InetAddress.getByName(parts[0]);
             java.net.InetAddress testAddress = java.net.InetAddress.getByName(ip);
 
+            // Normalize IPv4-mapped IPv6 (::ffff:a.b.c.d) so they compare correctly
+            // against IPv4 CIDRs on dual-stack JVMs where getRemoteAddr() returns the mapped form.
+            cidrAddress = normalizeAddress(cidrAddress);
+            testAddress = normalizeAddress(testAddress);
+
             byte[] cidrBytes = cidrAddress.getAddress();
             byte[] testBytes = testAddress.getAddress();
 
@@ -644,7 +649,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 return false;
             }
 
-            int prefixLength = (parts.length == 2) ? Integer.parseInt(parts[1]) : (cidrBytes.length * 8);
+            int maxBits = cidrBytes.length * 8;
+            int prefixLength = (parts.length == 2) ? Integer.parseInt(parts[1]) : maxBits;
+            if (prefixLength < 0 || prefixLength > maxBits) {
+                log.warn("Invalid prefix length {} in CIDR '{}' — rejecting", prefixLength, cidr);
+                return false;
+            }
             int remainingBits = prefixLength;
 
             for (int i = 0; i < cidrBytes.length; i++) {
@@ -671,6 +681,26 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
+     * Converts an IPv4-mapped IPv6 address (::ffff:a.b.c.d) to its IPv4 equivalent
+     * so that CIDR comparisons work correctly on dual-stack JVMs.
+     */
+    private java.net.InetAddress normalizeAddress(java.net.InetAddress address) throws java.net.UnknownHostException {
+        if (address instanceof java.net.Inet6Address) {
+            byte[] bytes = address.getAddress();
+            // IPv4-mapped form: 10 zero bytes, then 0xFF 0xFF, then 4 IPv4 bytes
+            if (bytes.length == 16 &&
+                    bytes[0] == 0 && bytes[1] == 0 && bytes[2] == 0 && bytes[3] == 0 &&
+                    bytes[4] == 0 && bytes[5] == 0 && bytes[6] == 0 && bytes[7] == 0 &&
+                    bytes[8] == 0 && bytes[9] == 0 &&
+                    bytes[10] == (byte) 0xFF && bytes[11] == (byte) 0xFF) {
+                return java.net.InetAddress.getByAddress(
+                        new byte[]{bytes[12], bytes[13], bytes[14], bytes[15]});
+            }
+        }
+        return address;
+    }
+
+    /**
      * Validates that a string is a well-formed IPv4 or IPv6 address.
      *
      * @param ip candidate IP string
@@ -680,13 +710,46 @@ public class MetricService extends io.jans.service.metric.MetricService {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
-        try {
-            // InetAddress.getByName handles both IPv4 and IPv6 including edge cases.
-            java.net.InetAddress.getByName(ip);
-            return true;
-        } catch (java.net.UnknownHostException e) {
+        String trimmed = ip.trim();
+        // IPv6 literals always contain a colon; getByName never does DNS for them.
+        if (trimmed.contains(":")) {
+            try {
+                java.net.InetAddress.getByName(trimmed);
+                return true;
+            } catch (java.net.UnknownHostException e) {
+                return false;
+            }
+        }
+        // For anything without a colon, only accept a valid IPv4 literal —
+        // getByName would perform a blocking DNS lookup for hostnames, which
+        // would allow attacker-controlled headers to trigger DNS queries.
+        return isValidIpv4Literal(trimmed);
+    }
+
+    private boolean isValidIpv4Literal(String ip) {
+        String[] octets = ip.split("\\.", -1);
+        if (octets.length != 4) {
             return false;
         }
+        for (String octet : octets) {
+            if (octet.isEmpty() || octet.length() > 3) {
+                return false;
+            }
+            for (char c : octet.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+            try {
+                int value = Integer.parseInt(octet);
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
