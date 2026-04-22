@@ -5,6 +5,7 @@
 
 //! `PostgreSQL` extension (`cedarling_pg`) for Cedarling-backed authorization.
 
+mod authorized;
 mod authz_bridge;
 mod engine;
 mod guc_config;
@@ -36,6 +37,30 @@ const _: fn(
     &str,
 ) -> Result<bool, authz_bridge::AuthorizeBridgeError> =
     authz_bridge::authorize_multi_issuer_decision;
+#[allow(clippy::type_complexity)]
+const _: fn(
+    Option<&str>,
+    &str,
+    &str,
+    &str,
+) -> Result<cedarling::RequestUnsigned, authz_bridge::UnsignedBridgeError> =
+    authz_bridge::unsigned_request_from_json_parts;
+const _: fn(
+    &cedarling::blocking::Cedarling,
+    cedarling::RequestUnsigned,
+) -> Result<bool, authz_bridge::UnsignedBridgeError> =
+    authz_bridge::authorize_unsigned_decision_for_request;
+#[allow(clippy::type_complexity)]
+const _: fn(
+    &cedarling::blocking::Cedarling,
+    Option<&str>,
+    &str,
+    &str,
+    &str,
+) -> Result<bool, authz_bridge::UnsignedBridgeError> = authz_bridge::authorize_unsigned_decision;
+const _: fn(&str, Option<&str>, &str) -> bool = authorized::cedarling_authorized;
+#[allow(clippy::type_complexity)]
+const _: fn(Option<&str>, &str, &str, &str) -> bool = authorized::cedarling_authorize_unsigned;
 
 ::pgrx::pg_module_magic!(name, version);
 
@@ -119,6 +144,93 @@ mod tests {
         assert!(
             crate::token_sql::cedarling_current_tokens().is_none(),
             "after second clear, current tokens should be NULL"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorized_fail_closed_without_engine() {
+        assert!(
+            !crate::authorized::cedarling_authorized(
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                Some(r#"[{"mapping":"M","payload":"p"}]"#),
+                "T::Action::\"A\"",
+            ),
+            "without bootstrap/engine, fail-closed should deny"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorized_fail_open_without_engine() {
+        Spi::run("SET LOCAL cedarling.fail_mode = 'open'").expect("SET fail_mode open");
+        assert!(
+            crate::authorized::cedarling_authorized(
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                Some(r#"[{"mapping":"M","payload":"p"}]"#),
+                "T::Action::\"A\"",
+            ),
+            "fail-open should allow when engine or authz errors are treated as pass"
+        );
+        Spi::run("SET LOCAL cedarling.fail_mode = 'closed'").expect("restore fail_mode closed");
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorized_empty_action_fail_closed() {
+        assert!(
+            !crate::authorized::cedarling_authorized(
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                Some(r#"[{"mapping":"M","payload":"p"}]"#),
+                "   ",
+            ),
+            "empty action should deny under fail-closed"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorize_unsigned_fail_closed_without_engine() {
+        assert!(
+            !crate::authorized::cedarling_authorize_unsigned(
+                None,
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                "T::Action::\"A\"",
+                "{}",
+            ),
+            "unsigned: without engine, fail-closed should deny"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorize_unsigned_fail_open_without_engine() {
+        Spi::run("SET LOCAL cedarling.fail_mode = 'open'").expect("SET fail_mode open");
+        assert!(
+            crate::authorized::cedarling_authorize_unsigned(
+                None,
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                "T::Action::\"A\"",
+                "{}",
+            ),
+            "unsigned: fail-open should pass on engine/authz errors"
+        );
+        Spi::run("SET LOCAL cedarling.fail_mode = 'closed'").expect("restore fail_mode closed");
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorize_unsigned_empty_resource_fail_closed() {
+        assert!(
+            !crate::authorized::cedarling_authorize_unsigned(None, "   ", "T::Action::\"A\"", "{}",),
+            "unsigned: empty resource should deny under fail-closed"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorize_unsigned_invalid_context_fail_closed() {
+        assert!(
+            !crate::authorized::cedarling_authorize_unsigned(
+                None,
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                "T::Action::\"A\"",
+                "[]",
+            ),
+            "unsigned: non-object context JSON should deny under fail-closed"
         );
     }
 }

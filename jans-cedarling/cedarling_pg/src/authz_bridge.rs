@@ -29,7 +29,6 @@ pub enum AuthorizeBridgeError {
 }
 
 /// Errors building or running an `authorize_unsigned` call.
-#[cfg_attr(not(test), allow(dead_code))]
 #[derive(Debug, Error)]
 pub enum UnsignedBridgeError {
     #[error("invalid principal entity JSON: {0}")]
@@ -65,7 +64,6 @@ pub fn authorize_multi_issuer_decision(
     Ok(result.decision)
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
 fn parse_optional_principal_json(
     principal_json: Option<&str>,
 ) -> Result<Option<cedarling::EntityData>, UnsignedBridgeError> {
@@ -81,7 +79,6 @@ fn parse_optional_principal_json(
         .map_err(UnsignedBridgeError::Principal)
 }
 
-#[cfg_attr(not(test), allow(dead_code))]
 fn parse_request_context_json(
     context_json: &str,
 ) -> Result<serde_json::Value, UnsignedBridgeError> {
@@ -97,11 +94,37 @@ fn parse_request_context_json(
     Ok(value)
 }
 
-/// Parses optional `principal_json`, `resource_json`, and required `context_json`, then returns Cedar’s decision bit (`true` = allow).
+/// Builds a [`RequestUnsigned`] from JSON parts (no Cedarling engine required).
 ///
-/// `principal_json`: omit, `NULL`-equivalent in SQL will be wired in PR6 as empty string: use `None` or `Some("")` for no principal.
+/// `principal_json`: use `None` or `Some("")` for no principal (SQL `NULL` / blank).
 /// `context_json`: must deserialize to a JSON **object** (use `"{}"` when unused), matching [`RequestUnsigned::context`](cedarling::RequestUnsigned).
-#[cfg_attr(not(test), allow(dead_code))]
+pub fn unsigned_request_from_json_parts(
+    principal_json: Option<&str>,
+    resource_json: &str,
+    action: &str,
+    context_json: &str,
+) -> Result<RequestUnsigned, UnsignedBridgeError> {
+    let principal = parse_optional_principal_json(principal_json)?;
+    let resource = resource::resource_entity_data_from_json_str(resource_json)?;
+    let context = parse_request_context_json(context_json)?;
+    Ok(RequestUnsigned {
+        principal,
+        resource,
+        action: action.to_string(),
+        context,
+    })
+}
+
+/// Runs [`Cedarling::authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) on a built request.
+pub fn authorize_unsigned_decision_for_request(
+    engine: &Cedarling,
+    request: RequestUnsigned,
+) -> Result<bool, UnsignedBridgeError> {
+    let result = engine.authorize_unsigned(request)?;
+    Ok(result.decision)
+}
+
+/// Parses JSON parts then returns Cedar’s decision bit (`true` = allow).
 pub fn authorize_unsigned_decision(
     engine: &Cedarling,
     principal_json: Option<&str>,
@@ -109,17 +132,9 @@ pub fn authorize_unsigned_decision(
     action: &str,
     context_json: &str,
 ) -> Result<bool, UnsignedBridgeError> {
-    let principal = parse_optional_principal_json(principal_json)?;
-    let resource = resource::resource_entity_data_from_json_str(resource_json)?;
-    let context = parse_request_context_json(context_json)?;
-    let request = RequestUnsigned {
-        principal,
-        resource,
-        action: action.to_string(),
-        context,
-    };
-    let result = engine.authorize_unsigned(request)?;
-    Ok(result.decision)
+    let request =
+        unsigned_request_from_json_parts(principal_json, resource_json, action, context_json)?;
+    authorize_unsigned_decision_for_request(engine, request)
 }
 
 #[cfg(test)]

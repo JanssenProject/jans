@@ -122,7 +122,7 @@ unsafe fn register_gucs_inner() {
     GucRegistry::define_enum_guc(
         c"cedarling.mode",
         c"Cedarling operation mode.",
-        c"enforcement: apply policy decisions. instrumentation: log only (behavior detailed in later milestones).",
+        c"enforcement: apply policy decisions. instrumentation: still evaluates policies; `cedarling_authorized` returns the same boolean as enforcement for safe RLS (extra logging may be added later).",
         &MODE,
         GucContext::Userset,
         GucFlags::empty(),
