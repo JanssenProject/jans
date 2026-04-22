@@ -537,8 +537,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
      *   <li><b>null (unset)</b> — legacy mode: proxy headers are trusted unconditionally
      *       (identical to the behaviour before this change, so existing deployments are unaffected).
      *   <li><b>false</b> — proxy headers are never read; {@code remoteAddr} is returned directly.
-     *   <li><b>true, empty {@code trustedProxyIpRanges}</b> — proxy headers are trusted from any
-     *       source IP (equivalent to the legacy unconfigured mode, but explicitly opted-in).
+     *   <li><b>true, empty {@code trustedProxyIpRanges}</b> — proxy headers are <em>ignored</em>
+     *       and {@code remoteAddr} is returned directly. An empty range list means no proxy is
+     *       trusted; a one-shot WARNING is logged to alert the operator of the misconfiguration.
      *   <li><b>true, non-empty {@code trustedProxyIpRanges}</b> — proxy headers are only trusted
      *       when the direct {@code remoteAddr} falls within one of the configured CIDR ranges.
      *       Requests from outside those ranges fall back to {@code remoteAddr}.
