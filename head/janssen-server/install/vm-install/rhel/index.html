@@ -2494,13 +2494,13 @@ sudo yum -y module enable mod_auth_openidc
 <ul>
 <li>
 <p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 </li>
 <li>
 <p>Verify the signature:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el9-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el9-replace-janssen-version-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>~/jans-replace-janssen-version-stable.el9.x86_64.rpm
@@ -2549,16 +2549,16 @@ sudo yum -y module enable mod_auth_openidc
 <ul>
 <li>
 <p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 </li>
 <li>
 <p>Verify the signature:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--bundle<span class="w"> </span>jans-el10-replace-janssen-version.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el10-replace-janssen-version-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>jans-replace-janssen-version-stable.el10.x86_64.rpm
+<span class="w"> </span>~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 </code></pre></div>
 <p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
@@ -2706,7 +2706,7 @@ the removal of all the unused dependencies.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 20, 2026 11:46:24 UTC"><span class="timeago" datetime="2026-04-20T11:46:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 20, 2026 11:46:24 UTC">2026-04-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 22, 2026 06:53:09 UTC"><span class="timeago" datetime="2026-04-22T06:53:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 22, 2026 06:53:09 UTC">2026-04-22</span>
   </span>
 
     
