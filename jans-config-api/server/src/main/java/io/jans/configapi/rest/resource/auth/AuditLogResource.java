@@ -247,7 +247,6 @@ public class AuditLogResource extends ConfigBaseResource {
 
             for (int i = 0; i < logEntries.size(); i++) {
                 String line = logEntries.get(i);
-                log.debug(":{}, line:{}", "\n\n", line);
                 if (StringUtils.isNotBlank(line) && line.length() > datePattern.length()) {
                     String timestampPart = line.substring(0, datePattern.length());
                     LocalDateTime logEntryLocalDate = getDate(timestampPart, formatter);
