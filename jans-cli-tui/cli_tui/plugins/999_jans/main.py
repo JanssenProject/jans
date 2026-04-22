@@ -153,9 +153,6 @@ class Plugin(DialogUtils):
         if not jwks_uri:
             raise SSAError(_("jwks_uri is not found in OpenID Configuration"))
 
-        ssl_context = ssl._create_unverified_context()
-
-
         if config_cli.args.noverify:
             ssl_context = ssl._create_unverified_context()
         else:
