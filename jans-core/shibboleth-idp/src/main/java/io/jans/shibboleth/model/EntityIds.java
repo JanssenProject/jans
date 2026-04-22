@@ -48,9 +48,13 @@ public class EntityIds {
         return of(Arrays.asList(rawEntityIds));
     }
 
-    public boolean hasAnyDiscoveredEntityIds() {
+    public boolean hasAny() {
+
+        return !ids.isEmpty();
+    }
+
+    public boolean hasNone() {
 
         return ids.isEmpty();
     }
-
 }

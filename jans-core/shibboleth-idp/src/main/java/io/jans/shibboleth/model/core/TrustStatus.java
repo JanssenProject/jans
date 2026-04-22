@@ -1,4 +1,4 @@
-package io.jans.shibboleth.model;
+package io.jans.shibboleth.model.core;
 
 
 public enum TrustStatus {
