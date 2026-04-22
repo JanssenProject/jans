@@ -1,5 +1,6 @@
 package io.jans.as.client.ws.rs.logout;
 
+import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.TestExecutionContext;
@@ -202,6 +203,7 @@ public class LogoutStatusJwtHttpTest extends BaseTest {
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setAccessTokenAsJwt(true);
+        registerRequest.setLogoutStatusJwtScriptDns(Lists.newArrayList("inum=0300-BA15,ou=scripts,o=jans"));
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
