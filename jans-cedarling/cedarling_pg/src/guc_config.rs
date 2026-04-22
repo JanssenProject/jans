@@ -52,6 +52,7 @@ static LOG_LEVEL: GucSetting<CedarlingLogLevelGuc> =
     GucSetting::<CedarlingLogLevelGuc>::new(CedarlingLogLevelGuc::Info);
 static CACHE_TTL: GucSetting<i32> = GucSetting::<i32>::new(300);
 static TOKENS: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
+static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 
 /// Current `cedarling.mode`.
 #[must_use]
@@ -86,6 +87,13 @@ pub fn cache_ttl_seconds() -> i32 {
 #[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn tokens_utf8() -> Option<String> {
     TOKENS.get().and_then(|c| c.into_string().ok())
+}
+
+/// Path from `cedarling.bootstrap_config` (bootstrap YAML / JSON / TOML for Cedarling), if set and valid UTF-8.
+#[must_use]
+#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
+pub fn bootstrap_config_path_utf8() -> Option<String> {
+    BOOTSTRAP_CONFIG.get().and_then(|c| c.into_string().ok())
 }
 
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
@@ -159,5 +167,14 @@ unsafe fn register_gucs_inner() {
         Some(cedarling_tokens_check_hook),
         None,
         None,
+    );
+
+    GucRegistry::define_string_guc(
+        c"cedarling.bootstrap_config",
+        c"Filesystem path to Cedarling bootstrap configuration (YAML, JSON, or TOML).",
+        c"Must be readable by the PostgreSQL server process. Used to construct the Cedarling engine on first authorization request.",
+        &BOOTSTRAP_CONFIG,
+        GucContext::Userset,
+        GucFlags::empty(),
     );
 }

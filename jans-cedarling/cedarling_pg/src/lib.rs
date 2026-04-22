@@ -5,8 +5,11 @@
 
 //! `PostgreSQL` extension (`cedarling_pg`) for Cedarling-backed authorization.
 
+mod authz_bridge;
+mod engine;
 mod guc_config;
 mod resource;
+mod token_bundle;
 mod token_sql;
 mod validate;
 
@@ -20,6 +23,19 @@ const _: fn(&str) -> Result<cedarling::EntityData, resource::ResourceEntityDataE
     resource::resource_entity_data_from_json_str;
 const _: fn(serde_json::Value) -> Result<cedarling::EntityData, resource::ResourceEntityDataError> =
     resource::resource_entity_data_from_json_value;
+const _: fn(&str) -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
+    engine::try_init_cedarling_from_bootstrap_path;
+const _: fn() -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
+    engine::global_cedarling;
+const _: fn(&str) -> Result<Vec<cedarling::TokenInput>, token_bundle::TokenBundleError> =
+    token_bundle::parse_token_inputs_from_json;
+const _: fn(
+    &cedarling::blocking::Cedarling,
+    &str,
+    &str,
+    &str,
+) -> Result<bool, authz_bridge::AuthorizeBridgeError> =
+    authz_bridge::authorize_multi_issuer_decision;
 
 ::pgrx::pg_module_magic!(name, version);
 
@@ -46,8 +62,8 @@ mod tests {
     #[pg_test]
     fn test_gucs_defaults() {
         use crate::guc_config::{
-            cache_ttl_seconds, fail_mode, log_level, mode, tokens_utf8, CedarlingFailMode,
-            CedarlingLogLevelGuc, CedarlingMode,
+            bootstrap_config_path_utf8, cache_ttl_seconds, fail_mode, log_level, mode, tokens_utf8,
+            CedarlingFailMode, CedarlingLogLevelGuc, CedarlingMode,
         };
 
         assert_eq!(mode(), CedarlingMode::Enforcement, "default mode");
@@ -55,6 +71,11 @@ mod tests {
         assert_eq!(log_level(), CedarlingLogLevelGuc::Info, "default log_level");
         assert_eq!(cache_ttl_seconds(), 300, "default cache_ttl");
         assert_eq!(tokens_utf8(), None, "default tokens unset");
+        assert_eq!(
+            bootstrap_config_path_utf8(),
+            None,
+            "default bootstrap_config unset"
+        );
 
         let show_mode = Spi::get_one::<String>("SHOW cedarling.mode")
             .expect("SPI should succeed for SHOW cedarling.mode");
