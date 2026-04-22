@@ -1092,6 +1092,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#debugging-dcr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging DCR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging DCR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-detailed-error-reasons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling Detailed Error Reasons
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Error Responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-signed-dcr-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Signed DCR Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-ssa-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting SSA Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-configuration-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Configuration Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2738,6 +2821,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#debugging-dcr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging DCR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging DCR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-detailed-error-reasons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling Detailed Error Reasons
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Error Responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-signed-dcr-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Signed DCR Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-ssa-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting SSA Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-configuration-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Configuration Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3470,6 +3636,154 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
 <li><strong>softwareStatementValidationType</strong>=<em>jwks</em>, allows to specify jwks claim name from software_statement. Claim name specified by <code>softwareStatementValidationClaimName</code> configuration property.</li>
 <li><strong>softwareStatementValidationType</strong>=<em>none</em>, no validation.</li>
 </ol>
+<h3 id="debugging-dcr">Debugging DCR<a class="headerlink" href="#debugging-dcr" title="Permanent link">#</a></h3>
+<p>When Dynamic Client Registration fails, especially with signed DCR or SSA validation, it can be challenging to identify the root cause. This section provides guidance on debugging DCR issues.</p>
+<h4 id="enabling-detailed-error-reasons">Enabling Detailed Error Reasons<a class="headerlink" href="#enabling-detailed-error-reasons" title="Permanent link">#</a></h4>
+<p>By default, error responses from the Authorization Server do not include detailed reasons to avoid leaking sensitive information. For debugging purposes, you can enable detailed error reasons by setting the <code>errorReasonEnabled</code> configuration property to <code>true</code>.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data<span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/errorReasonEnabled&quot;, &quot;value&quot;: true}]&#39;</span>
+</code></pre></div>
+<p>When enabled, error responses will include a <code>reason</code> field with specific details:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_client_metadata&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The value of one of the Client Metadata fields is invalid.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The sector_identifier_uri must contain all redirect_uris.&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Important:</strong> Disable <code>errorReasonEnabled</code> in production environments as it may expose internal details that could be useful to attackers.</p>
+<h4 id="enabling-debug-logging">Enabling Debug Logging<a class="headerlink" href="#enabling-debug-logging" title="Permanent link">#</a></h4>
+<p>To get detailed information about DCR processing, enable debug logging for the registration package:</p>
+<ol>
+<li>
+<p><strong>Via Jans TUI or Config API</strong>, set the logging level to <code>TRACE</code>.</p>
+</li>
+<li>
+<p><strong>Check the logs</strong> at <code>/opt/jans/jetty/jans-auth/logs/jans-auth.log</code> (or your configured log location).</p>
+</li>
+</ol>
+<p>Key log messages to look for:
+- <code>Attempting to register client</code> - Start of DCR processing
+- <code>Validating DCR signature</code> - JWT signature validation
+- <code>Validating software statement</code> - SSA validation
+- <code>DCR validation successful</code> / <code>DCR validation failed</code> - Validation result</p>
+<h4 id="common-error-responses">Common Error Responses<a class="headerlink" href="#common-error-responses" title="Permanent link">#</a></h4>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Description</th>
+<th>Troubleshooting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invalid_client_metadata</code></td>
+<td>Client metadata validation failed</td>
+<td>Check that all required fields are present and valid</td>
+</tr>
+<tr>
+<td><code>invalid_software_statement</code></td>
+<td>SSA validation failed</td>
+<td>Verify SSA signature, issuer, and expiration</td>
+</tr>
+<tr>
+<td><code>invalid_redirect_uri</code></td>
+<td>Redirect URI validation failed</td>
+<td>Ensure redirect URIs match allowed patterns</td>
+</tr>
+<tr>
+<td><code>access_denied</code></td>
+<td>Authorization failed</td>
+<td>Check if DCR is enabled and credentials are valid</td>
+</tr>
+</tbody>
+</table>
+<p>Example error response:
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_software_statement&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Software statement validation failed. Reason: Unable to find matching SSA issuer. Issuers from config: [https://trusted.issuer.com], SSA issuer: https://other.issuer.com&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h4 id="troubleshooting-signed-dcr-validation">Troubleshooting Signed DCR Validation<a class="headerlink" href="#troubleshooting-signed-dcr-validation" title="Permanent link">#</a></h4>
+<p>If signed DCR validation fails, follow these steps:</p>
+<ol>
+<li><strong>Decode and inspect the JWT</strong></li>
+</ol>
+<p>Use a tool like <a href="https://jwt.io">jwt.io</a> or command line to decode the DCR JWT.</p>
+<p>Note: JWTs use base64url encoding, which must be converted to standard base64 before decoding:
+   <div class="highlight"><pre><span></span><code><span class="c1"># Extract header (convert base64url to base64, add padding, decode)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&lt;JWT&gt;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39;.&#39;</span><span class="w"> </span>-f1<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;_-&#39;</span><span class="w"> </span><span class="s1">&#39;/+&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $0&quot;==&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.
+
+<span class="c1"># Extract payload (convert base64url to base64, add padding, decode)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&lt;JWT&gt;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39;.&#39;</span><span class="w"> </span>-f2<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;_-&#39;</span><span class="w"> </span><span class="s1">&#39;/+&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $0&quot;==&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.
+</code></pre></div></p>
+<ol>
+<li><strong>Verify the JWT header</strong></li>
+<li>Check <code>alg</code> matches the expected signing algorithm</li>
+<li>
+<p>Check <code>kid</code> (key ID) matches a key in the configured JWKS</p>
+</li>
+<li>
+<p><strong>Verify the JWT claims</strong></p>
+</li>
+<li><code>iss</code> (issuer) must match an entry in <code>dcrSsaValidationConfigs</code> or <code>trustedSsaIssuers</code></li>
+<li><code>exp</code> (expiration) must be in the future</li>
+<li><code>iat</code> (issued at) should be recent</li>
+<li>
+<p><code>aud</code> (audience) should match your AS issuer URL</p>
+</li>
+<li>
+<p><strong>Verify the signature</strong></p>
+</li>
+</ol>
+<p>Ensure the JWKS URI is accessible and contains the signing key:
+   <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>&lt;jwks_uri&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.keys[] | select(.kid==&quot;&lt;kid_from_jwt&gt;&quot;)&#39;</span>
+</code></pre></div></p>
+<ol>
+<li><strong>Check configuration</strong></li>
+<li>Verify <code>dcrSignatureValidationEnabled</code> is <code>true</code></li>
+<li>Verify <code>dcrSsaValidationConfigs</code> contains an entry for the DCR issuer</li>
+<li>For SSA validation, verify <code>softwareStatementValidationType</code> is set correctly</li>
+</ol>
+<h4 id="troubleshooting-ssa-validation">Troubleshooting SSA Validation<a class="headerlink" href="#troubleshooting-ssa-validation" title="Permanent link">#</a></h4>
+<p>If the software statement inside DCR fails validation:</p>
+<ol>
+<li>
+<p><strong>Extract and decode the SSA</strong> from the DCR payload's <code>software_statement</code> claim</p>
+</li>
+<li>
+<p><strong>Check SSA issuer</strong> matches configuration:</p>
+</li>
+<li>For <code>softwareStatementValidationType=builtin</code>: issuer must be in <code>dcrSsaValidationConfigs</code> with <code>type=SSA</code></li>
+<li>
+<p>For <code>softwareStatementValidationType=script</code>: script must return valid JWKS for the issuer</p>
+</li>
+<li>
+<p><strong>Verify SSA signature</strong> using the appropriate JWKS:</p>
+</li>
+<li>If using <code>jwks_uri</code> claim in SSA, ensure the URI is accessible</li>
+<li>If using <code>jwks</code> claim in SSA, verify the inline JWKS is valid JSON</li>
+</ol>
+<h4 id="debug-configuration-example">Debug Configuration Example<a class="headerlink" href="#debug-configuration-example" title="Permanent link">#</a></h4>
+<p>For comprehensive debugging, configure the following:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TRACE&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabledComponents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;DCR&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>These can be set via Config API using JSON Patch. The following example patches all the fields shown above:
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data<span class="w"> </span><span class="s1">&#39;[</span>
+<span class="s1">    {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLevel&quot;, &quot;value&quot;: &quot;TRACE&quot;},</span>
+<span class="s1">    {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLayout&quot;, &quot;value&quot;: &quot;text&quot;},</span>
+<span class="s1">    {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/enabledComponents&quot;, &quot;value&quot;: [&quot;DCR&quot;]}</span>
+<span class="s1">  ]&#39;</span>
+</code></pre></div></p>
 <h3 id="customizing-the-behavior-of-the-as-using-interception-script">Customizing the behavior of the AS using Interception script<a class="headerlink" href="#customizing-the-behavior-of-the-as-using-interception-script" title="Permanent link">#</a></h3>
 <p>Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the <a href="https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3">Software Statement</a> that is sent with the registration request.</p>
 <p>Learn more in the <a href="../../../../script-catalog/client_registration/client-registration/">Client Registration Script Guide</a></p>
@@ -3581,7 +3895,7 @@ authorization server.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 22, 2026 13:37:19 UTC"><span class="timeago" datetime="2026-04-22T13:37:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 22, 2026 13:37:19 UTC">2026-04-22</span>
   </span>
 
     
