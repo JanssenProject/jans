@@ -78,6 +78,10 @@ on:
         description: 'Cedarling Flask Sidecar'
         type: boolean
         default: false
+      cedarling_opa:
+        description: 'Cedarling OPA'
+        type: boolean
+        default: false
       cn_version:
         description: 'The war version to build the image off'
         required: false
@@ -105,7 +109,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
+        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
@@ -130,7 +134,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
-          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar"
+          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar cedarling-opa"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -150,6 +154,7 @@ jobs:
               [[ "${{ inputs.all_in_one }}" == "true" ]] && SELECTED="$SELECTED all-in-one"
               [[ "${{ inputs.shibboleth }}" == "true" ]] && SELECTED="$SELECTED shibboleth"
               [[ "${{ inputs.cedarling_flask_sidecar }}" == "true" ]] && SELECTED="$SELECTED cedarling-flask-sidecar"
+              [[ "${{ inputs.cedarling_opa }}" == "true" ]] && SELECTED="$SELECTED cedarling-opa"
             fi
             MATCH=false
             for svc in $SELECTED; do
@@ -166,7 +171,7 @@ jobs:
             pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
             if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
               # PR: get changed files via GitHub API
-              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^cedarling-flask-sidecar' || echo "$ALL_SERVICES")
+              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
             elif [[ "${{ github.event_name }}" == "schedule" || "${{ github.ref_type }}" == "tag" ]]; then
               # Nightly schedule or tag push: build all images
               DIRECTORIES_CHANGED="$ALL_SERVICES"
@@ -177,7 +182,7 @@ jobs:
               if [[ -z "$BEFORE" || "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
                 DIRECTORIES_CHANGED="$ALL_SERVICES"
               else
-                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^cedarling-flask-sidecar' || true)
+                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || true)
               fi
             fi
             MATCH=false
@@ -225,6 +230,9 @@ jobs:
           if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
           fi
+          if [[ "cedarling-opa" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./jans-cedarling/cedarling_opa
+          fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}
