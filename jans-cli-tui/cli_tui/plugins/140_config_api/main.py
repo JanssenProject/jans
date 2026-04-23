@@ -381,10 +381,10 @@ class Plugin(DialogUtils):
             if kwargs:
                 title = _("Edit Mapping Properties")
                 mapping_data = (
-                    kwargs['data']['directory'],
-                    ' '.join(kwargs['data']['type']),
-                    kwargs['data']['description'],
-                    kwargs['data']['jansServiceModule']
+                    kwargs['data'].get('directory') or '',
+                    ' '.join(kwargs['data'].get('type') or []),
+                    kwargs['data'].get('description') or '',
+                    kwargs['data'].get('jansServiceModule') or []
                     )
                 services = []
             else:
