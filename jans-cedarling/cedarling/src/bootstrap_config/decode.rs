@@ -126,7 +126,6 @@ impl BootstrapConfig {
         };
 
         let authorization_config = AuthorizationConfig {
-            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
         };
 
@@ -139,7 +138,6 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
-            entity_builder_config: raw.into(),
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,

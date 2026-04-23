@@ -1,0 +1,14 @@
+{
+    "query":{
+        "match_all":{
+        }
+    },
+    "ext": {
+        "tbac": {
+            "tokens": {
+                "Jans::Userinfo_token": "eyJraWQ...blah...blah..."
+            },
+            "context": { }
+        }
+    }
+}

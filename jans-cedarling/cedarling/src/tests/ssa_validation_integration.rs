@@ -5,12 +5,10 @@
 
 //! Integration tests for SSA JWT validation functionality
 
-use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LockServiceConfig,
+    LockTransport, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -59,12 +57,7 @@ async fn test_cedarling_with_valid_ssa() {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
@@ -116,12 +109,7 @@ async fn test_cedarling_without_ssa() {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-            principal_bool_operator: JsonRule::new(serde_json::json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .unwrap(),
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,

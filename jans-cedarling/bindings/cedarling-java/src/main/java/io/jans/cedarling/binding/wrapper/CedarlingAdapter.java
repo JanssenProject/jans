@@ -22,8 +22,10 @@ import java.util.Map;
  *   <li>{@link #authorizeMultiIssuer(Map, String, JSONObject, JSONObject)} –
  *       drop-in replacement that takes a token map, validates JWTs, and evaluates
  *       policies.</li>
- *   <li>{@link #authorizeUnsigned(String, String, JSONObject, JSONObject)} –
- *       for pre-validated / unsigned entity data.</li>
+ *   <li>{@link #authorizeUnsigned(String, String, JSONObject, JSONObject)} and
+ *       {@link #authorizeUnsignedEntity(EntityData, String, JSONObject, JSONObject)} –
+ *       for pre-validated / unsigned entity data (omit the principal or pass null
+ *       for partial evaluation when no asserted principal is supplied).</li>
  * </ul>
  */
 public class CedarlingAdapter implements AutoCloseable {
@@ -101,13 +103,15 @@ public class CedarlingAdapter implements AutoCloseable {
     // ── authorize_unsigned ──────────────────────────────────────────────
 
     /**
-     * Authorize with a single principal provided as a JSON string.
+     * Authorize with an optional principal provided as a JSON string.
      *
      * <p>This is the simplest way to call {@code authorizeUnsigned} without
-     * importing any UniFFI types.  The JSON string is converted to an
-     * {@link EntityData} internally.</p>
+     * importing any UniFFI types. When {@code principalJson} is non-null it is
+     * parsed into {@link EntityData}; when null, the engine runs without an asserted
+     * principal (partial evaluation / Cedar partial mode), matching core
+     * {@code RequestUnsigned.principal == None}.</p>
      *
-     * @param principalJson single principal as a JSON string (must not be null)
+     * @param principalJson principal as a JSON string, or null for no asserted principal
      * @param action  Cedar action
      * @param resource resource as JSONObject (must not be null)
      * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
@@ -119,56 +123,28 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
-        if (principalJson == null) {
-            throw new IllegalArgumentException("principalJson must not be null");
-        }
-        EntityData principal = EntityData.Companion.fromJson(principalJson);
-        return authorizeUnsigned(List.of(principal), action, resource, context);
+        EntityData principal =
+                principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
+        return authorizeUnsignedEntity(principal, action, resource, context);
     }
 
     /**
-     * Authorize with multiple principals provided as JSON strings.
+     * Authorize with an optional pre-built {@link EntityData} principal.
      *
-     * <p>Use this when you have more than one principal and want to avoid
-     * importing UniFFI types.  Each JSON string is converted to an
-     * {@link EntityData} internally.</p>
+     * <p>Use this when you already have an {@link EntityData} instance (e.g. from UniFFI
+     * or advanced integration code). Pass null for {@code principal} when no asserted
+     * principal should be supplied. A null {@code context} is sent as an empty JSON
+     * object to the engine.</p>
      *
-     * @param principalsJson principal JSON strings (must not be null; no null elements)
-     * @param action  Cedar action
-     * @param resource resource as JSONObject (must not be null)
-     * @param context  context as JSONObject (may be null; sent as empty JSON object to the engine)
-     * @return authorization result
-     */
-    public AuthorizeResult authorizeUnsignedFromJson(
-            List<String> principalsJson,
-            String action,
-            JSONObject resource,
-            JSONObject context) throws AuthorizeException, EntityException {
-
-        if (principalsJson == null) {
-            throw new IllegalArgumentException("principalsJson must not be null");
-        }
-        List<EntityData> principals = new ArrayList<>();
-        for (String json : principalsJson) {
-            if (json == null) {
-                throw new IllegalArgumentException("principalsJson must not contain null elements");
-            }
-            principals.add(EntityData.Companion.fromJson(json));
-        }
-        return authorizeUnsigned(principals, action, resource, context);
-    }
-
-    /**
-     * Authorize with pre-built {@link EntityData} principals.
+     * <p>This method is named {@code authorizeUnsignedEntity} (rather than an overload of
+     * {@link #authorizeUnsigned(String, String, JSONObject, JSONObject)}) so that a null
+     * principal does not make overload resolution ambiguous in Java.</p>
      *
-     * <p>Use this overload when you already have {@link EntityData} objects
-     * (e.g. from advanced integration code). A null {@code context} is sent as an
-     * empty JSON object to the engine.</p>
-     *
+     * @param principal optional principal entity, or null for partial evaluation without one
      * @param resource resource as JSONObject (must not be null)
      */
-    public AuthorizeResult authorizeUnsigned(
-            List<EntityData> principals,
+    public AuthorizeResult authorizeUnsignedEntity(
+            EntityData principal,
             String action,
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
@@ -178,7 +154,7 @@ public class CedarlingAdapter implements AutoCloseable {
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : "{}";
-        return cedarling.authorizeUnsigned(principals, action, resourceObj, contextStr);
+        return cedarling.authorizeUnsigned(principal, action, resourceObj, contextStr);
     }
 
     public String getLogById(String id) throws LogException {

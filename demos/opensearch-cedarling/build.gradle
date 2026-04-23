@@ -1,0 +1,156 @@
+buildscript {
+    ext {
+        opensearch_version = System.getProperty("opensearch.version", "3.6.0")
+    }
+
+    repositories {
+        mavenLocal()
+        maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "org.opensearch.gradle:build-tools:${opensearch_version}"
+    }
+}
+
+import org.opensearch.gradle.test.RestIntegTestTask
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'opensearch.opensearchplugin'
+apply plugin: 'opensearch.yaml-rest-test'
+apply plugin: 'opensearch.pluginzip'
+
+def pluginName = 'cedarling' 
+def pluginDescription = 'A plugin featuring TBAC security to database operations'
+def packagePath = 'io.jans'     
+def pathToPlugin = 'cedarling.opensearch'
+def pluginClassName = 'CedarlingPlugin'
+group = "io.jans"
+
+java {
+    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.register("preparePluginPathDirs") {
+    mustRunAfter clean
+    doLast {
+        def newPath = pathToPlugin.replace(".", "/")
+        mkdir "src/main/java/$packagePath/$newPath"
+        mkdir "src/test/java/$packagePath/$newPath"
+        mkdir "src/yamlRestTest/java/$packagePath/$newPath"
+    }
+}
+
+publishing {
+    publications {
+        pluginZip(MavenPublication) { publication ->
+            pom {
+              name = pluginName
+              description = pluginDescription
+              licenses {
+                license {
+                  name = "The Apache License, Version 2.0"
+                  url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                }
+              }
+              developers {
+                developer {
+                  name = "OpenSearch"
+                  url = "https://github.com/opensearch-project/opensearch-plugin-template-java"
+                }
+              }
+            }
+        }
+    }
+}
+
+opensearchplugin {
+    name pluginName
+    description pluginDescription
+    classname "${packagePath}.${pathToPlugin}.${pluginClassName}"
+    version "1.0.0-SNAPSHOT"
+}
+
+// This requires an additional Jar not published as part of build-tools
+loggerUsageCheck.enabled = false
+
+// No need to validate pom, as we do not upload to maven/sonatype
+validateNebulaPom.enabled = false
+
+repositories {
+    mavenLocal()
+    maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "https://maven.jans.io/maven" }
+}
+
+dependencies {
+    // JSON processing
+    implementation "org.json:json:20231013"
+    // Logging
+    implementation "org.apache.logging.log4j:log4j-api:2.25.3"
+    implementation "org.apache.logging.log4j:log4j-core:2.25.3"
+    // Cedarling FFI
+    implementation "io.jans:cedarling-java:2.0.0"
+    
+    // Testing dependencies
+    testImplementation "org.testng:testng:7.11.0"
+    testImplementation "org.jcommander:jcommander:2.0"
+    testImplementation "com.nimbusds:oauth2-oidc-sdk:11.26.1"
+    testImplementation "com.nimbusds:content-type:2.3"
+}
+
+test {
+    include '**/*Test.class'
+    
+    useTestNG() {
+        suites 'src/test/resources/suite.xml'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+task integTest(type: RestIntegTestTask) {
+    description = "Run tests against a cluster"
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
+tasks.named("check").configure { dependsOn(integTest) }
+
+integTest {
+    // The --debug-jvm command-line option makes the cluster debuggable; this makes the tests debuggable
+    if (System.getProperty("test.debug") != null) {
+        jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005'
+    }
+}
+
+testClusters.integTest {
+    testDistribution = "INTEG_TEST"
+
+    // This installs our plugin into the testClusters
+    plugin(project.tasks.bundlePlugin.archiveFile)
+}
+
+run {
+    useCluster testClusters.integTest
+}
+
+// updateVersion: Task to auto update version to the next development iteration
+task updateVersion {
+    onlyIf { System.getProperty('newVersion') }
+    doLast {
+        ext.newVersion = System.getProperty('newVersion')
+        println "Setting version to ${newVersion}."
+         // String tokenization to support -SNAPSHOT
+        ant.replaceregexp(file:'build.gradle', match: '"opensearch.version", "\\d.*"', replace: '"opensearch.version", "' + newVersion.tokenize('-')[0] + '-SNAPSHOT"', flags:'g', byline:true)
+    }
+}
+

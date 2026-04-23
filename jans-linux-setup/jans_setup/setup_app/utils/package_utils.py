@@ -52,9 +52,11 @@ class PackageUtils(SetupUtils):
             print(f"{base.os_type} {base.os_version} is not supported.")
             print(f"Supported distributions: {supported}")
             sys.exit(1)
-        
-        install_command, update_command, query_command, check_text = self.get_install_commands()
+
+        install_command, update_command, _, _ = self.get_install_commands()
+
         dnf_command = shutil.which('dnf')
+
         if dnf_command:
             for action_, repo_ in (('disable', 'postgresql'), ('reset', 'postgresql'), ('enable', 'postgresql:12')):
                 self.run([dnf_command, '-y', 'module', action_, repo_])
@@ -81,7 +83,7 @@ class PackageUtils(SetupUtils):
                                         ):
                             base.download(f'https://downloads.mysql.com/archives/get/p/23/file/{deb_fn}', os.path.join(tmpdirname, deb_fn))
                         self.run([install_command.format(os.path.join(tmpdirname, '*.deb'))],  shell=True)
-                elif base.os_type in ('centos', 'red') and base.os_version == '10':
+                elif base.os_type in ('centos', 'red', 'rocky') and base.os_version == '10':
                     package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
@@ -127,15 +129,21 @@ class PackageUtils(SetupUtils):
                 if install[install_type]:
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
-                    if not base.os_type in ('fedora', 'suse'):
-                        sout, serr = self.run(update_command, shell=True, get_stderr=True)
+                    if base.os_type not in ('suse',):
+                        self.run(update_command, shell=True, get_stderr=True)
                     self.installNetPackage(packages)
+
+                if 'openssl' in packages and not paths.cmd_openssl:
+                    cmd_openssl = shutil.which('openssl')
+                    if cmd_openssl:
+                        paths.cmd_openssl = cmd_openssl
 
         if base.clone_type == 'deb':
             self.run('a2enmod ssl headers proxy proxy_http proxy_ajp', shell=True)
             default_site = '/etc/apache2/sites-enabled/000-default.conf'
             if os.path.exists(default_site):
                 os.remove(default_site)
+
 
 
     def installPackage(self, packageName, remote=False):

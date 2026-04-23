@@ -141,31 +141,33 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
           placeholder={apiKeyValid && connectionStatus === 'connected' 
             ? `Describe what you want to accomplish... (using ${getCurrentProviderConfig().label} - ${getCurrentModelName()})` 
             : "Configure settings to start using the assistant"}
-          InputProps={{
-            startAdornment: !apiKeyValid && (
-              <InputAdornment position="start">
-                <KeyIcon sx={{ color: amber[500] }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton 
-                  aria-label="Send" 
-                  onClick={handleSend}
-                  disabled={loading || !query.trim() || !apiKeyValid || connectionStatus !== 'connected'}
-                  sx={{ 
-                    color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor(provider) : 'action.disabled',
-                    '&:hover': { backgroundColor: apiKeyValid ? green[50] : 'transparent' }
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    <AirplanemodeActiveOutlinedIcon />
-                  )}
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: !apiKeyValid && (
+                <InputAdornment position="start">
+                  <KeyIcon sx={{ color: amber[500] }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton 
+                    aria-label="Send" 
+                    onClick={handleSend}
+                    disabled={loading || !query.trim() || !apiKeyValid || connectionStatus !== 'connected'}
+                    sx={{ 
+                      color: apiKeyValid && connectionStatus === 'connected' ? getProviderColor(provider) : 'action.disabled',
+                      '&:hover': { backgroundColor: apiKeyValid ? green[50] : 'transparent' }
+                    }}
+                  >
+                    {loading ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      <AirplanemodeActiveOutlinedIcon />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }
           }}
           sx={{
             '& .MuiOutlinedInput-root': {

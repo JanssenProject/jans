@@ -6,7 +6,7 @@
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::test_helpers::create_test_unsigned_request;
 use super::utils::*;
-use crate::{EntityData, JsonRule};
+use crate::EntityData;
 use serde_json::json;
 use tokio::test;
 
@@ -18,12 +18,7 @@ async fn success_test_json() {
 
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_JSON.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-                "===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]
-            }))
-            .expect("principal bool operator");
-        },
+        |_| {},
     )
     .await;
 
@@ -48,7 +43,7 @@ async fn success_test_json() {
 
     let request = create_test_unsigned_request(
         "Jans::Action::\"UpdateForTestPrincipals\"",
-        vec![principal],
+        Some(principal),
         resource,
     );
 
@@ -57,9 +52,5 @@ async fn success_test_json() {
         .await
         .expect("request should be parsed without errors");
 
-    assert!(
-        result.decision,
-        "request result should be allowed: {:?}",
-        result.principals
-    );
+    assert!(result.decision, "request result should be allowed");
 }
