@@ -56,42 +56,36 @@ static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CStri
 
 /// Current `cedarling.mode`.
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn mode() -> CedarlingMode {
     MODE.get()
 }
 
 /// Current `cedarling.fail_mode`.
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn fail_mode() -> CedarlingFailMode {
     FAIL_MODE.get()
 }
 
 /// Current `cedarling.log_level`.
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn log_level() -> CedarlingLogLevelGuc {
     LOG_LEVEL.get()
 }
 
 /// Current `cedarling.cache_ttl` in seconds (0 disables result cache).
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn cache_ttl_seconds() -> i32 {
     CACHE_TTL.get()
 }
 
 /// Current `cedarling.tokens` as a UTF-8 string, if set and valid UTF-8.
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn tokens_utf8() -> Option<String> {
     TOKENS.get().and_then(|c| c.into_string().ok())
 }
 
 /// Path from `cedarling.bootstrap_config` (bootstrap YAML / JSON / TOML for Cedarling), if set and valid UTF-8.
 #[must_use]
-#[cfg_attr(not(any(test, feature = "pg_test")), allow(dead_code))]
 pub fn bootstrap_config_path_utf8() -> Option<String> {
     BOOTSTRAP_CONFIG.get().and_then(|c| c.into_string().ok())
 }
@@ -149,7 +143,7 @@ unsafe fn register_gucs_inner() {
     GucRegistry::define_int_guc(
         c"cedarling.cache_ttl",
         c"Authorization result cache TTL in seconds.",
-        c"0 disables caching (recommended until the cache milestone is implemented). Maximum 604800 (7 days).",
+        c"0 disables caching. Successful Cedarling evaluations are keyed by bootstrap path fingerprint, tokens/resource/action (JWT path), or principal/resource/action/context (unsigned path). Maximum 604800 (7 days).",
         &CACHE_TTL,
         0,
         604_800,

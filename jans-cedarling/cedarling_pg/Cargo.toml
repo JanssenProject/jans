@@ -23,8 +23,10 @@ pg_bench = ["dep:pgrx-bench"]
 cedarling = { path = "../cedarling", default-features = false, features = [
     "blocking",
 ] }
+chrono = { workspace = true }
 pgrx = "=0.18.0"
 serde_json = { workspace = true }
+sparkv = { workspace = true }
 thiserror = { workspace = true }
 
 [dependencies.pgrx-bench]

@@ -9,6 +9,7 @@
 use pgrx::prelude::*;
 
 use crate::authz_bridge;
+use crate::authz_cache;
 use crate::engine;
 use crate::guc_config::{self, CedarlingFailMode};
 
@@ -51,6 +52,17 @@ fn cedarling_authorized_inner(
         return fail_mode_to_bool_on_error(fail_mode);
     };
 
+    let ttl = guc_config::cache_ttl_seconds();
+    let cache_key = authz_cache::multi_issuer_key(
+        authz_cache::policy_segment_from_bootstrap_path(),
+        token_str.as_str(),
+        resource_trimmed,
+        action_trimmed,
+    );
+    if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
+        return decision;
+    }
+
     let Ok(engine) = engine::global_cedarling() else {
         return fail_mode_to_bool_on_error(fail_mode);
     };
@@ -61,7 +73,10 @@ fn cedarling_authorized_inner(
         resource_trimmed,
         action_trimmed,
     ) {
-        Ok(decision) => decision,
+        Ok(decision) => {
+            authz_cache::global_cache().store(ttl, cache_key, decision);
+            decision
+        },
         Err(_) => fail_mode_to_bool_on_error(fail_mode),
     }
 }
@@ -100,6 +115,24 @@ fn cedarling_authorize_unsigned_inner(
         return fail_mode_to_bool_on_error(fail_mode);
     }
 
+    let principal_norm = principal_json
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("");
+    let context_trimmed = context_json.trim();
+
+    let ttl = guc_config::cache_ttl_seconds();
+    let cache_key = authz_cache::unsigned_key(
+        authz_cache::policy_segment_from_bootstrap_path(),
+        principal_norm,
+        resource_trimmed,
+        action_trimmed,
+        context_trimmed,
+    );
+    if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
+        return decision;
+    }
+
     let Ok(request) = authz_bridge::unsigned_request_from_json_parts(
         principal_json,
         resource_trimmed,
@@ -114,7 +147,10 @@ fn cedarling_authorize_unsigned_inner(
     };
 
     match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
-        Ok(decision) => decision,
+        Ok(decision) => {
+            authz_cache::global_cache().store(ttl, cache_key, decision);
+            decision
+        },
         Err(_) => fail_mode_to_bool_on_error(fail_mode),
     }
 }

@@ -7,6 +7,7 @@
 
 mod authorized;
 mod authz_bridge;
+mod authz_cache;
 mod engine;
 mod guc_config;
 mod resource;
@@ -28,6 +29,8 @@ const _: fn(&str) -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engi
     engine::try_init_cedarling_from_bootstrap_path;
 const _: fn() -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
     engine::global_cedarling;
+const _: fn() -> guc_config::CedarlingMode = guc_config::mode;
+const _: fn() -> guc_config::CedarlingLogLevelGuc = guc_config::log_level;
 const _: fn(&str) -> Result<Vec<cedarling::TokenInput>, token_bundle::TokenBundleError> =
     token_bundle::parse_token_inputs_from_json;
 const _: fn(
@@ -74,7 +77,9 @@ fn hello_cedarling_pg() -> &'static str {
     "Hello, cedarling_pg"
 }
 
-#[cfg(any(test, feature = "pg_test"))]
+/// Slow `PostgreSQL`/`pgrx` integration tests (`#[cfg(feature = "pg_test")]`). Enable with
+/// `--features pg16,pg_test`. Workspace alias: `cargo cedarling-pg-sqltest`.
+#[cfg(feature = "pg_test")]
 #[pg_schema]
 mod tests {
     use pgrx::prelude::*;
