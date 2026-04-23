@@ -26,7 +26,6 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -48,6 +47,8 @@ public class AuditLogResource extends ConfigBaseResource {
     public static final String AUDIT_FILE_PATH = "/opt/jans/jetty/jans-config-api/logs/";
     public static final String AUDIT_FILE_NAME = "configapi-audit.log";
     public static final String AUDIT_FILE_DATE_FORMAT = "dd-MM-yyyy";
+    public static final String AUDIT_FILE_ISO_OFFSET_DATE_TIME = "dd-MM-yyyy HH:mm:ss.SSS";
+    public static final String PARAM_DATE_ISO_OFFSET_DATE_TIME = "dd-MM-yyyy'T'HH:mm:ss.SSS'Z'";
 
     static final String AUDIT = "/audit";
 
@@ -239,7 +240,7 @@ public class AuditLogResource extends ConfigBaseResource {
         List<String> filteredLogEntries = new ArrayList<>();
         try {
             String datePattern = (StringUtils.isNotBlank(getAuditDateFormat()) ? getAuditDateFormat()
-                    : AUDIT_FILE_DATE_FORMAT);
+                    : AUDIT_FILE_ISO_OFFSET_DATE_TIME);
             log.debug("datePattern:{}", datePattern);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(datePattern);
@@ -248,8 +249,9 @@ public class AuditLogResource extends ConfigBaseResource {
                 String line = logEntries.get(i);
                 if (StringUtils.isNotBlank(line) && line.length() > datePattern.length()) {
                     String timestampPart = line.substring(0, datePattern.length());
-                    LocalDate logEntryLocalDate = getDate(timestampPart, formatter);
-                    if (isValidlogEntry(formatter, startDate, endDate, logEntryLocalDate)) {
+                    LocalDateTime logEntryLocalDate = getDate(timestampPart, formatter);
+                    log.debug(":{}, timestampPart:{}, logEntryLocalDate:{}", "\n\n", timestampPart, logEntryLocalDate);
+                    if (isValidlogEntry(DateTimeFormatter.ofPattern(PARAM_DATE_ISO_OFFSET_DATE_TIME), startDate, endDate, logEntryLocalDate)) {
                         filteredLogEntries.add(line);
                     }
                 }
@@ -268,8 +270,8 @@ public class AuditLogResource extends ConfigBaseResource {
         }
 
         StringBuilder sb = new StringBuilder();
-        LocalDate startLocal = null;
-        LocalDate endLocal = null;
+        LocalDateTime startLocal = null;
+        LocalDateTime endLocal = null;
 
         // validate startDate
         if (StringUtils.isNotBlank(startDate)) {
@@ -299,7 +301,7 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private boolean isValidlogEntry(DateTimeFormatter formatter, String startDate, String endDate,
-            LocalDate logEntryLocalDate) {
+            LocalDateTime logEntryLocalDate) {
         if (log.isDebugEnabled()) {
             log.debug(" formatter:{}, startDate:{}, endDate:{}, logEntryLocalDate:{}", formatter, escapeLog(startDate),
                     escapeLog(endDate), logEntryLocalDate);
@@ -309,15 +311,15 @@ public class AuditLogResource extends ConfigBaseResource {
 
         // validate date
         validateDate(startDate, endDate, formatter);
-
+       
         // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g. yyyy-MM-ddTHH:mm:ssZ)
-        LocalDate startLocalDate = null;
+        LocalDateTime startLocalDate = null;
         if (StringUtils.isNotBlank(startDate)) {
             startLocalDate = parseUserDate(startDate, formatter);
         }
 
         // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g. yyyy-MM-ddTHH:mm:ssZ)
-        LocalDate endLocalDate = null;
+        LocalDateTime endLocalDate = null;
         if (StringUtils.isNotBlank(endDate)) {
             endLocalDate = parseUserDate(endDate, formatter);
         }
@@ -338,23 +340,23 @@ public class AuditLogResource extends ConfigBaseResource {
         return isValid;
     }
 
-    private LocalDate getDate(String strDate, DateTimeFormatter formatter) throws DateTimeParseException {
+    private LocalDateTime getDate(String strDate, DateTimeFormatter formatter) throws DateTimeParseException {
         log.debug(" Get Date strDate:{}, formatter:{}", strDate, formatter);
-        LocalDate logDate = null;
+        LocalDateTime logDateTime = null;
         try {
             if (StringUtils.isNotBlank(strDate)) {
-                logDate = parseDate(strDate, formatter);
+                logDateTime = parseDate(strDate, formatter);
             }
         } catch (DateTimeParseException ex) {
-            log.error("Error while parsing logDate:{} is:{}", logDate, ex);
-            return logDate;
+            log.error("Error while parsing logDateTime:{} is:{}", logDateTime, ex);
+            return logDateTime;
         }
-        return logDate;
+        return logDateTime;
     }
 
-    private LocalDate parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
+    private LocalDateTime parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
         log.debug(" Parse Date date:{}, formatter:{}", date, formatter);
-        return LocalDate.parse(date, formatter);
+        return LocalDateTime.parse(date, formatter);
     }
 
     /**
@@ -366,7 +368,7 @@ public class AuditLogResource extends ConfigBaseResource {
      * @return LocalDate for the given string, or null if dateStr is blank
      * @throws DateTimeParseException if the string cannot be parsed with any supported format
      */
-    private LocalDate parseUserDate(String dateStr, DateTimeFormatter fallbackFormatter) throws DateTimeParseException {
+    private LocalDateTime parseUserDate(String dateStr, DateTimeFormatter fallbackFormatter) throws DateTimeParseException {
         if (StringUtils.isBlank(dateStr)) {
             return null;
         }
@@ -374,33 +376,32 @@ public class AuditLogResource extends ConfigBaseResource {
         // Try ISO-8601 offset date-time (e.g. 2024-02-13T10:30:00Z, 2024-02-13T10:30:00+01:00)
         try {
             ZonedDateTime zdt = ZonedDateTime.parse(trimmed, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            return zdt.toLocalDate();
+            return zdt.toLocalDateTime();
         } catch (DateTimeParseException ignored) {
             // continue
         }
         // Try ISO local date-time (e.g. 2024-02-13T10:30:00)
         try {
-            LocalDateTime ldt = LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            return ldt.toLocalDate();
+            return LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException ignored) {
             // continue
         }
         // Try ISO date only (e.g. 2024-02-13)
         try {
-            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
+            return LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException ignored) {
             // continue
         }
         // Try configured audit format (e.g. dd-MM-yyyy)
         if (fallbackFormatter != null) {
             try {
-                return LocalDate.parse(trimmed, fallbackFormatter);
+                return LocalDateTime.parse(trimmed, fallbackFormatter);
             } catch (DateTimeParseException ignored) {
                 // continue
             }
         }
         // Fallback to legacy dd-MM-yyyy
-        return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT));
+        return LocalDateTime.parse(trimmed, DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT));
     }
 
 }

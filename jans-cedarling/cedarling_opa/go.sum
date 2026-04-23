@@ -1,7 +1,7 @@
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 h1:He8afgbRMd7mFxO99hRNu+6tazq8nFF9lIwo9JFroBk=
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6/go.mod h1:8o94RPi1/7XTJvwPpRSzSUedZrtlirdB3r9Z20bi2f8=
-github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260303125924-27dd703ba1d4 h1:57v/ikVrH1XOxuU0pofEIrOgL9sLJrA9ks5wU8rRmLc=
-github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260303125924-27dd703ba1d4/go.mod h1:2X4SOXytZUvTkNu5dCLVZW4Jzk54agrWXklfiQ/5VJg=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260416194629-3a7db527e089 h1:/t5ALXDvDjstoGnMto9OcEujlU3eV7XIPXYXOeGpEgk=
+github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260416194629-3a7db527e089/go.mod h1:2X4SOXytZUvTkNu5dCLVZW4Jzk54agrWXklfiQ/5VJg=
 github.com/agnivade/levenshtein v1.2.1 h1:EHBY3UOn1gwdy/VbFwgo4cxecRznFk7fKWN1KOX7eoM=
 github.com/agnivade/levenshtein v1.2.1/go.mod h1:QVVI16kDrtSuwcpd0p1+xMC6Z/VfhtCyDIjcwga4/DU=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
@@ -89,8 +89,8 @@ github.com/huandu/go-sqlbuilder v1.39.1 h1:uUaj41yLNTQBe7ojNF6Im1RPbHCN4zCjMRyST
 github.com/huandu/go-sqlbuilder v1.39.1/go.mod h1:zdONH67liL+/TvoUMwnZP/sUYGSSvHh9psLe/HpXn8E=
 github.com/huandu/xstrings v1.4.0 h1:D17IlohoQq4UcpqD7fDk80P7l+lwAmlFaBHgOipl2FU=
 github.com/huandu/xstrings v1.4.0/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
-github.com/ihciah/rust2go v0.0.0-20250427082441-4d6d8d2c2959 h1:vkmhmStmR6swQqpBsaGy4sqRHt4yP38wVdWmfF2VCN0=
-github.com/ihciah/rust2go v0.0.0-20250427082441-4d6d8d2c2959/go.mod h1:SpcZZoVYDXYhx373JZ1onR8dnEcalKA0H61x/FJ9O0s=
+github.com/ihciah/rust2go v0.0.0-20260314034108-6f06b0697c1b h1:5t8wONjmMs2KNn8E4LAIu0XeYRjv/k7UJ37NZrI62rU=
+github.com/ihciah/rust2go v0.0.0-20260314034108-6f06b0697c1b/go.mod h1:SpcZZoVYDXYhx373JZ1onR8dnEcalKA0H61x/FJ9O0s=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
