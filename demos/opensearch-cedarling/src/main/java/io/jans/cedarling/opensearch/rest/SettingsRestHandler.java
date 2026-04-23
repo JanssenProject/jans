@@ -56,8 +56,8 @@ public class SettingsRestHandler extends BaseRestHandler {
         return channel -> {
             try {
                 logger.info("Handling PUT request");
-                boolean hasJsonHeader = Optional.ofNullable(request.getAllHeaderValues("Content-Type"))
-                        .map(l -> l.contains("application/json")).orElse(false);
+                boolean hasJsonHeader = Optional.ofNullable(request.header("Content-Type"))
+                        .map(h -> h.contains("application/json")).orElse(false);
                 BytesRestResponse response;
                 
                 if (hasJsonHeader) {

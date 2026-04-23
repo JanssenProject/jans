@@ -1,3 +1,20 @@
+buildscript {
+    ext {
+        opensearch_version = System.getProperty("opensearch.version", "3.6.0")
+    }
+
+    repositories {
+        mavenLocal()
+        maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "org.opensearch.gradle:build-tools:${opensearch_version}"
+    }
+}
+
 import org.opensearch.gradle.test.RestIntegTestTask
 
 apply plugin: 'java'
@@ -12,7 +29,7 @@ def pluginDescription = 'A plugin featuring TBAC security to database operations
 def packagePath = 'io.jans'     
 def pathToPlugin = 'cedarling.opensearch'
 def pluginClassName = 'CedarlingPlugin'
-group = "RenameGroup"
+group = "io.jans"
 
 java {
     targetCompatibility = JavaVersion.VERSION_21
@@ -67,23 +84,6 @@ loggerUsageCheck.enabled = false
 // No need to validate pom, as we do not upload to maven/sonatype
 validateNebulaPom.enabled = false
 
-buildscript {
-    ext {
-        opensearch_version = System.getProperty("opensearch.version", "3.6.0")
-    }
-
-    repositories {
-        mavenLocal()
-        maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-
-    dependencies {
-        classpath "org.opensearch.gradle:build-tools:${opensearch_version}"
-    }
-}
-
 repositories {
     mavenLocal()
     maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
@@ -99,7 +99,7 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-api:2.25.3"
     implementation "org.apache.logging.log4j:log4j-core:2.25.3"
     // Cedarling FFI
-    implementation "io.jans:cedarling-java:0.0.0-nightly"
+    implementation "io.jans:cedarling-java:2.0.0"
     
     // Testing dependencies
     testImplementation "org.testng:testng:7.11.0"
