@@ -1113,8 +1113,9 @@ class JansCliApp(Application):
     def save_creds_via_dialog(self, dialog: Dialog) -> None:
         creds_info = {}
         for child in dialog.body.children:
-            prop_name = child.children[1].jans_name
-            prop_val = child.children[1].content.buffer.text
+            text_area = child.me
+            prop_name = text_area.window.jans_name
+            prop_val = text_area.buffer.text
             creds_info[prop_name] = prop_val
 
         self.save_creds(creds_info)

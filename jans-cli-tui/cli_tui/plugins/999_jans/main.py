@@ -224,7 +224,7 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             self.app.start_progressing(_("Creating client..."))
-
+            error = None
             try:
                 await self.app.loop.run_in_executor(
                     self.app.executor,
@@ -243,11 +243,15 @@ class Plugin(DialogUtils):
                     ),
                 )
             except SSAError as e:
-                self.app.show_message(_(common_strings.error), str(e), tobefocused=self.menu_container)
+                error = str(e)
+            except Exception as e:
+                error = _("Error while creating client from SSA: {}").format(e)
+            finally:
                 self.app.stop_progressing()
-                return
 
-            self.app.stop_progressing()
+            if error:
+                self.app.show_message(_(common_strings.error), error, tobefocused=self.menu_container)
+                return
 
             if response.status_code not in (200, 201):
                 self.app.show_message(_(common_strings.error), _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(iss, response.status_code, response.text), tobefocused=self.menu_container)
