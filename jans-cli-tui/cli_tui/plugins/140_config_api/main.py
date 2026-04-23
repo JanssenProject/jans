@@ -381,10 +381,10 @@ class Plugin(DialogUtils):
             if kwargs:
                 title = _("Edit Mapping Properties")
                 mapping_data = (
-                    kwargs['data']['directory'],
-                    ' '.join(kwargs['data']['type']),
-                    kwargs['data']['description'],
-                    kwargs['data']['jansServiceModule']
+                    kwargs['data'].get('directory') or '',
+                    ' '.join(kwargs['data'].get('type') or []),
+                    kwargs['data'].get('description') or '',
+                    kwargs['data'].get('jansServiceModule') or []
                     )
                 services = []
             else:
@@ -466,9 +466,9 @@ class Plugin(DialogUtils):
         asset_dir_mapping_data = []
         for mapping in asset_dir_mappings:
             asset_dir_mapping_data.append((
-                        mapping['directory'],
-                        ' '.join(mapping['type']),
-                        ' '.join(mapping['jansServiceModule'])
+                        mapping.get('directory') or '',
+                        ' '.join(mapping.get('type') or []),
+                        ' '.join(mapping.get('jansServiceModule') or [])
                         ))
 
         self.asset_dir_mappings_container = JansVerticalNav(
