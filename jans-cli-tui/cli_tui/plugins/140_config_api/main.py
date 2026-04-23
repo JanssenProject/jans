@@ -466,9 +466,9 @@ class Plugin(DialogUtils):
         asset_dir_mapping_data = []
         for mapping in asset_dir_mappings:
             asset_dir_mapping_data.append((
-                        mapping['directory'],
-                        ' '.join(mapping['type']),
-                        ' '.join(mapping['jansServiceModule'])
+                        mapping.get('directory') or '',
+                        ' '.join(mapping.get('type') or []),
+                        ' '.join(mapping.get('jansServiceModule') or [])
                         ))
 
         self.asset_dir_mappings_container = JansVerticalNav(
