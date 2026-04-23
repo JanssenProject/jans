@@ -57,7 +57,7 @@ public class TestCryptoContext {
             try {
                 INSTANCE = create();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to initialize TestCryptoContext", e);
             }
         }
     }
@@ -87,6 +87,8 @@ public class TestCryptoContext {
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(
                 keyStoreFile, TestConstants.DEFAULT_SECRET, TestConstants.DEFAULT_DN_NAME);
 
+        // required to force key store initialization (it's new key store)
+        // without it -> java.security.KeyStoreException: Uninitialized keystore
         cryptoProvider.getKeyStore().load(null, null);
 
         // Generate keys and JWKS
@@ -128,7 +130,8 @@ public class TestCryptoContext {
             case PS256:
                 this.ps256KeyId = keyId;
                 break;
-            // Add more as needed
+            default:
+                throw new IllegalStateException("Unsupported algorithm: " + algorithm);
         }
     }
 
@@ -169,8 +172,11 @@ public class TestCryptoContext {
         return dnName;
     }
 
+    /**
+     * Returns a defensive copy of the JWKS to prevent mutation of singleton state.
+     */
     public JSONWebKeySet getJwks() {
-        return jwks;
+        return JSONWebKeySet.fromJSONObject(jwks.toJSONObject());
     }
 
     public String getJwksAsString() {
@@ -221,6 +227,10 @@ public class TestCryptoContext {
             AuthCryptoProvider cryptoProvider,
             List<Claim> idTokenClaims,
             List<Claim> userInfoClaims) throws Exception {
+
+        if (signingKeyId == null || signingKeyId.isEmpty()) {
+            throw new IllegalArgumentException("signingKeyId is required for nested JWE");
+        }
 
         // Step 1: Create and sign JWS
         JwtAuthorizationRequest jwsRequest = new JwtAuthorizationRequest(
