@@ -320,7 +320,7 @@ class Plugin(DialogUtils):
             self.logout_exit_cli(clear_all=True)
 
         confirm_dialog = self.app.get_confirm_dialog(
-            message=_("Are you sure clearing TUI configuration? You will permanently lose session and configurations."),
+            message=_("Are you sure you want to clear the TUI configuration? You will permanently lose session and configurations."),
             confirm_handler=do_clear_config
         )
         self.app.show_jans_dialog(confirm_dialog)
