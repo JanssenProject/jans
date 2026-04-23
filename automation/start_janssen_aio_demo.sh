@@ -541,9 +541,8 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
     exit 1
 fi
 
-# reference to image version (e.g. 0.0.0-nightly, 2.0.0-1), not the actual release version
 if [[ -z $JANS_VERSION ]]; then
-    JANS_VERSION="2.0.0-1"
+    JANS_VERSION="0.0.0-nightly"
 fi
 
 LOG_TARGET="FILE"
@@ -572,6 +571,6 @@ prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP"
 
 docker compose -f "$basedir/compose.yaml" up -d
 echo "[I] Janssen is starting up!"
-echo "[I] To check the progress, run 'docker compose -f $basedir/compose.yaml logs -f' in separate terminal"
+echo "[I] To check the progress, run 'docker compose logs -f' in a separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."
 check_jans_readiness
