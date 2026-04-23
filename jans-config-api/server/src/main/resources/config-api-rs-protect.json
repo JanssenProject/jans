@@ -4442,6 +4442,10 @@
             {
               "inum": "",
               "name": "jans_stat"
+            },
+            {
+              "inum": "",
+              "name": "https://jans.io/oauth/lock/stat.readonly"
             }
           ],
           "groupScopes": [],

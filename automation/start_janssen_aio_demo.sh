@@ -571,6 +571,6 @@ prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP"
 
 docker compose -f "$basedir/compose.yaml" up -d
 echo "[I] Janssen is starting up!"
-echo "[I] To check the progress, run 'docker compose -f $basedir/compose.yaml logs -f' in separate terminal"
+echo "[I] To check the progress, run 'docker compose logs -f' in a separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."
 check_jans_readiness
