@@ -13,7 +13,7 @@
 //! All counters reset at each telemetry interval. Gauges reflect point-in-time snapshots.
 
 use chrono::{DateTime, Utc};
-use rand::{RngExt, SeedableRng, rngs::SmallRng};
+use hdrhistogram::Histogram;
 use std::{
     collections::HashMap,
     sync::{
@@ -25,49 +25,47 @@ use std::{
 use crate::{authz::error_metrics::ErrorMetricKey, log::Decision};
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
-const EVAL_TIMES_LOCK_POISONED: &str = "eval_times_us lock poisoned";
+const TIMING_LOCK_POISONED: &str = "timing recorder lock poisoned";
 const POLICY_STATS_READ_LOCK_POISONED: &str = "policy_stats read lock poisoned";
 const POLICY_STATS_WRITE_LOCK_POISONED: &str = "policy_stats write lock poisoned";
 const ERROR_COUNTERS_LOCK_POISONED: &str = "error_counters lock poisoned";
 
-/// Fixed-capacity reservoir sampler
+/// Timing statistics using HDR histogram
 #[derive(Debug)]
-struct ReservoirSampler {
-    samples: Vec<i64>,
-    capacity: usize,
-    /// Total number of items seen
-    count: usize,
-    rng: SmallRng,
+struct TimingRecorder {
+    histogram: Histogram<u64>,
 }
 
-impl ReservoirSampler {
-    fn new(capacity: usize) -> Self {
+impl TimingRecorder {
+    fn new() -> Self {
         Self {
-            samples: Vec::with_capacity(capacity),
-            capacity,
-            count: 0,
-            rng: SmallRng::try_from_rng(&mut rand::rngs::SysRng)
-                .expect("failed to seed SmallRng from OS RNG"),
+            // 3 significant figures gives <0.1% error across the full range of
+            // representable values. At microsecond granularity this is more than enough
+            histogram: Histogram::new(3).expect("HDR histogram config valid"),
         }
     }
 
-    /// Insert a value, replacing a random earlier sample once the reservoir is full
-    fn insert(&mut self, value: i64) {
-        self.count += 1;
-        if self.samples.len() < self.capacity {
-            self.samples.push(value);
+    /// Record eval time in microseconds
+    fn record(&mut self, value: i64) {
+        if value > 0 {
+            let _ = self.histogram.record(value.cast_unsigned());
+        }
+    }
+
+    /// Drain and compute percentiles, reset for next interval
+    fn drain_and_compute(&mut self) -> (i64, i64, i64, i64) {
+        if self.histogram.is_empty() {
+            (0, 0, 0, 0)
         } else {
-            let j = self.rng.random_range(0..self.count);
-            if j < self.capacity {
-                self.samples[j] = value;
-            }
+            let result = (
+                self.histogram.value_at_quantile(0.50).cast_signed(),
+                self.histogram.value_at_quantile(0.95).cast_signed(),
+                self.histogram.value_at_quantile(0.99).cast_signed(),
+                self.histogram.max().cast_signed(),
+            );
+            self.histogram.clear();
+            result
         }
-    }
-
-    /// Drain all retained samples, resetting the sampler for the next interval.
-    fn drain(&mut self) -> Vec<i64> {
-        self.count = 0;
-        self.samples.drain(..).collect()
     }
 }
 
@@ -134,7 +132,7 @@ struct IntervalState {
     authz_decision_deny: AtomicI64,
     authz_errors_total: AtomicI64,
 
-    eval_times_us: Mutex<ReservoirSampler>,
+    timing_recorder: Mutex<TimingRecorder>,
     last_eval_time_us: AtomicI64,
 
     token_cache_hits: AtomicI64,
@@ -154,7 +152,7 @@ struct IntervalState {
 }
 
 impl IntervalState {
-    fn new(start: DateTime<Utc>, metric_reservoir_size: usize) -> Self {
+    fn new(start: DateTime<Utc>) -> Self {
         Self {
             start,
             authz_requests_total: AtomicI64::new(0),
@@ -163,7 +161,7 @@ impl IntervalState {
             authz_decision_allow: AtomicI64::new(0),
             authz_decision_deny: AtomicI64::new(0),
             authz_errors_total: AtomicI64::new(0),
-            eval_times_us: Mutex::new(ReservoirSampler::new(metric_reservoir_size)),
+            timing_recorder: Mutex::new(TimingRecorder::new()),
             last_eval_time_us: AtomicI64::new(0),
             token_cache_hits: AtomicI64::new(0),
             token_cache_misses: AtomicI64::new(0),
@@ -189,12 +187,11 @@ impl IntervalState {
         init_time: DateTime<Utc>,
         policy_count_atomic: &AtomicI64,
     ) -> HashMap<String, i64> {
-        let times_snapshot = self
-            .eval_times_us
+        let (p50, p95, p99, max_time) = self
+            .timing_recorder
             .lock()
-            .expect(EVAL_TIMES_LOCK_POISONED)
-            .drain();
-        let (p50, p95, p99, max_time) = compute_percentiles(times_snapshot);
+            .expect(TIMING_LOCK_POISONED)
+            .drain_and_compute();
         let uptime_secs = now.signed_duration_since(init_time).num_seconds();
         let policy_count = policy_count_atomic.load(Ordering::Relaxed);
 
@@ -275,33 +272,28 @@ pub(crate) struct MetricsCollector {
     /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
-    metric_reservoir_size: usize,
 
     /// Swapped wholesale on each snapshot; read lock for record_*, write lock for snapshot
     interval: RwLock<Box<IntervalState>>,
 }
 
 impl MetricsCollector {
-    /// Creates a new metrics collector with the given initial policy count and reservoir size.
-    pub(crate) fn new(initial_policy_count: usize, metric_reservoir_size: usize) -> Self {
+    pub(crate) fn new(initial_policy_count: usize) -> Self {
         let now = Utc::now();
         Self {
             enabled: true,
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
-            metric_reservoir_size,
-            interval: RwLock::new(Box::new(IntervalState::new(now, metric_reservoir_size))),
+            interval: RwLock::new(Box::new(IntervalState::new(now))),
         }
     }
 
-    /// Creates a disabled metrics collector that does nothing
     pub(crate) fn disabled() -> Self {
         Self {
             enabled: false,
             init_time: Utc::now(),
             policy_count: AtomicI64::new(0),
-            metric_reservoir_size: 0,
-            interval: RwLock::new(Box::new(IntervalState::new(Utc::now(), 0))),
+            interval: RwLock::new(Box::new(IntervalState::new(Utc::now()))),
         }
     }
 
@@ -345,10 +337,10 @@ impl MetricsCollector {
             .store(decision_time_us, Ordering::Relaxed);
 
         interval
-            .eval_times_us
+            .timing_recorder
             .lock()
-            .expect(EVAL_TIMES_LOCK_POISONED)
-            .insert(decision_time_us);
+            .expect(TIMING_LOCK_POISONED)
+            .record(decision_time_us);
 
         let policies: Vec<(&str, Decision)> = evaluated_policies.collect();
         let untracked_policies: Vec<(&str, Decision)> = {
@@ -535,10 +527,7 @@ impl MetricsCollector {
 
         let old = {
             let mut guard = self.interval.write().expect(INTERVAL_LOCK_POISONED);
-            std::mem::replace(
-                &mut *guard,
-                Box::new(IntervalState::new(now, self.metric_reservoir_size)),
-            )
+            std::mem::replace(&mut *guard, Box::new(IntervalState::new(now)))
         };
 
         let interval_secs = now.signed_duration_since(old.start).num_seconds();
@@ -577,24 +566,6 @@ impl MetricsCollector {
     }
 }
 
-/// Computes percentiles from a mutable slice using nearest-rank method.
-/// Sorts in place. Returns `(p50, p95, p99, max)`. All zeros if empty.
-fn compute_percentiles(times: Vec<i64>) -> (i64, i64, i64, i64) {
-    if times.is_empty() {
-        return (0, 0, 0, 0);
-    }
-    let mut times = times;
-    times.sort_unstable();
-    let len = times.len();
-    let idx = |pct: usize| (len - 1) * pct / 100;
-    (
-        times[idx(50)],
-        times[idx(95)],
-        times[idx(99)],
-        times[len - 1],
-    )
-}
-
 fn saturating_usize_to_i64(value: usize) -> i64 {
     i64::try_from(value).unwrap_or(i64::MAX)
 }
@@ -612,7 +583,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_increments_authz_counters() {
-        let collector = MetricsCollector::new(5, 100);
+        let collector = MetricsCollector::new(5);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Deny, true, std::iter::empty());
@@ -649,7 +620,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_updates_policy_stats() {
-        let collector = MetricsCollector::new(3, 100);
+        let collector = MetricsCollector::new(3);
 
         collector.record_evaluation(
             50,
@@ -692,7 +663,7 @@ mod tests {
     fn record_error_aggregates_by_metric_key() {
         use crate::authz::MultiIssuerValidationError;
 
-        let collector = MetricsCollector::new(0, 100);
+        let collector = MetricsCollector::new(0);
 
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("jwt.decode_failed"));
@@ -727,7 +698,7 @@ mod tests {
 
     #[test]
     fn snapshot_and_reset_zeros_counters_preserves_gauges() {
-        let collector = MetricsCollector::new(10, 100);
+        let collector = MetricsCollector::new(10);
         collector.record_evaluation(500, Decision::Allow, false, std::iter::empty());
         collector.record_cache_hit();
         collector.record_jwt_validation(true);
@@ -769,8 +740,9 @@ mod tests {
     }
 
     #[test]
-    fn compute_percentiles_empty_returns_zeros() {
-        let (p50, p95, p99, max) = compute_percentiles(vec![]);
+    fn timing_recorder_empty_returns_zeros() {
+        let mut recorder = TimingRecorder::new();
+        let (p50, p95, p99, max) = recorder.drain_and_compute();
         assert_eq!(p50, 0, "p50 must be 0 for empty");
         assert_eq!(p95, 0, "p95 must be 0 for empty");
         assert_eq!(p99, 0, "p99 must be 0 for empty");
@@ -778,8 +750,10 @@ mod tests {
     }
 
     #[test]
-    fn compute_percentiles_single_element() {
-        let (p50, p95, p99, max) = compute_percentiles(vec![42]);
+    fn timing_recorder_single_element() {
+        let mut recorder = TimingRecorder::new();
+        recorder.record(42);
+        let (p50, p95, p99, max) = recorder.drain_and_compute();
         assert_eq!(p50, 42, "p50 must be 42");
         assert_eq!(p95, 42, "p95 must be 42");
         assert_eq!(p99, 42, "p99 must be 42");
@@ -787,12 +761,16 @@ mod tests {
     }
 
     #[test]
-    fn compute_percentiles_multiple_elements() {
+    fn timing_recorder_multiple_elements() {
+        let mut recorder = TimingRecorder::new();
         let times = vec![10, 20, 30, 33, 40, 70, 49, 55, 55, 90, 110];
-        let (p50, p95, p99, max) = compute_percentiles(times);
+        for time in times {
+            recorder.record(time);
+        }
+        let (p50, p95, p99, max) = recorder.drain_and_compute();
         assert_eq!(p50, 49, "p50 must be median");
-        assert_eq!(p95, 90, "p95 index (10*95/100)=9");
-        assert_eq!(p99, 90, "p99 index (10*99/100)=9");
+        assert_eq!(p95, 110, "p95 must be 110");
+        assert_eq!(p99, 110, "p99 must be 110");
         assert_eq!(max, 110, "max must be 110");
     }
 
@@ -830,7 +808,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_clears_eval_times_after_snapshot() {
-        let collector = MetricsCollector::new(0, 100);
+        let collector = MetricsCollector::new(0);
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Allow, false, std::iter::empty());
 
@@ -851,7 +829,7 @@ mod tests {
 
     #[test]
     fn record_cache_operations() {
-        let collector = MetricsCollector::new(0, 100);
+        let collector = MetricsCollector::new(0);
         collector.record_cache_hit();
         collector.record_cache_hit();
         collector.record_cache_miss();
@@ -877,7 +855,7 @@ mod tests {
 
     #[test]
     fn record_jwt_validations() {
-        let collector = MetricsCollector::new(0, 100);
+        let collector = MetricsCollector::new(0);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(false);
@@ -902,7 +880,7 @@ mod tests {
 
     #[test]
     fn record_data_operations() {
-        let collector = MetricsCollector::new(0, 100);
+        let collector = MetricsCollector::new(0);
         collector.record_data_push();
         collector.record_data_get();
         collector.record_data_get();
@@ -924,33 +902,6 @@ mod tests {
             Some(&1),
             "remove ops must be 1"
         );
-    }
-
-    #[test]
-    fn reservoir_sampler_bounded_memory() {
-        let mut sampler = ReservoirSampler::new(10);
-        for i in 0..10_000i64 {
-            sampler.insert(i);
-        }
-
-        assert_eq!(
-            sampler.samples.len(),
-            10,
-            "reservoir must not exceed capacity"
-        );
-        assert_eq!(sampler.count, 10_000, "total count must be tracked");
-    }
-
-    #[test]
-    fn reservoir_sampler_drain_resets_state() {
-        let mut sampler = ReservoirSampler::new(5);
-        for i in 0..5i64 {
-            sampler.insert(i);
-        }
-        let drained = sampler.drain();
-        assert_eq!(drained.len(), 5);
-        assert_eq!(sampler.samples.len(), 0);
-        assert_eq!(sampler.count, 0);
     }
 
     #[test]

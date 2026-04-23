@@ -135,7 +135,7 @@ impl Cedarling {
                 .as_ref()
                 .is_some_and(|c| c.telemetry_interval.is_some())
             {
-                MetricsCollector::new(0, config.authorization_config.metric_reservoir_size)
+                MetricsCollector::new(0)
             } else {
                 MetricsCollector::disabled()
             },

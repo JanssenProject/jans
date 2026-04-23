@@ -11,19 +11,12 @@ pub struct AuthorizationConfig {
     /// Claim name used for decision logging (e.g. which JWT claim identifies the token).
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in bootstrap properties documentation.
     pub decision_log_default_jwt_id: String,
-    /// Capacity of the reservoir sampler used to collect evaluation time samples for metrics.
-    pub metric_reservoir_size: usize,
-}
-
-impl AuthorizationConfig {
-    pub(super) const DEFAULT_METRIC_RESERVOIR_SIZE: usize = 1024;
 }
 
 impl Default for AuthorizationConfig {
     fn default() -> Self {
         Self {
             decision_log_default_jwt_id: "jti".to_string(),
-            metric_reservoir_size: Self::DEFAULT_METRIC_RESERVOIR_SIZE,
         }
     }
 }

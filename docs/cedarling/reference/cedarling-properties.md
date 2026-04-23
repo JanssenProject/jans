@@ -102,7 +102,6 @@ These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`
 
 - **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
 - **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
-- **`CEDARLING_METRIC_RESERVOIR_SIZE`** : Maximum size of the metrics reservoir (number of decision time samples to keep). Default value is `1024`.
 
 ## Lock Server integration
 

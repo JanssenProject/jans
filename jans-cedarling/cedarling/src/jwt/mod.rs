@@ -564,7 +564,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -601,7 +601,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -628,7 +628,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -696,7 +696,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -763,7 +763,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -806,7 +806,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -835,7 +835,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0, 100)),
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
