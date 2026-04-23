@@ -33,7 +33,7 @@ public class BenchmarkTest {
         String user = params.get("user");
         String pwd = params.get("password");
         
-        byte[] bytes = Base64.getUrlEncoder().encode((user + ":" + pwd).getBytes());
+        byte[] bytes = Base64.getEncoder().encode((user + ":" + pwd).getBytes());
         nu = new NetworkUtil(params.get("apiBase"), "Basic " + new String(bytes, UTF_8));
         
         entries = Integer.parseInt(params.get("entries"));
@@ -61,13 +61,14 @@ public class BenchmarkTest {
     public void fillIndex() throws Exception {
         
         logger.info("Creating documents...");
-        String payload = "";
+        StringBuilder sb = new StringBuilder();
         
         for (int i = 0; i < entries; i++) {
-            payload += String.format(bulkEntryTemplate, getAString(), 
-                        getADecimal(2024, 2028), ranma.nextFloat() * MAX_GPA);
+            sb.append(String.format(bulkEntryTemplate, getAString(), 
+                        getADecimal(2024, 2028), ranma.nextFloat() * MAX_GPA));
         }
         
+        String payload = sb.toString();
         logger.info("Payload of {} {} documents generated ({} bytes)", entries, indexName, payload.getBytes().length);
         JSONObject obj = nu.sendPost(indexName + "/_bulk?refresh=true&filter_path=-items", 200, payload);
         //refresh param allows the inserted documents to be immediately available for search after the POST is submitted
@@ -166,7 +167,7 @@ public class BenchmarkTest {
     
     private int getADecimal(int min, int max) {
         //Pick a uniformly distributed random number from the range [min, max)
-        return ranma.nextInt(max - min + 1) + min;
+        return ranma.nextInt(max - min) + min;
     }    
     
 }

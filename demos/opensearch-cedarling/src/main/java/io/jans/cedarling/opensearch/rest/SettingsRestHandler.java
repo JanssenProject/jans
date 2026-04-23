@@ -31,7 +31,7 @@ public class SettingsRestHandler extends BaseRestHandler {
     }
 
     @Override
-    public List routes() {
+    public List<RestHandler.Route> routes() {
         return List.of(new RestHandler.Route(GET, PATH), new RestHandler.Route(PUT, PATH));
     }
 

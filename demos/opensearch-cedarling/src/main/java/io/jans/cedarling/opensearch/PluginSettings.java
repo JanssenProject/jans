@@ -30,13 +30,13 @@ public class PluginSettings {
             return null;
         }
 
-        ps.searchActionName = job.optString("searchActionName");        
+        ps.searchActionName = job.optString("searchActionName", null);        
         if (ps.searchActionName == null) {
             logger.warn("Undefined 'searchActionName'");
             return null;
         }
 
-        ps.schemaPrefix = job.optString("schemaPrefix");        
+        ps.schemaPrefix = job.optString("schemaPrefix", null);        
         if (ps.schemaPrefix == null) {
             logger.warn("Undefined 'schemaPrefix'");
             return null;

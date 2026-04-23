@@ -59,7 +59,13 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
             return response;
         }
         
-        List<SearchExtBuilder> exts = request.source().ext();
+        SearchSource source = request.source();
+        if (source == null) {
+            logger.debug("No search source in request");
+            return response;
+        }
+
+        List<SearchExtBuilder> exts = source.ext();
         if (exts.isEmpty()) {
             logger.warn("No 'ext' in request");
             return response;
@@ -71,7 +77,7 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
             int authorizedHitsCount = 0;
             long avgDecisionTime = -1;
             
-            CedarlingSearchExtBuilder cseb = CedarlingSearchExtBuilder.class.cast(exts.get(0));
+            CedarlingSearchExtBuilder cseb = CedarlingSearchExtBuilder.fromExtBuilderList(exts);
             SearchHits searchHits = response.getHits();
             Iterator<SearchHit> it = searchHits.iterator();
 
@@ -88,7 +94,7 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                 long decisionsTook = 0;
                 do {
                     SearchHit hit = it.next();
-                    Map<String, Object> map = hit.getSourceAsMap();
+                    Map<String, Object> map = new HashMap<>(hit.getSourceAsMap());
                     
                     try {
                         appendExtraAttributes(map, pluginSettings.getSchemaPrefix(), hit.getIndex(), hit.getId());
@@ -100,7 +106,8 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                             authorized.add(hit);
                         }
                     } catch (Exception e) {
-                        authorized.add(hit);    //include the result when Cedarling cannot handle it
+                        //include the result when Cedarling cannot handle it?
+                        //authorized.add(hit);
                         logger.error(e.getMessage(), e);
                     }
                 } while (it.hasNext());

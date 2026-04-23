@@ -128,7 +128,7 @@ In the example policy, the `student` entity type is part of the schema. It is ex
 curl -n -H 'Content-Type: application/json' --data-binary @records.txt https://oshost/student/_bulk
 ```
 
-[Here](https://github.com/jgomer2001/pipelines-plugin/raw/refs/heads/main/records.txt) is a sample `records.txt` file. Insert more similar documents varying the `grad_year`. Learn more about Opensearch bulk requests [here](https://docs.opensearch.org/latest/api-reference/document-apis/bulk/).
+[Here](records.txt) is a sample `records.txt` file. Insert more similar documents varying the `grad_year`. Learn more about Opensearch bulk requests [here](https://docs.opensearch.org/latest/api-reference/document-apis/bulk/).
 
 Issue a request to retrieve the documents added so far:
 
@@ -136,13 +136,13 @@ Issue a request to retrieve the documents added so far:
 curl -n -H 'Content-Type: application/json' -d @query.json https://oshost/student/_search?pretty
 ```
 
-[query.json](https://github.com/jgomer2001/pipelines-plugin/raw/refs/heads/main/query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
+[query.json](query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
 
 Note that in real world scenarios, indices already exist and policies are built in conformance afterwards. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
 
 ## Setup a search pipeline
 
-This plugins implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](https://github.com/jgomer2001/pipelines-plugin/raw/refs/heads/main/pipeline.json) to the OpenSearch server and run:
+This plugins implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](pipeline.json) to the OpenSearch server and run:
 
 ```
 curl -n -H 'Content-Type: application/json' -d @pipeline.json -X PUT https://oshost/_search/pipeline/cedarling_search?pretty
@@ -160,7 +160,7 @@ Open Tarp. If this is the first time you use it, add a client there beforehand. 
 - Scope: `openid` and `profile`
 - Check "Display tokens"
 
-After logging in, copy the UserInfo token and paste it in the corresponding section inside file [query_ext.json](https://github.com/jgomer2001/pipelines-plugin/raw/refs/heads/main/query_ext.json). This is an "extended" search query the plugin will have access to so the Cedarling engine can be supplied with tokens and contextual data to make decisions.
+After logging in, copy the UserInfo token and paste it in the corresponding section inside file [query_ext.json](query_ext.json). This is an "extended" search query the plugin will have access to so the Cedarling engine can be supplied with tokens and contextual data to make decisions.
 
 Then, run:
 
@@ -186,7 +186,3 @@ logger.io.jans.cedarling: trace
 ## Benchmarking
 
 See this [page](./benchmark.md).
-
-## TODO:
-
-- Check linting and javadoc warnings
