@@ -340,7 +340,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             try:
                 self.myparent.layout.focus(focused_before)
             except Exception:
-                self.myparent.stop_progressing()
                 self.myparent.layout.focus(self.myparent.center_frame)
 
             if result.lower() == 'yes':
@@ -348,7 +347,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                     self.config_properties_container.remove_item(kwargs['selected'])
                 else:
                     self.module_properties_container.remove_item(kwargs['selected'])
-                self.myparent.stop_progressing()
+
 
             return result
 

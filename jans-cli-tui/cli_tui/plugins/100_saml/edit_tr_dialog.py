@@ -470,8 +470,8 @@ class EditTRDialog(JansGDialog, DialogUtils):
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
 
             cli_args = {'operation_id': operation_id, 'data': data}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            msg = _("Saving Trust Relationship")
+            response = await common_data.app.run_config_api_operation(cli_args, msg=msg)
 
             if response.status_code in (200, 201):
                 self.data = response.json()

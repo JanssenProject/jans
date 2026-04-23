@@ -160,9 +160,8 @@ class Agama(DialogUtils):
         async def coroutine():
 
             cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
-            self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
-            details_response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retrieving details for project {}").format(project_name)
+            details_response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if details_response.status_code == 204:
                 self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
@@ -177,10 +176,8 @@ class Agama(DialogUtils):
 
             async def do_import_config_coroutine(config):
                 cli_args = {'operation_id': 'put-agama-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
-                self.app.start_progressing(_("Saving project configuration..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-
-                self.app.stop_progressing()
+                msg = _("Saving project configuration...")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response.status_code in (200, 202):
                     self.app.show_message(_(common_strings.info), HTML(_("Configuration for project <b>{}</b> was imported successfully.").format(project_name)), tobefocused=fdata.main_dialog)
@@ -224,9 +221,8 @@ class Agama(DialogUtils):
             async def get_current_config_coroutine():
 
                 cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
-                self.app.start_progressing(_("Retrieving project configuration..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Retrieving project configuration...")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 result = None
                 try:
@@ -339,9 +335,8 @@ class Agama(DialogUtils):
 
     async def get_projects_coroutine(self, search_str='', update_container=True, focus_dialog=None):
         cli_args = {'operation_id': 'get-agama-prj'}
-        self.app.start_progressing(_("Retrieving agama projects..."))
-        response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        self.app.stop_progressing()
+        msg = _("Retrieving agama projects...")
+        response = await common_data.app.run_config_api_operation(cli_args, msg)
 
         try:
             self.data = response.json()
@@ -369,9 +364,9 @@ class Agama(DialogUtils):
         def project_uploader(path, project_name):
             async def coroutine():
                 cli_args = {'operation_id': 'post-agama-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
-                self.app.start_progressing(_("Uploading agama project..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg =_("Uploading agama project...")
+                await common_data.app.run_config_api_operation(cli_args, msg)
+
                 if file_path:
                     shutil.rmtree(os.path.dirname(file_path))
                 focus_dialog = None
@@ -456,9 +451,8 @@ class Agama(DialogUtils):
         def do_delete_agama_project(result):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-agama-prj', 'url_suffix': 'name:{}'.format(agama['details']['projectMetadata']['projectName'])}
-                self.app.start_progressing(_("Deleting agama project {}".format(project_name)))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg =_("Deleting agama project {}").format(project_name)
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
 
                 if response:
                     self.app.show_message(_(common_strings.error), HTML(_("Deleting project <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
@@ -480,14 +474,12 @@ class Agama(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': f'name:{project_name}'}
-            self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retrieving details for project {}").format(project_name)
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             cli_args_config = {'operation_id': 'get-agama-prj-configs', 'url_suffix':f'name:{project_name}'}
-            self.app.start_progressing(_("Retrieving project configuration..."))
-            response_config = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args_config)
-            self.app.stop_progressing()
+            msg = _("Retrieving project configuration...")
+            response_config = await common_data.app.run_config_api_operation(cli_args_config, msg)
 
             try:
                 result_config = response_config.json()
@@ -593,7 +585,9 @@ class Agama(DialogUtils):
             def download_project():
                 request.urlretrieve(download_url, download_path)
 
+            self.app.start_progressing(_("Downloading project {}").format(project_name))
             await get_event_loop().run_in_executor(self.app.executor, download_project)
+            self.app.stop_progressing()
 
             download_project_dialog.deploy_msg_label.text = _("Deploying {}").format(download_fn)
 

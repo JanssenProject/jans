@@ -42,8 +42,8 @@ class FidoEntries():
 
         async def delete_fido_devices_coroutine():
             cli_args = {'operation_id': 'delete-fido2-data', 'url_suffix': f'jansId:{seleted_device["id"]}'}
-            common_data.app.start_progressing(_("Deleting FIDO devices ..."))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+            msg = _("Deleting FIDO devices ...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             if response:
                 error_string = ''
                 if isinstance(response,str):
@@ -127,9 +127,9 @@ class FidoEntries():
     def get_user_fido_entries(self, show_dialog=True):
         async def get_fido_devices_coroutine():
             cli_args = {'operation_id': 'get-registration-entries-fido2', 'url_suffix': f'username:{self.user_data["userId"]}'}
-            common_data.app.start_progressing(_("Retreiving FIDO devices ..."))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = _("Retreiving FIDO devices ...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             data = response.json()
             self.fido_entries = data.get('entries', [])
             self.update_users_devices_box()

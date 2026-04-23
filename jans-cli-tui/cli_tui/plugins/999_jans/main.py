@@ -55,7 +55,8 @@ class Plugin:
         """
 
         async def coroutine():
-            self.app.start_progressing()
+            msg = _("Revoking sessions")
+            self.app.start_progressing(msg)
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_object.revoke_session)
             self.app.stop_progressing()
 

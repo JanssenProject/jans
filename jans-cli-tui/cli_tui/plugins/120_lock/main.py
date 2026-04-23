@@ -460,9 +460,9 @@ class Plugin(DialogUtils):
             new_data.update(lock_config)
 
             cli_args = {'operation_id': 'put-lock-properties', 'data': new_data}
-            common_data.app.start_progressing(_("Saving Lock configuration"))
-            response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = _("Saving Lock configuration")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code not in (200, 201):
                 common_data.app.show_message(
                     title=_(common_strings.error),

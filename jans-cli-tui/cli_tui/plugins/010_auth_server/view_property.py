@@ -110,9 +110,8 @@ class ViewProperty(JansGDialog, DialogUtils):
         cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':self.op_type, 'path': self.property_name, 'value': data } ]}
 
         async def coroutine():
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Saving changes")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             self.myparent.app_configuration = response
             self.future.set_result(DialogResult.ACCEPT)
             await self.myparent.get_appconfiguration()

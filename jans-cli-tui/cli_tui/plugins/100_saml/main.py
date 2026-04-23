@@ -23,7 +23,7 @@ from wui_components.jans_label_container import JansLabelContainer
 from edit_tr_dialog import EditTRDialog
 from edit_identity_provider_dialog import EditIdentityProvideDialog
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 
 class Plugin(DialogUtils):
@@ -304,10 +304,10 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'put-saml-properties', 'data': new_config}
-            self.app.start_progressing(_("Saving Jans SAML Configuration..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            msg = _("Saving Jans SAML Configuration...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 200:
-                self.app.stop_progressing()
                 self.app.show_message(title=_(common_strings.success), message=_("Jans SAML configuration was saved."), tobefocused=self.app.center_container)
                 self.config = response.json()
                 self.update_configuration_container()
@@ -328,9 +328,9 @@ class Plugin(DialogUtils):
         def do_delete_tr():
             async def coroutine():
                 cli_args = {'operation_id': 'delete-trust-relationship', 'url_suffix':'id:{}'.format(kwargs['selected'][0])}
-                self.app.start_progressing(_("Deleting trust relationship {}").format(kwargs['selected'][1]))
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Deleting trust relationship {}").format(kwargs['selected'][1])
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
+
                 if response:
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.tr_container)
                 await self.get_trust_relations()
@@ -360,10 +360,10 @@ class Plugin(DialogUtils):
         def do_delete_provider():
             async def coroutine():
                 cli_args = {'operation_id': 'delete-saml-identity-provider', 'url_suffix':'inum:{}'.format(kwargs['selected'][0])}
-                
-                self.app.start_progressing(_("Deleting identity provider {}").format(kwargs['selected'][1]))
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+
+                msg = _("Deleting identity provider {}").format(kwargs['selected'][1])
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
+
                 if response:
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.provider_container)
                 await self.get_identity_providers()

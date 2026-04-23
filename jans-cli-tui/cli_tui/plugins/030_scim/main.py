@@ -4,7 +4,7 @@ from prompt_toolkit.layout.containers import HSplit, VSplit, Window
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button,  Frame
 from wui_components.jans_drop_down import DropDownWidget
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 from utils.multi_lang import _
 
@@ -87,9 +87,8 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'get-scim-config'}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retrieving SCIM configurations")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             self.app_config = response.json()
             self.create_widgets()
             self.app.invalidate()
@@ -117,9 +116,9 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'patch-scim-config', 'data': patche_list}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Patching SCIM Configurations")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code in (200, 201):
                 self.app.show_message(title=_(common_strings.success), message=_("SCIM configuration was saved."), tobefocused=self.app.center_container)
             else:

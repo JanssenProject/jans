@@ -21,8 +21,10 @@ async def get_attributes_coroutine(app) -> None:
     while True:
 
         cli_args = {'operation_id': 'get-attributes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
-        response = await app.loop.run_in_executor(app.executor, app.cli_requests, cli_args)
-
+        response = await common_data.app.run_config_api_operation(
+            cli_args,
+            _("Retreiving attributes from server..."),
+        )
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -53,8 +55,10 @@ async def retrieve_enabled_scripts() -> None:
     common_data.app.logger.info("Backrgound Task: retreiving enabled scripts")
 
     cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
-    response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-
+    response = await common_data.app.run_config_api_operation(
+        cli_args,
+        _("Retreiving enabled scripts from server..."),
+    )
     if response.status_code not in (200, 201):
         common_data.app.show_message(_("Error getting scripts"), str(response.text), tobefocused=common_data.app.center_frame)
         return
@@ -69,9 +73,9 @@ async def get_admin_ui_roles() -> None:
 
     common_data.app.logger.info("Backrgound Task: retreiving admin-ui roles")
     cli_args = {'operation_id': 'get-all-adminui-roles'}
-    common_data.app.start_progressing(_("Retreiving admin UI roles from server..."))
-    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-    common_data.app.stop_progressing()
+    msg = _("Retreiving admin UI roles from server...")
+    response = await common_data.app.run_config_api_operation(cli_args, msg)
+
     if response.status_code not in (200, 201):
         common_data.app.show_message(
             title=_("Error getting Admin-UI Roles"),
@@ -89,9 +93,9 @@ async def get_persistence_type() -> None:
 
     common_data.app.logger.info("Backrgound Task: retreiving persistence type")
     cli_args = {'operation_id': 'get-properties-persistence'}
-    common_data.app.start_progressing(_("Retreiving persistence type from server..."))
-    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-    common_data.app.stop_progressing()
+    msg = _("Retreiving persistence type from server...")
+    response = await common_data.app.run_config_api_operation(cli_args, msg)
+
     if response.status_code not in (200, 201):
         common_data.app.show_message(
             title=_("Error getting persistence type"),
@@ -108,9 +112,9 @@ async def get_asset_services() -> None:
 
     common_data.app.logger.info("Backrgound Task: retreiving asset services")
     cli_args = {'operation_id': 'get-asset-services'}
-    common_data.app.start_progressing(_("Retreiving asset services from server..."))
-    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-    common_data.app.stop_progressing()
+    msg = _("Retreiving asset services from server...")
+    response = await common_data.app.run_config_api_operation(cli_args, msg)
+
     if response.status_code not in (200, 201):
         common_data.app.show_message(
             title=_("Error getting asset services"),
