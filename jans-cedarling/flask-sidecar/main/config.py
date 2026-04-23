@@ -43,23 +43,22 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
-    CEDARLING_BOOTSTRAP_CONFIG = None
     CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
-        "CEDARLING_BOOTSTRAP_CONFIG_FILE", "None"
+        "CEDARLING_BOOTSTRAP_CONFIG_FILE", None
     )
-    if CEDARLING_BOOTSTRAP_CONFIG_FILE == "None":
-        logger.info(
-            "Cedarling bootstrap file not found, falling back to environment variables"
+    if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
+        logger.warning(
+            "Cedarling bootstrap file not found, exiting"
         )
-    else:
-        try:
-            with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-                CEDARLING_BOOTSTRAP_CONFIG = f.read()
-        except OSError as e:
-            logger.warning(
-                f"Unable to read Cedarling bootstrap config from {CEDARLING_BOOTSTRAP_CONFIG_FILE}: {e}. "
-                "Falling back to environment variables"
-            )
+        raise RuntimeError("CEDARLING_BOOTSTRAP_CONFIG_FILE is not set")
+    try:
+        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+            CEDARLING_BOOTSTRAP_CONFIG = f.read()
+    except OSError as e:
+        logger.warning(
+            f"Unable to read Cedarling bootstrap config from {CEDARLING_BOOTSTRAP_CONFIG_FILE}: {e}. Exiting..."
+        )
+        raise RuntimeError("CEDARLING_BOOTSTRAP_CONFIG_FILE is not set")
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
 
