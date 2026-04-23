@@ -224,6 +224,7 @@ jobs:
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
+          PLATFORMS="linux/amd64,linux/arm64"
           if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
@@ -232,6 +233,7 @@ jobs:
           fi
           if [[ "cedarling-opa" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/cedarling_opa
+            PLATFORMS="linux/amd64"
           fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
@@ -263,6 +265,7 @@ jobs:
           fi
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
+          echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
           # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
           if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
             if [[ ${{ github.event_name != 'pull_request' }} ]]; then
@@ -323,7 +326,7 @@ jobs:
         uses: docker/setup-qemu-action@f8607cc714a3191ccc4468d6004a37d0e5a9419a # master
         with:
           image: tonistiigi/binfmt:master
-          platforms: all
+          platforms: ${{ steps.prep.outputs.platforms }}
 
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build
@@ -356,7 +359,7 @@ jobs:
           # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
-          platforms: linux/amd64, linux/arm64
+          platforms: ${{ steps.prep.outputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
           cache-from: type=gha,scope=${{ matrix.docker-images }}
