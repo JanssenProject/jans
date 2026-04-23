@@ -142,12 +142,12 @@ class Plugin(DialogUtils):
                 timeout=30,
                 )
         except Exception as e:
-            raise SSAError(_("Error while retreiving openID Configuration from {}").format(open_id_url)) from e
+            raise SSAError(_("Error while retrieving openID Configuration from {}").format(open_id_url)) from e
 
         try:
             open_id_configuration = response.json()
         except json.JSONDecodeError as e:
-            raise SSAError(_("Error while retreiving OpenID Configuration from {}").format(open_id_url)) from e
+            raise SSAError(_("Error while retrieving OpenID Configuration from {}").format(open_id_url)) from e
 
         jwks_uri = open_id_configuration.get('jwks_uri')
 
@@ -320,7 +320,7 @@ class Plugin(DialogUtils):
             self.logout_exit_cli(clear_all=True)
 
         confirm_dialog = self.app.get_confirm_dialog(
-            message=_("Are you sure clearing TUI configuration? You will permenantly lose session and configurations."),
+            message=_("Are you sure clearing TUI configuration? You will permanently lose session and configurations."),
             confirm_handler=do_clear_config
         )
         self.app.show_jans_dialog(confirm_dialog)
