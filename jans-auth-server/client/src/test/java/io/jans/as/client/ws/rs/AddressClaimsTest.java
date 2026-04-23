@@ -1167,6 +1167,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setJwks(cryptoContext.getJwksAsString());
 

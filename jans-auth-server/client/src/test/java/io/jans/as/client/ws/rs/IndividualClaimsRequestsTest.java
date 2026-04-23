@@ -1231,6 +1231,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
