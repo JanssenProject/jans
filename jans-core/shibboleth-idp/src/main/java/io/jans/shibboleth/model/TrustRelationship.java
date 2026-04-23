@@ -1,9 +1,18 @@
 package io.jans.shibboleth.model;
 
+import io.jans.shibboleth.model.config.profiles.Saml2ArtifactResolutionProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2EcpProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2LogoutProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2SsoProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.ShibbolethSsoProfileConfiguration;
+
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
 import io.jans.shibboleth.model.util.TrustResult;
+
+import java.util.Objects;
 
 
 public class TrustRelationship {
@@ -70,19 +79,34 @@ public class TrustRelationship {
         return version;
     }
 
-    public boolean isNew() {
+    public MetadataSource getMetadataSource() {
 
-        return ! id.isAssigned();
+        return metadataSource;
+    }
+
+    public EntityIds getDiscoveredEntityIds() {
+
+        return discoveredEntityIds;
+    }
+
+    public IdpInstances  getIdpInstances() {
+
+        return idpInstances;
     }
 
     public boolean hasNoMetadataSource() {
 
-        return metadataSource.getType() == MetadataSourceType.NONE;
+        return Objects.equals(metadataSource,NoMetadataSource.getInstance());
     }
 
     public boolean hasAnyDiscoveredEntityIds() {
 
-        return discoveredEntityIds.hasAnyDiscoveredEntityIds();
+        return discoveredEntityIds.hasAny();
+    }
+
+    public boolean hasNoDiscoveredEntityIds() {
+
+        return discoveredEntityIds.hasNone();
     }
 
     public boolean hasAnyRegisteredIdpInstances() {
@@ -95,11 +119,36 @@ public class TrustRelationship {
         return workItems.hasAny();
     }
 
-    public boolean hasNoEnabledProfiles() {
+    public ShibbolethSsoProfileConfiguration getShibbolethSsoProfileConfiguration() {
 
-        
+        return profiles.getShibbolethSso();
     }
 
+    public Saml2AttributeQueryProfileConfiguration getSaml2AttributeQueryProfileConfiguration() {
+
+        return profiles.getSaml2AttributeQuery();
+    }
+
+    public Saml2ArtifactResolutionProfileConfiguration getSaml2ArtifactResolutionProfileConfiguration() {
+
+        return profiles.getSaml2ArtifactResolution();
+    }
+
+    public Saml2EcpProfileConfiguration getSaml2EcpProfileConfiguration() {
+
+        return profiles.getSaml2Ecp();
+    }
+
+    public Saml2SsoProfileConfiguration getSaml2SsoProfileConfiguration() {
+        
+        return profiles.getSaml2Sso();
+    }
+
+    public Saml2LogoutProfileConfiguration getSaml2LogoutProfileConfiguration() {
+
+        return profiles.getSaml2Logout();
+    }
+    
     public static TrustResult<TrustRelationship> create (
         final String displayName,
         final String description,

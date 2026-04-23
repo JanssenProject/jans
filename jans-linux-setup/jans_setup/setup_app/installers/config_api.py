@@ -20,6 +20,7 @@ class ConfigApiInstaller(JettyInstaller):
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'shibboleth-plugin'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/shibboleth-plugin/{0}/shibboleth-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -50,6 +51,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.copy_facter_script()
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.install_plugin('user-mgt')
+        self.install_shibboleth_plugin()
         self.enable()
 
     def copy_facter_script(self):
@@ -256,3 +258,32 @@ class ConfigApiInstaller(JettyInstaller):
         self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_configuration, indent=2), config_api_config_dn)
 
 
+    def install_shibboleth_plugin(self):
+        # temporarily shibboleth installation is here. We will have only config api shibboleth-plugin here.
+
+        # find configuration dn
+        jans_config = base.read_properties_file(Config.jans_properties_fn)
+        idp_config_dn = jans_config['idp_ConfigurationEntryDN']
+
+        templates_dir = os.path.join(Config.templateFolder, 'jans-shibboleth-idp')
+        output_dir =  os.path.join(Config.output_dir,'jans-shibboleth-idp')
+        self.jans_shibboleth_idp_dynamic_config_fn = os.path.join(templates_dir, 'jans-shibboleth-idp-config.json')
+        self.shibboleth_base_dir = os.path.join(Config.opt_dir, 'shibboleth-idp')
+        self.shibboleth_metadata_dir = os.path.join(self.shibboleth_base_dir, 'metadata')
+        self.jans_shibboleth_idp_config_ldif_fn = os.path.join(output_dir, 'config.ldif')
+
+        if not os.path.exists(self.shibboleth_metadata_dir):
+            self.createDirs(self.shibboleth_metadata_dir)
+
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.shibboleth_metadata_dir])
+        self.run([paths.cmd_chmod, '0760', self.shibboleth_metadata_dir])
+
+        self.install_plugin('shibboleth')
+
+        # populate these
+        Config.templateRenderingDict['shibboleth_idp_scope'] = ''
+        Config.templateRenderingDict['shibboleth_idp_entity_id'] = ''
+        Config.templateRenderingDict['shibboleth_dynamic_conf_base64'] = self.generate_base64_file(self.jans_shibboleth_idp_dynamic_config_fn, 1)
+        self.renderTemplateInOut(self.jans_shibboleth_idp_config_ldif_fn, templates_dir, output_dir)
+
+        self.dbUtils.import_ldif([self.jans_shibboleth_idp_config_ldif_fn])

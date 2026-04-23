@@ -3,12 +3,16 @@ package io.jans.shibboleth.model;
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
+import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.util.TrustResult;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
+import static io.jans.shibboleth.model.TrustRelationshipAssert.*;
+import static io.jans.shibboleth.model.config.profiles.ProfileConfigurationAssert.*;
+
 
 
 public class TrustRelationshipTest {
@@ -57,26 +61,36 @@ public class TrustRelationshipTest {
         assertTrue(result.isSuccess());
 
         TrustRelationship trustrelationship = result.getValue();
-        assertThat(trustrelationship.isNew()).isTrue();
-        assertThat(trustrelationship.getDisplayName()).isEqualTo(io.jans.shibboleth.model.core.DisplayName.of("TestTR").getValue());
-        assertThat(trustrelationship.getDescription()).isEqualTo(Description.of("Test TR"));
+        assertThat(trustrelationship).isNew()
+            .hasDisplayName("TestTR")
+            .hasDescription("Test TR")
+            .isOfNature(TrustNature.INDIVIDUAL)
+            .hasStatus(TrustStatus.DRAFT)
+            .isVersion(1)
+            .hasNoMetadataSource()
+            .hasNoDiscoveredEntityIds()
+            .hasNoRegisteredIdpInstances()
+            .hasNoWorkItem();
         
-        assertThat(trustrelationship.getNature()).isEqualTo(TrustNature.INDIVIDUAL);
-        assertThat(trustrelationship.getStatus()).isEqualTo(TrustStatus.DRAFT);
-        assertThat(trustrelationship.getVersion()).isEqualTo(1);
+        assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
+            .isInactive()
+            .usesDefaultConfiguration();
         
-        assertThat(trustrelationship.hasNoMetadataSource()).isTrue();
-        assertThat(trustrelationship.hasAnyDiscoveredEntityIds()).isFalse();
-        assertThat(trustrelationship.hasAnyRegisteredIdpInstances()).isFalse();
-        assertThat(trustrelationship.hasAnyWorkItem()).isFalse();
+        assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ATTRIBUTE_QUERY)
+            .isInactive()
+            .usesDefaultConfiguration();
 
-        assertThat(trustrelationship.hasNoEnabledProfiles()).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SAML2_SSO)).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SAML2_ECP)).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SAML2_ATTRIBUTE_QUERY)).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SAML2_ATTRIBUTE_RESOLUTION)).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SHIBBOLETH_SSO)).isTrue();
-        assertThat(trustrelationship.isUsingDefaultProfileConfigurationFor(ProfileType.SAML2_LOGOUT)).isTrue();    
+        assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ARTIFACT_RESOLUTION)
+            .isInactive()
+            .usesDefaultConfiguration();
+        
+        assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ECP)
+            .isInactive()
+            .usesDefaultConfiguration();
+
+        assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_LOGOUT)
+            .isInactive()
+            .usesDefaultConfiguration();
     }
 
 
