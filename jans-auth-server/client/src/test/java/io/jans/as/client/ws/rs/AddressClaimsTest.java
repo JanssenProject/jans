@@ -83,15 +83,14 @@ public class AddressClaimsTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestDefault(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestDefault");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -100,7 +99,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.addressScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -113,8 +112,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -122,8 +119,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.RS256));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -411,15 +408,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestRS256");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -432,7 +428,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -444,7 +440,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -453,8 +448,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.RS256));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -493,14 +488,13 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestRS384(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestRS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -514,7 +508,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -526,8 +520,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -535,8 +527,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS384, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.RS384));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -575,15 +567,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestRS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestRS512");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -595,7 +586,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -608,8 +599,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -617,8 +606,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS512, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.RS512));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -657,15 +646,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestES256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestES256");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -677,7 +665,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -690,8 +678,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -699,8 +685,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES256, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.ES256));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -746,15 +732,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestES384");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -766,7 +751,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -779,8 +764,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -788,8 +771,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES384, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.ES384));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -835,15 +818,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestES512");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -855,7 +837,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -868,8 +850,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -877,8 +857,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.ES512, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.ES512));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -924,14 +904,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestPS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestPS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -944,8 +924,8 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -957,8 +937,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -966,8 +944,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.PS256));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -1006,14 +984,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestPS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1026,8 +1004,8 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1039,8 +1017,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1048,8 +1024,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS384, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.PS384));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -1088,14 +1064,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestPS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1108,7 +1084,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1121,8 +1097,6 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1130,8 +1104,8 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS512, cryptoContext.getCryptoProvider());
+        jwtAuthorizationRequest.setKeyId(cryptoContext.getKeyId(Algorithm.PS512));
         addAddressClaims(jwtAuthorizationRequest);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -1220,7 +1194,7 @@ public class AddressClaimsTest extends BaseTest {
         String authJwt = TestCryptoContext.createNestedJwe(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
-                cryptoContext.getRs256KeyId(),
+                cryptoContext.getKeyId(Algorithm.RS256),
                 KeyEncryptionAlgorithm.A128KW,
                 BlockEncryptionAlgorithm.A128GCM,
                 clientSecret,
@@ -1312,7 +1286,7 @@ public class AddressClaimsTest extends BaseTest {
         String authJwt = TestCryptoContext.createNestedJwe(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
-                cryptoContext.getRs256KeyId(),
+                cryptoContext.getKeyId(Algorithm.RS256),
                 KeyEncryptionAlgorithm.A256KW,
                 BlockEncryptionAlgorithm.A256GCM,
                 clientSecret,
@@ -1354,15 +1328,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA1_5_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestAlgRSA15EncA128CBCPLUSHS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1372,14 +1345,15 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.addressScopes);
-        registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1398,7 +1372,6 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1407,11 +1380,21 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        addAddressClaims(jwtAuthorizationRequest);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        List<Claim> idTokenClaims = createIdTokenAddressClaims();
+        List<Claim> userInfoClaims = createUserInfoAddressClaims();
+
+        String clientKeyId = cryptoContext.getKeyId(Algorithm.RS256);
+        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                clientKeyId,
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
+                serverKeyId,
+                jwks,
+                cryptoContext.getCryptoProvider(),
+                idTokenClaims,
+                userInfoClaims);
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -1426,7 +1409,7 @@ public class AddressClaimsTest extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 4. Validate id_token
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(cryptoContext.getKeyId(Algorithm.RSA1_5));
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
@@ -1449,15 +1432,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA1_5_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestAlgRSA15EncA256CBCPLUSHS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1467,14 +1449,15 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.addressScopes);
-        registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1493,7 +1476,6 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1502,11 +1484,20 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        addAddressClaims(jwtAuthorizationRequest);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        List<Claim> idTokenClaims = createIdTokenAddressClaims();
+        List<Claim> userInfoClaims = createUserInfoAddressClaims();
+
+        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
+                serverKeyId,
+                jwks,
+                cryptoContext.getCryptoProvider(),
+                idTokenClaims,
+                userInfoClaims);
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -1521,7 +1512,7 @@ public class AddressClaimsTest extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 4. Validate id_token
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(cryptoContext.getKeyId(Algorithm.RSA1_5));
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
@@ -1544,16 +1535,14 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA_OAEP_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestAlgRSAOAEPEncA256GCM");
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -1562,13 +1551,14 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.addressScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1588,7 +1578,6 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1597,11 +1586,20 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        addAddressClaims(jwtAuthorizationRequest);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        List<Claim> idTokenClaims = createIdTokenAddressClaims();
+        List<Claim> userInfoClaims = createUserInfoAddressClaims();
+
+        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM,
+                serverKeyId,
+                jwks,
+                cryptoContext.getCryptoProvider(),
+                idTokenClaims,
+                userInfoClaims);
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -1616,7 +1614,7 @@ public class AddressClaimsTest extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 4. Validate id_token
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(cryptoContext.getKeyId(Algorithm.RSA_OAEP));
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
