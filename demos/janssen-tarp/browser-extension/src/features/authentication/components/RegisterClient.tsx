@@ -356,12 +356,6 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-          },
-        }}
         className="form-container"
       >
         <DialogTitle>Register OIDC Client</DialogTitle>
