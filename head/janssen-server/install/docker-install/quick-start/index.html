@@ -19,7 +19,7 @@
         <link rel="prev" href="../../helm-install/post-install/">
       
       
-        <link rel="next" href="../compose/">
+        <link rel="next" href="../../setup/">
       
       
         
@@ -1232,8 +1232,6 @@
       
         
       
-        
-      
     
     
     
@@ -1404,34 +1402,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../compose/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Docker Compose
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2245,6 +2215,20 @@
       
       
       
+        <span class="md-tag">aio</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">all-in-one</span>
+      
+    
+      
+      
+      
+      
         <span class="md-tag">docker</span>
       
     
@@ -2272,80 +2256,92 @@
 <h1 id="docker-deployments-quick-start">Docker Deployments Quick Start<a class="headerlink" href="#docker-deployments-quick-start" title="Permanent link">#</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>This image is for testing and development purposes only. Use Janssen <a href="https://github.com/JanssenProject/jans/tree/main/charts/janssen">helm charts</a> for production setups.</strong></p>
+<p><strong>This image is for testing and development purposes only. Use Janssen <a href="https://docs.jans.io/stable/janssen-server/install/helm-install/">helm deployments</a> for production setups.</strong></p>
 </div>
-<p>The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server.</p>
+<p>The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server using the All-In-One (AIO) script.</p>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>System should meet <a href="../../vm-install/vm-requirements/">minimum VM system requirements</a></p>
+<p>System should meet the following requirements:</p>
+<div class="highlight"><pre><span></span><code>- 8 GB RAM
+- 4 CPU
+- 20 GB Disk
+</code></pre></div>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
-<p>Installation depends on a <a href="https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables">set of environment variables</a>.
-These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.</p>
-<p>Run this command to start the installation:</p>
+<p>To deploy the AIO Janssen Server, first download the installation script and make it executable:</p>
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh<span class="w"> </span>
+chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.sh
+</code></pre></div>
+<p>Next, execute the script. You will need to provide your fully qualified domain name (FQDN), the persistence type (<code>MYSQL</code> or <code>PGSQL</code>), the Janssen version (leave empty <code>""</code> for the default), and your Virtual Machine's IP address in place of <code>&lt;VM_IP&gt;</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">MySQL</label><label for="__tabbed_1_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>MYSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>main
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>start_janssen_aio_demo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>MYSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&lt;VM_IP&gt;
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>PGSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>main
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>start_janssen_aio_demo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>PGSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&lt;VM_IP&gt;
 </code></pre></div>
 </div>
 </div>
 </div>
-<p>Console messages like below confirms the successful installation:</p>
-<div class="highlight"><pre><span></span><code>[+] Running 3/3
- ⠿ Network docker-jans-monolith_cloud_bridge  Created                      0.0s
- ⠿ Container docker-jans-monolith-mysql-1     Started                      0.6s
- ⠿ Container docker-jans-monolith-jans-1      Started                      0.9s
-
-Waiting for the Janssen server to come up. Depending on the resources it may take 3-5 mins for the services to be up.
-Testing openid-configuration endpoint.. 
+<p>Console messages like below will confirm the successful startup and readiness of the services:</p>
+<div class="highlight"><pre><span></span><code>[I] Janssen is starting up!
+[I] To check the progress, run &#39;docker compose logs -f&#39; in a separate terminal
+[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ...
+[I] Waiting 120 seconds for services to initialize before starting health checks. Hang on...
+[W] Janssen is not ready yet; retrying in 10 seconds ...
+[I] Janssen is ready to accept request
 </code></pre></div>
-<p>As can be seen, the install script also accesses the well-known endpoints to verify that Janssen Server is responsive.</p>
 <h2 id="verify-installation-by-accessing-standard-endpoints">Verify Installation By Accessing Standard Endpoints<a class="headerlink" href="#verify-installation-by-accessing-standard-endpoints" title="Permanent link">#</a></h2>
-<p>To access Janssen Server standard endpoints from outside of the Docker container, systems <code>/etc/hosts</code> file needs to be updated. Open the file and add the IP domain record which should be the IP of the instance docker is installed. And the domain used in the env above <code>CN_HOSTNAME</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># For-example</span>
+<p>To access Janssen Server standard endpoints from outside of the Docker container, your system's <code>/etc/hosts</code> file needs to be updated. Open the file and add the IP domain record, which should be the IP of the instance where Docker is installed (your <code>&lt;VM_IP&gt;</code>), followed by the hostname used during installation (<code>demoexample.jans.io</code>).</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># For example</span>
 <span class="m">172</span>.22.0.3<span class="w">      </span>demoexample.jans.io
 </code></pre></div>
-<p>After adding the record, hit the standard endpoints such as</p>
+<p>After adding the record, test the standard endpoints such as:</p>
 <div class="highlight"><pre><span></span><code>https://demoexample.jans.io/.well-known/openid-configuration
 </code></pre></div>
 <h2 id="configure-janssen-server">Configure Janssen Server<a class="headerlink" href="#configure-janssen-server" title="Permanent link">#</a></h2>
+<p>Janssen Server can be configured using the Text-based User Interface (TUI). </p>
 <ol>
 <li>
-<p>Access the Docker container shell using:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-ti<span class="w"> </span>docker-jans-monolith-jans-1<span class="w"> </span>bash
+<p>Download the <code>jans-cli-tui</code>:</p>
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
 </code></pre></div>
 </li>
 <li>
-<p>Grab a pair of client_id and client_pw(secret) from <code>setup.properties</code> or <code>/opt/jans/jans-setup/setup.properties.last</code></p>
+<p>To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers. </p>
+<p>Run the following commands on your host machine to store the credentials in environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">FQDN</span><span class="o">=</span><span class="s2">&quot;demoexample.jans.io&quot;</span><span class="w"> </span><span class="c1"># Replace with your actual FQDN</span>
+
+<span class="c1"># Extract Client ID from Consul</span>
+<span class="nv">TUI_CLIENT_ID</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>consul<span class="w"> </span>consul<span class="w"> </span>kv<span class="w"> </span>get<span class="w"> </span>jans/config/tui_client_id<span class="k">)</span>
+
+<span class="c1"># Extract Root Token and Client Secret from Vault</span>
+<span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>vault<span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;Initial Root Token&#39;</span><span class="w"> </span>/vault/config/vault_key_token.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="w"> </span><span class="s1">&#39;: &#39;</span><span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
+<span class="nv">TUI_CLIENT_SECRET</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="nv">$VAULT_TOKEN</span><span class="w"> </span>vault<span class="w"> </span>vault<span class="w"> </span><span class="nb">read</span><span class="w"> </span>-field<span class="o">=</span>value<span class="w"> </span>secret/jans/tui_client_pw<span class="k">)</span>
+</code></pre></div>
 </li>
 <li>
-<p>Use the CLI tools located under <code>/opt/jans/jans-cli/</code> to configure Janssen Server as needed. For example you can run the <a href="../../../config-guide/config-tools/jans-tui/">TUI</a>:
-    <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>tui
-</code></pre></div></p>
+<p>Connect to the TUI using the downloaded <code>.pyz</code> file and the extracted credentials. <em>(Note: add <code>-noverify</code> if you are using the self-signed certificates generated by the demo script).</em></p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>jans-cli-tui-linux-ubuntu-X86-64.pyz<span class="w"> </span>--host<span class="w"> </span><span class="nv">$FQDN</span><span class="w"> </span>--client-id<span class="w"> </span><span class="nv">$TUI_CLIENT_ID</span><span class="w"> </span>--client-secret<span class="w"> </span><span class="nv">$TUI_CLIENT_SECRET</span><span class="w"> </span>-noverify
+</code></pre></div>
+</li>
+<li>
+<p>Note that the default <code>admin</code> password is <code>Test1234#</code></p>
 </li>
 </ol>
 <h2 id="uninstall-remove-the-janssen-server">Uninstall / Remove the Janssen Server<a class="headerlink" href="#uninstall-remove-the-janssen-server" title="Permanent link">#</a></h2>
-<p>This docker based installation uses <code>docker compose</code> under the hood to create containers. Hence uninstalling Janssen server involves invoking <code>docker compose</code> with appropriate yml file. Run command below to stop and remove containers.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">MySQL</label><label for="__tabbed_2_2">PostgreSQL</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml<span class="w"> </span>down<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/tmp/jans
+<p>This Docker-based installation uses <code>docker compose</code> under the hood to create the network and containers, and it stores volume data and templates in a local <code>jans-aio-demo</code> directory.</p>
+<p>Run the command below in the same directory where you executed the installation script to stop the containers, remove them, and clean up the generated files and volumes:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>down<span class="w"> </span>-v
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml<span class="w"> </span>down<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/tmp/jans
-</code></pre></div>
-</div>
-</div>
-</div>
-<p>Console messages like below confirms the successful removal:</p>
-<div class="highlight"><pre><span></span><code>[+] Running 3/3
- ⠿ Container docker-jans-monolith-jans-1      Removed                   10.5s
- ⠿ Container docker-jans-monolith-mysql-1     Removed                    0.9s
- ⠿ Network docker-jans-monolith_cloud_bridge  Removed                    0.1s
+<p>Console messages like below confirm the successful removal:</p>
+<div class="highlight"><pre><span></span><code>[+] down 6/6
+✔ Container jans        Removed                                                                                                            3.8s
+✔ Container traefik     Removed                                                                                                            0.9s
+✔ Container mysql       Removed                                                                                                            3.8s
+✔ Container vault       Removed                                                                                                           10.4s
+✔ Container consul      Removed                                                                                                            0.2s
+✔ Network jans-aio-demo Removed                                                                                                            0.1s
 </code></pre></div>
 
 
@@ -2369,7 +2365,7 @@ Testing openid-configuration endpoint..
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 21, 2026 14:21:52 UTC"><span class="timeago" datetime="2026-01-21T14:21:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 21, 2026 14:21:52 UTC">2026-01-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 23, 2026 05:06:26 UTC"><span class="timeago" datetime="2026-04-23T05:06:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 23, 2026 05:06:26 UTC">2026-04-23</span>
   </span>
 
     
