@@ -14,6 +14,7 @@ use url::Url;
 
 use crate::{
     LogLevel, LogWriter,
+    async_sleep::sleep,
     jwt::{
         IssuerConfig, TokenCache,
         decode::{DecodeJwtError, decode_jwt},
@@ -134,7 +135,7 @@ async fn keep_status_list_updated<F>(
     F: Fn(),
 {
     loop {
-        tokio::time::sleep(Duration::from_secs(ttl)).await;
+        sleep(Duration::from_secs(ttl)).await;
 
         let status_list_jwt = match StatusListJwtStr::get_from_url(&status_list_url).await {
             Ok(jwt) => jwt,

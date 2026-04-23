@@ -30,3 +30,17 @@
         - get_all
         - set
         - set_all
+
+::: jans.pycloudlib.secret.aws_secret.AwsSecret
+    options:
+      members:
+        - get
+        - get_all
+        - set
+        - set_all
+
+::: jans.pycloudlib.secret.file_secret.FileSecret
+    options:
+      members:
+        - get
+        - get_all

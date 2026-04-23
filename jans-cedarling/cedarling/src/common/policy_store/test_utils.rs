@@ -129,6 +129,20 @@ impl PolicyStoreTestBuilder {
         self
     }
 
+    /// Add a template file.
+    ///
+    /// # Arguments
+    /// * `name` - Filename without .cedar extension
+    /// * `content` - Cedar template content with @id annotation and slot(s)
+    pub(crate) fn with_template(
+        mut self,
+        name: impl Into<String>,
+        content: impl Into<String>,
+    ) -> Self {
+        self.templates.insert(name.into(), content.into());
+        self
+    }
+
     /// Add an entity file.
     ///
     /// # Arguments

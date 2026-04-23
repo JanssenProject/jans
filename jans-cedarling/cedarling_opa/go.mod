@@ -3,7 +3,7 @@ module github.com/JanssenProject/jans/jans-cedarling/cedarling_opa
 go 1.25.1
 
 require (
-	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260303125924-27dd703ba1d4
+	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260416194629-3a7db527e089
 	github.com/open-policy-agent/opa v1.14.0
 )
 
@@ -38,7 +38,7 @@ require (
 	github.com/huandu/go-clone v1.7.3 // indirect
 	github.com/huandu/go-sqlbuilder v1.39.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/ihciah/rust2go v0.0.0-20250427082441-4d6d8d2c2959 // indirect
+	github.com/ihciah/rust2go v0.0.0-20260314034108-6f06b0697c1b // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect

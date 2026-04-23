@@ -415,16 +415,13 @@ Example usage:
 
 ```js
 let input = {
-  principals: [
-    {
-      cedar_entity_mapping: {
-        entity_type: "Jans::User",
-        id: "user123"
-      },
-      email: "user@example.com",
-      role: ["admin"]
-    }
-  ],
+  principal: {
+    cedar_entity_mapping: {
+      entity_type: "Jans::User",
+      id: "user123"
+    },
+    email: "user@example.com"
+  },
   action: "Jans::Action::\"View\"",
   resource: {
     cedar_entity_mapping: {
@@ -445,19 +442,64 @@ let input = {
 let result = await cedarling.authorize_unsigned(input);
 ```
 
-Each principal in `principals` uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes. Roles are extracted from the attribute specified by `CEDARLING_UNSIGNED_ROLE_ID_SRC` (default: `"role"`).
+The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
 
-The result contains per-principal Cedar responses combined using the [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md) logic:
+The result contains a single Cedar response:
 
 ```js
 {
-  decision: true,           // Combined boolean decision
+  decision: true,           // Boolean decision (Allow = true, Deny = false)
   request_id: "...",        // Tracing ID
-  principals: {             // Per-principal Cedar responses
-    "Jans::User": { ... }
-  }
+  response: { ... }         // Cedar Response with decision() and diagnostics()
 }
 ```
+
+### Optional principal and partial evaluation
+
+The `principal` field is optional. When omitted, Cedarling uses Cedar's partial evaluator to evaluate the request against all policies.
+
+- Policies whose scope and conditions do not depend on the principal can still resolve to `Allow` even without a principal.
+- Policies that do depend on the principal produce _residuals_ — partially-evaluated expressions that cannot decide without the missing principal information.
+- If any residual policy could otherwise permit the request, Cedarling **fails closed** and returns `Decision::Deny`. The IDs of the residual policies are surfaced in `diagnostics().reason()` so the caller can see which policies were blocked by the missing principal.
+
+This is useful for evaluating purely context- or resource-driven policies (for example, token-based decisions handed off by an upstream layer) without forcing the caller to synthesize a placeholder principal. The same partial-evaluation path is used internally by `authorize_multi_issuer`.
+
+Example without a principal:
+
+```js
+let input = {
+  // principal is omitted
+  action: "Jans::Action::\"View\"",
+  resource: {
+    cedar_entity_mapping: {
+      entity_type: "Jans::Issue",
+      id: "ticket-10101"
+    },
+    owner: "bob@acme.com",
+    org_id: "Acme"
+  },
+  context: {
+    ip_address: "54.9.21.201",
+    time: 1719266610
+  }
+};
+
+let result = await cedarling.authorize_unsigned(input);
+```
+
+In Rust, pass `principal: None`:
+
+```rust
+let request = RequestUnsigned {
+    principal: None,
+    action: "Jans::Action::\"View\"".to_string(),
+    resource: issue_entity,
+    context: json!({ "ip_address": "54.9.21.201" }),
+};
+let result = cedarling.authorize_unsigned(request).await?;
+```
+
+The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
 
 ## Policy Introspection
 
@@ -469,10 +511,10 @@ Cedarling also provides methods to discover which policies are potentially appli
 
 Two methods are available, corresponding to the two authorization methods:
 
-- `get_matching_policies_unsigned(principals, actions, resources)` — for unsigned authorization
+- `get_matching_policies_unsigned(principal, actions, resources)` — for unsigned authorization. `principal` is optional (pass `None`/`null`) to list policies that match on action and resource regardless of principal.
 - `get_matching_policies_multi_issuer(tokens, actions, resources)` — for multi-issuer authorization
 
-Both accept arrays of principals (or tokens), actions, and resources, and return a list of `PolicyMetadata` objects containing the policy `id`, `annotations`, and `source` code.
+Both return a list of `PolicyMetadata` objects containing the policy `id`, `annotations`, and `source` code.
 
 **Important:** These methods perform scope-level filtering only (principal type, action, resource type). Policies with `when`/`unless` body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.
 

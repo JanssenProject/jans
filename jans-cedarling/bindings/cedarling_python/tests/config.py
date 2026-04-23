@@ -21,7 +21,6 @@ def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_tt
 
     config = {
         "CEDARLING_APPLICATION_NAME": "TestApp",
-        "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
         "CEDARLING_POLICY_STORE_LOCAL_FN": policy_store_location,
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",

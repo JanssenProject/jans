@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -33,12 +33,12 @@ jobs:
         workspaces: jans-cedarling
     - name: Run Tests (without default features)
       working-directory: jans-cedarling/cedarling
-      run: cargo test --no-default-features
+      run: cargo test --locked --no-default-features
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
-      run: cargo test --workspace
+      run: cargo test --locked --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
       run: cargo +stable clippy --workspace --all-targets -- -D warnings
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -66,7 +66,7 @@ jobs:
       uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
         workspaces: jans-cedarling
-    - uses: cargo-bins/cargo-binstall@f8ce4d55b131f4a1e373b8747ca6b6a54133ae5a # v1.18.0
+    - uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37 # v1.18.1
     - name: Install dylint
       run: |
         export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
 
@@ -175,7 +175,7 @@ jobs:
         python-version: ["3.10", "3.11"]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -189,6 +189,10 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: "1.95.0"
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
       run: tox
@@ -197,7 +201,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -219,7 +223,7 @@ jobs:
     - name: Build Rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        cargo build -r -p cedarling_go
+        cargo build -r --locked -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
@@ -229,3 +233,34 @@ jobs:
       run: |
         export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
         go test .
+
+  c_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Build Rust C library
+      working-directory: jans-cedarling/bindings/cedarling_c
+      run: |
+        cargo build --release --locked -p cedarling_c
+        test -f target/include/cedarling_c.h || (echo "header missing" && exit 1)
+    - name: Build and run C tests
+      working-directory: jans-cedarling/bindings/cedarling_c
+      run: |
+        export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
+        cd tests
+        make
+        ./test_cedarling

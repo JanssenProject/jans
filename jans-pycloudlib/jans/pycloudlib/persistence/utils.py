@@ -57,7 +57,6 @@ def render_base_properties(src: str, dest: str) -> None:
         f.write(rendered_txt)
 
 
-#: Supported persistence types.
 PERSISTENCE_TYPES = (
     "sql",
     "hybrid",
@@ -78,11 +77,7 @@ PERSISTENCE_SQL_DIALECTS = (
     "mysql",
     "pgsql",
 )
-"""SQL dialects.
-
-!!! warning
-    The `pgsql` dialect is in experimental phase and may introduce bugs
-    hence it is not recommended at the moment."""
+"""SQL dialects."""
 
 RDN_MAPPING = {
     "default": "",

@@ -1,0 +1,11 @@
+{
+  "response_processors": [
+    {
+      "cedarling" : {
+        "tag" : "cedarling_response",
+        "description" : "Demo processor",
+        "ignore_failure": false
+      }
+    }
+  ]
+}
