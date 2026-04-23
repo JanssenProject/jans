@@ -73,8 +73,6 @@ opensearchplugin {
     name pluginName
     description pluginDescription
     classname "${packagePath}.${pathToPlugin}.${pluginClassName}"
-    licenseFile rootProject.file('LICENSE.txt')
-    noticeFile rootProject.file('NOTICE.txt')
     version "1.0.0-SNAPSHOT"
 }
 
