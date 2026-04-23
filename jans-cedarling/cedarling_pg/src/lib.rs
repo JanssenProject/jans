@@ -9,6 +9,7 @@ mod authorized;
 mod authz_bridge;
 mod authz_cache;
 mod engine;
+mod extension_log;
 mod guc_config;
 mod resource;
 mod token_bundle;

@@ -134,7 +134,7 @@ unsafe fn register_gucs_inner() {
     GucRegistry::define_enum_guc(
         c"cedarling.log_level",
         c"Minimum log level for extension diagnostics.",
-        c"One of debug, info, warn, error.",
+        c"One of debug, info, warn, error. Controls server log output from cedarling_authorized / cedarling_authorize_unsigned (debug is most verbose). Messages never include raw JWTs.",
         &LOG_LEVEL,
         GucContext::Userset,
         GucFlags::empty(),

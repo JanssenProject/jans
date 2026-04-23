@@ -11,6 +11,7 @@ use pgrx::prelude::*;
 use crate::authz_bridge;
 use crate::authz_cache;
 use crate::engine;
+use crate::extension_log;
 use crate::guc_config::{self, CedarlingFailMode};
 
 /// Returns whether Cedarling **allows** the request (`true` = allow, `false` = deny).
@@ -25,6 +26,9 @@ use crate::guc_config::{self, CedarlingFailMode};
 /// **Errors:** JWT / engine / parse failures are **not** raised as SQL errors by default: the
 /// function returns `false` when [`CedarlingFailMode::Closed`] and `true` when
 /// [`CedarlingFailMode::Open`] (“fail open”), per `cedarling.fail_mode`.
+///
+/// **Logging:** structured messages go to the server log at or above [`guc_config::CedarlingLogLevelGuc`]
+/// (`cedarling.log_level`). JWT material is never logged.
 #[pg_extern]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps parameters from PostgreSQL calling convention
 pub fn cedarling_authorized(resource_json: &str, token_bundle: Option<&str>, action: &str) -> bool {
@@ -40,15 +44,27 @@ fn cedarling_authorized_inner(
 
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Debug,
+            "cedarling_authorized: empty action after trim",
+        );
         return fail_mode_to_bool_on_error(fail_mode);
     }
 
     let resource_trimmed = resource_json.trim();
     if resource_trimmed.is_empty() {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Debug,
+            "cedarling_authorized: empty resource JSON after trim",
+        );
         return fail_mode_to_bool_on_error(fail_mode);
     }
 
     let Some(token_str) = resolve_token_bundle(token_bundle) else {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Debug,
+            "cedarling_authorized: no token bundle (argument blank and cedarling.tokens unset)",
+        );
         return fail_mode_to_bool_on_error(fail_mode);
     };
 
@@ -63,8 +79,12 @@ fn cedarling_authorized_inner(
         return decision;
     }
 
-    let Ok(engine) = engine::global_cedarling() else {
-        return fail_mode_to_bool_on_error(fail_mode);
+    let engine = match engine::global_cedarling() {
+        Ok(e) => e,
+        Err(ref e) => {
+            extension_log::log_engine_failure(e);
+            return fail_mode_to_bool_on_error(fail_mode);
+        },
     };
 
     match authz_bridge::authorize_multi_issuer_decision(
@@ -77,7 +97,10 @@ fn cedarling_authorized_inner(
             authz_cache::global_cache().store(ttl, cache_key, decision);
             decision
         },
-        Err(_) => fail_mode_to_bool_on_error(fail_mode),
+        Err(ref e) => {
+            extension_log::log_multi_issuer_bridge_failure(e);
+            fail_mode_to_bool_on_error(fail_mode)
+        },
     }
 }
 
@@ -86,6 +109,8 @@ fn cedarling_authorized_inner(
 /// - **`principal_json`**: `NULL` or blank → no principal (Cedar partial-evaluation where applicable).
 /// - **`resource_json`**: required [`EntityData`](cedarling::EntityData) JSON.
 /// - **`context_json`**: Cedar request context; must be a JSON **object** (use `"{}"` if unused).
+///
+/// **Logging:** same rules as [`cedarling_authorized`] (`cedarling.log_level`, no secrets).
 #[pg_extern]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps parameters from PostgreSQL calling convention
 pub fn cedarling_authorize_unsigned(
@@ -107,11 +132,19 @@ fn cedarling_authorize_unsigned_inner(
 
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Debug,
+            "cedarling_authorize_unsigned: empty action after trim",
+        );
         return fail_mode_to_bool_on_error(fail_mode);
     }
 
     let resource_trimmed = resource_json.trim();
     if resource_trimmed.is_empty() {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Debug,
+            "cedarling_authorize_unsigned: empty resource JSON after trim",
+        );
         return fail_mode_to_bool_on_error(fail_mode);
     }
 
@@ -133,17 +166,25 @@ fn cedarling_authorize_unsigned_inner(
         return decision;
     }
 
-    let Ok(request) = authz_bridge::unsigned_request_from_json_parts(
+    let request = match authz_bridge::unsigned_request_from_json_parts(
         principal_json,
         resource_trimmed,
         action_trimmed,
         context_json,
-    ) else {
-        return fail_mode_to_bool_on_error(fail_mode);
+    ) {
+        Ok(r) => r,
+        Err(ref e) => {
+            extension_log::log_unsigned_bridge_failure(e);
+            return fail_mode_to_bool_on_error(fail_mode);
+        },
     };
 
-    let Ok(engine) = engine::global_cedarling() else {
-        return fail_mode_to_bool_on_error(fail_mode);
+    let engine = match engine::global_cedarling() {
+        Ok(e) => e,
+        Err(ref e) => {
+            extension_log::log_engine_failure(e);
+            return fail_mode_to_bool_on_error(fail_mode);
+        },
     };
 
     match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
@@ -151,7 +192,10 @@ fn cedarling_authorize_unsigned_inner(
             authz_cache::global_cache().store(ttl, cache_key, decision);
             decision
         },
-        Err(_) => fail_mode_to_bool_on_error(fail_mode),
+        Err(ref e) => {
+            extension_log::log_unsigned_bridge_failure(e);
+            fail_mode_to_bool_on_error(fail_mode)
+        },
     }
 }
 
