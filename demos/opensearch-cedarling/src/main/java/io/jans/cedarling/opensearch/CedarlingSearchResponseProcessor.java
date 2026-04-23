@@ -94,7 +94,9 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                 long decisionsTook = 0;
                 do {
                     SearchHit hit = it.next();
-                    Map<String, Object> map = new HashMap<>(hit.getSourceAsMap());
+                    
+                    Map<String, Object> map = Optional.ofNullable(hit.getSourceAsMap()).map(HashMap::new).orElse(null);
+                    if (map == null) continue;
                     
                     try {
                         appendExtraAttributes(map, pluginSettings.getSchemaPrefix(), hit.getIndex(), hit.getId());

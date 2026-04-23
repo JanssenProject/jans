@@ -37,7 +37,7 @@ For the interested, the below are the instructions to run a test:
 
 - Ensure to deploy and configure the plugin as explained in the [README](./README.md) <!--. At the top level of the JSON settings, add `"skipHits": true`. This will make the plugin omit the serialization of the results (hits) in the response. This avoids transfering a lot of data through the network and reduces the running time of the Java test considerably without effects in the computations of performance metrics -->
 - `cd` to the root directory of this repo
-- Edit the file `src/test/resources/testng.properties` accordingly. For `entries`, a value like `100000` (one hundred thousand documents) is OK and will only transfer around 15MB while tests run
+- Edit the file `src/test/resources/testng.properties` accordingly. For `entries`, a value like `10000` (ten thousand documents) is OK. Using a higher value may require tweaking OpenSearch `index.max_result_window` property, see [index settings](https://docs.opensearch.org/latest/install-and-configure/configuring-opensearch/index-settings/)
 - If the plugin will be in use for this particular test, set property `useCedarling` to `true`, and edit the accompanying file `query.json` supplying the tokens - these can be obtained via Tarp as mentioned in the README file
 - Restart OpenSearch
 - Run `./gradlew test`. Ensure the certificate keystore of Java trusts the certificate that protects the OpenSearch REST API endpoints

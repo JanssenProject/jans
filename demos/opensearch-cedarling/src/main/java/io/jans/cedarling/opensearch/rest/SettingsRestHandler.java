@@ -121,7 +121,6 @@ public class SettingsRestHandler extends BaseRestHandler {
                 channel.sendResponse(response);
             } catch (Exception e) {
                 channel.sendResponse(new BytesRestResponse(channel, e));
-                //channel.sendResponse(new BytesRestResponse(RestStatus.INTERNAL_SERVER_ERROR, "Error processing audit request: " + e.getMessage()));
             }
         };
 
