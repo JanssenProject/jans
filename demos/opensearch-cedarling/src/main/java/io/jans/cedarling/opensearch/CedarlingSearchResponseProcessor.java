@@ -94,9 +94,8 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                 long decisionsTook = 0;
                 do {
                     SearchHit hit = it.next();
-                    
-                    Map<String, Object> map = Optional.ofNullable(hit.getSourceAsMap()).map(HashMap::new).orElse(null);
-                    if (map == null) continue;
+                    Map<String, Object> map = Optional.ofNullable(hit.getSourceAsMap())
+                            .map(HashMap::new).orElse(new HashMap<>());
                     
                     try {
                         appendExtraAttributes(map, pluginSettings.getSchemaPrefix(), hit.getIndex(), hit.getId());
@@ -108,8 +107,7 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                             authorized.add(hit);
                         }
                     } catch (Exception e) {
-                        //include the result when Cedarling cannot handle it?
-                        //authorized.add(hit);
+                        //include the result when Cedarling cannot handle it?, ie. authorized.add(hit);
                         logger.error(e.getMessage(), e);
                     }
                 } while (it.hasNext());

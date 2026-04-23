@@ -84,7 +84,7 @@ For the short of time, there is a readily available policy store [here](https://
 
 ## Plugin deployment
 
-In the development machine, clone this repository. `cd` to the repo directory and run `./gradlew assemble -Dopensearch.version=3.6.0`. Ensure `JAVA_HOME` environment points to a Java 21 installation, e.g. `export JAVA_HOME=/path/to/corretto-21`.
+In the development machine, clone this repository (a shallow clone is recommended). `cd` to the directory where this README resides and run `./gradlew assemble -Dopensearch.version=3.6.0`. Ensure `JAVA_HOME` environment points to a Java 21 installation, e.g. `export JAVA_HOME=/path/to/corretto-21`.
 
 `cd` to `build/distributions`. And run:
 
@@ -175,7 +175,7 @@ The `search_pipeline` is required so the response to the query is intercepted an
 
 ## About development
 
-Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in `src` directory and compilation is a matter of issuing `./gradlew compileJava` at the root of the repo hierarchy.
+Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in `src` directory and compilation is a matter of issuing `./gradlew compileJava`.
 
 In package-based installations, OpenSearch log is found at `/var/log/opensearch/opensearch.log`. To be able to see the logging statements produced by this plugin, add a line like the below to `/etc/opensearch/opensearch.yml` and restart opensearch (`systemctl restart opensearch.service`): 
 

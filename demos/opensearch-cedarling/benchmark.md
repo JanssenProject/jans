@@ -5,7 +5,7 @@ To compare the performance of regular queries vs. queries filtered via this plug
 - Removes the index in question entirely (e.g. `student`)
 - Loads in bulk a set of JSON documents. Every document is generated with a (short) random name, a random graduation year (uniformly distributed between 2024 and 2027), and a GPA (random floating number between 0 and 5) 
 - Runs five queries that return documents with GPAs matching the intervals [0, 1), [1, 2), etc. <!--Before this, a preliminary warmup query is issued for the interval [5, 6) and its result discarded: it was observed that after the bulk is performed, the very first query takes a very long time compared to subsequent queries -->
-- The average query response time is computed. This does not include network latency - only server side processing
+- The average query response time is computed. This does not include network latency - only server-side processing
 
 The test is run twice, one without Cedarling (regular OpenSearch query), and one with the plugin. To avoid bias due to caching or other factors, the database is restarted before executing every test. The average decision time per document is also reported when using the plugin. <!--This allows to discriminate the overhead introduced by Cedarling and the plugin separately.  -->
 
@@ -13,7 +13,7 @@ Details like the server to point to, index name, and the number of random entrie
 
 ## Performance data
 
-The following data were obtained in a setup using a [Digital Ocean](https://slugs.do-api.dev/) Basic VM (s-4vcpu-8gb) with Ubuntu 22, OpenSearch 3.6.0 (single node, package-based installation with default configuration), and (local) Jans Server 1.16.0 (AS and database components only):
+The following data were obtained in a setup using a [Digital Ocean](https://www.digitalocean.com/products/droplets/) Basic VM (s-4vcpu-8gb) with Ubuntu 22, OpenSearch 3.6.0 (single node, package-based installation with default configuration), and (local) Jans Server 1.16.0 (AS and database components only):
 
 |Measurement|Value|
 |-|-|
@@ -36,7 +36,7 @@ These tests force the retrieval of all matching documents at once every time, ho
 For the interested, the below are the instructions to run a test:
 
 - Ensure to deploy and configure the plugin as explained in the [README](./README.md) <!--. At the top level of the JSON settings, add `"skipHits": true`. This will make the plugin omit the serialization of the results (hits) in the response. This avoids transfering a lot of data through the network and reduces the running time of the Java test considerably without effects in the computations of performance metrics -->
-- `cd` to the root directory of this repo
+- `cd` to the directory where this document resides
 - Edit the file `src/test/resources/testng.properties` accordingly. For `entries`, a value like `10000` (ten thousand documents) is OK. Using a higher value may require tweaking OpenSearch `index.max_result_window` property, see [index settings](https://docs.opensearch.org/latest/install-and-configure/configuring-opensearch/index-settings/)
 - If the plugin will be in use for this particular test, set property `useCedarling` to `true`, and edit the accompanying file `query.json` supplying the tokens - these can be obtained via Tarp as mentioned in the README file
 - Restart OpenSearch
