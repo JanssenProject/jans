@@ -221,31 +221,30 @@
   animation: slideInFromRight 0.6s ease-out 0.4s both;
 }
 
-
-/* Quick Start steps */
 .md-typeset h3 {
   opacity: 0;
   animation: slideInFromLeft 0.5s ease-out 0.4s both;
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--janssen-green-dark);
-  margin-bottom: 1rem;
-  margin-top: 2.5rem;
 }
 
+
 /* Quick Start Guide specific styling */
-h2:contains("Quick Start Guide") + h3,
-h2 + h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
+h3.quickstart {
+  font-size: 1.4rem;
+  font-weight: 600;
   color: var(--janssen-green-dark);
   border-bottom: 2px solid var(--janssen-green);
   padding-bottom: 0.5rem;
   margin-bottom: 1.5rem;
+  margin-top: 2.5rem;
+  opacity: 0;
+  animation: slideInFromLeft 0.5s ease-out 0.4s both;
 }
 
 /* Quick Start descriptive text */
-.md-typeset h3 + p {
+h3.quickstart + p {
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--janssen-text-secondary);
@@ -643,7 +642,7 @@ pre {
 .tabbed-set > .tabbed-labels > label {
   padding: 0.25rem 0.5rem;
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--janssen-text-secondary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -996,13 +995,6 @@ div.tabbed-content {
   line-height: 1.4;
 }
 
-.tabbed-content p {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--md-default-fg-color--light);
-  margin: 0 0 1.5rem 0;
-}
-
 
 .tabbed-content .md-button {
   margin-top: 1.5rem;
@@ -1242,32 +1234,17 @@ html {
   position: relative;
 }
 
-.md-content p {
-    font-size: 16px !important;
-    line-height: 1.6;
-    margin-bottom: 1em;
-}
-
 .md-content h1 + p,
 .md-content h2 + p,
 .md-content h3 + p,
 .md-content h4 + p,
 .md-content h5 + p,
 .md-content h6 + p {
-    font-size: 16px !important;
     margin-top: 0.5em;
 }
 
 .md-content .md-typeset p {
-    font-size: 16px !important;
-    font-weight: normal !important;
-}
-
-.md-content .md-typeset p.lead,
-.md-content .md-typeset p:first-of-type {
-    font-size: 16px !important;
-}
-
-.md-content .md-typeset .admonition p {
-    font-size: 16px !important;
+    font-weight: normal;
+    line-height: 1.6;
+    margin-bottom: 1em;
 }
