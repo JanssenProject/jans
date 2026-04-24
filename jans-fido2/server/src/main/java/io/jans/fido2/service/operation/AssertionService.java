@@ -416,9 +416,10 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 
-		// TODO: incase of a bug, this the second argument should have been null, see
-		// old code to understand
-		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, origin);
+		// Pass null so LDAP returns all registered devices for the user regardless of
+		// jansApp format — the publicKeyId filter below narrows to valid FIDO2 entries.
+		// Passing origin caused empty results when the stored jansApp format differed.
+		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, null);
 
 		// f.getRegistrationData().getAttenstationRequest() null check is added to
 		// maintain backward compatiblity with U2F devices when U2F devices are migrated
