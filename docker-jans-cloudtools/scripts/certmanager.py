@@ -199,7 +199,7 @@ class SqlPersistence(BasePersistence):
             "creationDate": utc_now,
             "exp": utc_now + timedelta(seconds=lifetime),
             "del": True,
-            "jansData": json.dumps({"mapType": "java.util.HashMap", "empty": False}),
+            "jansData": json.dumps(jwk),
             "attr": json.dumps({"attributes": {}}),
         }
         self.client.insert_into(table_name, column_mapping)
@@ -705,6 +705,7 @@ class AuthHandler:
         for old_jwk in old_jwks:
             if old_jwk["kid"] in new_jwks_kids:
                 continue
+            logger.info("JWK %s will be archived", old_jwk["kid"])
             self.backend.create_archived_jwk(old_jwk, lifetime)
 
 
