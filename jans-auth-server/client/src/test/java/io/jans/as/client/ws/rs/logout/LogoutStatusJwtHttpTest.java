@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static io.jans.as.client.TestConstants.LOGOUT_STATUS_JWT_SCRIPT_ID;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
@@ -203,7 +204,7 @@ public class LogoutStatusJwtHttpTest extends BaseTest {
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setAccessTokenAsJwt(true);
-        registerRequest.setLogoutStatusJwtScriptDns(Lists.newArrayList("inum=0300-BA15,ou=scripts,o=jans"));
+        registerRequest.setLogoutStatusJwtScriptDns(Lists.newArrayList(LOGOUT_STATUS_JWT_SCRIPT_ID));
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();

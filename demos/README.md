@@ -11,3 +11,6 @@ Holds a docker load test image packaging for Janssen. This image can load test u
 ## [Janssen Tarp](janssen-tarp)
 A Relying Party tool in form of a Browser Extension for convenient testing of authentication flows on a browser.
 
+## [Opensearch cedarling](opensearch-cedarling)
+
+An opensearch plugin that integrates Cedarling for token-based access control to data queries.

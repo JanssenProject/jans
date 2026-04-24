@@ -78,6 +78,10 @@ on:
         description: 'Cedarling Flask Sidecar'
         type: boolean
         default: false
+      cedarling_opa:
+        description: 'Cedarling OPA'
+        type: boolean
+        default: false
       cn_version:
         description: 'The war version to build the image off'
         required: false
@@ -105,7 +109,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
+        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -130,7 +134,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
-          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar"
+          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar cedarling-opa"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -150,6 +154,7 @@ jobs:
               [[ "${{ inputs.all_in_one }}" == "true" ]] && SELECTED="$SELECTED all-in-one"
               [[ "${{ inputs.shibboleth }}" == "true" ]] && SELECTED="$SELECTED shibboleth"
               [[ "${{ inputs.cedarling_flask_sidecar }}" == "true" ]] && SELECTED="$SELECTED cedarling-flask-sidecar"
+              [[ "${{ inputs.cedarling_opa }}" == "true" ]] && SELECTED="$SELECTED cedarling-opa"
             fi
             MATCH=false
             for svc in $SELECTED; do
@@ -166,7 +171,7 @@ jobs:
             pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
             if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
               # PR: get changed files via GitHub API
-              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^cedarling-flask-sidecar' || echo "$ALL_SERVICES")
+              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
             elif [[ "${{ github.event_name }}" == "schedule" || "${{ github.ref_type }}" == "tag" ]]; then
               # Nightly schedule or tag push: build all images
               DIRECTORIES_CHANGED="$ALL_SERVICES"
@@ -177,7 +182,7 @@ jobs:
               if [[ -z "$BEFORE" || "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
                 DIRECTORIES_CHANGED="$ALL_SERVICES"
               else
-                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^cedarling-flask-sidecar' || true)
+                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || true)
               fi
             fi
             MATCH=false
@@ -219,12 +224,17 @@ jobs:
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
+          PLATFORMS="linux/amd64,linux/arm64"
           if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
           if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
           fi
+          if [[ "cedarling-opa" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./jans-cedarling/cedarling_opa
+            PLATFORMS="linux/amd64"
+          fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}
@@ -255,6 +265,7 @@ jobs:
           fi
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
+          echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
           # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
           if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
             if [[ ${{ github.event_name != 'pull_request' }} ]]; then
@@ -315,7 +326,7 @@ jobs:
         uses: docker/setup-qemu-action@f8607cc714a3191ccc4468d6004a37d0e5a9419a # master
         with:
           image: tonistiigi/binfmt:master
-          platforms: all
+          platforms: ${{ steps.prep.outputs.platforms }}
 
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build
@@ -348,7 +359,7 @@ jobs:
           # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
-          platforms: linux/amd64, linux/arm64
+          platforms: ${{ steps.prep.outputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
           cache-from: type=gha,scope=${{ matrix.docker-images }}
