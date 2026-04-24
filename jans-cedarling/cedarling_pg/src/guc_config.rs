@@ -16,10 +16,17 @@ use crate::validate;
 /// How authorization results are applied.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PostgresGucEnum)]
 pub enum CedarlingMode {
+    /// Apply policy decisions (`false` → deny row).
     #[name = c"enforcement"]
     Enforcement,
+    /// Evaluate policies and emit logs but still return the underlying decision to callers.
+    /// Useful for observability without changing behavior.
     #[name = c"instrumentation"]
     Instrumentation,
+    /// Evaluate policies for logging only; the authorize function always returns `true` so
+    /// RLS lets every row through. Traces still record the would-be decision.
+    #[name = c"shadow"]
+    Shadow,
 }
 
 /// Fail-open vs fail-closed behavior on engine errors.
@@ -44,15 +51,32 @@ pub enum CedarlingLogLevelGuc {
     Error,
 }
 
+/// Access strategy for rows that fail authorization.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, PostgresGucEnum)]
+pub enum CedarlingStrategy {
+    /// Exclude unauthorized rows from the query result (standard RLS semantics).
+    #[name = c"filter"]
+    Filter,
+    /// Return the row but mask one or more columns according to `cedarling.mask_rules`.
+    /// The masking subsystem is delivered in Phase 3.
+    #[name = c"mask"]
+    Mask,
+}
+
 static MODE: GucSetting<CedarlingMode> =
     GucSetting::<CedarlingMode>::new(CedarlingMode::Enforcement);
 static FAIL_MODE: GucSetting<CedarlingFailMode> =
     GucSetting::<CedarlingFailMode>::new(CedarlingFailMode::Closed);
 static LOG_LEVEL: GucSetting<CedarlingLogLevelGuc> =
     GucSetting::<CedarlingLogLevelGuc>::new(CedarlingLogLevelGuc::Info);
+static STRATEGY: GucSetting<CedarlingStrategy> =
+    GucSetting::<CedarlingStrategy>::new(CedarlingStrategy::Filter);
 static CACHE_TTL: GucSetting<i32> = GucSetting::<i32>::new(300);
+static CACHE_SIZE: GucSetting<i32> = GucSetting::<i32>::new(8192);
+static AUDIT_FAIL_OPEN: GucSetting<bool> = GucSetting::<bool>::new(true);
 static TOKENS: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
+static POLICY_VERSION: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 
 /// Current `cedarling.mode`.
 #[must_use]
@@ -72,10 +96,28 @@ pub fn log_level() -> CedarlingLogLevelGuc {
     LOG_LEVEL.get()
 }
 
+/// Current `cedarling.strategy`.
+#[must_use]
+pub fn strategy() -> CedarlingStrategy {
+    STRATEGY.get()
+}
+
 /// Current `cedarling.cache_ttl` in seconds (0 disables result cache).
 #[must_use]
 pub fn cache_ttl_seconds() -> i32 {
     CACHE_TTL.get()
+}
+
+/// Current `cedarling.cache_size` — maximum in-memory decision entries per backend process.
+#[must_use]
+pub fn cache_size() -> i32 {
+    CACHE_SIZE.get()
+}
+
+/// Current `cedarling.audit_fail_open`: when fail-open, whether to emit a structured audit log.
+#[must_use]
+pub fn audit_fail_open() -> bool {
+    AUDIT_FAIL_OPEN.get()
 }
 
 /// Current `cedarling.tokens` as a UTF-8 string, if set and valid UTF-8.
@@ -88,6 +130,20 @@ pub fn tokens_utf8() -> Option<String> {
 #[must_use]
 pub fn bootstrap_config_path_utf8() -> Option<String> {
     BOOTSTRAP_CONFIG.get().and_then(|c| c.into_string().ok())
+}
+
+/// Current `cedarling.policy_version`, if explicitly pinned. Empty / unset means "latest".
+#[must_use]
+pub fn policy_version_utf8() -> Option<String> {
+    POLICY_VERSION.get().and_then(|c| {
+        let s = c.into_string().ok()?;
+        let t = s.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_string())
+        }
+    })
 }
 
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
@@ -116,7 +172,7 @@ unsafe fn register_gucs_inner() {
     GucRegistry::define_enum_guc(
         c"cedarling.mode",
         c"Cedarling operation mode.",
-        c"enforcement: apply policy decisions. instrumentation: still evaluates policies; `cedarling_authorized` returns the same boolean as enforcement for safe RLS (extra logging may be added later).",
+        c"enforcement: apply policy decisions. instrumentation: evaluate and log, still return the decision. shadow: evaluate and trace but always return true so RLS stays permissive (useful for rollout dry-runs).",
         &MODE,
         GucContext::Userset,
         GucFlags::empty(),
@@ -140,6 +196,15 @@ unsafe fn register_gucs_inner() {
         GucFlags::empty(),
     );
 
+    GucRegistry::define_enum_guc(
+        c"cedarling.strategy",
+        c"Access strategy for rows that fail authorization.",
+        c"filter: exclude the row (standard RLS). mask: return the row with masked columns (requires configured cedarling.mask_rules).",
+        &STRATEGY,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
     GucRegistry::define_int_guc(
         c"cedarling.cache_ttl",
         c"Authorization result cache TTL in seconds.",
@@ -147,6 +212,26 @@ unsafe fn register_gucs_inner() {
         &CACHE_TTL,
         0,
         604_800,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_int_guc(
+        c"cedarling.cache_size",
+        c"Maximum entries in the per-backend authorization result cache.",
+        c"Applies on the next process restart; changing this GUC at runtime does not resize the existing cache. Range 0..=1048576. Set to 0 to disable caching regardless of cedarling.cache_ttl.",
+        &CACHE_SIZE,
+        0,
+        1_048_576,
+        GucContext::Postmaster,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_bool_guc(
+        c"cedarling.audit_fail_open",
+        c"Emit a structured audit log entry whenever fail-open allows a request that otherwise would have denied.",
+        c"Defaults to true. Disable only if a downstream log collector is already recording decisions.",
+        &AUDIT_FAIL_OPEN,
         GucContext::Userset,
         GucFlags::empty(),
     );
@@ -168,6 +253,15 @@ unsafe fn register_gucs_inner() {
         c"Filesystem path to Cedarling bootstrap configuration (YAML, JSON, or TOML).",
         c"Must be readable by the PostgreSQL server process. Used to construct the Cedarling engine on first authorization request.",
         &BOOTSTRAP_CONFIG,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_string_guc(
+        c"cedarling.policy_version",
+        c"Policy version to pin this session to.",
+        c"Empty / unset means the most recently loaded version. Values are matched against versions registered via cedarling_use_policy().",
+        &POLICY_VERSION,
         GucContext::Userset,
         GucFlags::empty(),
     );

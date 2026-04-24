@@ -8,13 +8,18 @@
 mod authorized;
 mod authz_bridge;
 mod authz_cache;
+mod catalog;
 mod engine;
+mod error;
 mod extension_log;
 mod guc_config;
 mod resource;
 mod token_bundle;
 mod token_sql;
 mod validate;
+
+#[cfg(feature = "pg_test")]
+mod pg_test_rls_unsigned;
 
 use pgrx::prelude::*;
 
@@ -32,6 +37,16 @@ const _: fn() -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::
     engine::global_cedarling;
 const _: fn() -> guc_config::CedarlingMode = guc_config::mode;
 const _: fn() -> guc_config::CedarlingLogLevelGuc = guc_config::log_level;
+const _: fn() -> guc_config::CedarlingStrategy = guc_config::strategy;
+const _: fn() -> i32 = guc_config::cache_size;
+const _: fn() -> bool = guc_config::audit_fail_open;
+const _: fn() -> Option<String> = guc_config::policy_version_utf8;
+// Anchor the unified error API so Phase-2+ modules keep compiling as `CedarlingError` grows.
+const _: fn(&error::CedarlingError) -> bool = error::CedarlingError::should_deny;
+const _: fn(&error::CedarlingError) -> guc_config::CedarlingLogLevelGuc =
+    error::CedarlingError::log_level;
+const _: fn(&error::CedarlingError, &'static str) -> error::AuditLogEntry =
+    error::CedarlingError::to_audit_entry;
 const _: fn(&str) -> Result<Vec<cedarling::TokenInput>, token_bundle::TokenBundleError> =
     token_bundle::parse_token_inputs_from_json;
 const _: fn(
@@ -93,20 +108,25 @@ mod tests {
     #[pg_test]
     fn test_gucs_defaults() {
         use crate::guc_config::{
-            bootstrap_config_path_utf8, cache_ttl_seconds, fail_mode, log_level, mode, tokens_utf8,
-            CedarlingFailMode, CedarlingLogLevelGuc, CedarlingMode,
+            audit_fail_open, bootstrap_config_path_utf8, cache_size, cache_ttl_seconds, fail_mode,
+            log_level, mode, policy_version_utf8, strategy, tokens_utf8, CedarlingFailMode,
+            CedarlingLogLevelGuc, CedarlingMode, CedarlingStrategy,
         };
 
         assert_eq!(mode(), CedarlingMode::Enforcement, "default mode");
+        assert_eq!(strategy(), CedarlingStrategy::Filter, "default strategy");
         assert_eq!(fail_mode(), CedarlingFailMode::Closed, "default fail_mode");
         assert_eq!(log_level(), CedarlingLogLevelGuc::Info, "default log_level");
         assert_eq!(cache_ttl_seconds(), 300, "default cache_ttl");
+        assert_eq!(cache_size(), 8192, "default cache_size");
+        assert!(audit_fail_open(), "default audit_fail_open");
         assert_eq!(tokens_utf8(), None, "default tokens unset");
         assert_eq!(
             bootstrap_config_path_utf8(),
             None,
             "default bootstrap_config unset"
         );
+        assert_eq!(policy_version_utf8(), None, "default policy_version unset");
 
         let show_mode = Spi::get_one::<String>("SHOW cedarling.mode")
             .expect("SPI should succeed for SHOW cedarling.mode");
@@ -115,6 +135,95 @@ mod tests {
             Some("enforcement".to_string()),
             "SHOW should match GUC registration"
         );
+
+        let show_strategy = Spi::get_one::<String>("SHOW cedarling.strategy")
+            .expect("SHOW cedarling.strategy");
+        assert_eq!(show_strategy, Some("filter".to_string()));
+    }
+
+    #[pg_test]
+    fn test_strategy_guc_accepts_mask() {
+        Spi::run("SET cedarling.strategy = 'mask'")
+            .expect("SET cedarling.strategy = 'mask' should succeed");
+        assert_eq!(
+            crate::guc_config::strategy(),
+            crate::guc_config::CedarlingStrategy::Mask
+        );
+        Spi::run("RESET cedarling.strategy").expect("RESET cedarling.strategy");
+    }
+
+    #[pg_test]
+    fn test_mode_shadow_returns_true_even_when_denied() {
+        // With no engine bootstrap and fail_mode=closed, enforcement would deny.
+        // Shadow mode must always return true.
+        Spi::run("SET LOCAL cedarling.mode = 'shadow'").expect("SET LOCAL mode shadow");
+        assert!(
+            crate::authorized::cedarling_authorized(
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                Some(r#"[{"mapping":"M","payload":"p"}]"#),
+                "T::Action::\"A\"",
+            ),
+            "shadow mode should always allow"
+        );
+        assert!(
+            crate::authorized::cedarling_authorize_unsigned(
+                None,
+                r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+                "T::Action::\"A\"",
+                "{}",
+            ),
+            "shadow mode should always allow (unsigned path)"
+        );
+        Spi::run("SET LOCAL cedarling.mode = 'enforcement'").expect("restore enforcement");
+    }
+
+    #[pg_test]
+    fn test_catalog_schema_and_tables_exist() {
+        let ns = Spi::get_one::<String>(
+            "SELECT nspname FROM pg_namespace WHERE nspname = 'cedarling'",
+        )
+        .expect("SPI should succeed");
+        assert_eq!(ns, Some("cedarling".to_string()));
+
+        let mask_rules = Spi::get_one::<i64>(
+            "SELECT count(*) FROM pg_class c \
+             JOIN pg_namespace n ON n.oid = c.relnamespace \
+             WHERE n.nspname = 'cedarling' AND c.relname = 'mask_rules'",
+        )
+        .expect("SPI should succeed");
+        assert_eq!(mask_rules, Some(1), "cedarling.mask_rules should exist");
+
+        let policy_history = Spi::get_one::<i64>(
+            "SELECT count(*) FROM pg_class c \
+             JOIN pg_namespace n ON n.oid = c.relnamespace \
+             WHERE n.nspname = 'cedarling' AND c.relname = 'policy_history'",
+        )
+        .expect("SPI should succeed");
+        assert_eq!(
+            policy_history,
+            Some(1),
+            "cedarling.policy_history should exist"
+        );
+    }
+
+    #[pg_test]
+    fn test_mask_rules_insert_enforces_mask_type_check() {
+        // The CHECK constraint should reject unknown mask_type values.
+        let res = Spi::run(
+            "INSERT INTO cedarling.mask_rules (table_name, column_name, mask_type) \
+             VALUES ('t', 'c', 'bogus_type')",
+        );
+        assert!(
+            res.is_err(),
+            "mask_rules CHECK constraint must reject unknown mask_type"
+        );
+
+        Spi::run(
+            "INSERT INTO cedarling.mask_rules (table_name, column_name, mask_type) \
+             VALUES ('t', 'c', 'hash')",
+        )
+        .expect("valid mask_type 'hash' should be accepted");
+        Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 't'").expect("cleanup");
     }
 
     #[pg_test]
@@ -238,6 +347,13 @@ mod tests {
             ),
             "unsigned: non-object context JSON should deny under fail-closed"
         );
+    }
+
+    /// RLS + `cedarling_authorize_unsigned` against the unsigned policy store (runs late by name so
+    /// earlier `#[pg_test]` cases still see an uninitialized Cedarling engine in the same process).
+    #[pg_test]
+    fn test_zzz_rls_unsigned_policy_filters_select_under_row_security() {
+        crate::pg_test_rls_unsigned::run_rls_unsigned_policy_filters_select_under_row_security();
     }
 }
 

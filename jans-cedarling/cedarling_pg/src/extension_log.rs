@@ -11,6 +11,7 @@ use pgrx::prelude::*;
 
 use crate::authz_bridge::{AuthorizeBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
+use crate::error::CedarlingError;
 use crate::guc_config::{log_level, CedarlingLogLevelGuc};
 
 #[inline]
@@ -117,6 +118,17 @@ pub(crate) fn log_unsigned_bridge_failure(err: &UnsignedBridgeError) {
         UnsignedBridgeError::Authorize(e) => classify_authorize_error(e),
     };
     log_diagnostic(at, msg);
+}
+
+/// Emit a structured audit entry at `WARN` when fail-open converts an error-induced deny into
+/// an allow. Respects [`should_emit`] so it can be suppressed by `cedarling.log_level = error`.
+pub(crate) fn log_audit_fail_open(err: &CedarlingError) {
+    if !should_emit(CedarlingLogLevelGuc::Warn) {
+        return;
+    }
+    let entry = err.to_audit_entry("fail_open");
+    // Serialize to compact JSON so log collectors can parse it directly.
+    warning!("cedarling_pg: audit {}", entry.to_json());
 }
 
 fn classify_authorize_error(

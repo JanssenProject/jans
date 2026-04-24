@@ -11,8 +11,9 @@ use pgrx::prelude::*;
 use crate::authz_bridge;
 use crate::authz_cache;
 use crate::engine;
+use crate::error::CedarlingError;
 use crate::extension_log;
-use crate::guc_config::{self, CedarlingFailMode};
+use crate::guc_config::{self, CedarlingFailMode, CedarlingMode};
 
 /// Returns whether Cedarling **allows** the request (`true` = allow, `false` = deny).
 ///
@@ -20,12 +21,14 @@ use crate::guc_config::{self, CedarlingFailMode};
 ///   blank, [`guc_config::tokens_utf8`] (`cedarling.tokens`) is used instead.
 /// - **`action`**: full Cedar action UID string (e.g. `Jans::Action::"Read"`).
 ///
-/// **Instrumentation vs enforcement:** both modes return the same boolean from policy evaluation
-/// so `RLS` predicates stay safe; richer “observe only” behavior is reserved for later milestones.
+/// **Mode:**
+/// - `enforcement` (default) and `instrumentation` both return the evaluated decision.
+/// - `shadow` always returns `true`; the evaluated decision is still computed and logged.
 ///
 /// **Errors:** JWT / engine / parse failures are **not** raised as SQL errors by default: the
 /// function returns `false` when [`CedarlingFailMode::Closed`] and `true` when
-/// [`CedarlingFailMode::Open`] (“fail open”), per `cedarling.fail_mode`.
+/// [`CedarlingFailMode::Open`] (“fail open”), per `cedarling.fail_mode`. Shadow mode always
+/// returns `true` regardless of error class.
 ///
 /// **Logging:** structured messages go to the server log at or above [`guc_config::CedarlingLogLevelGuc`]
 /// (`cedarling.log_level`). JWT material is never logged.
@@ -40,32 +43,22 @@ fn cedarling_authorized_inner(
     token_bundle: Option<&str>,
     action: &str,
 ) -> bool {
-    let fail_mode = guc_config::fail_mode();
-
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
-        extension_log::log_diagnostic(
-            guc_config::CedarlingLogLevelGuc::Debug,
-            "cedarling_authorized: empty action after trim",
-        );
-        return fail_mode_to_bool_on_error(fail_mode);
+        return finalize_error(&CedarlingError::RequestInvalid("empty action".into()));
     }
 
     let resource_trimmed = resource_json.trim();
     if resource_trimmed.is_empty() {
-        extension_log::log_diagnostic(
-            guc_config::CedarlingLogLevelGuc::Debug,
-            "cedarling_authorized: empty resource JSON after trim",
-        );
-        return fail_mode_to_bool_on_error(fail_mode);
+        return finalize_error(&CedarlingError::ResourceConstruction(
+            "empty resource JSON".into(),
+        ));
     }
 
     let Some(token_str) = resolve_token_bundle(token_bundle) else {
-        extension_log::log_diagnostic(
-            guc_config::CedarlingLogLevelGuc::Debug,
-            "cedarling_authorized: no token bundle (argument blank and cedarling.tokens unset)",
-        );
-        return fail_mode_to_bool_on_error(fail_mode);
+        return finalize_error(&CedarlingError::Configuration(
+            "no token bundle (argument blank and cedarling.tokens unset)".into(),
+        ));
     };
 
     let ttl = guc_config::cache_ttl_seconds();
@@ -76,14 +69,14 @@ fn cedarling_authorized_inner(
         action_trimmed,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        return decision;
+        return finalize_decision(decision);
     }
 
     let engine = match engine::global_cedarling() {
         Ok(e) => e,
-        Err(ref e) => {
-            extension_log::log_engine_failure(e);
-            return fail_mode_to_bool_on_error(fail_mode);
+        Err(e) => {
+            extension_log::log_engine_failure(&e);
+            return finalize_error(&CedarlingError::from(e));
         },
     };
 
@@ -95,11 +88,11 @@ fn cedarling_authorized_inner(
     ) {
         Ok(decision) => {
             authz_cache::global_cache().store(ttl, cache_key, decision);
-            decision
+            finalize_decision(decision)
         },
-        Err(ref e) => {
-            extension_log::log_multi_issuer_bridge_failure(e);
-            fail_mode_to_bool_on_error(fail_mode)
+        Err(e) => {
+            extension_log::log_multi_issuer_bridge_failure(&e);
+            finalize_error(&CedarlingError::from(e))
         },
     }
 }
@@ -128,24 +121,16 @@ fn cedarling_authorize_unsigned_inner(
     action: &str,
     context_json: &str,
 ) -> bool {
-    let fail_mode = guc_config::fail_mode();
-
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
-        extension_log::log_diagnostic(
-            guc_config::CedarlingLogLevelGuc::Debug,
-            "cedarling_authorize_unsigned: empty action after trim",
-        );
-        return fail_mode_to_bool_on_error(fail_mode);
+        return finalize_error(&CedarlingError::RequestInvalid("empty action".into()));
     }
 
     let resource_trimmed = resource_json.trim();
     if resource_trimmed.is_empty() {
-        extension_log::log_diagnostic(
-            guc_config::CedarlingLogLevelGuc::Debug,
-            "cedarling_authorize_unsigned: empty resource JSON after trim",
-        );
-        return fail_mode_to_bool_on_error(fail_mode);
+        return finalize_error(&CedarlingError::ResourceConstruction(
+            "empty resource JSON".into(),
+        ));
     }
 
     let principal_norm = principal_json
@@ -163,7 +148,7 @@ fn cedarling_authorize_unsigned_inner(
         context_trimmed,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        return decision;
+        return finalize_decision(decision);
     }
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
@@ -173,28 +158,28 @@ fn cedarling_authorize_unsigned_inner(
         context_json,
     ) {
         Ok(r) => r,
-        Err(ref e) => {
-            extension_log::log_unsigned_bridge_failure(e);
-            return fail_mode_to_bool_on_error(fail_mode);
+        Err(e) => {
+            extension_log::log_unsigned_bridge_failure(&e);
+            return finalize_error(&CedarlingError::from(e));
         },
     };
 
     let engine = match engine::global_cedarling() {
         Ok(e) => e,
-        Err(ref e) => {
-            extension_log::log_engine_failure(e);
-            return fail_mode_to_bool_on_error(fail_mode);
+        Err(e) => {
+            extension_log::log_engine_failure(&e);
+            return finalize_error(&CedarlingError::from(e));
         },
     };
 
     match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
         Ok(decision) => {
             authz_cache::global_cache().store(ttl, cache_key, decision);
-            decision
+            finalize_decision(decision)
         },
-        Err(ref e) => {
-            extension_log::log_unsigned_bridge_failure(e);
-            fail_mode_to_bool_on_error(fail_mode)
+        Err(e) => {
+            extension_log::log_unsigned_bridge_failure(&e);
+            finalize_error(&CedarlingError::from(e))
         },
     }
 }
@@ -207,22 +192,39 @@ fn resolve_token_bundle(arg: Option<&str>) -> Option<String> {
     }
 }
 
-const fn fail_mode_to_bool_on_error(fail_mode: CedarlingFailMode) -> bool {
-    match fail_mode {
+/// Apply `cedarling.mode` to a cleanly evaluated decision.
+///
+/// In `shadow` mode we always return `true`; the raw decision has already been logged upstream
+/// for trace purposes.
+fn finalize_decision(decision: bool) -> bool {
+    match guc_config::mode() {
+        CedarlingMode::Shadow => true,
+        CedarlingMode::Enforcement | CedarlingMode::Instrumentation => decision,
+    }
+}
+
+/// Apply `cedarling.mode` + `cedarling.fail_mode` to an error path. Emits an audit entry when
+/// fail-open takes effect and `cedarling.audit_fail_open` is true.
+fn finalize_error(err: &CedarlingError) -> bool {
+    if matches!(guc_config::mode(), CedarlingMode::Shadow) {
+        // Shadow mode: never let an error change observable behavior. The error was already
+        // logged by the caller; don't raise further noise.
+        return true;
+    }
+    match guc_config::fail_mode() {
         CedarlingFailMode::Closed => false,
-        CedarlingFailMode::Open => true,
+        CedarlingFailMode::Open => {
+            if guc_config::audit_fail_open() {
+                extension_log::log_audit_fail_open(err);
+            }
+            true
+        },
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn fail_mode_mapping() {
-        assert!(!fail_mode_to_bool_on_error(CedarlingFailMode::Closed));
-        assert!(fail_mode_to_bool_on_error(CedarlingFailMode::Open));
-    }
 
     #[test]
     fn resolve_token_prefers_argument() {

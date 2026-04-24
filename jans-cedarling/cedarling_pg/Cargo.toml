@@ -28,6 +28,8 @@ pgrx = "=0.18.0"
 serde_json = { workspace = true }
 sparkv = { workspace = true }
 thiserror = { workspace = true }
+test_utils = { path = "../test_utils", optional = true }
+uuid = { version = "1.11", features = ["v4", "serde"] }
 
 [dependencies.pgrx-bench]
 version = "=0.18.0"
