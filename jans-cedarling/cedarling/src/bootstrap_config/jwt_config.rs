@@ -54,7 +54,16 @@ pub struct JwtConfig {
     pub token_cache_earliest_expiration_eviction: bool,
     /// Configuration for loading trusted issuers.
     pub trusted_issuer_loader: TrustedIssuerLoaderConfig,
+    /// Optional override for JWKS periodic refresh interval in seconds.
+    /// Set to `None` to use the server-driven or fallback interval.
+    pub jwks_refresh_interval: Option<u64>,
+    /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
+    pub jwks_refresh_min_interval: u64,
 }
+
+/// Default periodic JWKS refresh interval when neither `Cache-Control: max-age`
+/// nor the bootstrap config provides a value.
+pub(crate) const DEFAULT_JWKS_REFRESH_INTERVAL_SECS: u64 = 3600;
 
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
@@ -68,6 +77,8 @@ impl Default for JwtConfig {
             token_cache_earliest_expiration_eviction: true,
             token_cache_max_ttl_secs: 60 * 5, // 5min
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            jwks_refresh_interval: None,
+            jwks_refresh_min_interval: 30,
         };
         config.allow_all_algorithms()
     }

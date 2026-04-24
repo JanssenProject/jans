@@ -6,11 +6,15 @@
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
+    time::Duration,
 };
 use thiserror::Error;
+use tokio::sync::Notify;
+use web_time::Instant;
 
 use crate::{
     JwtConfig, LogLevel,
+    async_sleep::sleep,
     common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
@@ -18,7 +22,7 @@ use crate::{
         loading_state::TrustedIssuerLoadingState, status_list::StatusListCache,
         validation::JwtValidatorCache,
     },
-    jwt_config::TrustedIssuerLoaderConfig,
+    jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
 
@@ -51,6 +55,7 @@ pub(super) struct TrustedIssuerLoader {
     pub(super) token_cache: TokenCache,
     pub(super) logger: Option<Logger>,
     pub(super) loading_state: Arc<TrustedIssuerLoadingState>,
+    pub(super) jwks_refresh_notifiers: Arc<Mutex<HashMap<IssClaim, Arc<Notify>>>>,
 }
 
 impl TrustedIssuerLoader {
@@ -218,6 +223,41 @@ pub(super) async fn load_trusted_issuer(
             .await?;
     }
 
+    if loader.jwt_config.jwt_sig_validation
+        && let Some(openid_config) = iss_config.openid_config.clone()
+    {
+        let notify = Arc::new(Notify::new());
+
+        let initial_interval = Duration::from_secs(
+            loader
+                .jwt_config
+                .jwks_refresh_interval
+                .unwrap_or(DEFAULT_JWKS_REFRESH_INTERVAL_SECS),
+        );
+        let min_interval = Duration::from_secs(loader.jwt_config.jwks_refresh_min_interval);
+        let config_override = loader.jwt_config.jwks_refresh_interval;
+
+        {
+            let mut notifiers = loader
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock");
+            notifiers.insert(iss_claim.clone(), notify.clone());
+        }
+
+        let key_service = loader.key_service.clone();
+        let logger = loader.logger.clone();
+        spawn_task(keep_jwks_updated(
+            key_service,
+            openid_config,
+            initial_interval,
+            min_interval,
+            config_override,
+            notify,
+            logger,
+        ));
+    }
+
     loader.issuer_configs.insert(iss_claim, iss_config);
 
     Ok(())
@@ -278,6 +318,75 @@ fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceIni
     );
 }
 
+/// Background task that periodically re-fetches JWKS for a single trusted issuer
+async fn keep_jwks_updated(
+    key_service: Arc<KeyService>,
+    openid_config: OpenIdConfig,
+    initial_interval: Duration,
+    min_interval: Duration,
+    config_override: Option<u64>,
+    notify: Arc<Notify>,
+    logger: Option<Logger>,
+) {
+    let mut interval = initial_interval;
+    let mut last_refresh = Instant::now()
+        .checked_sub(interval)
+        .unwrap_or_else(Instant::now);
+
+    loop {
+        tokio::select! {
+            () = sleep(interval) => {},
+            () = notify.notified() => {
+                if last_refresh.elapsed() < min_interval {
+                    continue;
+                }
+            },
+        }
+
+        logger.log_any(JwtLogEntry::new(
+            format!(
+                "refreshing JWKS for issuer '{}'",
+                openid_config.issuer.as_str()
+            ),
+            Some(LogLevel::DEBUG),
+        ));
+
+        match key_service
+            .refresh_keys_using_oidc(&openid_config, logger.as_ref())
+            .await
+        {
+            Ok(max_age) => {
+                last_refresh = Instant::now();
+
+                if let Some(config_secs) = config_override {
+                    interval = Duration::from_secs(config_secs);
+                } else if let Some(max_age_secs) = max_age {
+                    interval = Duration::from_secs(max_age_secs);
+                }
+
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "refreshed JWKS for issuer '{}', next refresh in {}s",
+                        openid_config.issuer.as_str(),
+                        interval.as_secs(),
+                    ),
+                    Some(LogLevel::INFO),
+                ));
+            },
+            Err(err) => {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "failed to refresh JWKS for issuer '{}': {}",
+                        openid_config.issuer.as_str(),
+                        err,
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
+            },
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -324,6 +433,7 @@ mod test {
             token_cache: TokenCache::default(),
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(issuer_count)),
+            jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 
@@ -536,6 +646,7 @@ mod test {
             token_cache: TokenCache::default(),
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
+            jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
         };
 
         loader_with_keys.check_keys_loaded();

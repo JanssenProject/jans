@@ -7,8 +7,8 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
+    default_jti, default_jwks_refresh_min_interval, default_log_channel_capacity,
+    default_log_max_retries, default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
@@ -335,6 +335,23 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_workers: WorkersCount,
+
+    /// Optional override for JWKS periodic refresh interval in seconds.
+    /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
+    /// If omitted, the server-driven interval or a 1-hour fallback is used.
+    #[serde(rename = "CEDARLING_JWKS_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub jwks_refresh_interval: Option<u64>,
+
+    /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
+    /// Prevents abuse from invalid JWT floods triggering excessive re-fetches.
+    /// Default: 30 seconds.
+    #[serde(
+        rename = "CEDARLING_JWKS_REFRESH_MIN_INTERVAL",
+        default = "default_jwks_refresh_min_interval"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub jwks_refresh_min_interval: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -659,6 +676,29 @@ mod tests {
                     WorkersCount::MAX,
                     "Default worker count should be {}",
                     WorkersCount::MAX.get()
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_from_env_var() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "30"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "60"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(30),
+                    "JWKS refresh interval should match environment value"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, 60,
+                    "JWKS refresh min interval should match environment value"
                 );
             },
         );
