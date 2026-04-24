@@ -35,11 +35,11 @@ WORKDIR /api
 
 # Just dependencies
 COPY pyproject.toml uv.lock /api/
-COPY --from=builder /build/jans-cedarling/target/wheels/*.whl /api/
 RUN uv sync --locked --no-install-project --no-editable --no-group test
 
 # Rest of the app
 COPY . /api/
+COPY --from=builder /build/jans-cedarling/target/wheels/*.whl /api/
 # Sync the project
 RUN uv sync --locked --no-editable --no-group test \
     && uv pip install --no-cache-dir /api/*.whl \

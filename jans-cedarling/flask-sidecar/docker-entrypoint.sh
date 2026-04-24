@@ -13,6 +13,5 @@ exec gunicorn main.core:app \
   --worker-class gthread \
   --access-logfile - \
   --error-logfile - \
-  --preload \
   --worker-tmp-dir /dev/shm \
-  --log-config gunicorn_logging.conf
+  --log-config /api/gunicorn_logging.conf

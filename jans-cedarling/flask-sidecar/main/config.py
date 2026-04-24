@@ -48,7 +48,7 @@ class BaseConfig:
     @classmethod
     def load_bootstrap(cls) -> None:
         path = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE")
-        if not path:
+        if not path or path == "None":
             raise RuntimeError("CEDARLING_BOOTSTRAP_CONFIG_FILE is not set")
         try:
             with open(path) as f:

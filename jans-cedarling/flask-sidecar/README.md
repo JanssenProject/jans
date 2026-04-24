@@ -79,7 +79,7 @@ Not yet implemented
   git sparse-checkout set jans-cedarling
   cd jans-cedarling/flask-sidecar
   ```
-- Modify the `demo/bootstrap.json` file to your specifications. Configuration values are described [here](../docs/cedarling/cedarling-properties.md).
+- Modify the `demo/bootstrap.json` file to your specifications. Refer to the [Cedarling properties documentation](../../docs/cedarling/reference/cedarling-properties.md) for configuration values.
 - Run `docker compose up`
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 
