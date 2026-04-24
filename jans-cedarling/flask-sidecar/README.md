@@ -49,7 +49,7 @@ Not yet implemented
 
 - **Note**: Currently only remote policy stores via URI passing is supported on Docker builds.
 - Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
-- Modify the file to your specifications. Configuration values are described [here](https://docs.jans.io/head/cedarling/cedarling-properties/).
+- Modify the file to your specifications. Refer to the [Cedarling properties documentation](../../docs/cedarling/reference/cedarling-properties.md) for configuration values.
 - Pull the docker image:
   ```
   docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly

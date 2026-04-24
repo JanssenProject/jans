@@ -29,3 +29,5 @@
 **/*.dll
 **/dist/
 **/build/
+tests/
+demo/
