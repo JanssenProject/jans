@@ -709,7 +709,7 @@ class AuthHandler:
             try:
                 self.backend.create_archived_jwk(old_jwk, lifetime)
                 logger.info("JWK %s has been archived", old_jwk["kid"])
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - best-effort; rotation already committed
                 logger.warning("Unable to archive JWK %s; reason=%s", old_jwk["kid"], exc)
 
 
