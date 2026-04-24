@@ -1,73 +1,69 @@
-FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
-# ===============
-# Debian packages
-# ===============
+### Stage 1: Maturin build
+FROM ghcr.io/astral-sh/uv:0.11.3-python3.11-trixie-slim AS builder
+
+ARG RUST_VERSION=1.95.0
+ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
 
 RUN apt-get update \
-    && apt-get install -y bash unzip wget git curl
+    && apt-get install -y bash git curl ca-certificates gcc protobuf-compiler \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
 
+ENV PATH="/root/.cargo/bin:${PATH}" \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_CACHE=1
 
-# ========================
-# Install Python3 & Poetry
-# ========================
-ENV PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  # poetry:
-  POETRY_VERSION=1.4.1 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_CREATE=false \
-  POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  PATH="$PATH:/root/.poetry/bin"
+WORKDIR /build
 
+RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans . \
+        && git sparse-checkout init --cone \
+        && git checkout ${JANS_SOURCE_VERSION} \
+        && git sparse-checkout set jans-cedarling
 
-RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
-    && rm -rf /var/cache/apk/* /root/.cache /tmp/*
+RUN cd /build/jans-cedarling/bindings/cedarling_python \
+    && uvx maturin build --release
 
-# ===============
-# Project setup
-# ===============
-ENV JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+### Stage 2: Dependencies
+FROM ghcr.io/astral-sh/uv:0.11.3-python3.11-trixie-slim AS deps
 
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
-# create non-root user
-RUN adduser --shell /bin/sh --uid 1000 web \
-    && usermod -aG sudo web
+ENV PATH="/opt/venv/bin:${PATH}" \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_NO_CACHE=1
 
 WORKDIR /api
 
-COPY --chown=1000:1000 ./secrets/bootstrap.json /api/
+# Just dependencies
+COPY pyproject.toml uv.lock /api/
+RUN uv sync --locked --no-install-project --no-editable --no-group test
 
-RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
-        && cd /tmp/jans \
-        && git sparse-checkout init --cone \
-        && git checkout ${JANS_SOURCE_VERSION} \
-        && git sparse-checkout set jans-cedarling \
-        && cd jans-cedarling/bindings/cedarling_python \
-        && cp -r ../../flask-sidecar/* /api \
-        && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
-        && echo "${version}" > /api/cedarling_version \
-        && release_version="v${version}" \
-        && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl \
-        && rm -rf /tmp/jans
+# Rest of the app
+COPY . /api/
+COPY --from=builder /build/jans-cedarling/target/wheels/*.whl /api/
+# Sync the project
+RUN uv sync --locked --no-editable --no-group test \
+    && uv pip install --no-cache-dir /api/*.whl \
+    && rm -rf /api/*.whl
 
-# Setting up proper permissions:
-RUN chmod -R g=u /api \
-    && chown -R 1000:1000 /api
+### Stage 3: Final runtime
+FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
 
-# Project initialization:
-RUN poetry add /api/cedarling_python-"$(cat /api/cedarling_version)"-cp311-cp311-manylinux_2_34_x86_64.whl \
-    && poetry install --no-dev --no-root --no-interaction --no-ansi \
-    # Cleaning poetry installation's cache for production:
-    && rm -rf "$POETRY_CACHE_DIR"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV FLASK_APP=main.core:app \
+RUN useradd -m --home /home/web --shell /bin/sh --uid 1000 web
+
+WORKDIR /api
+COPY --from=deps --chown=1000:1000 /opt/venv /opt/venv
+COPY --from=deps --chown=1000:1000 /api /api
+COPY --chown=1000:1000 docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
     CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-None} \
     SIDECAR_DEBUG_RESPONSE=${SIDECAR_DEBUG_RESPONSE:-False}
@@ -88,10 +84,6 @@ ENV HOME=/home/web
 
 ENV APP_MODE=${APP_MODE:-production}
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "-e", "143", "-g", "--"]
 
-CMD "exec" "gunicorn" "main.core:app" "-b" ":5000" "--log-level" \
-$GUNICORN_LOG_LEVEL "--workers" "1" "--threads" "8" \
-"--worker-tmp-dir" "/dev/shm" "--worker-class" "gthread" \
-"--access-logfile" "-"  "--error-logfile" "-" "--preload" \
-"--log-config" "gunicorn_logging.conf"
+CMD ["/docker-entrypoint.sh"]

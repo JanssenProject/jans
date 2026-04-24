@@ -1,0 +1,33 @@
+# -------------------------
+# Python envs
+# -------------------------
+**/.venv/
+
+# -------------------------
+# Python cache
+# -------------------------
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+
+# -------------------------
+# Git + IDE
+# -------------------------
+.git/
+.idea/
+
+# -------------------------
+# build artifacts (if any survive)
+# -------------------------
+**/target/
+**/*.so
+**/*.pyd
+**/*.dll
+**/dist/
+**/build/
+tests/
+demo/
