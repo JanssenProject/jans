@@ -1,5 +1,5 @@
 ### Stage 1: Maturin build
-FROM ghcr.io/astral-sh/uv:0.11.3-python3.11-trixie-slim AS builder
+FROM ghcr.io/astral-sh/uv:0.11.7-python3.11-trixie-slim AS builder
 
 ARG RUST_VERSION=1.95.0
 ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
@@ -24,7 +24,7 @@ RUN cd /build/jans-cedarling/bindings/cedarling_python \
     && uvx maturin build --release
 
 ### Stage 2: Dependencies
-FROM ghcr.io/astral-sh/uv:0.11.3-python3.11-trixie-slim AS deps
+FROM ghcr.io/astral-sh/uv:0.11.7-python3.11-trixie-slim AS deps
 
 ENV PATH="/opt/venv/bin:${PATH}" \
     UV_PYTHON_DOWNLOADS=0 \
