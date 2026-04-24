@@ -701,12 +701,16 @@ class AuthHandler:
             new_jwks = json.loads(f.read()).get("keys", [])
 
         # old JWK that is not listed in new JWKS will be saved as an archived JWK
-        new_jwks_kids = tuple(new_jwk["kid"] for new_jwk in new_jwks)
+        new_jwks_kids = {new_jwk["kid"] for new_jwk in new_jwks}
         for old_jwk in old_jwks:
             if old_jwk["kid"] in new_jwks_kids:
                 continue
-            logger.info("JWK %s will be archived", old_jwk["kid"])
-            self.backend.create_archived_jwk(old_jwk, lifetime)
+
+            try:
+                self.backend.create_archived_jwk(old_jwk, lifetime)
+                logger.info("JWK %s has been been archived", old_jwk["kid"])
+            except Exception as exc:
+                logger.warning("Unable to archive JWK %s; reason=%s", old_jwk["kid"], exc)
 
 
 class WebHandler:
