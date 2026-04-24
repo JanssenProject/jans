@@ -593,7 +593,7 @@ class AuthHandler:
         )
 
         for jwk in old_jwks:
-            alg = jwk.get("alg", "").upper()
+            alg = (jwk.get("alg") or "").upper()
 
             # exclude alg if it's not allowed
             if alg not in self.allowed_key_algs:
