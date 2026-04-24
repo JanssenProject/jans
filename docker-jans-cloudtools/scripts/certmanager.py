@@ -708,7 +708,7 @@ class AuthHandler:
 
             try:
                 self.backend.create_archived_jwk(old_jwk, lifetime)
-                logger.info("JWK %s has been been archived", old_jwk["kid"])
+                logger.info("JWK %s has been archived", old_jwk["kid"])
             except Exception as exc:
                 logger.warning("Unable to archive JWK %s; reason=%s", old_jwk["kid"], exc)
 
