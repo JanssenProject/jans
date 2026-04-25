@@ -82,12 +82,15 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_object.revoke_session)
-            self.app.stop_progressing()
+            try:
+                await self.app.loop.run_in_executor(self.app.executor, self.app.cli_object.revoke_session)
+            finally:
+                self.app.stop_progressing()
+                self.exit_cli()
+ 
 
         asyncio.ensure_future(coroutine())
 
-        self.exit_cli()
 
     def configure_cli(self) -> None:
         """Configures CLI creds
@@ -141,6 +144,7 @@ class Plugin(DialogUtils):
                 verify=False if config_cli.args.noverify else True,
                 timeout=30,
                 )
+            response.raise_for_status()
         except Exception as e:
             raise SSAError(_("Error while retrieving openID Configuration from {}").format(open_id_url)) from e
 
@@ -167,6 +171,7 @@ class Plugin(DialogUtils):
                 ssa,
                 signing_key.key,
                 algorithms=["RS256"],
+                options={"verify_aud": False},
                 issuer=f"https://{iss}"
             )
         except jwt.exceptions.PyJWTError as e:
@@ -179,6 +184,92 @@ class Plugin(DialogUtils):
             raise SSAError(_("SSA is missing these grant types: {}").format(', '.join(missing_grant_types)))
 
         return decoded
+
+
+    def _build_registration_payload(self, parsed_iss, ssa):
+        payload = {
+              "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
+              "redirect_uris": [
+                f"https://{parsed_iss.netloc}/admin"
+              ],
+              "software_statement": ssa,
+              "grant_types": [
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "urn:ietf:params:oauth:grant-type:device_code"
+              ],
+              "userinfo_signed_response_alg": "RS256",
+              "access_token_lifetime": 2592000,
+              "scope": "jans_stat offline_access profile email openid https://jans.io/auth/ssa.admin",
+              "run_introspection_script_before_jwt_creation": False,
+              "update_token_script_dns": ["inum=2D3E.5A04,ou=scripts,o=jans"]
+            }
+
+        return payload
+
+
+    async def _create_client_coroutine(self, client_creation_data, parsed_iss, ssa):
+        self.app.start_progressing(_("Creating client..."))
+        error = None
+        response = None
+        try:
+            await self.app.loop.run_in_executor(
+                self.app.executor,
+                self.validate_ssa,
+                ssa,
+                parsed_iss.netloc,
+            )
+            response = await self.app.loop.run_in_executor(
+                self.app.executor,
+                lambda: config_cli.session.post(
+                    url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
+                    data=json.dumps(client_creation_data),
+                    headers={'Content-Type': 'application/json'},
+                    verify=False if config_cli.args.noverify else True,
+                    timeout=30,
+                ),
+            )
+        except SSAError as e:
+            error = str(e)
+        except Exception as e:
+            error = _("Error while creating client from SSA: {}").format(e)
+        finally:
+            self.app.stop_progressing()
+
+        if error:
+            self.app.show_message(_(common_strings.error), error, tobefocused=self.menu_container)
+            return
+
+        if response is None:
+            self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: empty server response"), tobefocused=self.menu_container)
+            return
+
+        if response.status_code not in (200, 201):
+            self.app.show_message(_(common_strings.error), _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(iss, response.status_code, response.text), tobefocused=self.menu_container)
+            return
+
+        try:
+            cli_info = response.json()
+        except json.JSONDecodeError as e:
+            self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}\nResponse was {}").format(e, response.text), tobefocused=self.menu_container)
+            return
+
+        jca_client_id = cli_info.get('client_id')
+        jca_client_secret = cli_info.get('client_secret')
+
+        if not (jca_client_id and jca_client_secret):
+            self.app.show_message(_(common_strings.error), _("client_id or client_secret is not in server response"), tobefocused=self.menu_container)
+            return
+
+        creds_info = {
+            'jans_host': parsed_iss.netloc,
+            'jca_client_id': jca_client_id,
+            'jca_client_secret': jca_client_secret
+            }
+
+        self.app.save_creds(creds_info)
+        self.app.create_cli()
 
 
     def create_ssa_cli(self, dialog):
@@ -203,88 +294,9 @@ class Plugin(DialogUtils):
         dialog.close()
         self.set_center_frame()
 
-        client_creation_data = {
-          "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
-          "redirect_uris": [
-            f"https://{parsed_iss.netloc}/admin"
-          ],
-          "software_statement": ssa,
-          "grant_types": [
-            "authorization_code",
-            "refresh_token",
-            "client_credentials",
-            "urn:ietf:params:oauth:grant-type:device_code"
-          ],
-          "userinfo_signed_response_alg": "RS256",
-          "access_token_lifetime": 2592000,
-          "scope": "jans_stat offline_access profile email openid https://jans.io/auth/ssa.admin",
-          "run_introspection_script_before_jwt_creation": False,
-          "update_token_script_dns": ["inum=2D3E.5A04,ou=scripts,o=jans"]
-        }
+        client_creation_data = self._build_registration_payload(parsed_iss, ssa)
 
-        async def coroutine():
-            self.app.start_progressing(_("Creating client..."))
-            error = None
-            response = None
-            try:
-                await self.app.loop.run_in_executor(
-                    self.app.executor,
-                    self.validate_ssa,
-                    ssa,
-                    parsed_iss.netloc,
-                )
-                response = await self.app.loop.run_in_executor(
-                    self.app.executor,
-                    lambda: config_cli.session.post(
-                        url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
-                        data=json.dumps(client_creation_data),
-                        headers={'Content-Type': 'application/json'},
-                        verify=False if config_cli.args.noverify else True,
-                        timeout=30,
-                    ),
-                )
-            except SSAError as e:
-                error = str(e)
-            except Exception as e:
-                error = _("Error while creating client from SSA: {}").format(e)
-            finally:
-                self.app.stop_progressing()
-
-            if error:
-                self.app.show_message(_(common_strings.error), error, tobefocused=self.menu_container)
-                return
-
-            if response is None:
-                self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: empty server response"), tobefocused=self.menu_container)
-                return
-
-            if response.status_code not in (200, 201):
-                self.app.show_message(_(common_strings.error), _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(iss, response.status_code, response.text), tobefocused=self.menu_container)
-                return
-
-            try:
-                cli_info = response.json()
-            except json.JSONDecodeError as e:
-                self.app.show_message(_(common_strings.error), _("Error while creating client from SSA: {}\nResponse was {}").format(e, response.text), tobefocused=self.menu_container)
-                return
-
-            jca_client_id = cli_info.get('client_id')
-            jca_client_secret = cli_info.get('client_secret')
-
-            if not (jca_client_id and jca_client_secret):
-                self.app.show_message(_(common_strings.error), _("client_id or client_secret is not in server response"), tobefocused=self.menu_container)
-                return
-
-            creds_info = {
-                'jans_host': parsed_iss.netloc,
-                'jca_client_id': jca_client_id,
-                'jca_client_secret': jca_client_secret
-                }
-
-            self.app.save_creds(creds_info)
-            self.app.create_cli()
-
-        asyncio.ensure_future(coroutine())
+        asyncio.ensure_future(self._create_client_coroutine(client_creation_data, parsed_iss, ssa))
 
 
     def create_ssa_client_window(self, dialog=None):
