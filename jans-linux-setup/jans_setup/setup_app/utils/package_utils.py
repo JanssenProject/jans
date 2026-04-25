@@ -75,15 +75,14 @@ class PackageUtils(SetupUtils):
                         local_apt_path = os.path.join(tmpdirname, apt_deb_fn)
                         base.download(f'https://repo.mysql.com//{apt_deb_fn}', local_apt_path)
                         if not os.path.exists(local_apt_path):
-                            print(f"Failed to download {apt_deb_fn}, cant' continue...")
-                            sys.exit()
+                            print(f"Failed to download {apt_deb_fn}, can't continue...")
+                            sys.exit(1)
                         self.run([install_command.format(local_apt_path)], shell=True)
                         self.run(update_command, shell=True, get_stderr=True)
-                        # check if MySQL Server is installable
-                        mysql_version_str = self.run('apt show mysql-server | grep Version', shell=True)
-                        if not mysql_version_str.strip():
-                            print(f"MySQL Server is not installable. Please fix apt repository for MySQL.")
-                            sys.exit()
+                        # check if MySQL Server is installable via the newly configured apt repo
+                        policy_out = self.run("apt-cache policy mysql-server", shell=True)
+                        if 'Candidate:' not in policy_out or 'Candidate: (none)' in policy_out:
+                             print("MySQL Server is not installable. Please fix apt repository for MySQL.")
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
                     
                 elif base.os_type in ('centos', 'red', 'rocky') and base.os_version == '10':
