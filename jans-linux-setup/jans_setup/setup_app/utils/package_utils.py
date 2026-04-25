@@ -74,9 +74,18 @@ class PackageUtils(SetupUtils):
                         apt_deb_fn = 'mysql-apt-config_0.8.39-1_all.deb'
                         local_apt_path = os.path.join(tmpdirname, apt_deb_fn)
                         base.download(f'https://repo.mysql.com//{apt_deb_fn}', local_apt_path)
-                        self.run([install_command.format(local_apt_path)],  shell=True)
+                        if not os.path.exists(local_apt_path):
+                            print(f"Failed to download {apt_deb_fn}, cant' continue...")
+                            sys.exit()
+                        self.run([install_command.format(local_apt_path)], shell=True)
                         self.run(update_command, shell=True, get_stderr=True)
+                        # check if MySQL Server is installable
+                        mysql_version_str = self.run('apt show mysql-server | grep Version', shell=True)
+                        if not mysql_version_str.strip():
+                            print(f"MySQL Server is not installable. Please fix apt repository for MySQL.")
+                            sys.exit()
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
+                    
                 elif base.os_type in ('centos', 'red', 'rocky') and base.os_version == '10':
                     package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
