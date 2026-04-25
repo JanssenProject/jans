@@ -83,8 +83,9 @@ class PackageUtils(SetupUtils):
                         policy_out = self.run("apt-cache policy mysql-server", shell=True)
                         if 'Candidate:' not in policy_out or 'Candidate: (none)' in policy_out:
                              print("MySQL Server is not installable. Please fix apt repository for MySQL.")
+                             sys.exit(1)
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
-                    
+
                 elif base.os_type in ('centos', 'red', 'rocky') and base.os_version == '10':
                     package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
