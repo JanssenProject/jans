@@ -1637,7 +1637,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		try {
-			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
+			String value;
+			if (propertyValue instanceof org.json.JSONObject) {
+				value = ((org.json.JSONObject) propertyValue).toString();
+			} else {
+				value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
+			}
 
 			return value;
 		} catch (Exception ex) {
@@ -2098,7 +2103,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	protected Object convertJsonToValue(Class<?> parameterType, Object propertyValue) {
 		try {
-			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
+			Object jsonValue;
+			if (parameterType.equals(org.json.JSONObject.class)) {
+				jsonValue = new org.json.JSONObject(String.valueOf(propertyValue));
+			} else {
+				jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
+			}
 			return jsonValue;
 		} catch (Exception ex) {
 			final String msg = String.format("Failed to convert json value '%s' to object of type %s", propertyValue, parameterType);
