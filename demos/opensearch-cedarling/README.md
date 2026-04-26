@@ -89,8 +89,8 @@ In the development machine, clone this repository (a shallow clone is recommende
 `cd` to `build/distributions`. And run:
 
 - `unzip cedarling.zip 'cedarling-java*'`
-- `zip -q -d cedarling-java-0.0.0-nightly.jar 'com/sun/jna/*'`
-- `zip -u cedarling.zip cedarling-java-0.0.0-nightly.jar`
+- `zip -q -d cedarling-java-2.0.0.jar 'com/sun/jna/*'`
+- `zip -u cedarling.zip cedarling-java-2.0.0.jar`
 
 Transfer the file `cedarling.zip` to the OpenSearch server. In a terminal run the below:
 
@@ -175,7 +175,7 @@ The `search_pipeline` is required so the response to the query is intercepted an
 
 ## About development
 
-Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in `src` directory and compilation is a matter of issuing `./gradlew compileJava`.
+Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in `src` directory and compilation is a matter of issuing `./gradlew clean compileJava`.
 
 In package-based installations, OpenSearch log is found at `/var/log/opensearch/opensearch.log`. To be able to see the logging statements produced by this plugin, add a line like the below to `/etc/opensearch/opensearch.yml` and restart opensearch (`systemctl restart opensearch.service`): 
 
@@ -186,3 +186,12 @@ logger.io.jans.cedarling: trace
 ## Benchmarking
 
 See this [page](./benchmark.md).
+
+## Troubleshooting
+
+If `gradle` ever starts giving problems, try the following to "reset it":
+
+```
+rm -rf ~/.gradle/caches/*
+rm -rf ~/.gradle/daemon/*
+```

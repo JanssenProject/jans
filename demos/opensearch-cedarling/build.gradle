@@ -25,7 +25,7 @@ apply plugin: 'opensearch.yaml-rest-test'
 apply plugin: 'opensearch.pluginzip'
 
 def pluginName = 'cedarling' 
-def pluginDescription = 'A plugin featuring TBAC security to database operations'
+def pluginDescription = 'A plugin featuring TBAC security to search operations'
 def packagePath = 'io.jans'     
 def pathToPlugin = 'cedarling.opensearch'
 def pluginClassName = 'CedarlingPlugin'
@@ -73,7 +73,9 @@ opensearchplugin {
     name pluginName
     description pluginDescription
     classname "${packagePath}.${pathToPlugin}.${pluginClassName}"
-    version "1.0.0-SNAPSHOT"
+    version "1.0.0-SNAPSHOT"    
+    licenseFile rootProject.file('LICENSE.txt')
+    noticeFile rootProject.file('NOTICE.txt')
 }
 
 // This requires an additional Jar not published as part of build-tools
