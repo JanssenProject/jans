@@ -33,7 +33,7 @@ import io.jans.shibboleth.model.config.profiles.support.SamlConfigurationSupport
 import java.time.Duration;
 
 public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable, AuthenticationConfigurationCapable, SamlConfigurationCapable, 
-    Saml2ConfigurationCapable, SamlAssertionConfigurationCapable,Saml2SsoConfigurationCapable {
+    SamlAssertionConfigurationCapable, Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
     
     private static final Duration DEFAULT_PROFILE_ASSERTION_LIFETIME = Duration.ofMinutes(5);
 
@@ -68,7 +68,7 @@ public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable,
             Duration.ofSeconds(0),
             EndpointValidationPolicy.SKIP_VALIDATION_WHEN_REQUEST_SIGNED,
             AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT,
-            FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME,
+            FriendlyNameRandomizationPolicy.RANDOMIZED,
             NameIdentifiers.empty(),
             RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS                                                                                                                                                                                  
         );

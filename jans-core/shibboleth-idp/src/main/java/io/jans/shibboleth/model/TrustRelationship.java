@@ -48,6 +48,11 @@ public class TrustRelationship {
         profiles = Profiles.allDefaults();
     }
 
+    private int incrementVersion() {
+
+        version++;
+        return version;
+    }
 
     public Id getId() {
 

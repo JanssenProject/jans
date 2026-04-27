@@ -31,14 +31,14 @@ import io.jans.shibboleth.model.config.profiles.support.SamlConfigurationSupport
 import java.time.Duration;
 
 public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, 
-    Saml2ConfigurationCapable, SamlAssertionConfigurationCapable,Saml2SsoConfigurationCapable {
+    SamlAssertionConfigurationCapable,Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
     
     private static final Duration DEFAULT_PROFILE_ASSERTION_LIFETIME = Duration.ofMinutes(5);
 
     private final CommonConfigurationSupport commonConfigurationSupport;
     private final SamlConfigurationSupport samlConfigurationSupport;
-    private final Saml2ConfigurationSupport saml2ConfigurationSupport;
     private final SamlAssertionConfigurationSupport samlAssertionConfigurationSupport;
+    private final Saml2ConfigurationSupport saml2ConfigurationSupport;
     private final Saml2SsoConfigurationSupport saml2SsoConfigurationSupport;
 
     private Saml2EcpProfileConfiguration() {
@@ -64,7 +64,7 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
             Duration.ofSeconds(0),
             EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT,
             AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT,
-            FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME,
+            FriendlyNameRandomizationPolicy.RANDOMIZED,
             NameIdentifiers.empty(),
             RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS                                                                                                                                                                                  
         );
