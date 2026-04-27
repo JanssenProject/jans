@@ -232,14 +232,9 @@
 
 /* Quick Start Guide specific styling */
 h3.quickstart {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--janssen-green-dark);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
   margin-top: 1rem;
-  opacity: 0;
-  animation: slideInFromLeft 0.5s ease-out 0.4s both;
 }
 
 /* Quick Start descriptive text */
@@ -668,7 +663,7 @@ pre {
 }
 
 .tabbed-content {
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem;
   background: var(--janssen-bg-primary);
   margin: 0;
 }
@@ -677,7 +672,7 @@ pre {
 .md-typeset .tabbed-set .tabbed-content,
 .tabbed-set .tabbed-content,
 div.tabbed-content {
-  padding: 0.5rem 0.5rem !important;
+  padding: 0.5rem !important;
   box-sizing: border-box !important;
 }
 
