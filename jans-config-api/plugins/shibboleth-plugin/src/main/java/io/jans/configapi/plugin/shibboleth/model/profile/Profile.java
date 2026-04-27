@@ -17,7 +17,7 @@ import java.util.Arrays;
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLProfile")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Profile {
+public class Profile  {
 
     @AttributeName
     @Schema(description = "Type of SAML Profile Type")
@@ -107,11 +107,11 @@ public class Profile {
         this.outboundFlows = outboundFlows;
     }
 
-    public boolean isPostAuthenticationFlows() {
+    public String[] getPostAuthenticationFlows() {
         return postAuthenticationFlows;
     }
 
-    public void setPostAuthenticationFlows(boolean postAuthenticationFlows) {
+    public void setPostAuthenticationFlows(String[] postAuthenticationFlows) {
         this.postAuthenticationFlows = postAuthenticationFlows;
     }
 
@@ -191,11 +191,12 @@ public class Profile {
     public String toString() {
         return "Profile [profileType=" + profileType + ", profileStatus=" + profileStatus + ", inboundFlows="
                 + Arrays.toString(inboundFlows) + ", outboundFlows=" + Arrays.toString(outboundFlows)
-                + ", postAuthenticationFlows=" + postAuthenticationFlows + ", authResultReuse=" + authResultReuse
-                + ", maxAuthenticationAge=" + maxAuthenticationAge + ", messageSigningPolicy=" + messageSigningPolicy
-                + ", validationRequestSignature=" + validationRequestSignature + ", encryptionFallbackPolicy="
-                + encryptionFallbackPolicy + ", encryptNameId=" + encryptNameId + ", signAssertion=" + signAssertion
-                + ", encryptAssertion=" + encryptAssertion + ", encryptAttribute=" + encryptAttribute + "]";
+                + ", postAuthenticationFlows=" + Arrays.toString(postAuthenticationFlows) + ", authResultReuse="
+                + authResultReuse + ", maxAuthenticationAge=" + maxAuthenticationAge + ", messageSigningPolicy="
+                + messageSigningPolicy + ", validationRequestSignature=" + validationRequestSignature
+                + ", encryptionFallbackPolicy=" + encryptionFallbackPolicy + ", encryptNameId=" + encryptNameId
+                + ", signAssertion=" + signAssertion + ", encryptAssertion=" + encryptAssertion + ", encryptAttribute="
+                + encryptAttribute + "]";
     }
 
 }
