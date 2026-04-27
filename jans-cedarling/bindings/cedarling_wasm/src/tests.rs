@@ -7,7 +7,7 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::bindings::serde_yml;
+use cedarling::bindings::serde_yaml_ng;
 use cedarling::{AuthorizeMultiIssuerRequest, EntityData, RequestUnsigned, TokenInput};
 use serde::Deserialize;
 use serde_json::json;
@@ -28,7 +28,7 @@ static MULTI_ISSUER_POLICY_STORE_YAML: &str =
 
 // Convert YAML policy store to JSON string for CEDARLING_POLICY_STORE_LOCAL
 static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yml::Value = serde_yml::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
+    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
         .expect("Multi-issuer policy store YAML should be valid");
     serde_json::to_string(&yaml_value).expect("Multi-issuer policy store should convert to JSON")
 });
@@ -62,7 +62,7 @@ static NO_ISSUERS_POLICY_STORE_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
 static NO_ISSUERS_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yml::Value = serde_yml::from_str(NO_ISSUERS_POLICY_STORE_YAML)
+    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(NO_ISSUERS_POLICY_STORE_YAML)
         .expect("no-issuers policy store YAML should be valid");
     serde_json::to_string(&yaml_value).expect("no-issuers policy store should convert to JSON")
 });
