@@ -46,14 +46,14 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-suse16-replace-janssen-version.bundle \
+          --bundle jans-suse16-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           jans-replace-janssen-version-stable.suse16.x86_64.rpm
