@@ -235,10 +235,9 @@ h3.quickstart {
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--janssen-green-dark);
-  border-bottom: 2px solid var(--janssen-green);
   padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
-  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
   opacity: 0;
   animation: slideInFromLeft 0.5s ease-out 0.4s both;
 }
@@ -640,9 +639,8 @@ pre {
 }
 
 .tabbed-set > .tabbed-labels > label {
-  padding: 0.25rem 0.5rem;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--janssen-text-secondary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -970,20 +968,6 @@ div.tabbed-content {
   background-color: var(--janssen-bg-primary);
 }
 
-.tabbed-set > label {
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 1.2rem 2rem;
-  color: var(--janssen-text-secondary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.02em;
-}
-
-.tabbed-set > label:hover {
-  color: var(--janssen-green);
-  background-color: var(--janssen-bg-secondary);
-  transform: translateY(-1px);
-}
 
 /* Tab content typography improvements */
 .tabbed-content h4,
