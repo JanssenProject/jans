@@ -72,8 +72,6 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private AppleUtilService appleUtilService;
 
-	private static final String SUBJECT_DN = "st=california, o=apple inc., cn=apple webauthn root ca";
-
 	@Override
 	public AttestationFormat getAttestationFormat() {
 		return AttestationFormat.apple;
@@ -110,7 +108,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			X509Certificate credCert = certificates.get(0);
 
 			try {
-				List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
+				List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAppleRootCertificates();
 				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate: " + trustAnchorCertificates.size());
 				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 				log.info("Step 1 completed");
@@ -180,4 +178,5 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 		}
 	}
+
 }

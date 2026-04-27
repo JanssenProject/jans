@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+
+<suite name="benchmark" parallel="false">
+
+    <parameter name="propertiesFile" value="../../resources/test/testng.properties" />
+    
+    <listeners>
+        <listener class-name="io.jans.cedarling.opensearch.AlterSuiteListener" />
+    </listeners>
+    <test name="1" enabled="true">
+        <classes>
+            <class name="io.jans.cedarling.opensearch.BenchmarkTest" />
+        </classes>
+    </test>
+
+</suite>

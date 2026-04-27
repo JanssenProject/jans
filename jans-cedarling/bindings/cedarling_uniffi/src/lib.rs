@@ -355,18 +355,12 @@ impl Cedarling {
     #[uniffi::method]
     pub fn authorize_unsigned(
         &self,
-        principals: Vec<Arc<EntityData>>,
+        principal: Option<Arc<EntityData>>,
         action: String,
         resource: Arc<EntityData>,
         context: JsonValue,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        if principals.len() > 1 {
-            return Err(AuthorizeError::InvalidInput {
-                error_msg: "authorize_unsigned accepts at most one principal".to_string(),
-            });
-        }
-        let core_principal: Option<core::EntityData> =
-            principals.into_iter().next().map(|v| v.inner.clone());
+        let core_principal: Option<core::EntityData> = principal.map(|p| p.inner.clone());
 
         let core_resource = resource.inner.clone();
 

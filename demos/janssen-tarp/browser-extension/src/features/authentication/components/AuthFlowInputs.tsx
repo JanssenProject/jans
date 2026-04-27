@@ -257,12 +257,6 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
             handleClose();
           }
         }}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-          },
-        }}
         className="form-container"
       >
         <DialogTitle>Authentication Flow Inputs</DialogTitle>
@@ -277,14 +271,19 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
           <DialogContentText>
             Enter inputs (optional) before initiating authentication flow.
           </DialogContentText>
+          <form
+            onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+              event.preventDefault();
+            }}
+            noValidate
+            autoComplete="off"
+          >
           <Stack
-            component="form"
             sx={{
               width: '75ch',
             }}
             spacing={2}
-            noValidate
-            autoComplete="off"
+            component="form"
           >
             {(!!errorMessage || errorMessage !== '') ?
               <Alert severity="error">{errorMessage}</Alert> : ''
@@ -448,6 +447,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
               )}
             />
           </Stack>
+          </form>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleClose}>Cancel</Button>

@@ -66,7 +66,10 @@ public class AttestationCertificateService {
     @Inject
     private DataMapperService dataMapperService;
 
+	private static final String APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME = "Apple_WebAuthn_Root_CA.pem";
+
 	private Map<String, X509Certificate> rootCertificatesMap;
+	private String appleRootCaSubjectDn;
 
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
@@ -76,6 +79,18 @@ public class AttestationCertificateService {
 
         String authenticatorCertsFolder = appConfiguration.getFido2Configuration().getAuthenticatorCertsFolder();
         this.rootCertificatesMap = certificateService.getCertificatesMap(authenticatorCertsFolder);
+
+        X509Certificate appleCert = certificateService.getCertificateByDisplayName(APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
+        if (appleCert != null) {
+            this.appleRootCaSubjectDn = appleCert.getSubjectDN().getName().toLowerCase();
+            log.debug("Loaded Apple WebAuthn root CA subject DN from DB: {}", appleRootCaSubjectDn);
+        } else {
+            log.warn("Apple WebAuthn root CA certificate '{}' not found in DB", APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
+        }
+	}
+
+	public List<X509Certificate> getAppleRootCertificates() {
+        return getRootCertificatesBySubjectDN(appleRootCaSubjectDn);
 	}
 
 	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode,
