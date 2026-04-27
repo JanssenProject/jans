@@ -1,0 +1,6 @@
+{ "create": {} }
+{ "name": "Jim Dunlop", "grad_year": 2021 }
+{ "create": {} }
+{ "name": "John Doe", "grad_year": 2023 }
+{ "create": {} }
+{ "name": "Aguacate Hass", "grad_year": 2025 }

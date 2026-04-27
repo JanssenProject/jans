@@ -1,6 +1,6 @@
 apiVersion: v2
 name: shibboleth-idp
-version: 2.0.0
+version: 0.0.0-nightly
 kubeVersion: ">=v1.23.0-0"
 description: Shibboleth Identity Provider 5.1.6 for SAML SSO, integrated with Janssen Auth Server for authentication.
 type: application

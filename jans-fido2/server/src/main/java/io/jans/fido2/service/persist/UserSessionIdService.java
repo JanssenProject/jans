@@ -113,14 +113,31 @@ public class UserSessionIdService {
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
         sessionAttributes.put("session_custom_state", "declined");
 
-        // TODO: Check if this not reset ttl and expiration. Check original SessionId service
         updateSessionId(entity);
     }
 
     public void updateSessionId(SessionId entity) {
-    	entity.setLastUsedAt(new Date());
+        Date now = new Date();
+        entity.setLastUsedAt(now);
+        refreshSessionExpiration(entity, now);
         persistenceEntryManager.merge(entity);
-	}
+    }
+
+    private void refreshSessionExpiration(SessionId entity, Date now) {
+        if (entity.getExpirationDate() == null || entity.getCreationDate() == null) {
+            log.warn("Session '{}' is missing creationDate or expirationDate; skipping TTL refresh", entity.getId());
+            return;
+        }
+        long sessionLifetimeMs = entity.getExpirationDate().getTime() - entity.getCreationDate().getTime();
+        int sessionLifetimeSeconds = (int) (sessionLifetimeMs / 1000);
+        if (sessionLifetimeSeconds <= 0) {
+            log.warn("Session '{}' has non-positive lifetime ({}s); skipping TTL refresh", entity.getId(), sessionLifetimeSeconds);
+            return;
+        }
+        // Extend expiration from now (sliding window) and refresh LDAP TTL
+        entity.setExpirationDate(new Date(now.getTime() + sessionLifetimeMs));
+        entity.setTtl(sessionLifetimeSeconds);
+    }
 
     private SessionId getSessionId(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
