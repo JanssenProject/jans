@@ -114,6 +114,17 @@ impl KeyService {
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
+        self.insert_jwk_set(openid_config, logger, jwks)?;
+
+        Ok(())
+    }
+
+    fn insert_jwk_set(
+        &self,
+        openid_config: &OpenIdConfig,
+        logger: Option<&Logger>,
+        jwks: JwkSet,
+    ) -> Result<(), KeyServiceError> {
         let (keys, errs) = jwks.unwrap_keys();
         for err in errs {
             let err_msg = format!(
@@ -178,51 +189,7 @@ impl KeyService {
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
-        let (keys, errs) = jwks.unwrap_keys();
-        for err in errs {
-            let err_msg = format!(
-                "failed to deserialize a JWK from '{}': {}",
-                openid_config.issuer.as_str(),
-                err,
-            );
-            logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
-        }
-
-        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
-
-        for parsed_key in keys {
-            let key = parsed_key.jwk;
-
-            let Some(key_algorithm) = key.common.key_algorithm else {
-                let err_msg = format!(
-                    "skipping a JWK with a missing algorithm specifier from '{}'",
-                    openid_config.issuer.as_str(),
-                );
-                logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::ERROR)));
-                continue;
-            };
-
-            let Ok(algorithm) = cast_to_algorithm(key_algorithm) else {
-                let alg_display = parsed_key.raw_algorithm.as_deref().unwrap_or("UNKNOWN");
-                let err_msg = format!(
-                    "skipping building a validation key for unsupported algorithm '{}' from '{}'",
-                    alg_display,
-                    openid_config.issuer.as_str(),
-                );
-                logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
-                continue;
-            };
-
-            let decoding_key =
-                DecodingKey::from_jwk(&key).map_err(FetchKeysError::BuildDecodingKey)?;
-
-            let key_info = DecodingKeyInfo {
-                issuer: Some(openid_config.issuer.clone()),
-                kid: key.common.key_id,
-                algorithm,
-            };
-            keys_guard.insert(key_info, Arc::new(decoding_key));
-        }
+        self.insert_jwk_set(openid_config, logger, jwks)?;
 
         Ok(max_age)
     }

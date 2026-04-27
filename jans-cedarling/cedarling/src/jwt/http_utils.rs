@@ -144,8 +144,8 @@ fn parse_max_age(cache_control: &str) -> Option<u64> {
     cache_control
         .split(',')
         .map(str::trim)
-        .find(|directive| directive.to_lowercase().starts_with("max-age="))
-        .and_then(|directive| directive.split_once('='))
+        .filter_map(|directive| directive.split_once('='))
+        .find(|(name, _)| name.trim().eq_ignore_ascii_case("max-age"))
         .and_then(|(_, value)| value.trim().parse::<u64>().ok())
 }
 

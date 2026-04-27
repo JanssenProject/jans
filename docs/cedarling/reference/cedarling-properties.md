@@ -109,7 +109,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
 - **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
 - **`CEDARLING_JWKS_REFRESH_INTERVAL`** : Optional override for JWKS periodic refresh interval in seconds. When set, overrides the `Cache-Control: max-age` from the JWKS endpoint. If omitted, the server-driven interval or a 1-hour fallback is used.
-- **`CEDARLING_JWKS_REFRESH_MIN_INTERVAL`** : Minimum interval in seconds between on-demand JWKS re-fetches per issuer. Prevents abuse from invalid JWT floods triggering excessive re-fetches. Default is `30` seconds.
+- **`CEDARLING_JWKS_REFRESH_MIN_INTERVAL`** : Minimum interval in seconds between on-demand JWKS re-fetches per issuer (those triggered by tokens with an unknown `kid`). Prevents abuse from invalid JWT floods triggering excessive re-fetches. Does not affect the periodic refresh schedule, which is driven by `CEDARLING_JWKS_REFRESH_INTERVAL` / `Cache-Control: max-age`. Default is `30` seconds.
 
 **Token cache:**
 

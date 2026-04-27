@@ -455,11 +455,15 @@ impl JwtService {
 
     /// Signals the background JWKS refresher for the given issuer, if one exists.
     fn signal_jwks_refresh(&self, iss: &IssClaim) {
-        let notifiers = self
-            .jwks_refresh_notifiers
-            .lock()
-            .expect("acquire jwks_refresh_notifiers lock");
-        if let Some(notify) = notifiers.get(iss) {
+        let notify = {
+            let notifiers = self
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock");
+            notifiers.get(iss).cloned()
+        };
+
+        if let Some(notify) = notify {
             notify.notify_one();
             self.logger.log_any(JwtLogEntry::new(
                 format!(
