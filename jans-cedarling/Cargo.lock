@@ -621,7 +621,7 @@ dependencies = [
  "hex",
  "http_utils",
  "jsonwebkey",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "mockito",
  "pprof",
  "prost",
@@ -696,7 +696,7 @@ name = "cedarling_uniffi"
 version = "0.1.0"
 dependencies = [
  "cedarling",
- "jsonwebtoken 9.3.1",
+ "jsonwebtoken",
  "openssl",
  "serde",
  "serde_json",
@@ -2346,7 +2346,7 @@ checksum = "ba781c43eb46c3bbf5bfda541139eed9a52b78d7c3aa74d516918885ecd63c40"
 dependencies = [
  "base64",
  "bitflags 2.11.1",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "num-bigint",
  "p256",
  "rand 0.9.4",
@@ -2355,21 +2355,6 @@ dependencies = [
  "thiserror 2.0.18",
  "yasna",
  "zeroize",
-]
-
-[[package]]
-name = "jsonwebtoken"
-version = "9.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a87cc7a48537badeae96744432de36f4be2b4a34a05a5ef32e9dd8a1c169dde"
-dependencies = [
- "base64",
- "js-sys",
- "pem",
- "ring",
- "serde",
- "serde_json",
- "simple_asn1",
 ]
 
 [[package]]
@@ -4593,7 +4578,7 @@ name = "test_utils"
 version = "0.0.0"
 dependencies = [
  "jsonwebkey",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "mockito",
  "pretty_assertions",
  "serde",

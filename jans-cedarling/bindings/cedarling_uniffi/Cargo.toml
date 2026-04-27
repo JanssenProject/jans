@@ -10,7 +10,7 @@ name = "cedarling_uniffi"
 # dependency for NOT wasm target
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cedarling = { workspace = true, features = ["blocking"] }
-jsonwebtoken = "9.3.0"
+jsonwebtoken = "10.3.0"
 # Maybe we can remove this dependency?
 openssl = { version = "0.10.71", features = ["vendored"] }
 uniffi = { version = "0.29.0", features = ["cli"] }
