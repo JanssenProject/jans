@@ -74,14 +74,15 @@ with the `student` entity type in the schema:
     }
 }
 ```
-<!--
-More attributes can be added if desired.
-jans_replace-janssen-version
--->
 
-For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. Ensure `student` is added to the `Search` action.
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
+
+**Notes**:
+
+- Ensure `student` is associated to the `Search` action
+- In Tarp, verify the issued UserInfo tokens have the `role` claim. One way to do so is adding the `role` database attribute to the `profile` OpenId scope in the server settings. In this case the registered client should have such scope associated as well as authentication requests
 
 ## Plugin deployment
 
