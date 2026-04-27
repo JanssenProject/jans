@@ -246,7 +246,13 @@ class Plugin(DialogUtils):
             return
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_(common_strings.error), _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(iss, response.status_code, response.text), tobefocused=self.menu_container)
+            self.app.show_message(
+                _(common_strings.error),
+                _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(
+                    parsed_iss.netloc, response.status_code, response.text
+                ),
+                tobefocused=self.menu_container,
+            )
             return
 
         try:

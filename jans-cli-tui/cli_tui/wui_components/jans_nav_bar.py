@@ -197,6 +197,7 @@ class JansNavBar():
             self.selection_changed(self.navbar_entries[self.cur_navbar_selection][0])
 
     def set_selected_item(self, selected: int) -> None:
+        """does not fire selection_changed"""
         self.cur_navbar_selection = selected % len(self.navbar_entries)
         get_app().invalidate()
 
