@@ -42,31 +42,29 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
-    public TrustRelationshipAssert hasDisplayName(String displayName) {
+    public TrustRelationshipAssert hasDisplayName(DisplayName comparedValue) {
 
         isNotNull();
 
-        DisplayName comparedValued = DisplayName.of(displayName).getValue();
-
-        if ( Objects.equals(actual.getDisplayName(),comparedValued) ) {
+        if ( Objects.equals(actual.getDisplayName(),comparedValue) ) {
 
             return this;
         }
 
-        failWithMessage("TrustRelationship displayName is <%s>. Expected: <%s>",actual.getDisplayName(),displayName);
+        failWithMessage("TrustRelationship displayName is <%s>. Expected: <%s>",actual.getDisplayName(),comparedValue);
         return this;
     }
 
-    public TrustRelationshipAssert hasDescription(String description) {
+    public TrustRelationshipAssert hasDescription(Description comparedValue) {
 
         isNotNull();
 
-        if( Objects.equals(actual.getDescription(), Description.of(description)) ) {
+        if( Objects.equals(actual.getDescription(), comparedValue) ) {
 
             return this;
         }
         
-        failWithMessage("TrustRelationship description is <%s>. Expected: <%s>",actual.getDescription(),description);
+        failWithMessage("TrustRelationship description is <%s>. Expected: <%s>",actual.getDescription(),comparedValue);
         return this;
     }
 

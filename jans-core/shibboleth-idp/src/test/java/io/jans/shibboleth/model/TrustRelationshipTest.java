@@ -73,12 +73,14 @@ public class TrustRelationshipTest {
             
             TrustResult<TrustRelationship> result = TrustRelationship.create("TestTR","Test TR",TrustNature.INDIVIDUAL);
 
-            assertTrue(result.isSuccess());
+            assertThat(result.isSuccess()).isTrue();
 
             TrustRelationship trustrelationship = result.getValue();
+            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("TestTR").getValue();
+
             assertThat(trustrelationship).isNew()
-                .hasDisplayName("TestTR")
-                .hasDescription("Test TR")
+                .hasDisplayName(newDisplayName)
+                .hasDescription(Description.of("Test TR"))
                 .isOfNature(TrustNature.INDIVIDUAL)
                 .hasStatus(TrustStatus.DRAFT)
                 .isVersion(1)
@@ -107,5 +109,103 @@ public class TrustRelationshipTest {
                 .isInactive()
                 .usesDefaultConfiguration();
         }
+    }
+
+    @Nested
+    @DisplayName("Basic Info Update")
+    public class BasicInfoUpdate {
+
+
+        @Test
+        @DisplayName("Given a null display name " + 
+            "WHEN updating the display name of an existing TrustRelationship " +
+            "THEN the update should fail with a display name required error"
+        )
+        public void shouldFailWithDisplayNameRequiredError() {
+
+            //Given 
+            TrustRelationship tr = createValidTrustRelationship();
+            io.jans.shibboleth.model.core.DisplayName newDisplayName = null;
+
+            //When
+            TrustResult<Void> result = tr.updateDisplayName(null);
+
+            //Then
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DisplayNameError.class);
+        }
+
+        @Test
+        @DisplayName("Given a null description " + 
+            "WHEN updating the description of an existing TrustRelationship " +
+            "THEN description is cleared and version is incremented")
+        public void shouldAllowNullToClearDescription() {
+
+            //Given
+            TrustRelationship tr = createValidTrustRelationship();
+            int originalVersion = tr.getVersion();
+            Description description = null;
+
+            //When
+            TrustResult<Void> result = tr.updateDescription(description);
+
+            //Then
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(tr).hasDescription(Description.of(""));
+            assertThat(tr).isVersion(originalVersion+1);
+        }
+
+        @Test
+        @DisplayName("Given a valid new display name " +
+            "WHEN updating the display name of an existing TrustRelationship " + 
+            "THEN display name is changed successfully "+
+            "status stays the same, " +
+            "and version is incremented")
+        public void shouldUpdateDisplayNameWhileKeepingStatusAndIncrementingVersion() {
+
+            //Given
+            TrustRelationship tr = createValidTrustRelationship();
+            int originalVersion = tr.getVersion();
+            TrustStatus originalStatus = tr.getStatus();
+
+            //When
+            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("NewTR").getValue();
+            TrustResult<Void> result = tr.updateDisplayName(newDisplayName);
+
+            //Then
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(tr).hasDisplayName(newDisplayName);
+            assertThat(tr).hasStatus(originalStatus);
+            assertThat(tr).isVersion(originalVersion+1);
+        }
+
+        @Test
+        @DisplayName("Given a valid new description " + 
+            "WHEN updating the description of an existing TrustRelationship " + 
+            "THEN description is changed successfully " +
+            "status stays the same, and version is incremented")
+        public void shouldUpdateDescriptionWhileKeepingStatusAndIncrementingVersion() {
+
+            //Given
+            TrustRelationship tr = createValidTrustRelationship();
+            int originalVersion = tr.getVersion();
+            TrustStatus originalStatus = tr.getStatus();
+
+            //When
+            Description newDescription = Description.of("New Description");
+            TrustResult<Void> result = tr.updateDescription(newDescription);
+
+            //Then
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(tr).hasDescription(newDescription);
+            assertThat(tr).hasStatus(originalStatus);
+            assertThat(tr).isVersion(originalVersion+1);
+        }
+    }
+
+
+    private TrustRelationship createValidTrustRelationship() {
+
+        return TrustRelationship.create("JansTR","Jans TR",TrustNature.INDIVIDUAL).getValue();
     }
 }
