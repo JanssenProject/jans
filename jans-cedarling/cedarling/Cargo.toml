@@ -30,7 +30,7 @@ uuid7 = { version = "1.6.0", features = [
     "uuid",
     "rand010",
 ], default-features = false }
-cedar-policy = { version = "4.9.0", features = ["partial-eval"] }
+cedar-policy = { version = "4.10.0", features = ["partial-eval"] }
 cedar-policy-core = "4.9.0"
 base64 = "0.22.1"
 url = "2.5.2"
