@@ -1,6 +1,6 @@
 {
     "CEDARLING_APPLICATION_NAME": "My App",
-    "CEDARLING_POLICY_STORE_URI": "https://gluu.org",
+    "CEDARLING_POLICY_STORE_URI": "https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpDemo.cjar",
     "CEDARLING_LOG_TYPE": "std_out",
     "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_LOG_TTL": null,

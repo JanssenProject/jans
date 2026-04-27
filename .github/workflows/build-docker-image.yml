@@ -230,6 +230,7 @@ jobs:
           fi
           if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
+            PLATFORMS="linux/amd64"
           fi
           if [[ "cedarling-opa" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/cedarling_opa
