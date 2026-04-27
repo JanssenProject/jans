@@ -10,68 +10,44 @@ tags:
 
 # Cedarling Properties
 
-These Bootstrap Properties control default application-level behavior. Properties are grouped below by which authorization method they apply to, so you can quickly find what you need for your chosen approach.
+Cedarling bootstrap properties control the application's behavior.
+Properties common and specific to different authorization methods are described below.
 
-Not sure which authorization method to use? See the [decision guide](./cedarling-authz.md#which-authorization-method-should-i-use).
+!!! tip
+    Not sure which authorization method to use? See the [decision guide](./cedarling-authz.md#which-authorization-method-should-i-use).
 
-## Required properties (both methods)
+## Common properties
 
-These properties are required regardless of which authorization method you use.
+These properties are effective regardless of which authorization method is in use.
 
-- **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this Cedarling instance.
+### Required properties
 
-To load policy store one of the following keys must be provided:
+- **`CEDARLING_APPLICATION_NAME`** : Human-friendly identifier for this Cedarling instance.
+
+### Loading the policy store
+
+To load the policy store, one of the following properties must be set.
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
-- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format:
-  - URLs ending in `.cjar` → loads as Cedar Archive
-  - Other URLs → loads as legacy JSON from Lock Server
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
+      - URLs ending in `.cjar` → loads as Cedar Archive
+      - Other URLs → loads as legacy JSON from Lock Server
 
-- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format:
-  - Directories → loads as directory-based policy store
-  - `.cjar` files → loads as Cedar Archive
-  - `.json` files → loads as JSON
-  - `.yaml`/`.yml` files → loads as YAML
+- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
+      - Directories → loads as directory-based policy store
+      - `.cjar` files → loads as Cedar Archive
+      - `.json` files → loads as JSON
+      - `.yaml`/`.yml` files → loads as YAML
 
-**New Directory-Based Format** (Native platforms only):
+!!! note "New Directory-Based Format"
+    For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. 
+    See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
 
-Cedarling now supports a directory-based policy store format with human-readable Cedar files. See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
+### Optional properties
 
-**Note:** In WASM environments, only `CEDARLING_POLICY_STORE_URI` and `CEDARLING_POLICY_STORE_LOCAL` are available. File and directory sources (`CEDARLING_POLICY_STORE_LOCAL_FN`) are not supported in WASM due to lack of filesystem access.
-
-!!! NOTE
-All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
-
-## Properties for `authorize_multi_issuer` (JWT-based / TBAC)
-
-These properties are relevant when using `authorize_multi_issuer` with signed JWT tokens from trusted identity providers. This is the recommended authorization method for most production deployments.
-
-**JWT and cryptographic behavior:**
-
-- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Default is `disabled`.
-- **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `disabled`.
-- **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
-- **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
-
-**Token cache:**
-
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `0`, which disables the maximum TTL — in that case, the token's `exp` claim is used to compute the cache entry TTL. If the token has no `exp` claim and this is `0`, the token is not cached at all. If the token has no `exp` claim and this is > 0, this value is used as the cache TTL fallback.
-- **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
-- **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
-
-**Trusted issuer loading:**
-
-- **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is `SYNC`. When using `ASYNC`, see [Trusted Issuer Loading Info](./cedarling-interfaces.md#trusted-issuer-loading-info) to check loading status.
-- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.
-
-**Decision logging for tokens:**
-
-- **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim or you need a different identifier.
-
-## Properties for both methods
-
-These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`.
+Properties listed here are optional. If a property value is not set, 
+the Cedarling will use the default value as specified in the property definition below.
 
 **Log behavior:**
 
@@ -103,7 +79,7 @@ These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`
 - **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
 - **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
 
-## Lock Server integration
+### Lock Server integration properties
 
 The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.
 
@@ -119,3 +95,34 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Default value is `rest`.
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
 - **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
+
+
+## authorize_multi_issuer method properties
+
+These properties are relevant only when using `authorize_multi_issuer` with signed JWT tokens from trusted identity providers. 
+Also called Token-based Access Control (TBAC). This is the recommended authorization method for most production deployments.
+
+**JWT and cryptographic behavior:**
+
+- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Default is `disabled`.
+- **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `disabled`.
+- **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
+- **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
+
+**Token cache:**
+
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `0`, which disables the maximum TTL — in that case, the token's `exp` claim is used to compute the cache entry TTL. If the token has no `exp` claim and this is `0`, the token is not cached at all. If the token has no `exp` claim and this is > 0, this value is used as the cache TTL fallback.
+- **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
+- **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
+
+**Trusted issuer loading:**
+
+- **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. `ASYNC` loader means that trusted issuers will be loaded in background. Default is `SYNC`. When using `ASYNC`, see [Trusted Issuer Loading Info](./cedarling-interfaces.md#trusted-issuer-loading-info) to check loading status.
+- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.
+
+**Decision logging for tokens:**
+
+- **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim, or you need a different identifier.
+
+
+

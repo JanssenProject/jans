@@ -36,14 +36,14 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el9-replace-janssen-version.bundle \
+          --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
@@ -98,17 +98,17 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-el10-replace-janssen-version.bundle \
+          --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-replace-janssen-version-stable.el10.x86_64.rpm
+         ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:

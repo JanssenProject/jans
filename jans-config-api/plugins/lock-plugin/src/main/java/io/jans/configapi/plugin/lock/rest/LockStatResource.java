@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class LockStatResource extends BaseResource {
 
-    private static final String STAT_URL = "/jans-lock/v1/internal/stat";
+    private static final String STAT_URL = "/jans-lock/api/v1/internal/stat";
 
     @Inject
     Logger logger;
