@@ -172,11 +172,6 @@
   border: 1px solid var(--janssen-border);
 }
 
-/* Apply animations to sections */
-.hero-section {
-  animation: fadeIn 0.8s ease-out;
-}
-
 /* Loading States */
 .content-loading .feature-highlight {
   display: none;
@@ -226,42 +221,24 @@
   animation: slideInFromRight 0.6s ease-out 0.4s both;
 }
 
-/* Section headings */
-.md-typeset h2 {
-  opacity: 0;
-  animation: slideInFromLeft 0.6s ease-out 0.3s both;
-}
-
-/* Core Components section */
-.tabbed-set {
-  opacity: 0;
-  animation: slideInFromBottom 0.8s ease-out 0.5s both;
-}
-
-/* Quick Start steps */
 .md-typeset h3 {
   opacity: 0;
   animation: slideInFromLeft 0.5s ease-out 0.4s both;
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--janssen-green-dark);
-  margin-bottom: 1rem;
-  margin-top: 2.5rem;
 }
 
+
 /* Quick Start Guide specific styling */
-h2:contains("Quick Start Guide") + h3,
-h2 + h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--janssen-green-dark);
-  border-bottom: 2px solid var(--janssen-green);
+h3.quickstart {
   padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 /* Quick Start descriptive text */
-.md-typeset h3 + p {
+h3.quickstart + p {
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--janssen-text-secondary);
@@ -549,6 +526,7 @@ pre {
   box-shadow: 0 2px 8px var(--janssen-shadow);
   position: relative;
   min-height: auto;
+  animation: fadeInUp 0.6s ease forwards;
 }
 
 .grid.cards > *::before {
@@ -634,11 +612,13 @@ pre {
 
 /* Tabs */
 .tabbed-set {
-  margin: 0;
   border: 1px solid var(--janssen-border);
   border-radius: 0.5rem;
   overflow: visible;
   display: block;
+  opacity: 0;
+  animation: slideInFromBottom 0.8s ease-out 0.5s both;
+  margin: 2rem 0;
 }
 
 .tabbed-set > input {
@@ -654,9 +634,8 @@ pre {
 }
 
 .tabbed-set > .tabbed-labels > label {
-  padding: 0.25rem 0.5rem;
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--janssen-text-secondary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -684,7 +663,7 @@ pre {
 }
 
 .tabbed-content {
-  padding: 0.5rem 0.5rem !important;
+  padding: 0.5rem;
   background: var(--janssen-bg-primary);
   margin: 0;
 }
@@ -693,7 +672,7 @@ pre {
 .md-typeset .tabbed-set .tabbed-content,
 .tabbed-set .tabbed-content,
 div.tabbed-content {
-  padding: 0.5rem 0.5rem !important;
+  padding: 0.5rem !important;
   box-sizing: border-box !important;
 }
 
@@ -771,15 +750,6 @@ div.tabbed-content {
   font-weight: 700;
 }
 
-/* Section Headers */
-.md-typeset h2 {
-  color: var(--janssen-gray-dark);
-  font-weight: 700;
-  font-size: 1.75rem;
-  margin: 0 0 2rem 0;
-  text-align: left;
-  position: relative;
-}
 
 .md-typeset h2::after {
   content: '';
@@ -985,10 +955,6 @@ div.tabbed-content {
 }
 
 /* Core Components Tab Styling */
-.tabbed-set {
-  margin: 2rem 0;
-  display: block;
-}
 
 .tabbed-set > input:checked + label {
   color: var(--janssen-green-dark);
@@ -997,20 +963,6 @@ div.tabbed-content {
   background-color: var(--janssen-bg-primary);
 }
 
-.tabbed-set > label {
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 1.2rem 2rem;
-  color: var(--janssen-text-secondary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.02em;
-}
-
-.tabbed-set > label:hover {
-  color: var(--janssen-green);
-  background-color: var(--janssen-bg-secondary);
-  transform: translateY(-1px);
-}
 
 /* Tab content typography improvements */
 .tabbed-content h4,
@@ -1022,26 +974,11 @@ div.tabbed-content {
   line-height: 1.4;
 }
 
-.tabbed-content p {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--md-default-fg-color--light);
-  margin: 0 0 1.5rem 0;
-}
-
 
 .tabbed-content .md-button {
   margin-top: 1.5rem;
   font-size: 0.9rem;
   padding: 0.7rem 1.5rem;
-}
-
-.component-image {
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px var(--md-shadow-z1);
-  margin: 1rem 0 1.5rem 0;
-  max-width: 100%;
-  height: auto;
 }
 
 /* Setup Guide Reference Links */
@@ -1092,9 +1029,6 @@ div.tabbed-content {
   }
 }
 
-.grid.cards > * {
-  animation: fadeInUp 0.6s ease forwards;
-}
 
 .grid.cards > *:nth-child(1) { animation-delay: 0.1s; }
 .grid.cards > *:nth-child(2) { animation-delay: 0.2s; }
@@ -1120,9 +1054,6 @@ div.tabbed-content {
 }
 
 /* Tab Content Enhancement */
-.tabbed-content {
-  padding: 2rem 0;
-}
 
 .tabbed-content h3 {
   color: var(--janssen-green-dark);
@@ -1276,12 +1207,10 @@ html {
   line-height: 1.3;
   margin-bottom: 0.75rem;
   margin-top: 1rem;
-}
-
-.md-content p {
-    font-size: 16px !important;
-    line-height: 1.6;
-    margin-bottom: 1em;
+  opacity: 0;
+  animation: slideInFromLeft 0.6s ease-out 0.3s both;
+  text-align: left;
+  position: relative;
 }
 
 .md-content h1 + p,
@@ -1290,20 +1219,11 @@ html {
 .md-content h4 + p,
 .md-content h5 + p,
 .md-content h6 + p {
-    font-size: 16px !important;
     margin-top: 0.5em;
 }
 
 .md-content .md-typeset p {
-    font-size: 16px !important;
-    font-weight: normal !important;
-}
-
-.md-content .md-typeset p.lead,
-.md-content .md-typeset p:first-of-type {
-    font-size: 16px !important;
-}
-
-.md-content .md-typeset .admonition p {
-    font-size: 16px !important;
+    font-weight: normal;
+    line-height: 1.6;
+    margin-bottom: 1em;
 }
