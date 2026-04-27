@@ -144,7 +144,7 @@ Note that in real-world scenarios, indices already exist and policies are built 
 
 ## Setup a search pipeline
 
-This plugins implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/pipeline.json) to the OpenSearch server and run:
+This plugin implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/pipeline.json) to the OpenSearch server and run:
 
 ```
 curl -n -H 'Content-Type: application/json' -d @pipeline.json -X PUT https://oshost/_search/pipeline/cedarling_search?pretty
