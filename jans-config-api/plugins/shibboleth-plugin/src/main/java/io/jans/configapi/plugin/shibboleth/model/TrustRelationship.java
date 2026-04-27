@@ -2,13 +2,16 @@ package io.jans.configapi.plugin.shibboleth.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.jans.configapi.plugin.shibboleth.model.profile.*;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -56,7 +59,7 @@ public class TrustRelationship extends Entry implements Serializable {
         
     @AttributeName(name = "jansProfileConfiguration")
     @Schema(description = "SAML profiles.")
-    private List<String> jansProfileConfiguration;
+    private List<Profile> jansProfileConfiguration;
 
     @AttributeName(name = "jansStatus")
     private Status status;
@@ -105,6 +108,14 @@ public class TrustRelationship extends Entry implements Serializable {
         this.metadataSource = metadataSource;
     }
 
+    public List<String> getReleasedAttributes() {
+        return releasedAttributes;
+    }
+
+    public void setReleasedAttributes(List<String> releasedAttributes) {
+        this.releasedAttributes = releasedAttributes;
+    }
+
     public List<String> getEntityIds() {
         return entityIds;
     }
@@ -113,11 +124,11 @@ public class TrustRelationship extends Entry implements Serializable {
         this.entityIds = entityIds;
     }
 
-    public List<String> getJansProfileConfiguration() {
+    public List<Profile> getJansProfileConfiguration() {
         return jansProfileConfiguration;
     }
 
-    public void setJansProfileConfiguration(List<String> jansProfileConfiguration) {
+    public void setJansProfileConfiguration(List<Profile> jansProfileConfiguration) {
         this.jansProfileConfiguration = jansProfileConfiguration;
     }
 
@@ -140,9 +151,9 @@ public class TrustRelationship extends Entry implements Serializable {
     @Override
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", entityIds=" + entityIds
-                + ", jansProfileConfiguration=" + jansProfileConfiguration + ", status=" + status + ", version="
-                + version + "]";
-    }
-    
+                + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", releasedAttributes="
+                + releasedAttributes + ", entityIds=" + entityIds + ", jansProfileConfiguration="
+                + jansProfileConfiguration + ", status=" + status + ", version=" + version + "]";
+    }    
+
 }

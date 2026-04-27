@@ -542,7 +542,7 @@ objectClass: top
 description: LogoutStatusJwt Custom Script - Sample in Java
 displayName: logout_status_jwt_script_in_java
 inum: 0300-BA15
-jansEnabled: FALSE
+jansEnabled: TRUE
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java

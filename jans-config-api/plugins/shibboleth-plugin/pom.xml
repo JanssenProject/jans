@@ -3,7 +3,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>io.jans.jans-config-api.plugins</groupId>
-        <version>2.0.0</version>
+        <version>0.0.0-nightly</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shibboleth-plugin</artifactId>
@@ -36,16 +36,35 @@
             <version>${jans.version}</version>
         </dependency>
         
-        <dependency>
-            <groupId>io.smallrye.config</groupId>
-            <artifactId>smallrye-config</artifactId>
-        </dependency>
+      <dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-annotation</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-document-store</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-saml</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		
+		<!-- Others -->
         
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
         </dependency>
         
+        <!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
+		</dependency>
+		
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -59,27 +78,136 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <finalName>${project.artifactId}-${project.version}-distribution</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+<build>
+		<filters>
+			<filter>../../profiles/${cfg}/config-build.properties</filter>
+			<filter>../../profiles/${cfg}/config-api-test.properties</filter>
+		</filters>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>karate.properties</include>
+					<include>karate_jenkins.properties</include>
+					<include>test.properties</include>
+					<include>*.*</include>
+				</includes>
+			</testResource>
+		</testResources>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.properties</include>
+					<include>**/*.json</include>
+					<include>META-INF/services/*.*</include>
+				</includes>
+			</resource>
+		</resources>
+
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+					</systemPropertyVariables>
+					<excludedGroups>integration</excludedGroups>
+					<systemProperties>
+						<karate.options>--tags ~@ignore</karate.options>
+					</systemProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<failIfNoTests>false</failIfNoTests>
+							<excludedGroups>!integration</excludedGroups>
+							<groups>integration</groups>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy-to-local-folder</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>../target/plugins</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<include>*-distribution.jar</include>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger-maven-plugin-jakarta}</version>
+				<executions>
+					<execution>
+						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
+							<outputFileName>shibboleth-plugin-swagger</outputFileName>
+							<contextId>${project.artifactId}</contextId>
+							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.configapi.plugin.shibboleth</package>
+							</resourcePackages>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models-jakarta</artifactId>
+						<version>${swagger-models-jakarta}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+
+		</plugins>
+	</build>
 </project>
