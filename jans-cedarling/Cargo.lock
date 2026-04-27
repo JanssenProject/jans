@@ -610,7 +610,6 @@ dependencies = [
  "chrono",
  "config",
  "criterion",
- "datalogic-rs",
  "derive_more",
  "flate2",
  "futures",
@@ -618,23 +617,19 @@ dependencies = [
  "getrandom 0.3.4",
  "getrandom 0.4.2",
  "gloo-timers",
- "hex",
  "http_utils",
  "jsonwebkey",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "mockito",
  "pprof",
  "prost",
  "prost-types",
  "rand 0.10.1",
- "regex",
  "reqwest",
  "semver",
  "serde",
  "serde_json",
  "serde_yaml_ng",
- "sha1",
- "sha2",
  "smol_str",
  "sparkv",
  "stats_alloc",
@@ -696,11 +691,7 @@ name = "cedarling_uniffi"
 version = "0.1.0"
 dependencies = [
  "cedarling",
- "jsonwebtoken 9.3.1",
- "openssl",
- "serde",
  "serde_json",
- "test_utils",
  "thiserror 2.0.18",
  "uniffi",
  "uniffi_macros",
@@ -1161,18 +1152,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "datalogic-rs"
-version = "4.0.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcab7239cbd842e6592ff150b568b4274700de080ff3c3060d80281f47d7c27a"
-dependencies = [
- "chrono",
- "regex",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "debugid"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1522,21 +1501,6 @@ name = "foldhash"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
-
-[[package]]
-name = "foreign-types"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
-dependencies = [
- "foreign-types-shared",
-]
-
-[[package]]
-name = "foreign-types-shared"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "form_urlencoded"
@@ -1912,12 +1876,8 @@ dependencies = [
 name = "http_utils"
 version = "0.1.0"
 dependencies = [
- "derive_more",
- "mockito",
- "pretty_assertions",
  "reqwest",
  "serde",
- "serde_json",
  "thiserror 2.0.18",
  "tokio",
 ]
@@ -2346,7 +2306,7 @@ checksum = "ba781c43eb46c3bbf5bfda541139eed9a52b78d7c3aa74d516918885ecd63c40"
 dependencies = [
  "base64",
  "bitflags 2.11.1",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "num-bigint",
  "p256",
  "rand 0.9.4",
@@ -2355,21 +2315,6 @@ dependencies = [
  "thiserror 2.0.18",
  "yasna",
  "zeroize",
-]
-
-[[package]]
-name = "jsonwebtoken"
-version = "9.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a87cc7a48537badeae96744432de36f4be2b4a34a05a5ef32e9dd8a1c169dde"
-dependencies = [
- "base64",
- "js-sys",
- "pem",
- "ring",
- "serde",
- "serde_json",
- "simple_asn1",
 ]
 
 [[package]]
@@ -2855,58 +2800,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6790f58c7ff633d8771f42965289203411a5e5c68388703c06e14f24770b41e"
 
 [[package]]
-name = "openssl"
-version = "0.10.78"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f38c4372413cdaaf3cc79dd92d29d7d9f5ab09b51b10dded508fb90bb70b9222"
-dependencies = [
- "bitflags 2.11.1",
- "cfg-if",
- "foreign-types",
- "libc",
- "once_cell",
- "openssl-macros",
- "openssl-sys",
-]
-
-[[package]]
-name = "openssl-macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a948666b637a0f465e8564c73e89d4dde00d72d4d473cc972f390fc3dcee7d9c"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "openssl-probe"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c87def4c32ab89d880effc9e097653c8da5d6ef28e6b539d313baaacfbafcbe"
-
-[[package]]
-name = "openssl-src"
-version = "300.6.0+3.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8e8cbfd3a4a8c8f089147fd7aaa33cf8c7450c4d09f8f80698a0cf093abeff4"
-dependencies = [
- "cc",
-]
-
-[[package]]
-name = "openssl-sys"
-version = "0.9.114"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13ce1245cd07fcc4cfdb438f7507b0c7e4f3849a69fd84d52374c66d83741bb6"
-dependencies = [
- "cc",
- "libc",
- "openssl-src",
- "pkg-config",
- "vcpkg",
-]
 
 [[package]]
 name = "ordered-multimap"
@@ -4248,17 +4145,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sha1"
-version = "0.10.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
-dependencies = [
- "cfg-if",
- "cpufeatures 0.2.17",
- "digest",
-]
-
-[[package]]
 name = "sha2"
 version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4593,7 +4479,7 @@ name = "test_utils"
 version = "0.0.0"
 dependencies = [
  "jsonwebkey",
- "jsonwebtoken 10.3.0",
+ "jsonwebtoken",
  "mockito",
  "pretty_assertions",
  "serde",
@@ -5374,12 +5260,6 @@ dependencies = [
  "serde",
  "uuid",
 ]
-
-[[package]]
-name = "vcpkg"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version_check"
