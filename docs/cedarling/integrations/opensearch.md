@@ -140,7 +140,7 @@ curl -n -H 'Content-Type: application/json' -d @query.json https://oshost/studen
 
 [query.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
 
-Note that in real world scenarios, indices already exist and policies are built in conformance afterwards. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
+Note that in real-world scenarios, indices already exist and policies are built in conformance afterward. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
 
 ## Setup a search pipeline
 
