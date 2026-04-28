@@ -265,6 +265,7 @@ debug = get_bool(debug)
 session = requests.Session()
 session.headers.update({'Jans-Client':'jans-tui'})
 
+AUTH_DISCOVERY_ENDPOINT = '.well-known/openid-configuration'
 
 class JCA_CLI:
 
@@ -284,7 +285,7 @@ class JCA_CLI:
         if wrapped == None:
             self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-        self.discovery_endpoint = '.well-known/openid-configuration'
+        self.discovery_endpoint = AUTH_DISCOVERY_ENDPOINT
         self.openid_configuration = {}
         self.set_user()
         self.plugins()

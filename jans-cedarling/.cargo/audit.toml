@@ -1,0 +1,5 @@
+[advisories]
+# RUSTSEC-2023-0071: Marvin Attack in rsa 0.9.10 (timing side-channel)
+# No fixed version available. Accepted risk: timing attack complexity,
+# used only for JWT signing/verification at auth time.
+ignore = ["RUSTSEC-2023-0071"]

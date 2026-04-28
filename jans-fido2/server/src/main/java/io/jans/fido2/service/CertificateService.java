@@ -128,8 +128,21 @@ public class CertificateService {
         List<Document> tocCertificatesDocuments = dbDocumentService.getDocumentsByFilePath(rootCertificatePath);
         for (Document certDB : tocCertificatesDocuments)
             certificates.add(getCertificate(certDB.getDocument()));
-        
+
         return certificates;
+    }
+
+    public X509Certificate getCertificateByDisplayName(String displayName) {
+        try {
+            Document doc = dbDocumentService.getDocumentByDisplayName(displayName);
+            if (doc == null || doc.getDocument() == null) {
+                return null;
+            }
+            return getCertificate(doc.getDocument());
+        } catch (Exception e) {
+            log.error("Failed to load certificate with displayName {}", displayName, e);
+            return null;
+        }
     }
 
     public X509Certificate getCertificate(String certsFolder, String certFileName) {
