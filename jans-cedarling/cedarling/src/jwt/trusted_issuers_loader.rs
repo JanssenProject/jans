@@ -26,6 +26,7 @@ use crate::{
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
+use http_utils::Backoff;
 
 use crate::http::spawn_task;
 
@@ -350,13 +351,15 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
     let mut last_refresh = Instant::now()
         .checked_sub(interval)
         .unwrap_or_else(Instant::now);
+    let mut backoff = Backoff::default_fixed();
 
     loop {
         tokio::select! {
             () = sleep(interval) => {},
             () = notify.notified() => {
-                if last_refresh.elapsed() < min_interval {
-                    continue;
+                let elapsed = last_refresh.elapsed();
+                if elapsed < min_interval {
+                    sleep(min_interval.saturating_sub(elapsed)).await;
                 }
             },
             () = cancel_tkn.cancelled() => { break; },
@@ -376,6 +379,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
         {
             Ok(max_age) => {
                 last_refresh = Instant::now();
+                backoff.reset();
 
                 if let Some(config_secs) = config_override {
                     interval = Duration::from_secs(config_secs);
@@ -401,6 +405,11 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
                     ),
                     Some(LogLevel::ERROR),
                 ));
+
+                tokio::select! {
+                    _ = backoff.snooze() => {},
+                    () = cancel_tkn.cancelled() => { break; },
+                }
             },
         }
     }

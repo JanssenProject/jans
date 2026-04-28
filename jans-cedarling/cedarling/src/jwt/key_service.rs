@@ -500,4 +500,50 @@ mod test {
             "key should be loaded via refresh"
         );
     }
+
+    #[tokio::test]
+    async fn refresh_returns_none_when_cache_control_header_missing() {
+        let keys = generate_keypair_hs256(Some("cache_test_key")).unwrap();
+        let mut server = mockito::Server::new_async().await;
+
+        let jwks_body =
+            json!({"keys": generate_jwks(std::slice::from_ref(&keys)).keys}).to_string();
+
+        server
+            .mock("GET", "/jwks")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(&jwks_body)
+            .expect(1)
+            .create();
+
+        let openid_config = OpenIdConfig {
+            issuer: IssClaim::new(&server.url()),
+            jwks_uri: url::Url::parse(&(server.url() + "/jwks")).unwrap(),
+            status_list_endpoint: None,
+        };
+
+        let key_service = KeyService::default();
+        let max_age = key_service
+            .refresh_keys_using_oidc(&openid_config, None)
+            .await
+            .expect("refresh without cache-control header should succeed");
+
+        assert_eq!(
+            max_age,
+            None,
+            "max_age should be None when Cache-Control header is missing"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(IssClaim::new(&server.url())),
+                    kid: Some("cache_test_key".to_string()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "key should be loaded via refresh"
+        );
+    }
 }
