@@ -53,8 +53,8 @@ public class ShibbolethProfileResourceService {
 
 
   
-    public List<Profile> getAllProfileForTrustRelationships(String inum) {
-        List<Profile> profiles = new ArrayList<>();
+    public List<SAMLProfile> getAllProfileForTrustRelationships(String inum) {
+        List<SAMLProfile> profiles = new ArrayList<>();
 		//TO-DO
         return persistenceEntryManager.findEntries(profiles);
     }

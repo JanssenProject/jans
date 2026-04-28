@@ -5,19 +5,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.base.Entry;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.Duration;
 import java.util.Arrays;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLProfile")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Profile  {
+public class SAMLProfile {
 
     @AttributeName
     @Schema(description = "Type of SAML Profile Type")

@@ -25,6 +25,7 @@ public final class Constants {
 
     public static final String SHIBBOLETH_READ_ACCESS = "https://jans.io/oauth/config/shibboleth.readonly";
     public static final String SHIBBOLETH_WRITE_ACCESS = "https://jans.io/oauth/config/shibboleth.write";
+    public static final String SHIBBOLETH_DELETE_ACCESS = "https://jans.io/oauth/config/shibboleth.delete";
     public static final String SHIBBOLETH_ADMIN_ACCESS = "https://jans.io/oauth/config/shibboleth.admin";
 
     public static final String SHIBBOLETH_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/shibboleth/config.readonly";

@@ -3,6 +3,8 @@ package io.jans.configapi.plugin.shibboleth.rest;
 import java.io.InputStream;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -14,12 +16,13 @@ import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
 import io.jans.configapi.plugin.shibboleth.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -106,9 +109,54 @@ public class ShibbolethResource extends BaseResource {
         SearchRequest searchReq = createSearchRequest(shibbolethService.getDnForTrustRelationship(null), pattern,
                 sortBy, sortOrder, startIndex, limit, null, null, shibbolethService.getRecordMaxCount(), fieldValuePair,
                 TrustRelationship.class);
-        // searchReq.setPage(page); //TO_DO
+        searchReq.setPage(page);
 
         return Response.ok(this.doSearch(searchReq)).build();
+    }
+
+    @Operation(summary = "Gets trusted service provider by unique identifier", description = "shibbolethService", operationId = "get-shibboleth-trust-by-inum", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-by-id"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @Path(Constants.INUM_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getTrustedServiceProviderByInum(
+            @Parameter(description = "Trust Relationship identifier") @PathParam(Constants.INUM) @NotNull String inum) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Shibboleth trust search by - inum:{}", escapeLog(inum));
+        }
+        TrustRelationship trustRelationship = shibbolethService.getTrustRelationshipByInum(inum);
+
+        return Response.ok(trustRelationship).build();
+    }
+
+    @Operation(summary = "Gets trusted service providers by name.", description = "Gets list of trusted service providers by name", operationId = "get-shibboleth-trust-by-name", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-by-name"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @Path(Constants.NAME_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getTrustedServiceProvidersByName(
+            @Parameter(description = "Trust Relationship Name") @PathParam(Constants.NAME) @NotNull String name) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Shibboleth trust by name:{}", escapeLog(name));
+        }
+        List<TrustRelationship> trustRelationshipList = shibbolethService.getAllTrustRelationshipByDisplayName(name);
+        return Response.ok(trustRelationshipList).build();
     }
 
     @Operation(summary = "Adds trusted service provider", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
@@ -167,6 +215,36 @@ public class ShibbolethResource extends BaseResource {
         TrustRelationship trustRelationship = shibbolethService
                 .updateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metadatafile);
         return Response.status(Response.Status.OK).entity(trustRelationship).build();
+    }
+    
+    /**
+     * Delete the TrustRelationship identified by the given inum.
+     *
+     * Validates that the TrustRelationship exists and removes it from storage.
+     *
+     * @param inum identifier (inum) of the TrustRelationship to delete
+     * @return a 204 No Content response on successful deletion
+     */
+    @Operation(summary = "Marks Trust Relationship for deletion", description = "Marks Trust Relationship for deletion", operationId = "delete-shibboleth-trust-by-inum", tags = {
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @DELETE
+    @Path(ApiConstants.INUM_PATH)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }, groupScopes = {}, superScopes = { Constants.SHIBBOLETH_DELETE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    public Response deleteClient(
+            @Parameter(description = "TrustRelationship inum") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("TrustRelationship to be deleted - inum:{} ", escapeLog(inum));
+        }
+            //Blocks if an AGGREGATE has ACTIVE children.
+            //If ACTIVE, marks PENDING_DELETE for the Worker to unpublish.
+        return Response.noContent().build();
     }
 
     /* Helper methods */

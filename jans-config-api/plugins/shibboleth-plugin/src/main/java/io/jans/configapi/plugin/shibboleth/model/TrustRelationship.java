@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.shibboleth.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.jans.shibboleth.model.config.profiles.support.*;
 import io.jans.configapi.plugin.shibboleth.model.profile.*;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -59,7 +60,7 @@ public class TrustRelationship extends Entry implements Serializable {
         
     @AttributeName(name = "jansProfileConfiguration")
     @Schema(description = "SAML profiles.")
-    private List<Profile> jansProfileConfiguration;
+    private List<SAMLProfile> jansProfileConfiguration;
 
     @AttributeName(name = "jansStatus")
     private Status status;
@@ -124,11 +125,11 @@ public class TrustRelationship extends Entry implements Serializable {
         this.entityIds = entityIds;
     }
 
-    public List<Profile> getJansProfileConfiguration() {
+    public List<SAMLProfile> getJansProfileConfiguration() {
         return jansProfileConfiguration;
     }
 
-    public void setJansProfileConfiguration(List<Profile> jansProfileConfiguration) {
+    public void setJansProfileConfiguration(List<SAMLProfile> jansProfileConfiguration) {
         this.jansProfileConfiguration = jansProfileConfiguration;
     }
 
