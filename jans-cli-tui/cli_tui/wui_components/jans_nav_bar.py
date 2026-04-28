@@ -9,6 +9,7 @@ from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.application import get_app
 
 
 import cli_style
@@ -194,6 +195,11 @@ class JansNavBar():
 
         if self.selection_changed:
             self.selection_changed(self.navbar_entries[self.cur_navbar_selection][0])
+
+    def set_selected_item(self, selected: int) -> None:
+        """does not fire selection_changed"""
+        self.cur_navbar_selection = selected % len(self.navbar_entries)
+        get_app().invalidate()
 
     def get_nav_bar_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
