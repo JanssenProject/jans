@@ -1,11 +1,17 @@
-# OpenSearch Cedarling demo plugin
+ ---
+tags:
+  - Cedarling
+  - Opensearch
+---
 
-This is a demo plugin aimed at integrating token-based access control into [OpenSearch](https://opensearch.org). Specifically it is focused on filtering search results obtained in response to search queries sent to any of the endpoints listed [here](https://docs.opensearch.org/docs/latest/api-reference/search-apis/search/). Filtering takes place based on the Cedarling policy provided in the plugin settings.
+# OpenSearch demo plugin
+
+This is a demo plugin that integrates token-based access control into [OpenSearch](https://opensearch.org). Specifically it is focused on filtering search results obtained in response to search queries sent to any of the endpoints listed [here](https://docs.opensearch.org/docs/latest/api-reference/search-apis/search/). Filtering takes place based on the Cedarling policy provided in the plugin settings.
 
 ## Requisites
 
 - OpenSearch 3.6.0
-- [Jans Server](https://github.com/JanssenProject/jans/releases) 1.16.0
+- [Jans Server](https://github.com/JanssenProject/jans/releases) 1.16.0 or higher
 - A browser with tarp extension installed
 - Basic Cedar and OpenSearch knowledge
 - Java 21 and `git` for development
@@ -68,23 +74,19 @@ with the `student` entity type in the schema:
     }
 }
 ```
-<!--
-More attributes can be added if desired.
--->
 
-For this, follow the steps found [here](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. Ensure `student` is added to the `Search` action.
-
-<!--
-The `User` resource should be already there if you used . Ensure the `role` attribute is not mandatory.
-
-The easiest way to test the policy is using Tarp. Continue with the steps in the doc [page](https://docs.jans.io/head/cedarling/cedarling-quick-start-tbac/) for this purpose now using the previously setup Jans Server and the policy just created. To get the policy URI in Agama Lab, go to "Policy Stores", click on "Manage" on the corresponding policy row, and then on "Copy link".
--->
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
+**Notes**:
+
+- Ensure `student` is associated to the `Search` action
+- In Tarp, verify the issued UserInfo tokens have the `role` claim. One way to do so is adding the `role` database attribute to the `profile` OpenId scope in the server settings. In this case the registered client should have such scope associated as well as authentication requests
+
 ## Plugin deployment
 
-In the development machine, clone this repository (a shallow clone is recommended). `cd` to the directory where this README resides and run `./gradlew assemble -Dopensearch.version=3.6.0`. Ensure `JAVA_HOME` environment points to a Java 21 installation, e.g. `export JAVA_HOME=/path/to/corretto-21`.
+In the development machine, clone this repository (a shallow clone is recommended). `cd` to the `demos/opensearch-cedarling` and run `./gradlew assemble -Dopensearch.version=3.6.0`. Ensure `JAVA_HOME` environment points to a Java 21 installation, e.g. `export JAVA_HOME=/path/to/corretto-21`.
 
 `cd` to `build/distributions`. And run:
 
@@ -104,7 +106,7 @@ Verify the plugin was effectively deployed by running `curl -n https://oshost/_c
 
 OpenSearch provides endpoints for handling configuration settings of plugins as well as Java classes for reading those. However when it comes to large, complex, and nested JSON hierarchies, like the settings this plugin may require, OpenSearch facilities are not convenient. For this purpose, an additional endpoint was implemented in order to retrieve and supply configuration settings. This allows to pass complex JSON objects without hassle. Under the hood everything is converted into a big string and stored as a single setting in Opensearch.
 
-Check the file [settings.json](https://raw.githubusercontent.com/jgomer2001/pipelines-plugin/refs/heads/main/settings.json) and fill the value corresponding to the policy store URI.
+Check the file [settings.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/settings.json) and fill the value corresponding to the policy store URI.
 
 With a complete settings file, transfer it to the server and call the endpoint `/_plugins/cedarling/settings`:
 
@@ -118,7 +120,7 @@ The response will contain a boolean value indicating the operation success. The 
 curl -n https://oshost/_cluster/settings?pretty
 ```
 
-This plugin settings are dynamic and persistent which means they can be altered any time and survive server restarts. Check this [page](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/) for more information in these concepts.
+This plugin settings are dynamic and persistent which means they can be altered any time and survive server restarts. Check this [page](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/) for more information on these concepts.
 
 ## Setup testing data
 
@@ -128,7 +130,7 @@ In the example policy, the `student` entity type is part of the schema. It is ex
 curl -n -H 'Content-Type: application/json' --data-binary @records.txt https://oshost/student/_bulk
 ```
 
-[Here](records.txt) is a sample `records.txt` file. Insert more similar documents varying the `grad_year`. Learn more about Opensearch bulk requests [here](https://docs.opensearch.org/latest/api-reference/document-apis/bulk/).
+[Here](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/records.txt) is a sample `records.txt` file. Insert more similar documents varying the `grad_year`. Learn more about Opensearch bulk requests [here](https://docs.opensearch.org/latest/api-reference/document-apis/bulk/).
 
 Issue a request to retrieve the documents added so far:
 
@@ -136,13 +138,13 @@ Issue a request to retrieve the documents added so far:
 curl -n -H 'Content-Type: application/json' -d @query.json https://oshost/student/_search?pretty
 ```
 
-[query.json](query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
+[query.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
 
-Note that in real world scenarios, indices already exist and policies are built in conformance afterwards. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
+Note that in real-world scenarios, indices already exist and policies are built in conformance afterward. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
 
 ## Setup a search pipeline
 
-This plugins implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](pipeline.json) to the OpenSearch server and run:
+This plugin implements a search response processor which must be "attached" to a [search pipeline](https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/). Transfer the file [pipeline.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/pipeline.json) to the OpenSearch server and run:
 
 ```
 curl -n -H 'Content-Type: application/json' -d @pipeline.json -X PUT https://oshost/_search/pipeline/cedarling_search?pretty
@@ -160,7 +162,7 @@ Open Tarp. If this is the first time you use it, add a client there beforehand. 
 - Scope: `openid` and `profile`
 - Check "Display tokens"
 
-After logging in, copy the UserInfo token and paste it in the corresponding section inside file [query_ext.json](query_ext.json). This is an "extended" search query the plugin will have access to so the Cedarling engine can be supplied with tokens and contextual data to make decisions.
+After logging in, copy the UserInfo token and paste it in the corresponding section inside file [query_ext.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query_ext.json). This is an "extended" search query the plugin will have access to so the Cedarling engine can be supplied with tokens and contextual data to make decisions.
 
 Then, run:
 
@@ -182,10 +184,6 @@ In package-based installations, OpenSearch log is found at `/var/log/opensearch/
 ```
 logger.io.jans.cedarling: trace
 ```
-
-## Benchmarking
-
-See this [page](./benchmark.md).
 
 ## Troubleshooting
 
