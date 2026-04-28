@@ -494,6 +494,7 @@ class JansCliApp(Application):
 
                     self.cli_object_ok = True
                     self.check_available_plugins()
+                    self.nav_bar.set_selected_item(0)
                     self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
                 asyncio.ensure_future(coroutine())

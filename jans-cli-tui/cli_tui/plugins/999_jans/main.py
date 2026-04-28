@@ -134,10 +134,10 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def validate_ssa(self, ssa, iss):
+    def validate_ssa(self, ssa, issuer_url):
 
         # get openid configuration
-        open_id_url = f"https://{iss}/{config_cli.AUTH_DISCOVERY_ENDPOINT}"
+        open_id_url = f'{issuer_url}/{config_cli.AUTH_DISCOVERY_ENDPOINT}'
         try:
             response = config_cli.session.get(
                 url=open_id_url,
@@ -172,7 +172,7 @@ class Plugin(DialogUtils):
                 signing_key.key,
                 algorithms=["RS256"],
                 options={"verify_aud": False},
-                issuer=f"https://{iss}"
+                issuer=issuer_url
             )
         except jwt.exceptions.PyJWTError as e:
             raise SSAError(_("SSA validation failed: {}").format(e)) from e
@@ -186,11 +186,11 @@ class Plugin(DialogUtils):
         return decoded
 
 
-    def _build_registration_payload(self, parsed_iss, ssa):
+    def _build_registration_payload(self, issuer_url, ssa):
         payload = {
               "client_name": f"SSA Created TUI Client {os.urandom(3).hex()}",
               "redirect_uris": [
-                f"https://{parsed_iss.netloc}/admin"
+                f"{issuer_url}/admin"
               ],
               "software_statement": ssa,
               "grant_types": [
@@ -209,7 +209,7 @@ class Plugin(DialogUtils):
         return payload
 
 
-    async def _create_client_coroutine(self, client_creation_data, parsed_iss, ssa):
+    async def _create_client_coroutine(self, client_creation_data, issuer_url, issuer_host, ssa):
         self.app.start_progressing(_("Creating client..."))
         error = None
         response = None
@@ -218,12 +218,12 @@ class Plugin(DialogUtils):
                 self.app.executor,
                 self.validate_ssa,
                 ssa,
-                parsed_iss.netloc,
+                issuer_url,
             )
             response = await self.app.loop.run_in_executor(
                 self.app.executor,
                 lambda: config_cli.session.post(
-                    url=f"https://{parsed_iss.netloc}/jans-auth/restv1/register",
+                    url=f'{issuer_url}/jans-auth/restv1/register',
                     data=json.dumps(client_creation_data),
                     headers={'Content-Type': 'application/json'},
                     verify=False if config_cli.args.noverify else True,
@@ -249,7 +249,7 @@ class Plugin(DialogUtils):
             self.app.show_message(
                 _(common_strings.error),
                 _("Server {} returned error.\nStatus code: {}.\nResponse text: {}").format(
-                    parsed_iss.netloc, response.status_code, response.text
+                    issuer_url, response.status_code, response.text
                 ),
                 tobefocused=self.menu_container,
             )
@@ -269,7 +269,7 @@ class Plugin(DialogUtils):
             return
 
         creds_info = {
-            'jans_host': parsed_iss.netloc,
+            'jans_host': issuer_host,
             'jca_client_id': jca_client_id,
             'jca_client_secret': jca_client_secret
             }
@@ -287,9 +287,10 @@ class Plugin(DialogUtils):
             self.app.show_message(_(common_strings.error), _("Issuer was not entered"), tobefocused=dialog.buttons[0])
             return
 
-        parsed_iss = urlparse(iss)
+        issuer_url = iss.rstrip('/')
+        parsed_iss = urlparse(issuer_url)
 
-        if not parsed_iss.netloc:
+        if not (parsed_iss.scheme and parsed_iss.netloc):
             self.app.show_message(_(common_strings.error), _("Please enter valid issuer"), tobefocused=dialog.buttons[0])
             return
 
@@ -300,9 +301,11 @@ class Plugin(DialogUtils):
         dialog.close()
         self.set_center_frame()
 
-        client_creation_data = self._build_registration_payload(parsed_iss, ssa)
+        client_creation_data = self._build_registration_payload(issuer_url, ssa)
 
-        asyncio.ensure_future(self._create_client_coroutine(client_creation_data, parsed_iss, ssa))
+        asyncio.ensure_future(
+            self._create_client_coroutine(client_creation_data, issuer_url, parsed_iss.netloc, ssa)
+        )
 
 
     def create_ssa_client_window(self, dialog=None):
