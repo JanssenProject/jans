@@ -384,7 +384,11 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
                 if let Some(config_secs) = config_override {
                     interval = Duration::from_secs(config_secs);
                 } else if let Some(max_age_secs) = max_age {
-                    interval = Duration::from_secs(max_age_secs);
+                    interval = if max_age_secs == 0 {
+                        min_interval
+                    } else {
+                        Duration::from_secs(max_age_secs)
+                    };
                 }
 
                 logger.log_any(JwtLogEntry::new(
