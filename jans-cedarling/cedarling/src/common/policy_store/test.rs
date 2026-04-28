@@ -151,7 +151,7 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     static POLICY_STORE_RAW_YAML: &str =
         include_str!("../../../../test_files/policy-store_policy_err_broken_policy.yaml");
 
-    let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
+    let policy_result = serde_yaml_ng::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
     let err = policy_result.expect_err("Expected policy parsing error for broken policy syntax");
     let err_msg = err.to_string();
 
