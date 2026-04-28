@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,5 +105,35 @@ public class JSONWebKeySet {
         }
 
         return jwks;
+    }
+
+    public String getKeyId(Algorithm algorithm) {
+        List<JSONWebKey> jsonWebKeys = getKeys(algorithm);
+        if (!jsonWebKeys.isEmpty()) {
+            return jsonWebKeys.get(0).getKid();
+        } else {
+            return null;
+        }
+    }
+
+    public List<JSONWebKey> getKeys(Algorithm algorithm) {
+        List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
+
+        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
+            for (JSONWebKey jsonWebKey : getKeys()) {
+                if (jsonWebKey.getAlg().equals(algorithm)) {
+                    jsonWebKeys.add(jsonWebKey);
+                }
+            }
+        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
+            for (JSONWebKey jsonWebKey : getKeys()) {
+                if (jsonWebKey.getAlg().equals(algorithm)) {
+                    jsonWebKeys.add(jsonWebKey);
+                }
+            }
+        }
+
+        jsonWebKeys.sort(KeySelectionStrategy.compareExp());
+        return jsonWebKeys;
     }
 }
