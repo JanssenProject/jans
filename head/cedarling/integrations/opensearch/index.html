@@ -13,31 +13,29 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/cedarling/developer/mobile-apps/cedarling-android/">
+        <link rel="canonical" href="https://docs.jans.io/head/cedarling/integrations/opensearch/">
       
       
-        <link rel="prev" href="../cedarling-uniffi/">
+        <link rel="prev" href="../cedarling-opa/">
       
-      
-        <link rel="next" href="../cedarling-ios/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
-        <title>Android - Janssen Documentation</title>
+        <title>OpenSearch - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -56,17 +54,17 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
+      <link rel="stylesheet" href="../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../../../css/tabs.css">
+      <link rel="stylesheet" href="../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -91,7 +89,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-uniffi-binding-android-app" class="md-skip">
+        <a href="#opensearch-demo-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -106,12 +104,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../../../..">
+  <a href="../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -123,9 +121,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -142,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Android
+              OpenSearch
             
           </span>
         </div>
@@ -273,7 +271,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../getting-started/" class="md-tabs__link">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -298,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -322,7 +320,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../" class="md-tabs__link">
+        <a href="../../" class="md-tabs__link">
           
   
   
@@ -364,9 +362,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -431,7 +429,7 @@
   
   
   
-    <a href="../../../../getting-started/" class="md-nav__link">
+    <a href="../../../getting-started/" class="md-nav__link">
       
   
   
@@ -512,7 +510,7 @@
   
   
   
-    <a href="../../../../agama/introduction/" class="md-nav__link">
+    <a href="../../../agama/introduction/" class="md-nav__link">
       
   
   
@@ -585,7 +583,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
   
@@ -629,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../cedar-intro/" class="md-nav__link">
+      <a href="../../../cedar-intro/" class="md-nav__link">
         
   
   
@@ -657,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-start/cedarling-quick-start/" class="md-nav__link">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
         
   
   
@@ -723,7 +721,7 @@
   
   
   
-    <a href="../../../tutorials/cedarling-getting-started/" class="md-nav__link">
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
       
   
   
@@ -795,7 +793,7 @@
   
   
   
-    <a href="../../../reference/cedarling-authz/" class="md-nav__link">
+    <a href="../../reference/cedarling-authz/" class="md-nav__link">
       
   
   
@@ -803,6 +801,70 @@
     
   
     Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
   
 
     
@@ -839,10 +901,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -856,17 +914,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Developer
+    Integrations
   
 
     
@@ -877,12 +935,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Developer
+    Integrations
   
 
           </label>
@@ -895,14 +953,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling-rust/" class="md-nav__link">
+      <a href="../cedarling-krakend/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Rust
+    KrakenD
   
 
     
@@ -923,104 +981,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling-kotlin/" class="md-nav__link">
+      <a href="../cedarling-opa/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Kotlin/Java
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_3" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_3_6_3" id="__nav_3_6_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Mobile Apps
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_6_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Mobile Apps
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-uniffi/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    UniFFI Interface
+    OPA
   
 
     
@@ -1057,7 +1025,7 @@
   <span class="md-ellipsis">
     
   
-    Android
+    OpenSearch
   
 
     
@@ -1075,7 +1043,7 @@
   <span class="md-ellipsis">
     
   
-    Android
+    OpenSearch
   
 
     
@@ -1101,10 +1069,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#requisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Requisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-an-netrc-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create an .netrc file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-the-health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the health check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-and-test-a-cedar-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create and test a cedar policy
       
     </span>
   </a>
@@ -1112,10 +1119,76 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
+  <a href="#plugin-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building
+        Plugin deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-testing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup testing data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-a-search-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup a search pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#about-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About development
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1131,220 +1204,8 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-ios/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    iOS
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../sidecar/cedarling-sidecar-overview/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Sidecar
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Interface Reference
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../integrations/cedarling-krakend/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integrations
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
       
     </li>
   
@@ -1385,10 +1246,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#requisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Requisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-an-netrc-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create an .netrc file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-the-health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the health check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-and-test-a-cedar-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create and test a cedar policy
       
     </span>
   </a>
@@ -1396,10 +1296,76 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
+  <a href="#plugin-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building
+        Plugin deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-testing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup testing data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-a-search-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup a search pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#about-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About development
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1432,7 +1398,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../../" class="md-path__link">
+        <a href="../../" class="md-path__link">
           
   <span class="md-ellipsis">
     Cedarling
@@ -1450,28 +1416,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../cedarling-rust/" class="md-path__link">
+        <a href="../cedarling-krakend/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Developer
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../cedarling-uniffi/" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Mobile Apps
+    Integrations
   </span>
 
         </a>
@@ -1494,35 +1442,139 @@
   
 
 
-<h1 id="using-uniffi-binding-android-app">Using UniFFI binding Android App<a class="headerlink" href="#using-uniffi-binding-android-app" title="Permanent link">#</a></h1>
-<p>Cedarling UniFFI binding exposes its <code>init</code>, <code>authz</code> and <code>log</code> interfaces to different languages and on all the different platforms, including Kotlin for Android. This section covers how to build and use Cedarling UniFFI binding in an Android app.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<hr />
+<p>tags:
+  - Cedarling
+  - Opensearch</p>
+<hr />
+<h1 id="opensearch-demo-plugin">OpenSearch demo plugin<a class="headerlink" href="#opensearch-demo-plugin" title="Permanent link">#</a></h1>
+<p>This is a demo plugin that integrates token-based access control into <a href="https://opensearch.org">OpenSearch</a>. Specifically it is focused on filtering search results obtained in response to search queries sent to any of the endpoints listed <a href="https://docs.opensearch.org/docs/latest/api-reference/search-apis/search/">here</a>. Filtering takes place based on the Cedarling policy provided in the plugin settings.</p>
+<h2 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h2>
 <ul>
-<li>Rust: Install it from <a href="https://www.rust-lang.org/tools/install">the official Rust website</a>.</li>
-<li>Android Studio: Download from <a href="https://developer.android.com/studio">the official site</a>.</li>
+<li>OpenSearch 3.6.0</li>
+<li><a href="https://github.com/JanssenProject/jans/releases">Jans Server</a> 1.16.0 or higher</li>
+<li>A browser with tarp extension installed</li>
+<li>Basic Cedar and OpenSearch knowledge</li>
+<li>Java 21 and <code>git</code> for development</li>
 </ul>
-<h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
-<ol>
-<li>
-<p>Ask toolchain manager to install support for compiling Rust code for aarch64-linux, armv7-linux, i686-linux and x86_64-linux.
-    <div class="highlight"><pre><span></span><code><span class="w">    </span>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>aarch64-linux-android<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>armv7-linux-androideabi<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>i686-linux-android<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>x86_64-linux-android
-</code></pre></div></p>
-</li>
-<li>
-<p>Run below command to build and import binding into Android project.
-    <div class="highlight"><pre><span></span><code>make<span class="w"> </span>android
+<p><strong>Notes:</strong></p>
+<ul>
+<li>All commands given in this document were tested using Ubuntu 22. Accommodate to your specific OS</li>
+<li>The OpenSearch installation used to test here was single node and packaged-based. Installers can be found <a href="https://docs.opensearch.org/docs/latest/install-and-configure/">here</a> for several OSes. Keep the admin password at hand</li>
+</ul>
+<h3 id="create-an-netrc-file">Create an .netrc file<a class="headerlink" href="#create-an-netrc-file" title="Permanent link">#</a></h3>
+<p>To avoid typing the OpenSearch password in <code>curl</code> commands over and over, create a <code>~/.netrc</code> <a href="https://everything.curl.dev/usingcurl/netrc.html">file</a>. Here is how it might look:</p>
+<div class="highlight"><pre><span></span><code>machine localhost login admin password secret
 </code></pre></div>
-    Use <code>make android BUILD_TYPE=release</code> or <code>make android BUILD_TYPE=debug</code> to build in <code>release</code> or <code>debug</code> mode. If <code>BUILD_TYPE</code> is not specified, the <code>release</code> profile is used by default.</p>
-</li>
-<li>
-<p>We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the <code>./bindings/cedarling_uniffi/androidApp</code> project on Android Studio and run the project on simulator.</p>
-</li>
-</ol>
-<div style="position: relative; padding-bottom: 104.75728155339806%; height: 0;"><iframe src="https://www.loom.com/embed/463de78bd3174f2ca7d2b2f2fb2915cd?sid=01bd3481-857f-4981-9414-e81852fa3079" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+<h3 id="run-the-health-check">Run the health check<a class="headerlink" href="#run-the-health-check" title="Permanent link">#</a></h3>
+<p>With <code>curl</code>, issue a request to the cluster health <a href="https://docs.opensearch.org/docs/latest/api-reference/cluster-api/cluster-health/">endpoint</a> to check status. By default all API requests are served through port <code>9200</code>, e.g. <code>https://localhost:9200</code>. It may take some administrative work to properly issue requests from the development machine, however sending <code>curl</code> requests directly from the server where OpenSearch resides is OK for testing purposes.</p>
+<p>In this document, occurrences of <code>https://oshost</code> will refer to the root URL where OpenSearch HTTP API can be reached.</p>
+<h2 id="create-and-test-a-cedar-policy">Create and test a cedar policy<a class="headerlink" href="#create-and-test-a-cedar-policy" title="Permanent link">#</a></h2>
+<p>Here, the intention is to create a policy that looks like:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;alumni_restricted_access&quot;)
+permit(
+  principal,
+  action in Jans::Action::&quot;Search&quot;,
+  resource is Jans::student
+)
+when {
+  resource.grad_year &lt; 2026 ||
+  (
+    context has tokens.jans_userinfo_token &amp;&amp;
+    context.tokens.jans_userinfo_token.hasTag(&quot;role&quot;) &amp;&amp;
+    context.tokens.jans_userinfo_token.getTag(&quot;role&quot;).contains(&quot;AdmissionsCounselor&quot;)
+  )
+};
+</code></pre></div>
+<p>with the <code>student</code> entity type in the schema:</p>
+<div class="highlight"><pre><span></span><code>{
+    &quot;shape&quot;: {
+        &quot;type&quot;: &quot;Record&quot;,
+        &quot;attributes&quot;: {
+            &quot;name&quot;: {
+                &quot;type&quot;: &quot;String&quot;
+            },
+            &quot;grad_year&quot;: {
+                &quot;type&quot;: &quot;Long&quot;
+            }
+        }
+    }
+}
+</code></pre></div>
+<p>For this, follow the steps found <a href="https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">here</a> as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. </p>
+<p>For the short of time, there is a readily available policy store <a href="https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar">here</a>.</p>
+<p><strong>Notes</strong>:</p>
+<ul>
+<li>Ensure <code>student</code> is associated to the <code>Search</code> action</li>
+<li>In Tarp, verify the issued UserInfo tokens have the <code>role</code> claim. One way to do so is adding the <code>role</code> database attribute to the <code>profile</code> OpenId scope in the server settings. In this case the registered client should have such scope associated as well as authentication requests</li>
+</ul>
+<h2 id="plugin-deployment">Plugin deployment<a class="headerlink" href="#plugin-deployment" title="Permanent link">#</a></h2>
+<p>In the development machine, clone this repository (a shallow clone is recommended). <code>cd</code> to the <code>demos/opensearch-cedarling</code> and run <code>./gradlew assemble -Dopensearch.version=3.6.0</code>. Ensure <code>JAVA_HOME</code> environment points to a Java 21 installation, e.g. <code>export JAVA_HOME=/path/to/corretto-21</code>.</p>
+<p><code>cd</code> to <code>build/distributions</code>. And run:</p>
+<ul>
+<li><code>unzip cedarling.zip 'cedarling-java*'</code></li>
+<li><code>zip -q -d cedarling-java-2.0.0.jar 'com/sun/jna/*'</code></li>
+<li><code>zip -u cedarling.zip cedarling-java-2.0.0.jar</code></li>
+</ul>
+<p>Transfer the file <code>cedarling.zip</code> to the OpenSearch server. In a terminal run the below:</p>
+<ul>
+<li><code>/usr/share/opensearch/bin/opensearch-plugin remove cedarling</code> (not required for first time deployment)</li>
+<li><code>/usr/share/opensearch/bin/opensearch-plugin install file:///path/to/cedarling.zip</code></li>
+<li><code>systemctl restart opensearch.service</code></li>
+</ul>
+<p>Verify the plugin was effectively deployed by running <code>curl -n https://oshost/_cat/plugins</code>. There should be an entry for <code>cedarling</code> in the table.</p>
+<h2 id="plugin-configuration">Plugin configuration<a class="headerlink" href="#plugin-configuration" title="Permanent link">#</a></h2>
+<p>OpenSearch provides endpoints for handling configuration settings of plugins as well as Java classes for reading those. However when it comes to large, complex, and nested JSON hierarchies, like the settings this plugin may require, OpenSearch facilities are not convenient. For this purpose, an additional endpoint was implemented in order to retrieve and supply configuration settings. This allows to pass complex JSON objects without hassle. Under the hood everything is converted into a big string and stored as a single setting in Opensearch.</p>
+<p>Check the file <a href="https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/settings.json">settings.json</a> and fill the value corresponding to the policy store URI.</p>
+<p>With a complete settings file, transfer it to the server and call the endpoint <code>/_plugins/cedarling/settings</code>:</p>
+<div class="highlight"><pre><span></span><code>curl -n -H &#39;Content-Type: application/json&#39; -d @settings.json -X PUT https://oshost/_plugins/cedarling/settings
+</code></pre></div>
+<p>The response will contain a boolean value indicating the operation success. The current settings can be retrieved issuing a <code>GET</code> to the same endpoint. To check the actual settings OpenSearch stores, use a request like:</p>
+<div class="highlight"><pre><span></span><code>curl -n https://oshost/_cluster/settings?pretty
+</code></pre></div>
+<p>This plugin settings are dynamic and persistent which means they can be altered any time and survive server restarts. Check this <a href="https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/">page</a> for more information on these concepts.</p>
+<h2 id="setup-testing-data">Setup testing data<a class="headerlink" href="#setup-testing-data" title="Permanent link">#</a></h2>
+<p>In the example policy, the <code>student</code> entity type is part of the schema. It is expected all resources referenced by policies exist as OpenSearch indices in equivalence. For this, some "students" should be added:</p>
+<div class="highlight"><pre><span></span><code>curl -n -H &#39;Content-Type: application/json&#39; --data-binary @records.txt https://oshost/student/_bulk
+</code></pre></div>
+<p><a href="https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/records.txt">Here</a> is a sample <code>records.txt</code> file. Insert more similar documents varying the <code>grad_year</code>. Learn more about Opensearch bulk requests <a href="https://docs.opensearch.org/latest/api-reference/document-apis/bulk/">here</a>.</p>
+<p>Issue a request to retrieve the documents added so far:</p>
+<div class="highlight"><pre><span></span><code>curl -n -H &#39;Content-Type: application/json&#39; -d @query.json https://oshost/student/_search?pretty
+</code></pre></div>
+<p><a href="https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query.json">query.json</a> contains a <a href="https://docs.opensearch.org/docs/latest/query-dsl/">search request</a> that matches all documents in the index. </p>
+<p>Note that in real-world scenarios, indices already exist and policies are built in conformance afterward. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.</p>
+<h2 id="setup-a-search-pipeline">Setup a search pipeline<a class="headerlink" href="#setup-a-search-pipeline" title="Permanent link">#</a></h2>
+<p>This plugin implements a search response processor which must be "attached" to a <a href="https://docs.opensearch.org/docs/latest/search-plugins/search-pipelines/index/">search pipeline</a>. Transfer the file <a href="https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/pipeline.json">pipeline.json</a> to the OpenSearch server and run:</p>
+<div class="highlight"><pre><span></span><code>curl -n -H &#39;Content-Type: application/json&#39; -d @pipeline.json -X PUT https://oshost/_search/pipeline/cedarling_search?pretty
+</code></pre></div>
+<p>This action needs to be performed only <strong>once</strong> regardless of how many plugin redeployments take place.</p>
+<p>With this pipeline, search results may now be filtered as per defined Cedarling policies. See the next section.</p>
+<h2 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h2>
+<p>Open Tarp. If this is the first time you use it, add a client there beforehand. Then, in the "Authentication Flow" tab, trigger an authentication flow with the following:</p>
+<ul>
+<li>Acr: <code>basic</code></li>
+<li>Scope: <code>openid</code> and <code>profile</code></li>
+<li>Check "Display tokens"</li>
+</ul>
+<p>After logging in, copy the UserInfo token and paste it in the corresponding section inside file <a href="https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query_ext.json">query_ext.json</a>. This is an "extended" search query the plugin will have access to so the Cedarling engine can be supplied with tokens and contextual data to make decisions.</p>
+<p>Then, run:</p>
+<div class="highlight"><pre><span></span><code>curl -n -H &#39;Content-Type: application/json&#39; -d @query_ext.json &#39;https://oshost/student/_search?pretty&amp;search_pipeline=cedarling_search&#39;
+</code></pre></div>
+<p>The <code>search_pipeline</code> is required so the response to the query is intercepted and processed by the plugin which in turn will invoke Cedarling. The response will probably contain less hits than the query issued <a href="#setup-testing-data">earlier</a> and will come with an <code>ext</code> section that reports:</p>
+<ul>
+<li>The amount of hits that passed authorization</li>
+<li>The average decision time per hit</li>
+</ul>
+<h2 id="about-development">About development<a class="headerlink" href="#about-development" title="Permanent link">#</a></h2>
+<p>Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in <code>src</code> directory and compilation is a matter of issuing <code>./gradlew clean compileJava</code>.</p>
+<p>In package-based installations, OpenSearch log is found at <code>/var/log/opensearch/opensearch.log</code>. To be able to see the logging statements produced by this plugin, add a line like the below to <code>/etc/opensearch/opensearch.yml</code> and restart opensearch (<code>systemctl restart opensearch.service</code>): </p>
+<div class="highlight"><pre><span></span><code>logger.io.jans.cedarling: trace
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<p>If <code>gradle</code> ever starts giving problems, try the following to "reset it":</p>
+<div class="highlight"><pre><span></span><code>rm -rf ~/.gradle/caches/*
+rm -rf ~/.gradle/daemon/*
+</code></pre></div>
 
 
 
@@ -1545,7 +1597,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 17, 2026 06:12:23 UTC"><span class="timeago" datetime="2026-04-17T06:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 17, 2026 06:12:23 UTC">2026-04-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 24, 2026 20:37:52 UTC"><span class="timeago" datetime="2026-04-24T20:37:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 24, 2026 20:37:52 UTC">2026-04-24</span>
   </span>
 
     
@@ -1555,7 +1607,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2021 15:32:33 UTC"><span class="timeago" datetime="2021-04-16T15:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2021 15:32:33 UTC">2021-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 23, 2026 19:34:51 UTC"><span class="timeago" datetime="2026-04-23T19:34:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 23, 2026 19:34:51 UTC">2026-04-23</span>
   </span>
 
     
@@ -1635,19 +1687,19 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../js/timeago.min.js"></script>
+        <script src="../../../js/timeago.min.js"></script>
       
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 
