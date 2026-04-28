@@ -1221,6 +1221,38 @@ public abstract class BaseTest {
         return registerResponse;
     }
 
+    public RegisterResponse registerClientWithJwks(
+            final String redirectUris, final List<ResponseType> responseTypes, final String sectorIdentifierUri,
+            final SignatureAlgorithm signatureAlgorithm,
+            final KeyEncryptionAlgorithm keyEncryptionAlgorithm, final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setAuthorizationSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setRequestObjectSigningAlg(signatureAlgorithm);
+        registerRequest.setRequestObjectEncryptionAlg(keyEncryptionAlgorithm);
+        registerRequest.setRequestObjectEncryptionEnc(blockEncryptionAlgorithm);
+        registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setScope(Tester.standardScopes);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
+
+        return registerResponse;
+    }
+
     public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
                                            final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
                                            final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
