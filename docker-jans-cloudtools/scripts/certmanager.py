@@ -6,6 +6,9 @@ import time
 from collections import Counter
 from collections import deque
 from contextlib import suppress
+from datetime import datetime
+from datetime import timedelta
+from datetime import UTC
 
 import click
 
@@ -29,6 +32,9 @@ logger = logging.getLogger("cloudtools")
 SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
 ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
 KEY_STRATEGIES = ("OLDER", "NEWER", "FIRST")
+
+# default archived JWK lifetime is 31536000 seconds (1 year)
+DEFAULT_ARCHIVED_JWK_LIFETIME = 60 * 60 * 24 * 365
 
 
 def keytool_import_key(src_jks_fn, dest_jks_fn, alias, password):
@@ -155,6 +161,9 @@ class BasePersistence:
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
         raise NotImplementedError
 
+    def create_archived_jwk(self, jwk, lifetime):
+        raise NotImplementedError
+
 
 class SqlPersistence(BasePersistence):
     def __init__(self, manager):
@@ -178,6 +187,22 @@ class SqlPersistence(BasePersistence):
             id_,
             {"jansRevision": rev, "jansConfDyn": json.dumps(conf_dynamic), "jansConfWebKeys": json.dumps(conf_webkeys)}
         )
+
+    def create_archived_jwk(self, jwk, lifetime):
+        table_name = "jansArchJwk"
+        utc_now = datetime.now(UTC)
+        column_mapping = {
+            "doc_id": jwk["kid"],
+            "objectClass": table_name,
+            "dn": f"jansId={jwk['kid']},ou=archived_jwks,o=jans",
+            "jansId": jwk["kid"],
+            "creationDate": utc_now,
+            "exp": utc_now + timedelta(seconds=lifetime),
+            "del": True,
+            "jansData": json.dumps(jwk),
+            "attr": json.dumps({"attributes": {}}),
+        }
+        self.client.insert_into(table_name, column_mapping)
 
 
 _backend_classes = {
@@ -277,7 +302,7 @@ class AuthHandler:
         )
 
         for jwk in old_jwks:
-            alg = jwk.get("alg", "").upper()
+            alg = (jwk.get("alg") or "").upper()
 
             # exclude alg if it's not allowed
             if alg not in self.allowed_key_algs:
@@ -464,6 +489,10 @@ class AuthHandler:
                     generate_base64_contents(json.dumps(keys)),
                 )
 
+                # create archived jwks (if applicable)
+                archived_jwk_lifetime = conf_dynamic.get("archivedJwkLifetimeInSeconds") or DEFAULT_ARCHIVED_JWK_LIFETIME
+                self.create_archived_jwks("/etc/certs/auth-keys.old.json", jwks_fn, archived_jwk_lifetime)
+
                 # publish delayed jks
                 if self.push_keys and self.privkey_push_delay > 0 and auth_containers:
                     logger.info("Waiting for private key push delay (%s seconds) ...", self.privkey_push_delay)
@@ -564,7 +593,7 @@ class AuthHandler:
         )
 
         for jwk in old_jwks:
-            alg = jwk.get("alg", "").upper()
+            alg = (jwk.get("alg") or "").upper()
 
             # exclude alg if it's not allowed
             if alg not in self.allowed_key_algs:
@@ -663,6 +692,25 @@ class AuthHandler:
                 )
         except (TypeError, ValueError,) as exc:
             logger.warning("Unable to get public keys; reason=%s", exc)
+
+    def create_archived_jwks(self, old_jwks_fn, new_jwks_fn, lifetime):
+        with open(old_jwks_fn) as f:
+            old_jwks = json.loads(f.read()).get("keys", [])
+
+        with open(new_jwks_fn) as f:
+            new_jwks = json.loads(f.read()).get("keys", [])
+
+        # old JWK that is not listed in new JWKS will be saved as an archived JWK
+        new_jwks_kids = {new_jwk["kid"] for new_jwk in new_jwks}
+        for old_jwk in old_jwks:
+            if old_jwk["kid"] in new_jwks_kids:
+                continue
+
+            try:
+                self.backend.create_archived_jwk(old_jwk, lifetime)
+                logger.info("JWK %s has been archived", old_jwk["kid"])
+            except Exception as exc:  # noqa: BLE001 - best-effort; rotation already committed
+                logger.warning("Unable to archive JWK %s; reason=%s", old_jwk["kid"], exc)
 
 
 class WebHandler:

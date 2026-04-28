@@ -33,14 +33,14 @@ mod tests {
     #[test]
     fn test_read_ok() {
         static POLICY_STORE_RAW: &str = include_str!("../../../../test_files/policy-store_ok.yaml");
-        serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
             .expect("failed to deserialize policy-store_ok.yaml into LegacyAgamaPolicyStore");
     }
 
     #[test]
     fn test_agama_ok() {
         static POLICY_STORE_RAW: &str = include_str!("../../../../test_files/agama-store.yaml");
-        serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
             .expect("failed to deserialize agama-store.yaml into LegacyAgamaPolicyStore");
     }
 
@@ -56,7 +56,7 @@ mod tests {
     fn test_readable_yaml_ok() {
         static YAML_POLICY_STORE: &str =
             include_str!("../../../../test_files/policy-store_readable.yaml");
-        serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
+        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
             .expect("failed to deserialize policy-store_readable.yaml into LegacyAgamaPolicyStore");
     }
 
@@ -67,7 +67,7 @@ mod tests {
         static JSON_POLICY_STORE: &str =
             include_str!("../../../../test_files/policy-store_readable.json");
 
-        let yaml_policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
+        let yaml_policy_result = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
         let json_policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(JSON_POLICY_STORE);
 
         let yaml = yaml_policy_result
@@ -112,7 +112,7 @@ mod tests {
     fn test_read_json_error() {
         static POLICY_STORE_RAW_YAML: &str =
             include_str!("../../../../test_files/policy-store_schema_err.yaml");
-        let policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
+        let policy_result = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
         let err = policy_result
             .expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
@@ -126,7 +126,7 @@ mod tests {
     fn test_parse_cedar_error() {
         static POLICY_STORE_RAW_YAML: &str =
             include_str!("../../../../test_files/policy-store_schema_err_cedar_mistake.yaml");
-        let policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
+        let policy_result = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
         let err_msg = policy_result
             .expect_err("expected parsing to fail due to missing required field 'name'")
             .to_string();
