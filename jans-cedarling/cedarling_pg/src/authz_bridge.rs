@@ -54,6 +54,7 @@ pub fn authorize_multi_issuer_decision(
     action: &str,
 ) -> Result<bool, AuthorizeBridgeError> {
     let tokens = token_bundle::parse_token_inputs_from_json(token_bundle_json)?;
+
     let resource = resource::resource_entity_data_from_json_str(resource_json)?;
     let request =
         AuthorizeMultiIssuerRequest::new_with_fields(tokens, resource, action.to_string(), None);

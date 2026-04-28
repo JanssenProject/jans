@@ -74,6 +74,7 @@ static STRATEGY: GucSetting<CedarlingStrategy> =
 static CACHE_TTL: GucSetting<i32> = GucSetting::<i32>::new(300);
 static CACHE_SIZE: GucSetting<i32> = GucSetting::<i32>::new(8192);
 static AUDIT_FAIL_OPEN: GucSetting<bool> = GucSetting::<bool>::new(true);
+static CLOCK_SKEW: GucSetting<i32> = GucSetting::<i32>::new(60);
 static TOKENS: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static POLICY_VERSION: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
@@ -118,6 +119,12 @@ pub fn cache_size() -> i32 {
 #[must_use]
 pub fn audit_fail_open() -> bool {
     AUDIT_FAIL_OPEN.get()
+}
+
+/// Allowed clock drift in seconds for JWT `exp` / `nbf` validation (default 60).
+#[must_use]
+pub fn clock_skew_seconds() -> i32 {
+    CLOCK_SKEW.get()
 }
 
 /// Current `cedarling.tokens` as a UTF-8 string, if set and valid UTF-8.
@@ -232,6 +239,17 @@ unsafe fn register_gucs_inner() {
         c"Emit a structured audit log entry whenever fail-open allows a request that otherwise would have denied.",
         c"Defaults to true. Disable only if a downstream log collector is already recording decisions.",
         &AUDIT_FAIL_OPEN,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_int_guc(
+        c"cedarling.clock_skew_seconds",
+        c"Allowed clock drift in seconds for JWT exp/nbf validation.",
+        c"Tokens expired within this window are still accepted. Tokens whose nbf is this many seconds in the future are also accepted. Range 0..=3600. Default 60.",
+        &CLOCK_SKEW,
+        0,
+        3_600,
         GucContext::Userset,
         GucFlags::empty(),
     );

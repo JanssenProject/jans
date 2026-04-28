@@ -43,8 +43,8 @@ const _: fn() -> guc_config::CedarlingLogLevelGuc = guc_config::log_level;
 const _: fn() -> guc_config::CedarlingStrategy = guc_config::strategy;
 const _: fn() -> i32 = guc_config::cache_size;
 const _: fn() -> bool = guc_config::audit_fail_open;
+const _: fn() -> i32 = guc_config::clock_skew_seconds;
 const _: fn() -> Option<String> = guc_config::policy_version_utf8;
-// Anchor the unified error API so Phase-2+ modules keep compiling as `CedarlingError` grows.
 const _: fn(&error::CedarlingError) -> bool = error::CedarlingError::should_deny;
 const _: fn(&error::CedarlingError) -> guc_config::CedarlingLogLevelGuc =
     error::CedarlingError::log_level;
@@ -119,9 +119,9 @@ mod tests {
     #[pg_test]
     fn test_gucs_defaults() {
         use crate::guc_config::{
-            audit_fail_open, bootstrap_config_path_utf8, cache_size, cache_ttl_seconds, fail_mode,
-            log_level, mode, policy_version_utf8, strategy, tokens_utf8, CedarlingFailMode,
-            CedarlingLogLevelGuc, CedarlingMode, CedarlingStrategy,
+            audit_fail_open, bootstrap_config_path_utf8, cache_size, cache_ttl_seconds,
+            clock_skew_seconds, fail_mode, log_level, mode, policy_version_utf8, strategy,
+            tokens_utf8, CedarlingFailMode, CedarlingLogLevelGuc, CedarlingMode, CedarlingStrategy,
         };
 
         assert_eq!(mode(), CedarlingMode::Enforcement, "default mode");
@@ -138,6 +138,7 @@ mod tests {
             "default bootstrap_config unset"
         );
         assert_eq!(policy_version_utf8(), None, "default policy_version unset");
+        assert_eq!(clock_skew_seconds(), 60, "default clock_skew_seconds");
 
         let show_mode = Spi::get_one::<String>("SHOW cedarling.mode")
             .expect("SPI should succeed for SHOW cedarling.mode");
@@ -450,6 +451,18 @@ mod tests {
             v.get("duration_ms").is_some(),
             "trace must have duration_ms"
         );
+    }
+
+    #[pg_test]
+    fn test_clock_skew_guc_default_and_set() {
+        assert_eq!(
+            crate::guc_config::clock_skew_seconds(),
+            60,
+            "default clock_skew_seconds must be 60"
+        );
+        Spi::run("SET cedarling.clock_skew_seconds = 120").expect("SET clock_skew");
+        assert_eq!(crate::guc_config::clock_skew_seconds(), 120);
+        Spi::run("RESET cedarling.clock_skew_seconds").expect("RESET clock_skew");
     }
 
     /// RLS + `cedarling_authorize_unsigned` against the unsigned policy store (runs late by name so
