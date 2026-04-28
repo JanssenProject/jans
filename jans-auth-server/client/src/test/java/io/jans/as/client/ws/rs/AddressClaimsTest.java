@@ -1382,7 +1382,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
         String clientKeyId = cryptoContext.getKeyId(Algorithm.RS256);
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 clientKeyId,
@@ -1485,7 +1485,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1587,7 +1587,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),

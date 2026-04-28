@@ -184,7 +184,7 @@ public class TestCryptoContext {
      * @param userInfoClaims Claims to add to userinfo
      * @return Encoded JWE containing nested JWS
      */
-    public static String createNestedJwe(
+    public static String createJweWithNestedJws(
             AuthorizationRequest authRequest,
             SignatureAlgorithm sigAlg,
             String signingKeyId,
@@ -228,7 +228,7 @@ public class TestCryptoContext {
     /**
      * Simplified version for tests that don't need custom claims.
      */
-    public static String createNestedJwe(
+    public static String createJweWithNestedJws(
             AuthorizationRequest authRequest,
             SignatureAlgorithm sigAlg,
             String signingKeyId,
@@ -237,7 +237,7 @@ public class TestCryptoContext {
             String encryptionKey,
             AuthCryptoProvider cryptoProvider) throws Exception {
 
-        return createNestedJwe(authRequest, sigAlg, signingKeyId,
+        return createJweWithNestedJws(authRequest, sigAlg, signingKeyId,
                 keyEncAlg, blockEncAlg, encryptionKey, cryptoProvider, null, null);
     }
 
@@ -257,7 +257,7 @@ public class TestCryptoContext {
      * @param userInfoClaims    Claims to add to userinfo
      * @return Encoded JWE containing nested JWS
      */
-    public static String createNestedJweWithRsaEncryption(
+    public static String createJweWithNestedJwsAndRsaEncryption(
             AuthorizationRequest authRequest,
             SignatureAlgorithm sigAlg,
             String signingKeyId,
@@ -306,7 +306,7 @@ public class TestCryptoContext {
     /**
      * Simplified version for RSA encryption tests that don't need custom claims.
      */
-    public static String createNestedJweWithRsaEncryption(
+    public static String createJweWithNestedJwsAndRsaEncryption(
             AuthorizationRequest authRequest,
             SignatureAlgorithm sigAlg,
             String signingKeyId,
@@ -316,7 +316,7 @@ public class TestCryptoContext {
             JSONObject serverJwks,
             AuthCryptoProvider cryptoProvider) throws Exception {
 
-        return createNestedJweWithRsaEncryption(authRequest, sigAlg, signingKeyId,
+        return createJweWithNestedJwsAndRsaEncryption(authRequest, sigAlg, signingKeyId,
                 keyEncAlg, blockEncAlg, encryptionKeyId, serverJwks, cryptoProvider, null, null);
     }
 
