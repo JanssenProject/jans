@@ -651,7 +651,6 @@ dependencies = [
  "vfs",
  "wasm-bindgen-futures",
  "web-sys",
- "web-time",
  "zip",
 ]
 

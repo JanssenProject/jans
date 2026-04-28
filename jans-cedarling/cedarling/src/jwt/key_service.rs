@@ -530,8 +530,7 @@ mod test {
             .expect("refresh without cache-control header should succeed");
 
         assert_eq!(
-            max_age,
-            None,
+            max_age, None,
             "max_age should be None when Cache-Control header is missing"
         );
 

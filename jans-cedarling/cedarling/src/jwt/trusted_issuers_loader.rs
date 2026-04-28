@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use chrono::Utc;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -11,7 +12,6 @@ use std::{
 use thiserror::Error;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
-use web_time::Instant;
 
 use crate::{
     JwtConfig, LogLevel,
@@ -348,18 +348,16 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
     } = params;
 
     let mut interval = initial_interval;
-    let mut last_refresh = Instant::now()
-        .checked_sub(interval)
-        .unwrap_or_else(Instant::now);
+    let mut last_refresh = Utc::now() - interval;
     let mut backoff = Backoff::default_fixed();
 
     loop {
         tokio::select! {
             () = sleep(interval) => {},
             () = notify.notified() => {
-                let elapsed = last_refresh.elapsed();
-                if elapsed < min_interval {
-                    sleep(min_interval.saturating_sub(elapsed)).await;
+                let elapsed = Utc::now().signed_duration_since(last_refresh).num_seconds().cast_unsigned();
+                if elapsed < min_interval.as_secs() {
+                    sleep(Duration::from_secs(min_interval.as_secs() - elapsed)).await;
                 }
             },
             () = cancel_tkn.cancelled() => { break; },
@@ -378,7 +376,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
             .await
         {
             Ok(max_age) => {
-                last_refresh = Instant::now();
+                last_refresh = Utc::now();
                 backoff.reset();
 
                 if let Some(config_secs) = config_override {
