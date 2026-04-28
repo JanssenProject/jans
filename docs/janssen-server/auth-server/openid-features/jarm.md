@@ -42,7 +42,7 @@ These global properties define supported JARM response modes and allowed signing
 - [authorizationEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#authorizationencryptionalgvaluessupported)
 - [authorizationEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#authorizationencryptionencvaluessupported)
 
-You can configure them using the [Janssen TUI](../../config-guide/config-tools/jans-tui/README.md) follow tabs `Auth Server` -> `Properties`, or through Config API/JSON configuration management.
+You can configure them using the [Janssen TUI](../../config-guide/config-tools/jans-tui/README.md) by navigating to `Auth Server` -> `Properties`, or through Config API/JSON configuration management.
 
 ### 2) Client metadata (per client)
 
