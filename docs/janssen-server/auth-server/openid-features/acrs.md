@@ -43,7 +43,7 @@ against the backend datastore.
 
 ### 2. ACR for authenticating using external LDAP or Active Directory
 
-Use the instructions provided in jans-tui [LDAP configuration options](../../config-guide/auth-server-config/authentication-method-config.md#ldap-servers-as-authentication-method) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
+Use the instructions provided in jans-tui [LDAP configuration options](../../config-guide/auth-server-config/authentication-method-config.md#ldap-servers-as-authentication-method) documentation to learn how to enable and configure ACRs that use external LDAP or Active Directory as IDP.
 
 ### 3. Script-based ACRs
 
