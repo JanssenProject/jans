@@ -1484,7 +1484,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1595,7 +1595,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1706,7 +1706,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
