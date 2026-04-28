@@ -36,8 +36,8 @@ const MUTEX_POISONED_ERR: &str =
 /// periodically re-fetches keys from the issuer's `jwks_uri`. The refresh
 /// interval is driven by (in priority order):
 ///
-/// 1. `Cache-Control: max-age` from the JWKS HTTP response
-/// 2. `CEDARLING_JWKS_REFRESH_INTERVAL` bootstrap property
+/// 1. `CEDARLING_JWKS_REFRESH_INTERVAL` bootstrap property
+/// 2. `Cache-Control: max-age` from the JWKS HTTP response
 /// 3. Hardcoded fallback of 3600 seconds (1 hour)
 ///
 /// Additionally, an on-demand refresh is triggered when a token arrives with

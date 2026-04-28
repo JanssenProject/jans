@@ -65,6 +65,9 @@ pub struct JwtConfig {
 /// nor the bootstrap config provides a value.
 pub(crate) const DEFAULT_JWKS_REFRESH_INTERVAL_SECS: u64 = 3600;
 
+/// Minimum allowed refresh interval, in seconds. Values below this are clamped.
+pub(crate) const MIN_JWKS_REFRESH_SECS: u64 = 5;
+
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {

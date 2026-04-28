@@ -103,6 +103,7 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use tokio::sync::Notify;
+use tokio_util::sync::CancellationToken;
 use trusted_issuers_loader::TrustedIssuerLoader;
 use validation::{
     JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
@@ -121,6 +122,8 @@ pub(crate) struct JwtService {
     loading_state: Arc<TrustedIssuerLoadingState>,
     /// Per-issuer notifiers for triggering on-demand JWKS re-fetch
     jwks_refresh_notifiers: Arc<Mutex<HashMap<IssClaim, Arc<Notify>>>>,
+    /// Cancellation token to stop all background JWKS refresh tasks on drop
+    jwks_cancel_token: CancellationToken,
 }
 
 struct IssuerConfig {
@@ -169,6 +172,7 @@ impl JwtService {
         let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
 
         let jwks_refresh_notifiers = Arc::new(Mutex::new(HashMap::new()));
+        let jwks_cancel_token = CancellationToken::new();
 
         let loader = TrustedIssuerLoader {
             jwt_config: jwt_config.clone(),
@@ -180,6 +184,7 @@ impl JwtService {
             logger: logger.clone(),
             loading_state: loading_state.clone(),
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
+            jwks_cancel_token: jwks_cancel_token.clone(),
         };
 
         loader.load_trusted_issuers(trusted_issuers.clone()).await?;
@@ -196,6 +201,7 @@ impl JwtService {
             token_cache,
             loading_state,
             jwks_refresh_notifiers,
+            jwks_cancel_token,
         })
     }
 
@@ -487,6 +493,12 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         Cow::Borrowed(entity_type_name)
+    }
+}
+
+impl Drop for JwtService {
+    fn drop(&mut self) {
+        self.jwks_cancel_token.cancel();
     }
 }
 
