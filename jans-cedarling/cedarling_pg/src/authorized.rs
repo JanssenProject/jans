@@ -14,6 +14,8 @@ use crate::engine;
 use crate::error::CedarlingError;
 use crate::extension_log;
 use crate::guc_config::{self, CedarlingFailMode, CedarlingMode};
+use crate::status;
+use crate::trace::{push_trace, AuthorizationTrace};
 
 /// Returns whether Cedarling **allows** the request (`true` = allow, `false` = deny).
 ///
@@ -69,16 +71,24 @@ fn cedarling_authorized_inner(
         action_trimmed,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
+        status::record_cache_hit();
+        status::record_decision(decision);
         return finalize_decision(decision);
     }
+
+    status::record_request();
 
     let engine = match engine::global_cedarling() {
         Ok(e) => e,
         Err(e) => {
             extension_log::log_engine_failure(&e);
+            status::record_error();
             return finalize_error(&CedarlingError::from(e));
         },
     };
+
+    let start = std::time::Instant::now();
+    let timestamp = chrono::Utc::now().to_rfc3339();
 
     match authz_bridge::authorize_multi_issuer_decision(
         engine.as_ref(),
@@ -87,12 +97,31 @@ fn cedarling_authorized_inner(
         action_trimmed,
     ) {
         Ok(decision) => {
+            let duration_ms = start.elapsed().as_millis() as u64;
             authz_cache::global_cache().store(ttl, cache_key, decision);
+            status::record_decision(decision);
+            push_trace(AuthorizationTrace {
+                timestamp,
+                action: action_trimmed.to_string(),
+                duration_ms,
+                decision: Some(decision),
+                error_category: None,
+            });
             finalize_decision(decision)
         },
         Err(e) => {
+            let duration_ms = start.elapsed().as_millis() as u64;
             extension_log::log_multi_issuer_bridge_failure(&e);
-            finalize_error(&CedarlingError::from(e))
+            let ce = CedarlingError::from(e);
+            status::record_error();
+            push_trace(AuthorizationTrace {
+                timestamp,
+                action: action_trimmed.to_string(),
+                duration_ms,
+                decision: None,
+                error_category: Some(ce.category()),
+            });
+            finalize_error(&ce)
         },
     }
 }
@@ -148,8 +177,12 @@ fn cedarling_authorize_unsigned_inner(
         context_trimmed,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
+        status::record_cache_hit();
+        status::record_decision(decision);
         return finalize_decision(decision);
     }
+
+    status::record_request();
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
         principal_json,
@@ -160,6 +193,7 @@ fn cedarling_authorize_unsigned_inner(
         Ok(r) => r,
         Err(e) => {
             extension_log::log_unsigned_bridge_failure(&e);
+            status::record_error();
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -168,18 +202,41 @@ fn cedarling_authorize_unsigned_inner(
         Ok(e) => e,
         Err(e) => {
             extension_log::log_engine_failure(&e);
+            status::record_error();
             return finalize_error(&CedarlingError::from(e));
         },
     };
 
+    let start = std::time::Instant::now();
+    let timestamp = chrono::Utc::now().to_rfc3339();
+
     match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
         Ok(decision) => {
+            let duration_ms = start.elapsed().as_millis() as u64;
             authz_cache::global_cache().store(ttl, cache_key, decision);
+            status::record_decision(decision);
+            push_trace(AuthorizationTrace {
+                timestamp,
+                action: action_trimmed.to_string(),
+                duration_ms,
+                decision: Some(decision),
+                error_category: None,
+            });
             finalize_decision(decision)
         },
         Err(e) => {
+            let duration_ms = start.elapsed().as_millis() as u64;
             extension_log::log_unsigned_bridge_failure(&e);
-            finalize_error(&CedarlingError::from(e))
+            let ce = CedarlingError::from(e);
+            status::record_error();
+            push_trace(AuthorizationTrace {
+                timestamp,
+                action: action_trimmed.to_string(),
+                duration_ms,
+                decision: None,
+                error_category: Some(ce.category()),
+            });
+            finalize_error(&ce)
         },
     }
 }
@@ -196,7 +253,7 @@ fn resolve_token_bundle(arg: Option<&str>) -> Option<String> {
 ///
 /// In `shadow` mode we always return `true`; the raw decision has already been logged upstream
 /// for trace purposes.
-fn finalize_decision(decision: bool) -> bool {
+pub(crate) fn finalize_decision(decision: bool) -> bool {
     match guc_config::mode() {
         CedarlingMode::Shadow => true,
         CedarlingMode::Enforcement | CedarlingMode::Instrumentation => decision,
@@ -205,7 +262,7 @@ fn finalize_decision(decision: bool) -> bool {
 
 /// Apply `cedarling.mode` + `cedarling.fail_mode` to an error path. Emits an audit entry when
 /// fail-open takes effect and `cedarling.audit_fail_open` is true.
-fn finalize_error(err: &CedarlingError) -> bool {
+pub(crate) fn finalize_error(err: &CedarlingError) -> bool {
     if matches!(guc_config::mode(), CedarlingMode::Shadow) {
         // Shadow mode: never let an error change observable behavior. The error was already
         // logged by the caller; don't raise further noise.

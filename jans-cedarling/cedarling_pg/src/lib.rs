@@ -14,8 +14,11 @@ mod error;
 mod extension_log;
 mod guc_config;
 mod resource;
+mod row_authz;
+mod status;
 mod token_bundle;
 mod token_sql;
+mod trace;
 mod validate;
 
 #[cfg(feature = "pg_test")]
@@ -80,6 +83,14 @@ const _: fn(
 const _: fn(&str, Option<&str>, &str) -> bool = authorized::cedarling_authorized;
 #[allow(clippy::type_complexity)]
 const _: fn(Option<&str>, &str, &str, &str) -> bool = authorized::cedarling_authorize_unsigned;
+const _: fn() -> pgrx::datum::JsonB = status::cedarling_status;
+const _: fn() -> Option<pgrx::datum::JsonB> = trace::cedarling_last_trace;
+const _: fn(Option<i32>) -> pgrx::datum::JsonB = trace::cedarling_recent_traces;
+const _: fn(&str, &str) -> pgrx::datum::JsonB = trace::cedarling_explain;
+const _: fn(pgrx::datum::JsonB, Option<&str>, Option<&str>) -> String =
+    row_authz::cedarling_build_resource;
+const _: fn(pgrx::datum::JsonB, &str, Option<pgrx::datum::JsonB>) -> bool =
+    row_authz::cedarling_authorized_row;
 
 ::pgrx::pg_module_magic!(name, version);
 
@@ -136,8 +147,8 @@ mod tests {
             "SHOW should match GUC registration"
         );
 
-        let show_strategy = Spi::get_one::<String>("SHOW cedarling.strategy")
-            .expect("SHOW cedarling.strategy");
+        let show_strategy =
+            Spi::get_one::<String>("SHOW cedarling.strategy").expect("SHOW cedarling.strategy");
         assert_eq!(show_strategy, Some("filter".to_string()));
     }
 
@@ -179,10 +190,9 @@ mod tests {
 
     #[pg_test]
     fn test_catalog_schema_and_tables_exist() {
-        let ns = Spi::get_one::<String>(
-            "SELECT nspname FROM pg_namespace WHERE nspname = 'cedarling'",
-        )
-        .expect("SPI should succeed");
+        let ns =
+            Spi::get_one::<String>("SELECT nspname FROM pg_namespace WHERE nspname = 'cedarling'")
+                .expect("SPI should succeed");
         assert_eq!(ns, Some("cedarling".to_string()));
 
         let mask_rules = Spi::get_one::<i64>(
@@ -346,6 +356,99 @@ mod tests {
                 "[]",
             ),
             "unsigned: non-object context JSON should deny under fail-closed"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_status_returns_jsonb_with_required_keys() {
+        use pgrx::datum::JsonB;
+        let status: JsonB = crate::status::cedarling_status();
+        let v = &status.0;
+        assert!(
+            v.get("total_requests").is_some(),
+            "status missing total_requests"
+        );
+        assert!(v.get("allowed").is_some(), "status missing allowed");
+        assert!(v.get("denied").is_some(), "status missing denied");
+        assert!(v.get("errors").is_some(), "status missing errors");
+        assert!(v.get("cache_hits").is_some(), "status missing cache_hits");
+    }
+
+    #[pg_test]
+    fn test_cedarling_last_trace_api_does_not_panic() {
+        // `cedarling_last_trace()` must not panic regardless of ring buffer state.
+        let _ = crate::trace::cedarling_last_trace();
+    }
+
+    #[pg_test]
+    fn test_cedarling_recent_traces_returns_array() {
+        let result = crate::trace::cedarling_recent_traces(Some(5));
+        assert!(
+            result.0.is_array(),
+            "cedarling_recent_traces should return a JSON array"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_explain_empty_action_returns_error_field() {
+        let result = crate::trace::cedarling_explain(
+            r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+            "",
+        );
+        let v = &result.0;
+        assert!(
+            v.get("error").is_some(),
+            "empty action must yield an error field"
+        );
+        assert!(v["decision"].is_null(), "decision must be null on error");
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorized_row_fail_closed_without_engine() {
+        use pgrx::datum::JsonB;
+        use serde_json::json;
+        let resource = JsonB(json!({
+            "cedar_entity_mapping": {"entity_type": "T", "id": "x"}
+        }));
+        assert!(
+            !crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None),
+            "cedarling_authorized_row: without engine, fail-closed should deny"
+        );
+    }
+
+    #[pg_test]
+    fn test_cedarling_authorized_row_shadow_mode_always_allows() {
+        use pgrx::datum::JsonB;
+        use serde_json::json;
+        Spi::run("SET LOCAL cedarling.mode = 'shadow'").expect("SET LOCAL mode shadow");
+        let resource = JsonB(json!({
+            "cedar_entity_mapping": {"entity_type": "T", "id": "x"}
+        }));
+        assert!(
+            crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None),
+            "cedarling_authorized_row: shadow mode must always allow"
+        );
+        Spi::run("SET LOCAL cedarling.mode = 'enforcement'").expect("restore enforcement");
+    }
+
+    #[pg_test]
+    fn test_cedarling_explain_sql_returns_jsonb() {
+        let result = Spi::get_one::<pgrx::datum::JsonB>(
+            r#"SELECT cedarling_explain(
+                '{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}',
+                'T::Action::"Read"'
+            )"#,
+        )
+        .expect("SPI should succeed");
+        assert!(
+            result.is_some(),
+            "cedarling_explain should return a non-null JSONB"
+        );
+        let v = result.unwrap().0;
+        assert!(v.get("timestamp").is_some(), "trace must have timestamp");
+        assert!(
+            v.get("duration_ms").is_some(),
+            "trace must have duration_ms"
         );
     }
 
