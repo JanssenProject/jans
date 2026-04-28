@@ -146,10 +146,10 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
                 profileconfig.getAttributeEncryptionPolicy(),AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES);
         }
 
-        if (! Objects.equals(profileconfig.getFriendlyNameRandomizationPolicy(),FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME) ) {
+        if (! Objects.equals(profileconfig.getFriendlyNameRandomizationPolicy(),FriendlyNameRandomizationPolicy.RANDOMIZED) ) {
 
             failWithMessage("FriendlyName randomization policy for profile is <%s>. Expected: <%s>",
-                profileconfig.getFriendlyNameRandomizationPolicy(),FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME);
+                profileconfig.getFriendlyNameRandomizationPolicy(),FriendlyNameRandomizationPolicy.RANDOMIZED);
         }
 
         return this;
@@ -216,7 +216,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         hasMaximumSPSessionLifetime(Duration.ofMinutes(0));
         hasEndpointValidationPolicy(EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT);
         hasAttributeStatementPolicy(AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT);
-        hasFriendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME);
+        hasFriendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.RANDOMIZED);
         hasNoNameIdFormatPrecedence();
         hasRequestSigningRequirement(RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS);
 
@@ -251,7 +251,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         hasMaximumSPSessionLifetime(Duration.ofMinutes(0));
         hasEndpointValidationPolicy(EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT);
         hasAttributeStatementPolicy(AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT);
-        hasFriendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME);
+        hasFriendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.RANDOMIZED);
         hasNoNameIdFormatPrecedence();
         hasRequestSigningRequirement(RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS);
 

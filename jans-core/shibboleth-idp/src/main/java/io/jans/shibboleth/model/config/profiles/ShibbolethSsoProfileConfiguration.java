@@ -5,7 +5,6 @@ import io.jans.shibboleth.model.config.profiles.common.*;
 import io.jans.shibboleth.model.config.profiles.support.*;
 
 import java.time.Duration;
-import java.util.List;
 
 public final class ShibbolethSsoProfileConfiguration implements CommonConfigurationCapable, AuthenticationConfigurationCapable, 
     SamlConfigurationCapable, SamlAssertionConfigurationCapable {

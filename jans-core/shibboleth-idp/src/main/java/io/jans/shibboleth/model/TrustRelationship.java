@@ -48,6 +48,11 @@ public class TrustRelationship {
         profiles = Profiles.allDefaults();
     }
 
+    private int incrementVersion() {
+
+        version++;
+        return version;
+    }
 
     public Id getId() {
 
@@ -59,9 +64,28 @@ public class TrustRelationship {
         return displayName;
     }
 
+    public TrustResult<Void> updateDisplayName(DisplayName newDisplayName) {
+
+        if (newDisplayName == null) {
+
+            return TrustResult.failure(DisplayNameError.required());
+        }
+        displayName = newDisplayName;
+        incrementVersion();
+        return TrustResult.success(null);
+    } 
+
     public Description getDescription() {
 
         return description;
+    }
+
+    public TrustResult<Void> updateDescription(Description newDescription) {
+
+        description = newDescription != null ? newDescription : Description.of("");
+        incrementVersion();
+        return TrustResult.success(null);
+
     }
 
     public TrustNature getNature() {

@@ -13,4 +13,9 @@ public class DisplayNameError extends TrustError {
 
         return new DisplayNameError("Display name cannot be null or blank");
     }
+
+    public static DisplayNameError required() {
+
+        return new DisplayNameError("Display name is required");
+    }
 }

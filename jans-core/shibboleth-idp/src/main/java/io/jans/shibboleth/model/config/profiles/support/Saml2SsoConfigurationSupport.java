@@ -42,7 +42,7 @@ public class Saml2SsoConfigurationSupport {
         this.maximumSPSessionLifetime  = maximumSPSessionLifetime!=null ? maximumSPSessionLifetime : Duration.ofSeconds(0);
         this.endpointValidationPolicy  = endpointValidationPolicy!=null ? endpointValidationPolicy : EndpointValidationPolicy.SKIP_VALIDATION_WHEN_REQUEST_SIGNED;
         this.attributeStatementPolicy  = attributeStatementPolicy!=null ? attributeStatementPolicy : AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT;
-        this.friendlyNameRandomizationPolicy = friendlyNameRandomizationPolicy!=null ? friendlyNameRandomizationPolicy : FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME;
+        this.friendlyNameRandomizationPolicy = friendlyNameRandomizationPolicy!=null ? friendlyNameRandomizationPolicy : FriendlyNameRandomizationPolicy.RANDOMIZED;
         this.nameIdFormatPrecedence = nameIdFormatPrecedence!=null ? nameIdFormatPrecedence : NameIdentifiers.empty();
         this.requestSigningRequirement = requestSigningRequirement!=null ? requestSigningRequirement : RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS;
     }

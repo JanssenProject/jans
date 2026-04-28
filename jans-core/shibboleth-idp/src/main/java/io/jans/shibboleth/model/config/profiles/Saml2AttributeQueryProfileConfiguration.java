@@ -54,7 +54,7 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
         );
         assertionEncryptionPolicy = AssertionEncryptionPolicy.DO_NOT_ENCRYPT_ASSERTIONS;
         attributeEncryptionPolicy = AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES;
-        friendlyNameRandomizationPolicy = FriendlyNameRandomizationPolicy.DO_NOT_RANDOMIZE_FRIENDLY_NAME;
+        friendlyNameRandomizationPolicy = FriendlyNameRandomizationPolicy.RANDOMIZED;
     }
 
     public static Saml2AttributeQueryProfileConfiguration defaultConfiguration() {
