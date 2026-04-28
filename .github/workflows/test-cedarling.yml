@@ -43,6 +43,24 @@ jobs:
       working-directory: jans-cedarling
       run: cargo +stable clippy --workspace --all-targets -- -D warnings
 
+  cargo_audit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Run cargo-audit
+      uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: jans-cedarling
+        # RUSTSEC-2023-0071: `rsa` Marvin timing sidechannel affects RSA decryption.
+        # Cedarling only uses `jsonwebtoken` for signature verification; the
+        # decryption path is not reachable. No upstream fix available.
+        ignore: RUSTSEC-2023-0071
+
   custom_lints:
     runs-on: ubuntu-latest
     steps:

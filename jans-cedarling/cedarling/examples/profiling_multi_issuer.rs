@@ -79,7 +79,7 @@ async fn init_cedarling_multi_issuer(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store = serde_yml::from_str::<serde_yml::Value>(POLICY_STORE_RAW)
+    let mut policy_store = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE_RAW)
         .expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
@@ -97,7 +97,7 @@ async fn init_cedarling_multi_issuer(
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(
-                serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
+                serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
         },
         jwt_config: JwtConfig {
