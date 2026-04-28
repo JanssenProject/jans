@@ -32,14 +32,14 @@ To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu 
 
 Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:
 
-```
+```bash
 curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode \
 'filter=deviceData co "ios"' -d count=10 https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
 ```
 
 The response will be like:
 
-```
+```json
 {
   "totalResults": ...,
   "itemsPerPage": ...,
