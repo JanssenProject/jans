@@ -30,7 +30,7 @@ from cedarling_python import (
 WARMUP_ITERS = 100
 MEASURE_ITERS = 1000
 
-EXAMPLE_FILES = Path(__file__).resolve().parent.parent / "example_files"
+TEST_FILES = Path(__file__).resolve().parents[3] / "test_files"
 
 RESOURCE = EntityData.from_dict(
     {
@@ -72,7 +72,7 @@ def _unsigned_cedarling() -> Cedarling:
     config = BootstrapConfig(
         {
             "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
-            "CEDARLING_POLICY_STORE_LOCAL_FN": str(EXAMPLE_FILES / "policy-store-unsigned"),
+            "CEDARLING_POLICY_STORE_LOCAL_FN": str(TEST_FILES / "policy-store_ok_2.yaml"),
             "CEDARLING_JWT_SIG_VALIDATION": "disabled",
             "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
             "CEDARLING_LOG_TYPE": "off",
