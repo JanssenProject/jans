@@ -6,7 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
