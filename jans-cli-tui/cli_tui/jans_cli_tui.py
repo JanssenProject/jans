@@ -126,6 +126,7 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.layout import ScrollablePane
 
 from prompt_toolkit.layout.containers import (
     Float,
@@ -219,9 +220,7 @@ class JansCliApp(Application):
         self.current_page = None
         self.jans_help = get_help_with()
 
-        self.not_implemented = Frame(
-            body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
-            height=D())
+        self.not_implemented = HSplit([Label(text=_("Please wait for center frame to be populated..."))], width=D())
 
         self.yes_button = Button(text=_("Yes"), handler=accept_yes)
         self.no_button = Button(text=_("No"), handler=accept_no)
@@ -270,7 +269,8 @@ class JansCliApp(Application):
             mouse_support=True,  ## added
         )
 
-        self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
+        #self.nav_bar.set_selected_item(1)
+        #self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.plugins_initialised = False
 
         self.create_background_task(self.check_jans_cli_ini())
@@ -474,13 +474,9 @@ class JansCliApp(Application):
                 dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
                 async def coroutine():
-                    app = get_app()
-                    focused_before = app.layout.current_window
+
                     await self.show_dialog_as_float(dialog)
-                    try:
-                        app.layout.focus(focused_before)
-                    except Exception:
-                        app.layout.focus(self.center_frame)
+                    self.layout.focus(self.nav_bar.nav_window)
 
                     self.start_progressing()
                     try:
@@ -498,12 +494,15 @@ class JansCliApp(Application):
 
                     self.cli_object_ok = True
                     self.check_available_plugins()
+                    self.nav_bar.set_selected_item(0)
+                    self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
                 asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
                 self.check_available_plugins()
+                self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
     def check_available_plugins(self) -> None:
         """Disables plugins when cli object is ready.
@@ -558,21 +557,23 @@ class JansCliApp(Application):
             style='class:jans-main-usercredintial'
         )
 
-        buttons = [Button(_("Save"), handler=self.save_creds)]
+
+        config_plugin = self.get_plugin_by_id('jans-menu')
+
+        create_client_button_label = _("Create Client with SSA")
+        buttons = [Button(_("Save"), handler=self.save_creds_via_dialog)]
+        if config_plugin is not None:
+            buttons.append(Button(
+                create_client_button_label,
+                width=len(create_client_button_label) + 4,
+                handler=config_plugin.create_ssa_client_window,
+            ))
+        buttons.append(Button(_("Cancel"), handler=self.stay_in_config_menu))
+
         dialog = JansGDialog(self, title=_("Janssen Config Api Client Credentials"), body=body, buttons=buttons)
 
-        async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
-            result = await self.show_dialog_as_float(dialog)
-            try:
-                app.layout.focus(focused_before)
-            except Exception:
-                app.layout.focus(self.center_frame)
+        self.show_jans_dialog(dialog)
 
-            self.create_cli()
-
-        asyncio.ensure_future(coroutine())
 
     def set_keybindings(self) -> None:
         # Global key bindings.
@@ -993,11 +994,23 @@ class JansCliApp(Application):
             if plugin.pid == pid:
                 return plugin
 
+
+    def stay_in_config_menu(self, dialog=None):
+        plugin = self.get_plugin_by_id('jans-menu')
+        self.nav_bar.set_selected_item(len(self.nav_bar.navbar_entries)-1)
+        plugin.set_center_frame()
+        self.layout.focus(self.nav_bar.nav_window)
+
     def main_nav_selection_changed(self, selection: str) -> None:
+        if not self.cli_object_ok:
+            self.stay_in_config_menu()
+            return
+
         plugin = self.get_plugin_by_id(selection)
         if hasattr(plugin, 'on_page_enter'):
             plugin.on_page_enter()
         plugin.set_center_frame()
+        self.layout.focus(self.nav_bar.nav_window)
 
     async def show_dialog_as_float(self, dialog: Dialog, focus=None) -> None:
         'Coroutine.'
@@ -1019,9 +1032,27 @@ class JansCliApp(Application):
         if self.root_layout.floats:
             self.layout.focus(self.root_layout.floats[-1].content)
         else:
-            self.layout.focus(self.center_frame)
+            self.layout.focus(self.nav_bar.nav_window)
 
         return result
+
+    def get_first_focusable_child(self, element):
+        if element is None:
+            return None
+        if isinstance(element, Window):
+            return element
+        if hasattr(element, 'window'):
+            return element.window
+        for attr in ('body', 'content'):
+            child = getattr(element, attr, None)
+            focusable = self.get_first_focusable_child(child)
+            if focusable is not None:
+                return focusable
+        for child in getattr(element, 'children', []):
+            focusable = self.get_first_focusable_child(child)
+            if focusable is not None:
+                return focusable
+        return None
 
     def show_jans_dialog(self, dialog: Dialog, focus=None, tobefocused=None) -> None:
 
@@ -1033,7 +1064,8 @@ class JansCliApp(Application):
                 try:
                     self.layout.focus(focused_before)
                 except Exception:
-                    self.layout.focus(self.center_frame)
+                    fallback = self.get_first_focusable_child(self.center_container)
+                    self.layout.focus(fallback or self.nav_bar.nav_window)
 
             return result
 
@@ -1079,29 +1111,40 @@ class JansCliApp(Application):
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog, tobefocused=params.get('tobefocused'))
 
-    def save_creds(self, dialog: Dialog) -> None:
-
+    def save_creds_via_dialog(self, dialog: Dialog) -> None:
+        creds_info = {}
         for child in dialog.body.children:
-            prop_name = child.children[1].jans_name
-            prop_val = child.children[1].content.buffer.text
+            text_area = child.me
+            prop_name = text_area.window.jans_name
+            prop_val = text_area.buffer.text
+            creds_info[prop_name] = prop_val
+
+        self.save_creds(creds_info)
+        self.create_cli()
+
+    def save_creds(self, creds_info: dict) -> None:
+
+        for prop_name, prop_val in creds_info.items():
             if prop_name == 'jca_client_secret':
                 config_cli.config['DEFAULT']['jca_client_secret_enc'] = config_cli.obscure(prop_val)
                 if 'jca_client_secret' in config_cli.config['DEFAULT']:
                     del config_cli.config['DEFAULT']['jca_client_secret']
             else:
                 config_cli.config['DEFAULT'][prop_name] = prop_val
-            config_cli.write_config()
 
-        config_cli.config['DEFAULT']['user_data'] = ''
+        for key in ('user_data', 'access_token_enc', 'access_token'):
+            config_cli.config['DEFAULT'][key] = ''
+
         config_cli.write_config()
 
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
 
-        if 'jca_client_secret' in config_cli.config['DEFAULT']:
+        if config_cli.config['DEFAULT'].get('jca_client_secret'):
             config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
         else:
-            config_cli.client_secret = config_cli.unobscure(config_cli.config['DEFAULT']['jca_client_secret_enc'])
+            enc = config_cli.config['DEFAULT'].get('jca_client_secret_enc', '')
+            config_cli.client_secret = config_cli.unobscure(enc) if enc else ''
         config_cli.access_token = None
 
         log_dir = config_cli.config['DEFAULT'].get('log_dir')
@@ -1120,7 +1163,7 @@ class JansCliApp(Application):
             tobefocused: AnyContainer = None
     ) -> None:
         body = HSplit([Label(message)])
-        dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
+        dialog = JansMessageDialog(title=title, body=ScrollablePane(body), buttons=buttons)
 
         if not tobefocused:
             focused_before = self.root_layout.floats[

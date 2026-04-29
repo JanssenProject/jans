@@ -41,13 +41,9 @@ priority than any other script. This ACR is always available and enabled on any 
 This ACR is a simple user-id and password-based authentication mechanism. It authenticates the end-user
 against the backend datastore.
 
-### 2. Pre-packaged ACR for authenticating using external LDAP or Active Directory
+### 2. ACR for authenticating using external LDAP or Active Directory
 
-All Janssen Server deployments have `default_ldap_server` ACR which can be enabled to perform authentication against a
-remote LDAP-based IDP (e.g. ActiveDirectory). By default, this ACR is disabled. This ACR can only authenticate against
-LDAP-based IDP.
-
-Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/auth-server-config/ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
+Use the instructions provided in jans-tui [LDAP configuration options](../../config-guide/auth-server-config/authentication-method-config.md#ldap-servers-as-authentication-method) documentation to learn how to enable and configure ACRs that use external LDAP or Active Directory as IDP.
 
 ### 3. Script-based ACRs
 
