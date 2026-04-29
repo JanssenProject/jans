@@ -21,7 +21,7 @@ pub enum PolicyStoreLoadError {
     ParseJson(#[from] serde_json::Error),
     /// Failed to parse policy store from YAML string.
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
-    ParseYaml(#[from] serde_yml::Error),
+    ParseYaml(#[from] serde_yaml_ng::Error),
     /// Failed to fetch the policy store from the lock server.
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer(#[from] HttpClientError),
@@ -88,7 +88,7 @@ pub async fn load_policy_store(
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
-            let agama_policy_store = serde_yml::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
+            let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
@@ -104,7 +104,7 @@ pub async fn load_policy_store(
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
-            let agama_policy_store = serde_yml::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
+            let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         #[cfg(not(target_arch = "wasm32"))]

@@ -58,14 +58,8 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
             logger.debug("Cedarling service did not start properly");
             return response;
         }
-        
-        SearchSource source = request.source();
-        if (source == null) {
-            logger.debug("No search source in request");
-            return response;
-        }
 
-        List<SearchExtBuilder> exts = source.ext();
+        List<SearchExtBuilder> exts = request.source().ext();
         if (exts.isEmpty()) {
             logger.warn("No 'ext' in request");
             return response;

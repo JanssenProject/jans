@@ -140,7 +140,7 @@ mod test {
         let yaml = "
             entity_type_name: Jans::Access_token
         ";
-        let parsed = serde_yml::from_str::<TokenEntityMetadata>(yaml)
+        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml)
             .expect("Failed to parse an empty YAML object into TokenEntityMetadata");
         assert_eq!(
             parsed,
@@ -156,7 +156,7 @@ mod test {
             role_mapping: ''
             entity_type_name: Jans::Access_token
         ";
-        let parsed = serde_yml::from_str::<TokenEntityMetadata>(yaml).expect(
+        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml).expect(
             "Failed to parse YAML object with user_id and role_mapping into TokenEntityMetadata",
         );
         assert_eq!(

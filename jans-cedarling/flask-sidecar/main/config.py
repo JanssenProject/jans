@@ -32,6 +32,7 @@ def parse_bool_env(var_name: str, default: str = "False") -> bool:
     return value.lower() in ("true", "1", "yes")
 
 
+
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
     API_VERSION = "v1"
@@ -43,23 +44,24 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
-    CEDARLING_BOOTSTRAP_CONFIG = None
-    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
-        "CEDARLING_BOOTSTRAP_CONFIG_FILE", "None"
-    )
-    if CEDARLING_BOOTSTRAP_CONFIG_FILE == "None":
-        logger.info(
-            "Cedarling bootstrap file not found, falling back to environment variables"
-        )
-    else:
+
+    @classmethod
+    def load_bootstrap(cls) -> None:
+        path = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE")
+        if not path or path == "None":
+            raise RuntimeError("CEDARLING_BOOTSTRAP_CONFIG_FILE is not set")
         try:
-            with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-                CEDARLING_BOOTSTRAP_CONFIG = f.read()
+            with open(path) as f:
+                cls.CEDARLING_BOOTSTRAP_CONFIG = f.read()
         except OSError as e:
-            logger.warning(
-                f"Unable to read Cedarling bootstrap config from {CEDARLING_BOOTSTRAP_CONFIG_FILE}: {e}. "
-                "Falling back to environment variables"
-            )
+            logger.exception("Unable to read Cedarling bootstrap config from %s", path)
+            raise RuntimeError(
+                f"Cannot read CEDARLING_BOOTSTRAP_CONFIG_FILE={path}"
+            ) from e
+        cls.CEDARLING_BOOTSTRAP_CONFIG_FILE = path
+
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = None
+    CEDARLING_BOOTSTRAP_CONFIG = None
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
 
@@ -92,5 +94,7 @@ class ConfigLoader:
         mode = os.environ.get("APP_MODE")
         if mode is not None:
             logger.info(f"Loads {mode} config")
-            return config.get(mode, TestingConfig)
+            current_config = config.get(mode, TestingConfig)
+            current_config.load_bootstrap()
+            return current_config
         return config.get("default")
