@@ -416,10 +416,12 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 
-		// Pass null so LDAP returns all registered devices for the user regardless of
-		// jansApp format — the publicKeyId filter below narrows to valid FIDO2 entries.
-		// Passing origin caused empty results when the stored jansApp format differed.
-		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, null);
+		// origin is already the normalized rpId (hostname only, scheme stripped) produced
+		// by CommonVerifiers.verifyRpDomain → networkService.getHost. Registration stores
+		// the same normalized value in jansApp via entity.setRpId(origin), so the filter
+		// is consistent on both sides. Passing null would leak credential IDs across RPs
+		// and corrupt the U2F applicationId picked up at line 448.
+		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, origin);
 
 		// f.getRegistrationData().getAttenstationRequest() null check is added to
 		// maintain backward compatiblity with U2F devices when U2F devices are migrated
