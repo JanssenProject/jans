@@ -967,7 +967,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.scripts_widget_dict = OrderedDict()
 
-
         list_of_scripts = (
                 ("Spontaneous Scopes", 'spontaneousScopes', ['spontaneous_scope', 'uma_claims_gathering', 'uma_rpt_policy']),
                 ("Update Token", 'updateTokenScriptDns', ['update_token']),
@@ -975,6 +974,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 ("Introspection", 'introspectionScripts', ['introspection', 'persistence_extension', 'person_authentication']),
                 ("Password Grant", 'ropcScripts', ['resource_owner_password_credentials', 'scim']),
                 ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp'])
+                ("Spontaneous Scope", 'spontaneousScopeScriptDns', ['spontaneous_scope']),
+                ("Logout Status Jwt", 'logoutStatusJwtScriptDns', ['logout_status_jwt']),
+                ("Par", 'parScriptDns', ['par']),
+                ("TX Token", 'txTokenScriptDns', ['tx_Token']),
                 )
 
         for title, script_var, script_types in list_of_scripts:
