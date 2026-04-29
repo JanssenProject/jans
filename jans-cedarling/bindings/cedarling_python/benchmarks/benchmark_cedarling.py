@@ -86,7 +86,7 @@ def _multi_issuer_cedarling() -> Cedarling:
         {
             "CEDARLING_APPLICATION_NAME": "TestApp",
             # Match tests/config.py + get_multi_issuer_config fixture.
-            "CEDARLING_POLICY_STORE_LOCAL_FN": "../../test_files/policy-store-multi-issuer-test.yaml",
+            "CEDARLING_POLICY_STORE_LOCAL_FN": str(TEST_FILES / "policy-store-multi-issuer-test.yaml"),
             "CEDARLING_JWT_SIG_VALIDATION": "disabled",
             "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
             "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],

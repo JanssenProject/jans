@@ -26,7 +26,7 @@ benchmark_cedarling: benchmark_cedarling.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LDFLAGS)
 
 run: benchmark_cedarling
-	LD_LIBRARY_PATH=../../../target/release ./benchmark_cedarling
+	LD_LIBRARY_PATH=../../../target/release DYLD_LIBRARY_PATH=../../../target/release ./benchmark_cedarling
 
 clean:
 	rm -f benchmark_cedarling

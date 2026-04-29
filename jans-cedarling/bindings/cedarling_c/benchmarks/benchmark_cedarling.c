@@ -133,7 +133,13 @@ static void run_bench(const char *name, bench_fn fn, uint64_t instance_id,
 
     /* warm-up — not timed */
     for (int i = 0; i < WARMUP_ITERS; i++) {
-        fn(instance_id, request, &r);
+        int ret = fn(instance_id, request, &r);
+        if (ret != 0) {
+            fprintf(stderr, "warmup call failed at iteration %d: %s\n", i,
+                    r.error_message ? r.error_message : "unknown");
+            cedarling_free_result(&r);
+            exit(1);
+        }
         cedarling_free_result(&r);
     }
 
