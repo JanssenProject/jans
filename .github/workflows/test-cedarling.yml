@@ -190,7 +190,7 @@ jobs:
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
         node benchmarks/benchmark.mjs | tee bench_output.txt
-        python3 ../../../scripts/parse_binding_benchmarks.py --format wasm bench_output.txt >> $GITHUB_STEP_SUMMARY
+        python3 ../../scripts/parse_binding_benchmarks.py --format wasm bench_output.txt >> $GITHUB_STEP_SUMMARY
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
@@ -327,7 +327,7 @@ jobs:
       with:
         toolchain: stable
     - name: Set up Java
-      uses: actions/setup-java@b36cde31dbb1da85c604140f68cd259e24372b44 # v4.7.1
+      uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: "17"
