@@ -60,6 +60,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.Reporter;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
@@ -119,6 +120,12 @@ public abstract class BaseTest {
     protected String loginFormLoginButton;
     protected String authorizeFormDoNotAllowButton;
     private String authorizeFormAllowButton;
+
+    @AfterMethod
+    public void tearDown() {
+        privateKey = null;
+        sharedKey = null;
+    }
 
     public static boolean isJsonError(String str) {
         try {
