@@ -158,12 +158,11 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestHS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -190,7 +189,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -242,12 +241,11 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestHS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestHS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -274,7 +272,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -325,12 +323,11 @@ public class AddressClaimsTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestHS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -357,7 +354,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1192,7 +1189,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJwe(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1284,7 +1281,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJwe(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1385,7 +1382,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
         String clientKeyId = cryptoContext.getKeyId(Algorithm.RS256);
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 clientKeyId,
@@ -1488,7 +1485,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1590,7 +1587,7 @@ public class AddressClaimsTest extends BaseTest {
         List<Claim> idTokenClaims = createIdTokenAddressClaims();
         List<Claim> userInfoClaims = createUserInfoAddressClaims();
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),

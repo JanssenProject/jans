@@ -69,20 +69,23 @@ class PackageUtils(SetupUtils):
 
         if not Config.installed_instance:
             if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-                if base.os_type == 'debian' and base.os_version == '13':
+                if base.os_type == 'debian':
                     with tempfile.TemporaryDirectory() as tmpdirname:
-                        libaio1_url = 'http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb'
-                        base.download(libaio1_url, os.path.join(tmpdirname, os.path.basename(libaio1_url)))
-                        for deb_fn in ( 'mysql-community-server_9.2.0-1debian12_amd64.deb',
-                                        'mysql-common_9.2.0-1debian12_amd64.deb',
-                                        'mysql-community-server-core_9.2.0-1debian12_amd64.deb',
-                                        'mysql-client_9.2.0-1debian12_amd64.deb',
-                                        'mysql-community-client_9.2.0-1debian12_amd64.deb',
-                                        'mysql-community-client-core_9.2.0-1debian12_amd64.deb',
-                                        'mysql-community-client-plugins_9.2.0-1debian12_amd64.deb',
-                                        ):
-                            base.download(f'https://downloads.mysql.com/archives/get/p/23/file/{deb_fn}', os.path.join(tmpdirname, deb_fn))
-                        self.run([install_command.format(os.path.join(tmpdirname, '*.deb'))],  shell=True)
+                        apt_deb_fn = 'mysql-apt-config_0.8.39-1_all.deb'
+                        local_apt_path = os.path.join(tmpdirname, apt_deb_fn)
+                        base.download(f'https://repo.mysql.com//{apt_deb_fn}', local_apt_path)
+                        if not os.path.exists(local_apt_path):
+                            print(f"Failed to download {apt_deb_fn}, can't continue...")
+                            sys.exit(1)
+                        self.run([install_command.format(local_apt_path)], shell=True)
+                        self.run(update_command, shell=True, get_stderr=True)
+                        # check if MySQL Server is installable via the newly configured apt repo
+                        policy_out = self.run("apt-cache policy mysql-server", shell=True)
+                        if 'Candidate:' not in policy_out or 'Candidate: (none)' in policy_out:
+                            print("MySQL Server is not installable. Please fix apt repository for MySQL.")
+                            sys.exit(1)
+                    package_list[os_type_version]['mandatory'] += ' mysql-server'
+
                 elif base.os_type in ('centos', 'red', 'rocky') and base.os_version == '10':
                     package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
