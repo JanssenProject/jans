@@ -37,12 +37,11 @@ import static org.testng.Assert.assertTrue;
  */
 public class CanRequestAndUseClaimsInIdToken extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void canRequestAndUseClaimsInIdToken(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Claims in id token");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -55,6 +54,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(scopes);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -67,7 +67,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
