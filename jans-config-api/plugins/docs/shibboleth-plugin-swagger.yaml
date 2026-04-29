@@ -481,41 +481,37 @@ components:
             seconds:
               type: integer
               format: int64
-            zero:
-              type: boolean
-            nano:
-              type: integer
-              format: int32
             negative:
               type: boolean
-            positive:
+            zero:
               type: boolean
             units:
               type: array
               items:
                 type: object
                 properties:
-                  durationEstimated:
-                    type: boolean
                   duration:
                     type: object
                     properties:
                       seconds:
                         type: integer
                         format: int64
+                      negative:
+                        type: boolean
                       zero:
                         type: boolean
                       nano:
                         type: integer
                         format: int32
-                      negative:
-                        type: boolean
-                      positive:
-                        type: boolean
-                  timeBased:
+                  durationEstimated:
                     type: boolean
                   dateBased:
                     type: boolean
+                  timeBased:
+                    type: boolean
+            nano:
+              type: integer
+              format: int32
           description: ISO-8601 duration format PnDTnHnMn.nS. E.g. PT15M. Indicates
             how long until an AuthenticationResult can be reused for the current request
         messageSigningPolicy:

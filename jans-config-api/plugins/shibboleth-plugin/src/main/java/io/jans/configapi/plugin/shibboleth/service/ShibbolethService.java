@@ -4,7 +4,7 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
-
+import io.jans.configapi.plugin.shibboleth.model.EntityType;
 import io.jans.configapi.plugin.shibboleth.model.Status;
 import io.jans.configapi.plugin.shibboleth.util.Constants;
 import io.jans.configapi.util.ApiConstants;
@@ -26,11 +26,10 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,6 @@ import org.apache.commons.lang3.StringUtils;
 @ApplicationScoped
 public class ShibbolethService {
 
-    private static final String SHIBBOLETH_IDP_CONFIG_DN = "ou=shibboleth-idp-plugin,ou=configuration,o=jans";
     private static final String SHIBBOLETH_TR_CONFIG_DN = "inum=%s,ou=trustRelationships,%s";
 
     @Inject
@@ -192,7 +190,25 @@ public class ShibbolethService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+    public Set<String> getFederationEntityId(String fedId) {
+        logger.debug("Search TrustRelationship with fedId:{}", fedId);
+
+        if (StringUtils.isBlank(fedId)) {
+            throw new InvalidAttributeException("Federation ID cannot be null");
+        }
+
+        TrustRelationship trustRelationship = getTrustRelationshipByInum(fedId);
+        if (trustRelationship == null) {
+            throw new InvalidAttributeException("No Federation found by inum:{" + fedId + "}");
+        }
+
+        if (trustRelationship.getEntityType() != EntityType.AGGREGATE) {
+            throw new InvalidAttributeException("{" + fedId + "} is not a Federation");
+        }
+        return trustRelationship.getEntityIds();
+    }
+
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
         return addTrustRelationship(trustRelationship, null);
     }
 
@@ -213,6 +229,9 @@ public class ShibbolethService {
     public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
             throws IOException {
         logger.info("Update trustRelationship:{}, file:{}", trustRelationship, file);
+        if (trustRelationship == null) {
+            return trustRelationship;
+        }
         setTrustRelationshipDefaultValue(trustRelationship, true);
 
         if (file != null && file.available() > 0) {

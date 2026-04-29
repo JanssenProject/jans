@@ -8,13 +8,16 @@ import io.jans.orm.annotation.ObjectClass;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Arrays;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLProfile")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SAMLProfile {
+public class SAMLProfile implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @AttributeName
     @Schema(description = "Type of SAML Profile Type")

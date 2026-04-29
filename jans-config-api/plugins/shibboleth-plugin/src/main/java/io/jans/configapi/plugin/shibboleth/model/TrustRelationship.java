@@ -2,7 +2,6 @@ package io.jans.configapi.plugin.shibboleth.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.jans.shibboleth.model.config.profiles.support.*;
 import io.jans.configapi.plugin.shibboleth.model.profile.*;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -10,9 +9,8 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -56,7 +54,7 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(name = "jansEntityId")
     @Schema(description = "Uniquely identifies the entity across federated systems.")
-    private List<String> entityIds;
+    private Set<String> entityIds;
         
     @AttributeName(name = "jansProfileConfiguration")
     @Schema(description = "SAML profiles.")
@@ -117,11 +115,11 @@ public class TrustRelationship extends Entry implements Serializable {
         this.releasedAttributes = releasedAttributes;
     }
 
-    public List<String> getEntityIds() {
+    public Set<String> getEntityIds() {
         return entityIds;
     }
 
-    public void setEntityIds(List<String> entityIds) {
+    public void setEntityIds(Set<String> entityIds) {
         this.entityIds = entityIds;
     }
 

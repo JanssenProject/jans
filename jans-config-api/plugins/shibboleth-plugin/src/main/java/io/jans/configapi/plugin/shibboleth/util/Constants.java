@@ -12,6 +12,8 @@ public final class Constants {
     public static final String SP_MODULE = "sp-module";
     public static final String SP_METADATA_FILE_PATTERN = "%s_sp-metadata.xml";
 
+    public static final String FED_ID = "fedId";
+    public static final String FED_ID_PATH_PARAM = "/{fed-id}";   
     public static final String INUM = "inum";
     public static final String INUM_PATH_PARAM = "/{inum}";
     public static final String NAME = "name";
@@ -22,6 +24,8 @@ public final class Constants {
     public static final String URI = "/uri";
     public static final String UPSTREAM = "/upstream";
     public static final String MDQ  = "/mdq";
+    public static final String DISCOVERY = "/discovery";
+    public static final String ENTITIES = "/entities";
 
     public static final String SHIBBOLETH_READ_ACCESS = "https://jans.io/oauth/config/shibboleth.readonly";
     public static final String SHIBBOLETH_WRITE_ACCESS = "https://jans.io/oauth/config/shibboleth.write";

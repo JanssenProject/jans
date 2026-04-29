@@ -51,7 +51,6 @@ public class ShibbolethProfileResourceService {
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
-
   
     public List<SAMLProfile> getAllProfileForTrustRelationships(String inum) {
         List<SAMLProfile> profiles = new ArrayList<>();

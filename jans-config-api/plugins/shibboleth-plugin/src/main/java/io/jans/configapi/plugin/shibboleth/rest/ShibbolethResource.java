@@ -74,6 +74,9 @@ public class ShibbolethResource extends BaseResource {
     private class TrustRelationshipPagedResult extends PagedResult<TrustRelationship> {
     };
 
+    private class StringPagedResult extends PagedResult<String> {
+    };
+
     @Inject
     private Logger logger;
 
@@ -159,6 +162,36 @@ public class ShibbolethResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
+    @Operation(summary = "Gets list of federation entity ID based on federation ID", description = "Gets list of federation entity ID based on federation ID", operationId = "get-entities-by-fed-id", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = StringPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-federation-entities-by-fed-id"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @Path(Constants.FED_ID_PATH_PARAM + Constants.DISCOVERY + Constants.ENTITIES)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getFederationEntityId(
+            @Parameter(description = "Federation ID") @PathParam(Constants.FED_ID) @NotNull String fedId,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Get feration entity ID by fedId:{}", escapeLog(fedId));
+        }
+        Set<String> entityIds = shibbolethService.getFederationEntityId(fedId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("EntityIds under federation:{} are:{}", escapeLog(fedId), entityIds);
+        }
+
+        StringPagedResult pagedResult = this.getEntityIdsPagedResult(entityIds, startIndex, limit);
+
+        return Response.ok(pagedResult).build();
+    }
+
     @Operation(summary = "Adds trusted service provider", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
@@ -216,7 +249,7 @@ public class ShibbolethResource extends BaseResource {
                 .updateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metadatafile);
         return Response.status(Response.Status.OK).entity(trustRelationship).build();
     }
-    
+
     /**
      * Delete the TrustRelationship identified by the given inum.
      *
@@ -235,15 +268,15 @@ public class ShibbolethResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }, groupScopes = {}, superScopes = { Constants.SHIBBOLETH_DELETE_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_DELETE_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteClient(
             @Parameter(description = "TrustRelationship inum") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("TrustRelationship to be deleted - inum:{} ", escapeLog(inum));
         }
-            //Blocks if an AGGREGATE has ACTIVE children.
-            //If ACTIVE, marks PENDING_DELETE for the Worker to unpublish.
+        // Blocks if an AGGREGATE has ACTIVE children.
+        // If ACTIVE, marks PENDING_DELETE for the Worker to unpublish.
         return Response.noContent().build();
     }
 
@@ -268,12 +301,108 @@ public class ShibbolethResource extends BaseResource {
             pagedTrustRelationship.setStart(pagedResult.getStart());
             pagedTrustRelationship.setEntriesCount(pagedResult.getEntriesCount());
             pagedTrustRelationship.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-            pagedTrustRelationship.setEntries(trustRelationships);
+            pagedTrustRelationship.setEntries(
+                    this.getPageData(trustRelationships, searchReq.getCount().intValue(), searchReq.getPage()));
         }
 
         logger.info("TrustRelationship pagedTrustRelationship:{}", pagedTrustRelationship);
         return pagedTrustRelationship;
+    }
 
+    private StringPagedResult getEntityIdsPagedResult(Set<String> entityIdSet, int startIndex, int limit) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Federation entityIdSet:{}, startIndex:{}, limit:{}", entityIdSet, escapeLog(startIndex),
+                    escapeLog(limit));
+        }
+
+        StringPagedResult stringPagedResult = new StringPagedResult();
+        if (entityIdSet == null || entityIdSet.isEmpty()) {
+            return stringPagedResult;
+        }
+
+        try {
+            List<String> entityIdList = new ArrayList<>(entityIdSet);
+
+            // verify start and limit index
+            getStartIndex(entityIdList, startIndex);
+            int toIndex = (startIndex + limit <= entityIdSet.size()) ? startIndex + limit : entityIdSet.size();
+            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
+
+            // Extract paginated data
+            List<String> sublist = entityIdList.subList(startIndex, toIndex);
+
+            stringPagedResult.setStart(startIndex);
+            stringPagedResult.setEntriesCount(limit);
+            stringPagedResult.setTotalEntriesCount(entityIdList.size());
+            stringPagedResult.setEntries(sublist);
+
+        } catch (IndexOutOfBoundsException ioe) {
+            logger.error("Error while getting log data is - ", ioe);
+            throwBadRequestException("Index may be incorrect, total entries:{" + entityIdSet.size()
+                    + "}, startIndex provided:{" + startIndex + "} , endtIndex provided:{" + limit + "} ");
+
+        }
+
+        logger.info("Federation Entities stringPagedResult:{}", stringPagedResult);
+
+        return stringPagedResult;
+    }
+
+    private int getStartIndex(List<String> dataList, int startIndex) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Get startIndex dataList:{}, startIndex:{}", dataList, escapeLog(startIndex));
+        }
+
+        if (dataList != null && !dataList.isEmpty()) {
+            try {
+                dataList.get(startIndex);
+            } catch (IndexOutOfBoundsException ioe) {
+                logger.error("Error while getting data at startIndex:{}", startIndex, ioe);
+                throwBadRequestException("Page startIndex is incorrect, total entries are:{" + dataList.size()
+                        + "}, but startIndex provided is:{" + startIndex + "} ");
+            }
+        }
+        return startIndex;
+    }
+
+    private List<TrustRelationship> getPageData(List<TrustRelationship> dataList, int limit, int pageNo) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Get Page data dataList:{}, limit:{}, pageNo:{}", dataList, escapeLog(limit),
+                    escapeLog(pageNo));
+        }
+
+        List<TrustRelationship> pageDataList = null;
+        if (dataList == null || dataList.isEmpty()) {
+            return pageDataList;
+        }
+        int dataSize = dataList.size();
+        double totalPages = (dataSize / limit);
+        logger.debug("totalPages:{}", totalPages);
+        if (totalPages < pageNo) {
+            throwBadRequestException("Total pages in paginatedare:{" + totalPages
+                    + "}, but page provided in request is:{" + pageNo + "} ");
+        }
+        int startIndex = pageNo * limit;
+        logger.debug("startIndex:{}", startIndex);
+        try {
+            dataList.get(startIndex);
+        } catch (IndexOutOfBoundsException ioe) {
+            logger.error("Error while getting data as startIndex:{}", startIndex, ioe);
+            throwBadRequestException(
+                    "Page startIndex:{ " + startIndex + " } calulated as per pageNo:{ " + pageNo + " } is incorrect");
+        }
+
+        int toIndex = (startIndex + limit <= dataList.size()) ? startIndex + limit : dataList.size();
+        try {
+            dataList.get(toIndex);
+        } catch (IndexOutOfBoundsException ioe) {
+            logger.error("Error while getting data as toIndex:{}", toIndex, ioe);
+            throwBadRequestException(
+                    "Page toIndex:{ " + toIndex + " } calulated as per pageNo:{ " + pageNo + " } is incorrect");
+        }
+        pageDataList = dataList.subList(startIndex, toIndex);
+        logger.debug("toIndex:{}", toIndex, pageDataList);
+        return pageDataList;
     }
 
     private void validateTrustRelationship(TrustRelationshipForm trustRelationshipForm, InputStream metaDataFile,
@@ -292,7 +421,7 @@ public class ShibbolethResource extends BaseResource {
         }
 
         if (!missingAttributesList.isEmpty()) {
-            // checkNotNull(missingAttributesList);
+            checkNotNull(missingAttributesList);
         }
 
         // check if Enity type is valid
@@ -325,7 +454,7 @@ public class ShibbolethResource extends BaseResource {
                         list);
 
             }
-            if ((!isUpdate) || (isUpdate && list != null && !list.isEmpty())) {
+            if ((!isUpdate) || (list != null && !list.isEmpty())) {
                 throwBadRequestException(NAME_CONFLICT,
                         String.format(NAME_CONFLICT_MSG, trustRelationship.getDisplayName()));
             }
@@ -348,21 +477,26 @@ public class ShibbolethResource extends BaseResource {
         switch (metadataSourceType) {
         case FILE:
             validateFileMetaDataSourceType(trustRelationship, metaDataFile);
+            break;
         case URI:
             validateURIMetaDataSourceType(trustRelationship);
+            break;
         case UPSTREAM:
             validateUpstreamMetaDataSourceType(trustRelationship);
+            break;
         case MANUAL:
             validateManualMetaDataSourceType(trustRelationship);
+            break;
         case MDQ:
             validateMDQMetaDataSourceType(trustRelationship);
+            break;
         default:
             return;
         }
 
     }
 
-    private void validateFileMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile) {
+    private void validateFileMetaDataSourceType(InputStream metaDataFile) {
 
         // If MetaDataSourceType==FILE and it is not Update flow
         try {
@@ -399,7 +533,7 @@ public class ShibbolethResource extends BaseResource {
         InputStream metaDataInputStream = new ByteArrayInputStream(
                 trustRelationship.getMetadataSource().getMetadataStr().getBytes());
         try {
-            if ((metaDataInputStream == null || metaDataInputStream.available() <= 0)) {
+            if ((metaDataInputStream.available() <= 0)) {
                 throwBadRequestException(DATA_NULL_CHK,
                         String.format(DATA_NULL_MSG, "SP MetaData String should be provided"));
             }
