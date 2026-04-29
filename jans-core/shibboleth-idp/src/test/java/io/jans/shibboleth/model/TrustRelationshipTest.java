@@ -23,7 +23,7 @@ public class TrustRelationshipTest {
     
 
     @Nested
-    @DisplayName("Creation")
+    @DisplayName("TrustRelationship Creation")
     public class CreationTests {
 
         @Test
@@ -120,7 +120,7 @@ public class TrustRelationshipTest {
 
     @Nested
     @DisplayName("Basic Info Update")
-    public class BasicInfoUpdate {
+    public class BasicInfoUpdateTests {
 
 
         @Test
@@ -215,8 +215,8 @@ public class TrustRelationshipTest {
     }
 
     @Nested
-    @DisplayName("Update metadata")
-    public class MetadataSourceUpdate {
+    @DisplayName("Metadata Source Update")
+    public class MetadataSourceUpdateTests {
 
 
         @Test
@@ -278,6 +278,13 @@ public class TrustRelationshipTest {
 
            //TODO: Circle back to this once other features this depends on are implemented 
         }
+
+    }
+
+    @Nested
+    @DisplayName("Idp Instance Management")
+    public class IdpInstanceManagementTests {
+
 
     }
 
