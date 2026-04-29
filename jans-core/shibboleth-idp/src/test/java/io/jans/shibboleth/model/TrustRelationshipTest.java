@@ -2,10 +2,13 @@ package io.jans.shibboleth.model;
 
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
+import io.jans.shibboleth.model.metadata.MetadataSource;
+import io.jans.shibboleth.model.metadata.NoMetadataSource;
 import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.util.TrustResult;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 
@@ -24,9 +27,10 @@ public class TrustRelationshipTest {
     public class CreationTests {
 
         @Test
-        @DisplayName("Given blank or null displayName " +
-                     "WHEN creating trustrelationship " + 
-                     "THEN creation fails with a DisplayNameError")
+        @DisplayName(
+            "Given blank or null displayName " +
+            "WHEN creating trustrelationship " + 
+            "THEN creation fails with a DisplayNameError")
         public void shouldRejectNullOrEmptyDisplayName() {
 
             final TrustNature nature = TrustNature.INDIVIDUAL;
@@ -41,9 +45,10 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given null trust nature " + 
-                     "WHEN creating trustrelationship " +
-                     "THEN creation fails with a TrustNatureError ")
+        @DisplayName(
+            "Given null trust nature " + 
+            "WHEN creating trustrelationship " +
+            "THEN creation fails with a TrustNatureError ")
         public void shouldRejectNoTrustNature() {
 
             TrustResult<TrustRelationship> result = TrustRelationship.create("JansTR","Jans TR",null);
@@ -52,9 +57,10 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given null description " +
-                     "WHEN creating trustrelationship " + 
-                     "THEN it is created with a blank description")
+        @DisplayName(
+            "Given null description " +
+            "WHEN creating trustrelationship " + 
+            "THEN it is created with a blank description")
         public void shouldCreateTrustRelationshipWithBlankDescription() {
 
             TrustResult<TrustRelationship> result = TrustRelationship.create("JansTR",null,TrustNature.INDIVIDUAL);
@@ -63,12 +69,13 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given valid parameters " + 
-                     "WHEN creating trustrelationship " +
-                     "THEN it should create a trust relationship in DRAFT STATUS " +
-                     "  with version 1 " +
-                     "  with no metadata source configured yet " +
-                     "  and using all default profile configurations ")
+        @DisplayName(
+            "Given valid parameters " + 
+            "WHEN creating trustrelationship " +
+            "THEN it should create a trust relationship in DRAFT STATUS " +
+            "  with version 1 " +
+            "  with no metadata source configured yet " +
+            "  and using all default profile configurations ")
         public void shouldCreateTrustRelationshipInInitialDraftState() {
             
             TrustResult<TrustRelationship> result = TrustRelationship.create("TestTR","Test TR",TrustNature.INDIVIDUAL);
@@ -117,7 +124,8 @@ public class TrustRelationshipTest {
 
 
         @Test
-        @DisplayName("Given a null display name " + 
+        @DisplayName(
+            "Given a null display name " + 
             "WHEN updating the display name of an existing TrustRelationship " +
             "THEN the update should fail with a display name required error"
         )
@@ -136,7 +144,8 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given a null description " + 
+        @DisplayName(
+            "Given a null description " + 
             "WHEN updating the description of an existing TrustRelationship " +
             "THEN description is cleared and version is incremented")
         public void shouldAllowNullToClearDescription() {
@@ -156,7 +165,8 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given a valid new display name " +
+        @DisplayName(
+            "Given a valid new display name " +
             "WHEN updating the display name of an existing TrustRelationship " + 
             "THEN display name is changed successfully "+
             "status stays the same, " +
@@ -180,7 +190,8 @@ public class TrustRelationshipTest {
         }
 
         @Test
-        @DisplayName("Given a valid new description " + 
+        @DisplayName(
+            "Given a valid new description " + 
             "WHEN updating the description of an existing TrustRelationship " + 
             "THEN description is changed successfully " +
             "status stays the same, and version is incremented")
@@ -203,6 +214,72 @@ public class TrustRelationshipTest {
         }
     }
 
+    @Nested
+    @DisplayName("Update metadata")
+    public class MetadataSourceUpdate {
+
+
+        @Test
+        @DisplayName(
+            "Given a null metadatasource " +
+            "WHEN updating the metadata source of an existing TrustRelationship " +
+            "THEN the operation should fail with a missing metadatasource error" )
+        public void shouldFailWhenMetadataSourceIsNull() {
+
+            //Given
+            MetadataSource metadataSource = null;
+            TrustRelationship tr = createValidTrustRelationship();
+    
+
+            //When
+            TrustResult<Void> result = tr.updateMetadataSource(metadataSource);
+
+            //Then
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(MetadataSourceError.class);
+
+        }
+
+        @Test
+        @DisplayName(
+            "GIVEN an existing TrustRelationship using NoMetadataSource " +
+            "WHEN the same NoMetadataSource is provided again " +
+            "THEN the update succeeds without changing status or version ")
+        public void shouldTreatSameNoMetadataSourceAsNoOp() {
+
+            //Given
+            MetadataSource metadataSource = NoMetadataSource.getInstance();
+            TrustRelationship tr = createValidTrustRelationship();
+            int originalVersion = tr.getVersion();
+            TrustStatus originalStatus = tr.getStatus();
+
+            //When
+            TrustResult<Void> result = tr.updateMetadataSource(metadataSource);
+
+            //Then
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(tr.getMetadataSource()).isInstanceOf(NoMetadataSource.class);
+            assertThat(tr).isVersion(originalVersion);
+            assertThat(tr).hasStatus(originalStatus);
+        }
+
+        @Disabled
+        @Test
+        @DisplayName(
+            " GIVEN an existing TrustRelationship that currently has: " +
+            "   - a configured metadata source " +
+            "   - pending work items " +
+            "   - discovered entity IDs " +
+            " WHEN updateMetadataSource is called with NoMetadataSource " +
+            " THEN the operation succeeds, status switches to DRAFT, " +
+            "   pending work items and discovered entity IDs are cleared, " +
+            "   and version is incremented ")
+        public void shouldSwitchToDraftAndClearPendingWorkAndDiscoveredEntityIdsWhenSettingNoMetadataSource() {
+
+           //TODO: Circle back to this once other features this depends on are implemented 
+        }
+
+    }
 
     private TrustRelationship createValidTrustRelationship() {
 

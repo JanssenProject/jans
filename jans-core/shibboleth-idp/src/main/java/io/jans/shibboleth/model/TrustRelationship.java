@@ -108,6 +108,15 @@ public class TrustRelationship {
         return metadataSource;
     }
 
+    public TrustResult<Void> updateMetadataSource(MetadataSource source) {
+
+        if (source == null) {
+
+            return TrustResult.failure(MetadataSourceError.required());
+        }
+        return TrustResult.success(null);
+    }
+
     public EntityIds getDiscoveredEntityIds() {
 
         return discoveredEntityIds;
