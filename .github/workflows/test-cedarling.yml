@@ -343,4 +343,4 @@ jobs:
       run: |
         export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
         mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
-        python3 ../../../../scripts/parse_binding_benchmarks.py --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
+        python3 ../../../scripts/parse_binding_benchmarks.py --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
