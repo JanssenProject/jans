@@ -8,6 +8,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -168,6 +170,10 @@ public class TestCryptoContext {
 
     public String getKeyId(Algorithm algorithm) {
         return keyIdMap.get(algorithm);
+    }
+
+    public PrivateKey getPrivateKey(Algorithm algorithm) throws CryptoProviderException {
+        return cryptoProvider.getPrivateKey(getKeyId(algorithm));
     }
 
     /**
