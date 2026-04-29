@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy_core::validator::types::{EntityKind, Primitive, Type};
+use cedar_policy_core::validator::types::{EntityKind, Type};
 use derive_more::derive::Deref;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
@@ -57,11 +57,18 @@ impl AttrSrc {
                     BuildAttrSrcErrorKind::InvalidType(value.clone()).while_building(attr_name)
                 );
             },
-            Type::True | Type::False => Self::JwtClaim(TknClaimAttrSrc {
+            Type::Bool(_) => Self::JwtClaim(TknClaimAttrSrc {
                 claim: attr_name.to_string(),
                 expected_type: ExpectedClaimType::Bool,
             }),
-            Type::Primitive { primitive_type } => Self::from_primitive(attr_name, primitive_type),
+            Type::Long => Self::JwtClaim(TknClaimAttrSrc {
+                claim: attr_name.to_string(),
+                expected_type: ExpectedClaimType::Number,
+            }),
+            Type::String => Self::JwtClaim(TknClaimAttrSrc {
+                claim: attr_name.to_string(),
+                expected_type: ExpectedClaimType::String,
+            }),
             Type::Set { element_type } => {
                 let element_type = element_type.as_ref().ok_or(
                     BuildAttrSrcErrorKind::SetElementTypeNotDefined.while_building(attr_name),
@@ -103,23 +110,6 @@ impl AttrSrc {
         };
 
         Ok(attr_src)
-    }
-
-    fn from_primitive(attr_name: &str, value: &Primitive) -> Self {
-        match value {
-            Primitive::Bool => Self::JwtClaim(TknClaimAttrSrc {
-                claim: attr_name.to_string(),
-                expected_type: ExpectedClaimType::Bool,
-            }),
-            Primitive::Long => Self::JwtClaim(TknClaimAttrSrc {
-                claim: attr_name.to_string(),
-                expected_type: ExpectedClaimType::Number,
-            }),
-            Primitive::String => Self::JwtClaim(TknClaimAttrSrc {
-                claim: attr_name.to_string(),
-                expected_type: ExpectedClaimType::String,
-            }),
-        }
     }
 
     fn from_entity_kind(
@@ -172,8 +162,9 @@ impl From<&Type> for ExpectedClaimType {
     fn from(value: &Type) -> Self {
         match value {
             Type::Never => ExpectedClaimType::Null,
-            Type::True | Type::False => ExpectedClaimType::Bool,
-            Type::Primitive { primitive_type } => primitive_type.into(),
+            Type::Bool(_) => ExpectedClaimType::Bool,
+            Type::Long => ExpectedClaimType::Number,
+            Type::String => ExpectedClaimType::String,
             Type::Set { element_type } => element_type
                 .as_ref()
                 .map(|t| Self::from(&**t))
@@ -201,12 +192,3 @@ impl From<&Type> for ExpectedClaimType {
     }
 }
 
-impl From<&Primitive> for ExpectedClaimType {
-    fn from(value: &Primitive) -> Self {
-        match value {
-            Primitive::Bool => Self::Bool,
-            Primitive::Long => Self::Number,
-            Primitive::String => Self::String,
-        }
-    }
-}

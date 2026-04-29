@@ -612,6 +612,7 @@ nav:
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md
     - OPA: cedarling/integrations/cedarling-opa.md
+    - OpenSearch: cedarling/integrations/opensearch.md
 
 
 plugins:

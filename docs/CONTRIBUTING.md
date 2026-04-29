@@ -283,10 +283,10 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
 !!! Warning
 
-* `head` version of documentation may contain the release marker at various places. URLs, commands etc. So, URLs, and commands might not work as it is. Users will have to manually replace the marker or use the most recent stable release documentation.
+    * `head` version of documentation may contain the release marker at various places. URLs, commands etc. So, URLs, and commands might not work as it is. Users will have to manually replace the marker or use the most recent stable release documentation.
 
-* Release marker should be used only when contributing to the latest documentation. Not when updating documentation
-for previous releases.
+    * Release marker should be used only when contributing to the latest documentation. Not when updating documentation
+    for previous releases.
 
 #### General Text
 
