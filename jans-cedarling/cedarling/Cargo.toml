@@ -82,6 +82,7 @@ zip = { version = "= 8.1.0", default-features = false, features = [
 prost = { version = "0.14.3", optional = true }
 prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.3", optional = true }
+hdrhistogram = "7.5.4"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tonic = { version = "0.14.3", optional = true, features = ["tls-native-roots"] }

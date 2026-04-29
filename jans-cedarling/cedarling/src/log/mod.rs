@@ -80,6 +80,7 @@ pub(crate) use log_strategy::LogStrategy;
 
 use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
+use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::log_config::LogConfig;
 use crate::lock::{InitLockServiceError, LockService};
 
@@ -98,11 +99,13 @@ pub(crate) async fn init_logger(
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
     lock_config: Option<&LockServiceConfig>,
+    metrics: Arc<MetricsCollector>,
 ) -> Result<Logger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name));
     let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
-        let lock_service = LockService::new(pdp_id, lock_config, Some(logger_weak)).await?;
+        let lock_service =
+            LockService::new(pdp_id, lock_config, Some(logger_weak), metrics).await?;
         logger.set_lock_service(lock_service);
     }
     Ok(logger)

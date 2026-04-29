@@ -8,6 +8,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::log::MetricsLogEntry;
+
 #[derive(Debug, thiserror::Error)]
 pub(super) enum MappingValidationError {
     #[error("missing required field")]
@@ -33,6 +35,15 @@ pub(super) struct CedarlingLogEntry {
     pub extra: HashMap<String, Value>,
 }
 
+#[derive(Debug, Deserialize)]
+pub(super) struct CedarlingMetricsEntry {
+    #[serde(flatten)]
+    pub metric: MetricsLogEntry,
+    pub pdp_id: String,
+    #[serde(default)]
+    pub application_id: String,
+}
+
 /// Serializes into the lock server's expected format
 #[derive(Debug, Serialize)]
 pub(super) struct LockServerLogEntry {
@@ -53,6 +64,20 @@ pub(super) struct LockServerLogEntry {
     pub client_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context_information: Option<Value>,
+}
+
+/// Serializes into the lock server's expected telemetry format (3-map model).
+#[derive(Debug, Serialize)]
+pub(super) struct LockServerMetricsEntry {
+    pub creation_date: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub service: Option<String>,
+    pub node_name: String,
+    pub status: String,
+    pub interval_secs: i64,
+    pub policy_stats: HashMap<String, i64>,
+    pub error_counters: HashMap<String, i64>,
+    pub operational_stats: HashMap<String, i64>,
 }
 
 impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
@@ -98,6 +123,25 @@ impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
     }
 }
 
+impl TryFrom<CedarlingMetricsEntry> for LockServerMetricsEntry {
+    type Error = MappingValidationError;
+
+    fn try_from(value: CedarlingMetricsEntry) -> Result<Self, Self::Error> {
+        let timestamp = value.metric.base.timestamp.unwrap_or_default();
+
+        Ok(Self {
+            creation_date: timestamp,
+            service: (!value.application_id.is_empty()).then_some(value.application_id),
+            node_name: value.pdp_id,
+            status: "running".to_string(),
+            interval_secs: value.metric.interval_secs,
+            policy_stats: value.metric.policy_stats,
+            error_counters: value.metric.error_counters,
+            operational_stats: value.metric.operational_stats,
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
@@ -106,7 +150,8 @@ mod test {
     use crate::common::app_types::{ApplicationName, PdpID};
     use crate::log::log_strategy::LogEntryWithClientInfo;
     use crate::log::{
-        BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo, PushedDataInfo,
+        BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo, LogType,
+        MetricsLogEntry, PushedDataInfo,
     };
 
     /// Verifies that a real `DecisionLogEntry` (wrapped in `LogEntryWithClientInfo`)
@@ -268,5 +313,106 @@ mod test {
             matches!(err, MappingValidationError::MissingField),
             "expected MissingField when a required input field is empty"
         );
+    }
+
+    #[test]
+    fn metrics_log_entry_maps_to_lock_server_format() {
+        let request_id = crate::log::gen_uuid7();
+        let base = BaseLogEntry::new_metric(request_id);
+
+        let mut policy_stats = std::collections::HashMap::new();
+        policy_stats.insert("allow_read_docs".to_string(), 340);
+        policy_stats.insert("deny_admin".to_string(), 12);
+
+        let mut operational_stats = std::collections::HashMap::new();
+        operational_stats.insert("authz.requests_total".to_string(), 1240);
+        operational_stats.insert("authz.decision_allow".to_string(), 1218);
+
+        let mut error_counters = std::collections::HashMap::new();
+        error_counters.insert("jwt.validation_failed".to_string(), 8);
+
+        let metrics_entry = MetricsLogEntry {
+            base,
+            policy_stats,
+            error_counters,
+            operational_stats,
+            interval_secs: 60,
+        };
+
+        let pdp_id = PdpID::new();
+        let app_name = ApplicationName::from("jans-auth".to_string());
+
+        let wrapped = LogEntryWithClientInfo::from_loggable(metrics_entry, pdp_id, Some(app_name));
+
+        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped metrics entry");
+
+        let cedarling_entry: CedarlingMetricsEntry =
+            serde_json::from_str(&json_str).expect("deserialize into CedarlingMetricsEntry");
+
+        assert_eq!(cedarling_entry.metric.base.log_kind, LogType::Metric);
+        assert_eq!(cedarling_entry.metric.interval_secs, 60);
+        assert_eq!(cedarling_entry.application_id, "jans-auth");
+        assert_eq!(
+            cedarling_entry.metric.policy_stats.get("allow_read_docs"),
+            Some(&340)
+        );
+        assert_eq!(
+            cedarling_entry
+                .metric
+                .error_counters
+                .get("jwt.validation_failed"),
+            Some(&8)
+        );
+        assert_eq!(
+            cedarling_entry
+                .metric
+                .operational_stats
+                .get("authz.requests_total"),
+            Some(&1240)
+        );
+
+        let lock_entry = LockServerMetricsEntry::try_from(cedarling_entry)
+            .expect("map to LockServerMetricsEntry");
+
+        assert_eq!(lock_entry.service.as_deref(), Some("jans-auth"));
+        assert_eq!(lock_entry.node_name, pdp_id.to_string());
+        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.interval_secs, 60);
+        assert_eq!(lock_entry.policy_stats.get("allow_read_docs"), Some(&340));
+        assert_eq!(
+            lock_entry.error_counters.get("jwt.validation_failed"),
+            Some(&8)
+        );
+        assert_eq!(
+            lock_entry.operational_stats.get("authz.requests_total"),
+            Some(&1240)
+        );
+    }
+
+    #[test]
+    fn metrics_log_entry_without_app_name_maps_correctly() {
+        let base = BaseLogEntry::new_metric(crate::log::gen_uuid7());
+
+        let metrics_entry = MetricsLogEntry {
+            base,
+            policy_stats: std::collections::HashMap::new(),
+            error_counters: std::collections::HashMap::new(),
+            operational_stats: std::collections::HashMap::new(),
+            interval_secs: 30,
+        };
+
+        let pdp_id = PdpID::new();
+        let wrapped = LogEntryWithClientInfo::from_loggable(metrics_entry, pdp_id, None);
+        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped MetricsLogEntry");
+        let cedarling: CedarlingMetricsEntry =
+            serde_json::from_str(&json_str).expect("deserialize to CedarlingMetricsEntry");
+        let lock_entry = LockServerMetricsEntry::try_from(cedarling)
+            .expect("convert CedarlingMetricsEntry to LockServerMetricsEntry");
+
+        assert_eq!(lock_entry.service, None);
+        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.interval_secs, 30);
+        assert!(lock_entry.policy_stats.is_empty());
+        assert!(lock_entry.error_counters.is_empty());
     }
 }

@@ -81,12 +81,13 @@ pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
 pub(crate) use token::{Token, TokenClaims};
 pub(crate) use token_cache::TokenCache;
-pub(crate) use validation::TrustedIssuerError;
+pub(crate) use validation::{TrustedIssuerError, ValidateJwtError};
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
+use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
@@ -105,7 +106,7 @@ use std::sync::Arc;
 use trusted_issuers_loader::TrustedIssuerLoader;
 use validation::{
     JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
-    ValidateJwtError, ValidatedJwt, ValidatorInfo, validate_required_claims,
+    ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
 /// Handles JWT validation
@@ -113,11 +114,11 @@ pub(crate) struct JwtService {
     validators: Arc<JwtValidatorCache>,
     key_service: Arc<KeyService>,
     issuer_configs: Arc<IssuerIndex>,
-    /// Trusted issuer validator for advanced validation scenarios
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
     loading_state: Arc<TrustedIssuerLoadingState>,
+    metrics: Arc<MetricsCollector>,
 }
 
 struct IssuerConfig {
@@ -136,7 +137,7 @@ impl JwtService {
     /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
     /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
     /// * `logger` - Optional logger for diagnostic messages
-    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 means no TTL limit — the token's `exp` claim is used instead)
+    /// * `metrics` - Shared metrics collector for telemetry
     ///
     /// # Errors
     ///
@@ -145,6 +146,7 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
+        metrics: Arc<MetricsCollector>,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
@@ -160,6 +162,7 @@ impl JwtService {
             jwt_config.token_cache_capacity,
             jwt_config.token_cache_earliest_expiration_eviction,
             logger.clone(),
+            metrics.clone(),
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
@@ -189,6 +192,7 @@ impl JwtService {
             logger,
             token_cache,
             loading_state,
+            metrics,
         })
     }
 
@@ -355,6 +359,7 @@ impl JwtService {
                 // Validate JWT using existing single token validation
                 match self.validate_single_token(&token_kind, &token.payload) {
                     Ok(validated_jwt) => {
+                        self.metrics.record_jwt_validation(true);
                         // Extract issuer for non-deterministic check
                         let issuer = validated_jwt
                             .claims
@@ -408,12 +413,14 @@ impl JwtService {
                         }
                     },
                     Err(err) => {
+                        self.metrics.record_jwt_validation(false);
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
                                 format!("Token validation failed at index {index}: {err}"),
                                 Some(LogLevel::WARN),
                             ));
                         }
+                        self.metrics.record_error(&err);
                     },
                 }
             }
@@ -489,11 +496,13 @@ mod test {
     use super::test_utils::*;
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
+    use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
+    use std::sync::Arc;
     use tokio::test;
 
     #[test]
@@ -555,6 +564,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -591,6 +601,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -617,6 +628,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -684,6 +696,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -750,6 +763,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -792,6 +806,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
@@ -820,6 +835,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
         )
         .await
         .expect("Should create JwtService");
