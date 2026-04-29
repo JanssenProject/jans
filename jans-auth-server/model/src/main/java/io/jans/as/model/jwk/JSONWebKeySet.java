@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,15 +118,9 @@ public class JSONWebKeySet {
     public List<JSONWebKey> getKeys(Algorithm algorithm) {
         List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
 
-        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
-            for (JSONWebKey jsonWebKey : getKeys()) {
-                if (jsonWebKey.getAlg().equals(algorithm)) {
-                    jsonWebKeys.add(jsonWebKey);
-                }
-            }
-        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
-            for (JSONWebKey jsonWebKey : getKeys()) {
-                if (jsonWebKey.getAlg().equals(algorithm)) {
+        if (keys != null) {
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey != null && algorithm.equals(jsonWebKey.getAlg())) {
                     jsonWebKeys.add(jsonWebKey);
                 }
             }
