@@ -196,8 +196,8 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
             </div>
             <span
               className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${isSubmitting
-                  ? 'border-amber-300 text-amber-700 bg-amber-50'
-                  : 'border-green-300 text-green-700 bg-green-50'
+                ? 'border-amber-300 text-amber-700 bg-amber-50'
+                : 'border-green-300 text-green-700 bg-green-50'
                 }`}
             >
               {isSubmitting ? 'Running...' : 'Ready'}
@@ -345,8 +345,8 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                       key={tab}
                       onClick={() => setLogType(tab)}
                       className={`px-5 py-2 text-sm font-medium transition-colors ${logType === tab
-                          ? 'bg-green-600 text-white'
-                          : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                       {tab}
@@ -414,8 +414,8 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                     <span className="text-sm font-medium text-gray-700">Decision</span>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${JSON.parse(authzResult).decision
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                         }`}
                     >
                       {JSON.parse(authzResult).decision ? 'True' : 'False'}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Info } from "lucide-react";
+import { CircleQuestionMark } from 'lucide-react';
 
-export const labelWithTooltip = (
+export const LabelWithTooltipMultiLine = (
   label: React.ReactNode,
   tooltip: React.ReactNode
 ) => (
@@ -26,6 +27,31 @@ export const labelWithTooltip = (
     </div>
   </span>
 );
+
+/** Tooltip label helper */
+export const LabelWithTooltip = ({ label, tip }: { label: string; tip: string }) => {
+  const [show, setShow] = React.useState(false);
+  return (
+    <span className="flex items-center gap-1.5 text-sm font-semibold text-[#1a3a2a]">
+      {label}
+      <span className="relative inline-flex items-center">
+        <button
+          type="button"
+          onMouseEnter={() => setShow(true)}
+          onMouseLeave={() => setShow(false)}
+          className="text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          <CircleQuestionMark className="w-4 h-4" tabIndex={-1}/>
+        </button>
+        {show && (
+          <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
+            {tip}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+};
 
 /** Animated spinner */
 export const Spinner = () => (

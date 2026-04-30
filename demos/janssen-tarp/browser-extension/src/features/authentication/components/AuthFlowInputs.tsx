@@ -5,8 +5,10 @@ import Utils from '../../../options/Utils';
 import { v4 as uuidv4 } from 'uuid';
 import { ILooseObject } from '../../../shared/types';
 import { ClientDetails } from '../type/Authentication';
-import { CircleQuestionMark } from 'lucide-react';
 import { Spinner } from '../../../shared/components/Common';
+import { MultiSelectDropdown } from '../../../shared/components/multiSelect/MultiSelectDropdown';
+import { Dropdown } from '../../../shared/components/Dropdown';
+import { LabelWithTooltip } from '../../../shared/components/Common';
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Option = { name: string; label?: string; create?: boolean };
@@ -16,194 +18,6 @@ type AuthFlowInputsProps = {
   handleDialog: (isOpen: boolean) => void;
   client: ClientDetails;
   notifyOnDataChange: () => void;
-};
-
-// ── Tooltip label ──────────────────────────────────────────────────────────────
-
-const LabelWithTooltip = ({ label, tip }: { label: string; tip: string }) => {
-  const [show, setShow] = React.useState(false);
-  return (
-    <span className="flex items-center gap-1.5 text-sm font-semibold text-[#1a3a2a]">
-      {label}
-      <span className="relative inline-flex items-center">
-        <button
-          type="button"
-          onMouseEnter={() => setShow(true)}
-          onMouseLeave={() => setShow(false)}
-          className="text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <CircleQuestionMark className="w-4 h-4" />
-        </button>
-        {show && (
-          <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
-            {tip}
-          </span>
-        )}
-      </span>
-    </span>
-  );
-};
-
-// ── Tag pill (for scope tags) ──────────────────────────────────────────────────
-
-const Tag = ({ name, onRemove }: { name: string; onRemove: () => void }) => (
-  <span className="inline-flex items-center gap-1 bg-[#d1fae5] text-[#065f46] text-xs font-semibold px-2.5 py-1 rounded-full">
-    {name}
-    <button type="button" onClick={onRemove} className="hover:text-red-500 transition-colors leading-none ml-0.5">×</button>
-  </span>
-);
-
-// ── Dropdown (ACR Values) ──────────────────────────────────────────────────────
-
-const Dropdown = ({
-  options,
-  selected,
-  onSelect,
-  placeholder = 'Select Here',
-}: {
-  options: Option[];
-  selected: Option | null;
-  onSelect: (opt: Option | null) => void;
-  placeholder?: string;
-}) => {
-  const [open, setOpen] = React.useState(false);
-  const [input, setInput] = React.useState('');
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  // Close on outside click
-  React.useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const filtered = options.filter((o) =>
-    o.name.toLowerCase().includes(input.toLowerCase())
-  );
-
-  // Allow custom typed value
-  const showCustom =
-    input.trim() !== '' && !options.some((o) => o.name === input.trim());
-
-  const handleSelect = (opt: Option) => {
-    onSelect(opt);
-    setInput('');
-    setOpen(false);
-  };
-
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelect(null);
-    setInput('');
-  };
-
-  return (
-    <div ref={ref} className="relative w-full">
-      <div
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between w-full border border-slate-200 rounded-lg px-4 py-3
-          text-sm text-slate-700 bg-slate-50/60 cursor-pointer
-          focus-within:ring-2 focus-within:ring-[#1a6b3c]/30 focus-within:border-[#1a6b3c] transition-all"
-      >
-        {selected ? (
-          <span className="flex items-center gap-2">
-            <Tag name={selected.name} onRemove={() => { onSelect(null); setInput(''); }} />
-          </span>
-        ) : (
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => { setInput(e.target.value); setOpen(true); }}
-            placeholder={placeholder}
-            className="bg-transparent flex-1 outline-none placeholder-slate-400 text-sm"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && input.trim()) {
-                handleSelect({ name: input.trim(), create: true });
-              }
-            }}
-          />
-        )}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-          className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}>
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </div>
-
-      {open && (
-        <ul className="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-          {filtered.length === 0 && !showCustom && (
-            <li className="px-4 py-3 text-sm text-slate-400">No options</li>
-          )}
-          {filtered.map((opt) => (
-            <li
-              key={opt.name}
-              onClick={() => handleSelect(opt)}
-              className="px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer"
-            >
-              {opt.name}
-            </li>
-          ))}
-          {showCustom && (
-            <li
-              onClick={() => handleSelect({ name: input.trim(), create: true })}
-              className="px-4 py-2.5 text-sm text-[#1a6b3c] font-medium hover:bg-slate-50 cursor-pointer"
-            >
-              Add &quot;{input.trim()}&quot;
-            </li>
-          )}
-        </ul>
-      )}
-    </div>
-  );
-};
-
-// ── Tag input (Scope) ──────────────────────────────────────────────────────────
-
-const TagInput = ({
-  tags,
-  onAdd,
-  onRemove,
-  placeholder = 'Enter Here',
-}: {
-  tags: Option[];
-  onAdd: (name: string) => void;
-  onRemove: (name: string) => void;
-  placeholder?: string;
-}) => {
-  const [input, setInput] = React.useState('');
-
-  const commit = () => {
-    if (input.trim()) { onAdd(input.trim()); setInput(''); }
-  };
-
-  return (
-    <div
-      className="min-h-[48px] w-full border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap gap-1.5
-        focus-within:ring-2 focus-within:ring-[#1a6b3c]/30 focus-within:border-[#1a6b3c]
-        transition-all bg-slate-50/60 cursor-text"
-      onClick={() => document.getElementById('scope-input')?.focus()}
-    >
-      {tags.map((t) => (
-        <Tag key={t.name} name={t.name} onRemove={() => onRemove(t.name)} />
-      ))}
-      <input
-        id="scope-input"
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commit(); }
-          if (e.key === 'Backspace' && !input && tags.length) onRemove(tags[tags.length - 1].name);
-        }}
-        onBlur={commit}
-        placeholder={tags.length === 0 ? placeholder : ''}
-        className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none py-0.5"
-      />
-    </div>
-  );
 };
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -473,11 +287,11 @@ export default function AuthFlowInputs({
                 tip="Optional. Scopes to request in the authorization flow (e.g. openid, profile, email). If omitted, the client's default scopes are used."
               />
             </label>
-            <TagInput
-              tags={selectedScopes}
-              onAdd={addScope}
-              onRemove={removeScope}
-              placeholder="Enter Here"
+            <MultiSelectDropdown
+              options={scopeOptions}
+              selected={selectedScopes}
+              onChange={setSelectedScopes}
+              placeholder="Select scopes"
             />
             <p className="mt-1 text-xs text-slate-400">Press Enter or comma to add a scope.</p>
           </div>

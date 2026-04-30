@@ -4,9 +4,8 @@ import axios from 'axios';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { CircleQuestionMark } from 'lucide-react';
 import { Spinner} from '../../../shared/components/Common';
-
+import { LabelWithTooltip } from '../../../shared/components/Common';
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type ScopeOption = { id?: string; name: string; label?: string; create?: boolean };
@@ -35,31 +34,6 @@ const AlertBanner = ({ severity, message }: { severity: AlertSeverity; message: 
       <span className="font-bold mt-0.5">{icons[severity]}</span>
       <span>{message}</span>
     </div>
-  );
-};
-
-/** Tooltip label helper */
-const LabelWithTooltip = ({ label, tip }: { label: string; tip: string }) => {
-  const [show, setShow] = React.useState(false);
-  return (
-    <span className="flex items-center gap-1.5 text-sm font-semibold text-[#1a3a2a]">
-      {label}
-      <span className="relative inline-flex items-center">
-        <button
-          type="button"
-          onMouseEnter={() => setShow(true)}
-          onMouseLeave={() => setShow(false)}
-          className="text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <CircleQuestionMark className="w-4 h-4" />
-        </button>
-        {show && (
-          <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
-            {tip}
-          </span>
-        )}
-      </span>
-    </span>
   );
 };
 

@@ -1,7 +1,6 @@
 // UnsignedAuthzForm.tsx
 import React from 'react';
 import { JsonEditor } from 'json-edit-react';
-import { Minus } from 'lucide-react';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from '../../../options/Utils';
 

@@ -7,7 +7,6 @@ import {
   Plus,
   Minus,
   LogOut,
-  X,
 } from "lucide-react";
 import { Spinner } from "../../../shared/components/Common";
 import {

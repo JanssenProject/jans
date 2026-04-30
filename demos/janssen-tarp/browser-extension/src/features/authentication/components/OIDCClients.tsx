@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
-  Info,
 } from 'lucide-react';
 
 import RegisterClient from './RegisterClient';
