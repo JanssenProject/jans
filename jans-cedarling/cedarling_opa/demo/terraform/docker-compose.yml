@@ -1,0 +1,43 @@
+services:
+  opa-cedarling:
+    # Pre-built image published by the Janssen CI pipeline.
+    # To pin to a specific release, replace "latest" with a version tag, e.g.:
+    #   image: ghcr.io/janssenproject/jans/cedarling-opa:2.0.0-1
+    image: ghcr.io/janssenproject/jans/cedarling-opa:0.0.0-nightly
+    # Mount the demo-specific files into the path the command references.
+    # The published image is distroless (binary only) so these are not baked in.
+    volumes:
+      - ./opa-config.json:/app/demo/terraform/opa-config.json:ro
+      - ./rego:/app/demo/terraform/rego:ro
+      - ./policy-store:/app/demo/terraform/policy-store:ro
+    command:
+      - run
+      - --server
+      - --addr
+      - "0.0.0.0:8181"
+      - --config-file
+      - /app/demo/terraform/opa-config.json
+      - /app/demo/terraform/rego
+    working_dir: /app/demo/terraform
+    ports:
+      - "8181:8181"
+    healthcheck:
+      # The distroless base image has no shell or curl.
+      # `opa-cedarling health --addr` issues an HTTP GET /health and exits 0 when ready.
+      test: ["CMD", "/app/opa-cedarling", "health", "--addr", "http://localhost:8181"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  tf-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile.demo
+    depends_on:
+      opa-cedarling:
+        condition: service_started
+    environment:
+      OPA_URL: http://opa-cedarling:8181
+    profiles:
+      - demo

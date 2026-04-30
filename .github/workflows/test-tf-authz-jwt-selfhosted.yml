@@ -1,0 +1,1078 @@
+# End-to-end test for the self-hosted OPA path in the terraform-jwt demo.
+#
+# What this tests:
+#   - OPA starts correctly via docker compose -f docker-compose.yml
+#     -f docker-compose.prod.yml up -d (the production-mode overlay).
+#   - The /health endpoint becomes reachable within the timeout; the job fails
+#     if OPA does not become healthy (guards against healthcheck URL changes or
+#     incorrect config/rego/policy-store volume mount paths in docker-compose.prod.yml).
+#   - A real GitHub Actions OIDC token is sent to the authorize endpoint five times:
+#       1. Action "Plan" for repository "janssenproject/jans" → expected ALLOW.
+#          The ci-permit-plan policy permits Plan from this repository, so an
+#          ALLOW confirms that JWT validation AND Cedar evaluation both worked
+#          correctly and that a legitimate request reaches the right policy.
+#       2. Action "Destroy" → expected DENY.
+#          No policy permits Destroy from any repository, so a DENY here
+#          confirms that Cedar correctly withholds permission when no policy
+#          matches — distinguishing a real deny from an evaluation error.
+#       3. Action "Apply" for the staging workspace on the main branch → expected ALLOW.
+#          (Main-branch pushes only.) The ci-permit-apply-main-non-prod policy
+#          permits Apply from janssenproject/jans on refs/heads/main to any
+#          non-production workspace, so an ALLOW here proves end-to-end Apply
+#          policy evaluation is working correctly.
+#       4. Action "Apply" targeting the production workspace without an environment
+#          claim → expected DENY.  The ci-permit-apply-prod-via-environment policy
+#          requires a "production" GitHub Environment scope; a missing environment
+#          claim must not accidentally grant production access.
+#       5. Action "Apply" targeting the production workspace FROM a job running inside
+#          the GitHub "production" Environment → expected ALLOW.  (Main-branch pushes
+#          only.)  GitHub injects an `environment` claim into the OIDC token when a job
+#          targets a named Environment, proving the environment gate was satisfied.
+#          This exercises the ALLOW path of ci-permit-apply-prod-via-environment.
+#
+# A third job (test-deny-path-assertions) tests the DENY path of the repository
+# and branch checks in both Apply policies.  Because a real GitHub OIDC token
+# always carries the repository that issued it, this job uses OPA in demo mode
+# (JWT signature validation disabled) so that a synthetic JWT bearing a foreign
+# repository or wrong-branch claim can be submitted.  The job runs seven deny-path
+# assertions:
+#   6. Apply to the production workspace with a correct branch + environment claim
+#      but repository "attacker-org/evil-repo" → expected DENY.
+#      Confirms ci-permit-apply-prod-via-environment's repository guard.
+#   7. Apply to a non-production workspace (staging) with a correct main-branch ref
+#      but repository "attacker-org/evil-repo" → expected DENY.
+#      Confirms ci-permit-apply-main-non-prod's repository guard, which was
+#      previously untested on the deny path.
+#   8. Apply to a non-production workspace (staging) with the correct repository
+#      but ref "refs/heads/feature-xyz" (not main) → expected DENY.
+#      Confirms ci-permit-apply-main-non-prod's branch guard on the deny path.
+#   9. Apply to the production workspace with the correct repository + environment
+#      claim but ref "refs/heads/feature-xyz" (not main) → expected DENY.
+#      Confirms ci-permit-apply-prod-via-environment's branch guard on the deny
+#      path, which was previously untested.
+#  10. Apply to the production workspace with all correct claims (correct repo,
+#      branch, and environment) but iss "https://evil-issuer.example.com" → expected
+#      DENY.  Confirms ci-permit-apply-prod-via-environment's new issuer guard,
+#      which ensures tokens from outside GitHub Actions cannot satisfy the policy
+#      even when every other claim is correct.
+#  11. Apply to a non-production workspace (staging) with all correct claims
+#      (correct repo and branch) but iss "https://evil-issuer.example.com" →
+#      expected DENY.  Confirms ci-permit-apply-main-non-prod's issuer guard,
+#      which ensures tokens from outside GitHub Actions cannot satisfy the
+#      non-production Apply policy even when every other claim is correct.
+#  12. Plan to any workspace with the correct repository claim but iss
+#      "https://evil-issuer.example.com" → expected DENY.  Confirms
+#      ci-permit-plan's new issuer guard, which ensures tokens from outside
+#      GitHub Actions cannot satisfy the Plan policy even when every other
+#      claim is correct.
+#
+# Note: docker compose is used rather than jobs.<job>.services because service
+# containers launch before actions/checkout, making it impossible to bind-mount
+# the repo's config/rego/policy-store files into the container.
+
+name: Test tf-authz JWT self-hosted OPA path
+
+on:
+  push:
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+  pull_request:
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+
+jobs:
+  test-selfhosted-opa:
+    name: Self-hosted OPA (docker-compose.prod.yml) — health + authorize
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write   # Required to request a GitHub OIDC token
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start OPA (self-hosted, production mode)
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+      - name: Wait for OPA to become healthy
+        run: |
+          echo "Waiting for OPA /health endpoint (up to 60 s)..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+              echo "OPA is healthy after $((i * 2)) s."
+              exit 0
+            fi
+            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
+            sleep 2
+          done
+          echo "ERROR: OPA did not become healthy within 60 s." >&2
+          docker compose \
+            -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.yml \
+            -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.prod.yml \
+            logs >&2 || true
+          exit 1
+
+      - name: Fetch GitHub OIDC token
+        id: get-token
+        run: |
+          TOKEN=$(curl -sf \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
+            | jq -r '.value')
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "ERROR: failed to obtain GitHub OIDC token." >&2
+            exit 1
+          fi
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::${TOKEN}"
+
+      - name: "Authorize Plan — expect ALLOW (ci-permit-plan matches this repo)"
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${TF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Plan\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Plan / staging)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          # Verify the response parses as JSON and contains a result field.
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-plan policy permits Plan from janssenproject/jans (this
+          # repository).  An ALLOW here proves that:
+          #   (a) Cedarling validated the JWT signature against GitHub's JWKS,
+          #   (b) Cedar policy evaluation ran, and
+          #   (c) a legitimately-permitted request is correctly approved.
+          if [ "${DECISION}" != "true" ]; then
+            echo "ERROR: Expected OPA to allow Plan for janssenproject/jans," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned ALLOW for Plan — JWT validated and Cedar policy evaluated correctly."
+
+      - name: "Authorize Destroy — expect DENY (no policy permits Destroy)"
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${TF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Destroy\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Destroy / staging)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          # Verify the response parses as JSON and contains a result field.
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # No policy in the store permits Destroy.  A DENY here confirms that
+          # Cedar withholds permission when no policy matches, distinguishing a
+          # deliberate deny from a silent evaluation error.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Destroy (no policy grants it)," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Destroy — policy correctly withholds unpermitted actions."
+
+      - name: "Authorize Apply (main branch / staging) — expect ALLOW (ci-permit-apply-main-non-prod)"
+        if: github.ref == 'refs/heads/main'
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${TF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / main branch / staging)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-main-non-prod policy permits Apply from
+          # janssenproject/jans on refs/heads/main to any non-production workspace.
+          # An ALLOW here proves that JWT validation AND Cedar Apply policy
+          # evaluation both worked correctly end-to-end.
+          if [ "${DECISION}" != "true" ]; then
+            echo "ERROR: Expected OPA to allow Apply (main branch / staging) for janssenproject/jans," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned ALLOW for Apply (main / staging) — ci-permit-apply-main-non-prod evaluated correctly."
+
+      - name: "Authorize Apply / production without environment — expect DENY"
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${TF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "production"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / production / no environment claim)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-prod-via-environment policy requires the OIDC token
+          # to carry an `environment` claim set to "production" (proving the job ran
+          # inside a GitHub Environment with required reviewers).  A job token without
+          # that claim must never be granted production Apply access.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to production (no environment claim)," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to production without environment — policy correctly enforces the environment gate."
+
+      - name: Stop OPA
+        if: always()
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml down --volumes || true
+
+  test-deny-path-assertions:
+    name: Self-hosted OPA (demo mode) — Deny-path assertions (wrong repository, branch & issuer) — prod + non-prod
+    runs-on: ubuntu-latest
+    # This job does not need id-token: write because it uses a synthetic JWT
+    # crafted in-step; no real GitHub OIDC token is requested.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start OPA (demo mode — JWT signature validation disabled)
+        # The base docker-compose.yml (without the prod overlay) starts OPA with
+        # opa-config-demo.json, which sets CEDARLING_JWT_SIG_VALIDATION: "disabled".
+        # This allows a locally crafted JWT with a foreign repository claim to be
+        # submitted, exercising the Cedar policy's repository check in isolation.
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Wait for OPA to become healthy
+        run: |
+          echo "Waiting for OPA /health endpoint (up to 60 s)..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+              echo "OPA is healthy after $((i * 2)) s."
+              exit 0
+            fi
+            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
+            sleep 2
+          done
+          echo "ERROR: OPA did not become healthy within 60 s." >&2
+          docker compose \
+            -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.yml \
+            logs >&2 || true
+          exit 1
+
+      - name: "Authorize Apply / production / wrong repository — expect DENY"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-prod-via-environment
+        # *except* the repository check.  The policy requires
+        # principal.repository == "janssenproject/jans"; a token claiming
+        # "attacker-org/evil-repo" must be denied even when the branch is
+        # refs/heads/main and the environment claim is "production".
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          # Build a base64url-encoded JWT header and payload.
+          # Signature validation is disabled in demo mode, so any non-empty
+          # signature segment is accepted by OPA/Cedarling.
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://token.actions.githubusercontent.com",' \
+            '"sub":"repo:attacker-org/evil-repo:environment:production",' \
+            '"repository":"attacker-org/evil-repo",' \
+            '"ref":"refs/heads/main",' \
+            '"environment":"production",' \
+            '"workflow":"evil-workflow"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_REPO_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_REPO_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "production"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / production / wrong repository)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-prod-via-environment policy requires
+          # principal.repository == "janssenproject/jans".  A token from
+          # "attacker-org/evil-repo" must never receive production Apply access,
+          # regardless of the branch or environment claims it carries.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to production for a foreign repository," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to production from an unauthorized repository."
+
+      - name: "Authorize Apply / non-prod / wrong repository — expect DENY (ci-permit-apply-main-non-prod)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-main-non-prod
+        # *except* the repository check.  The policy requires
+        # principal.repository == "janssenproject/jans"; a token claiming
+        # "attacker-org/evil-repo" must be denied even when the branch is
+        # refs/heads/main and the target workspace is non-production.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://token.actions.githubusercontent.com",' \
+            '"sub":"repo:attacker-org/evil-repo:ref:refs/heads/main",' \
+            '"repository":"attacker-org/evil-repo",' \
+            '"ref":"refs/heads/main",' \
+            '"workflow":"evil-workflow"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_REPO_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_REPO_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / staging / wrong repository)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-main-non-prod policy requires
+          # principal.repository == "janssenproject/jans".  A token from
+          # "attacker-org/evil-repo" must never receive non-production Apply
+          # access, regardless of the branch it carries.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to staging for a foreign repository," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to staging from an unauthorized repository — ci-permit-apply-main-non-prod repository guard is enforced."
+
+      - name: "Authorize Apply / non-prod / wrong Git ref — expect DENY (ci-permit-apply-main-non-prod)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-main-non-prod
+        # *except* the branch check.  The policy requires
+        # principal.ref == "refs/heads/main"; a token claiming a feature branch
+        # must be denied even when the repository is correct and the target
+        # workspace is non-production.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://token.actions.githubusercontent.com",' \
+            '"sub":"repo:janssenproject/jans:ref:refs/heads/feature-xyz",' \
+            '"repository":"janssenproject/jans",' \
+            '"ref":"refs/heads/feature-xyz",' \
+            '"workflow":"ci"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_REF_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_REF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / staging / wrong Git ref)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-main-non-prod policy requires
+          # principal.ref == "refs/heads/main".  A token carrying a feature-branch
+          # ref must never receive non-production Apply access, even when the
+          # repository is correct and the target workspace is non-production.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to staging for a non-main branch," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to staging from a non-main branch — ci-permit-apply-main-non-prod branch guard is enforced."
+
+      - name: "Authorize Apply / production / wrong Git ref — expect DENY (ci-permit-apply-prod-via-environment)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-prod-via-environment
+        # *except* the branch check.  The policy requires
+        # principal.ref == "refs/heads/main"; a token from the correct repository
+        # carrying a feature-branch ref must be denied even when the environment
+        # claim is "production" and the target workspace is production.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://token.actions.githubusercontent.com",' \
+            '"sub":"repo:janssenproject/jans:environment:production",' \
+            '"repository":"janssenproject/jans",' \
+            '"ref":"refs/heads/feature-xyz",' \
+            '"environment":"production",' \
+            '"workflow":"ci"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_REF_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_REF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "production"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / production / wrong Git ref)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-prod-via-environment policy requires
+          # principal.ref == "refs/heads/main".  A token from the correct
+          # repository carrying a feature-branch ref must never receive
+          # production Apply access, even when it carries a valid environment
+          # claim of "production".
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to production for a non-main branch," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to production from a non-main branch — ci-permit-apply-prod-via-environment branch guard is enforced."
+
+      - name: "Authorize Apply / production / wrong issuer — expect DENY (ci-permit-apply-prod-via-environment)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-prod-via-environment
+        # *except* the issuer check.  The policy requires
+        # principal.iss == "https://token.actions.githubusercontent.com"; a token
+        # from a different issuer must be denied even when the repository, branch,
+        # and environment claims are all correct.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://evil-issuer.example.com",' \
+            '"sub":"repo:janssenproject/jans:environment:production",' \
+            '"repository":"janssenproject/jans",' \
+            '"ref":"refs/heads/main",' \
+            '"environment":"production",' \
+            '"workflow":"ci"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_ISS_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_ISS_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "production"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / production / wrong issuer)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-prod-via-environment policy now requires
+          # principal.iss == "https://token.actions.githubusercontent.com".
+          # A token from a different issuer must never receive production Apply
+          # access, even when the repository, branch, and environment claims are
+          # all correct.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to production for a foreign issuer," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to production from a foreign issuer — ci-permit-apply-prod-via-environment issuer guard is enforced."
+
+      - name: "Authorize Apply / non-prod / wrong issuer — expect DENY (ci-permit-apply-main-non-prod)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-apply-main-non-prod
+        # *except* the issuer check.  The policy requires
+        # principal.iss == "https://token.actions.githubusercontent.com"; a token
+        # from a different issuer must be denied even when the repository, branch,
+        # and target workspace are all correct.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://evil-issuer.example.com",' \
+            '"sub":"repo:janssenproject/jans:ref:refs/heads/main",' \
+            '"repository":"janssenproject/jans",' \
+            '"ref":"refs/heads/main",' \
+            '"workflow":"ci"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_ISS_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_ISS_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / staging / wrong issuer)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-apply-main-non-prod policy requires
+          # principal.iss == "https://token.actions.githubusercontent.com".
+          # A token from a different issuer must never receive non-production Apply
+          # access, even when the repository, branch, and target workspace are all
+          # correct.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Apply to staging for a foreign issuer," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Apply to staging from a foreign issuer — ci-permit-apply-main-non-prod issuer guard is enforced."
+
+      - name: "Authorize Plan / wrong issuer — expect DENY (ci-permit-plan)"
+        # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
+        # claims satisfy every condition in ci-permit-plan *except* the issuer check.
+        # The policy requires principal.iss == "https://token.actions.githubusercontent.com";
+        # a token from a different issuer must be denied even when the repository
+        # claim is correct.
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          JWT_HEADER=$(printf '%s' '{"alg":"HS256","typ":"JWT"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_PAYLOAD=$(printf '%s' \
+            '{"iss":"https://evil-issuer.example.com",' \
+            '"sub":"repo:janssenproject/jans:ref:refs/heads/main",' \
+            '"repository":"janssenproject/jans",' \
+            '"ref":"refs/heads/main",' \
+            '"workflow":"ci"}' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          JWT_SIG=$(printf '%s' 'fakesignature' \
+            | base64 -w 0 | tr '+/' '-_' | tr -d '=')
+
+          WRONG_ISS_JWT="${JWT_HEADER}.${JWT_PAYLOAD}.${JWT_SIG}"
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${WRONG_ISS_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Plan\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "staging"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Plan / staging / wrong issuer)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # The ci-permit-plan policy requires
+          # principal.iss == "https://token.actions.githubusercontent.com".
+          # A token from a different issuer must never receive Plan access, even
+          # when the repository claim is correct.
+          if [ "${DECISION}" != "false" ]; then
+            echo "ERROR: Expected OPA to deny Plan for a foreign issuer," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned DENY for Plan from a foreign issuer — ci-permit-plan issuer guard is enforced."
+
+      - name: Stop OPA
+        if: always()
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        # This job starts OPA with only the base compose file (demo mode — no prod
+        # overlay), so teardown uses only docker-compose.yml to match.
+        run: docker compose -f docker-compose.yml down --volumes || true
+
+  test-production-environment-apply:
+    name: Self-hosted OPA — Authorize Apply / production with environment (ALLOW)
+    runs-on: ubuntu-latest
+    needs: test-selfhosted-opa
+    # Only run on post-merge pushes to main so the OIDC token carries
+    # ref == refs/heads/main, which the Cedar policy requires.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # The `environment` key causes GitHub to inject an `environment` claim into
+    # the OIDC token, which is the proof the ci-permit-apply-prod-via-environment
+    # Cedar policy checks.  Without this, the token has no environment claim and
+    # production Apply is denied (tested in the job above).
+    #
+    # IMPORTANT — required reviewers must be configured:
+    # The "production" Environment in the janssenproject/jans repository settings
+    # must have at least one required reviewer.  GitHub only issues an environment-
+    # scoped OIDC token (carrying `environment: "production"`) after a designated
+    # reviewer explicitly approves the deployment in the Actions UI.  Without that
+    # reviewer approval the job is blocked and the token is never issued, so the
+    # Cedar policy gate cannot be bypassed by simply adding `environment: production`
+    # to a workflow file.
+    #
+    # To configure required reviewers:
+    #   Repository Settings → Environments → production → Required reviewers
+    #   Add at least one GitHub user or team and save.
+    environment: production
+
+    permissions:
+      id-token: write   # Required to request a GitHub OIDC token
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start OPA (self-hosted, production mode)
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+      - name: Wait for OPA to become healthy
+        run: |
+          echo "Waiting for OPA /health endpoint (up to 60 s)..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+              echo "OPA is healthy after $((i * 2)) s."
+              exit 0
+            fi
+            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
+            sleep 2
+          done
+          echo "ERROR: OPA did not become healthy within 60 s." >&2
+          docker compose \
+            -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.yml \
+            -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.prod.yml \
+            logs >&2 || true
+          exit 1
+
+      - name: Fetch GitHub OIDC token (environment-scoped)
+        id: get-token
+        run: |
+          TOKEN=$(curl -sf \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
+            | jq -r '.value')
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "ERROR: failed to obtain GitHub OIDC token." >&2
+            exit 1
+          fi
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::${TOKEN}"
+
+      - name: "Authorize Apply / production with environment — expect ALLOW (ci-permit-apply-prod-via-environment)"
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+        run: |
+          CURRENT_TIME=$(date +%s)
+
+          PAYLOAD=$(jq -n \
+            --arg jwt  "${TF_JWT}" \
+            --argjson t "${CURRENT_TIME}" \
+            '{
+              input: {
+                tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+                action: "CI::Action::\"Apply\"",
+                resource: {
+                  cedar_entity_mapping: {
+                    entity_type: "CI::TerraformWorkspace",
+                    id: "production"
+                  }
+                },
+                context: { current_time: $t }
+              }
+            }')
+
+          echo "Sending authorize request (Apply / production / environment-scoped token)..."
+          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "ERROR: OPA authorize endpoint did not respond." >&2
+            exit 1
+          }
+
+          echo "OPA response received."
+
+          echo "${RESPONSE}" | jq -e '.result' > /dev/null || {
+            echo "ERROR: OPA response is not valid JSON or is missing .result" >&2
+            echo "Raw response: ${RESPONSE}" >&2
+            exit 1
+          }
+
+          DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+          echo "OPA decision: ${DECISION}"
+
+          # This job runs inside the GitHub "production" Environment, so GitHub
+          # injects `environment: "production"` into the OIDC token.  The
+          # ci-permit-apply-prod-via-environment Cedar policy requires that claim.
+          # An ALLOW here proves the full ALLOW path of the policy works end-to-end:
+          # JWT validation, Cedar evaluation, and the environment gate check all
+          # function correctly together.
+          if [ "${DECISION}" != "true" ]; then
+            echo "ERROR: Expected OPA to allow Apply to production (environment-scoped token)," >&2
+            echo "       but the decision was '${DECISION}'." >&2
+            echo "Full response:" >&2
+            echo "${RESPONSE}" | jq . >&2
+            exit 1
+          fi
+
+          echo "Confirmed: OPA returned ALLOW for Apply / production with environment — ci-permit-apply-prod-via-environment evaluated correctly."
+
+      - name: Stop OPA
+        if: always()
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml down --volumes || true

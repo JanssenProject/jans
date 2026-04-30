@@ -1,0 +1,25 @@
+namespace Infra {
+    // Role entity kept for schema validity; role membership is enforced via
+    // principal.role.contains("RoleName") — see the "Adding More Policies" section of README.md.
+    entity Role;
+
+    // A human operator or CI service account that runs Terraform.
+    entity User in [Role] {
+        sub: String,
+        role: Set<String>,
+    };
+
+    // A named Terraform workspace / environment target, e.g. "dev", "staging", "production".
+    entity TerraformWorkspace;
+
+    // Actions map to Terraform sub-commands:
+    //   Plan → terraform plan  |  Apply → terraform apply  |  Destroy → terraform destroy
+    action Plan, Apply, Destroy
+        appliesTo {
+            principal: [User],
+            resource:  [TerraformWorkspace],
+            context: {
+                current_time: Long,
+            }
+        };
+}

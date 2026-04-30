@@ -1,0 +1,305 @@
+# Cedar policy test cases for the tf-authz integration tests.
+#
+# Each entry defines one authorization scenario.  Add new cases here whenever
+# a new policy rule, role, workspace, or subcommand is introduced — no changes
+# to the workflow YAML or the test runner script are required.
+#
+# Fields:
+#   name        – Human-readable label printed in test output.
+#   user_id     – Identity of the operator (used as the Cedar principal ID).
+#   roles       – Comma-separated Cedar role names (e.g. "Ops", "Developer").
+#   workspace   – Target Terraform workspace (e.g. "staging", "production").
+#   subcommand  – Terraform subcommand: plan | apply | destroy.
+#   expected    – Expected authorization outcome: ALLOWED or DENIED.
+#   policy_note – (optional) Which Cedar policy should drive the decision.
+
+test_cases:
+
+  # ── Admin role ──────────────────────────────────────────────────────────────
+  # admin-permit-all: Admins may plan, apply, or destroy any workspace.
+
+  - name:        "Admin — plan on staging"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  - name:        "Admin — apply on staging"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   staging
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  - name:        "Admin — destroy on staging"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   staging
+    subcommand:  destroy
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  - name:        "Admin — plan on production"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   production
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  - name:        "Admin — apply on production"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   production
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  - name:        "Admin — destroy on production"
+    user_id:     ci-admin-bot
+    roles:       Admin
+    workspace:   production
+    subcommand:  destroy
+    expected:    ALLOWED
+    policy_note: admin-permit-all
+
+  # ── Ops role ────────────────────────────────────────────────────────────────
+  # ops-permit-plan-apply-non-prod: Ops may plan or apply on non-production
+  # workspaces only.  Destroy is not permitted; production is not permitted.
+
+  - name:        "Ops — plan on staging"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: ops-permit-plan-apply-non-prod
+
+  - name:        "Ops — apply on staging"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   staging
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: ops-permit-plan-apply-non-prod
+
+  - name:        "Ops — destroy on staging (must be DENIED)"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   staging
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: no policy grants Ops the Destroy action
+
+  - name:        "Ops — plan on production (must be DENIED)"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   production
+    subcommand:  plan
+    expected:    DENIED
+    policy_note: ops-permit-plan-apply-non-prod excludes production
+
+  - name:        "Ops — apply on production (must be DENIED)"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   production
+    subcommand:  apply
+    expected:    DENIED
+    policy_note: ops-permit-plan-apply-non-prod excludes production
+
+  - name:        "Ops — destroy on production (must be DENIED)"
+    user_id:     ci-ops-bot
+    roles:       Ops
+    workspace:   production
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: no policy grants Ops the Destroy action
+
+  # ── Developer role ──────────────────────────────────────────────────────────
+  # developer-permit-plan: Developers may only run terraform plan, on any
+  # workspace.  Apply and destroy are never permitted.
+
+  - name:        "Developer — plan on staging"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: developer-permit-plan
+
+  - name:        "Developer — apply on staging (must be DENIED)"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   staging
+    subcommand:  apply
+    expected:    DENIED
+    policy_note: no policy grants Developer the Apply action
+
+  - name:        "Developer — destroy on staging (must be DENIED)"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   staging
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: no policy grants Developer the Destroy action
+
+  - name:        "Developer — plan on production"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   production
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: developer-permit-plan has no workspace restriction
+
+  - name:        "Developer — apply on production (must be DENIED)"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   production
+    subcommand:  apply
+    expected:    DENIED
+    policy_note: no policy grants Developer the Apply action
+
+  - name:        "Developer — destroy on production (must be DENIED)"
+    user_id:     ci-dev-bot
+    roles:       Developer
+    workspace:   production
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: no policy grants Developer the Destroy action
+
+  # ── Multi-role: Developer + Ops ─────────────────────────────────────────────
+  # Cedar evaluates all role memberships together; the union of grants applies.
+  # Developer grants Plan anywhere; Ops grants Plan+Apply on non-production.
+  # Neither grants Destroy; Ops does not cover production apply.
+
+  - name:        "Developer+Ops — plan on staging"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: both developer-permit-plan and ops-permit-plan-apply-non-prod allow this
+
+  - name:        "Developer+Ops — apply on staging (ALLOWED via Ops)"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   staging
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: ops-permit-plan-apply-non-prod grants Apply on staging even though Developer alone cannot
+
+  - name:        "Developer+Ops — destroy on staging (must be DENIED)"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   staging
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: neither Developer nor Ops grants the Destroy action
+
+  - name:        "Developer+Ops — plan on production"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   production
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: developer-permit-plan has no workspace restriction
+
+  - name:        "Developer+Ops — apply on production (must be DENIED)"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   production
+    subcommand:  apply
+    expected:    DENIED
+    policy_note: Ops excludes production; Developer does not grant Apply; no policy covers this
+
+  - name:        "Developer+Ops — destroy on production (must be DENIED)"
+    user_id:     ci-dev-ops-bot
+    roles:       "Developer,Ops"
+    workspace:   production
+    subcommand:  destroy
+    expected:    DENIED
+    policy_note: neither Developer nor Ops grants the Destroy action
+
+  # ── Multi-role: Ops + Admin ──────────────────────────────────────────────────
+  # Admin's permit-all policy covers every action and workspace, so any user
+  # who holds Admin is effectively unrestricted regardless of other roles.
+
+  - name:        "Ops+Admin — plan on staging"
+    user_id:     ci-ops-admin-bot
+    roles:       "Ops,Admin"
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: admin-permit-all (and also ops-permit-plan-apply-non-prod)
+
+  - name:        "Ops+Admin — apply on production"
+    user_id:     ci-ops-admin-bot
+    roles:       "Ops,Admin"
+    workspace:   production
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Apply on production even though Ops alone cannot
+
+  - name:        "Ops+Admin — destroy on production (ALLOWED via Admin)"
+    user_id:     ci-ops-admin-bot
+    roles:       "Ops,Admin"
+    workspace:   production
+    subcommand:  destroy
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Destroy on production even though Ops alone cannot
+
+  # ── Multi-role: Developer + Admin ───────────────────────────────────────────
+  # Admin's permit-all policy covers every action and workspace, so any user
+  # who holds Admin is effectively unrestricted regardless of other roles.
+  # Developer alone cannot apply or destroy, but Admin overrides those limits.
+
+  - name:        "Developer+Admin — plan on staging"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   staging
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: admin-permit-all (and also developer-permit-plan)
+
+  - name:        "Developer+Admin — apply on staging (ALLOWED via Admin)"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   staging
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Apply on staging even though Developer alone cannot
+
+  - name:        "Developer+Admin — destroy on staging (ALLOWED via Admin)"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   staging
+    subcommand:  destroy
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Destroy on staging even though Developer alone cannot
+
+  - name:        "Developer+Admin — plan on production"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   production
+    subcommand:  plan
+    expected:    ALLOWED
+    policy_note: admin-permit-all (and also developer-permit-plan has no workspace restriction)
+
+  - name:        "Developer+Admin — apply on production (ALLOWED via Admin)"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   production
+    subcommand:  apply
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Apply on production even though Developer alone cannot
+
+  - name:        "Developer+Admin — destroy on production (ALLOWED via Admin)"
+    user_id:     ci-dev-admin-bot
+    roles:       "Developer,Admin"
+    workspace:   production
+    subcommand:  destroy
+    expected:    ALLOWED
+    policy_note: admin-permit-all grants Destroy on production even though Developer alone cannot

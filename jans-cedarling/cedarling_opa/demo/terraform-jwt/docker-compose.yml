@@ -1,0 +1,32 @@
+services:
+  opa-cedarling:
+    # Pre-built image published by the Janssen CI pipeline.
+    # To pin to a specific release, replace "latest" with a version tag, e.g.:
+    #   image: ghcr.io/janssenproject/jans/cedarling-opa:2.0.0-1
+    image: ghcr.io/janssenproject/jans/cedarling-opa:0.0.0-nightly
+    # Mount the JWT demo-specific files into the path the command references.
+    # The published image is distroless (binary only) so these are not baked in.
+    # opa-config-demo.json has JWT signature validation disabled for local testing.
+    volumes:
+      - ./opa-config-demo.json:/app/demo/terraform-jwt/opa-config-demo.json:ro
+      - ./rego:/app/demo/terraform-jwt/rego:ro
+      - ./policy-store:/app/demo/terraform-jwt/policy-store:ro
+    command:
+      - run
+      - --server
+      - --addr
+      - "0.0.0.0:8181"
+      - --config-file
+      - /app/demo/terraform-jwt/opa-config-demo.json
+      - /app/demo/terraform-jwt/rego
+    working_dir: /app/demo/terraform-jwt
+    ports:
+      - "8181:8181"
+    healthcheck:
+      # The distroless base image has no shell or curl.
+      # `opa-cedarling health --addr` issues an HTTP GET /health and exits 0 when ready.
+      test: ["CMD", "/app/opa-cedarling", "health", "--addr", "http://localhost:8181"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
