@@ -38,7 +38,7 @@ pub(super) struct AuditEndpoints {
     )]
     pub health: Option<Url>,
     #[serde(
-        rename = "telemetery_endpoint",
+        rename = "telemetry_endpoint",
         deserialize_with = "deserialize_to_bulk_endpoint",
         default
     )]

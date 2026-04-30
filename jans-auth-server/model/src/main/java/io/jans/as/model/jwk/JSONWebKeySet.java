@@ -105,4 +105,28 @@ public class JSONWebKeySet {
 
         return jwks;
     }
+
+    public String getKeyId(Algorithm algorithm) {
+        List<JSONWebKey> jsonWebKeys = getKeys(algorithm);
+        if (!jsonWebKeys.isEmpty()) {
+            return jsonWebKeys.get(0).getKid();
+        } else {
+            return null;
+        }
+    }
+
+    public List<JSONWebKey> getKeys(Algorithm algorithm) {
+        List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
+
+        if (keys != null) {
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey != null && algorithm.equals(jsonWebKey.getAlg())) {
+                    jsonWebKeys.add(jsonWebKey);
+                }
+            }
+        }
+
+        jsonWebKeys.sort(KeySelectionStrategy.compareExp());
+        return jsonWebKeys;
+    }
 }

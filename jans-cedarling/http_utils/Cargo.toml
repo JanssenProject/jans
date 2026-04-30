@@ -7,12 +7,6 @@ license = "Apache-2.0"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
 tokio = { workspace = true }
-derive_more = { workspace = true, features = ["display"] }
-
-[dev-dependencies]
-mockito = "1.7.2"
-pretty_assertions = "1"
