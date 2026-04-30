@@ -82,6 +82,8 @@ impl KeyService {
             .into_iter()
             .map(|(iss, keys)| (IssClaim::new(&iss), keys))
         {
+            keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&issuer));
+
             for jwk in keys {
                 let decoding_key =
                     DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
@@ -137,6 +139,7 @@ impl KeyService {
 
         let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
 
+        keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&openid_config.issuer));
         for parsed_key in keys {
             let key = parsed_key.jwk;
 
@@ -543,6 +546,63 @@ mod test {
                 })
                 .is_some(),
             "key should be loaded via refresh"
+        );
+    }
+
+    #[tokio::test]
+    async fn refresh_removes_old_keys_after_rotation() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let (_, initial_kid) = server.jwt_decoding_key_and_id().unwrap();
+
+        let openid_config = server.openid_config();
+        let key_service = KeyService::default();
+
+        key_service
+            .get_keys_using_oidc(&openid_config, None)
+            .await
+            .expect("initial key fetch should succeed");
+
+        let initial_kid = initial_kid.unwrap();
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some(initial_kid.clone()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "initial key should be present"
+        );
+
+        server
+            .rotate_signing_key_hs256("rotated_key")
+            .expect("should rotate signing key");
+
+        key_service
+            .refresh_keys_using_oidc(&server.openid_config(), None)
+            .await
+            .expect("refresh should succeed");
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some(initial_kid),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_none(),
+            "old key should be removed after refresh"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some("rotated_key".to_string()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "new key should be present after refresh"
         );
     }
 }
