@@ -72,6 +72,10 @@ public class Id {
     @Override
     public String toString() {
 
-        return value.toString();
+        if ( assigned ) {
+            return value.toString();
+        }
+        
+        return "[unassigned id]";
     }
 }

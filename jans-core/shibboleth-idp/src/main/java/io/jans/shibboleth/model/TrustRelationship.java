@@ -28,8 +28,6 @@ public class TrustRelationship {
     private MetadataSource metadataSource;
 
     private EntityIds discoveredEntityIds;
-    private IdpInstances idpInstances;
-    private WorkItems workItems;
     private Profiles profiles;
 
     private TrustRelationship(final Id id, DisplayName displayName, Description description, final TrustNature nature) {
@@ -43,8 +41,6 @@ public class TrustRelationship {
         status = TrustStatus.DRAFT;
         metadataSource = new NoMetadataSource();
         discoveredEntityIds =  EntityIds.empty();
-        idpInstances = IdpInstances.empty();
-        workItems = WorkItems.empty();
         profiles = Profiles.allDefaults();
     }
 
@@ -122,11 +118,6 @@ public class TrustRelationship {
         return discoveredEntityIds;
     }
 
-    public IdpInstances  getIdpInstances() {
-
-        return idpInstances;
-    }
-
     public boolean hasNoMetadataSource() {
 
         return Objects.equals(metadataSource,NoMetadataSource.getInstance());
@@ -140,16 +131,6 @@ public class TrustRelationship {
     public boolean hasNoDiscoveredEntityIds() {
 
         return discoveredEntityIds.hasNone();
-    }
-
-    public boolean hasAnyRegisteredIdpInstances() {
-
-        return idpInstances.hasAnyRegisteredInstance();
-    }
-
-    public boolean hasAnyWorkItem() {
-
-        return workItems.hasAny();
     }
 
     public ShibbolethSsoProfileConfiguration getShibbolethSsoProfileConfiguration() {

@@ -127,27 +127,6 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
-    public TrustRelationshipAssert hasNoRegisteredIdpInstances() {
-
-        isNotNull();
-
-        if(actual.hasAnyRegisteredIdpInstances()) {
-
-            failWithMessage("TrustRelationship has at least one registered idp instance");
-        }
-        return this;
-    }
-
-    public TrustRelationshipAssert hasNoWorkItem() {
-
-        isNotNull();
-        if(actual.hasAnyWorkItem()) {
-
-            failWithMessage("TrustRelationship has at least one work item");
-        }
-        return this;
-    }
-
     public ProfileConfigurationAssert withProfileConfiguration(ProfileType profileType) {
 
         ProfileConfigurationAssert ret = null;

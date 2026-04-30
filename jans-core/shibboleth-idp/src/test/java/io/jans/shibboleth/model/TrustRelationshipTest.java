@@ -92,9 +92,7 @@ public class TrustRelationshipTest {
                 .hasStatus(TrustStatus.DRAFT)
                 .isVersion(1)
                 .hasNoMetadataSource()
-                .hasNoDiscoveredEntityIds()
-                .hasNoRegisteredIdpInstances()
-                .hasNoWorkItem();
+                .hasNoDiscoveredEntityIds();
         
             assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
                 .isInactive()
@@ -278,13 +276,6 @@ public class TrustRelationshipTest {
 
            //TODO: Circle back to this once other features this depends on are implemented 
         }
-
-    }
-
-    @Nested
-    @DisplayName("Idp Instance Management")
-    public class IdpInstanceManagementTests {
-
 
     }
 

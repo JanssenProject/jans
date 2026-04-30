@@ -1,12 +1,7 @@
 package io.jans.shibboleth.model.core;
 
+import java.time.Instant;
 
-public class IdpInstanceStatus {
-
-    private final String instanceId;
-
-    public IdpInstanceStatus(String instanceId) {
-
-        this.instanceId = instanceId;
-    }
+public enum IdpInstanceStatus {
+    ACTIVE
 }
