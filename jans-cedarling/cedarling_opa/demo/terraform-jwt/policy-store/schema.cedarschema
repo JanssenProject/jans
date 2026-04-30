@@ -23,6 +23,8 @@ namespace CI {
     // A named Terraform workspace / environment target, e.g. "dev", "staging", "production".
     entity TerraformWorkspace;
 
+    entity Any;
+
     // Injected automatically by Cedarling's multi-issuer context builder.
     // Access token claims in Cedar policies via context.tokens.ci_githubworkflow.<attr>.
     type TokensContext = {
