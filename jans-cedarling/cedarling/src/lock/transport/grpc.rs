@@ -19,10 +19,16 @@ use tonic_web_wasm_client::Client;
 use crate::{
     lock::{
         LockLogEntry,
-        proto::{BulkLogRequest, LogEntry, audit_service_client::AuditServiceClient},
+        proto::{
+            BulkLogRequest, BulkTelemetryRequest, LogEntry, TelemetryEntry,
+            audit_service_client::AuditServiceClient,
+        },
         transport::{
-            AuditTransport, SerializedLogEntry, TransportError, TransportResult,
-            mapping::{CedarlingLogEntry, LockServerLogEntry},
+            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
+            mapping::{
+                CedarlingLogEntry, CedarlingMetricsEntry, LockServerLogEntry,
+                LockServerMetricsEntry,
+            },
         },
     },
     log::{LogWriter, Logger},
@@ -72,42 +78,51 @@ impl GrpcTransport {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
-    async fn send_logs(&self, entries: &[SerializedLogEntry]) -> TransportResult<()> {
+    async fn send(
+        &self,
+        entries: &[SerializedAuditEntry],
+        audit_kind: &AuditKind,
+    ) -> TransportResult<()> {
         if entries.is_empty() {
             return Ok(());
         }
 
-        let proto_entries: Vec<_> = entries
-            .iter()
-            .filter_map(|v| {
-                serde_json::from_str::<CedarlingLogEntry>(v)
-                    .ok()
-                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
-                    .map(json_to_proto)
-            })
-            .collect();
-
-        let skipped = entries.len() - proto_entries.len();
-        if skipped > 0 {
-            self.logger.log_any(LockLogEntry::warn(format!(
-                "skipped {skipped} entries because they were malformed"
-            )));
-        }
-
-        if proto_entries.is_empty() {
-            return Err(TransportError::Serialization(format!(
-                "all {skipped} entries were malformed, nothing to send"
-            )));
-        }
-
-        let mut request = Request::new(BulkLogRequest {
-            entries: proto_entries,
-        });
         let token: MetadataValue<_> = format!("Bearer {}", self.access_token).parse()?;
-        request.metadata_mut().insert("authorization", token);
-
         let mut client = self.client.clone();
-        let response = client.process_bulk_log(request).await?;
+        let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
+
+        let response = match audit_kind {
+            AuditKind::Log(_) => {
+                let entries = transport::deserialize_entries::<
+                    LockServerLogEntry,
+                    CedarlingLogEntry,
+                >(entries, "log", warn)?
+                .into_iter()
+                .map(log_json_to_proto)
+                .collect();
+
+                let mut request = Request::new(BulkLogRequest { entries });
+                request
+                    .metadata_mut()
+                    .insert("authorization", token.clone());
+
+                client.process_bulk_log(request).await?
+            },
+            AuditKind::Telemetry(_) => {
+                let entries = transport::deserialize_entries::<
+                    LockServerMetricsEntry,
+                    CedarlingMetricsEntry,
+                >(entries, "telemetry", warn)?
+                .into_iter()
+                .map(telemetry_json_to_proto)
+                .collect();
+
+                let mut request = Request::new(BulkTelemetryRequest { entries });
+                request.metadata_mut().insert("authorization", token);
+
+                client.process_bulk_telemetry(request).await?
+            },
+        };
 
         let inner = response.into_inner();
         if !inner.success {
@@ -122,7 +137,7 @@ impl AuditTransport for GrpcTransport {
 }
 
 /// Converts a [`LockServerLogEntry`] into a [`LogEntry`]
-fn json_to_proto(entry: LockServerLogEntry) -> LogEntry {
+fn log_json_to_proto(entry: LockServerLogEntry) -> LogEntry {
     LogEntry {
         creation_date: parse_timestamp(&entry.creation_date),
         event_time: parse_timestamp(&entry.event_time),
@@ -143,6 +158,20 @@ fn json_to_proto(entry: LockServerLogEntry) -> LogEntry {
             .into_iter()
             .map(|(k, v)| (k, v.as_str().map_or_else(|| v.to_string(), str::to_owned)))
             .collect(),
+    }
+}
+
+/// Converts a [`LockServerMetricsEntry`] into a [`TelemetryEntry`]
+fn telemetry_json_to_proto(entry: LockServerMetricsEntry) -> TelemetryEntry {
+    TelemetryEntry {
+        creation_date: parse_timestamp(&entry.creation_date),
+        service: entry.service.unwrap_or_default(),
+        node_name: entry.node_name,
+        status: entry.status,
+        policy_stats: entry.policy_stats,
+        error_counters: entry.error_counters,
+        operational_stats: entry.operational_stats,
+        interval_secs: entry.interval_secs,
     }
 }
 
@@ -175,6 +204,7 @@ mod test {
     #[derive(Debug)]
     struct MockAuditService {
         log_sender: mpsc::UnboundedSender<Vec<LogEntry>>,
+        telemetry_sender: mpsc::UnboundedSender<Vec<TelemetryEntry>>,
         should_fail: bool,
     }
 
@@ -240,18 +270,47 @@ mod test {
 
         async fn process_bulk_telemetry(
             &self,
-            _: Request<proto::BulkTelemetryRequest>,
+            request: Request<proto::BulkTelemetryRequest>,
         ) -> Result<Response<AuditResponse>, Status> {
-            unimplemented!()
+            if self.should_fail {
+                return Ok(Response::new(AuditResponse {
+                    success: false,
+                    message: "Server error".to_string(),
+                }));
+            }
+
+            let auth = request
+                .metadata()
+                .get("authorization")
+                .and_then(|v| v.to_str().ok());
+
+            assert!(
+                matches!(auth, Some(token) if token.starts_with("Bearer ")),
+                "expected Bearer token in authorization header, got {auth:?}"
+            );
+
+            let entries = request.into_inner().entries;
+            self.telemetry_sender.send(entries).unwrap();
+
+            Ok(Response::new(AuditResponse {
+                success: true,
+                message: "OK".to_string(),
+            }))
         }
     }
 
     async fn start_mock_server(
         should_fail: bool,
-    ) -> (SocketAddr, mpsc::UnboundedReceiver<Vec<LogEntry>>) {
+    ) -> (
+        SocketAddr,
+        mpsc::UnboundedReceiver<Vec<LogEntry>>,
+        mpsc::UnboundedReceiver<Vec<TelemetryEntry>>,
+    ) {
         let (tx, rx) = mpsc::unbounded_channel();
+        let (telemetry_tx, telemetry_rx) = mpsc::unbounded_channel();
         let service = MockAuditService {
             log_sender: tx,
+            telemetry_sender: telemetry_tx,
             should_fail,
         };
 
@@ -266,7 +325,7 @@ mod test {
                 .unwrap();
         });
 
-        (addr, rx)
+        (addr, rx, telemetry_rx)
     }
 
     #[test]
@@ -288,7 +347,7 @@ mod test {
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
         let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
-        let proto_entry = json_to_proto(lock_entry);
+        let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date,
@@ -333,7 +392,7 @@ mod test {
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
         let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
-        let proto_entry = json_to_proto(lock_entry);
+        let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(proto_entry.service, "minimal-service");
         assert_eq!(proto_entry.event_type, "Decision");
@@ -343,7 +402,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_success() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -363,7 +422,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -379,11 +441,14 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_empty() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         transport
-            .send_logs(&[])
+            .send(
+                &[],
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -393,13 +458,16 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
-        let (addr, _rx) = start_mock_server(false).await;
+        let (addr, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec!["not valid json".to_string().into_boxed_str()];
 
         let error = transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect_err("this should cause a serialization error");
         assert!(
@@ -410,7 +478,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_server_error() {
-        let (addr, _) = start_mock_server(true).await;
+        let (addr, _, _) = start_mock_server(true).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -428,7 +496,10 @@ mod test {
         ];
 
         let error = transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect_err("this should cause a server error");
 
@@ -440,7 +511,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_partial_malformed() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -470,7 +541,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully despite malformed entries");
 
@@ -482,7 +556,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_multiple_entries() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -522,7 +596,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -535,7 +612,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_with_all_fields() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -557,7 +634,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -579,7 +659,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_with_missing_optional_fields() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -597,7 +677,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -609,7 +692,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_large_batch() {
-        let (addr, mut rx) = start_mock_server(false).await;
+        let (addr, mut rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries: Vec<_> = (0..100)
@@ -631,12 +714,73 @@ mod test {
             .collect();
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 100);
+    }
+
+    #[tokio::test]
+    async fn test_send_telemetry_success() {
+        let (addr, _, mut telemetry_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![
+            json!({
+                "id": "f3c80a24-4608-45b8-adc3-a74f2841e156",
+                "request_id": "019d6842-7577-7e43-adfd-46e2bb275405",
+                "timestamp": "2026-04-07T17:04:39.162Z",
+                "log_kind": "Metric",
+                "policy_stats": {
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow": 6,
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": 7,
+                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny": 1
+                },
+                "error_counters": {
+                    "parse_error": 0,
+                    "validation_error": 0
+                },
+                "operational_stats": {
+                    "evaluation_requests": 100,
+                    "memory_usage": 240
+                },
+                "interval_secs": 60,
+                "application_id": "test_app",
+                "pdp_id": "node-1"
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send(
+                &entries,
+                &AuditKind::Telemetry(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("telemetry should be sent successfully");
+
+        let received = telemetry_rx.try_recv().unwrap();
+        assert_eq!(received.len(), 1);
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[0].node_name, "node-1");
+        assert_eq!(
+            received[0]
+                .policy_stats
+                .get("555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow"),
+            Some(&6)
+        );
+        assert_eq!(
+            received[0]
+                .policy_stats
+                .get("555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny"),
+            Some(&1)
+        );
     }
 
     #[test]
@@ -655,7 +799,7 @@ mod test {
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
         let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
-        let proto_entry = json_to_proto(lock_entry);
+        let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date,
@@ -687,7 +831,7 @@ mod test {
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
         let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
-        let proto_entry = json_to_proto(lock_entry);
+        let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date.as_ref().unwrap().seconds,
