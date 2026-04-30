@@ -34,7 +34,7 @@ namespace CI {
     //   Plan → terraform plan  |  Apply → terraform apply  |  Destroy → terraform destroy
     action Plan, Apply, Destroy
         appliesTo {
-            principal: [GitHubWorkflow],
+            principal: [Any],
             resource:  [TerraformWorkspace],
             context: {
                 current_time: Long,
