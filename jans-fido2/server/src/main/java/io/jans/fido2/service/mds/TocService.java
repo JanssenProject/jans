@@ -432,7 +432,7 @@ public class TocService {
 			if (aaguid.isPresent()) {
 				processAaguidEntry(entries, metadataEntryNode, aaguid.get());
 			} else if (aaid.isPresent()) {
-				log.debug("TODO: handle aaid addition to tocEntries {}", aaid.get());
+				processAaidEntry(entries, metadataEntryNode, aaid.get());
 			} else if (attestationCertificateKeyIdentifiers.isPresent()) {
 				processAttestationCertificateKeyIdentifiers(entries, entriesNode,
 						attestationCertificateKeyIdentifiers.get());
@@ -453,6 +453,19 @@ public class TocService {
 			}
 			entries.put(aaguid, metadataEntryNode);
 			log.info("Added TOC entry: {} ", aaguid);
+		} catch (Fido2RuntimeException e) {
+			log.error(e.getMessage());
+		}
+	}
+
+	private void processAaidEntry(Map<String, JsonNode> entries, JsonNode metadataEntryNode, String aaid) {
+		try {
+			certificateVerifier.verifyStatusAcceptable(aaid, metadataEntryNode);
+			if (!metadataEntryNode.has("metadataStatement")) {
+				log.warn("This entry doesn't contain metadataStatement");
+			}
+			entries.put(aaid, metadataEntryNode);
+			log.info("Added TOC entry: {} ", aaid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
