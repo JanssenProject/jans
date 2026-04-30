@@ -10,7 +10,7 @@ permit (
     context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::"https://token.actions.githubusercontent.com" &&
     (
         context.tokens.ci_githubworkflow.repository == "octoorg/myrepo" ||
-        context.tokens.ci_githubworkflow.repository == "janssenproject/jans"
+        context.tokens.ci_githubworkflow.repository == "JanssenProject/jans"
     ) &&
     context.tokens.ci_githubworkflow.ref == "refs/heads/main" &&
     resource != CI::TerraformWorkspace::"production"

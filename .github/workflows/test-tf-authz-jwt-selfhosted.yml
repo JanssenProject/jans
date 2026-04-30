@@ -7,7 +7,7 @@
 #     if OPA does not become healthy (guards against healthcheck URL changes or
 #     incorrect config/rego/policy-store volume mount paths in docker-compose.prod.yml).
 #   - A real GitHub Actions OIDC token is sent to the authorize endpoint five times:
-#       1. Action "Plan" for repository "janssenproject/jans" → expected ALLOW.
+#       1. Action "Plan" for repository "JanssenProject/jans" → expected ALLOW.
 #          The ci-permit-plan policy permits Plan from this repository, so an
 #          ALLOW confirms that JWT validation AND Cedar evaluation both worked
 #          correctly and that a legitimate request reaches the right policy.
@@ -17,7 +17,7 @@
 #          matches — distinguishing a real deny from an evaluation error.
 #       3. Action "Apply" for the staging workspace on the main branch → expected ALLOW.
 #          (Main-branch pushes only.) The ci-permit-apply-main-non-prod policy
-#          permits Apply from janssenproject/jans on refs/heads/main to any
+#          permits Apply from JanssenProject/jans on refs/heads/main to any
 #          non-production workspace, so an ALLOW here proves end-to-end Apply
 #          policy evaluation is working correctly.
 #       4. Action "Apply" targeting the production workspace without an environment
@@ -173,13 +173,13 @@ jobs:
           DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
           echo "OPA decision: ${DECISION}"
 
-          # The ci-permit-plan policy permits Plan from janssenproject/jans (this
+          # The ci-permit-plan policy permits Plan from JanssenProject/jans (this
           # repository).  An ALLOW here proves that:
           #   (a) Cedarling validated the JWT signature against GitHub's JWKS,
           #   (b) Cedar policy evaluation ran, and
           #   (c) a legitimately-permitted request is correctly approved.
           if [ "${DECISION}" != "true" ]; then
-            echo "ERROR: Expected OPA to allow Plan for janssenproject/jans," >&2
+            echo "ERROR: Expected OPA to allow Plan for JanssenProject/jans," >&2
             echo "       but the decision was '${DECISION}'." >&2
             echo "Full response:" >&2
             echo "${RESPONSE}" | jq . >&2
@@ -289,11 +289,11 @@ jobs:
           echo "OPA decision: ${DECISION}"
 
           # The ci-permit-apply-main-non-prod policy permits Apply from
-          # janssenproject/jans on refs/heads/main to any non-production workspace.
+          # JanssenProject/jans on refs/heads/main to any non-production workspace.
           # An ALLOW here proves that JWT validation AND Cedar Apply policy
           # evaluation both worked correctly end-to-end.
           if [ "${DECISION}" != "true" ]; then
-            echo "ERROR: Expected OPA to allow Apply (main branch / staging) for janssenproject/jans," >&2
+            echo "ERROR: Expected OPA to allow Apply (main branch / staging) for JanssenProject/jans," >&2
             echo "       but the decision was '${DECISION}'." >&2
             echo "Full response:" >&2
             echo "${RESPONSE}" | jq . >&2
@@ -401,7 +401,7 @@ jobs:
         # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
         # claims satisfy every condition in ci-permit-apply-prod-via-environment
         # *except* the repository check.  The policy requires
-        # principal.repository == "janssenproject/jans"; a token claiming
+        # principal.repository == "JanssenProject/jans"; a token claiming
         # "attacker-org/evil-repo" must be denied even when the branch is
         # refs/heads/main and the environment claim is "production".
         run: |
@@ -464,7 +464,7 @@ jobs:
           echo "OPA decision: ${DECISION}"
 
           # The ci-permit-apply-prod-via-environment policy requires
-          # principal.repository == "janssenproject/jans".  A token from
+          # principal.repository == "JanssenProject/jans".  A token from
           # "attacker-org/evil-repo" must never receive production Apply access,
           # regardless of the branch or environment claims it carries.
           if [ "${DECISION}" != "false" ]; then
@@ -481,7 +481,7 @@ jobs:
         # Craft a synthetic JWT (HS256, sig validation disabled in demo mode) whose
         # claims satisfy every condition in ci-permit-apply-main-non-prod
         # *except* the repository check.  The policy requires
-        # principal.repository == "janssenproject/jans"; a token claiming
+        # principal.repository == "JanssenProject/jans"; a token claiming
         # "attacker-org/evil-repo" must be denied even when the branch is
         # refs/heads/main and the target workspace is non-production.
         run: |
@@ -540,7 +540,7 @@ jobs:
           echo "OPA decision: ${DECISION}"
 
           # The ci-permit-apply-main-non-prod policy requires
-          # principal.repository == "janssenproject/jans".  A token from
+          # principal.repository == "JanssenProject/jans".  A token from
           # "attacker-org/evil-repo" must never receive non-production Apply
           # access, regardless of the branch it carries.
           if [ "${DECISION}" != "false" ]; then
@@ -568,8 +568,8 @@ jobs:
 
           JWT_PAYLOAD=$(printf '%s' \
             '{"iss":"https://token.actions.githubusercontent.com",' \
-            '"sub":"repo:janssenproject/jans:ref:refs/heads/feature-xyz",' \
-            '"repository":"janssenproject/jans",' \
+            '"sub":"repo:JanssenProject/jans:ref:refs/heads/feature-xyz",' \
+            '"repository":"JanssenProject/jans",' \
             '"ref":"refs/heads/feature-xyz",' \
             '"workflow":"ci"}' \
             | base64 -w 0 | tr '+/' '-_' | tr -d '=')
@@ -644,8 +644,8 @@ jobs:
 
           JWT_PAYLOAD=$(printf '%s' \
             '{"iss":"https://token.actions.githubusercontent.com",' \
-            '"sub":"repo:janssenproject/jans:environment:production",' \
-            '"repository":"janssenproject/jans",' \
+            '"sub":"repo:JanssenProject/jans:environment:production",' \
+            '"repository":"JanssenProject/jans",' \
             '"ref":"refs/heads/feature-xyz",' \
             '"environment":"production",' \
             '"workflow":"ci"}' \
@@ -722,8 +722,8 @@ jobs:
 
           JWT_PAYLOAD=$(printf '%s' \
             '{"iss":"https://evil-issuer.example.com",' \
-            '"sub":"repo:janssenproject/jans:environment:production",' \
-            '"repository":"janssenproject/jans",' \
+            '"sub":"repo:JanssenProject/jans:environment:production",' \
+            '"repository":"JanssenProject/jans",' \
             '"ref":"refs/heads/main",' \
             '"environment":"production",' \
             '"workflow":"ci"}' \
@@ -800,8 +800,8 @@ jobs:
 
           JWT_PAYLOAD=$(printf '%s' \
             '{"iss":"https://evil-issuer.example.com",' \
-            '"sub":"repo:janssenproject/jans:ref:refs/heads/main",' \
-            '"repository":"janssenproject/jans",' \
+            '"sub":"repo:JanssenProject/jans:ref:refs/heads/main",' \
+            '"repository":"JanssenProject/jans",' \
             '"ref":"refs/heads/main",' \
             '"workflow":"ci"}' \
             | base64 -w 0 | tr '+/' '-_' | tr -d '=')
@@ -876,8 +876,8 @@ jobs:
 
           JWT_PAYLOAD=$(printf '%s' \
             '{"iss":"https://evil-issuer.example.com",' \
-            '"sub":"repo:janssenproject/jans:ref:refs/heads/main",' \
-            '"repository":"janssenproject/jans",' \
+            '"sub":"repo:JanssenProject/jans:ref:refs/heads/main",' \
+            '"repository":"JanssenProject/jans",' \
             '"ref":"refs/heads/main",' \
             '"workflow":"ci"}' \
             | base64 -w 0 | tr '+/' '-_' | tr -d '=')
@@ -957,7 +957,7 @@ jobs:
     # production Apply is denied (tested in the job above).
     #
     # IMPORTANT — required reviewers must be configured:
-    # The "production" Environment in the janssenproject/jans repository settings
+    # The "production" Environment in the JanssenProject/jans repository settings
     # must have at least one required reviewer.  GitHub only issues an environment-
     # scoped OIDC token (carrying `environment: "production"`) after a designated
     # reviewer explicitly approves the deployment in the Actions UI.  Without that

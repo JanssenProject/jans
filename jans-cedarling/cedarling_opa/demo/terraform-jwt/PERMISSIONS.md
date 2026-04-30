@@ -127,7 +127,7 @@ All three policy files contain a `repository` allowlist:
 ```cedar
 (
     context.tokens.ci_githubworkflow.repository == "octoorg/myrepo" ||
-    context.tokens.ci_githubworkflow.repository == "janssenproject/jans"
+    context.tokens.ci_githubworkflow.repository == "JanssenProject/jans"
 )
 ```
 
@@ -161,7 +161,7 @@ permit (
     context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::"https://token.actions.githubusercontent.com" &&
     (
         context.tokens.ci_githubworkflow.repository == "octoorg/myrepo" ||
-        context.tokens.ci_githubworkflow.repository == "janssenproject/jans"
+        context.tokens.ci_githubworkflow.repository == "JanssenProject/jans"
     ) &&
     context.tokens.ci_githubworkflow.ref == "refs/heads/main" &&
     context.tokens.ci_githubworkflow has environment &&

@@ -12,7 +12,7 @@ permit (
     context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::"https://token.actions.githubusercontent.com" &&
     (
         context.tokens.ci_githubworkflow.repository == "octoorg/myrepo" ||
-        context.tokens.ci_githubworkflow.repository == "janssenproject/jans"
+        context.tokens.ci_githubworkflow.repository == "JanssenProject/jans"
     ) &&
     context.tokens.ci_githubworkflow.ref == "refs/heads/main" &&
     // `has` guard required: `environment` is optional — absent on plan and non-prod-apply tokens.
