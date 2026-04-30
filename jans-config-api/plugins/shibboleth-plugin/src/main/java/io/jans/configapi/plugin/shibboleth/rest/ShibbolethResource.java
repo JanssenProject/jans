@@ -12,6 +12,7 @@ import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 
 import io.jans.configapi.plugin.shibboleth.model.EntityType;
 import io.jans.configapi.plugin.shibboleth.model.MetadataSourceType;
+import io.jans.configapi.plugin.shibboleth.model.Status;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
@@ -270,13 +271,14 @@ public class ShibbolethResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_DELETE_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteClient(
+    public Response deleteTrustRelationship(
             @Parameter(description = "TrustRelationship inum") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("TrustRelationship to be deleted - inum:{} ", escapeLog(inum));
         }
-        // Blocks if an AGGREGATE has ACTIVE children.
-        // If ACTIVE, marks PENDING_DELETE for the Worker to unpublish.
+
+        this.shibbolethService.deleteTrustRelationship(inum);
+
         return Response.noContent().build();
     }
 
@@ -476,7 +478,7 @@ public class ShibbolethResource extends BaseResource {
 
         switch (metadataSourceType) {
         case FILE:
-            validateFileMetaDataSourceType(trustRelationship, metaDataFile);
+            validateFileMetaDataSourceType(metaDataFile);
             break;
         case URI:
             validateURIMetaDataSourceType(trustRelationship);

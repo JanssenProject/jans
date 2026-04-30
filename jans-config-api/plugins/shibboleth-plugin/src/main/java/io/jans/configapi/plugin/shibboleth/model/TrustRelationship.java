@@ -55,6 +55,10 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansEntityId")
     @Schema(description = "Uniquely identifies the entity across federated systems.")
     private Set<String> entityIds;
+    
+    @AttributeName(name = "jansContainerFed")
+    @Schema(description = "DN of the Federation")
+    private String jansContainerFedId;
         
     @AttributeName(name = "jansProfileConfiguration")
     @Schema(description = "SAML profiles.")
@@ -123,6 +127,14 @@ public class TrustRelationship extends Entry implements Serializable {
         this.entityIds = entityIds;
     }
 
+    public String getJansContainerFedId() {
+        return jansContainerFedId;
+    }
+
+    public void setJansContainerFedId(String jansContainerFedId) {
+        this.jansContainerFedId = jansContainerFedId;
+    }
+
     public List<SAMLProfile> getJansProfileConfiguration() {
         return jansProfileConfiguration;
     }
@@ -151,8 +163,8 @@ public class TrustRelationship extends Entry implements Serializable {
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", releasedAttributes="
-                + releasedAttributes + ", entityIds=" + entityIds + ", jansProfileConfiguration="
-                + jansProfileConfiguration + ", status=" + status + ", version=" + version + "]";
-    }    
-
+                + releasedAttributes + ", entityIds=" + entityIds + ", jansContainerFedId=" + jansContainerFedId
+                + ", jansProfileConfiguration=" + jansProfileConfiguration + ", status=" + status + ", version="
+                + version + "]";
+    }
 }

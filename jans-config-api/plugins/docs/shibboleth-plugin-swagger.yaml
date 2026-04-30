@@ -355,6 +355,56 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.delete
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationship/{fed-id}/discovery/entities:
+    get:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Gets list of federation entity ID based on federation ID
+      description: Gets list of federation entity ID based on federation ID
+      operationId: get-entities-by-fed-id
+      parameters:
+      - name: fedId
+        in: path
+        description: Federation ID
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringPagedResult"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: example/shibboleth/trust-relationship/get-federation-entities-by-fed-id
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
   /shibboleth/trust-relationship/{name}:
     get:
       tags:
@@ -481,37 +531,41 @@ components:
             seconds:
               type: integer
               format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
             negative:
               type: boolean
-            zero:
+            positive:
               type: boolean
             units:
               type: array
               items:
                 type: object
                 properties:
+                  durationEstimated:
+                    type: boolean
                   duration:
                     type: object
                     properties:
                       seconds:
                         type: integer
                         format: int64
-                      negative:
-                        type: boolean
                       zero:
                         type: boolean
                       nano:
                         type: integer
                         format: int32
-                  durationEstimated:
+                      negative:
+                        type: boolean
+                      positive:
+                        type: boolean
+                  timeBased:
                     type: boolean
                   dateBased:
                     type: boolean
-                  timeBased:
-                    type: boolean
-            nano:
-              type: integer
-              format: int32
           description: ISO-8601 duration format PnDTnHnMn.nS. E.g. PT15M. Indicates
             how long until an AuthenticationResult can be reused for the current request
         messageSigningPolicy:
@@ -580,11 +634,15 @@ components:
           items:
             type: string
         entityIds:
+          uniqueItems: true
           type: array
           description: Uniquely identifies the entity across federated systems.
           items:
             type: string
             description: Uniquely identifies the entity across federated systems.
+        jansContainerFedId:
+          type: string
+          description: DN of the Federation
         jansProfileConfiguration:
           type: array
           description: SAML profiles.
@@ -624,6 +682,22 @@ components:
         metaDataFile:
           type: string
           format: binary
+    StringPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: string
     TrustRelationshipPagedResult:
       type: object
       properties:
