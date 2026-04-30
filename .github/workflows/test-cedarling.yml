@@ -133,7 +133,13 @@ jobs:
       run: cargo bench
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
-      run: python3 scripts/check_benchmarks.py
+      run: |
+        set -o pipefail
+        python3 scripts/check_benchmarks.py | tee rust_bench_output.txt
+    - name: Append Rust benchmark summary
+      working-directory: jans-cedarling
+      run: |
+        python3 scripts/parse_binding_benchmarks.py --format rust rust_bench_output.txt >> $GITHUB_STEP_SUMMARY
 
   wasm_tests:
     runs-on: ubuntu-latest
@@ -341,6 +347,6 @@ jobs:
     - name: Run UniFFI Java benchmarks
       working-directory: jans-cedarling/bindings/cedarling_uniffi/javaApp
       run: |
-        export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH="${GITHUB_WORKSPACE}/target/release:${LD_LIBRARY_PATH}"
         mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
-        python3 ../../../scripts/parse_binding_benchmarks.py --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
+        python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format java bench_output.txt >> $GITHUB_STEP_SUMMARY

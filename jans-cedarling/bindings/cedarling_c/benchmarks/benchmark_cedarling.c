@@ -8,6 +8,8 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include <libgen.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,28 +20,76 @@
 
 #define WARMUP_ITERS  100
 #define MEASURE_ITERS 1000
+#define CONFIG_MAX    1024
 
+static char UNSIGNED_CONFIG[CONFIG_MAX];
+static char MULTI_ISSUER_CONFIG[CONFIG_MAX];
 
-static const char *UNSIGNED_CONFIG =
-    "{"
-    "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
-    "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
-    "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
-    "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
-    "\"CEDARLING_LOG_TYPE\":\"off\","
-    "\"CEDARLING_POLICY_STORE_LOCAL_FN\":\"../../../test_files/policy-store_ok_2.yaml\""
-    "}";
+static void init_benchmark_configs(const char *argv0) {
+    char test_files_dir[PATH_MAX] = {0};
+    const char *env_test_files = getenv("CEDARLING_TEST_FILES_DIR");
+    if (env_test_files != NULL && env_test_files[0] != '\0') {
+        snprintf(test_files_dir, sizeof(test_files_dir), "%s", env_test_files);
+    } else {
+        char resolved_binary[PATH_MAX];
+        if (realpath(argv0, resolved_binary) != NULL) {
+            char candidate[PATH_MAX];
+            snprintf(candidate, sizeof(candidate), "%s/../../../test_files", dirname(resolved_binary));
+            if (realpath(candidate, test_files_dir) == NULL) {
+                snprintf(test_files_dir, sizeof(test_files_dir), "%s", candidate);
+            }
+        } else {
+            snprintf(test_files_dir, sizeof(test_files_dir), "../../../test_files");
+        }
+    }
 
-static const char *MULTI_ISSUER_CONFIG =
-    "{"
-    "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
-    "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
-    "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
-    "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
-    "\"CEDARLING_LOG_TYPE\":\"off\","
-    "\"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED\":[\"HS256\"],"
-    "\"CEDARLING_POLICY_STORE_LOCAL_FN\":\"../../../test_files/policy-store-multi-issuer-test.yaml\""
-    "}";
+    char unsigned_policy[PATH_MAX];
+    char multi_issuer_policy[PATH_MAX];
+    snprintf(unsigned_policy, sizeof(unsigned_policy), "%s/policy-store_ok_2.yaml", test_files_dir);
+    snprintf(
+        multi_issuer_policy,
+        sizeof(multi_issuer_policy),
+        "%s/policy-store-multi-issuer-test.yaml",
+        test_files_dir
+    );
+
+    int n = snprintf(
+        UNSIGNED_CONFIG,
+        sizeof(UNSIGNED_CONFIG),
+        "{"
+        "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
+        "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
+        "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
+        "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
+        "\"CEDARLING_LOG_TYPE\":\"off\","
+        "\"CEDARLING_POLICY_STORE_LOCAL_FN\":\"%s\""
+        "}",
+        unsigned_policy
+    );
+    if (n < 0 || n >= (int)sizeof(UNSIGNED_CONFIG)) {
+        fprintf(stderr, "UNSIGNED_CONFIG buffer too small\n");
+        exit(1);
+    }
+
+    n = snprintf(
+        MULTI_ISSUER_CONFIG,
+        sizeof(MULTI_ISSUER_CONFIG),
+        "{"
+        "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
+        "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
+        "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
+        "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
+        "\"CEDARLING_LOG_TYPE\":\"off\","
+        "\"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED\":[\"HS256\"],"
+        "\"CEDARLING_POLICY_STORE_LOCAL_FN\":\"%s\""
+        "}",
+        multi_issuer_policy
+    );
+    if (n < 0 || n >= (int)sizeof(MULTI_ISSUER_CONFIG)) {
+        fprintf(stderr, "MULTI_ISSUER_CONFIG buffer too small\n");
+        exit(1);
+    }
+}
 
 
 
@@ -239,7 +289,12 @@ static void bench_authorize_multi_issuer(void) {
     cedarling_drop(id);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+    if (argc < 1 || argv[0] == NULL) {
+        fprintf(stderr, "argv[0] missing; cannot resolve benchmark paths\n");
+        return 1;
+    }
+    init_benchmark_configs(argv[0]);
     cedarling_init();
     build_multi_issuer_request();
     bench_authorize_unsigned();

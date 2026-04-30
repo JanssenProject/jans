@@ -8,6 +8,7 @@ Usage:
 Supported formats:
     go   -- output of `go test -bench=. -benchmem`
     c    -- line-oriented `name=<op> mean_us=<f> stddev_us=<f> min_us=<f> max_us=<f>`
+    rust -- output of scripts/check_benchmarks.py (`✅ <bench>: <ns> ns ...`)
 
 Each invocation writes one self-contained Markdown section so multiple
 bindings can append independently to $GITHUB_STEP_SUMMARY without
@@ -85,6 +86,30 @@ def parse_kv(text: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# Rust benchmark check script output
+# ---------------------------------------------------------------------------
+# Example lines:
+#   ✅ authz_authorize_unsigned/new/estimates.json: 371266 ns <= 1000000 ns
+# ---------------------------------------------------------------------------
+_RUST_RE = re.compile(
+    r"^[✅❌]\s+(.+?):\s+(\d+(?:\.\d+)?)\s+ns\b",
+    re.MULTILINE,
+)
+
+
+def parse_rust(text: str) -> list[dict]:
+    rows = []
+    for m in _RUST_RE.finditer(text):
+        rows.append(
+            {
+                "operation": m.group(1),
+                "mean_us": float(m.group(2)) / 1000.0,
+            }
+        )
+    return rows
+
+
+# ---------------------------------------------------------------------------
 # Markdown output
 # ---------------------------------------------------------------------------
 
@@ -130,6 +155,7 @@ def render_markdown(binding: str, rows: list[dict]) -> str:
 
 PARSERS = {
     "go": ("Go", parse_go),
+    "rust": ("Rust", parse_rust),
     "c": ("C", parse_kv),
     "python": ("Python", parse_kv),
     "wasm": ("WASM", parse_kv),
