@@ -183,6 +183,7 @@ jobs:
             echo "       but the decision was '${DECISION}'." >&2
             echo "Full response:" >&2
             echo "${RESPONSE}" | jq . >&2
+            docker logs terraform-jwt-opa-cedarling-1
             exit 1
           fi
 
