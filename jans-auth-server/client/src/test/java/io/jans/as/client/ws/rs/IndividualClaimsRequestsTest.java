@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -50,12 +51,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         return Arrays.asList(
                 new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
                 new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})),
-                new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)),
-                new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
-                new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)),
-                new Claim(JwtClaimName.FAMILY_NAME, ClaimValue.createEssential(false)),
-                new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
-                new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull())
+                new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true))
         );
     }
 
@@ -113,6 +109,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -187,7 +184,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignaturePlainText()
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -224,6 +221,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -298,7 +296,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignaturePlainText()
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -335,6 +333,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -410,7 +409,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureHMAC(SignatureAlgorithm.HS256, clientSecret)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -448,6 +447,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -523,7 +523,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureHMAC(SignatureAlgorithm.HS384, clientSecret)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -561,6 +561,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -636,7 +637,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureHMAC(SignatureAlgorithm.HS512, clientSecret)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -677,6 +678,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -728,7 +730,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -769,6 +771,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -820,7 +823,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -861,6 +864,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -912,7 +916,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -953,6 +957,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1004,7 +1009,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES256)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1045,6 +1050,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1096,7 +1102,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES384)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1137,6 +1143,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1188,7 +1195,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES512)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1233,6 +1240,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1265,7 +1273,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJwe(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1289,7 +1297,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1332,7 +1340,9 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1365,7 +1375,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJwe(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1389,7 +1399,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1434,6 +1444,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1473,7 +1484,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1482,7 +1493,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 serverKeyId,
                 jwks,
                 cryptoContext.getCryptoProvider(),
-                createIdTokenClaims(),
+                new ArrayList<>(),
                 createUserInfoClaims());
         authorizationRequest.setRequest(authJwt);
 
@@ -1500,7 +1511,6 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1545,6 +1555,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1584,7 +1595,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1593,7 +1604,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 serverKeyId,
                 jwks,
                 cryptoContext.getCryptoProvider(),
-                createIdTokenClaims(),
+                new ArrayList<>(),
                 createUserInfoClaims());
         authorizationRequest.setRequest(authJwt);
 
@@ -1611,7 +1622,6 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
@@ -1656,6 +1666,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.NICKNAME,
@@ -1695,7 +1706,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        String authJwt = TestCryptoContext.createNestedJweWithRsaEncryption(
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
                 authorizationRequest,
                 SignatureAlgorithm.RS256,
                 cryptoContext.getKeyId(Algorithm.RS256),
@@ -1722,7 +1733,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsPresence(JwtClaimName.NAME)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
