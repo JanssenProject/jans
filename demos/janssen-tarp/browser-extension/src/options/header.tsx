@@ -1,62 +1,34 @@
 import React from "react";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { HelpCircle } from 'lucide-react';
+import HelpDrawer from "./helpDrawer";
 
 const Header = () => {
+  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+
+  const handleDrawer = (isOpen: boolean) => {
+    setIsHelpOpen(isOpen);
+  };
   return (
-    <Box
-      sx={{
-        width: '100%',
-        background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
-        color: '#ffffff',
-        px: { xs: 3, sm: 5 },
-        py: 1.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        boxShadow: '0 2px 10px rgba(13, 71, 161, 0.4)',
-        flexShrink: 0,
-      }}
-    >
-      <Box
-        component="img"
-        src="logo.jpg"
-        alt="Janssen"
-        sx={{
-          height: 44,
-          width: 'auto',
-          borderRadius: 1.5,
-          flexShrink: 0,
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-        }}
-      />
-      <Box>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            fontWeight: 800,
-            letterSpacing: 0.5,
-            lineHeight: 1.2,
-            color: '#ffffff',
-          }}
-        >
-          Janssen TARP
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            opacity: 0.8,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-            fontSize: '0.65rem',
-            color: '#ffffff',
-          }}
-        >
-          Test Authentication Relying Party
-        </Typography>
-      </Box>
-    </Box>
+    <header className="bg-white border-b border-gray-200 px-8 py-4">
+      <HelpDrawer isOpen={isHelpOpen} handleDrawer={handleDrawer} />
+      <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+        <div className="flex items-center gap-2 px-7">
+          <div className="flex items-center">
+            <img
+              src="logo.jpg"
+              alt="Jans TARP"
+              className="h-12 w-auto object-contain"
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 px-7">
+          <button onClick={() => handleDrawer(true)} className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <HelpCircle className="w-5 h-5 text-gray-600" />
+            <span className="text-gray-700 font-medium text-base">Need help?</span>
+          </button>
+        </div>
+      </div>
+    </header>
   );
 };
 
