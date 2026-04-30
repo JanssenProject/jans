@@ -4,12 +4,14 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 use std::time::Duration as StdDuration;
 
 use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
 use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
+
+use crate::authz::metrics::MetricsCollector;
 
 use super::config::{ConfigValidationError, DataStoreConfig};
 use super::entry::DataEntry;
@@ -40,6 +42,7 @@ const MAX_SAFE_DURATION_SECS: u64 = (i64::MAX / 1000) as u64;
 pub(crate) struct DataStore {
     storage: RwLock<SparKV<DataEntry>>,
     config: DataStoreConfig,
+    metrics: Arc<MetricsCollector>,
 }
 
 impl DataStore {
@@ -51,7 +54,10 @@ impl DataStore {
     /// - If `config.default_ttl` is `None`, uses 10 years (effectively infinite)
     ///
     /// Returns `ConfigValidationError` if the configuration is invalid.
-    pub(crate) fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
+    pub(crate) fn new(
+        config: DataStoreConfig,
+        metrics: Arc<MetricsCollector>,
+    ) -> Result<Self, ConfigValidationError> {
         // Validate configuration before creating the store
         config.validate()?;
 
@@ -80,6 +86,7 @@ impl DataStore {
                 size_calculator,
             )),
             config,
+            metrics,
         })
     }
 
@@ -105,7 +112,9 @@ impl DataStore {
     ) -> Result<(), DataError> {
         // Validate key
         if key.is_empty() {
-            return Err(DataError::InvalidKey);
+            let err = DataError::InvalidKey;
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         // Validate explicit TTL against max_ttl before calculating effective TTL
@@ -113,10 +122,12 @@ impl DataStore {
             && let Some(max_ttl) = self.config.max_ttl
             && explicit_ttl > max_ttl
         {
-            return Err(DataError::TTLExceeded {
+            let err = DataError::TTLExceeded {
                 requested: explicit_ttl,
                 max: max_ttl,
-            });
+            };
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         // Calculate effective TTL using the helper function
@@ -134,14 +145,20 @@ impl DataStore {
 
         // Check entry size before storing (including metadata)
         let entry_size = serde_json::to_string(&entry)
-            .map_err(DataError::from)?
+            .map_err(|e| {
+                let err = DataError::from(e);
+                self.metrics.record_error(&err);
+                err
+            })?
             .len();
 
         if self.config.max_entry_size > 0 && entry_size > self.config.max_entry_size {
-            return Err(DataError::ValueTooLarge {
+            let err = DataError::ValueTooLarge {
                 size: entry_size,
                 max: self.config.max_entry_size,
-            });
+            };
+            self.metrics.record_error(&err);
+            return Err(err);
         }
 
         let chrono_ttl = effective_ttl_chrono;
@@ -151,26 +168,28 @@ impl DataStore {
         // Use empty index keys since we don't need indexing for data store
         storage
             .set_with_ttl(key, entry, chrono_ttl, &[])
-            .map_err(|e| match e {
-                SparKVError::CapacityExceeded => DataError::StorageLimitExceeded {
-                    max: self.config.max_entries,
-                },
-                SparKVError::ItemSizeExceeded => DataError::ValueTooLarge {
-                    size: entry_size,
-                    max: self.config.max_entry_size,
-                },
-                SparKVError::TTLTooLong => {
-                    // This shouldn't happen since we validated above, but handle it anyway
-                    DataError::TTLExceeded {
+            .map_err(|e| {
+                let err = match e {
+                    SparKVError::CapacityExceeded => DataError::StorageLimitExceeded {
+                        max: self.config.max_entries,
+                    },
+                    SparKVError::ItemSizeExceeded => DataError::ValueTooLarge {
+                        size: entry_size,
+                        max: self.config.max_entry_size,
+                    },
+                    SparKVError::TTLTooLong => DataError::TTLExceeded {
                         requested: ttl.unwrap_or_default(),
                         max: self
                             .config
                             .max_ttl
                             .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64)),
-                    }
-                },
+                    },
+                };
+                self.metrics.record_error(&err);
+                err
             })?;
 
+        self.metrics.record_data_push();
         Ok(())
     }
 
@@ -224,6 +243,7 @@ impl DataStore {
             };
 
             let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
+            self.metrics.record_data_get();
             Some(entry)
         } else {
             // Fast path: use read lock when metrics are disabled
@@ -237,6 +257,7 @@ impl DataStore {
                 return None;
             }
 
+            self.metrics.record_data_get();
             Some(entry)
         }
     }
@@ -247,7 +268,11 @@ impl DataStore {
     /// Uses write lock for exclusive access.
     pub(crate) fn remove(&self, key: &str) -> bool {
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.pop(key).is_some()
+        let removed = storage.pop(key).is_some();
+        if removed {
+            self.metrics.record_data_remove();
+        }
+        removed
     }
 
     /// Clear all entries from the store.
@@ -392,7 +417,8 @@ mod tests {
     use test_utils::assert_eq;
 
     fn create_test_store() -> DataStore {
-        DataStore::new(DataStoreConfig::default()).expect("should create store")
+        let metrics = Arc::new(MetricsCollector::new(0));
+        DataStore::new(DataStoreConfig::default(), metrics).expect("should create store")
     }
 
     #[test]
@@ -548,7 +574,8 @@ mod tests {
             max_entries: 2,
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         store
             .push("key1", json!("value1"), None)
@@ -571,7 +598,8 @@ mod tests {
             max_entry_size: 200,
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         // Small value should work (use a very short string to ensure it's under 200 bytes with metadata)
         store
@@ -595,7 +623,8 @@ mod tests {
             max_ttl: Some(StdDuration::from_secs(60)),
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         // TTL within limit should work
         store
@@ -617,7 +646,8 @@ mod tests {
             default_ttl: Some(StdDuration::from_millis(100)),
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         // Push without explicit TTL should use default
         store
@@ -776,7 +806,8 @@ mod tests {
             enable_metrics: true,
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         store
             .push("key1", json!("value1"), None)
@@ -801,7 +832,8 @@ mod tests {
             enable_metrics: false,
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         store
             .push("key1", json!("value1"), None)
@@ -868,7 +900,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            DataStore::new(valid_config).is_ok(),
+            DataStore::new(valid_config, Arc::new(MetricsCollector::new(0))).is_ok(),
             "expected DataStore::new() to succeed with valid DataStoreConfig"
         );
 
@@ -880,7 +912,7 @@ mod tests {
         };
         assert!(
             matches!(
-                DataStore::new(invalid_config),
+                DataStore::new(invalid_config, Arc::new(MetricsCollector::new(0))),
                 Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
             ),
             "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
@@ -919,7 +951,8 @@ mod tests {
             enable_metrics: true,
             ..Default::default()
         };
-        let store = DataStore::new(config).expect("should create store");
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+            .expect("should create store");
 
         let retrieved_config = store.config();
 

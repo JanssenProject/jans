@@ -9,6 +9,7 @@ use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
 use crate::LogLevel;
+use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
@@ -23,6 +24,7 @@ pub(crate) struct TokenCache {
     cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     max_ttl: usize,
     logger: Option<Logger>,
+    metrics: Arc<MetricsCollector>,
 }
 
 #[cfg(test)]
@@ -31,7 +33,13 @@ impl Default for TokenCache {
         // default parameters, is used only for testing
 
         use crate::log::TEST_LOGGER;
-        Self::new(60 * 5, 100, true, Some(TEST_LOGGER.clone()))
+        Self::new(
+            60 * 5,
+            100,
+            true,
+            Some(TEST_LOGGER.clone()),
+            Arc::new(MetricsCollector::new(0)),
+        )
     }
 }
 
@@ -44,6 +52,7 @@ impl TokenCache {
         capacity: usize,
         earliest_expiration_eviction: bool,
         logger: Option<Logger>,
+        metrics: Arc<MetricsCollector>,
     ) -> Self {
         Self {
             cache: Arc::new(RwLock::new(SparKV::with_config(Config {
@@ -54,6 +63,7 @@ impl TokenCache {
             }))),
             max_ttl,
             logger,
+            metrics,
         }
     }
 
@@ -75,11 +85,18 @@ impl TokenCache {
     /// otherwise returns `None`.
     pub(crate) fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
         let key = hash_jwt_token(kind, jwt);
-        self.cache
+        let result = self
+            .cache
             .read()
             .expect("token cache mutex shouldn't be poisoned")
             .get(&key)
-            .map(std::borrow::ToOwned::to_owned)
+            .map(std::borrow::ToOwned::to_owned);
+        if result.is_some() {
+            self.metrics.record_cache_hit();
+        } else {
+            self.metrics.record_cache_miss();
+        }
+        result
     }
 
     /// Saves a token to the cache with appropriate TTL.
@@ -169,10 +186,14 @@ impl TokenCache {
     /// This should be called periodically to prevent memory leaks from
     /// accumulated expired tokens.
     pub(crate) fn clear_expired(&self) {
-        self.cache
+        let cleared = self
+            .cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
             .clear_expired();
+        if cleared > 0 {
+            self.metrics.record_cache_eviction(cleared);
+        }
     }
 
     /// Remove tokens from cache by index key

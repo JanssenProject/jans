@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @ApplicationScoped
 public class CommonUtilService {
@@ -26,6 +25,9 @@ public class CommonUtilService {
 
     public static JsonNode toJsonNode(Object obj) {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.valueToTree(Objects.requireNonNullElse(obj, "{}"));
+        if (obj == null) {
+            return mapper.createObjectNode();
+        }
+        return mapper.valueToTree(obj);
     }
 }
