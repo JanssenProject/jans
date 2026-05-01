@@ -205,7 +205,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         if (claimsPresence != null) {
             for (String claim : claimsPresence) {
                 assertNotNull(claim, "Claim name is null");
-                assertNotNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim " + claim + " is not found");
+                assertNotNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim '" + claim + "' is not found");
             }
         }
 

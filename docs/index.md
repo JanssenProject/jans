@@ -135,7 +135,7 @@ hide:
 
 ## Quick Start Guide
 
-### 1. Choose Your Deployment
+### 1. Choose Your Deployment {.quickstart}
 
 Select the deployment method that best fits your environment and requirements.
 
@@ -168,7 +168,7 @@ Select the deployment method that best fits your environment and requirements.
     
     [Complete VM Setup Guide](janssen-server/install/vm-install/README.md)
 
-### 2. Initial Configuration
+### 2. Initial Configuration {.quickstart}
 
 Set up your identity platform with the configuration tools.
 
@@ -196,7 +196,7 @@ Set up your identity platform with the configuration tools.
     }
     ```
 
-### 3. Create Your First Client
+### 3. Create Your First Client {.quickstart}
 
 Register an application using Terraform for infrastructure as code.
 
@@ -222,7 +222,7 @@ resource "jans_client" "webapp" {
 }
 ```
 
-### 4. Test Authentication
+### 4. Test Authentication {.quickstart}
 
 Verify your setup with a simple authentication flow.
 

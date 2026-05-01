@@ -260,8 +260,8 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         );
         let log_kind = log.get("log_kind").expect("log_kind should exist");
         assert!(
-            log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {log_kind:?}"
+            log_kind == "Decision" || log_kind == "System" || log_kind == "Metric",
+            "Log kind should be Decision, System, or Metric, got: {log_kind:?}"
         );
 
         if log_kind == "Decision" {
