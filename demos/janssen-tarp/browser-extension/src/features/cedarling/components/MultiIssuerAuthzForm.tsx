@@ -154,6 +154,11 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
   const resetInputs = () => {
     setUiMessage('');
     setFormFields({ tokens: [], action: '', context: {}, resource: {} });
+    setTokenSelection({
+      accessToken: false,
+      userInfo: false,
+      idToken: false,
+   });
     chrome.storage.local.remove('multiIssueAuthz');
   };
 
@@ -436,7 +441,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
               )}
               <button
                 onClick={() => setAuthzResult('')}
-                className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                className="text-sm text-green-600 hover:text-green-700 font-medium"
               >
                 Clear result
               </button>
@@ -472,7 +477,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
               />
               <button
                 onClick={() => setAuthzLogs('')}
-                className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                className="text-sm text-green-600 hover:text-green-700 font-medium"
               >
                 Clear logs
               </button>

@@ -45,6 +45,8 @@ export const MultiSelectDropdown = ({
     <div ref={ref} className="relative w-full">
       {/* Trigger */}
       <div
+        tabIndex={0}
+        role="listbox"
         onClick={() => setOpen((v) => !v)}
         className="min-h-[48px] w-full border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap gap-1.5
         bg-slate-50/60 cursor-pointer

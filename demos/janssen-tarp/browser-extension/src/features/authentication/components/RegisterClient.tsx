@@ -112,7 +112,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       });
     } catch (err) {
       console.error('Error registering OIDC client:', err);
-      setAlert('Error in fetching Openid configuration. Check error log on console.');
+      setAlert('Error in registering OIDC client. Check error log on console.');
       setAlertSeverity('error');
     }
   };

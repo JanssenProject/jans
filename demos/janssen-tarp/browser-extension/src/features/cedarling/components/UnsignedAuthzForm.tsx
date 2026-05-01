@@ -96,13 +96,27 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
     <div className="space-y-4">
       {/* Main accordion */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {/* Card header */}
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Cedarling Unsigned Authorization
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Build an Unsigned authz request from principals, action, resource, and context — then run
+                authorization.
+              </p>
+            </div>
+          </div>
+        </div>
         {/* Accordion header */}
         <button
           onClick={() => setExpanded(!expanded)}
           className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
         >
           <span className="font-semibold text-gray-800 text-sm">
-            Cedarling Unsigned Authz Request Form
+            Request builder
           </span>
           <span className="flex items-center justify-center w-7 h-7 bg-gray-900 text-white rounded-full text-lg leading-none">
             −

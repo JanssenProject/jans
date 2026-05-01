@@ -15,6 +15,7 @@ export const TagInput = ({
   placeholder?: string;
 }) => {
   const [input, setInput] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const commit = () => {
     if (input.trim()) { onAdd(input.trim()); setInput(''); }
@@ -25,13 +26,13 @@ export const TagInput = ({
       className="min-h-[48px] w-full border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap gap-1.5
         focus-within:ring-2 focus-within:ring-[#1a6b3c]/30 focus-within:border-[#1a6b3c]
         transition-all bg-slate-50/60 cursor-text"
-      onClick={() => document.getElementById('scope-input')?.focus()}
+        onClick={() => inputRef.current?.focus()}
     >
       {tags.map((t) => (
         <Tag key={t.name} name={t.name} onRemove={() => onRemove(t.name)} />
       ))}
       <input
-        id="scope-input"
+        ref={inputRef}
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}

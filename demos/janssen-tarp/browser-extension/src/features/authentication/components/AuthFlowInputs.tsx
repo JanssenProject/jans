@@ -65,17 +65,6 @@ export default function AuthFlowInputs({
     }
   };
 
-  // ── Scope helpers ──────────────────────────────────────────────────────────
-
-  const addScope = (name: string) => {
-    if (!name || selectedScopes.some((s) => s.name === name)) return;
-    setSelectedScopes((prev) => [...prev, { name }]);
-  };
-
-  const removeScope = (name: string) => {
-    setSelectedScopes((prev) => prev.filter((s) => s.name !== name));
-  };
-
   // ── Auth flow ──────────────────────────────────────────────────────────────
 
   const triggerCodeFlow = async () => {
@@ -196,7 +185,6 @@ export default function AuthFlowInputs({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop — clicking does NOT close (matching original backdropClick guard) */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
       {/* Modal */}
@@ -293,17 +281,23 @@ export default function AuthFlowInputs({
               onChange={setSelectedScopes}
               placeholder="Select scopes"
             />
-            <p className="mt-1 text-xs text-slate-400">Press Enter or comma to add a scope.</p>
+            <p className="mt-1 text-xs text-slate-400">Type scope and Press Enter to add a scope.</p>
           </div>
 
           {/* ── Display tokens checkbox ── */}
           <label className="flex items-center gap-3 cursor-pointer select-none group">
+            <input
+              type="checkbox"
+              checked={displayToken}
+              onChange={(e) => setDisplayToken(e.target.checked)}
+              className="sr-only peer"
+            />
             <span
-              onClick={() => setDisplayToken((v) => !v)}
+              aria-hidden="true"
               className={`w-5 h-5 flex-shrink-0 rounded flex items-center justify-center border-2 transition-colors
                 ${displayToken
                   ? 'bg-[#22a05a] border-[#22a05a]'
-                  : 'bg-white border-slate-300 group-hover:border-[#22a05a]'
+                  : 'bg-white border-slate-300 group-hover:border-[`#22a05a`] peer-focus:ring-2 peer-focus:ring-[`#1a6b3c`]/30'
                 }`}
             >
               {displayToken && (

@@ -36,12 +36,13 @@ export const LabelWithTooltip = ({ label, tip }: { label: string; tip: string })
       {label}
       <span className="relative inline-flex items-center">
         <button
+          tabIndex={-1}
           type="button"
           onMouseEnter={() => setShow(true)}
           onMouseLeave={() => setShow(false)}
           className="text-slate-400 hover:text-slate-600 transition-colors"
         >
-          <CircleQuestionMark className="w-4 h-4" tabIndex={-1}/>
+          <CircleQuestionMark className="w-4 h-4"/>
         </button>
         {show && (
           <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
