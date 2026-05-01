@@ -7,14 +7,40 @@ tags:
   - consent
 ---
 # Customize
-## This content is in progress
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen supports customizing consent beyond the default scope approval page. The implementation uses a Consent Gathering extension point during authorization, and can run either script-based logic or Agama-based consent flows.
 
-## Have questions in the meantime?
+The detailed customization guide already exists in script catalog docs:
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+- [Consent Gathering](../../../../script-catalog/consent_gathering/consent-gathering.md)
 
-## Want to contribute?
+This page summarizes where customization hooks into the auth server and which properties are most relevant.
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Customization Options
+
+- **Consent Gathering scripts**: implement custom pages, multistep consent, extra business validations, and allow/deny decisions.
+- **Agama consent flows**: use Agama for richer orchestration, branching, and reusable flow logic.
+- **Client-level script assignment**: assign consent scripts directly in client configuration.
+- **ACR-based routing**: map `acr_values` to specific consent scripts and/or Agama consent flows.
+
+## Key Configuration Properties
+
+Consent script and flow selection is controlled by auth server configuration:
+
+- `consentGatheringScriptBackwardCompatibility`
+- `acrToConsentScriptNameMapping`
+- `acrToAgamaConsentFlowMapping`
+
+For property details, see:
+
+- [Auth Server JSON Properties](../../../reference/json/properties/janssenauthserver-properties.md)
+
+## Related OpenID Connect Behavior
+
+- `prompt=consent` requests explicit consent interaction in the authorization flow.
+- `prompt=none` does not allow interactive consent and returns an error if consent is required.
+
+See also:
+
+- [Authorization Endpoint](../../endpoints/authorization.md)
+- [Prompt Parameter](../prompt-parameter.md)

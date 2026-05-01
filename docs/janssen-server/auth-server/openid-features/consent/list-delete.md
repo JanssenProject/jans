@@ -7,14 +7,57 @@ tags:
   - consent
 ---
 # List/Delete Consent
-## This content is in progress
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen stores authorization/consent decisions in token grant data. To view and revoke them, use the Config API token endpoints.
 
-## Have questions in the meantime?
+As noted in Janssen planning docs, viewing and revoking consent is done via Config API (not OpenID Connect or SCIM):
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+- [Consent Gathering (planning context)](../../../planning/use-cases.md)
+- [Config API overview](../../../config-guide/config-tools/config-api/README.md)
 
-## Want to contribute?
+## How Janssen Persists Consent
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+In auth server code, consent outcomes are applied through authorization grants and persisted token entities. Those entities include useful fields for consent-oriented filtering, such as:
+
+- `usrId` / `jansUsrDN` (user)
+- `clnId` (client)
+- `scp` (scopes)
+- `grtId`, `grtTyp`, `tknTyp`
+
+## List Consents
+
+Use Config API token search to list grants/tokens by user and/or client.
+
+Endpoint pattern:
+
+```text
+GET /api/v1/token/search
+```
+
+Example query parameters:
+
+- `fieldValuePair=usrId=<userId>`
+- `fieldValuePair=clnId=<clientId>`
+- `fieldValuePair=usrId=<userId>,clnId=<clientId>`
+- optional paging/sorting: `startIndex`, `limit`, `sortBy`, `sortOrder`
+
+You can also fetch tokens for a specific client:
+
+```text
+GET /api/v1/token/client/{clientId}
+```
+
+## Delete (Revoke) Consent
+
+To revoke a consent/grant entry, revoke its token by token code:
+
+```text
+DELETE /api/v1/token/revoke/{tknCde}
+```
+
+After revocation, the corresponding token entry is removed. Repeating this for all tokens associated with a user/client effectively removes previously stored consent approvals for that pairing.
+
+## Notes
+
+- Config API endpoints are OAuth 2.0 protected; ensure your admin/API client has required Config API scopes.
+- In production, prefer automation that first searches by user/client, then selectively revokes matching entries.
