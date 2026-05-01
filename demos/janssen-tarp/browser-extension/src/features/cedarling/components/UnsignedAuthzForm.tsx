@@ -37,7 +37,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
         });
       }
     });
-  }, [data]);
+  }, []);
 
   const triggerCedarlingAuthzRequest = async () => {
     setAuthzResult('');
