@@ -189,11 +189,10 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
                   <button
                     key={tab}
                     onClick={() => setLogType(tab)}
-                    className={`px-5 py-2 text-sm font-medium transition-colors ${
-                      logType === tab
+                    className={`px-5 py-2 text-sm font-medium transition-colors ${logType === tab
                         ? 'bg-green-600 text-white'
                         : 'bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {tab}
                   </button>
@@ -231,17 +230,22 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
             </summary>
             <div className="px-5 pb-5 border-t border-gray-100 pt-4 space-y-3">
               {Utils.isJSON(authzResult) ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-gray-700">Decision</span>
-                    {JSON.parse(authzResult).decision ? (
-                      <span className="text-green-600 text-xl font-bold">True</span>
-                    ) : (
-                      <span className="text-red-500 text-xl font-bold">False</span>
-                    )}
-                  </div>
-                  <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
-                </>
+                (() => {
+                  const parsed = JSON.parse(authzResult);
+                  return (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-700">Decision</span>
+                        {parsed.decision ? (
+                          <span className="text-green-600 text-xl font-bold">True</span>
+                        ) : (
+                          <span className="text-red-500 text-xl font-bold">False</span>
+                        )}
+                      </div>
+                      <JsonEditor data={parsed} rootName="result" viewOnly={true} />
+                    </>
+                  );
+                })()
               ) : (
                 <textarea
                   className="w-full h-48 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none"

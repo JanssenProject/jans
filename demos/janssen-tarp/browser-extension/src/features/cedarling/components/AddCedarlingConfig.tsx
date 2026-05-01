@@ -114,17 +114,15 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
               <div className="flex bg-gray-100 p-1 rounded-lg">
                 <button
                   onClick={() => setInputSelection('json')}
-                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${
-                    inputSelection === 'json' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${inputSelection === 'json' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                   JSON
                 </button>
                 <button
                   onClick={() => setInputSelection('url')}
-                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${
-                    inputSelection === 'url' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${inputSelection === 'url' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                   URL
                 </button>
@@ -160,6 +158,18 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
             {/* JSON Editor Window */}
             {inputSelection === 'json' ? (
               <div className="border border-gray-200 rounded-xl bg-gray-50/30 overflow-hidden">
+                <style>{`
+                  .jer-confirm-buttons {
+                    position: absolute !important;
+                    top: 4px !important;
+                    right: 4px !important;
+                    bottom: unset !important;
+                  }
+                  .jer-collection-inner {
+                    position: relative !important;
+                  }
+                `}
+                </style>
                 <div className="max-h-80 overflow-y-auto p-2">
                   <JsonEditor
                     data={bootstrap}
