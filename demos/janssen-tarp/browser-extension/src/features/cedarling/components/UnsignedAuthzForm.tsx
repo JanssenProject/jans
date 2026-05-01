@@ -27,12 +27,13 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
 
   React.useEffect(() => {
     chrome.storage.local.get(['authzRequest_unsigned'], (result) => {
-      if (!Utils.isEmpty(result) && Object.keys(result).length !== 0) {
+      const savedRequest = result?.authzRequest_unsigned;
+      if (savedRequest) {
         setFormFields({
-          principals: result.authzRequest_unsigned.principals,
-          action: result.authzRequest_unsigned.action,
-          context: result.authzRequest_unsigned.context,
-          resource: result.authzRequest_unsigned.resource,
+          principals: savedRequest.principals ?? [],
+          action: savedRequest.action ?? '',
+          context: savedRequest.context ?? {},
+          resource: savedRequest.resource ?? {},
         });
       }
     });

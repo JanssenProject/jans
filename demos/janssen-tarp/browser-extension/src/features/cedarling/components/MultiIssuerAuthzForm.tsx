@@ -405,10 +405,11 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                     e.preventDefault();
                     copyText(authzResult);
                   }}
+                  aria-label="Copy result"
                   className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
                   title="Copy result"
                 >
-                  <Copy size={14} />
+                  <Copy size={14} aria-hidden="true" />
                 </button>
               </div>
             </summary>
@@ -462,10 +463,11 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
                     e.preventDefault();
                     copyText(authzLogs);
                   }}
+                  aria-label="Copy logs"
                   className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
                   title="Copy logs"
                 >
-                  <Copy size={14} />
+                  <Copy size={14} aria-hidden="true" />
                 </button>
               </div>
             </summary>

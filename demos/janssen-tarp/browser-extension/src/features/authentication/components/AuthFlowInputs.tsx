@@ -57,7 +57,15 @@ export default function AuthFlowInputs({
     setAdditionalParamError('');
     if (!value.trim()) return true;
     try {
-      JSON.parse(value);
+      const parsed = JSON.parse(value);
+      if (
+        parsed === null ||
+        Array.isArray(parsed) ||
+        typeof parsed !== 'object'
+      ) {
+        setAdditionalParamError('Additional params must be a JSON object.');
+        return false;
+      }
       return true;
     } catch {
       setAdditionalParamError('Error in parsing JSON.');
@@ -188,7 +196,12 @@ export default function AuthFlowInputs({
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-flow-dialog-title"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8"
+      >
 
         {loading && <Spinner />}
 
