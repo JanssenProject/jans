@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::sync::LazyLock;
+use std::time::Duration;
 
 use crate::common::issuer_utils::IssClaim;
 
@@ -14,7 +15,22 @@ use reqwest::{Client, header::ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+/// Total time budget for any single OIDC discovery, JWKS, or status-list fetch.
+/// Without a bound, a slow or unresponsive issuer can stall a Cedarling task
+/// forever and starve the tokio runtime.
+const HTTP_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// Time budget for the TCP connect step alone. Most healthy issuers respond well
+/// inside this window; a longer wait usually means the host is unreachable.
+const HTTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
+
+static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| {
+    Client::builder()
+        .timeout(HTTP_REQUEST_TIMEOUT)
+        .connect_timeout(HTTP_CONNECT_TIMEOUT)
+        .build()
+        .expect("default reqwest client should build")
+});
 
 // async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.

@@ -12,6 +12,11 @@ use reqwest::Client;
 use serde::Deserialize;
 use std::time::Duration;
 
+/// Default per-request timeout for production callers of [`HttpClient`].
+/// Without this, a slow or unresponsive upstream can stall a Cedarling task
+/// indefinitely.
+pub(crate) const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
+
 /// A wrapper around `reqwest::Client` providing HTTP request functionality
 /// with retry logic using exponential backoff.
 ///
@@ -26,8 +31,13 @@ pub(crate) struct HttpClient {
 }
 
 impl HttpClient {
-    pub(crate) fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
+    pub(crate) fn new(
+        max_retries: u32,
+        retry_delay: Duration,
+        request_timeout: Duration,
+    ) -> Result<Self, HttpClientError> {
         let client = Client::builder()
+            .timeout(request_timeout)
             .build()
             .map_err(HttpRequestError::InitializeHttpClient)?;
 
@@ -111,7 +121,8 @@ mod test {
             .create_async();
 
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient.");
 
         let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
         let req_fut = client.get(link);
@@ -133,7 +144,8 @@ mod test {
     #[tokio::test]
     async fn errors_when_max_http_retries_exceeded() {
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient");
         let response = client.get("0.0.0.0").await;
 
         assert!(
@@ -155,7 +167,8 @@ mod test {
             .create_async();
 
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient.");
 
         let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
         let client_fut = client.get(link);
@@ -183,7 +196,8 @@ mod test {
             .create_async();
 
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient.");
         let link = &format!("{}/binary", mock_server.url());
         let req_fut = client.get_bytes(link);
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
@@ -205,7 +219,8 @@ mod test {
             .create_async();
 
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient.");
         let link = &format!("{}/error-binary", mock_server.url());
         let req_fut = client.get_bytes(link);
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
@@ -220,11 +235,49 @@ mod test {
     #[tokio::test]
     async fn get_bytes_max_retries_exceeded() {
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
+            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
+                .expect("Should create HttpClient");
         let response = client.get_bytes("0.0.0.0").await;
         assert!(
             matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
             "Expected error due to MaxRetriesExceeded: {response:?}"
+        );
+    }
+
+    /// A server that accepts TCP connections but never sends a response would
+    /// previously stall an `HttpClient::get` call indefinitely. With a request
+    /// timeout configured the call must error promptly.
+    #[tokio::test]
+    async fn get_times_out_when_server_never_responds() {
+        use tokio::net::{TcpListener, TcpStream};
+
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("Should bind a local TCP listener");
+        let addr = listener.local_addr().expect("Should read local addr");
+
+        // Accept connections and hold them open without writing any response.
+        let _accept_task = tokio::spawn(async move {
+            let mut held: Vec<TcpStream> = Vec::new();
+            while let Ok((sock, _)) = listener.accept().await {
+                held.push(sock);
+            }
+        });
+
+        // 0 retries so the timeout fires once and we don't measure backoff.
+        let request_timeout = Duration::from_millis(200);
+        let client = HttpClient::new(0, Duration::from_millis(1), request_timeout)
+            .expect("Should create HttpClient");
+
+        let start = std::time::Instant::now();
+        let response = client.get(&format!("http://{addr}/")).await;
+        let elapsed = start.elapsed();
+
+        assert!(response.is_err(), "Expected timeout error: {response:?}");
+        // Timeout fires at ~200ms; allow generous slack for CI variance.
+        assert!(
+            elapsed < Duration::from_secs(2),
+            "Expected to time out near {request_timeout:?}, took {elapsed:?}",
         );
     }
 }

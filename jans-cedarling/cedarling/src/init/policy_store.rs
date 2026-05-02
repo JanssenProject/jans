@@ -11,7 +11,7 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
-use crate::http::{HttpClient, HttpClientError};
+use crate::http::{DEFAULT_REQUEST_TIMEOUT, HttpClient, HttpClientError};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -128,7 +128,7 @@ pub async fn load_policy_store(
 async fn load_policy_store_from_lock_master(
     uri: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    let client = HttpClient::new(3, Duration::from_secs(3))?;
+    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
     let agama_policy_store = client.get(uri).await?.json::<LegacyAgamaPolicyStore>()?;
     extract_first_policy_store(&agama_policy_store)
 }
@@ -194,7 +194,7 @@ async fn load_policy_store_from_cjar_url(
     use crate::common::policy_store::loader;
 
     // Fetch the archive bytes via HTTP
-    let client = HttpClient::new(3, Duration::from_secs(3))?;
+    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
     let bytes = client
         .get_bytes(url)
         .await
@@ -232,7 +232,7 @@ async fn load_policy_store_from_cjar_url(
     use crate::common::policy_store::loader;
 
     // Fetch the archive bytes via HTTP
-    let client = HttpClient::new(3, Duration::from_secs(3))?;
+    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
     let bytes = client
         .get_bytes(url)
         .await
