@@ -36,8 +36,15 @@ impl HttpClient {
         retry_delay: Duration,
         request_timeout: Duration,
     ) -> Result<Self, HttpClientError> {
-        let client = Client::builder()
-            .timeout(request_timeout)
+        // WASM's reqwest backend (browser fetch) doesn't expose `.timeout(...)`;
+        // request timing is handled by the browser. `request_timeout` is
+        // intentionally consumed as a no-op on that target.
+        let builder = Client::builder();
+        #[cfg(not(target_arch = "wasm32"))]
+        let builder = builder.timeout(request_timeout);
+        #[cfg(target_arch = "wasm32")]
+        let _ = request_timeout;
+        let client = builder
             .build()
             .map_err(HttpRequestError::InitializeHttpClient)?;
 

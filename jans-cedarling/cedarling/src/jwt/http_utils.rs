@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::sync::LazyLock;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
 use crate::common::issuer_utils::IssClaim;
@@ -17,17 +18,24 @@ use url::Url;
 
 /// Total time budget for any single OIDC discovery, JWKS, or status-list fetch.
 /// Without a bound, a slow or unresponsive issuer can stall a Cedarling task
-/// forever and starve the tokio runtime.
+/// forever and starve the tokio runtime. WASM targets rely on the browser
+/// fetch backend's own timing — `reqwest::ClientBuilder` doesn't expose
+/// `timeout` there.
+#[cfg(not(target_arch = "wasm32"))]
 const HTTP_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// Time budget for the TCP connect step alone. Most healthy issuers respond well
 /// inside this window; a longer wait usually means the host is unreachable.
+#[cfg(not(target_arch = "wasm32"))]
 const HTTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 
 static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| {
-    Client::builder()
+    let builder = Client::builder();
+    #[cfg(not(target_arch = "wasm32"))]
+    let builder = builder
         .timeout(HTTP_REQUEST_TIMEOUT)
-        .connect_timeout(HTTP_CONNECT_TIMEOUT)
+        .connect_timeout(HTTP_CONNECT_TIMEOUT);
+    builder
         .build()
         .expect("default reqwest client should build")
 });
