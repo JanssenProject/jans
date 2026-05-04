@@ -18,9 +18,33 @@ use url::Url;
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-pub(super) trait GetFromUrl<T> {
+pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
     /// Send a get request to receive the resource from a URL
-    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError>;
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError> {
+        // add delay to simulate network latency and test async behavior
+        // it would be great to implement delay in mock server, but mockito doesn't support it.
+        #[cfg(test)]
+        {
+            use std::time::Duration;
+            use tokio::time::sleep;
+
+            sleep(Duration::from_millis(1)).await;
+        }
+
+        let result = client
+            .raw_client
+            .get(url.as_str())
+            .send()
+            .await
+            .map_err(HttpError::GetRequest)?
+            .error_for_status()
+            .map_err(HttpError::ErrorCode)?
+            .json::<T>()
+            .await
+            .map_err(HttpError::JsonDeserializeResponse)?;
+
+        Ok(result)
+    }
 }
 
 #[derive(Deserialize)]
@@ -57,55 +81,9 @@ where
     Ok(url)
 }
 
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
-    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
-        // add delay to simulate network latency and test async behavior of trusted issuers loading
-        // it would be great to implement delay in mock server, but mockito doesn't support it.
-        #[cfg(test)]
-        {
-            use std::time::Duration;
-            use tokio::time::sleep;
+impl GetFromUrl<OpenIdConfig> for OpenIdConfig {}
 
-            sleep(Duration::from_millis(1)).await;
-        }
-
-        let openid_config = client
-            .raw_client
-            .get(url.as_str())
-            .send()
-            .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<OpenIdConfig>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
-
-        Ok(openid_config)
-    }
-}
-
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<JwkSet> for JwkSet {
-    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
-        let jwk_set = client
-            .raw_client
-            .get(url.as_str())
-            .send()
-            .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<JwkSet>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
-
-        Ok(jwk_set)
-    }
-}
+impl GetFromUrl<JwkSet> for JwkSet {}
 
 // NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
