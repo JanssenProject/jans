@@ -18,15 +18,13 @@ import io.jans.lock.cedarling.config.BootstrapConfig;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
-import io.jans.service.cdi.event.ApplicationInitialized;
-import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import uniffi.cedarling_uniffi.AuthorizeResult;
 import uniffi.cedarling_uniffi.CedarlingException;
+import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 
 /**
  * 
@@ -34,6 +32,8 @@ import uniffi.cedarling_uniffi.CedarlingException;
  */
 @ApplicationScoped
 public class CedarlingAuthorizationService {
+
+	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_Token";
 
 	@Inject
 	private Logger log;
@@ -75,8 +75,8 @@ public class CedarlingAuthorizationService {
 	    BootstrapConfig config = BootstrapConfig.builder()
 	        .applicationName("Lock Server")
 	        .policyStoreLocal(policyConfiguration.getPolicy())
-	        .userAuthz(false)
-	        .workloadAuthz(true)
+	        .jwtSigValidation(false)
+	        .jwtSigValidation(false)
 	        .logType(cedarConf.getLogType())
 	        .logLevel(cedarConf.getLogLevel())
 	        .build();
@@ -121,29 +121,29 @@ public class CedarlingAuthorizationService {
 	}
 	
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
-//		try {
-//			if (log.isDebugEnabled()) {
-//				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
-//						tokens, action, resource, context);
-//			}
-//			AuthorizeResult res = cedarlingAdapter.authorize(/*tokens/* null, action, resource, context);
-//			
-//			if (res == null) {
-//				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
-//						tokens, action, resource, context);
-//				return false;
-//			}
-//
-//			String requestId = res.getRequestId();
-//			if (log.isDebugEnabled()) {
-//				log.debug("Authorization workload decision {} for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
-//						res.getDecision(), requestId, tokens, action, resource, context);
-//			}
-//
-//			return res.getDecision();
-//		} catch (Exception ex) {
-//			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
-//		}
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
+						tokens, action, resource, context);
+			}
+			MultiIssuerAuthorizeResult res = cedarlingAdapter.authorizeMultiIssuer(tokens, action, resource, context);
+			
+			if (res == null) {
+				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
+						tokens, action, resource, context);
+				return false;
+			}
+
+			String requestId = res.getRequestId();
+			if (log.isDebugEnabled()) {
+				log.debug("Authorization workload decision {} for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+						res.getDecision(), requestId, tokens, action, resource, context);
+			}
+
+			return res.getDecision();
+		} catch (Exception ex) {
+			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
+		}
 		
 		return false;
 	}
