@@ -153,6 +153,17 @@ public class AuthorizeParamsValidatorTest {
     }
 
     @Test
+    public void validateParamsWithReason_whenFapiAndQueryModeAndEmptyResponseType_shouldReturnResponseTypeRequiredReason() {
+        List<ResponseType> responseTypes = Collections.emptyList();
+        List<Prompt> prompts = Collections.emptyList();
+
+        String reason = AuthorizeParamsValidator.validateParamsWithReason(responseTypes, prompts, "nonce123", true, ResponseMode.QUERY);
+
+        assertNotNull(reason);
+        assertEquals(reason, "response_type is required");
+    }
+
+    @Test
     public void validateParamsWithReason_whenAllValid_shouldReturnNull() {
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
         List<Prompt> prompts = Collections.singletonList(Prompt.LOGIN);

@@ -45,6 +45,10 @@ public class AuthorizeParamsValidator {
      */
     public static String validateParamsWithReason(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
                                                   boolean fapiCompatibility, ResponseMode responseMode) {
+        if (responseTypes.isEmpty()) {
+            return "response_type is required";
+        }
+
         if (fapiCompatibility) {
             // The authorization server shall require the response_type value code in conjunction with the response_mode value jwt
             if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE) && responseMode != ResponseMode.JWT) {
@@ -69,10 +73,6 @@ public class AuthorizeParamsValidator {
         }
         if (!existsNonce && responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1) {
             return "nonce is required for response_type=token";
-        }
-
-        if (responseTypes.isEmpty()) {
-            return "response_type is required";
         }
 
         if (!noNonePrompt(prompts)) {
