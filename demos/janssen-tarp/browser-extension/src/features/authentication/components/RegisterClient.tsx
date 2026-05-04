@@ -1,195 +1,233 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import { v4 as uuidv4 } from 'uuid';
-import CircularProgress from "@mui/material/CircularProgress";
-import { labelWithTooltip } from '../../../shared/components/Common';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import Stack from '@mui/material/Stack';
 import axios from 'axios';
-import Alert, { AlertColor } from '@mui/material/Alert';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
 import type { Moment } from 'moment';
+import moment from 'moment';
+import { Spinner} from '../../../shared/components/Common';
+import { LabelWithTooltip } from '../../../shared/components/Common';
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type ScopeOption = { id?: string; name: string; label?: string; create?: boolean };
+type AlertSeverity = 'success' | 'error' | 'warning' | 'info';
 
 type RegisterClientProps = {
   isOpen: boolean;
   handleDialog: (isOpen: boolean) => void;
 };
 
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+/** Alert banner */
+const AlertBanner = ({ severity, message }: { severity: AlertSeverity; message: string }) => {
+  const styles: Record<AlertSeverity, string> = {
+    success: 'bg-emerald-50 border-emerald-300 text-emerald-800',
+    error:   'bg-red-50   border-red-300   text-red-800',
+    warning: 'bg-amber-50 border-amber-300 text-amber-800',
+    info:    'bg-blue-50  border-blue-300  text-blue-800',
+  };
+  const icons: Record<AlertSeverity, string> = {
+    success: '✓', error: '✕', warning: '⚠', info: 'ℹ',
+  };
+  return (
+    <div className={`flex items-start gap-2 border rounded-lg px-4 py-3 text-sm ${styles[severity]}`}>
+      <span className="font-bold mt-0.5">{icons[severity]}</span>
+      <span>{message}</span>
+    </div>
+  );
+};
+
+/** Scope tag pill */
+const ScopeTag = ({ name, onRemove }: { name: string; onRemove: () => void }) => (
+  <span className="inline-flex items-center gap-1 bg-[#d1fae5] text-[#065f46] text-xs font-semibold px-2.5 py-1 rounded-full">
+    {name}
+    <button
+      type="button"
+      onClick={onRemove}
+      className="ml-0.5 hover:text-red-500 transition-colors leading-none"
+    >
+      ×
+    </button>
+  </span>
+);
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
 export default function RegisterClient({ isOpen, handleDialog }: RegisterClientProps) {
-  const [open, setOpen] = React.useState(isOpen);
-  const [selectedScopes, setSelectedScopes] = React.useState<ScopeOption[]>([])
-  const [scopeOptions] = React.useState<ScopeOption[]>([{ name: "openid" }]);
+  const [selectedScopes, setSelectedScopes] = React.useState<ScopeOption[]>([{ name: 'openid' }]);
+  const [scopeInput, setScopeInput] = React.useState('');
   const [expireAt, setExpireAt] = React.useState<Moment | null>(null);
   const [issuer, setIssuer] = React.useState<string | null>(null);
-  const [issuerError, setIssuerError] = React.useState("")
-  const [alert, setAlert] = React.useState("")
-  const [alertSeverity, setAlertSeverity] = React.useState<AlertColor>('success');
+  const [issuerError, setIssuerError] = React.useState('');
+  const [alert, setAlert] = React.useState('');
+  const [alertSeverity, setAlertSeverity] = React.useState<AlertSeverity>('success');
   const [loading, setLoading] = React.useState(false);
 
-  const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.'
-  const filter = createFilterOptions<ScopeOption>();
+  const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.';
 
+  // Reset state when dialog opens
   React.useEffect(() => {
     if (isOpen) {
-      handleOpen();
-    } else {
-      handleClose();
+      setIssuerError('');
+      setAlert('');
+      setLoading(false);
+      setSelectedScopes([{ name: 'openid' }]);
+      setExpireAt(null);
+      setIssuer(null);
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleClose = () => {
-    handleDialog(false)
-    setOpen(false);
+    handleDialog(false);
   };
 
-  const handleOpen = () => {
-    setIssuerError('');
-    setAlert('');
-    setLoading(false);
-    handleDialog(true)
-    setOpen(true);
-  };
+  // ── Helpers ────────────────────────────────────────────────────────────────
 
-  const validateIssuer = async (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-
-    setIssuerError('');
-    let issuer = e.target.value;
-    if (issuer.length === 0) {
-      e.target.value = '';
-      return;
+  const generateOpenIdConfigurationURL = (raw: string): string => {
+    let url = raw.trim();
+    if (!url.includes('http')) url = 'https://' + url;
+    if (!url.includes('/.well-known/openid-configuration')) {
+      url = url.replace(/\/$/, '') + '/.well-known/openid-configuration';
     }
-    setLoading(true);
-    const openIdConfigurationURL = generateOpenIdConfigurationURL(issuer);
+    return url;
+  };
+
+  const getOpenidConfiguration = async (endpoint: string) => {
     try {
-      const opConfiguration = await getOpenidConfiguration(openIdConfigurationURL);
-      if (!opConfiguration || !opConfiguration.data.issuer) {
+      setAlert('');
+      return await axios({ method: 'GET', url: endpoint });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const registerOIDCClient = async (endpoint: string, payload: RegistrationRequest) => {
+    try {
+      setAlert('');
+      return await axios({
+        method: 'POST',
+        url: endpoint,
+        headers: { 'content-type': 'application/json' },
+        data: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error('Error registering OIDC client:', err);
+      setAlert('Error in registering OIDC client. Check error log on console.');
+      setAlertSeverity('error');
+    }
+  };
+
+  // ── Issuer validation (on blur) ────────────────────────────────────────────
+
+  const validateIssuer = async (e: React.FocusEvent<HTMLInputElement>) => {
+    setIssuerError('');
+    const raw = e.target.value.trim();
+    if (!raw) return;
+
+    setLoading(true);
+    const configUrl = generateOpenIdConfigurationURL(raw);
+    try {
+      const resp = await getOpenidConfiguration(configUrl);
+      if (!resp?.data?.issuer) {
         setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
         e.target.value = '';
+      } else {
+        setIssuer(configUrl);
       }
-      setIssuer(openIdConfigurationURL);
-    } catch (err) {
-      console.error(err)
+    } catch {
       setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
       e.target.value = '';
     }
     setLoading(false);
   };
 
-  const generateOpenIdConfigurationURL = (issuer: string) => {
-    if (issuer.length === 0) {
-      return '';
-    }
-    if (!issuer.includes('/.well-known/openid-configuration')) {
-      issuer = issuer + '/.well-known/openid-configuration';
-    }
+  // ── Scope management ───────────────────────────────────────────────────────
 
-    if (!issuer.includes('https') && !issuer.includes('http')) {
-      issuer = 'https://' + issuer;
-    }
-    return issuer;
+  const addScope = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (selectedScopes.some((s) => s.name === trimmed)) return;
+    setSelectedScopes((prev) => [...prev, { name: trimmed }]);
   };
 
-  const registerOIDCClient = async (registration_endpoint: string, registerObj: RegistrationRequest) => {
-    try {
-      setAlert('');
-      const registerReqOptions = {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        data: JSON.stringify(registerObj),
-        url: registration_endpoint,
-      };
+  const removeScope = (name: string) => {
+    setSelectedScopes((prev) => prev.filter((s) => s.name !== name));
+  };
 
-      const response = await axios(registerReqOptions);
-      return await response;
-    } catch (err) {
-      console.error('Error in fetching Openid configuration: ' + err);
-      setAlert('Error in fetching Openid configuration. Check error log on console.');
-      setAlertSeverity('error');
+  const handleScopeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addScope(scopeInput);
+      setScopeInput('');
     }
   };
 
-  const getOpenidConfiguration = async (opConfigurationEndpoint: string) => {
-    try {
-      setAlert('');
-      const oidcConfigOptions = {
-        method: 'GET',
-        url: opConfigurationEndpoint,
-      };
-      const response = await axios(oidcConfigOptions);
-      return await response;
-    } catch (err) {
-      console.error(err)
-    }
-  };
+  // ── Storage helpers ────────────────────────────────────────────────────────
+
+  const storeOpenIDConfiguration = (config: OpenIDConfiguration): Promise<void> =>
+    new Promise((resolve, reject) => {
+      chrome.storage.local.get(['openidConfigurations'], (result) => {
+        if (chrome.runtime.lastError) { reject(chrome.runtime.lastError); return; }
+        const configs: OpenIDConfiguration[] = result.openidConfigurations || [];
+        const idx = configs.findIndex((c) => c.issuer === config.issuer);
+        if (idx >= 0) configs[idx] = config; else configs.push(config);
+        chrome.storage.local.set({ openidConfigurations: configs }, () => {
+          chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve();
+        });
+      });
+    });
+
+  const storeOIDCClient = (client: OIDCClient): Promise<void> =>
+    new Promise((resolve, reject) => {
+      chrome.storage.local.get(['oidcClients'], (result) => {
+        if (chrome.runtime.lastError) { reject(chrome.runtime.lastError); return; }
+        const clients: OIDCClient[] = result.oidcClients || [];
+        const idx = clients.findIndex((c) => c.clientId === client.clientId && c.opHost === client.opHost);
+        if (idx >= 0) clients[idx] = client; else clients.push(client);
+        clients.sort((a, b) => b.registrationDate - a.registrationDate);
+        chrome.storage.local.set({ oidcClients: clients }, () => {
+          chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve();
+        });
+      });
+    });
+
+  // ── Register ───────────────────────────────────────────────────────────────
 
   const registerClient = async (): Promise<void> => {
     try {
       setLoading(true);
 
-      // Validate issuer
-      if (!issuer || issuer === '') {
+      if (!issuer) {
         setIssuerError('Issuer cannot be left blank. Either enter correct Issuer or OpenID Configuration URL.');
         return;
       }
 
-      // Normalize issuer URL
-      let issuerUrl: string;
       let opConfigurationEndpoint: string;
+      let issuerUrl: string;
 
-      try {
-        // Check if the issuer is already a configuration endpoint or needs .well-known/openid-configuration
-        if (issuer.includes('.well-known/openid-configuration')) {
-          opConfigurationEndpoint = issuer;
-          const url = new URL(issuer);
-          issuerUrl = issuer.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
-        } else {
-          issuerUrl = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
-          opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
-        }
-      } catch (error) {
-        setAlert('Invalid URL format. Please enter a valid URL.');
-        setAlertSeverity('error');
-        return;
+      if (issuer.includes('.well-known/openid-configuration')) {
+        opConfigurationEndpoint = issuer;
+        issuerUrl = issuer.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
+      } else {
+        issuerUrl = issuer.replace(/\/$/, '');
+        opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
       }
 
-      // Prepare scopes
-      const scopes = selectedScopes.map((ele) => ele.name).join(" ");
-
-      // Fetch OpenID configuration
+      const scopes = selectedScopes.map((s) => s.name).join(' ');
       const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
 
       if (!openidConfig?.data) {
-        setAlert('Error in fetching OpenID configuration!');
-        setAlertSeverity('error');
-        return;
+        setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error'); return;
       }
 
       const configData = openidConfig.data;
 
-      // Validate required endpoints
       if (!configData.registration_endpoint) {
-        setAlert('OpenID configuration does not contain a registration endpoint');
-        setAlertSeverity('error');
-        return;
+        setAlert('OpenID configuration does not contain a registration endpoint'); setAlertSeverity('error'); return;
       }
 
-      // Store multiple OpenID configurations
       await storeOpenIDConfiguration(configData);
 
-      // Register OIDC client
-      const registrationUrl = configData.registration_endpoint;
       const clientId = `janssen-tarp-${uuidv4()}`;
 
       const registerObj: RegistrationRequest = {
@@ -202,28 +240,22 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         client_name: clientId,
         token_endpoint_auth_method: 'client_secret_basic',
         access_token_as_jwt: true,
-        userinfo_signed_response_alg: "RS256",
-        jansInclClaimsInIdTkn: "true",
-        access_token_lifetime: 86400 // 1 day
+        userinfo_signed_response_alg: 'RS256',
+        jansInclClaimsInIdTkn: 'true',
+        access_token_lifetime: 86400,
       };
 
-      // Add expiration if specified
       if (expireAt) {
-        const lifetimeSeconds = Math.floor((expireAt.valueOf() - Date.now()) / 1000);
-        if (lifetimeSeconds > 0) {
-          registerObj.lifetime = lifetimeSeconds;
-        }
+        const lifetime = Math.floor((expireAt.valueOf() - Date.now()) / 1000);
+        if (lifetime > 0) registerObj.lifetime = lifetime;
       }
 
-      const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
+      const registrationResp = await registerOIDCClient(configData.registration_endpoint, registerObj);
 
       if (!registrationResp?.data) {
-        setAlert(REGISTRATION_ERROR);
-        setAlertSeverity('error');
-        return;
+        setAlert(REGISTRATION_ERROR); setAlertSeverity('error'); return;
       }
 
-      // Create client object
       const newClient: OIDCClient = {
         id: uuidv4(),
         opHost: issuerUrl,
@@ -241,22 +273,14 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         expireAt: expireAt ? expireAt.valueOf() : undefined,
         showClientExpiry: !!expireAt,
         registrationDate: Date.now(),
-        openidConfiguration: configData
+        openidConfiguration: configData,
       };
 
-      // Store the new client
       await storeOIDCClient(newClient);
-
-      console.log('OIDC client registered successfully!', {
-        clientId: newClient.clientId,
-        opHost: newClient.opHost
-      });
 
       setAlert('Registration successful!');
       setAlertSeverity('success');
-
       handleClose();
-
     } catch (err) {
       console.error('Client registration failed:', err);
       setAlert(err instanceof Error ? err.message : REGISTRATION_ERROR);
@@ -266,216 +290,154 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
     }
   };
 
-  // Helper function to store multiple OpenID configurations
-  const storeOpenIDConfiguration = async (config: OpenIDConfiguration): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      chrome.storage.local.get(["openidConfigurations"], (result) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-          return;
-        }
-        try {
-          const configs: OpenIDConfiguration[] = result.openidConfigurations || [];
+  // ── Render ─────────────────────────────────────────────────────────────────
 
-          // Use the authoritative issuer from the config, not the derived URL
-          const authoritativeIssuer: string = config.issuer;
-
-          // Check if configuration already exists (by issuer )
-          const existingIndex = configs.findIndex(c =>
-            c.issuer === authoritativeIssuer
-          );
-
-          if (existingIndex >= 0) {
-            // Update existing configuration
-            configs[existingIndex] = config;
-          } else {
-            // Add new configuration
-            configs.push(config);
-          }
-
-          chrome.storage.local.set({ openidConfigurations: configs }, () => {
-            if (chrome.runtime.lastError) {
-              reject(chrome.runtime.lastError);
-            } else {
-              console.log(`OpenID configuration stored for ${authoritativeIssuer}`);
-              resolve();
-            }
-          });
-
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-  };
-
-  // Helper function to store OIDC client with support for multiple clients
-  const storeOIDCClient = async (client: OIDCClient): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      chrome.storage.local.get(["oidcClients"], (result) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-          return;
-        }
-        try {
-          const clients: OIDCClient[] = result.oidcClients || [];
-
-          // Check if client already exists (by clientId or opHost + clientId combination)
-          const existingIndex = clients.findIndex(c =>
-            c.clientId === client.clientId && c.opHost === client.opHost
-          );
-
-          if (existingIndex >= 0) {
-            // Update existing client
-            clients[existingIndex] = client;
-          } else {
-            // Add new client
-            clients.push(client);
-          }
-
-          // Sort clients by registration date (newest first)
-          clients.sort((a, b) => b.registrationDate - a.registrationDate);
-
-          chrome.storage.local.set({ oidcClients: clients }, () => {
-            if (chrome.runtime.lastError) {
-              reject(chrome.runtime.lastError);
-            } else {
-              console.log(`Client stored: ${client.clientId}`);
-              resolve();
-            }
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-  };
+  if (!isOpen) return null;
 
   return (
-    <React.Fragment>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        className="form-container"
-      >
-        <DialogTitle>Register OIDC Client</DialogTitle>
-        {loading ? (
-          <div className="loader-overlay">
-            <CircularProgress color="success" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        onClick={handleClose}
+      />
+
+      {/* Modal card */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8">
+
+        {/* Loading overlay */}
+        {loading && <Spinner />}
+
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-[#1a3a2a] mb-1">Register OIDC Client</h2>
+        <p className="text-slate-500 text-sm mb-6">Submit below details to create a new OIDC client.</p>
+
+        {/* Alert */}
+        {alert && (
+          <div className="mb-5">
+            <AlertBanner severity={alertSeverity} message={alert} />
           </div>
-        ) : (
-          ""
         )}
-        <DialogContent>
-          <DialogContentText>
-            Submit below details to create a new OIDC client.
-          </DialogContentText>
-          <Stack
-            component="form"
-            sx={{
-              width: '75ch',
-            }}
-            spacing={2}
-            noValidate
-            autoComplete="off"
-          >
-            {alert ?
-              <Alert severity={alertSeverity}>{alert}</Alert> : ''
-            }
-            <TextField
-              error={issuerError.length !== 0}
-              autoFocus
-              required
-              margin="dense"
+
+        <div className="flex flex-col gap-5">
+
+          {/* ── Issuer ── */}
+          <div>
+            <label htmlFor="issuer" className="block mb-1.5">
+              <LabelWithTooltip
+                label="Issuer *"
+                tip="Your OpenID Provider base URL (or its /.well-known/openid-configuration). We'll discover endpoints and register a new client."
+              />
+            </label>
+            <input
               id="issuer"
-              name="issuer"
-              label={labelWithTooltip(
-                "Issuer",
-                "Your OpenID Provider base URL (or its /.well-known/openid-configuration). We’ll discover endpoints and register a new client."
-              )}
               type="text"
-              fullWidth
-              variant="outlined"
-              helperText={issuerError}
-              onBlur={(e) => {
-                validateIssuer(e);
-              }}
+              autoFocus
+              placeholder="https://your-op.example.com"
+              onBlur={validateIssuer}
+              className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:border-[#1a6b3c] transition-all bg-slate-50/60
+                ${issuerError
+                  ? 'border-red-400 focus:ring-red-200'
+                  : 'border-slate-200 focus:ring-[#1a6b3c]/30'
+                }`}
             />
-            <LocalizationProvider dateAdapter={AdapterMoment}>
-              <DemoContainer components={['DateTimePicker']}>
-                <DateTimePicker
-                  label={labelWithTooltip(
-                    "Client Expiry Date",
-                    "Optional. If set, the client will be marked as expired after this date/time."
-                  )}
-                  disablePast
-                  onChange={(newValue) => setExpireAt(newValue)}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <Autocomplete<ScopeOption, true, false, true>
-              value={selectedScopes}
-              multiple
-              defaultValue={[scopeOptions[0]]}
-              onChange={(_event, newValue) => {
-                const normalized: ScopeOption[] = newValue.map((v) =>
-                  typeof v === 'string' ? { name: v, create: true } : v
-                );
-                setSelectedScopes(normalized);
-              }}
-              filterSelectedOptions
-              filterOptions={(options, params) => {
-                const filtered = filter(options, params);
+            {issuerError && (
+              <p className="mt-1.5 text-xs text-red-600">{issuerError}</p>
+            )}
+          </div>
 
-                const { inputValue } = params;
-                // Suggest the creation of a new value
-                const isExisting = options.some((option) => inputValue === option.name);
-                if (inputValue !== '' && !isExisting) {
-                  filtered.push({
-                    name: inputValue,
-                    label: `Add "${inputValue}"`,
-                    create: true
-                  });
+          {/* ── Client Expiry Date ── */}
+          <div>
+            <label htmlFor="expiry" className="block mb-1.5">
+              <LabelWithTooltip
+                label="Client Expiry Date"
+                tip="Optional. If set, the client will be marked as expired after this date/time."
+              />
+            </label>
+            <div className="relative">
+              <input
+                id="expiry"
+                type="datetime-local"
+                min={moment().format('YYYY-MM-DDTHH:mm')}
+                onChange={(e) =>
+                  setExpireAt(e.target.value ? moment(e.target.value) : null)
                 }
+                className="w-full border border-slate-200 rounded-lg px-4 py-3 pr-10 text-sm text-slate-700
+                  focus:outline-none focus:ring-2 focus:ring-[#1a6b3c]/30 focus:border-[#1a6b3c]
+                  transition-all bg-slate-50/60 appearance-none"
+              />
+            </div>
+          </div>
 
-                return filtered;
-              }}
-              selectOnFocus
-              clearOnBlur
-              handleHomeEndKeys
-              id="scope"
-              options={scopeOptions}
-              getOptionLabel={(option) => {
-                // Value selected with enter, right from the input
-                if (typeof option === 'string') {
-                  return option;
-                }
-                // Add "xxx" option created dynamically
-                if (option.label) return option.name;
-                // Regular option
-                return option.name;
-              }}
-              renderOption={(props, option) => (
-                <li {...props}>{option.create ? (option.label ?? option.name) : option.name}</li>
-              )}
-              freeSolo
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={labelWithTooltip(
-                    "Scopes",
-                    "Requested OAuth/OIDC scopes for this client (e.g. openid, profile, email). You can also type a custom scope and press Enter to add it."
-                  )}
-                />
-              )}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-          <Button variant="outlined" type="submit" onClick={registerClient}>Register</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
+          {/* ── Scopes ── */}
+          <div>
+            <label htmlFor="scopes" className="block mb-1.5">
+              <LabelWithTooltip
+                label="Scopes"
+                tip="Requested OAuth/OIDC scopes for this client (e.g. openid, profile, email). Type a scope and press Enter to add it."
+              />
+            </label>
+
+            {/* Tag container */}
+            <div
+              className="min-h-[48px] w-full border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap gap-1.5
+                focus-within:ring-2 focus-within:ring-[#1a6b3c]/30 focus-within:border-[#1a6b3c]
+                transition-all bg-slate-50/60 cursor-text"
+              onClick={() => document.getElementById('scopes')?.focus()}
+            >
+              {selectedScopes.map((s) => (
+                <ScopeTag key={s.name} name={s.name} onRemove={() => removeScope(s.name)} />
+              ))}
+              <input
+                id="scopes"
+                type="text"
+                value={scopeInput}
+                onChange={(e) => setScopeInput(e.target.value)}
+                onKeyDown={handleScopeKeyDown}
+                onBlur={() => { if (scopeInput.trim()) { addScope(scopeInput); setScopeInput(''); } }}
+                placeholder={selectedScopes.length === 0 ? 'e.g. openid profile email' : ''}
+                className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-700 placeholder-slate-400
+                  focus:outline-none py-0.5"
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-400">Type scope and Press Enter to add a scope.</p>
+          </div>
+        </div>
+
+        {/* ── Actions ── */}
+        <div className="mt-8 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-300
+              rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={registerClient}
+            disabled={loading}
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
+              rounded-lg transition-colors shadow-sm shadow-green-200"
+          >
+            Register
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

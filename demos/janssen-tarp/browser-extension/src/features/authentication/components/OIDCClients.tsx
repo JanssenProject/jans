@@ -1,224 +1,309 @@
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
-import { pink, green } from '@mui/material/colors';
-import Paper from '@mui/material/Paper';
-import AddIcon from '@mui/icons-material/Add';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import {
+  Trash2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+} from 'lucide-react';
+
 import RegisterClient from './RegisterClient';
 import AuthFlowInputs from './AuthFlowInputs';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import CheckCircleOutlineRounded from '@mui/icons-material/CheckCircleOutlineRounded';
-import LiveHelpIcon from '@mui/icons-material/LiveHelp';
-import HelpDrawer from '../../../options/helpDrawer';
-import Alert from '@mui/material/Alert';
-import StyledTableCell from '../../../shared/components/StyledTableCell';
 import { ClientDetails } from '../type/Authentication';
+import { SuccessAlert } from '../../../shared/components/Common';
 
-function createData(
-    opHost: string,
-    clientId: string,
-    clientSecret: string,
-    showClientExpiry: boolean,
-    expireAt: number,
-    scope: string,
-    redirectUris: string[],
-    authorizationEndpoint: string,
-    tokenEndpoint: string,
-    userinfoEndpoint: string,
-    endSessionEndpoint: string,
-    responseType: string,
-    postLogoutRedirectUris: string[],
-    acrValuesSupported: string[],
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
 
-) {
-    return {
-        opHost,
-        clientId,
-        clientSecret,
-        showClientExpiry,
-        expireAt,
-        scope,
-        redirectUris,
-        authorizationEndpoint,
-        tokenEndpoint,
-        userinfoEndpoint,
-        endSessionEndpoint,
-        responseType,
-        postLogoutRedirectUris,
-        acrValuesSupported,
-    };
-}
-
-/**
- * Render a table row representing an OIDC client with controls to delete the client and trigger an authentication flow.
- *
- * @param props.row - OIDC client data (as returned by `createData`) used to populate the row's cells.
- * @param props.notifyOnDataChange - Callback invoked after client data changes (for example, after deletion or when the auth flow is triggered).
- * @returns A JSX element containing the table row and its action controls.
- */
-function Row(props: { row: ClientDetails, notifyOnDataChange: () => void }) {
-    const { row, notifyOnDataChange } = props;
-    const [open, setOpen] = React.useState(false);
-    const lifetime = row.expireAt ? Math.floor((row.expireAt - Date.now()) / 1000) : -1;
-
-    const handleDialog = (isOpen: boolean) => {
-        setOpen(isOpen);
-    };
-
-    async function resetClient() {
-        chrome.storage.local.get(["oidcClients"], (result: { oidcClients?: { clientId: string }[] }) => {
-            let clientArr: { clientId: string }[] = []
-            if (!!result.oidcClients) {
-                clientArr = result.oidcClients;
-                chrome.storage.local.set({ oidcClients: clientArr.filter((obj) => obj.clientId !== row.clientId) });
-            }
-        });
-        notifyOnDataChange();
-    }
-
-    return (
-        <React.Fragment>
-            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange} />
-            <TableRow
-                hover
-                sx={{
-                    '& > *': { borderBottom: 'unset' },
-                }}
-            >
-                <TableCell>
-                    <Tooltip title="Delete Client from janssen-tarp">
-                        <IconButton aria-label="Delete">
-                            <DeleteForeverOutlinedIcon sx={{ color: pink[500] }} onClick={resetClient} />
-                        </IconButton>
-                    </Tooltip>
-                </TableCell>
-                <TableCell component="th" scope="row" align="left">
-                    {row.opHost}
-                </TableCell>
-                <TableCell align="left" component="th" scope="row">{row.clientId}</TableCell>
-                <TableCell align="left" component="th" scope="row">
-                    <Tooltip title={row.clientSecret}>
-                        <span>{row.clientSecret}</span>
-                    </Tooltip>
-                </TableCell>
-                <TableCell align="left" component="th" scope="row">
-                    {row.showClientExpiry ? (!(lifetime <= 0) ? <CheckCircleOutlineRounded sx={{ color: green[500] }} /> : <HighlightOffIcon sx={{ color: pink[500] }} />) : <CheckCircleOutlineRounded sx={{ color: green[500] }} />}
-                </TableCell>
-                <TableCell component="th" scope="row">
-                    <Tooltip title="Trigger authentication flow">
-                    <IconButton
-                            aria-label="Trigger Auth Flow"
-                            onClick={() => {
-                                setOpen(true);
-                                notifyOnDataChange();
-                            }}
-                        >
-                            <OfflineBoltIcon sx={{ color: green[500] }} />
-                        </IconButton>
-                    </Tooltip>
-                </TableCell>
-            </TableRow>
-        </React.Fragment>
-    );
-}
-
-type OIDCClientsProps = {
-    data: any;
-    notifyOnDataChange: () => void;
+export type OIDCClient = {
+  opHost: string;
+  clientId: string;
+  clientSecret: string;
+  showClientExpiry: boolean;
+  expireAt: number;
+  scope: string;
+  redirectUris: string[];
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  endSessionEndpoint: string;
+  responseType: string;
+  postLogoutRedirectUris: string[];
+  acrValuesSupported: string[];
 };
 
-export default function OIDCClients({ data, notifyOnDataChange }: OIDCClientsProps) {
-    const [modelOpen, setModelOpen] = React.useState(false);
-    const [drawerOpen, setDrawerOpen] = React.useState(false);
-    const handleDialog = (isOpen: boolean) => {
-        setModelOpen(isOpen);
-        notifyOnDataChange();
-    };
+type OIDCClientsProps = {
+  data: OIDCClient[];
+  notifyOnDataChange: () => void;
+};
 
-    const handleDrawer = (isOpen: boolean) => {
-        setDrawerOpen(isOpen);
-    };
+type ClientRowProps = {
+  row: ClientDetails;
+  index: number;
+  notifyOnDataChange: () => void;
+  onDelete?: (client: ClientDetails) => void;
+};
 
-    return (
-        <Container maxWidth="lg">
-            <RegisterClient isOpen={modelOpen} handleDialog={handleDialog} />
-            <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
-            <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
-                <Stack
-                    direction="row"
-                    sx={{ mb: 1, justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                    <div>
-                        <Typography variant="h6" sx={{ mb: 0.5 }}>
-                            OIDC Clients
-                        </Typography>
-                    </div>
-                    <Button
-                        color="success"
-                        variant="outlined"
-                        startIcon={<AddIcon />}
-                        onClick={() => setModelOpen(true)}
-                        sx={{ borderRadius: 999, textTransform: 'none', maxWidth: 200 }}
-                    >
-                        Add client
-                    </Button>
-                </Stack>
-                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-                    <Table aria-label="collapsible table">
-                        <TableHead>
-                            <TableRow>
-                                <StyledTableCell />
-                                <StyledTableCell>Issuer</StyledTableCell>
-                                <StyledTableCell>Client ID</StyledTableCell>
-                                <StyledTableCell>Client Secret</StyledTableCell>
-                                <StyledTableCell>Active</StyledTableCell>
-                                <StyledTableCell align="right">Action</StyledTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {(data === undefined || data?.length == 0)
-                                ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6}>
-                                            <Alert severity="info">
-                                                No clients configured yet. Use &quot;Add client&quot; to get started.
-                                            </Alert>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    data.map((row: any) => (
-                                        <Row
-                                            key={`${row?.opHost}-${row?.clientId}`}
-                                            row={row}
-                                            notifyOnDataChange={notifyOnDataChange}
-                                        />
-                                    ))
-                                )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <Button
-                    color="secondary"
-                    variant="outlined"
-                    startIcon={<LiveHelpIcon />}
-                    onClick={() => handleDrawer(true)}
-                    sx={{ maxWidth: 180, alignSelf: 'flex-start', textTransform: 'none' }}
-                >
-                    Need help?
-                </Button>
-            </Stack>
-        </Container>
+/* -------------------------------------------------------------------------- */
+/* Reusable Row Component                                                     */
+/* -------------------------------------------------------------------------- */
+
+function ClientRow({
+  row,
+  index,
+  notifyOnDataChange,
+  onDelete,
+}: ClientRowProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const lifetime = row.expireAt
+    ? Math.floor((row.expireAt - Date.now()) / 1000)
+    : -1;
+
+  const isEnabled =
+    row.showClientExpiry && lifetime > 0;
+
+  const handleDialog = (isOpen: boolean) => {
+    setOpen(isOpen);
+    notifyOnDataChange();
+  };
+
+  return (
+    <>
+      <AuthFlowInputs
+        isOpen={open}
+        handleDialog={handleDialog}
+        client={row}
+        notifyOnDataChange={notifyOnDataChange}
+      />
+
+      <tr
+        key={index}
+        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+      >
+        <td className="px-6 py-5 text-sm text-gray-800">
+          {row.opHost}
+        </td>
+
+        <td className="px-6 py-5 text-sm text-gray-800 break-all">
+          {row.clientId}
+        </td>
+
+        <td className="px-6 py-5 text-sm text-gray-800 break-all">
+          {row.clientSecret}
+        </td>
+
+        <td className="px-6 py-5">
+          <span
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+              isEnabled
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            {isEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+        </td>
+
+        <td className="px-6 py-5">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setOpen(true)}
+              title="Open Flow"
+              className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+            >
+              <Zap className="w-4 h-4" fill="currentColor" />
+            </button>
+
+            <button
+              onClick={() => onDelete?.(row)}
+              title="Delete"
+              className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Component                                                             */
+/* -------------------------------------------------------------------------- */
+
+export default function OIDCClients({
+  data = [],
+  notifyOnDataChange,
+}: OIDCClientsProps) {
+  const [modelOpen, setModelOpen] = React.useState(false);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(0);
+
+  const handleDialog = (isOpen: boolean) => {
+    setModelOpen(isOpen);
+    notifyOnDataChange();
+  };
+
+  const paginatedRows = React.useMemo(() => {
+    const start = page * rowsPerPage;
+    return data.slice(start, start + rowsPerPage);
+  }, [data, page, rowsPerPage]);
+
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  const handleDelete = (client: ClientDetails) => {
+    chrome.storage.local.get(
+      ['oidcClients'],
+      (result: { oidcClients?: { clientId: string }[] }) => {
+        let clientArr: { clientId: string }[] = [];
+
+        if (result.oidcClients) {
+          clientArr = result.oidcClients;
+
+          chrome.storage.local.set({
+            oidcClients: clientArr.filter(
+              (obj) => obj.clientId !== client.clientId
+            ),
+          });
+        }
+      }
     );
+
+    notifyOnDataChange();
+  };
+
+  return (
+    <div className="rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+      <RegisterClient
+        isOpen={modelOpen}
+        handleDialog={handleDialog}
+      />
+
+      {/* Header */}
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            OIDC Clients
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Manage authentication clients for secure access.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setModelOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          <Plus className="w-4 h-4" />
+          Add Client
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <table className="min-w-full">
+          <thead className="bg-gray-50">
+            <tr className="border-b border-gray-200">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                Issuer
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                Client ID
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                Client Secret
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                Active
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="bg-white">
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-6">
+                  <SuccessAlert>
+                    No clients configured yet. Use
+                    <span className="font-medium">
+                      {' '}
+                      Add Client
+                    </span>{' '}
+                    to get started.
+                  </SuccessAlert>
+                </td>
+              </tr>
+            ) : (
+              paginatedRows.map((row, index) => (
+                <ClientRow
+                  key={row.clientId}
+                  row={{...row} as any}
+                  index={index}
+                  notifyOnDataChange={notifyOnDataChange}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      {data.length > 0 && (
+        <div className="mt-6 flex flex-col gap-4 border-t border-gray-200 pt-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">
+              Rows per page:
+            </span>
+
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setPage(0);
+              }}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          <span className="text-sm text-gray-600">
+            {page * rowsPerPage + 1}–
+            {Math.min(
+              (page + 1) * rowsPerPage,
+              data.length
+            )}{' '}
+            of {data.length}
+          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage((prev) => prev - 1)}
+              className="rounded-md border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <button
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage((prev) => prev + 1)}
+              className="rounded-md border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
