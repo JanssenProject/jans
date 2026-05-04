@@ -12,7 +12,6 @@ import io.jans.configapi.plugin.shibboleth.form.TrustRelationshipForm;
 import io.jans.configapi.plugin.shibboleth.model.EntityType;
 import io.jans.configapi.plugin.shibboleth.model.MetadataSourceType;
 import io.jans.configapi.plugin.shibboleth.model.profile.*;
-import io.jans.configapi.plugin.shibboleth.model.Status;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
 
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
@@ -139,11 +138,8 @@ public class ShibbolethResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Shibboleth trust search by - inum:{}", escapeLog(inum));
         }
-        TrustRelationship trustRelationship = shibbolethService.getTrustRelationshipByInum(inum);
 
-        if (trustRelationship == null) {
-            throwNotFoundException(NOT_FOUND_ERROR, String.format(NOT_FOUND_MSG, inum));
-        }
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
 
         return Response.ok(trustRelationship).build();
     }
@@ -170,38 +166,6 @@ public class ShibbolethResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Gets trusted service providers profile settings", description = "Gets trusted service providers profile settings", operationId = "get-shibboleth-trust-saml-profiles", tags = {
-            "Shibboleth - Trust Relationship" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLProfile.class)), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-federation-entities-by-fed-id.json"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
-    @GET
-    @Path(Constants.INUM_PATH_PARAM + Constants.SAML_PROFILES)
-    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
-            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
-    public Response getTrustRelationshipSamlProfiles(
-            @Parameter(description = "Trust Relationship identifier") @PathParam(Constants.INUM) @NotNull String inum) {
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Shibboleth TrustRelationship SamlProfiles search by - inum:{}", escapeLog(inum));
-        }
-
-        TrustRelationship trustRelationship = this.shibbolethService.getTrustRelationshipByInum(inum);
-        if (logger.isDebugEnabled()) {
-            logger.debug("TrustRelationship identified by inum:{} is trustRelationship:{}", escapeLog(inum),
-                    trustRelationship);
-        }
-        if (trustRelationship == null) {
-            throwNotFoundException(NOT_FOUND_ERROR, String.format(NOT_FOUND_MSG, inum));
-        }
-        return Response.ok(trustRelationship.getJansProfileConfiguration()).build();
-    }
-
     @Operation(summary = "Get attribute list Trust Relationship", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
@@ -223,14 +187,9 @@ public class ShibbolethResource extends BaseResource {
             logger.debug("Verify TrustRelationship for attribute by - inum:{}", escapeLog(inum));
         }
 
-        TrustRelationship trustRelationship = this.shibbolethService.getTrustRelationshipByInum(inum);
-        if (logger.isDebugEnabled()) {
-            logger.debug("TrustRelationship identified by inum:{} is trustRelationship:{}", escapeLog(inum),
-                    trustRelationship);
-        }
-        if (trustRelationship == null) {
-            throwNotFoundException(NOT_FOUND_ERROR, String.format(NOT_FOUND_MSG, inum));
-        }
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+
         return Response.ok(trustRelationship.getReleasedAttributes()).build();
     }
 
@@ -352,7 +311,87 @@ public class ShibbolethResource extends BaseResource {
         return Response.noContent().build();
     }
 
+    @Operation(summary = "Gets configured SAML profiles for a trust relationship", description = "Gets configured SAML profiles for a trust relationship", operationId = "get-shibboleth-trust-saml-profiles", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLProfile.class)), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-saml-profiles.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @Path(Constants.INUM_PATH_PARAM + Constants.SAML_PROFILES)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getTrustRelationshipSamlProfiles(
+            @Parameter(description = "Trust Relationship identifier") @PathParam(Constants.INUM) @NotNull String inum) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Shibboleth TrustRelationship SamlProfiles search by - inum:{}", escapeLog(inum));
+        }
+
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+
+        return Response.ok(trustRelationship.getJansProfileConfiguration()).build();
+    }
+
+    @Operation(summary = "Updates configured SAML profiles for a trust relationship", description = "Updates configured SAML profiles for a trust relationship", operationId = "post-shibboleth-trust", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = SAMLProfile.class)), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/put-shibboleth-trust-saml-profiles.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLProfile.class)), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/put-shibboleth-trust-saml-profiles.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @PUT
+    @Path(Constants.INUM_PATH_PARAM + Constants.SAML_PROFILES)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response updateTrustRelationshipSamlProfiles(
+            @Parameter(description = "Trust Relationship identifier") @PathParam(Constants.INUM) @NotNull String inum,
+            List<SAMLProfile> samlProfileList) throws IOException {
+        logger.info("POST TrustRelationship");
+        if (logger.isInfoEnabled()) {
+            logger.info("Update TrustRelationship inum:{}, SAMLProfiles:{}", escapeLog(inum),
+                    escapeLog(samlProfileList));
+        }
+
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+
+        // validation
+        if (samlProfileList == null || samlProfileList.isEmpty()) {
+            throwBadRequestException(DATA_NULL_CHK, "SAML Profile details should not be null");
+        }
+
+        trustRelationship.setJansProfileConfiguration(samlProfileList);
+
+        // update
+        trustRelationship = shibbolethService.updateTrustRelationship(trustRelationship);
+
+        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    }
+
     /* Helper methods */
+
+    private TrustRelationship getTrustRelationshipByInum(String inum) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Get TrustRelationship by - inum:{}", escapeLog(inum));
+        }
+        TrustRelationship trustRelationship = shibbolethService.getTrustRelationshipByInum(inum);
+
+        if (trustRelationship == null) {
+            throwNotFoundException(NOT_FOUND_ERROR, String.format(NOT_FOUND_MSG, inum));
+        }
+
+        return trustRelationship;
+    }
 
     private TrustRelationshipPagedResult doSearch(SearchRequest searchReq) {
 
