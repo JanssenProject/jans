@@ -34,35 +34,52 @@ public class AuthorizeParamsValidator {
     }
 
     /**
-     * Validates the parameters for an authorization request.
+     * Validates the parameters for an authorization request and returns the reason if validation fails.
      *
-     * @param responseTypes The response types. This parameter is mandatory.
-     * @return Returns <code>true</code> when all the parameters are valid.
+     * @param responseTypes   The response types. This parameter is mandatory.
+     * @param prompts         The prompts.
+     * @param nonce           The nonce.
+     * @param fapiCompatibility Whether FAPI compatibility is required.
+     * @param responseMode    The response mode.
+     * @return Returns null if validation passes, or a specific error reason if validation fails.
      */
-    public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
-                                         boolean fapiCompatibility, ResponseMode responseMode) {
+    public static String validateParamsWithReason(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
+                                                  boolean fapiCompatibility, ResponseMode responseMode) {
         if (fapiCompatibility) {
             // The authorization server shall require the response_type value code in conjunction with the response_mode value jwt
             if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE) && responseMode != ResponseMode.JWT) {
-                return false;
+                return "FAPI requires response_mode=jwt when response_type=code";
             }
             if (responseMode == ResponseMode.QUERY) {
                 log.trace("ResponseMode=query is not allowed for FAPI.");
-                return false;
+                return "response_mode=query is not allowed for FAPI";
             }
         }
 
         boolean existsNonce = StringUtils.isNotBlank(nonce);
 
-        if (!existsNonce && ((responseTypes.contains(ResponseType.CODE) && responseTypes.contains(ResponseType.ID_TOKEN))
-                || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1)
-                || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN))
-                || (responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1))) {
-            return false;
+        if (!existsNonce && responseTypes.contains(ResponseType.CODE) && responseTypes.contains(ResponseType.ID_TOKEN)) {
+            return "nonce is required for response_type=code id_token";
+        }
+        if (!existsNonce && responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1) {
+            return "nonce is required for response_type=id_token";
+        }
+        if (!existsNonce && responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN)) {
+            return "nonce is required for response_type=id_token token";
+        }
+        if (!existsNonce && responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1) {
+            return "nonce is required for response_type=token";
         }
 
-        boolean validParams = !responseTypes.isEmpty();
-        return validParams && noNonePrompt(prompts);
+        if (responseTypes.isEmpty()) {
+            return "response_type is required";
+        }
+
+        if (!noNonePrompt(prompts)) {
+            return "prompt=none cannot be combined with other prompt values";
+        }
+
+        return null; // validation passed
     }
 
     public static boolean noNonePrompt(List<Prompt> prompts) {
