@@ -12,20 +12,17 @@ use reqwest::Client;
 use serde::Deserialize;
 use std::time::Duration;
 
-/// Default per-request timeout for production callers of [`HttpClient`].
-/// Without this, a slow or unresponsive upstream can stall a Cedarling task
-/// indefinitely.
-pub(crate) const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
-
 /// A wrapper around `reqwest::Client` providing HTTP request functionality
 /// with retry logic using exponential backoff.
 ///
 /// The `HttpClient` struct allows for sending GET requests with a retry mechanism
 /// that attempts to fetch the requested resource up to a maximum number of times
 /// if an error occurs, using the `Sender` and `Backoff` utilities from `http_utils`.
-#[derive(Debug)]
+///
+/// Structure is thread safe, feel free to clone.
+#[derive(Debug, Clone)]
 pub(crate) struct HttpClient {
-    client: Client,
+    pub(crate) raw_client: Client,
     retry_delay: Duration,
     max_retries: u32,
 }
@@ -40,13 +37,28 @@ pub(crate) struct HttpClientConfig {
     request_timeout: Duration,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+impl HttpClientConfig {
+    /// Default per-request timeout for production callers of [`HttpClient`].
+    /// Without this, a slow or unresponsive upstream can stall a Cedarling task
+    /// indefinitely.
+    pub(crate) const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
+
+    /// Time budget for the TCP connect step alone. Most healthy issuers respond well
+    /// inside this window; a longer wait usually means the host is unreachable.
+    const DEFAULT_HTTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
+}
+
 impl HttpClient {
     pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, HttpClientError> {
-        let builder = Client::builder();
+        let mut builder = Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
-        let builder = builder.timeout(conf.request_timeout);
-        #[cfg(target_arch = "wasm32")]
-        let _ = request_timeout;
+        {
+            builder = builder
+                .timeout(conf.request_timeout)
+                .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
+        }
+
         let client = builder
             .build()
             .map_err(HttpRequestError::InitializeHttpClient)?;

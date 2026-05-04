@@ -3,42 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::LazyLock;
-#[cfg(not(target_arch = "wasm32"))]
-use std::time::Duration;
-
-use crate::common::issuer_utils::IssClaim;
+use crate::{common::issuer_utils::IssClaim, http::HttpClient};
 
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
-use reqwest::{Client, header::ToStrError};
+use reqwest::header::ToStrError;
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
-
-/// Total time budget for any single OIDC discovery, JWKS, or status-list fetch.
-/// Without a bound, a slow or unresponsive issuer can stall a Cedarling task
-/// forever and starve the tokio runtime. WASM targets rely on the browser
-/// fetch backend's own timing — `reqwest::ClientBuilder` doesn't expose
-/// `timeout` there.
-#[cfg(not(target_arch = "wasm32"))]
-const HTTP_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
-
-/// Time budget for the TCP connect step alone. Most healthy issuers respond well
-/// inside this window; a longer wait usually means the host is unreachable.
-#[cfg(not(target_arch = "wasm32"))]
-const HTTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
-
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| {
-    let builder = Client::builder();
-    #[cfg(not(target_arch = "wasm32"))]
-    let builder = builder
-        .timeout(HTTP_REQUEST_TIMEOUT)
-        .connect_timeout(HTTP_CONNECT_TIMEOUT);
-    builder
-        .build()
-        .expect("default reqwest client should build")
-});
 
 // async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.
@@ -48,7 +20,7 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(|| {
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(super) trait GetFromUrl<T> {
     /// Send a get request to receive the resource from a URL
-    async fn get_from_url(url: &Url) -> Result<T, HttpError>;
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError>;
 }
 
 #[derive(Deserialize)]
@@ -88,7 +60,7 @@ where
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
         // add delay to simulate network latency and test async behavior of trusted issuers loading
         // it would be great to implement delay in mock server, but mockito doesn't support it.
         #[cfg(test)]
@@ -99,7 +71,8 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
             sleep(Duration::from_millis(1)).await;
         }
 
-        let openid_config = HTTP_CLIENT
+        let openid_config = client
+            .raw_client
             .get(url.as_str())
             .send()
             .await
@@ -117,8 +90,9 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<JwkSet> for JwkSet {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let jwk_set = HTTP_CLIENT
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
+        let jwk_set = client
+            .raw_client
             .get(url.as_str())
             .send()
             .await
@@ -136,8 +110,9 @@ impl GetFromUrl<JwkSet> for JwkSet {
 // NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
 impl StatusListJwtStr {
-    pub(super) async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let response = HTTP_CLIENT
+    pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
+        let response = client
+            .raw_client
             .get(url.as_str())
             .header("Content-Type", "application/statuslist+jwt")
             .send()
