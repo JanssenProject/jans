@@ -133,7 +133,13 @@ jobs:
       run: cargo bench
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
-      run: python3 scripts/check_benchmarks.py
+      run: |
+        set -o pipefail
+        python3 scripts/check_benchmarks.py | tee rust_bench_output.txt
+    - name: Append Rust benchmark summary
+      working-directory: jans-cedarling
+      run: |
+        python3 scripts/parse_binding_benchmarks.py --format rust rust_bench_output.txt >> $GITHUB_STEP_SUMMARY
 
   wasm_tests:
     runs-on: ubuntu-latest
@@ -182,6 +188,16 @@ jobs:
         mkdir -p "$TMPDIR"
         wasm-pack test --headless --firefox
 
+    - name: Build WASM for Node.js (benchmarks)
+      working-directory: jans-cedarling/bindings/cedarling_wasm
+      run: wasm-pack build --target nodejs --release
+
+    - name: Run WASM binding benchmarks
+      working-directory: jans-cedarling/bindings/cedarling_wasm
+      run: |
+        node benchmarks/benchmark.mjs | tee bench_output.txt
+        python3 ../../scripts/parse_binding_benchmarks.py --format wasm bench_output.txt >> $GITHUB_STEP_SUMMARY
+
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
       run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
@@ -214,6 +230,12 @@ jobs:
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
       run: tox
+    - name: Run Python binding benchmarks
+      if: matrix.python-version == '3.11'
+      working-directory: jans-cedarling/bindings/cedarling_python
+      run: |
+        tox -e benchmark | tee bench_output.txt
+        python3 ../../scripts/parse_binding_benchmarks.py --format python bench_output.txt >> $GITHUB_STEP_SUMMARY
 
   golang_tests:
     runs-on: ubuntu-latest
@@ -251,6 +273,12 @@ jobs:
       run: |
         export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
         go test .
+    - name: Run Go binding benchmarks
+      working-directory: jans-cedarling/bindings/cedarling_go
+      run: |
+        export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
+        go test -bench=. -benchmem -benchtime=5s -count=1 -run=^$ | tee bench_output.txt
+        python3 ../../scripts/parse_binding_benchmarks.py --format go bench_output.txt >> $GITHUB_STEP_SUMMARY
 
   c_tests:
     runs-on: ubuntu-latest
@@ -282,3 +310,43 @@ jobs:
         cd tests
         make
         ./test_cedarling
+    - name: Run C binding benchmarks
+      working-directory: jans-cedarling/bindings/cedarling_c
+      run: |
+        export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
+        cd benchmarks && make
+        ./benchmark_cedarling | tee bench_output.txt
+        python3 ../../../scripts/parse_binding_benchmarks.py --format c bench_output.txt >> $GITHUB_STEP_SUMMARY
+
+  uniffi_benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+    - name: Set up Java
+      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+      with:
+        distribution: temurin
+        java-version: "17"
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Build UniFFI Java artifacts
+      working-directory: jans-cedarling/bindings/cedarling_uniffi
+      run: make java
+    - name: Run UniFFI Java benchmarks
+      working-directory: jans-cedarling/bindings/cedarling_uniffi/javaApp
+      run: |
+        export LD_LIBRARY_PATH="${GITHUB_WORKSPACE}/target/release:${LD_LIBRARY_PATH}"
+        mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
+        python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
