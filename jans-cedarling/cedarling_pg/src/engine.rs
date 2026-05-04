@@ -12,17 +12,20 @@ use thiserror::Error;
 
 use crate::guc_config;
 
-/// One-time or cached initialization of the blocking Cedarling engine.
+struct EngineInner {
+    current: Arc<Cedarling>,
+    path: String,
+    previous: Option<(Arc<Cedarling>, String)>,
+}
+
 enum EngineSlot {
     Empty,
-    Ready(Arc<Cedarling>),
-    /// Cached hard failure (e.g. bad bootstrap file); operator must fix config and restart `PostgreSQL`.
+    Ready(EngineInner),
     Failed(String),
 }
 
 static ENGINE: Mutex<EngineSlot> = Mutex::new(EngineSlot::Empty);
 
-/// Errors while resolving the global Cedarling instance.
 #[derive(Debug, Error)]
 pub enum EngineError {
     #[error("cedarling.bootstrap_config is not set or is whitespace only")]
@@ -37,18 +40,19 @@ pub enum EngineError {
     MutexPoisoned,
 }
 
-/// Loads Cedarling from a bootstrap file (YAML / JSON / TOML per Cedarling). For unit tests and tools.
+/// Loads Cedarling from a bootstrap file. Used by the global slot and by `use_policy`.
 pub fn try_init_cedarling_from_bootstrap_path(path: &str) -> Result<Arc<Cedarling>, EngineError> {
     let config = cedarling::BootstrapConfig::load_from_file(path)?;
     let instance = Cedarling::new(&config)?;
     Ok(Arc::new(instance))
 }
 
-/// Returns the process-wide Cedarling engine, initializing it on first call from [`guc_config::bootstrap_config_path_utf8`].
+/// Returns the process-wide Cedarling engine, initializing it on first call from
+/// [`guc_config::bootstrap_config_path_utf8`].
 pub fn global_cedarling() -> Result<Arc<Cedarling>, EngineError> {
     let mut slot = lock_engine_slot()?;
     match &*slot {
-        EngineSlot::Ready(arc) => return Ok(arc.clone()),
+        EngineSlot::Ready(inner) => return Ok(inner.current.clone()),
         EngineSlot::Failed(msg) => return Err(EngineError::InitPreviouslyFailed(msg.clone())),
         EngineSlot::Empty => {},
     }
@@ -61,7 +65,11 @@ pub fn global_cedarling() -> Result<Arc<Cedarling>, EngineError> {
 
     match try_init_cedarling_from_bootstrap_path(trimmed) {
         Ok(arc) => {
-            *slot = EngineSlot::Ready(arc.clone());
+            *slot = EngineSlot::Ready(EngineInner {
+                current: arc.clone(),
+                path: trimmed.to_string(),
+                previous: None,
+            });
             Ok(arc)
         },
         Err(e) => {
@@ -70,6 +78,54 @@ pub fn global_cedarling() -> Result<Arc<Cedarling>, EngineError> {
             Err(e)
         },
     }
+}
+
+/// Atomically swap in a new engine loaded from `new_path`.
+///
+/// The new engine is built *before* the lock is acquired so the lock hold time is minimal.
+/// Returns the previous bootstrap path (for audit logging), or `None` if there was none.
+pub fn use_policy(new_path: &str) -> Result<Option<String>, EngineError> {
+    let new_arc = try_init_cedarling_from_bootstrap_path(new_path)?;
+    let mut slot = lock_engine_slot()?;
+    let old_path = match &*slot {
+        EngineSlot::Ready(inner) => Some(inner.path.clone()),
+        _ => None,
+    };
+    let old_inner = match std::mem::replace(&mut *slot, EngineSlot::Empty) {
+        EngineSlot::Ready(inner) => Some((inner.current, inner.path)),
+        _ => None,
+    };
+    *slot = EngineSlot::Ready(EngineInner {
+        current: new_arc,
+        path: new_path.to_string(),
+        previous: old_inner,
+    });
+    Ok(old_path)
+}
+
+/// Revert to the previous engine.
+///
+/// Returns `Some((rolled_back_to_path, rolled_back_from_path))` on success,
+/// or `None` if there is no previous engine stored.
+pub fn rollback_policy() -> Result<Option<(String, String)>, EngineError> {
+    let mut slot = lock_engine_slot()?;
+    let has_previous = matches!(&*slot, EngineSlot::Ready(inner) if inner.previous.is_some());
+    if !has_previous {
+        return Ok(None);
+    }
+    if let EngineSlot::Ready(inner) = std::mem::replace(&mut *slot, EngineSlot::Empty) {
+        let old_path = inner.path.clone();
+        if let Some((prev_engine, prev_path)) = inner.previous {
+            let new_path = prev_path.clone();
+            *slot = EngineSlot::Ready(EngineInner {
+                current: prev_engine,
+                path: prev_path,
+                previous: None,
+            });
+            return Ok(Some((new_path, old_path)));
+        }
+    }
+    Ok(None)
 }
 
 fn lock_engine_slot() -> Result<MutexGuard<'static, EngineSlot>, EngineError> {

@@ -63,12 +63,15 @@ fn cedarling_authorized_inner(
         ));
     };
 
+    let context_from_guc = guc_config::context_utf8();
+    let context_trimmed = context_from_guc.as_deref().unwrap_or("");
     let ttl = guc_config::cache_ttl_seconds();
     let cache_key = authz_cache::multi_issuer_key(
         authz_cache::policy_segment_from_bootstrap_path(),
         token_str.as_str(),
         resource_trimmed,
         action_trimmed,
+        context_trimmed,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
         status::record_cache_hit();
@@ -95,6 +98,7 @@ fn cedarling_authorized_inner(
         token_str.as_str(),
         resource_trimmed,
         action_trimmed,
+        context_from_guc.as_deref(),
     ) {
         Ok(decision) => {
             let duration_ms = start.elapsed().as_millis() as u64;

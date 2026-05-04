@@ -12,7 +12,7 @@
 //! cache / counter path — useful for interactive policy debugging in `psql`.
 
 use std::collections::VecDeque;
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use std::time::Instant;
 
 use chrono::Utc;
@@ -21,9 +21,26 @@ use serde_json::{json, Value};
 
 use crate::authz_bridge;
 use crate::engine;
+#[cfg(not(test))]
+use crate::guc_config;
 
-/// Maximum number of authorization traces kept per backend process.
-const MAX_TRACES: usize = 64;
+static TRACE_BUFFER_SIZE: OnceLock<usize> = OnceLock::new();
+
+fn trace_buffer_size() -> usize {
+    *TRACE_BUFFER_SIZE.get_or_init(load_trace_buffer_size)
+}
+
+#[cfg(test)]
+fn load_trace_buffer_size() -> usize {
+    64
+}
+
+#[cfg(not(test))]
+fn load_trace_buffer_size() -> usize {
+    usize::try_from(guc_config::trace_buffer_size())
+        .unwrap_or(0)
+        .min(65_536)
+}
 
 /// A single recorded authorization event.
 ///
@@ -46,8 +63,12 @@ static RING: Mutex<VecDeque<AuthorizationTrace>> = Mutex::new(VecDeque::new());
 
 /// Push a trace into the ring buffer. Oldest entry is silently dropped when the buffer is full.
 pub(crate) fn push_trace(trace: AuthorizationTrace) {
+    let max_traces = trace_buffer_size();
+    if max_traces == 0 {
+        return;
+    }
     if let Ok(mut buf) = RING.lock() {
-        if buf.len() >= MAX_TRACES {
+        if buf.len() >= max_traces {
             buf.pop_front();
         }
         buf.push_back(trace);
@@ -85,11 +106,16 @@ pub fn cedarling_last_trace() -> Option<pgrx::datum::JsonB> {
 
 /// Returns the most recent `limit` authorization traces as a JSONB array (newest first).
 ///
-/// `limit` defaults to 10 when `NULL`; clamped to 0..=64. Traces are per-backend-process.
+/// `limit` defaults to 10 when `NULL`; clamped to `0..=cedarling.trace_buffer_size`.
+/// Traces are per-backend-process.
 #[pg_extern]
 pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
+    let max_traces = trace_buffer_size();
+    if max_traces == 0 {
+        return pgrx::datum::JsonB(json!([]));
+    }
     let count = limit.unwrap_or(10).max(0) as usize;
-    let count = count.min(MAX_TRACES);
+    let count = count.min(max_traces);
     let arr: Vec<Value> = RING
         .lock()
         .map(|buf| buf.iter().rev().take(count).map(trace_to_value).collect())
@@ -237,7 +263,8 @@ mod tests {
 
     #[test]
     fn ring_does_not_exceed_max_traces() {
-        for i in 0..MAX_TRACES + 5 {
+        let max_traces = trace_buffer_size().max(1);
+        for i in 0..max_traces + 5 {
             push_trace(AuthorizationTrace {
                 timestamp: "2026-01-01T00:00:00Z".into(),
                 action: format!("T::A::\"{i}\""),
@@ -248,8 +275,8 @@ mod tests {
         }
         let buf = RING.lock().expect("lock");
         assert!(
-            buf.len() <= MAX_TRACES,
-            "ring buffer must never exceed MAX_TRACES ({MAX_TRACES})"
+            buf.len() <= max_traces,
+            "ring buffer must never exceed configured trace_buffer_size"
         );
     }
 

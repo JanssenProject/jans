@@ -19,6 +19,7 @@
 //!   ));
 //! ```
 
+use pgrx::datum::{AnyElement, JsonB};
 use pgrx::prelude::*;
 use serde_json::json;
 
@@ -65,6 +66,24 @@ pub fn cedarling_build_resource(
     json_str
 }
 
+/// Build a Cedarling `EntityData` JSON string from a composite row (`anyelement`).
+///
+/// SQL name is `cedarling_build_resource_row` so it does not overload `cedarling_build_resource`
+/// (`jsonb`, …): PostgreSQL cannot reliably resolve two `cedarling_build_resource` targets when
+/// one uses polymorphic `anyelement`.
+#[pg_extern(name = "cedarling_build_resource_row")]
+pub fn cedarling_build_resource_anyelement(record: AnyElement) -> String {
+    match crate::resource::row::build_resource_json_from_row(record) {
+        Ok(json_str) => {
+            if let Err(e) = resource::resource_entity_data_from_json_str(&json_str) {
+                pgrx::error!("cedarling_build_resource_row: invalid EntityData: {e}");
+            }
+            json_str
+        },
+        Err(e) => pgrx::error!("cedarling_build_resource_row: {e}"),
+    }
+}
+
 /// Authorize a JSONB resource under unsigned Cedar policy (no JWT tokens required).
 ///
 /// `resource`: JSONB document containing a valid `EntityData` (`cedar_entity_mapping` required).
@@ -84,7 +103,13 @@ pub fn cedarling_authorized_row(
         return finalize_error(&CedarlingError::RequestInvalid("empty action".into()));
     }
 
-    let context_value = context.map(|j| j.0).unwrap_or_else(|| json!({}));
+    let context_value = context
+        .map(|j| j.0)
+        .or_else(|| {
+            guc_config::context_utf8()
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+        })
+        .unwrap_or_else(|| json!({}));
     if !context_value.is_object() {
         return finalize_error(&CedarlingError::RequestInvalid(
             "context must be a JSON object".into(),
@@ -171,6 +196,41 @@ pub fn cedarling_authorized_row(
             finalize_error(&ce)
         },
     }
+}
+
+/// AnyElement wrapper for row-based unsigned authorization.
+///
+/// This function materializes the row to canonical Cedar `EntityData` JSON and then
+/// reuses the existing JSONB unsigned path (`cedarling_authorized_row`).
+#[pg_extern(name = "cedarling_authorized_row")]
+pub fn cedarling_authorized_row_from_anyelement(
+    record: AnyElement,
+    action: &str,
+    context: Option<JsonB>,
+) -> bool {
+    let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
+        Ok(v) => v,
+        Err(e) => return finalize_error(&e),
+    };
+    let resource_value: serde_json::Value = match serde_json::from_str(&resource_json) {
+        Ok(v) => v,
+        Err(e) => return finalize_error(&CedarlingError::JsonParsing(e.to_string())),
+    };
+    cedarling_authorized_row(JsonB(resource_value), action, context)
+}
+
+/// AnyElement wrapper for JWT/multi-issuer authorization.
+///
+/// Reads tokens from the function argument fallback chain in `cedarling_authorized`:
+/// explicit bundle (none here) -> `cedarling.tokens` GUC.
+#[pg_extern]
+pub fn cedarling_authorized_row_jwt(record: AnyElement, action: Option<&str>) -> bool {
+    let action = action.unwrap_or("Read");
+    let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
+        Ok(v) => v,
+        Err(e) => return finalize_error(&e),
+    };
+    crate::authorized::cedarling_authorized(&resource_json, None, action)
 }
 
 #[cfg(test)]

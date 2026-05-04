@@ -52,17 +52,39 @@ pub fn authorize_multi_issuer_decision(
     token_bundle_json: &str,
     resource_json: &str,
     action: &str,
+    context_json: Option<&str>,
 ) -> Result<bool, AuthorizeBridgeError> {
     let tokens = token_bundle::parse_token_inputs_from_json(token_bundle_json)?;
 
     let resource = resource::resource_entity_data_from_json_str(resource_json)?;
+    let context =
+        parse_optional_context_json_object(context_json).map_err(AuthorizeBridgeError::RequestInvalid)?;
     let request =
-        AuthorizeMultiIssuerRequest::new_with_fields(tokens, resource, action.to_string(), None);
+        AuthorizeMultiIssuerRequest::new_with_fields(tokens, resource, action.to_string(), context);
     request
         .validate()
         .map_err(|e| AuthorizeBridgeError::RequestInvalid(e.to_string()))?;
     let result = engine.authorize_multi_issuer(request)?;
     Ok(result.decision)
+}
+
+fn parse_optional_context_json_object(
+    context_json: Option<&str>,
+) -> Result<Option<serde_json::Value>, String> {
+    let Some(raw) = context_json else {
+        return Ok(None);
+    };
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    let value: serde_json::Value =
+        serde_json::from_str(trimmed).map_err(|e| format!("invalid context JSON: {e}"))?;
+    if value.is_object() {
+        Ok(Some(value))
+    } else {
+        Err("context must be a JSON object".to_string())
+    }
 }
 
 fn parse_optional_principal_json(
@@ -149,6 +171,8 @@ mod smoke {
 
     use super::{authorize_multi_issuer_decision, authorize_unsigned_decision};
     use crate::engine::try_init_cedarling_from_bootstrap_path;
+
+    use super::parse_optional_context_json_object;
 
     const POLICY_MULTI_ISSUER: &str = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -241,6 +265,7 @@ mod smoke {
             &token_bundle,
             &resource,
             "Acme::Action::\"GetFood\"",
+            None,
         )
         .expect("authorize_multi_issuer should run");
 
@@ -293,5 +318,19 @@ mod smoke {
         .expect("authorize_unsigned should run");
 
         assert!(allowed, "expected ALLOW for unsigned principal+resource");
+    }
+
+    #[test]
+    fn parse_optional_context_accepts_object_and_rejects_array() {
+        let parsed = parse_optional_context_json_object(Some(r#"{"tenant":"acme"}"#))
+            .expect("object context should parse");
+        assert!(parsed.is_some(), "object context should be preserved");
+
+        let err = parse_optional_context_json_object(Some(r#"["x"]"#))
+            .expect_err("array context should be rejected");
+        assert!(
+            err.contains("object"),
+            "non-object context should include object requirement"
+        );
     }
 }

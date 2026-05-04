@@ -74,10 +74,12 @@ static STRATEGY: GucSetting<CedarlingStrategy> =
 static CACHE_TTL: GucSetting<i32> = GucSetting::<i32>::new(300);
 static CACHE_SIZE: GucSetting<i32> = GucSetting::<i32>::new(8192);
 static AUDIT_FAIL_OPEN: GucSetting<bool> = GucSetting::<bool>::new(true);
-static CLOCK_SKEW: GucSetting<i32> = GucSetting::<i32>::new(60);
 static TOKENS: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
+static CONTEXT: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static POLICY_VERSION: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
+static TRACE_BUFFER_SIZE: GucSetting<i32> = GucSetting::<i32>::new(1024);
+static POLICY_HISTORY_SIZE: GucSetting<i32> = GucSetting::<i32>::new(16);
 
 /// Current `cedarling.mode`.
 #[must_use]
@@ -121,16 +123,26 @@ pub fn audit_fail_open() -> bool {
     AUDIT_FAIL_OPEN.get()
 }
 
-/// Allowed clock drift in seconds for JWT `exp` / `nbf` validation (default 60).
-#[must_use]
-pub fn clock_skew_seconds() -> i32 {
-    CLOCK_SKEW.get()
-}
-
 /// Current `cedarling.tokens` as a UTF-8 string, if set and valid UTF-8.
 #[must_use]
 pub fn tokens_utf8() -> Option<String> {
     TOKENS.get().and_then(|c| c.into_string().ok())
+}
+
+/// Current `cedarling.context` as a UTF-8 string, if set and valid UTF-8.
+///
+/// Empty / whitespace-only values are treated as unset.
+#[must_use]
+pub fn context_utf8() -> Option<String> {
+    CONTEXT.get().and_then(|c| {
+        let s = c.into_string().ok()?;
+        let t = s.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_string())
+        }
+    })
 }
 
 /// Path from `cedarling.bootstrap_config` (bootstrap YAML / JSON / TOML for Cedarling), if set and valid UTF-8.
@@ -153,6 +165,18 @@ pub fn policy_version_utf8() -> Option<String> {
     })
 }
 
+/// Current `cedarling.trace_buffer_size` (per-backend trace ring capacity).
+#[must_use]
+pub fn trace_buffer_size() -> i32 {
+    TRACE_BUFFER_SIZE.get()
+}
+
+/// Current `cedarling.policy_history_size` (rows retained in `cedarling.policy_history`).
+#[must_use]
+pub fn policy_history_size() -> i32 {
+    POLICY_HISTORY_SIZE.get()
+}
+
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
 pub fn register_gucs() {
     unsafe {
@@ -173,6 +197,21 @@ unsafe extern "C-unwind" fn cedarling_tokens_check_hook(
         return false;
     };
     validate::tokens_json_is_valid(s)
+}
+
+#[pg_guard]
+unsafe extern "C-unwind" fn cedarling_context_check_hook(
+    newval: *mut *mut std::ffi::c_char,
+    _extra: *mut *mut std::ffi::c_void,
+    _source: pg_sys::GucSource::Type,
+) -> bool {
+    if newval.is_null() || (*newval).is_null() {
+        return true;
+    }
+    let Ok(s) = CStr::from_ptr(*newval).to_str() else {
+        return false;
+    };
+    validate::context_json_is_valid_object(s)
 }
 
 unsafe fn register_gucs_inner() {
@@ -226,11 +265,11 @@ unsafe fn register_gucs_inner() {
     GucRegistry::define_int_guc(
         c"cedarling.cache_size",
         c"Maximum entries in the per-backend authorization result cache.",
-        c"Applies on the next process restart; changing this GUC at runtime does not resize the existing cache. Range 0..=1048576. Set to 0 to disable caching regardless of cedarling.cache_ttl.",
+        c"New connections pick up the updated limit; an existing backend session keeps its allocated cache size until disconnect. Range 0..=1048576. Set to 0 to disable caching regardless of cedarling.cache_ttl.",
         &CACHE_SIZE,
         0,
         1_048_576,
-        GucContext::Postmaster,
+        GucContext::Userset,
         GucFlags::empty(),
     );
 
@@ -243,17 +282,6 @@ unsafe fn register_gucs_inner() {
         GucFlags::empty(),
     );
 
-    GucRegistry::define_int_guc(
-        c"cedarling.clock_skew_seconds",
-        c"Allowed clock drift in seconds for JWT exp/nbf validation.",
-        c"Tokens expired within this window are still accepted. Tokens whose nbf is this many seconds in the future are also accepted. Range 0..=3600. Default 60.",
-        &CLOCK_SKEW,
-        0,
-        3_600,
-        GucContext::Userset,
-        GucFlags::empty(),
-    );
-
     GucRegistry::define_string_guc_with_hooks(
         c"cedarling.tokens",
         c"JWT token bundle JSON for Cedarling.",
@@ -262,6 +290,18 @@ unsafe fn register_gucs_inner() {
         GucContext::Userset,
         GucFlags::empty(),
         Some(cedarling_tokens_check_hook),
+        None,
+        None,
+    );
+
+    GucRegistry::define_string_guc_with_hooks(
+        c"cedarling.context",
+        c"Optional Cedar request context JSON object.",
+        c"JSON object merged into Cedar authorization context for cedarling_authorized and cedarling_authorized_row. Empty clears the value.",
+        &CONTEXT,
+        GucContext::Userset,
+        GucFlags::empty(),
+        Some(cedarling_context_check_hook),
         None,
         None,
     );
@@ -280,6 +320,28 @@ unsafe fn register_gucs_inner() {
         c"Policy version to pin this session to.",
         c"Empty / unset means the most recently loaded version. Values are matched against versions registered via cedarling_use_policy().",
         &POLICY_VERSION,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_int_guc(
+        c"cedarling.trace_buffer_size",
+        c"Maximum traces retained in the per-backend authorization ring buffer.",
+        c"0 disables in-memory trace retention. Range 0..=65536.",
+        &TRACE_BUFFER_SIZE,
+        0,
+        65_536,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_int_guc(
+        c"cedarling.policy_history_size",
+        c"Maximum rows retained in cedarling.policy_history.",
+        c"0 keeps no history rows; each policy operation prunes to this cap. Range 0..=100000.",
+        &POLICY_HISTORY_SIZE,
+        0,
+        100_000,
         GucContext::Userset,
         GucFlags::empty(),
     );

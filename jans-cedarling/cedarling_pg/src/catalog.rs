@@ -24,7 +24,7 @@
 use pgrx::extension_sql;
 
 extension_sql!(
-    r#"
+    r"
 -- Namespace for cedarling_pg catalog objects.
 CREATE SCHEMA IF NOT EXISTS cedarling;
 GRANT USAGE ON SCHEMA cedarling TO PUBLIC;
@@ -62,6 +62,16 @@ CREATE INDEX IF NOT EXISTS policy_history_applied_at_idx
 COMMENT ON SCHEMA cedarling IS 'cedarling_pg catalog and masking configuration.';
 COMMENT ON TABLE  cedarling.mask_rules     IS 'Per-(table,column) masking configuration for cedarling.strategy = mask.';
 COMMENT ON TABLE  cedarling.policy_history IS 'Audit trail of policy version swaps performed through cedarling_use_policy / cedarling_rollback_policy.';
-"#,
+
+-- Explicit mapping from PostgreSQL table OID to Cedar entity type and ID columns.
+-- Used by AnyElement-based row helpers.
+CREATE TABLE IF NOT EXISTS cedarling.entity_map (
+    table_oid    oid PRIMARY KEY,
+    entity_type  text NOT NULL,
+    id_columns   text[] NOT NULL DEFAULT '{}',
+    updated_at   timestamptz NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE cedarling.entity_map IS 'Optional overrides for table -> Cedar entity mapping used by row authorization.';
+",
     name = "cedarling_pg_catalog",
 );
