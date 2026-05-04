@@ -833,28 +833,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs['Encryption/Signing'] = HSplit(encryption_signing)
 
-        def allow_spontaneous_changed(cb):
-            self.spontaneous_scopes.me.window.style = 'underline ' + \
-                (self.myparent.styles['textarea']
-                 if cb.checked else self.myparent.styles['textarea-readonly'])
-            self.spontaneous_scopes.me.text = ''
-            self.spontaneous_scopes.me.read_only = not cb.checked
-
-        self.spontaneous_scopes = self.myparent.getTitledText(
-            _("Spontaneos scopes validation regex"),
-            name='spontaneousScopeScriptDns',
-            value='\n'.join(self.data.get('attributes', {}).get(
-                'spontaneousScopeScriptDns', [])),
-            read_only=False if 'allowSpontaneousScopes' in self.data and self.data.get(
-                'attributes', {}).get('allowSpontaneousScopes') else True,
-            focusable=True,
-            jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'spontaneousScopeScriptDns'),
-            height=3,
-            style=cli_style.check_box)
-
         self.tabs['Advanced Client Prop.'] = HSplit([
 
             self.myparent.getTitledCheckBox(
@@ -883,16 +861,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 name='allowSpontaneousScopes',
                 checked=self.data.get('attributes', {}).get(
                     'allowSpontaneousScopes'),
-                on_selection_changed=allow_spontaneous_changed,
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference(
                         '', ATTRIBUTE_SCHEMA_PATH),
                     'allowSpontaneousScopes'),
                 style=cli_style.check_box
             ),
-
-            self.spontaneous_scopes,
-
 
             VSplit([
                 Label(text=_("Spontaneous scopes"), style=cli_style.label,
@@ -967,14 +941,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.scripts_widget_dict = OrderedDict()
 
-
         list_of_scripts = (
                 ("Spontaneous Scopes", 'spontaneousScopes', ['spontaneous_scope', 'uma_claims_gathering', 'uma_rpt_policy']),
                 ("Update Token", 'updateTokenScriptDns', ['update_token']),
                 ("Post Authn", 'postAuthnScripts', ['post_authn']),
                 ("Introspection", 'introspectionScripts', ['introspection', 'persistence_extension', 'person_authentication']),
                 ("Password Grant", 'ropcScripts', ['resource_owner_password_credentials', 'scim']),
-                ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp'])
+                ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp']),
+                ("Spontaneous Scope", 'spontaneousScopeScriptDns', ['spontaneous_scope']),
+                ("Logout Status Jwt", 'logoutStatusJwtScriptDns', ['logout_status_jwt']),
+                ("Par", 'parScriptDns', ['par']),
+                ("TX Token", 'txTokenScriptDns', ['tx_token']),
                 )
 
         for title, script_var, script_types in list_of_scripts:

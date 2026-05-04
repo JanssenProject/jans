@@ -9,6 +9,7 @@
 
 use super::service_config::ServiceConfig;
 use crate::LogLevel;
+use crate::authz::metrics::MetricsCollector;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::{
@@ -27,6 +28,7 @@ pub(crate) struct ServiceFactory<'a> {
     service_config: ServiceConfig,
     log_service: log::Logger,
     data_store: Arc<DataStore>,
+    metrics: Arc<MetricsCollector>,
     container: SingletonContainer,
 }
 
@@ -45,12 +47,14 @@ impl<'a> ServiceFactory<'a> {
         service_config: ServiceConfig,
         log_service: log::Logger,
         data_store: Arc<DataStore>,
+        metrics: Arc<MetricsCollector>,
     ) -> Self {
         Self {
             bootstrap_config,
             service_config,
             log_service,
             data_store,
+            metrics,
             container: SingletonContainer::default(),
         }
     }
@@ -86,7 +90,10 @@ impl<'a> ServiceFactory<'a> {
             let config = &self.bootstrap_config.jwt_config;
             let trusted_issuers = self.policy_store()?.trusted_issuers.clone();
             let logger = self.log_service();
-            let service = Arc::new(JwtService::new(config, trusted_issuers, Some(logger)).await?);
+            let service = Arc::new(
+                JwtService::new(config, trusted_issuers, Some(logger), self.metrics.clone())
+                    .await?,
+            );
             self.container.jwt_service = Some(service.clone());
             Ok(service)
         }
@@ -141,6 +148,7 @@ impl<'a> ServiceFactory<'a> {
                 entity_builder: self.entity_builder()?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
                 data_store: self.data_store.clone(),
+                metrics: self.metrics.clone(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());

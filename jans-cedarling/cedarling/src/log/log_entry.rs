@@ -323,6 +323,24 @@ pub(crate) struct DecisionLogEntry {
     pub pushed_data: Option<PushedDataInfo>,
 }
 
+/// Telemetry log entry following the 3-map model.
+///
+/// Contains per-policy evaluation counts, classified error counters, and
+/// operational statistics for a single telemetry interval.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct MetricsLogEntry {
+    #[serde(flatten)]
+    pub base: BaseLogEntry,
+    /// Per-policy evaluation counts (`policy_id` → count)
+    pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters (`error_key` → count)
+    pub error_counters: HashMap<String, i64>,
+    /// Operational metrics (`stat_key` → value)
+    pub operational_stats: HashMap<String, i64>,
+    /// Duration of the collection interval in seconds
+    pub interval_secs: i64,
+}
+
 /// Information about pushed data injected into the authorization context
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub(crate) struct PushedDataInfo {
@@ -365,6 +383,30 @@ impl Indexed for DecisionLogEntry {
 }
 
 impl Loggable for DecisionLogEntry {
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
+}
+
+impl Indexed for MetricsLogEntry {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
+    }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for MetricsLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }

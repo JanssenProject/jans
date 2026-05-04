@@ -1,59 +1,30 @@
-import * as React from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from '@mui/material/Stack';
-import Alert from '@mui/material/Alert';
-import initWasm, { init } from "@janssenproject/cedarling_wasm";
-import { v4 as uuidv4 } from 'uuid';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import React from 'react';
+import { X, Copy, List } from 'lucide-react';
 import { JsonEditor } from 'json-edit-react';
-import axios from 'axios';
+import initWasm, { init } from '@janssenproject/cedarling_wasm';
+import { v4 as uuidv4 } from 'uuid';
 import Utils from '../../../options/Utils';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import { pink } from '@mui/material/colors';
 import cedarlingBootstrapJson from '../cedarlingBootstrap.json';
-import Chip from '@mui/material/Chip';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import Snackbar from '@mui/material/Snackbar';
-import CloseIcon from '@mui/icons-material/Close';
 
 interface AddCedarlingConfigProps {
-  newData: any; // or define the actual shape of cedarlingConfig data
+  newData: any;
   handleDialog: (isOpen: boolean) => void;
   isOpen: boolean;
 }
 
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: AddCedarlingConfigProps) {
-  const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
-  const [errorMessage, setErrorMessage] = React.useState("")
+  const [errorMessage, setErrorMessage] = React.useState('');
   const [loading, setLoading] = React.useState(false);
-  const [inputSelection, setInputSelection] = React.useState("json");
+  const [inputSelection, setInputSelection] = React.useState<'json' | 'url'>('json');
   const [showConfiguration, setShowConfiguration] = React.useState(false);
   const [showConfigurationButton, setShowConfigurationButton] = React.useState(true);
-  const [snackbar, setSnackbar] = React.useState({ open: false, message: '' });
-
-  const ADD_BOOTSTRAP_ERROR = 'Error in adding bootstrap. Check web console for logs.'
+  const [snackbarMsg, setSnackbarMsg] = React.useState('');
 
   React.useEffect(() => {
-    if (isOpen) {
-      handleOpen();
-    } else {
-      handleClose();
-    }
-  }, [isOpen]);
-
-  React.useEffect(() => {
+    if (!isOpen) return;
+    setErrorMessage('');
+    setLoading(false);
     if (Utils.isEmpty(newData) || Object.keys(newData).length === 0) {
       setBootstrap({});
       setShowConfiguration(true);
@@ -63,67 +34,33 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
       setShowConfiguration(false);
       setShowConfigurationButton(false);
     }
-  }, [newData]);
+  }, [isOpen, newData]);
+
+  if (!isOpen) return null;
 
   const handleClose = () => {
-    setInputSelection('json')
-    handleDialog(false)
-    setOpen(false);
-  };
-
-  const handleOpen = () => {
-    setErrorMessage('');
-    setLoading(false);
-    handleDialog(true)
-    setOpen(true);
+    setInputSelection('json');
+    handleDialog(false);
   };
 
   const copyToClipboard = () => {
     try {
-      const jsonString = JSON.stringify(bootstrap, null, 2); // pretty print
-      navigator.clipboard.writeText(jsonString);
-      setSnackbar({ open: true, message: 'JSON copied to clipboard!' });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setSnackbar({ open: true, message: 'Copy failed: ' + message });
+      navigator.clipboard.writeText(JSON.stringify(bootstrap, null, 2));
+      setSnackbarMsg('JSON copied to clipboard!');
+      setTimeout(() => setSnackbarMsg(''), 3000);
+    } catch (err) {
+      setSnackbarMsg('Copy failed: ' + String(err));
     }
   };
 
-  const validateBootstrap = async (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    let bootstrap = e.target.value;
-    setErrorMessage('');
-    if (inputSelection === 'url') {
-      let bootstrapUrl = e.target.value;
-      if (bootstrapUrl === '') {
-        setErrorMessage('URL is required.');
-        return false;
-      }
-      const oidcConfigOptions = {
-        method: 'GET',
-        url: bootstrapUrl,
-      };
-      const response = await axios(oidcConfigOptions);
-      bootstrap = response.data;
-
-    } else if (inputSelection === 'json') {
-      bootstrap = e.target.value;
-    }
-    if (Utils.isEmpty(bootstrap) || Object.keys(bootstrap).length === 0) {
-      setErrorMessage('Empty authorization request not allowed.');
-      return false;
-    }
-    await isJsonValid(bootstrap);
-  };
-
-  const isJsonValid = async (bootstrap: unknown) => {
+  const isJsonValid = async (data: unknown) => {
     setErrorMessage('');
     try {
-      setBootstrap(JSON.parse(JSON.stringify(bootstrap)));
+      setBootstrap(JSON.parse(JSON.stringify(data)));
       return true;
     } catch (err) {
-      console.error(err)
-      const message = err instanceof Error ? err.message : String(err);
-      setErrorMessage(`Invalid input: ${message}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`Invalid input: ${msg}`);
       return false;
     }
   };
@@ -131,153 +68,153 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }: Ad
   const saveBootstrap = async () => {
     try {
       setLoading(true);
-      if (!(await isJsonValid(bootstrap))) {
-        return;
-      }
-
+      if (!(await isJsonValid(bootstrap))) return;
       await initWasm();
       await init(bootstrap);
-
-      chrome.storage.local.get(["cedarlingConfig"], ({ cedarlingConfig = [] }) => {
-        const updatedConfig = []
-          let idObj = { id: uuidv4() };
-
-      updatedConfig.push({
-        ...bootstrap,
-        ...idObj
-      });
-
+      chrome.storage.local.get(['cedarlingConfig'], ({ cedarlingConfig = [] }) => {
+        const updatedConfig = [{ ...bootstrap, id: uuidv4() }];
         chrome.storage.local.set({ cedarlingConfig: updatedConfig }, handleClose);
-});
+      });
     } catch (err) {
-      console.error(err)
-      const message = err instanceof Error ? err.message : String(err);
-      setErrorMessage(ADD_BOOTSTRAP_ERROR + ' ' + message)
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage('Error in adding bootstrap. ' + msg);
     }
     setLoading(false);
-  }
-
-  const action = (
-    <React.Fragment>
-      <IconButton
-        size="small"
-        aria-label="close"
-        color="inherit"
-        onClick={() => setSnackbar({ open: false, message: '' })}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </React.Fragment>
-  );
+  };
 
   return (
-    <React.Fragment>
-      <Snackbar
-      open={snackbar.open}
-      autoHideDuration={6000}
-      onClose={() => setSnackbar({ open: false, message: '' })}
-      message={snackbar.message}
-      action={action}/>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        className="form-container"
-      >
-        <DialogTitle>Add Cedarling Configuration</DialogTitle>
-        {loading ? (
-          <div className="loader-overlay">
-            <CircularProgress color="success" />
-          </div>
-        ) : (
-          ""
-        )}
-        <DialogContent>
-          <DialogContentText>
-            Submit below details.
-          </DialogContentText>
-          <Stack
-            component="form"
-            sx={{
-              width: '75ch',
-            }}
-            spacing={2}
-            noValidate
-            autoComplete="off"
-          >
-            {(!!errorMessage || errorMessage !== '') ?
-              <Alert severity="error">{errorMessage}</Alert> : ''
-            }
-            <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: 'min(600px, 90vw)' }}>
-              <RadioGroup
-                row
-                aria-labelledby="demo-row-radio-buttons-group-label"
-                name="row-radio-buttons-group"
-                defaultValue="json"
-              >
-                <FormControlLabel value="json" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("json"); }} color="success" />} label="JSON" />
-                <FormControlLabel value="url" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("url") }} />} label="URL" />
-              </RadioGroup>
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center backdrop-blur-sm">
+        {/* Dialog Container */}
+        <div
+          className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {loading && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-50">
+              <div className="w-10 h-10 border-4 border-[#00B06E] border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
 
-              {inputSelection === 'json' &&
-                (<Tooltip title="Copy JSON configuration">
-                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
-                    <ContentCopyIcon sx={{ color: pink[500] }} />
-                  </IconButton>
-                </Tooltip>)}
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 pt-8 pb-2">
+            <div>
+              <h2 className="text-2xl font-bold text-[#002B49]">Add Cedarling Configuration</h2>
+              <p className="text-sm text-gray-500 mt-1">Submit below details</p>
+            </div>
+            <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="px-8 py-4 space-y-6">
+            {/* Input Toggle + Copy Group */}
+            <div className="flex items-center justify-between">
+              <div className="flex bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setInputSelection('json')}
+                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${inputSelection === 'json' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  JSON
+                </button>
+                <button
+                  onClick={() => setInputSelection('url')}
+                  className={`px-6 py-1.5 text-xs font-bold rounded-md transition-all ${inputSelection === 'url' ? 'bg-[#00B06E] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  URL
+                </button>
+              </div>
+
+              {inputSelection === 'json' && (
+                <button
+                  onClick={copyToClipboard}
+                  className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  <Copy size={14} />
+                  Copy
+                </button>
+              )}
             </div>
 
-            {inputSelection === 'json' &&
-              (
-                <>
-                {showConfigurationButton && (
-                <div style={{maxWidth: '50vmax'}}>
-                  <Chip icon={<ViewListIcon />}
-                    label={showConfiguration ? "Show Minimal Configuration" : "Remove Minimal Configuration"}
-                    variant="outlined"
-                    onClick={() => {
-                      if (showConfiguration) {
-                        setBootstrap(cedarlingBootstrapJson);
-                        setShowConfiguration(false);
-                      } else {
-                        setBootstrap({});
-                        setShowConfiguration(true);
-                      }
-                    }
-                    }
-                  />
-                  </div>)}
+            {/* Config Button Toggle */}
+            {inputSelection === 'json' && showConfigurationButton && (
+              <div>
+                <button
+                  onClick={() => {
+                    setBootstrap(showConfiguration ? cedarlingBootstrapJson : {});
+                    setShowConfiguration(!showConfiguration);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 font-medium"
+                >
+                  <List size={18} />
+                  {showConfiguration ? 'Remove Minimal Configuration' : 'Add Minimal Configuration'}
+                </button>
+              </div>
+            )}
+
+            {/* JSON Editor Window */}
+            {inputSelection === 'json' ? (
+              <div className="border border-gray-200 rounded-xl bg-gray-50/30 overflow-hidden">
+                <style>{`
+                  .jer-confirm-buttons {
+                    position: absolute !important;
+                    top: 4px !important;
+                    right: 4px !important;
+                    bottom: unset !important;
+                  }
+                  .jer-collection-inner {
+                    position: relative !important;
+                  }
+                `}
+                </style>
+                <div className="max-h-80 overflow-y-auto p-2">
                   <JsonEditor
                     data={bootstrap}
                     setData={setBootstrap}
                     rootName="bootstrapConfig"
-                    icons={{ copy: <ContentCopyIcon /> }}
+                    restrictEdit={false}
+                    restrictAdd={false}
+                    restrictDelete={false}
                   />
-                </>
-              )}
-            {inputSelection === 'url' &&
-              (<TextField
-                error={errorMessage.length !== 0}
-                autoFocus
-                required
-                margin="dense"
-                id="bootstrapUrl"
-                name="bootstrapUrl"
-                label="Bootstrap Configuration URL"
+                </div>
+              </div>
+            ) : (
+              <input
                 type="text"
-                fullWidth
-                variant="outlined"
-                helperText={errorMessage}
-                onBlur={(e) => {
-                  validateBootstrap(e);
-                }}
-              />)}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-          <Button variant="outlined" type="submit" onClick={saveBootstrap}>Save</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
+                placeholder="Enter Configuration URL"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00B06E] focus:border-transparent outline-none transition-all"
+              />
+            )}
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+                {errorMessage}
+              </p>
+            )}
+          </div>
+
+          {/* Footer Action */}
+          <div className="px-8 pb-8">
+            <button
+              onClick={saveBootstrap}
+              disabled={loading}
+              className="w-24 py-2.5 bg-[#00B06E] hover:bg-[#00965e] text-white font-bold rounded-lg transition-all shadow-lg shadow-green-200 disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Snackbar */}
+      {!!snackbarMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#002B49] text-white text-sm font-medium rounded-full shadow-2xl flex items-center gap-3 z-[60] animate-bounce">
+          {snackbarMsg}
+        </div>
+      )}
+    </>
   );
 }
