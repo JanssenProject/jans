@@ -26,22 +26,25 @@ pub(crate) const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 #[derive(Debug)]
 pub(crate) struct HttpClient {
     client: Client,
-    base_delay: Duration,
+    retry_delay: Duration,
     max_retries: u32,
 }
 
+pub(crate) struct HttpClientConfig {
+    max_retries: u32,
+    retry_delay: Duration,
+    // WASM's reqwest backend (browser fetch) doesn't expose `.timeout(...)`;
+    // request timing is handled by the browser. `request_timeout` is
+    // intentionally consumed as a no-op on that target.
+    #[cfg(not(target_arch = "wasm32"))]
+    request_timeout: Duration,
+}
+
 impl HttpClient {
-    pub(crate) fn new(
-        max_retries: u32,
-        retry_delay: Duration,
-        request_timeout: Duration,
-    ) -> Result<Self, HttpClientError> {
-        // WASM's reqwest backend (browser fetch) doesn't expose `.timeout(...)`;
-        // request timing is handled by the browser. `request_timeout` is
-        // intentionally consumed as a no-op on that target.
+    pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, HttpClientError> {
         let builder = Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
-        let builder = builder.timeout(request_timeout);
+        let builder = builder.timeout(conf.request_timeout);
         #[cfg(target_arch = "wasm32")]
         let _ = request_timeout;
         let client = builder
@@ -50,15 +53,15 @@ impl HttpClient {
 
         Ok(Self {
             client,
-            base_delay: retry_delay,
-            max_retries,
+            retry_delay: conf.retry_delay,
+            max_retries: conf.max_retries,
         })
     }
 
     /// Creates a new Sender with the configured backoff strategy.
     fn create_sender(&self) -> Sender {
         Sender::new(Backoff::new_exponential(
-            self.base_delay,
+            self.retry_delay,
             Some(self.max_retries),
         ))
     }
@@ -102,13 +105,18 @@ pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(test)]
 mod test {
-    use crate::http::{HttpClient, HttpClientError};
+    use crate::http::{HttpClient, HttpClientConfig, HttpClientError};
 
     use mockito::Server;
     use serde_json::json;
     use std::time::Duration;
     use test_utils::assert_eq;
     use tokio::join;
+    const HTTP_CONF: HttpClientConfig = HttpClientConfig {
+        max_retries: 3,
+        request_timeout: Duration::from_millis(1),
+        retry_delay: Duration::from_secs(5),
+    };
 
     #[tokio::test]
     async fn can_fetch() {
@@ -127,9 +135,7 @@ mod test {
             .expect(1)
             .create_async();
 
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient.");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
 
         let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
         let req_fut = client.get(link);
@@ -150,9 +156,7 @@ mod test {
 
     #[tokio::test]
     async fn errors_when_max_http_retries_exceeded() {
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
         let response = client.get("0.0.0.0").await;
 
         assert!(
@@ -173,9 +177,7 @@ mod test {
             .expect_at_least(1)
             .create_async();
 
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient.");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
 
         let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
         let client_fut = client.get(link);
@@ -202,9 +204,7 @@ mod test {
             .expect(1)
             .create_async();
 
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient.");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
         let link = &format!("{}/binary", mock_server.url());
         let req_fut = client.get_bytes(link);
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
@@ -225,9 +225,7 @@ mod test {
             .expect_at_least(1)
             .create_async();
 
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient.");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
         let link = &format!("{}/error-binary", mock_server.url());
         let req_fut = client.get_bytes(link);
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
@@ -241,9 +239,7 @@ mod test {
 
     #[tokio::test]
     async fn get_bytes_max_retries_exceeded() {
-        let client =
-            HttpClient::new(3, Duration::from_millis(1), Duration::from_secs(5))
-                .expect("Should create HttpClient");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
         let response = client.get_bytes("0.0.0.0").await;
         assert!(
             matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
@@ -273,8 +269,12 @@ mod test {
 
         // 0 retries so the timeout fires once and we don't measure backoff.
         let request_timeout = Duration::from_millis(200);
-        let client = HttpClient::new(0, Duration::from_millis(1), request_timeout)
-            .expect("Should create HttpClient");
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(1),
+            request_timeout,
+        })
+        .expect("Should create HttpClient");
 
         let start = std::time::Instant::now();
         let response = client.get(&format!("http://{addr}/")).await;
