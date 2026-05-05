@@ -78,7 +78,7 @@ the Cedarling will use the default value as specified in the property definition
 
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS`** : Per-request timeout in milliseconds. Only applicable for native targets (not WASM). Default is `10000` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
-- **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in milliseconds. Default is `3000` (3 seconds).
+- **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in milliseconds. Only applicable for native targets (not WASM). Default is `3000` (3 seconds).
 
 **Advanced configuration:**
 

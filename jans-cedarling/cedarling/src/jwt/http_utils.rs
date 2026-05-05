@@ -122,7 +122,7 @@ impl StatusListJwtStr {
     pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
         let response = client
             .get_with_retry_with(url.as_str(), |b| {
-                b.header("Content-Type", "application/statuslist+jwt")
+                b.header("Accept", "application/statuslist+jwt")
             })
             .await
             .map_err(HttpError::Request)?;
