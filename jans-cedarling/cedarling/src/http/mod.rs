@@ -156,14 +156,15 @@ impl HttpClient {
 
     // Execute POST request
     // prepare request build in `builder_fn` and return value as parsed json
+    // NOTE: no retries — POST is non-idempotent; replay can cause duplicate side effects.
     pub(crate) async fn post_json<T, F>(&self, builder_fn: F) -> Result<T, HttpClientError>
     where
         T: serde::de::DeserializeOwned,
-        F: Fn(&Client) -> RequestBuilder,
+        F: FnOnce(&Client) -> RequestBuilder,
     {
         let mut sender = self.create_sender();
         let client = &self.raw_client;
-        sender.send(|| builder_fn(client)).await
+        sender.send_once(move || builder_fn(client)).await
     }
 
     /// Sends a GET request with retry logic and returns the raw [`reqwest::Response`].

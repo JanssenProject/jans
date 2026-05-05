@@ -180,6 +180,34 @@ impl Sender {
         }
     }
 
+    /// Sends an HTTP request a single time and deserializes the JSON response.
+    ///
+    /// Unlike [`send`], this method performs **no retries** — useful for non-idempotent
+    /// requests (POST, PUT, PATCH, DELETE) where replaying the request is unsafe.
+    pub async fn send_once<T, F>(&mut self, request: F) -> Result<T, HttpRequestError>
+    where
+        F: FnOnce() -> RequestBuilder,
+        T: serde::de::DeserializeOwned,
+    {
+        let response = request().send().await.map_err(|e| {
+            let err_msg = e.to_string();
+            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
+                .with_retry_count(1)
+                .with_last_error(err_msg)
+        })?;
+        let response = response.error_for_status().map_err(|e| {
+            let status = e.status();
+            let err_msg = e.to_string();
+            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, status)
+                .with_retry_count(1)
+                .with_last_error(err_msg)
+        })?;
+        let status = response.status();
+        response.json::<T>().await.map_err(|e| {
+            HttpRequestError::new(HttpRequestReasonError::DeserializeToJson(e), Some(status))
+        })
+    }
+
     /// Sends an HTTP request with retry logic then deserializes the JSON response to a
     /// struct.
     ///
