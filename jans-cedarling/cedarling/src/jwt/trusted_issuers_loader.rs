@@ -3,14 +3,19 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use chrono::Utc;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
+    time::Duration,
 };
 use thiserror::Error;
+use tokio::sync::Notify;
+use tokio_util::sync::CancellationToken;
 
 use crate::{
     JwtConfig, LogLevel,
+    async_sleep::sleep,
     common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
     http::HttpClient,
     jwt::{
@@ -19,9 +24,10 @@ use crate::{
         loading_state::TrustedIssuerLoadingState, status_list::StatusListCache,
         validation::JwtValidatorCache,
     },
-    jwt_config::TrustedIssuerLoaderConfig,
+    jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
+use http_utils::Backoff;
 
 use crate::http::spawn_task;
 
@@ -53,6 +59,8 @@ pub(super) struct TrustedIssuerLoader {
     pub(super) logger: Option<Logger>,
     pub(super) loading_state: Arc<TrustedIssuerLoadingState>,
     pub(super) http_client: HttpClient,
+    pub(super) jwks_refresh_notifiers: Arc<Mutex<HashMap<IssClaim, Arc<Notify>>>>,
+    pub(super) jwks_cancel_token: CancellationToken,
 }
 
 impl TrustedIssuerLoader {
@@ -227,6 +235,44 @@ pub(super) async fn load_trusted_issuer(
             .await?;
     }
 
+    if loader.jwt_config.jwt_sig_validation
+        && let Some(openid_config) = iss_config.openid_config.clone()
+    {
+        let notify = Arc::new(Notify::new());
+
+        let initial_interval = Duration::from_secs(
+            loader
+                .jwt_config
+                .jwks_refresh_interval
+                .unwrap_or(DEFAULT_JWKS_REFRESH_INTERVAL_SECS),
+        );
+        let min_interval = Duration::from_secs(loader.jwt_config.jwks_refresh_min_interval);
+        let config_override = loader.jwt_config.jwks_refresh_interval;
+
+        {
+            let mut notifiers = loader
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock");
+            notifiers.insert(iss_claim.clone(), notify.clone());
+        }
+
+        let key_service = loader.key_service.clone();
+        let logger = loader.logger.clone();
+        let cancel_tkn = loader.jwks_cancel_token.clone();
+        spawn_task(keep_jwks_updated(JwksRefreshParams {
+            key_service,
+            openid_config,
+            initial_interval,
+            min_interval,
+            config_override,
+            notify,
+            logger,
+            cancel_tkn,
+            http_client: loader.http_client.clone(),
+        }));
+    }
+
     loader.issuer_configs.insert(iss_claim, iss_config);
 
     Ok(())
@@ -290,6 +336,102 @@ fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceIni
     );
 }
 
+struct JwksRefreshParams {
+    key_service: Arc<KeyService>,
+    openid_config: OpenIdConfig,
+    initial_interval: Duration,
+    min_interval: Duration,
+    config_override: Option<u64>,
+    notify: Arc<Notify>,
+    logger: Option<Logger>,
+    cancel_tkn: CancellationToken,
+    http_client: HttpClient,
+}
+
+/// Background task that periodically re-fetches JWKS for a single trusted issuer
+async fn keep_jwks_updated(params: JwksRefreshParams) {
+    let JwksRefreshParams {
+        key_service,
+        openid_config,
+        initial_interval,
+        min_interval,
+        config_override,
+        notify,
+        logger,
+        cancel_tkn,
+        http_client,
+    } = params;
+
+    let mut interval = initial_interval;
+    let mut last_refresh = Utc::now() - interval;
+    let mut backoff = Backoff::default_fixed();
+
+    loop {
+        tokio::select! {
+            () = sleep(interval) => {},
+            () = notify.notified() => {
+                let elapsed = Utc::now().signed_duration_since(last_refresh).num_seconds().cast_unsigned();
+                if elapsed < min_interval.as_secs() {
+                    sleep(Duration::from_secs(min_interval.as_secs() - elapsed)).await;
+                }
+            },
+            () = cancel_tkn.cancelled() => { break; },
+        }
+
+        logger.log_any(JwtLogEntry::new(
+            format!(
+                "refreshing JWKS for issuer '{}'",
+                openid_config.issuer.as_str()
+            ),
+            Some(LogLevel::DEBUG),
+        ));
+
+        match key_service
+            .refresh_keys_using_oidc(&openid_config, logger.as_ref(), &http_client)
+            .await
+        {
+            Ok(max_age) => {
+                last_refresh = Utc::now();
+                backoff.reset();
+
+                if let Some(config_secs) = config_override {
+                    interval = Duration::from_secs(config_secs);
+                } else if let Some(max_age_secs) = max_age {
+                    interval = if max_age_secs == 0 {
+                        min_interval
+                    } else {
+                        Duration::from_secs(max_age_secs)
+                    };
+                }
+
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "refreshed JWKS for issuer '{}', next refresh in {}s",
+                        openid_config.issuer.as_str(),
+                        interval.as_secs(),
+                    ),
+                    Some(LogLevel::INFO),
+                ));
+            },
+            Err(err) => {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "failed to refresh JWKS for issuer '{}': {}",
+                        openid_config.issuer.as_str(),
+                        err,
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
+
+                tokio::select! {
+                    _ = backoff.snooze() => {},
+                    () = cancel_tkn.cancelled() => { break; },
+                }
+            },
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -347,6 +489,8 @@ mod test {
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(issuer_count)),
             http_client: HTTP_CLIENT.clone(),
+            jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
+            jwks_cancel_token: CancellationToken::new(),
         }
     }
 
@@ -560,6 +704,8 @@ mod test {
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
             http_client: HTTP_CLIENT.clone(),
+            jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
+            jwks_cancel_token: CancellationToken::new(),
         };
 
         loader_with_keys.check_keys_loaded();

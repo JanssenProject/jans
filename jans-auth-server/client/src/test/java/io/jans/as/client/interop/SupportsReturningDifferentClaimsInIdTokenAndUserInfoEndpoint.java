@@ -44,6 +44,7 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid");
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -51,6 +52,8 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(scopes);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.EMAIL,
@@ -68,7 +71,7 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();

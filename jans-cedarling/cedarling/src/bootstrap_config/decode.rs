@@ -125,6 +125,8 @@ impl BootstrapConfig {
             trusted_issuer_loader: raw
                 .trusted_issuer_loader_type
                 .to_config(raw.trusted_issuer_loader_workers),
+            jwks_refresh_interval: raw.jwks_refresh_interval,
+            jwks_refresh_min_interval: raw.jwks_refresh_min_interval,
         };
 
         let authorization_config = AuthorizationConfig {

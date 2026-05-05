@@ -1,0 +1,45 @@
+# cargo-deny policy
+# Layered on top of the cargo-audit job in test-cedarling.yml: This basically
+# extends coverage to license compliance, duplicate-crate drift, source-origin
+# pinning, and advisories.
+
+[graph]
+all-features = true
+
+[advisories]
+# See rationale in jans-cedarling/.cargo/audit.toml
+ignore = ["RUSTSEC-2023-0071"]
+
+[licenses]
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-1-Clause",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "CDLA-Permissive-2.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+]
+confidence-threshold = 0.93
+
+# Per-crate exceptions
+exceptions = [{ allow = ["bzip2-1.0.6"], crate = "libbz2-rs-sys" }]
+
+[bans]
+# for now, we keep it at "warn" for duplicates and wildcards. This will be updated to "deny" in a follow-up PR after we propagate `publish = false` to the internal crates
+multiple-versions = "warn"
+wildcards = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

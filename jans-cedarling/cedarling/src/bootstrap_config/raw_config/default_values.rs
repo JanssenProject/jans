@@ -21,6 +21,10 @@ pub(super) fn default_token_cache_capacity() -> usize {
     JwtConfig::default().token_cache_capacity
 }
 
+pub(super) fn default_jwks_refresh_min_interval() -> u64 {
+    JwtConfig::default().jwks_refresh_min_interval
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) fn default_stdout_timeout_millis() -> u64 {
     StdOutLoggerMode::DEFAULT_FLUSH_TIMEOUT_MILLIS

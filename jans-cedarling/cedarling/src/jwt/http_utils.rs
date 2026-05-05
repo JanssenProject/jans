@@ -8,7 +8,7 @@ use crate::{common::issuer_utils::IssClaim, http::HttpClient};
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
-use reqwest::header::ToStrError;
+use reqwest::header::{CACHE_CONTROL, ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
 
@@ -47,7 +47,7 @@ pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub(super) struct OpenIdConfig {
     pub issuer: IssClaim,
     #[serde(deserialize_with = "deserialize_url")]
@@ -84,6 +84,45 @@ where
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {}
 
 impl GetFromUrl<JwkSet> for JwkSet {}
+
+impl JwkSet {
+    pub(super) async fn get_from_url_with_max_age(
+        url: &Url,
+        client: &HttpClient,
+    ) -> Result<(Self, Option<u64>), HttpError> {
+        let response = client
+            .raw_client
+            .get(url.as_str())
+            .send()
+            .await
+            .map_err(HttpError::GetRequest)?
+            .error_for_status()
+            .map_err(HttpError::ErrorCode)?;
+
+        let max_age = response
+            .headers()
+            .get(CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok())
+            .and_then(parse_max_age);
+
+        let jwk_set = response
+            .json::<JwkSet>()
+            .await
+            .map_err(HttpError::JsonDeserializeResponse)?;
+
+        Ok((jwk_set, max_age))
+    }
+}
+
+/// Parses `max-age=<seconds>` from a `Cache-Control` header value.
+fn parse_max_age(cache_control: &str) -> Option<u64> {
+    cache_control
+        .split(',')
+        .map(str::trim)
+        .filter_map(|directive| directive.split_once('='))
+        .find(|(name, _)| name.trim().eq_ignore_ascii_case("max-age"))
+        .and_then(|(_, value)| value.trim().parse::<u64>().ok())
+}
 
 // NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
@@ -132,4 +171,40 @@ pub enum HttpError {
     InvalidHeader(String, ToStrError),
     #[error("{0}")]
     Unsupported(String),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_max_age;
+
+    #[test]
+    fn parses_max_age_from_cache_control_header() {
+        let max_age = parse_max_age("public, max-age=172800, immutable");
+
+        assert_eq!(
+            max_age,
+            Some(172_800),
+            "expected to parse max-age directive from Cache-Control header"
+        );
+    }
+
+    #[test]
+    fn ignores_invalid_max_age_value() {
+        let max_age = parse_max_age("public, max-age=abc");
+
+        assert_eq!(
+            max_age, None,
+            "expected invalid max-age value to be ignored"
+        );
+    }
+
+    #[test]
+    fn returns_none_when_max_age_missing() {
+        let max_age = parse_max_age("no-cache, no-store");
+
+        assert_eq!(
+            max_age, None,
+            "expected no max-age when directive is missing"
+        );
+    }
 }
