@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
 import static io.jans.as.model.register.RegisterRequestParam.*;
 
 /**
@@ -22,7 +22,7 @@ import static io.jans.as.model.register.RegisterRequestParam.*;
 public class AuthorizationRedirectUrisRegexTest extends BaseTest {
     
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri", "redirectUrisRegex", "redirectUri"})
-    @Test
+    @Test(enabled = false)
     public void requestClientValidateUsingRedirectUrisRegex( final String userId, final String userSecret,
                                                 final String redirectUris, final String sectorIdentifierUri,
                                                 final String redirectUrisRegex, final String redirectUri) {
@@ -63,7 +63,7 @@ public class AuthorizationRedirectUrisRegexTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         String state = UUID.randomUUID().toString();

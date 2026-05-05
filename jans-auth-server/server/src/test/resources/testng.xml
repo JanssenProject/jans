@@ -12,6 +12,7 @@
 
             <class name="io.jans.as.server.model.CIBAGrantTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
+            <class name="io.jans.as.server.model.authorize.AuthorizeParamsValidatorTest" />
             <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
             <class name="io.jans.as.server.model.common.ExecutionContextTest" />
             <class name="io.jans.as.server.model.common.TxTokenTest" />

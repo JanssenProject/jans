@@ -44,6 +44,7 @@ public class ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims extends B
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid");
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -55,6 +56,8 @@ public class ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims extends B
                 JwtClaimName.NAME,
                 JwtClaimName.EMAIL,
                 JwtClaimName.PICTURE));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
