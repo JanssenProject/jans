@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import '../static/css/options.css';
 import Header from './header';
 import HomePage from './homePage';
 import Utils from './Utils';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
-import theme from '../theme/theme';
 
 const Options = () => {
 
@@ -57,32 +51,10 @@ const Options = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: '100vh',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.default',
-        }}
-      >
-        <Header />
-        <Container sx={{ py: 4, flex: 1 }}>
-          <Box
-            sx={{
-              bgcolor: 'background.paper',
-              boxShadow: 2,
-              borderRadius: 3,
-              overflow: 'hidden',
-            }}
-          >
-            {renderPage({ optionType, data })}
-          </Box>
-        </Container>
-      </Box>
-    </ThemeProvider>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      {renderPage({ optionType, data })}
+    </div>
   );
 };
 

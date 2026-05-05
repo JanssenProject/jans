@@ -104,7 +104,8 @@ pub async fn load_policy_store(
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
-            let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
+            let agama_policy_store =
+                serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         #[cfg(not(target_arch = "wasm32"))]

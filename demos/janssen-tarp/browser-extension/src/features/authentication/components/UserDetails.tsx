@@ -1,457 +1,441 @@
-import React, { useState } from 'react'
-import { v4 as uuidv4 } from 'uuid';
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from '@mui/material/Box';
-import { JsonEditor } from 'json-edit-react'
-import Button from '@mui/material/Button';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React, { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { JsonEditor } from "json-edit-react";
 import { jwtDecode } from "jwt-decode";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import { pink } from '@mui/material/colors';
-import Snackbar from '@mui/material/Snackbar';
-import CloseIcon from '@mui/icons-material/Close';
-import { OpenIDConfiguration, LogoutOptions, LoginDetails, IJWT } from '../../../shared/types';
+import {
+  Copy,
+  Plus,
+  Minus,
+  LogOut,
+} from "lucide-react";
+import { Spinner } from "../../../shared/components/Common";
+import {
+  OpenIDConfiguration,
+  LogoutOptions,
+  LoginDetails,
+  IJWT,
+} from "../../../shared/types";
 
 type UserDetailsProps = {
-    data?: any;
-    notifyOnDataChange: (value: string) => void;
+  data?: any;
+  notifyOnDataChange: (value: string) => void;
 };
 
-const UserDetails = ({ data, notifyOnDataChange }: UserDetailsProps) => {
-    const [loading, setLoading] = useState(false);
-    const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
-    const [showPayloadAT, setShowPayloadAT] = useState(false);
-    const [showPayloadUI, setShowPayloadUI] = useState(false);
-    const [snackbar, setSnackbar] = React.useState({ open: false, message: '' });
-    const [decodedTokens, setDecodedTokens] = React.useState<{
-        access_token: IJWT;
-        userinfo_token: IJWT;
-        id_token: IJWT;
+const UserDetails = ({
+  data,
+  notifyOnDataChange,
+}: UserDetailsProps) => {
+  const [loading, setLoading] = useState(false);
+  const [showPayloadIdToken, setShowPayloadIdToken] =
+    useState(false);
+  const [showPayloadAT, setShowPayloadAT] =
+    useState(false);
+  const [showPayloadUI, setShowPayloadUI] =
+    useState(false);
+
+  const [expanded, setExpanded] = useState({
+    access: true,
+    id: false,
+    user: false,
+  });
+
+  const [snackbar, setSnackbar] = useState('');
+
+  const [decodedTokens, setDecodedTokens] =
+    useState<{
+      access_token: IJWT;
+      userinfo_token: IJWT;
+      id_token: IJWT;
     }>({
-        access_token: { header: {}, payload: {} },
-        userinfo_token: { header: {}, payload: {} },
-        id_token: { header: {}, payload: {} },
-    });
-    const [jwtTokens, setJwtTokens] = React.useState<{
-        access_token: String;
-        userinfo_token: String;
-        id_token: String;
-    }>({
-        access_token: "",
-        userinfo_token: "",
-        id_token: "",
+      access_token: { header: {}, payload: {} },
+      userinfo_token: { header: {}, payload: {} },
+      id_token: { header: {}, payload: {} },
     });
 
-    React.useEffect(() => {
+  const [jwtTokens, setJwtTokens] = useState({
+    access_token: "",
+    userinfo_token: "",
+    id_token: "",
+  });
 
-        if (data) {
-            setDecodedTokens({
-                access_token: decodeJWT(data.access_token),
-                userinfo_token: decodeJWT(data.userDetails),
-                id_token: decodeJWT(data.id_token),
-            });
-            setJwtTokens({
-                access_token: data.access_token,
-                userinfo_token: data.userDetails,
-                id_token: data.id_token,
-            })
+  React.useEffect(() => {
+    if (data) {
+      setDecodedTokens({
+        access_token: decodeJWT(data.access_token),
+        userinfo_token: decodeJWT(data.userDetails),
+        id_token: decodeJWT(data.id_token),
+      });
+
+      setJwtTokens({
+        access_token: data.access_token,
+        userinfo_token: data.userDetails,
+        id_token: data.id_token,
+      });
+    }
+  }, [data]);
+
+  const decodeJWT = (token?: string): IJWT => {
+    try {
+      if (!token)
+        return { header: {}, payload: {} };
+
+      const payload =
+        jwtDecode<Record<string, unknown>>(token);
+
+      const header = jwtDecode<
+        Record<string, unknown>
+      >(token, { header: true });
+
+      return { header, payload };
+    } catch {
+      return { header: {}, payload: {} };
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        JSON.stringify(jwtTokens, null, 2)
+      );
+
+      setSnackbar("Token JSON copied successfully");
+      setTimeout(() => setSnackbar(''), 3000);
+    } catch (error: any) {
+      setSnackbar('Copy failed: ' + String(error) || "Failed to copy");
+    }
+  };
+
+  async function logout(
+    options: LogoutOptions = {}
+  ) {
+    const {
+      forceSilentLogout = false,
+      notifyOnComplete = true,
+    } = options;
+
+    setLoading(true);
+
+    try {
+      const loginDetails =
+        await getStoredLoginDetails();
+
+      if (!loginDetails?.id_token) return;
+
+      const payload = jwtDecode<{ iss: string }>(
+        loginDetails.id_token
+      );
+
+      const config =
+        await getOpenIDConfigurationByIssuer(
+          payload.iss
+        );
+
+      if (!config) return;
+
+      await removeLoginDetails();
+
+      await performRemoteLogout(
+        loginDetails.id_token,
+        config,
+        forceSilentLogout
+      );
+    } catch {
+      await performLocalLogout();
+    } finally {
+      setLoading(false);
+
+      if (notifyOnComplete) {
+        notifyOnDataChange("true");
+      }
+    }
+  }
+
+  async function getStoredLoginDetails(): Promise<LoginDetails | null> {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(
+        ["loginDetails"],
+        (result) => {
+          resolve(result.loginDetails || null);
         }
-    }, [data])
+      );
+    });
+  }
 
-    const decodeJWT = (token: string | undefined): IJWT => {
-        try {
-            if (!token) return { header: {}, payload: {} }; // Handle undefined token
-            const payload = jwtDecode<Record<string, unknown>>(token);
-            const header = jwtDecode<Record<string, unknown>>(token, { header: true });
-            return { header, payload };
-        } catch (error) {
-            console.error("Error decoding JWT:", error);
-            return { header: {}, payload: {} }; // Return empty object on error
+  async function getOpenIDConfigurationByIssuer(
+    issuerUrl: string
+  ): Promise<OpenIDConfiguration | null> {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(
+        ["openidConfigurations"],
+        (result) => {
+          const configs =
+            result.openidConfigurations || [];
+
+          const found = configs.find(
+            (c: OpenIDConfiguration) =>
+              c.issuer === issuerUrl
+          );
+
+          resolve(found || null);
         }
-    };
+      );
+    });
+  }
 
-    const copyToClipboard = () => {
-        try {
-            const jsonString = JSON.stringify(jwtTokens, null, 2); // pretty print
-            navigator.clipboard.writeText(jsonString);
-            setSnackbar({ open: true, message: 'Token JSON copied to clipboard!' });
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            setSnackbar({ open: true, message: 'Copy failed: ' + message });
-        }
-    };
+  async function removeLoginDetails() {
+    return new Promise<void>((resolve) => {
+      chrome.storage.local.remove(
+        ["loginDetails"],
+        () => resolve()
+      );
+    });
+  }
 
-    /**
- * Main logout function with improved error handling and structure
- */
-    async function logout(options: LogoutOptions = {}): Promise<void> {
-        const { forceSilentLogout = false, notifyOnComplete = true } = options;
+  async function performLocalLogout() {
+    return new Promise<void>((resolve) => {
+      chrome.storage.local.remove(
+        ["loginDetails"],
+        () => resolve()
+      );
+    });
+  }
 
-        setLoading(true);
-
-        try {
-            // Get login details
-            const loginDetails = await getStoredLoginDetails();
-
-            if (!loginDetails || !loginDetails.id_token) {
-                console.warn('No login details found, nothing to logout');
-                return;
-            }
-
-            // Decode ID token to get issuer
-            const idToken = loginDetails.id_token;
-            const payload = jwtDecode<{ iss: string;[key: string]: any }>(idToken);
-            const issuerUrl = payload.iss;
-
-            // Get OpenID configuration for this issuer
-            const openidConfiguration = await getOpenIDConfigurationByIssuer(issuerUrl);
-
-            if (!openidConfiguration) {
-                throw new Error(`OpenID Configuration not found for issuer: ${issuerUrl}`);
-            }
-
-            // Check if end_session_endpoint is available
-            if (!openidConfiguration.end_session_endpoint) {
-                console.warn('No end_session_endpoint available, performing local logout only');
-                await performLocalLogout();
-                return;
-            }
-
-            // Remove login details first (immediate local logout)
-            await removeLoginDetails();
-
-            // Perform remote logout
-            await performRemoteLogout(idToken, openidConfiguration, forceSilentLogout);
-
-            console.log("Logged out successfully.");
-
-        } catch (error) {
-            console.error("Logout error:", error);
-
-            // Capture login details before cleanup for potential silent logout
-            let savedIdToken: string | null = null;
-            let savedOpenIdConfig: OpenIDConfiguration | null = null;
-            try {
-                const loginDetails = await getStoredLoginDetails();
-                if (loginDetails?.id_token) {
-                    savedIdToken = loginDetails.id_token;
-                    const payload = jwtDecode<{ iss: string }>(loginDetails.id_token);
-                    savedOpenIdConfig = await getOpenIDConfigurationByIssuer(payload.iss);
-                }
-            } catch (captureError) {
-                console.error("Failed to capture logout data:", captureError);
-            }
-
-            // Fallback: Always ensure local data is cleaned up
-            try {
-                await performLocalLogout();
-            } catch (cleanupError) {
-                console.error("Cleanup error:", cleanupError);
-            }
-
-            if (savedIdToken && savedOpenIdConfig?.end_session_endpoint) {
-                try {
-                    await performSilentLogout(savedIdToken, savedOpenIdConfig);
-                } catch (silentError) {
-                    console.error("Silent logout failed:", silentError);
-                }
-            }
-        } finally {
-            setLoading(false);
-            if (notifyOnComplete) notifyOnDataChange("true");
-        }
+  async function performRemoteLogout(
+    idToken: string,
+    config: OpenIDConfiguration,
+    forceSilent = false
+  ) {
+    if (forceSilent) {
+      return performSilentLogout(idToken, config);
     }
 
-    /**
-     * Get stored login details
-     */
-    async function getStoredLoginDetails(): Promise<LoginDetails | null> {
-        return new Promise((resolve) => {
-            chrome.storage.local.get(["loginDetails"], (result: { loginDetails?: LoginDetails }) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error reading login details:", chrome.runtime.lastError);
-                    resolve(null);
-                    return;
-                }
-                resolve(result.loginDetails || null);
-            });
-        });
-    }
+    return new Promise<void>((resolve) => {
+      chrome.identity.launchWebAuthFlow(
+        {
+          url: buildLogoutUrl(idToken, config),
+          interactive: true,
+        },
+        () => resolve()
+      );
+    });
+  }
 
-    /**
-     * Get OpenID configuration by issuer URL
-     */
-    async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
-        const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
-            chrome.storage.local.get(["openidConfigurations"], (result: { openidConfigurations?: OpenIDConfiguration[] }) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error reading OpenID configurations:", chrome.runtime.lastError);
-                    resolve([]);
-                    return;
-                }
-                resolve(result?.openidConfigurations ? result.openidConfigurations : []);
-            })
-        });
-
-        const existingIndex = openidConfigurations.findIndex(c =>
-            c.issuer === issuerUrl
-        )
-
-        if (existingIndex >= 0) {
-            // Return existing configuration
-            return openidConfigurations[existingIndex];
+  async function performSilentLogout(
+    idToken: string,
+    config: OpenIDConfiguration
+  ) {
+    try {
+      await fetch(
+        buildLogoutUrl(idToken, config),
+        {
+          method: "GET",
+          credentials: "include",
+          mode: "no-cors",
         }
+      );
+    } catch { }
+  }
 
-        return null;
-    }
+  function buildLogoutUrl(
+    idToken: string,
+    config: OpenIDConfiguration
+  ) {
+    const params = new URLSearchParams({
+      state: uuidv4(),
+      id_token_hint: idToken,
+      post_logout_redirect_uri:
+        chrome.identity.getRedirectURL(
+          "logout"
+        ),
+      ui_locales: navigator.language,
+      logout_hint: idToken,
+    });
 
-    /**
-     * Remove login details from storage
-     */
-    async function removeLoginDetails(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.remove(["loginDetails"], () => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
-                } else {
-                    resolve();
-                }
-            });
-        });
-    }
+    return `${config.end_session_endpoint}?${params.toString()}`;
+  }
 
-    /**
- * Perform comprehensive local logout
- */
-    async function performLocalLogout(): Promise<void> {
-        const itemsToRemove = [
-            "loginDetails"
-        ];
-
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.remove(itemsToRemove, () => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
-                } else {
-                    console.log("Local logout completed");
-                    resolve();
-                }
-            });
-        });
-    }
-
-    /**
-     * Perform remote logout via end_session_endpoint
-     */
-    async function performRemoteLogout(
-        idToken: string,
-        openidConfiguration: OpenIDConfiguration,
-        forceSilent: boolean = false
-    ): Promise<void> {
-        // If forced silent or no interactive logout needed, use silent logout
-        if (forceSilent) {
-            return performSilentLogout(idToken, openidConfiguration);
+  const TokenCard = ({
+    title,
+    expandedState,
+    showPayload,
+    setShowPayload,
+    rawToken,
+    decoded,
+  }: {
+    title: string;
+    expandedState: keyof typeof expanded;
+    showPayload: boolean;
+    setShowPayload: (v: boolean) => void;
+    rawToken: string;
+    decoded: IJWT;
+  }) => (
+    <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      {/* Header */}
+      <button
+        onClick={() =>
+          setExpanded((prev) => ({
+            ...prev,
+            [expandedState]:
+              !prev[expandedState],
+          }))
         }
+        className="flex w-full items-center justify-between px-6 py-5 text-left hover:bg-gray-50"
+      >
+        <span className="text-xl font-semibold text-gray-900">
+          {title}
+        </span>
 
-        // Interactive logout with web auth flow
-        return new Promise((resolve, reject) => {
-            const logoutUrl = buildLogoutUrl(idToken, openidConfiguration);
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-900 text-white">
+          {expanded[expandedState] ? (
+            <Minus size={16} />
+          ) : (
+            <Plus size={16} />
+          )}
+        </span>
+      </button>
 
-            chrome.identity.launchWebAuthFlow(
-                {
-                    url: logoutUrl,
-                    interactive: true
-                },
-                (_responseUrl?: string) => {
-                    if (chrome.runtime.lastError) {
-                        console.warn("Interactive logout failed, trying silent:", chrome.runtime.lastError);
-                        // Fallback to silent logout
-                        performSilentLogout(idToken, openidConfiguration)
-                            .then(resolve)
-                            .catch(reject);
-                    } else {
-                        console.log("Interactive logout completed");
-                        resolve();
-                    }
-                }
-            );
-        });
-    }
-
-    /**
-     * Perform silent logout (no user interaction)
-     */
-    async function performSilentLogout(
-        idToken: string,
-        openidConfiguration: OpenIDConfiguration
-    ): Promise<void> {
-        const logoutUrl = buildLogoutUrl(idToken, openidConfiguration);
-
-        try {
-            const response = await fetch(logoutUrl, {
-                method: 'GET',
-                credentials: 'include',
-                mode: 'no-cors' // Use no-cors to avoid CORS issues
-            });
-
-            console.log("Silent logout request sent");
-        } catch (error) {
-            console.warn("Silent logout request failed:", error);
-            // Silent logout is best effort, don't throw
-        }
-    }
-
-    /**
-     * Build logout URL with parameters
-     */
-    function buildLogoutUrl(
-        idToken: string,
-        openidConfiguration: OpenIDConfiguration,
-        clientId?: string
-    ): string {
-        const params = new URLSearchParams({
-            state: uuidv4(),
-            id_token_hint: idToken
-        });
-
-        // Add post_logout_redirect_uri if available
-        const redirectUri = chrome.identity.getRedirectURL('logout');
-        if (redirectUri) {
-            params.append('post_logout_redirect_uri', redirectUri);
-        }
-
-        // Add client_id if provided
-        if (clientId) {
-            params.append('client_id', clientId);
-        }
-
-        // Add UI locale
-        params.append('ui_locales', navigator.language);
-        params.append('logout_hint', idToken);
-
-        return `${openidConfiguration.end_session_endpoint}?${params.toString()}`;
-    }
-
-    const action = (
-        <React.Fragment>
-            <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setSnackbar({ open: false, message: '' })}
-            >
-                <CloseIcon fontSize="small" />
-            </IconButton>
-        </React.Fragment>
-    );
-
-
-    return (
-        <Box sx={{ position: 'relative', p: 3, borderRadius: 2 }}>
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={() => setSnackbar({ open: false, message: '' })}
-                message={snackbar.message}
-                action={action} />
-
-            {loading && (
-              <Box
-                sx={{
-                  position: 'absolute', top: 0, left: 0,
-                  width: '100%', height: '100%',
-                  bgcolor: 'rgba(255,255,255,0.85)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  zIndex: 10, borderRadius: 2,
-                }}
-              >
-                <CircularProgress color="primary" />
-              </Box>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '90vw' }}>
-                <legend><span className="number">O</span> User Details:</legend>
-                <Tooltip title="Copy tokens JSON">
-                    <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
-                        <ContentCopyIcon sx={{ color: pink[500] }} />
-                    </IconButton>
-                </Tooltip>
-            </div>
-            <hr />
-
-            {data?.displayToken &&
+      {/* Content */}
+      {expanded[expandedState] && (
+        <div className="border-t border-gray-200 bg-gray-50 px-6 py-5">
+          <div className="rounded-xl border border-gray-200 bg-white p-5">
+            <div className="break-all text-sm leading-7 text-gray-600">
+              {showPayload ? (
                 <>
-                    <Accordion>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel1-header"
-                        >
-                            <Typography component="span"><strong>Access Token</strong></Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                                <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadAT ? (!!data ?
-                                    <>
-                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.access_token.header} rootName="header" />
-                                        <JsonEditor data={decodedTokens.access_token.payload} collapse={true} viewOnly={true} rootName="payload" />
-                                    </>
-                                    : '') : (!!data ? data?.access_token : '')}</Box>
-                                <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
-                            </Box>
-                        </AccordionDetails>
-                    </Accordion>
-                    <Accordion>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel1-header"
-                        >
-                            <Typography component="span"><strong>Id Token</strong></Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
+                  <JsonEditor
+                    collapse
+                    viewOnly
+                    data={decoded.header}
+                    rootName="header"
+                  />
+                  <JsonEditor
+                    collapse
+                    viewOnly
+                    data={decoded.payload}
+                    rootName="payload"
+                  />
+                </>
+              ) : (
+                rawToken
+              )}
+            </div>
 
-                            <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                                <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadIdToken ? (!!data ?
-                                    <>
-                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.id_token.header} rootName="header" />
-                                        <JsonEditor data={decodedTokens.id_token.payload} collapse={true} viewOnly={true} rootName="payload" />
-                                    </>
-                                    : '') : (!!data ? data?.id_token : '')}</Box>
-                                <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
-                            </Box>
-                        </AccordionDetails>
-                    </Accordion>
-                </>}
-            <Accordion>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <Typography component="span"><strong>User Details</strong></Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Box sx={{ bgcolor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 1.5, p: 2 }}>
-                        <Box sx= {{overflowWrap: 'break-word'}} component="div">{showPayloadUI ? (!!data ?
-                            <>
-                                <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userinfo_token.header} rootName="header" />
-                                <JsonEditor data={decodedTokens.userinfo_token.payload} collapse={true} viewOnly={true} rootName="payload" />
-                            </>
-                            : '') : (!!data ? data?.userDetails : '')}</Box>
-                        <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>
-                    </Box>
-                </AccordionDetails>
-            </Accordion>
-            <hr />
-            <Button variant="contained" id="logoutButton" color="success" onClick={() => logout({ forceSilentLogout: false, notifyOnComplete: true })}>Logout</Button>
-        </Box>
-    )
+            <button
+              onClick={() =>
+                setShowPayload(!showPayload)
+              }
+              className="mt-4 text-sm font-medium text-emerald-600 hover:underline"
+            >
+              {showPayload
+                ? "Show JWT"
+                : "Show Payload"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      {/* Snackbar */}
+      {!!snackbar && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true" 
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#002B49] text-white text-sm font-medium rounded-full shadow-2xl flex items-center gap-3 z-[60] animate-bounce">
+          {snackbar}
+        </div>
+      )}
+
+      <div className="relative mx-auto max-w-5xl rounded-2xl border border-gray-200 bg-white p-10">
+        {/* Loader Overlay */}
+        {loading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm">
+            <Spinner />
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-4xl font-bold text-gray-900">
+            User Details
+          </h1>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={copyToClipboard}
+              className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Copy size={15} />
+              Copy
+            </button>
+
+            <button
+              onClick={() =>
+                logout({
+                  forceSilentLogout: false,
+                  notifyOnComplete: true,
+                })
+              }
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+            >
+              <LogOut size={15} />
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Tokens */}
+        {data?.displayToken && (
+          <>
+            <TokenCard
+              title="Access Token"
+              expandedState="access"
+              showPayload={showPayloadAT}
+              setShowPayload={setShowPayloadAT}
+              rawToken={data?.access_token}
+              decoded={decodedTokens.access_token}
+            />
+
+            <TokenCard
+              title="ID Token"
+              expandedState="id"
+              showPayload={showPayloadIdToken}
+              setShowPayload={setShowPayloadIdToken}
+              rawToken={data?.id_token}
+              decoded={decodedTokens.id_token}
+            />
+          </>
+        )}
+
+        <TokenCard
+          title="User Details"
+          expandedState="user"
+          showPayload={showPayloadUI}
+          setShowPayload={setShowPayloadUI}
+          rawToken={data?.userDetails}
+          decoded={decodedTokens.userinfo_token}
+        />
+
+        {/* Logout */}
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={() =>
+              logout({
+                forceSilentLogout: false,
+                notifyOnComplete: true,
+              })
+            }
+            className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default UserDetails;

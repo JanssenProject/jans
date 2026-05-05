@@ -30,18 +30,19 @@ const MUTEX_POISONED_ERR: &str =
 ///
 /// This structure is thread-safe.
 ///
-/// ## TODO
+/// ## Key Rotation
 ///
-/// We still need to figure out a reliable way to handle rotating out expired keys.
+/// JWKS are automatically refreshed via a per-issuer background task that
+/// periodically re-fetches keys from the issuer's `jwks_uri`. The refresh
+/// interval is driven by (in priority order):
 ///
-/// the Jans Auth Server adds a custom `exp` field to the JWK but it's not really
-/// a standard approach yet as per [`RFC 7517 v41`] so some IDPs will might not follow
-/// the same convention. Thus, we shouldn't rely on it yet for rotating keys.
+/// 1. `CEDARLING_JWKS_REFRESH_INTERVAL` bootstrap property
+/// 2. `Cache-Control: max-age` from the JWKS HTTP response
+/// 3. Hardcoded fallback of 3600 seconds (1 hour)
 ///
-/// A naive first solution might be to try fetching a new key if validation fails
-/// but this could be abused if someone just kept sending invalid JWTs.
-///
-/// [`RFC 7517 v41`]: https://datatracker.ietf.org/doc/html/draft-ietf-jose-json-web-key-41
+/// Additionally, an on-demand refresh is triggered when a token arrives with
+/// an unknown `kid`. This signal is rate-limited per issuer
+/// (`CEDARLING_JWKS_REFRESH_MIN_INTERVAL`, default 30 s) to prevent abuse.
 #[derive(Default)]
 pub(super) struct KeyService {
     keys: RwLock<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
@@ -81,6 +82,8 @@ impl KeyService {
             .into_iter()
             .map(|(iss, keys)| (IssClaim::new(&iss), keys))
         {
+            keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&issuer));
+
             for jwk in keys {
                 let decoding_key =
                     DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
@@ -113,6 +116,17 @@ impl KeyService {
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
+        self.insert_jwk_set(openid_config, logger, jwks)?;
+
+        Ok(())
+    }
+
+    fn insert_jwk_set(
+        &self,
+        openid_config: &OpenIdConfig,
+        logger: Option<&Logger>,
+        jwks: JwkSet,
+    ) -> Result<(), KeyServiceError> {
         let (keys, errs) = jwks.unwrap_keys();
         for err in errs {
             let err_msg = format!(
@@ -125,6 +139,7 @@ impl KeyService {
 
         let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
 
+        keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&openid_config.issuer));
         for parsed_key in keys {
             let key = parsed_key.jwk;
 
@@ -163,6 +178,23 @@ impl KeyService {
         }
 
         Ok(())
+    }
+
+    /// Re-fetches JWKS from the issuer's `jwks_uri`, inserts new keys, and
+    /// returns the `Cache-Control: max-age` value from the HTTP response
+    /// (if present) for use as the next refresh interval.
+    pub(super) async fn refresh_keys_using_oidc(
+        &self,
+        openid_config: &OpenIdConfig,
+        logger: Option<&Logger>,
+    ) -> Result<Option<u64>, KeyServiceError> {
+        let (jwks, max_age) = JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri)
+            .await
+            .map_err(KeyServiceError::GetJwks)?;
+
+        self.insert_jwk_set(openid_config, logger, jwks)?;
+
+        Ok(max_age)
     }
 
     pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<Arc<DecodingKey>> {
@@ -282,7 +314,7 @@ pub enum FetchKeysError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::jwt::test_utils::MockServer;
+    use crate::jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256};
     use jsonwebtoken::Algorithm;
     use serde_json::json;
 
@@ -422,6 +454,155 @@ mod test {
                 })
                 .is_none(),
             "expected to not find a key from an unknown issuer"
+        );
+    }
+
+    #[tokio::test]
+    async fn refresh_returns_max_age_from_cache_control_header() {
+        let keys = generate_keypair_hs256(Some("cache_test_key")).unwrap();
+        let mut server = mockito::Server::new_async().await;
+
+        let jwks_body =
+            json!({"keys": generate_jwks(std::slice::from_ref(&keys)).keys}).to_string();
+
+        server
+            .mock("GET", "/jwks")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_header("cache-control", "public, max-age=300")
+            .with_body(&jwks_body)
+            .expect(1)
+            .create();
+
+        let openid_config = OpenIdConfig {
+            issuer: IssClaim::new(&server.url()),
+            jwks_uri: url::Url::parse(&(server.url() + "/jwks")).unwrap(),
+            status_list_endpoint: None,
+        };
+
+        let key_service = KeyService::default();
+        let max_age = key_service
+            .refresh_keys_using_oidc(&openid_config, None)
+            .await
+            .expect("refresh with cache-control header should succeed");
+
+        assert_eq!(
+            max_age,
+            Some(300),
+            "should parse max-age=300 from Cache-Control header"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(IssClaim::new(&server.url())),
+                    kid: Some("cache_test_key".to_string()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "key should be loaded via refresh"
+        );
+    }
+
+    #[tokio::test]
+    async fn refresh_returns_none_when_cache_control_header_missing() {
+        let keys = generate_keypair_hs256(Some("cache_test_key")).unwrap();
+        let mut server = mockito::Server::new_async().await;
+
+        let jwks_body =
+            json!({"keys": generate_jwks(std::slice::from_ref(&keys)).keys}).to_string();
+
+        server
+            .mock("GET", "/jwks")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(&jwks_body)
+            .expect(1)
+            .create();
+
+        let openid_config = OpenIdConfig {
+            issuer: IssClaim::new(&server.url()),
+            jwks_uri: url::Url::parse(&(server.url() + "/jwks")).unwrap(),
+            status_list_endpoint: None,
+        };
+
+        let key_service = KeyService::default();
+        let max_age = key_service
+            .refresh_keys_using_oidc(&openid_config, None)
+            .await
+            .expect("refresh without cache-control header should succeed");
+
+        assert_eq!(
+            max_age, None,
+            "max_age should be None when Cache-Control header is missing"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(IssClaim::new(&server.url())),
+                    kid: Some("cache_test_key".to_string()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "key should be loaded via refresh"
+        );
+    }
+
+    #[tokio::test]
+    async fn refresh_removes_old_keys_after_rotation() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let (_, initial_kid) = server.jwt_decoding_key_and_id().unwrap();
+
+        let openid_config = server.openid_config();
+        let key_service = KeyService::default();
+
+        key_service
+            .get_keys_using_oidc(&openid_config, None)
+            .await
+            .expect("initial key fetch should succeed");
+
+        let initial_kid = initial_kid.unwrap();
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some(initial_kid.clone()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "initial key should be present"
+        );
+
+        server
+            .rotate_signing_key_hs256("rotated_key")
+            .expect("should rotate signing key");
+
+        key_service
+            .refresh_keys_using_oidc(&server.openid_config(), None)
+            .await
+            .expect("refresh should succeed");
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some(initial_kid),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_none(),
+            "old key should be removed after refresh"
+        );
+
+        assert!(
+            key_service
+                .get_key(&DecodingKeyInfo {
+                    issuer: Some(server.issuer()),
+                    kid: Some("rotated_key".to_string()),
+                    algorithm: Algorithm::HS256,
+                })
+                .is_some(),
+            "new key should be present after refresh"
         );
     }
 }
