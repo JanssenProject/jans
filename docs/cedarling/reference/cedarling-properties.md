@@ -74,6 +74,12 @@ the Cedarling will use the default value as specified in the property definition
 
 - **`CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD`** : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is `80.0`. When capacity usage exceeds this threshold, `memory_alert_triggered` will be `true` in statistics.
 
+**HTTP client:**
+
+- **`CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS`** : Per-request timeout in milliseconds. Only applicable for native targets (not WASM). Default is `10000` (10 seconds).
+- **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
+- **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in milliseconds. Default is `3000` (3 seconds).
+
 **Advanced configuration:**
 
 - **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)

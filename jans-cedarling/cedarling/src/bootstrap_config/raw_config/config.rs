@@ -333,7 +333,7 @@ pub struct BootstrapConfigRaw {
     // =========================================================================
     // HTTP CLIENT CONFIGURATION
     // =========================================================================
-    /// `CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS` — per-request timeout in milliseconds.
+    /// Per-request timeout in milliseconds.
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(
         rename = "CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS",
@@ -341,7 +341,7 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub http_client_request_timeout_millis: u64,
-    /// `CEDARLING_HTTP_REQUEST_MAX_RETRIES` — maximum number of retry attempts per request.
+    /// Maximum number of retry attempts per request.
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(
         rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
@@ -350,7 +350,7 @@ pub struct BootstrapConfigRaw {
     )]
     pub http_client_request_max_retries: u32,
 
-    /// `CEDARLING_HTTP_REQUEST_RETRY_DELAY` — base delay between retries in milliseconds.
+    /// Base delay between retries in milliseconds.
     #[serde(
         rename = "CEDARLING_HTTP_REQUEST_RETRY_DELAY",
         default = "default_http_client_retry_delay",
