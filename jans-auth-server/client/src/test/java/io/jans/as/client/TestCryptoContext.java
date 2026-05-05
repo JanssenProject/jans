@@ -1,0 +1,329 @@
+package io.jans.as.client;
+
+import io.jans.as.client.model.authorize.Claim;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyOpsType;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.jans.as.model.jwk.JWKParameter.*;
+
+public class TestCryptoContext {
+
+    private static final int DEFAULT_KEY_LENGTH = 2048;
+    private static final int DEFAULT_EXPIRATION_HOURS = 24;
+
+    private final AuthCryptoProvider cryptoProvider;
+    private final String keyStoreFile;
+    private final String keyStoreSecret;
+    private final String dnName;
+    private final JSONWebKeySet jwks;
+
+    // Key IDs for different algorithms
+    private final Map<Algorithm, String> keyIdMap = new HashMap<>();
+
+    private TestCryptoContext(AuthCryptoProvider cryptoProvider, String keyStoreFile,
+                              String keyStoreSecret, String dnName, JSONWebKeySet jwks) {
+        this.cryptoProvider = cryptoProvider;
+        this.keyStoreFile = keyStoreFile;
+        this.keyStoreSecret = keyStoreSecret;
+        this.dnName = dnName;
+        this.jwks = jwks;
+    }
+
+    private static class Holder {
+        private static final TestCryptoContext INSTANCE;
+
+        static {
+            try {
+                INSTANCE = create();
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to initialize TestCryptoContext", e);
+            }
+        }
+    }
+
+    public static TestCryptoContext getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    /**
+     * Creates a new TestCryptoContext with generated keys.
+     * P12 file is created in temp directory.
+     */
+    private static TestCryptoContext create() throws Exception {
+        return create(Arrays.asList(Algorithm.values()));
+    }
+
+    /**
+     * Creates a new TestCryptoContext with specified algorithms.
+     */
+    public static TestCryptoContext create(List<Algorithm> algorithms) throws Exception {
+        // Create temp p12 file
+        File tempFile = Files.createTempFile("test-keystore-", ".p12").toFile();
+        tempFile.deleteOnExit();
+        String keyStoreFile = tempFile.getAbsolutePath();
+
+        // Create crypto provider (creates p12 if not exists)
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(
+                keyStoreFile, TestConstants.DEFAULT_SECRET, TestConstants.DEFAULT_DN_NAME);
+
+        // required to force key store initialization (it's new key store)
+        // without it -> java.security.KeyStoreException: Uninitialized keystore
+        cryptoProvider.getKeyStore().load(null, null);
+
+        // Generate keys and JWKS
+        JSONWebKeySet jwks = new JSONWebKeySet();
+        long expirationTime = System.currentTimeMillis() + (DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000);
+
+        TestCryptoContext context = new TestCryptoContext(
+                cryptoProvider, keyStoreFile, TestConstants.DEFAULT_SECRET, TestConstants.DEFAULT_DN_NAME, jwks);
+
+        for (Algorithm algorithm : algorithms) {
+            if (algorithm.getFamily() == AlgorithmFamily.AES ||
+                    algorithm.getFamily() == AlgorithmFamily.PASSW  ||
+                    algorithm.getFamily() == AlgorithmFamily.DIR) {
+                continue;
+            }
+
+            JSONObject keyJson = cryptoProvider.generateKey(
+                    algorithm, expirationTime, DEFAULT_KEY_LENGTH, KeyOpsType.CONNECT);
+
+            String keyId = keyJson.getString(KEY_ID);
+            context.keyIdMap.put(algorithm, keyId);
+
+            // Build JSONWebKey for JWKS
+            JSONWebKey jwk = buildJwk(algorithm, keyJson);
+            jwks.getKeys().add(jwk);
+        }
+
+        return context;
+    }
+
+    private static JSONWebKey buildJwk(Algorithm algorithm, JSONObject keyJson) {
+        JSONWebKey key = new JSONWebKey();
+        key.setKid(keyJson.getString(KEY_ID));
+        key.setUse(algorithm.getUse());
+        key.setAlg(algorithm);
+        key.setKty(algorithm.getFamily().getKeyType());
+        key.setExp(keyJson.optLong(EXPIRATION_TIME));
+        key.setN(keyJson.optString(MODULUS));
+        key.setE(keyJson.optString(EXPONENT));
+        key.setX(keyJson.optString(X));
+        key.setY(keyJson.optString(Y));
+        if (keyJson.has(CURVE)) {
+            key.setCrv(EllipticEdvardsCurve.fromString(keyJson.getString(CURVE)));
+        }
+        JSONArray x5c = keyJson.optJSONArray(CERTIFICATE_CHAIN);
+        if (x5c != null) {
+            key.setX5c(StringUtils.toList(x5c));
+        }
+        return key;
+    }
+
+    public AuthCryptoProvider getCryptoProvider() {
+        return cryptoProvider;
+    }
+
+    public String getKeyStoreFile() {
+        return keyStoreFile;
+    }
+
+    public String getKeyStoreSecret() {
+        return keyStoreSecret;
+    }
+
+    public String getDnName() {
+        return dnName;
+    }
+
+    /**
+     * Returns a defensive copy of the JWKS to prevent mutation of singleton state.
+     */
+    public JSONWebKeySet getJwks() {
+        return JSONWebKeySet.fromJSONObject(jwks.toJSONObject());
+    }
+
+    public String getJwksAsString() {
+        return jwks.toString();
+    }
+
+    public String getKeyId(Algorithm algorithm) {
+        return keyIdMap.get(algorithm);
+    }
+
+    public PrivateKey getPrivateKey(Algorithm algorithm) throws CryptoProviderException {
+        return cryptoProvider.getPrivateKey(getKeyId(algorithm));
+    }
+
+    /**
+     * Creates a JWE containing a nested JWS (signed then encrypted).
+     *
+     * @param authRequest    The authorization request
+     * @param sigAlg         Signature algorithm for JWS
+     * @param signingKeyId   Key ID for signing
+     * @param keyEncAlg      Key encryption algorithm for JWE
+     * @param blockEncAlg    Block encryption algorithm for JWE
+     * @param encryptionKey  Shared key for symmetric encryption (clientSecret)
+     * @param cryptoProvider Crypto provider for signing
+     * @param idTokenClaims  Claims to add to id_token
+     * @param userInfoClaims Claims to add to userinfo
+     * @return Encoded JWE containing nested JWS
+     */
+    public static String createJweWithNestedJws(
+            AuthorizationRequest authRequest,
+            SignatureAlgorithm sigAlg,
+            String signingKeyId,
+            KeyEncryptionAlgorithm keyEncAlg,
+            BlockEncryptionAlgorithm blockEncAlg,
+            String encryptionKey,
+            AuthCryptoProvider cryptoProvider,
+            List<Claim> idTokenClaims,
+            List<Claim> userInfoClaims) throws Exception {
+
+        if (signingKeyId == null || signingKeyId.isEmpty()) {
+            throw new IllegalArgumentException("signingKeyId is required for nested JWE");
+        }
+
+        // Step 1: Create and sign JWS
+        JwtAuthorizationRequest jwsRequest = new JwtAuthorizationRequest(
+                authRequest, sigAlg, cryptoProvider);
+        jwsRequest.setKeyId(signingKeyId);
+
+        if (idTokenClaims != null) {
+            for (Claim claim : idTokenClaims) {
+                jwsRequest.addIdTokenClaim(claim);
+            }
+        }
+        if (userInfoClaims != null) {
+            for (Claim claim : userInfoClaims) {
+                jwsRequest.addUserInfoClaim(claim);
+            }
+        }
+
+        Jwt jws = Jwt.parse(jwsRequest.getEncodedJwt());
+
+        // Step 2: Create JWE with nested JWS
+        JwtAuthorizationRequest jweRequest = new JwtAuthorizationRequest(
+                authRequest, keyEncAlg, blockEncAlg, encryptionKey);
+        jweRequest.setNestedPayload(jws);
+
+        return jweRequest.getEncodedJwt();
+    }
+
+    /**
+     * Simplified version for tests that don't need custom claims.
+     */
+    public static String createJweWithNestedJws(
+            AuthorizationRequest authRequest,
+            SignatureAlgorithm sigAlg,
+            String signingKeyId,
+            KeyEncryptionAlgorithm keyEncAlg,
+            BlockEncryptionAlgorithm blockEncAlg,
+            String encryptionKey,
+            AuthCryptoProvider cryptoProvider) throws Exception {
+
+        return createJweWithNestedJws(authRequest, sigAlg, signingKeyId,
+                keyEncAlg, blockEncAlg, encryptionKey, cryptoProvider, null, null);
+    }
+
+    /**
+     * Creates a JWE containing a nested JWS using RSA-based asymmetric encryption.
+     * Use this for RSA1_5 and RSA_OAEP encryption algorithms.
+     *
+     * @param authRequest       The authorization request
+     * @param sigAlg            Signature algorithm for JWS (e.g., RS256)
+     * @param signingKeyId      Key ID for signing (client's key)
+     * @param keyEncAlg         Key encryption algorithm for JWE (e.g., RSA1_5, RSA_OAEP)
+     * @param blockEncAlg       Block encryption algorithm for JWE
+     * @param encryptionKeyId   Server's encryption key ID
+     * @param serverJwks        Server's JWKS containing the encryption public key
+     * @param cryptoProvider    Crypto provider for signing and encryption
+     * @param idTokenClaims     Claims to add to id_token
+     * @param userInfoClaims    Claims to add to userinfo
+     * @return Encoded JWE containing nested JWS
+     */
+    public static String createJweWithNestedJwsAndRsaEncryption(
+            AuthorizationRequest authRequest,
+            SignatureAlgorithm sigAlg,
+            String signingKeyId,
+            KeyEncryptionAlgorithm keyEncAlg,
+            BlockEncryptionAlgorithm blockEncAlg,
+            String encryptionKeyId,
+            JSONObject serverJwks,
+            AuthCryptoProvider cryptoProvider,
+            List<Claim> idTokenClaims,
+            List<Claim> userInfoClaims) throws Exception {
+
+        if (signingKeyId == null || signingKeyId.isEmpty()) {
+            throw new IllegalArgumentException("signingKeyId is required for nested JWE");
+        }
+        if (encryptionKeyId == null || encryptionKeyId.isEmpty()) {
+            throw new IllegalArgumentException("encryptionKeyId is required for RSA encryption");
+        }
+
+        // Step 1: Create and sign JWS
+        JwtAuthorizationRequest jwsRequest = new JwtAuthorizationRequest(
+                authRequest, sigAlg, cryptoProvider);
+        jwsRequest.setKeyId(signingKeyId);
+
+        if (idTokenClaims != null) {
+            for (Claim claim : idTokenClaims) {
+                jwsRequest.addIdTokenClaim(claim);
+            }
+        }
+        if (userInfoClaims != null) {
+            for (Claim claim : userInfoClaims) {
+                jwsRequest.addUserInfoClaim(claim);
+            }
+        }
+
+        Jwt jws = Jwt.parse(jwsRequest.getEncodedJwt());
+
+        // Step 2: Create JWE with nested JWS using RSA encryption
+        JwtAuthorizationRequest jweRequest = new JwtAuthorizationRequest(
+                authRequest, keyEncAlg, blockEncAlg, cryptoProvider);
+        jweRequest.setKeyId(encryptionKeyId);
+        jweRequest.setNestedPayload(jws);
+
+        return jweRequest.getEncodedJwt(serverJwks);
+    }
+
+    /**
+     * Simplified version for RSA encryption tests that don't need custom claims.
+     */
+    public static String createJweWithNestedJwsAndRsaEncryption(
+            AuthorizationRequest authRequest,
+            SignatureAlgorithm sigAlg,
+            String signingKeyId,
+            KeyEncryptionAlgorithm keyEncAlg,
+            BlockEncryptionAlgorithm blockEncAlg,
+            String encryptionKeyId,
+            JSONObject serverJwks,
+            AuthCryptoProvider cryptoProvider) throws Exception {
+
+        return createJweWithNestedJwsAndRsaEncryption(authRequest, sigAlg, signingKeyId,
+                keyEncAlg, blockEncAlg, encryptionKeyId, serverJwks, cryptoProvider, null, null);
+    }
+
+}

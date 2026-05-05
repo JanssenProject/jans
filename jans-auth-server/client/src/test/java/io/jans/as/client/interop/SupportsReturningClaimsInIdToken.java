@@ -35,12 +35,11 @@ import static org.testng.Assert.assertNotNull;
  */
 public class SupportsReturningClaimsInIdToken extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void supportsReturningClaimsInIdToken(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Supports Returning Claims in ID Token");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -52,6 +51,7 @@ public class SupportsReturningClaimsInIdToken extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(scopes);
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.NAME,
                 JwtClaimName.EMAIL));
@@ -67,7 +67,7 @@ public class SupportsReturningClaimsInIdToken extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();

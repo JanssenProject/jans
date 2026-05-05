@@ -326,6 +326,53 @@ impl MockServer {
         self.endpoints.oidc = Some(oidc);
     }
 
+    /// Rotates the active HS256 signing key and updates mocked OIDC/JWKS responses.
+    pub(crate) fn rotate_signing_key_hs256(
+        &mut self,
+        kid: impl ToString,
+    ) -> Result<(), KeyGenerationError> {
+        self.keys = generate_keypair_hs256(Some(kid))?;
+
+        // Replace JWKS endpoint with the new key set.
+        let old_jwks = self.endpoints.jwks.take();
+        drop(old_jwks);
+        let jwks = self
+            .server
+            .mock("GET", MOCK_JWKS_URI)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({"keys": generate_jwks(std::slice::from_ref(&self.keys)).keys}).to_string(),
+            )
+            .expect_at_least(1)
+            .create();
+        self.endpoints.jwks = Some(jwks);
+
+        let old_oidc = self.endpoints.oidc.take();
+        drop(old_oidc);
+
+        let mut body = json!({
+            "issuer": self.server.url(),
+            "jwks_uri": self.server.url() + MOCK_JWKS_URI,
+        });
+
+        if let Some(status_list_endpoint) = self.status_list_endpoint() {
+            body["status_list_endpoint"] = json!(status_list_endpoint.to_string());
+        }
+
+        let oidc = self
+            .server
+            .mock("GET", MOCK_OIDC_ENDPOINT)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(body.to_string())
+            .expect_at_least(0)
+            .create();
+        self.endpoints.oidc = Some(oidc);
+
+        Ok(())
+    }
+
     /// Helper function for generating a status list JWT for this mock server
     pub(crate) async fn status_list_jwt(&self) -> Result<String, reqwest::Error> {
         static CLIENT: LazyLock<Client> = LazyLock::new(Client::new);

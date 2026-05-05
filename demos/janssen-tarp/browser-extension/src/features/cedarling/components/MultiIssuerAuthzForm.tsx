@@ -1,586 +1,492 @@
+// MultiIssuerAuthzForm.tsx
 import React from 'react';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import { JsonEditor } from 'json-edit-react'
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import initWasm, { init, Cedarling, MultiIssuerAuthorizeResult } from '@janssenproject/cedarling_wasm';
+import { JsonEditor } from 'json-edit-react';
+import { Copy, HelpCircle } from 'lucide-react';
+import initWasm, {
+  init,
+  Cedarling,
+  MultiIssuerAuthorizeResult,
+} from '@janssenproject/cedarling_wasm';
+import { SuccessAlert } from '../../../shared/components/Common';
 import Utils from '../../../options/Utils';
-import Stack from '@mui/material/Stack';
-import Tooltip from "@mui/material/Tooltip";
-import HelpIcon from '@mui/icons-material/Help';
-import { pink } from '@mui/material/colors';
-import Paper from '@mui/material/Paper';
-import Divider from '@mui/material/Divider';
-import Alert from '@mui/material/Alert';
-import Chip from '@mui/material/Chip';
-import { labelWithTooltip } from '../../../shared/components/Common';
-import IconButton from '@mui/material/IconButton';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CircularProgress from '@mui/material/CircularProgress';
 
 interface CedarlingMultiIssuerAuthzProps {
-    data: any; // or define the actual shape of cedarlingConfig data
+  data: any;
 }
 
-type TokenObj = {
-    mapping: string;
-    payload: string;
-};
-
-type TokenSelection = {
-    accessToken: boolean;
-    userInfo: boolean;
-    idToken: boolean;
-};
-
+type TokenObj = { mapping: string; payload: string };
+type TokenSelection = { accessToken: boolean; userInfo: boolean; idToken: boolean };
 type FormFields = {
-    tokens: TokenObj[];
-    action: string;
-    context: Record<string, unknown>;
-    resource: Record<string, unknown>;
+  tokens: TokenObj[];
+  action: string;
+  context: Record<string, unknown>;
+  resource: Record<string, unknown>;
 };
 
 export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthzProps) {
-    const [logType, setLogType] = React.useState('Decision');
-    const [authzResult, setAuthzResult] = React.useState("");
-    const [authzLogs, setAuthzLogs] = React.useState("");
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [uiMessage, setUiMessage] = React.useState<string>("");
-    const [formFields, setFormFields] = React.useState<FormFields>({ tokens: [], action: "", context: {}, resource: {} });
-    const [tokenSelection, setTokenSelection] = React.useState<TokenSelection>({ accessToken: false, userInfo: false, idToken: false });
-    const [loginDetails, setLoginDetails] = React.useState<{
-            access_token?: string;
-            id_token?: string;
-            userDetails?: string;
-        } | null>(null);
+  const [logType, setLogType] = React.useState('Decision');
+  const [authzResult, setAuthzResult] = React.useState('');
+  const [authzLogs, setAuthzLogs] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [uiMessage, setUiMessage] = React.useState('');
+  const [expanded, setExpanded] = React.useState(true);
+  const [formFields, setFormFields] = React.useState<FormFields>({
+    tokens: [],
+    action: '',
+    context: {},
+    resource: {},
+  });
+  const [tokenSelection, setTokenSelection] = React.useState<TokenSelection>({
+    accessToken: false,
+    userInfo: false,
+    idToken: false,
+  });
+  const [loginDetails, setLoginDetails] = React.useState<{
+    access_token?: string;
+    id_token?: string;
+    userDetails?: string;
+  } | null>(null);
 
-    React.useEffect(() => {
-        setLoginDetails(data?.loginDetails ?? null);
-    }, [data?.loginDetails]);
+  React.useEffect(() => {
+    setLoginDetails(data?.loginDetails ?? null);
+  }, [data?.loginDetails]);
 
-    React.useEffect(() => {
-        chrome.storage.local.get(["multiIssueAuthz"], (result) => {
-            if (result?.multiIssueAuthz) {
-                setFormFields({
-                    tokens: result.multiIssueAuthz.tokens ?? [],
-                    action: result.multiIssueAuthz.action ?? "",
-                    context: result.multiIssueAuthz.context ?? {},
-                    resource: result.multiIssueAuthz.resource ?? {},
-                });
-            }
-        });
-    }, []);
-
-    const handleLogTypeChange = (
-        event: React.MouseEvent<HTMLElement>,
-        newLogType: string | null,
-    ) => {
-        if (newLogType) {
-            setLogType(newLogType);
-        }
-    };
-
-    const triggerCedarlingAuthzRequest = async () => {
-        setUiMessage("");
-        setAuthzResult("");
-        setAuthzLogs("");
-        setIsSubmitting(true);
-        let reqObj = await createCedarlingAuthzRequestObj();
-        chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
-            let instance: Cedarling | null = null;
-            try {
-                const config = cedarlingConfig?.cedarlingConfig?.[0];
-                if (!config) {
-                    setAuthzResult("Error: No Cedarling configuration found. Please add a configuration first.");
-                    setUiMessage("No Cedarling configuration found. Add a bootstrap configuration in the Cedarling tab.");
-                    setIsSubmitting(false);
-                    return;
-                }
-                await initWasm();
-                instance = await init(config);
-                const result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
-                setAuthzResult(result.json_string());
-
-                try {
-                    const logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    if (logs.length !== 0) {
-                        const prettyLogs = logs.map((log) => JSON.stringify(log, null, 2));
-                        setAuthzLogs(prettyLogs.join("\n"));
-                    }
-                } catch (logErr) {
-                    setAuthzLogs(`Failed to fetch logs: ${String(logErr)}`);
-                }
-            } catch (err: unknown) {
-                setAuthzResult(String(err));
-                console.log("err:", err);
-                if (instance) {
-                    const logs = await instance.pop_logs();
-                    if (logs.length !== 0) {
-                        const prettyLogs = logs.map((log) => JSON.stringify(log, null, 2));
-                        setAuthzLogs(prettyLogs.join("\n"));
-                    }
-                }
-                setUiMessage("Authorization failed. Check the error output (and logs if available).");
-            } finally {
-                setIsSubmitting(false);
-            }
-
-        });
-
-    };
-
-    const addTokens = async () => {
-        const tokenAliasMap = {
-            accessToken: "AccessToken_namespace::Access_token_entity",
-            userInfo: "UserInfoToken_namespace::Userinfo_entity",
-            idToken: "IDToken_namespace::Id_token_entity"
-        };
-
-        setFormFields((prev) => {
-            let updatedTokens = [...prev.tokens];
-
-            const tokenPayloadMap = {
-                accessToken: loginDetails?.access_token,
-                idToken: loginDetails?.id_token,
-                userInfo: loginDetails?.userDetails
-            };
-
-            (Object.keys(tokenAliasMap) as (keyof typeof tokenAliasMap)[]).forEach((key) => {
-                const mapping = tokenAliasMap[key];
-
-                if (tokenSelection[key]) {
-                    const payload = tokenPayloadMap[key];
-                    if (!payload) {
-                        return;
-                    }
-
-                    // TokenObj.payload is a string (JWT or JSON). If userDetails is an object, stringify it.
-                    const nextToken: TokenObj = {
-                        mapping,
-                        payload: typeof payload === "string" ? payload : JSON.stringify(payload),
-                    };
-                    const index = updatedTokens.findIndex((t) => t.mapping === mapping);
-
-                    if (index >= 0) {
-                        updatedTokens[index] = nextToken;
-                    } else {
-                        updatedTokens.push(nextToken);
-                    }
-                } else {
-                    updatedTokens = updatedTokens.filter((t) => t.mapping !== mapping);
-                }
-            });
-
-            return {
-                ...prev,
-                tokens: updatedTokens
-            };
-        });
-    };
-
-    const createCedarlingAuthzRequestObj = async () => {
-        const reqObj = {
-            tokens: formFields.tokens,
-            action: formFields.action,
-            context: formFields.context,
-            resource: formFields.resource,
-        };
-        chrome.storage.local.set({ multiIssueAuthz: reqObj });
-        return reqObj;
-    };
-
-    const resetInputs = () => {
-        setUiMessage("");
+  React.useEffect(() => {
+    chrome.storage.local.get(['multiIssueAuthz'], (result) => {
+      if (result?.multiIssueAuthz) {
         setFormFields({
-            tokens: [],
-            action: "",
-            context: {},
-            resource: {}
+          tokens: result.multiIssueAuthz.tokens ?? [],
+          action: result.multiIssueAuthz.action ?? '',
+          context: result.multiIssueAuthz.context ?? {},
+          resource: result.multiIssueAuthz.resource ?? {},
         });
-        chrome.storage.local.remove("multiIssueAuthz");
-    };
+      }
+    });
+  }, []);
 
-    const canSubmit = React.useMemo(() => {
-        const hasAction = !!formFields.action && formFields.action.trim().length > 0;
-        const hasTokens = Array.isArray(formFields.tokens) && formFields.tokens.length > 0;
-        const hasResource = !!formFields.resource && Object.keys(formFields.resource).length > 0;
-        return hasAction && hasTokens && hasResource && !isSubmitting;
-    }, [formFields.action, formFields.tokens, formFields.resource, isSubmitting]);
-
-    const copyText = async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setUiMessage("Copied to clipboard.");
-        } catch {
-            setUiMessage("Copy failed. Your browser blocked clipboard access.");
+  const triggerCedarlingAuthzRequest = async () => {
+    setUiMessage('');
+    setAuthzResult('');
+    setAuthzLogs('');
+    setIsSubmitting(true);
+    const reqObj = await createCedarlingAuthzRequestObj();
+    chrome.storage.local.get(['cedarlingConfig'], async (cedarlingConfig) => {
+      let instance: Cedarling | null = null;
+      try {
+        const config = cedarlingConfig?.cedarlingConfig?.[0];
+        if (!config) {
+          setAuthzResult('Error: No Cedarling configuration found.');
+          setUiMessage('No Cedarling configuration found. Add a bootstrap configuration first.');
+          setIsSubmitting(false);
+          return;
         }
+        await initWasm();
+        instance = await init(config);
+        const result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
+        setAuthzResult(result.json_string());
+        try {
+          const logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+          if (logs.length !== 0) {
+            setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).join('\n'));
+          }
+        } catch (logErr) {
+          setAuthzLogs(`Failed to fetch logs: ${String(logErr)}`);
+        }
+      } catch (err: unknown) {
+        setAuthzResult(String(err));
+        if (instance) {
+          const logs = await instance.pop_logs();
+          if (logs.length !== 0) {
+            setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).join('\n'));
+          }
+        }
+        setUiMessage('Authorization failed. Check the error output.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
+  };
+
+  const addTokens = async () => {
+    const tokenAliasMap = {
+      accessToken: 'AccessToken_namespace::Access_token_entity',
+      userInfo: 'UserInfoToken_namespace::Userinfo_entity',
+      idToken: 'IDToken_namespace::Id_token_entity',
     };
+    setFormFields((prev) => {
+      let updatedTokens = [...prev.tokens];
+      const tokenPayloadMap = {
+        accessToken: loginDetails?.access_token,
+        idToken: loginDetails?.id_token,
+        userInfo: loginDetails?.userDetails,
+      };
+      (Object.keys(tokenAliasMap) as (keyof typeof tokenAliasMap)[]).forEach((key) => {
+        const mapping = tokenAliasMap[key];
+        if (tokenSelection[key]) {
+          const payload = tokenPayloadMap[key];
+          if (!payload) return;
+          const nextToken: TokenObj = {
+            mapping,
+            payload: typeof payload === 'string' ? payload : JSON.stringify(payload),
+          };
+          const index = updatedTokens.findIndex((t) => t.mapping === mapping);
+          if (index >= 0) updatedTokens[index] = nextToken;
+          else updatedTokens.push(nextToken);
+        } else {
+          updatedTokens = updatedTokens.filter((t) => t.mapping !== mapping);
+        }
+      });
+      return { ...prev, tokens: updatedTokens };
+    });
+  };
 
-    return (
-        <Container maxWidth="lg">
-            {(data === undefined || data?.length == 0) ? '' :
-                <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-                    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}>
-                            <Box>
-                                <Typography variant="h6" sx={{ fontWeight: 650 }}>
-                                    Cedarling Multi-Issuer Authorization
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    Build an authz request from tokens, action, resource, and context — then run authorization.
-                                </Typography>
-                            </Box>
-                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                <Chip size="small" label={isSubmitting ? "Running..." : "Ready"} color={isSubmitting ? "warning" : "success"} variant="outlined" />
-                                {isSubmitting && <CircularProgress size={18} />}
-                            </Stack>
-                        </Stack>
+  const createCedarlingAuthzRequestObj = async () => {
+    const reqObj = {
+      tokens: formFields.tokens,
+      action: formFields.action,
+      context: formFields.context,
+      resource: formFields.resource,
+    };
+    chrome.storage.local.set({ multiIssueAuthz: reqObj });
+    return reqObj;
+  };
 
-                        <Divider sx={{ my: 2 }} />
+  const resetInputs = () => {
+    setUiMessage('');
+    setFormFields({ tokens: [], action: '', context: {}, resource: {} });
+    setTokenSelection({
+      accessToken: false,
+      userInfo: false,
+      idToken: false,
+   });
+    chrome.storage.local.remove('multiIssueAuthz');
+  };
 
-                        {!!uiMessage && (
-                            <Alert severity="info" sx={{ mb: 2 }}>
-                                {uiMessage}
-                            </Alert>
-                        )}
+  const canSubmit = React.useMemo(() => {
+    const hasAction = !!formFields.action?.trim();
+    const hasTokens = Array.isArray(formFields.tokens) && formFields.tokens.length > 0;
+    const hasResource = !!formFields.resource && Object.keys(formFields.resource).length > 0;
+    return hasAction && hasTokens && hasResource && !isSubmitting;
+  }, [formFields.action, formFields.tokens, formFields.resource, isSubmitting]);
 
-                        <Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span" sx={{ fontWeight: 600 }}>Request builder</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Stack spacing={2}>
-                                {(loginDetails?.access_token || loginDetails?.id_token || loginDetails?.userDetails) &&
-                                    <>
-                                        <Box>
-                                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                                                Add tokens from Auth Flow
-                                            </Typography>
-                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'flex-start', sm: 'center' } }}>
-                                                <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
-                                                <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
-                                                <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="ID Token" />
-                                            </Stack>
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                onClick={addTokens}
-                                                sx={{ mt: 1, textTransform: 'none', borderRadius: 999 }}
-                                            >
-                                                Add selected tokens to mapping
-                                            </Button>
-                                        </Box>
-                                    </>
-                                }
-                                {labelWithTooltip(
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ display: "block", mb: 0.5, color: "text.secondary" }}
-                                    >
-                                        Example JSON format
-                                    </Typography>,
-                                    <Box
-                                        component="pre"
-                                        sx={{
-                                            margin: 0,
-                                            padding: 1.25,
-                                            borderRadius: 1,
-                                            backgroundColor: "grey.900",
-                                            color: "grey.100",
-                                            fontFamily: "Monospace, monospace",
-                                            fontSize: "0.75rem",
-                                            whiteSpace: "pre-wrap",
-                                            wordBreak: "break-all",
-                                        }}
-                                    >
-                                        {`[
-                                                    {
-                                                        "mapping": "Namespace_Name::Token_Entity",
-                                                        "payload": "<JWT_TOKEN_STRING>"
-                                                    },
-                                                    {
-                                                        "mapping": "Acme::Access_token",
-                                                        "payload": "<JWT_TOKEN_STRING>"
-                                                    }
-                                                ]`}
-                                    </Box>
-                                )}
-                                <Tooltip
-                                    placement="bottom-start"
-                                    title={
-                                        <Box sx={{ maxWidth: 480 }}>
-                                            <Typography
-                                                variant="caption"
-                                                sx={{ display: "block", mb: 0.5, color: "text.secondary" }}
-                                            >
-                                                Example JSON format
-                                            </Typography>
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setUiMessage('Copied to clipboard.');
+    } catch {
+      setUiMessage('Copy failed.');
+    }
+  };
 
-                                            <Box
-                                                component="pre"
-                                                sx={{
-                                                    margin: 0,
-                                                    padding: 1.25,
-                                                    borderRadius: 1,
-                                                    backgroundColor: "grey.900",
-                                                    color: "grey.100",
-                                                    fontFamily: "Monospace, monospace",
-                                                    fontSize: "0.75rem",
-                                                    whiteSpace: "pre-wrap",
-                                                    wordBreak: "break-all",
-                                                }}
-                                            >
-                                                {`[
-                                                    {
-                                                        "mapping": "Namespace_Name::Token_Entity",
-                                                        "payload": "<JWT_TOKEN_STRING>"
-                                                    },
-                                                    {
-                                                        "mapping": "Acme::Access_token",
-                                                        "payload": "<JWT_TOKEN_STRING>"
-                                                    }
-                                                ]`}
-                                            </Box>
-                                        </Box>
-                                    }
-                                >
-                                    <InputLabel id="issuer-token-mapping-label">Issuer-to-Token Mapping <HelpIcon sx={{ color: pink[500], fontSize: 15 }} /></InputLabel>
-                                </Tooltip>
-                                <JsonEditor
-                                    data={formFields.tokens}
-                                    setData={(e: any) => {
-                                        setFormFields((prev) => ({
-                                            ...prev,
-                                            ["tokens"]: e
-                                        }));
-                                    }}
-                                    rootName="tokens"
-                                />
+  if (!data || data?.length === 0) return null;
 
-                                <TextField
-                                    autoFocus
-                                    required
-                                    margin="dense"
-                                    id="action"
-                                    name="action"
-                                    label="Action"
-                                    type="text"
-                                    fullWidth
-                                    variant="outlined"
-                                    value={formFields.action}
-                                    onChange={(e) => {
-                                        const { name, value } = e.target;
-                                        setFormFields((prev) => ({
-                                            ...prev,
-                                            [name]: value
-                                        }));
-                                    }}
-                                />
-                                <InputLabel id="resource-value-label">Resource</InputLabel>
-                                <JsonEditor
-                                    data={formFields.resource}
-                                    rootName="resource"
-                                    setData={(e: unknown) => {
-                                        setFormFields((prev) => ({
-                                            ...prev,
-                                            resource: (e ?? {}) as Record<string, unknown>
-                                        }));
-                                    }} />
-                                <InputLabel id="context-value-label">Context</InputLabel>
-                                <JsonEditor
-                                    data={formFields.context}
-                                    setData={(e: unknown) => {
-                                        setFormFields((prev) => ({
-                                            ...prev,
-                                            context: (e ?? {}) as Record<string, unknown>
-                                        }));
-                                    }}
-                                    rootName="context" />
+  const logTabs = ['Decision', 'System', 'Metric'];
 
-                                <Box>
-                                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                                        Log tag
-                                    </Typography>
-                                    <ToggleButtonGroup
-                                        color="primary"
-                                        value={logType}
-                                        exclusive
-                                        onChange={handleLogTypeChange}
-                                        aria-label="Log type"
-                                    >
-                                        <ToggleButton value="Decision" sx={{ textTransform: 'none' }}>Decision</ToggleButton>
-                                        <ToggleButton value="System" sx={{ textTransform: 'none' }}>System</ToggleButton>
-                                        <ToggleButton value="Metric" sx={{ textTransform: 'none' }}>Metric</ToggleButton>
-                                    </ToggleButtonGroup>
-                                </Box>
+  return (
+    <div className="space-y-4">
+      {/* ── Main card ── */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
 
-                                <Divider />
+        {/* Card header */}
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Cedarling Multi-Issuer Authorization
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Build an authz request from tokens, action, resource, and context — then run
+                authorization.
+              </p>
+            </div>
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${isSubmitting
+                ? 'border-amber-300 text-amber-700 bg-amber-50'
+                : 'border-green-300 text-green-700 bg-green-50'
+                }`}
+            >
+              {isSubmitting ? 'Running...' : 'Ready'}
+            </span>
+          </div>
+        </div>
 
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between' }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Required: tokens + action + resource
-                                    </Typography>
-                                    <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                                        <Button
-                                            variant="outlined"
-                                            color="inherit"
-                                            onClick={resetInputs}
-                                            disabled={isSubmitting}
-                                            sx={{ textTransform: 'none', borderRadius: 999 }}
-                                        >
-                                            Reset
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            onClick={triggerCedarlingAuthzRequest}
-                                            disabled={!canSubmit}
-                                            sx={{ textTransform: 'none', borderRadius: 999 }}
-                                        >
-                                            Run authorization
-                                        </Button>
-                                    </Stack>
-                                </Stack>
-                                {!canSubmit && !isSubmitting && (
-                                    <Typography variant="caption" color="text.secondary">
-                                        Add at least 1 token mapping, an action, and a non-empty resource.
-                                    </Typography>
-                                )}
-                                </Stack>
-                            </AccordionDetails>
-                        </Accordion>
+        {/* Request builder accordion */}
+        <div>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-semibold text-gray-800 text-sm">Request builder</span>
+            <span className="flex items-center justify-center w-7 h-7 bg-gray-900 text-white rounded-full text-lg leading-none select-none">
+              {expanded ? '−' : '+'}
+            </span>
+          </button>
 
-                        {(!!authzResult || !!authzLogs) && <Divider sx={{ my: 2 }} />}
+          {expanded && (
+            <div className="px-6 pb-6 space-y-5 border-t border-gray-100 pt-4">
 
-                        {!!authzResult && (
-                            <Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel-result-content"
-                                    id="panel-result-header"
-                                >
-                                    <Stack direction="row" spacing={1} sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Typography component="span" sx={{ fontWeight: 600 }}>Result</Typography>
-                                        <Tooltip title="Copy result JSON/text">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => copyText(authzResult)}
-                                                aria-label="Copy result"
-                                            >
-                                                <ContentCopyIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Stack>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    {Utils.isJSON(authzResult) ? (
-                                        <>
-                                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                                                <Typography variant="subtitle2">Decision</Typography>
-                                                {JSON.parse(authzResult).decision ? (
-                                                    <Chip label="True" color="success" size="small" />
-                                                ) : (
-                                                    <Chip label="False" color="error" size="small" />
-                                                )}
-                                            </Box>
-                                            <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
-                                        </>
-                                    ) : (
-                                        <TextField
-                                            autoFocus
-                                            margin="dense"
-                                            id="authzResult"
-                                            name="authzResult"
-                                            label="Authz Result"
-                                            rows={10}
-                                            multiline
-                                            type="text"
-                                            fullWidth
-                                            variant="outlined"
-                                            value={authzResult}
-                                        />
-                                    )}
-                                    <Button
-                                        variant="text"
-                                        color="inherit"
-                                        onClick={() => setAuthzResult('')}
-                                        sx={{ mt: 1, textTransform: 'none' }}
-                                    >
-                                        Clear result
-                                    </Button>
-                                </AccordionDetails>
-                            </Accordion>
-                        )}
+              {/* Info bar */}
+              <div className="flex items-start gap-2 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
+                <SuccessAlert>
+                  <span>
+                    Required:
+                    <span className="font-medium">tokens + action + resource</span>
+                    {' '}Add at least 1 token mapping, an action, and a non-empty resource.
+                  </span>
+                </SuccessAlert>
+              </div>
 
-                        {!!authzLogs && (
-                            <Accordion disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel-logs-content"
-                                    id="panel-logs-header"
-                                >
-                                    <Stack direction="row" spacing={1} sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between'}} >
-                                        <Typography component="span" sx={{ fontWeight: 600 }}>Logs</Typography>
-                                        <Stack direction="row" spacing={0.5} sx={{alignItems:'center'}}>
-                                            <Tooltip title="Copy logs">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => copyText(authzLogs)}
-                                                    aria-label="Copy logs"
-                                                >
-                                                    <ContentCopyIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Stack>
-                                    </Stack>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <TextField
-                                        autoFocus
-                                        margin="dense"
-                                        id="authzLogs"
-                                        name="authzLogs"
-                                        label="Authz Logs"
-                                        rows={12}
-                                        multiline
-                                        type="text"
-                                        fullWidth
-                                        variant="outlined"
-                                        value={authzLogs}
-                                        sx={{
-                                            '& .MuiInputBase-input': {
-                                                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-                                            }
-                                        }}
-                                    />
-                                    <Button
-                                        variant="text"
-                                        color="inherit"
-                                        onClick={() => setAuthzLogs('')}
-                                        sx={{ mt: 1, textTransform: 'none' }}
-                                    >
-                                        Clear logs
-                                    </Button>
-                                </AccordionDetails>
-                            </Accordion>
-                        )}
-                    </Box>
-                </Paper>}
-        </Container >
-    );
+              {/* ── Tokens from auth flow (shown only when login tokens exist) ── */}
+              {(loginDetails?.access_token ||
+                loginDetails?.id_token ||
+                loginDetails?.userDetails) && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Add tokens from Auth Flow
+                    </p>
+                    <div className="flex flex-wrap gap-4 mb-3">
+                      {(['accessToken', 'userInfo', 'idToken'] as const).map((key) => {
+                        const labels: Record<typeof key, string> = {
+                          accessToken: 'Access Token',
+                          userInfo: 'Userinfo Token',
+                          idToken: 'ID Token',
+                        };
+                        return (
+                          <label key={key} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={tokenSelection[key]}
+                              onChange={() =>
+                                setTokenSelection((prev) => ({ ...prev, [key]: !prev[key] }))
+                              }
+                              className="w-4 h-4 accent-green-600 rounded"
+                            />
+                            <span className="text-sm text-gray-700">{labels[key]}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={addTokens}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-full transition-colors"
+                    >
+                      Add selected tokens to mapping
+                    </button>
+                  </div>
+                )}
+
+              {/* ── Issuer-to-Token Mapping ── */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Issuer-to-Token Mapping:
+                  </label>
+                  <HelpCircle size={14} className="text-pink-500" />
+                </div>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <JsonEditor
+                    data={formFields.tokens}
+                    setData={(e: any) => setFormFields((prev) => ({ ...prev, tokens: e }))}
+                    rootName="tokens"
+                  />
+                </div>
+              </div>
+
+              {/* ── Action ── */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Action:</label>
+                <input
+                  type="text"
+                  name="action"
+                  placeholder="Enter Here"
+                  value={formFields.action}
+                  onChange={(e) =>
+                    setFormFields((prev) => ({ ...prev, action: e.target.value }))
+                  }
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                />
+              </div>
+
+              {/* ── Resource ── */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Resource:</label>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <JsonEditor
+                    data={formFields.resource}
+                    rootName="resource"
+                    setData={(e: unknown) =>
+                      setFormFields((prev) => ({
+                        ...prev,
+                        resource: (e ?? {}) as Record<string, unknown>,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* ── Context ── */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Context:</label>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <JsonEditor
+                    data={formFields.context}
+                    setData={(e: unknown) =>
+                      setFormFields((prev) => ({
+                        ...prev,
+                        context: (e ?? {}) as Record<string, unknown>,
+                      }))
+                    }
+                    rootName="context"
+                  />
+                </div>
+              </div>
+
+              {/* ── Log tag tabs ── */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Log tag</label>
+                <div className="flex rounded-lg border border-gray-200 overflow-hidden w-fit">
+                  {logTabs.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setLogType(tab)}
+                      className={`px-5 py-2 text-sm font-medium transition-colors ${logType === tab
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <hr className="border-gray-200" />
+
+              {/* Inline status message */}
+              {uiMessage && (
+                <div className="flex items-start gap-2 px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
+                  <span>ℹ {uiMessage}</span>
+                </div>
+              )}
+
+              {/* ── Form actions ── */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={triggerCedarlingAuthzRequest}
+                    disabled={!canSubmit}
+                    className="px-5 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    {isSubmitting ? 'Running...' : 'Run authorization'}
+                  </button>
+                  <button
+                    onClick={resetInputs}
+                    disabled={isSubmitting}
+                    className="px-5 py-2.5 border border-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Result card ── */}
+      {!!authzResult && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <details open>
+            <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 list-none">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-800 text-sm">Result</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    copyText(authzResult);
+                  }}
+                  aria-label="Copy result"
+                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                  title="Copy result"
+                >
+                  <Copy size={14} aria-hidden="true" />
+                </button>
+              </div>
+            </summary>
+            <div className="px-6 pb-5 pt-4 space-y-3">
+              {Utils.isJSON(authzResult) ? (
+                <>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-700">Decision</span>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${JSON.parse(authzResult).decision
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                        }`}
+                    >
+                      {JSON.parse(authzResult).decision ? 'True' : 'False'}
+                    </span>
+                  </div>
+                  <JsonEditor
+                    data={JSON.parse(authzResult)}
+                    rootName="result"
+                    viewOnly={true}
+                  />
+                </>
+              ) : (
+                <textarea
+                  className="w-full h-48 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none"
+                  value={authzResult}
+                  readOnly
+                />
+              )}
+              <button
+                onClick={() => setAuthzResult('')}
+                className="text-sm text-green-600 hover:text-green-700 font-medium"
+              >
+                Clear result
+              </button>
+            </div>
+          </details>
+        </div>
+      )}
+
+      {/* ── Logs card ── */}
+      {!!authzLogs && (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <details>
+            <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 list-none">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-800 text-sm">Logs</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    copyText(authzLogs);
+                  }}
+                  aria-label="Copy logs"
+                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                  title="Copy logs"
+                >
+                  <Copy size={14} aria-hidden="true" />
+                </button>
+              </div>
+            </summary>
+            <div className="px-6 pb-5 pt-4 space-y-3">
+              <textarea
+                className="w-full h-56 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none"
+                value={authzLogs}
+                readOnly
+              />
+              <button
+                onClick={() => setAuthzLogs('')}
+                className="text-sm text-green-600 hover:text-green-700 font-medium"
+              >
+                Clear logs
+              </button>
+            </div>
+          </details>
+        </div>
+      )}
+    </div>
+  );
 }

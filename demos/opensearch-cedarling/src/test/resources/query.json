@@ -1,0 +1,17 @@
+{
+    "query":{
+        "bool": { 
+          "filter": [
+            { "range": { "gpa": { "gte": %d, "lt": %d }}}
+          ]
+        }
+    },
+    "ext": {
+        "tbac": {
+            "tokens": {
+                "Jans::Userinfo_token": "eyJraW...blah...blah..."
+            },
+            "context": { }
+        }
+    }
+}
