@@ -316,15 +316,25 @@ pub enum FetchKeysError {
 
 #[cfg(test)]
 mod test {
+    use std::sync::LazyLock;
     use std::time::Duration;
 
     use super::*;
     use crate::{
-        http::HttpClientConfig,
+        http::{HttpClient, HttpClientConfig},
         jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256},
     };
     use jsonwebtoken::Algorithm;
     use serde_json::json;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     fn can_insert_and_get_keys_from_str() {
@@ -497,7 +507,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh with cache-control header should succeed");
 
@@ -543,7 +553,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh without cache-control header should succeed");
 
@@ -573,7 +583,7 @@ mod test {
         let key_service = KeyService::default();
 
         key_service
-            .get_keys_using_oidc(&openid_config, None)
+            .get_keys_using_oidc(&openid_config, None, HTTP_CLIENT.clone())
             .await
             .expect("initial key fetch should succeed");
 
@@ -594,7 +604,7 @@ mod test {
             .expect("should rotate signing key");
 
         key_service
-            .refresh_keys_using_oidc(&server.openid_config(), None)
+            .refresh_keys_using_oidc(&server.openid_config(), None, &HTTP_CLIENT)
             .await
             .expect("refresh should succeed");
 

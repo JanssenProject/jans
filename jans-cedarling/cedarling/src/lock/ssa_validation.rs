@@ -59,7 +59,8 @@
 //! - **`InvalidExpirationTime`**: Expiration time is not a number
 //! - **`InvalidIssuedAtTime`**: Issued at time is not a number
 //! - **`HttpClientError`**: HTTP client initialization failed
-//! - **`JwksFetchError`**: Failed to fetch JWKS from IDP//! - **`MissingKeyId`**: JWT header missing key ID
+//! - **`JwksFetchError`**: Failed to fetch JWKS from IDP
+//! - **`MissingKeyId`**: JWT header missing key ID
 //! - **`KeyNotFound`**: Key not found in JWKS
 //! - **`KeyDecodeError`**: Failed to decode key data
 //! - **`InvalidKeyFormat`**: Key format is invalid

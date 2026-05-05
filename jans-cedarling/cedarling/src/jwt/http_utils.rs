@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{common::issuer_utils::IssClaim, http::HttpClient};
+use crate::{
+    common::issuer_utils::IssClaim,
+    http::{HttpClient, HttpClientError},
+};
 
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
@@ -32,16 +35,9 @@ pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
         }
 
         let result = client
-            .raw_client
-            .get(url.as_str())
-            .send()
+            .get_json::<T>(url.as_str())
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<T>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
+            .map_err(HttpError::Request)?;
 
         Ok(result)
     }
@@ -91,13 +87,9 @@ impl JwkSet {
         client: &HttpClient,
     ) -> Result<(Self, Option<u64>), HttpError> {
         let response = client
-            .raw_client
-            .get(url.as_str())
-            .send()
+            .get_with_retry(url.as_str())
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?;
+            .map_err(HttpError::Request)?;
 
         let max_age = response
             .headers()
@@ -129,14 +121,11 @@ fn parse_max_age(cache_control: &str) -> Option<u64> {
 impl StatusListJwtStr {
     pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
         let response = client
-            .raw_client
-            .get(url.as_str())
-            .header("Content-Type", "application/statuslist+jwt")
-            .send()
+            .get_with_retry_with(url.as_str(), |b| {
+                b.header("Content-Type", "application/statuslist+jwt")
+            })
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?;
+            .map_err(HttpError::Request)?;
 
         if let Some(content_type) = response.headers().get("Content-Type") {
             let content_type = content_type
@@ -159,13 +148,11 @@ impl StatusListJwtStr {
 
 #[derive(Debug, thiserror::Error)]
 pub enum HttpError {
-    #[error("failed to complete GET request: {0}")]
-    GetRequest(#[source] reqwest::Error),
-    #[error("received an error response: {0}")]
-    ErrorCode(#[source] reqwest::Error),
-    #[error("failed to deserialize respose from JSON: {0}")]
+    #[error("HTTP request failed: {0}")]
+    Request(#[from] HttpClientError),
+    #[error("failed to deserialize response from JSON: {0}")]
     JsonDeserializeResponse(#[source] reqwest::Error),
-    #[error("failed to read the respose text: {0}")]
+    #[error("failed to read the response text: {0}")]
     ReadTextResponse(#[source] reqwest::Error),
     #[error("the value of the '{0}' header is invalid: {1}")]
     InvalidHeader(String, ToStrError),

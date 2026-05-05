@@ -116,7 +116,7 @@ impl Sender {
     /// Internal helper that sends an HTTP request with retry logic and returns the response.
     ///
     /// This is the core retry loop used by all public send methods.
-    async fn send_with_retry<F>(
+    pub async fn send_with_retry<F>(
         &mut self,
         mut request: F,
     ) -> Result<reqwest::Response, HttpRequestError>

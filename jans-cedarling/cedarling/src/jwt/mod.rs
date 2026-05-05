@@ -920,6 +920,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -1000,6 +1001,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");

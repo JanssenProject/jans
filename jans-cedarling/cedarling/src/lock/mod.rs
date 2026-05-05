@@ -351,8 +351,7 @@ fn create_worker(
                 Some(headers),
                 bootstrap_conf.accept_invalid_certs,
                 http_conf,
-            )
-            .map_err(GetLockConfigError::from)?;
+            )?;
 
             let transport = Arc::new(RestTransport::new(
                 http_client,

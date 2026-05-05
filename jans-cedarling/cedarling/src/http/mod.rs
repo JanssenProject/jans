@@ -167,6 +167,31 @@ impl HttpClient {
         let client = &self.raw_client;
         sender.send(|| builder_fn(client)).await
     }
+
+    /// Sends a GET request with retry logic and returns the raw [`reqwest::Response`].
+    ///
+    /// Unlike `get`, `get_json`, or `get_bytes`, this method gives the caller access to
+    /// response headers and lets them decide how to consume the body. Use it when you
+    /// need to inspect headers (e.g. `Cache-Control`, `Content-Type`) before reading
+    /// the payload.
+    pub(crate) async fn get_with_retry(&self, uri: &str) -> Result<reqwest::Response, HttpClientError> {
+        let mut sender = self.create_sender();
+        sender.send_with_retry(|| self.raw_client.get(uri)).await
+    }
+
+    /// Sends a GET request with retry logic, allowing the caller to modify the
+    /// [`RequestBuilder`] before dispatch (e.g. to add custom headers).
+    pub(crate) async fn get_with_retry_with<F>(
+        &self,
+        uri: &str,
+        f: F,
+    ) -> Result<reqwest::Response, HttpClientError>
+    where
+        F: Fn(RequestBuilder) -> RequestBuilder,
+    {
+        let mut sender = self.create_sender();
+        sender.send_with_retry(|| f(self.raw_client.get(uri))).await
+    }
 }
 
 #[derive(Debug)]
