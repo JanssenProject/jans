@@ -35,13 +35,64 @@
 
 mod backoff;
 
+use std::fmt::Display;
+
 pub use backoff::Backoff;
 
-use reqwest::RequestBuilder;
+use reqwest::{RequestBuilder, StatusCode};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum HttpRequestError {
+pub struct HttpRequestError {
+    reason: HttpRequestReasonError,
+    status_code: Option<StatusCode>,
+    retry_count: u32,
+    last_error: Option<String>,
+}
+
+impl HttpRequestError {
+    pub fn new(reason: HttpRequestReasonError, status_code: Option<StatusCode>) -> Self {
+        Self {
+            reason,
+            status_code,
+            retry_count: 0,
+            last_error: None,
+        }
+    }
+
+    pub fn is_max_retries_exceeded(&self) -> bool {
+        matches!(self.reason, HttpRequestReasonError::MaxRetriesExceeded)
+    }
+
+    pub fn with_retry_count(mut self, count: u32) -> Self {
+        self.retry_count = count;
+        self
+    }
+
+    pub fn with_last_error(mut self, error: impl Into<String>) -> Self {
+        self.last_error = Some(error.into());
+        self
+    }
+}
+
+impl Display for HttpRequestError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.reason)?;
+        if let Some(code) = self.status_code {
+            write!(f, " (HTTP {})", code)?;
+        }
+        if self.retry_count > 0 {
+            write!(f, " (retries: {})", self.retry_count)?;
+        }
+        if let Some(err) = &self.last_error {
+            write!(f, " [last error: {}]", err)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum HttpRequestReasonError {
     #[error("max retries exceeded")]
     MaxRetriesExceeded,
     #[error("failed to deserialize response to JSON: {0}")]
@@ -50,8 +101,6 @@ pub enum HttpRequestError {
     DecodeResponseText(#[source] reqwest::Error),
     #[error("failed to read response body bytes: {0}")]
     DecodeResponseBytes(#[source] reqwest::Error),
-    #[error("failed to initialize HTTP client: {0}")]
-    InitializeHttpClient(#[source] reqwest::Error),
 }
 
 /// Sends an HTTP request with backoff retry logic.
@@ -76,32 +125,48 @@ impl Sender {
     {
         let backoff = &mut self.backoff;
         backoff.reset();
+        let mut attempt = 0u32;
 
         loop {
+            attempt += 1;
             let response = match request().send().await {
                 Ok(resp) => resp,
-                Err(_err) => {
+                Err(err) => {
                     // Retry silently - callers receive the final error if all retries fail.
                     // TODO: add optional debug-level logging hook here once a logger can be
                     //       passed in without pulling logging into this low-level crate.
-                    backoff
-                        .snooze()
-                        .await
-                        .map_err(|_| HttpRequestError::MaxRetriesExceeded)?;
+                    let err_msg = err
+                        .to_string()
+                        .lines()
+                        .next()
+                        .unwrap_or("unknown error")
+                        .to_string();
+                    backoff.snooze().await.map_err(|_| {
+                        HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
+                            .with_retry_count(attempt)
+                            .with_last_error(err_msg)
+                    })?;
                     continue;
                 },
             };
 
             let response = match response.error_for_status() {
                 Ok(resp) => resp,
-                Err(_err) => {
+                Err(err) => {
                     // Retry silently - callers receive the final error if all retries fail.
                     // TODO: add optional debug-level logging hook here once a logger can be
                     //       passed in without pulling logging into this low-level crate.
-                    backoff
-                        .snooze()
-                        .await
-                        .map_err(|_| HttpRequestError::MaxRetriesExceeded)?;
+                    let err_msg = err
+                        .to_string()
+                        .lines()
+                        .next()
+                        .unwrap_or("unknown error")
+                        .to_string();
+                    backoff.snooze().await.map_err(|_| {
+                        HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
+                            .with_retry_count(attempt)
+                            .with_last_error(err_msg)
+                    })?;
                     continue;
                 },
             };
@@ -128,10 +193,10 @@ impl Sender {
         T: serde::de::DeserializeOwned,
     {
         let response = self.send_with_retry(request).await?;
-        response
-            .json::<T>()
-            .await
-            .map_err(HttpRequestError::DeserializeToJson)
+        let status = response.status();
+        response.json::<T>().await.map_err(|e| {
+            HttpRequestError::new(HttpRequestReasonError::DeserializeToJson(e), Some(status))
+        })
     }
 
     /// Sends an HTTP request with retry logic and returns the response body as text.
@@ -148,10 +213,10 @@ impl Sender {
         F: FnMut() -> RequestBuilder,
     {
         let response = self.send_with_retry(request).await?;
-        response
-            .text()
-            .await
-            .map_err(HttpRequestError::DecodeResponseText)
+        let status = response.status();
+        response.text().await.map_err(|e| {
+            HttpRequestError::new(HttpRequestReasonError::DecodeResponseText(e), Some(status))
+        })
     }
 
     /// Sends an HTTP request with retry logic and returns the response body as raw bytes.
@@ -168,10 +233,9 @@ impl Sender {
         F: FnMut() -> RequestBuilder,
     {
         let response = self.send_with_retry(request).await?;
-        response
-            .bytes()
-            .await
-            .map(|b| b.to_vec())
-            .map_err(HttpRequestError::DecodeResponseBytes)
+        let status = response.status();
+        response.bytes().await.map(|b| b.to_vec()).map_err(|e| {
+            HttpRequestError::new(HttpRequestReasonError::DecodeResponseBytes(e), Some(status))
+        })
     }
 }

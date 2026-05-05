@@ -6,12 +6,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
-use super::default_values::{
-    default_jti, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
-};
-#[cfg(not(target_arch = "wasm32"))]
-use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::default_values::*;
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::JwtConfig;
@@ -335,6 +330,33 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_workers: WorkersCount,
+    // =========================================================================
+    // HTTP CLIENT CONFIGURATION
+    // =========================================================================
+    /// `CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS` — per-request timeout in milliseconds.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS",
+        default = "default_http_client_request_timeout_millis",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_timeout_millis: u64,
+    /// `CEDARLING_HTTP_REQUEST_MAX_RETRIES` — maximum number of retry attempts per request.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
+        default = "default_http_client_max_retries",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_max_retries: u32,
+
+    /// `CEDARLING_HTTP_REQUEST_RETRY_DELAY` — base delay between retries in milliseconds.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_RETRY_DELAY",
+        default = "default_http_client_retry_delay",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_retry_delay: u64,
 }
 
 impl Default for BootstrapConfigRaw {

@@ -4,14 +4,13 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::path::Path;
-use std::time::Duration;
 use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
-use crate::http::{DEFAULT_REQUEST_TIMEOUT, HttpClient, HttpClientError};
+use crate::http::{HttpClient, HttpClientError};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -78,8 +77,9 @@ fn extract_first_policy_store(
 /// Loads the policy store based on the provided configuration.
 ///
 /// This function supports multiple sources for loading policies.
-pub async fn load_policy_store(
+pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
+    http_client: &HttpClient,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
@@ -93,7 +93,7 @@ pub async fn load_policy_store(
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::LockServer(policy_store_uri) => {
-            load_policy_store_from_lock_master(policy_store_uri).await?
+            load_policy_store_from_lock_master(policy_store_uri, http_client).await?
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
@@ -104,14 +104,17 @@ pub async fn load_policy_store(
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
-            let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
+            let agama_policy_store =
+                serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path).await?,
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path)?,
-        PolicyStoreSource::CjarUrl(url) => load_policy_store_from_cjar_url(url).await?,
+        PolicyStoreSource::CjarUrl(url) => {
+            load_policy_store_from_cjar_url(url, http_client).await?
+        },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path).await?,
         #[cfg(target_arch = "wasm32")]
@@ -127,9 +130,12 @@ pub async fn load_policy_store(
 /// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
 async fn load_policy_store_from_lock_master(
     uri: &str,
+    http_client: &HttpClient,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
-    let agama_policy_store = client.get(uri).await?.json::<LegacyAgamaPolicyStore>()?;
+    let agama_policy_store = http_client
+        .get(uri)
+        .await?
+        .json::<LegacyAgamaPolicyStore>()?;
     extract_first_policy_store(&agama_policy_store)
 }
 
@@ -190,12 +196,12 @@ fn load_policy_store_from_cjar_file(
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_cjar_url(
     url: &str,
+    http_client: &HttpClient,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Fetch the archive bytes via HTTP
-    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
-    let bytes = client
+    let bytes = http_client
         .get_bytes(url)
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
@@ -228,12 +234,12 @@ async fn load_policy_store_from_cjar_url(
 #[cfg(target_arch = "wasm32")]
 async fn load_policy_store_from_cjar_url(
     url: &str,
+    http_client: &HttpClient,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Fetch the archive bytes via HTTP
-    let client = HttpClient::new(3, Duration::from_secs(3), DEFAULT_REQUEST_TIMEOUT)?;
-    let bytes = client
+    let bytes = http_client
         .get_bytes(url)
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
@@ -342,12 +348,24 @@ fn load_policy_store_from_archive_bytes(
 
 #[cfg(test)]
 mod test {
-    use std::path::Path;
+    use std::{path::Path, sync::LazyLock, time::Duration};
 
     use mockito::Server;
 
     use super::load_policy_store;
-    use crate::PolicyStoreConfig;
+    use crate::{
+        PolicyStoreConfig,
+        http::{HttpClient, HttpClientConfig},
+    };
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     // NOTE: we probably don't need to test if the deserialization for JSON and YAML
     // works correctly anymore here since we already have tests for those in
@@ -355,22 +373,28 @@ mod test {
 
     #[tokio::test]
     async fn can_load_from_json_file() {
-        load_policy_store(&PolicyStoreConfig {
-            source: crate::PolicyStoreSource::FileJson(
-                Path::new("../test_files/policy-store_generated.json").into(),
-            ),
-        })
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: crate::PolicyStoreSource::FileJson(
+                    Path::new("../test_files/policy-store_generated.json").into(),
+                ),
+            },
+            &HTTP_CLIENT,
+        )
         .await
         .expect("Should load policy store from JSON file");
     }
 
     #[tokio::test]
     async fn can_load_from_yaml_file() {
-        load_policy_store(&PolicyStoreConfig {
-            source: crate::PolicyStoreSource::FileYaml(
-                Path::new("../test_files/policy-store_ok.yaml").into(),
-            ),
-        })
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: crate::PolicyStoreSource::FileYaml(
+                    Path::new("../test_files/policy-store_ok.yaml").into(),
+                ),
+            },
+            &HTTP_CLIENT,
+        )
         .await
         .expect("Should load policy store from YAML file");
     }
@@ -392,9 +416,12 @@ mod test {
 
         let uri = format!("{}/policy-store", mock_server.url()).to_string();
 
-        load_policy_store(&PolicyStoreConfig {
-            source: crate::PolicyStoreSource::LockServer(uri),
-        })
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: crate::PolicyStoreSource::LockServer(uri),
+            },
+            &HTTP_CLIENT,
+        )
         .await
         .expect("Should load policy store from Lock Master file");
 

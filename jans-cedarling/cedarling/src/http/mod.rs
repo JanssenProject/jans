@@ -8,9 +8,11 @@ mod spawn_task;
 pub use spawn_task::*;
 
 use http_utils::{Backoff, HttpRequestError, Sender};
-use reqwest::Client;
+pub(crate) use reqwest::RequestBuilder;
+use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
 use std::time::Duration;
+use thiserror::Error;
 
 /// A wrapper around `reqwest::Client` providing HTTP request functionality
 /// with retry logic using exponential backoff.
@@ -23,18 +25,26 @@ use std::time::Duration;
 #[derive(Debug, Clone)]
 pub(crate) struct HttpClient {
     pub(crate) raw_client: Client,
+    // used in non-test builds via create_sender()
+    #[allow(unused)]
     retry_delay: Duration,
+    #[allow(unused)]
     max_retries: u32,
 }
 
-pub(crate) struct HttpClientConfig {
-    max_retries: u32,
-    retry_delay: Duration,
+/// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct HttpClientConfig {
+    /// Maximum number of times a failed request is retried before giving up.
+    pub max_retries: u32,
+    /// Base delay between retries; actual delay grows exponentially with each attempt.
+    pub retry_delay: Duration,
     // WASM's reqwest backend (browser fetch) doesn't expose `.timeout(...)`;
     // request timing is handled by the browser. `request_timeout` is
     // intentionally consumed as a no-op on that target.
+    /// Maximum time to wait for a single HTTP request to complete.
     #[cfg(not(target_arch = "wasm32"))]
-    request_timeout: Duration,
+    pub request_timeout: Duration,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -42,16 +52,45 @@ impl HttpClientConfig {
     /// Default per-request timeout for production callers of [`HttpClient`].
     /// Without this, a slow or unresponsive upstream can stall a Cedarling task
     /// indefinitely.
-    pub(crate) const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
+    pub const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 
     /// Time budget for the TCP connect step alone. Most healthy issuers respond well
     /// inside this window; a longer wait usually means the host is unreachable.
     const DEFAULT_HTTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 }
 
+impl HttpClientConfig {
+    /// Default maximum retry count used when building an [`HttpClient`] without explicit config.
+    pub const DEFAULT_MAX_RETRIES: u32 = 3;
+
+    /// Default base retry delay used when building an [`HttpClient`] without explicit config.
+    pub const DEFAULT_RETRY_DELAY: Duration = Duration::from_secs(3);
+}
+
+impl Default for HttpClientConfig {
+    fn default() -> Self {
+        Self {
+            max_retries: 3,
+            retry_delay: Self::DEFAULT_RETRY_DELAY,
+            request_timeout: Self::DEFAULT_REQUEST_TIMEOUT,
+        }
+    }
+}
+
+#[derive(Debug, Error)]
+#[error(transparent)]
+pub struct InitializeHttpClientError(#[from] reqwest::Error);
+
 impl HttpClient {
-    pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, HttpClientError> {
-        let mut builder = Client::builder();
+    pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, InitializeHttpClientError> {
+        Self::new_with_builder(Client::builder(), conf)
+    }
+
+    pub(crate) fn new_with_builder(
+        builder: ClientBuilder,
+        conf: HttpClientConfig,
+    ) -> Result<Self, InitializeHttpClientError> {
+        let mut builder = builder;
         #[cfg(not(target_arch = "wasm32"))]
         {
             builder = builder
@@ -59,31 +98,51 @@ impl HttpClient {
                 .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
         }
 
-        let client = builder
-            .build()
-            .map_err(HttpRequestError::InitializeHttpClient)?;
+        let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
         Ok(Self {
-            client,
+            raw_client,
             retry_delay: conf.retry_delay,
             max_retries: conf.max_retries,
         })
     }
 
     /// Creates a new Sender with the configured backoff strategy.
-    fn create_sender(&self) -> Sender {
-        Sender::new(Backoff::new_exponential(
-            self.retry_delay,
-            Some(self.max_retries),
-        ))
+    pub(crate) fn create_sender(&self) -> Sender {
+        #[cfg(not(test))]
+        {
+            Sender::new(Backoff::new_exponential(
+                self.retry_delay,
+                Some(self.max_retries),
+            ))
+        }
+
+        // We implement a faster retry for the tests (faster backoff, but still
+        // respects the configured max_retries count).
+        #[cfg(test)]
+        {
+            Sender::new(Backoff::new_exponential(
+                Duration::from_millis(10),
+                Some(self.max_retries),
+            ))
+        }
     }
 
     /// Sends a GET request to the specified URI with retry logic.
     pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         let mut sender = self.create_sender();
-        let client = &self.client;
+        let client = &self.raw_client;
         let text = sender.send_text(|| client.get(uri)).await?;
         Ok(Response { text })
+    }
+
+    pub(crate) async fn get_json<T>(&self, uri: &str) -> Result<T, HttpClientError>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let mut sender = self.create_sender();
+        let client = &self.raw_client;
+        sender.send(|| client.get(uri)).await
     }
 
     /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
@@ -93,8 +152,20 @@ impl HttpClient {
     /// like archive files.
     pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
         let mut sender = self.create_sender();
-        let client = &self.client;
+        let client = &self.raw_client;
         sender.send_bytes(|| client.get(uri)).await
+    }
+
+    // Execute POST request
+    // prepare request build in `builder_fn` and return value as parsed json
+    pub(crate) async fn post_json<T, F>(&self, builder_fn: F) -> Result<T, HttpClientError>
+    where
+        T: serde::de::DeserializeOwned,
+        F: Fn(&Client) -> RequestBuilder,
+    {
+        let mut sender = self.create_sender();
+        let client = &self.raw_client;
+        sender.send(|| builder_fn(client)).await
     }
 }
 
@@ -117,7 +188,7 @@ pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(test)]
 mod test {
-    use crate::http::{HttpClient, HttpClientConfig, HttpClientError};
+    use crate::http::{HttpClient, HttpClientConfig};
 
     use mockito::Server;
     use serde_json::json;
@@ -172,7 +243,7 @@ mod test {
         let response = client.get("0.0.0.0").await;
 
         assert!(
-            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
             "Expected error due to MaxRetriesExceeded: {response:?}"
         );
     }
@@ -197,7 +268,7 @@ mod test {
         let (mock_endpoint, response) = join!(mock_endpoint_fut, client_fut);
 
         assert!(
-            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
             "Expected error due to MaxRetriesExceeded after retrying on HTTP errors: {response:?}"
         );
 
@@ -243,7 +314,7 @@ mod test {
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
 
         assert!(
-            matches!(req_result, Err(HttpClientError::MaxRetriesExceeded)),
+            matches!(req_result, Err(ref e) if e.is_max_retries_exceeded()),
             "Expected MaxRetriesExceeded after retrying on HTTP error status: {req_result:?}"
         );
         mock_result.assert();
@@ -254,7 +325,7 @@ mod test {
         let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
         let response = client.get_bytes("0.0.0.0").await;
         assert!(
-            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
             "Expected error due to MaxRetriesExceeded: {response:?}"
         );
     }

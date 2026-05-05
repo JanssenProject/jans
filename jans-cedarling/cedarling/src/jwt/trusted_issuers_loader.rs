@@ -12,6 +12,7 @@ use thiserror::Error;
 use crate::{
     JwtConfig, LogLevel,
     common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
+    http::HttpClient,
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
         OpenIdConfig, TokenCache, key_service::KeyServiceError,
@@ -51,6 +52,7 @@ pub(super) struct TrustedIssuerLoader {
     pub(super) token_cache: TokenCache,
     pub(super) logger: Option<Logger>,
     pub(super) loading_state: Arc<TrustedIssuerLoadingState>,
+    pub(super) http_client: HttpClient,
 }
 
 impl TrustedIssuerLoader {
@@ -122,8 +124,10 @@ async fn load_trusted_issuers(
         let loader_clone = loader.clone();
         let errors_clone = errors.clone();
 
+        let http_client_clone = loader.http_client.clone();
         let handle = spawn_task(async move {
-            let result = load_trusted_issuer(&loader_clone, issuer_id.clone(), iss).await;
+            let result =
+                load_trusted_issuer(&loader_clone, issuer_id.clone(), iss, http_client_clone).await;
             drop(permit); // Release the permit
 
             if let Err(error) = result {
@@ -176,6 +180,7 @@ pub(super) async fn load_trusted_issuer(
     loader: &TrustedIssuerLoader,
     issuer_id: String,
     iss: TrustedIssuer,
+    http_client: HttpClient,
 ) -> Result<(), JwtServiceInitError> {
     // this is what we expect to find in the JWT `iss` claim
     let mut iss_claim = iss.iss_claim();
@@ -187,7 +192,9 @@ pub(super) async fn load_trusted_issuer(
     };
 
     if loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation {
-        iss_claim = update_openid_config(&mut iss_config, loader.logger.as_ref()).await?;
+        iss_claim =
+            update_openid_config(&mut iss_config, loader.logger.as_ref(), http_client.clone())
+                .await?;
     }
 
     insert_keys(
@@ -195,6 +202,7 @@ pub(super) async fn load_trusted_issuer(
         &loader.jwt_config,
         &iss_config,
         loader.logger.as_ref(),
+        http_client.clone(),
     )
     .await?;
 
@@ -214,6 +222,7 @@ pub(super) async fn load_trusted_issuer(
                 &loader.key_service,
                 loader.token_cache.clone(),
                 loader.logger.clone(),
+                http_client,
             )
             .await?;
     }
@@ -227,18 +236,20 @@ pub(super) async fn load_trusted_issuer(
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
     logger: Option<&Logger>,
+    http_client: HttpClient,
 ) -> Result<IssClaim, JwtServiceInitError> {
-    let openid_config = OpenIdConfig::get_from_url(iss_config.policy.get_oidc_endpoint())
-        .await
-        .inspect_err(|e| {
-            logger.log_any(JwtLogEntry::new(
-                format!(
-                    "failed to get openid configuration for trusted issuer: '{}': {}",
-                    iss_config.issuer_id, e
-                ),
-                Some(LogLevel::ERROR),
-            ));
-        })?;
+    let openid_config =
+        OpenIdConfig::get_from_url(iss_config.policy.get_oidc_endpoint(), &http_client)
+            .await
+            .inspect_err(|e| {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "failed to get openid configuration for trusted issuer: '{}': {}",
+                        iss_config.issuer_id, e
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
+            })?;
 
     let iss_claim = openid_config.issuer.clone();
     iss_config.openid_config = Some(openid_config);
@@ -252,6 +263,7 @@ async fn insert_keys(
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
     logger: Option<&Logger>,
+    http_client: HttpClient,
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
@@ -259,7 +271,7 @@ async fn insert_keys(
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
         key_service
-            .get_keys_using_oidc(openid_config, logger)
+            .get_keys_using_oidc(openid_config, logger, http_client)
             .await?;
     }
 
@@ -281,6 +293,7 @@ fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceIni
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::http::HttpClientConfig;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
         MockServer, create_failing_trusted_issuer, create_unreachable_trusted_issuer,
@@ -289,9 +302,18 @@ mod test {
     use jsonwebtoken::Algorithm;
     use mockito::Server;
     use std::collections::HashMap;
-    use std::sync::Arc;
+    use std::sync::{Arc, LazyLock};
     use tokio::time::{Duration, sleep};
     use url::Url;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     /// Helper to retry an assertion for a short period, useful for async tests
     /// where operations may complete slightly after tasks are awaited.
@@ -324,6 +346,7 @@ mod test {
             token_cache: TokenCache::default(),
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(issuer_count)),
+            http_client: HTTP_CLIENT.clone(),
         }
     }
 
@@ -536,6 +559,7 @@ mod test {
             token_cache: TokenCache::default(),
             logger: None,
             loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
+            http_client: HTTP_CLIENT.clone(),
         };
 
         loader_with_keys.check_keys_loaded();

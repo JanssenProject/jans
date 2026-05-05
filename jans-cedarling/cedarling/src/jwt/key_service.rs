@@ -8,6 +8,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::LogWriter;
 use crate::common::issuer_utils::IssClaim;
+use crate::http::HttpClient;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
@@ -108,8 +109,9 @@ impl KeyService {
         &self,
         openid_config: &OpenIdConfig,
         logger: Option<&Logger>,
+        http_client: HttpClient,
     ) -> Result<(), KeyServiceError> {
-        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
+        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri, &http_client)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
@@ -281,8 +283,10 @@ pub enum FetchKeysError {
 
 #[cfg(test)]
 mod test {
+    use std::time::Duration;
+
     use super::*;
-    use crate::jwt::test_utils::MockServer;
+    use crate::{http::HttpClientConfig, jwt::test_utils::MockServer};
     use jsonwebtoken::Algorithm;
     use serde_json::json;
 
@@ -371,12 +375,19 @@ mod test {
 
         let key_service = KeyService::default();
 
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
         key_service
-            .get_keys_using_oidc(&server1.openid_config(), None)
+            .get_keys_using_oidc(&server1.openid_config(), None, http_client.clone())
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .get_keys_using_oidc(&server2.openid_config(), None)
+            .get_keys_using_oidc(&server2.openid_config(), None, http_client)
             .await
             .expect("fetch keys for issuer 2");
 
