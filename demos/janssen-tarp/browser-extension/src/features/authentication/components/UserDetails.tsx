@@ -261,15 +261,14 @@ const UserDetails = ({
     const base64UrlPattern = /^[A-Za-z0-9_-]+$/;
     if (!parts.every((part) => base64UrlPattern.test(part))) return false;
     try {
-      const decode = (str: string) =>
-        JSON.parse(
-          atob(
-            str
-              .replace(/-/g, "+")
-              .replace(/_/g, "/")
-              .padEnd(str.length + (4 - (str.length % 4)) % 4, "=")
-          )
-        );
+      const decode = (str: string) => {
+        const base64 = str
+          .replace(/-/g, "+")
+          .replace(/_/g, "/")
+          .padEnd(str.length + (4 - (str.length % 4)) % 4, "=");
+        const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      };
       const header = decode(parts[0]);
       const payload = decode(parts[1]);
       return typeof header === "object" && header !== null && "alg" in header &&
@@ -319,7 +318,11 @@ const UserDetails = ({
           <div className="rounded-xl border border-gray-200 bg-white p-5">
 
             {/* 👇 Branch on JWT validity */}
-            {!isValidJWT ? (
+            {!rawToken ? (
+              <p className="text-sm text-gray-400 italic">
+                No token available.
+              </p>
+            ) : !isValidJWT ? (
               <p className="text-sm text-gray-400 italic">
                 ⚠️ This token is not in a valid JWT format.
               </p>
