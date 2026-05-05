@@ -44,6 +44,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub struct HttpRequestError {
+    #[source]
     reason: HttpRequestReasonError,
     status_code: Option<StatusCode>,
     retry_count: u32,
