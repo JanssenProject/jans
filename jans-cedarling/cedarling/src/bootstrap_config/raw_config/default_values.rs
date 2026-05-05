@@ -48,7 +48,6 @@ pub(super) fn default_http_client_request_timeout_millis() -> u64 {
     u64::try_from(HttpClientConfig::DEFAULT_REQUEST_TIMEOUT.as_millis()).unwrap_or(u64::MAX)
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 pub(super) fn default_http_client_max_retries() -> u32 {
     HttpClientConfig::DEFAULT_MAX_RETRIES
 }

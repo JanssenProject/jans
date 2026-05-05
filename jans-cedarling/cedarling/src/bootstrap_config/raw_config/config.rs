@@ -7,15 +7,15 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_jwks_refresh_min_interval, default_log_channel_capacity,
-    default_log_max_retries, default_token_cache_capacity, default_true,
+    default_http_client_max_retries, default_http_client_retry_delay, default_jti,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
-    default_http_client_max_retries, default_http_client_request_timeout_millis,
-    default_stdout_buffer_limit, default_stdout_timeout_millis,
+    default_http_client_request_timeout_millis, default_stdout_buffer_limit,
+    default_stdout_timeout_millis,
 };
-use super::default_values::default_http_client_retry_delay;
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
@@ -354,7 +354,6 @@ pub struct BootstrapConfigRaw {
     )]
     pub http_client_request_timeout_millis: u64,
     /// Maximum number of retry attempts per request.
-    #[cfg(not(target_arch = "wasm32"))]
     #[serde(
         rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
         default = "default_http_client_max_retries",
