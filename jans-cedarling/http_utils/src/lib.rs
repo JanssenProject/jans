@@ -156,6 +156,7 @@ impl Sender {
                     // Retry silently - callers receive the final error if all retries fail.
                     // TODO: add optional debug-level logging hook here once a logger can be
                     //       passed in without pulling logging into this low-level crate.
+                    let status = err.status();
                     let err_msg = err
                         .to_string()
                         .lines()
@@ -163,9 +164,12 @@ impl Sender {
                         .unwrap_or("unknown error")
                         .to_string();
                     backoff.snooze().await.map_err(|_| {
-                        HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
-                            .with_retry_count(attempt)
-                            .with_last_error(err_msg)
+                        HttpRequestError::new(
+                            HttpRequestReasonError::MaxRetriesExceeded,
+                            status,
+                        )
+                        .with_retry_count(attempt)
+                        .with_last_error(err_msg)
                     })?;
                     continue;
                 },
