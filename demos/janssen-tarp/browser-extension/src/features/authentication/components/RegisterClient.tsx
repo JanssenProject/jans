@@ -220,6 +220,18 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         return;
       }
 
+      if (addExistingClient && !clientId?.trim()) {
+        setAlert('Client ID is required when adding an existing client.');
+        setAlertSeverity('error');
+        return;
+      }
+
+      if (addExistingClient && !clientSecret?.trim()) {
+        setAlert('Client Secret is required when adding an existing client.');
+        setAlertSeverity('error');
+        return;
+      }
+
       let opConfigurationEndpoint: string;
       let issuerUrl: string;
 
@@ -270,7 +282,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
 
       setAlert('Added Client successfully into Tarp!');
       setAlertSeverity('success');
-      setAddExistingClient(false)
+      setAddExistingClient(false);
       handleClose();
     } catch (err) {
       console.error('Error in adding Client into Tarp:', err);
@@ -419,6 +431,66 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         )}
 
         <div className="flex flex-col gap-5">
+          {/* ── Info panel ── */}
+          {addExistingClient && (
+            <div className="bg-blue-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                  </svg>
+                </div>
+                <div className="text-sm text-green-800 space-y-1">
+                  <p className="font-semibold">The OpenID client should have the following configuration to work properly with Tarp:</p>
+                  <ul className="space-y-0.5 text-sm">
+                    <li>
+                      · <strong>Grant Types</strong>: Should include <code>authorization_code</code>.
+                    </li>
+                    <li>
+                      · <strong>Response Types</strong>: Should include <code>code</code>.
+                    </li>
+                    <li>
+                      · <strong>Userinfo Signed Response Algorithm</strong>: Should be set to a valid algorithm (e.g., RS256).
+                    </li>
+                    <li>
+                      · <strong>Access Token as JWT</strong>: Should be set to <code>true</code> so that Tarp can decode the access token and show its claims.
+                    </li>
+                    <li>
+                      · <strong>Jans Include Claims In Id Token</strong>: Can be set to <code>true</code> if required for Cedarling authorization.
+                    </li>
+                    <li className="flex items-center gap-2 flex-wrap">
+                      · <strong>Redirect URIs</strong>: Need to include the Tarp redirect URI in your OIDC client.
+                      <button
+                        type="button"
+                        onClick={copyRedirectUrl}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md border transition-all
+      ${redirectUrlCopied
+                            ? 'bg-green-100 border-green-400 text-green-700'
+                            : 'bg-white border-green-300 text-green-700 hover:bg-green-50'
+                          }`}
+                      >
+                        {redirectUrlCopied ? (
+                          <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
+                              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
+                              <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                            </svg>
+                            Copy Redirect URI
+                          </>
+                        )}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── Issuer ── */}
           <div>
@@ -533,7 +605,6 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
                   id="clientId"
                   type="text"
                   onChange={(e) => setClientId(e.target.value)}
-                  autoFocus
                   placeholder="Enter existing client ID"
                   // onBlur={validateIssuer}
                   className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
@@ -552,139 +623,80 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
                   id="clientSecret"
                   type="text"
                   onChange={(e) => setClientSecret(e.target.value)}
-                  autoFocus
                   placeholder="Enter existing client secret"
                   className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
                 focus:outline-none focus:ring-2 focus:border-[#1a6b3c] transition-all bg-slate-50/60`}
                 />
               </div>
-
-              {/* ── Info panel ── */}
-              <div className="bg-blue-50 border border-green-200 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-                    </svg>
-                  </div>
-                  <div className="text-sm text-green-800 space-y-1">
-                    <p className="font-semibold">The OpenID client should have the following configuration to work properly with Tarp:</p>
-                    <ul className="space-y-0.5 text-sm">
-                      <li>
-                        · <strong>Grant Types</strong>: Should include <code>authorization_code</code>.
-                      </li>
-                      <li>
-                        · <strong>Response Types</strong>: Should include <code>code</code>.
-                      </li>
-                      <li>
-                        · <strong>Userinfo Signed Response Algorithm</strong>: Should be set to a valid algorithm (e.g., RS256).
-                      </li>
-                      <li>
-                        · <strong>Access Token as JWT</strong>: Should be set to <code>true</code> so that Tarp can decode the access token and show its claims.
-                      </li>
-                      <li>
-                        · <strong>Jans Include Claims In Id Token</strong>: Can be set to <code>true</code> if required for Cedarling authorization.
-                      </li>
-                      <li className="flex items-center gap-2 flex-wrap">
-                        · <strong>Redirect URIs</strong>: Need to include the Tarp redirect URI in your OIDC client.
-                        <button
-                          type="button"
-                          onClick={copyRedirectUrl}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md border transition-all
-      ${redirectUrlCopied
-                              ? 'bg-green-100 border-green-400 text-green-700'
-                              : 'bg-white border-green-300 text-green-700 hover:bg-green-50'
-                            }`}
-                        >
-                          {redirectUrlCopied ? (
-                            <>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
-                                <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                              Copied!
-                            </>
-                          ) : (
-                            <>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
-                                <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                              </svg>
-                              Copy Redirect URI
-                            </>
-                          )}
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
             </>
-
           )}
-
           {/* ── Client Expiry Date ── */}
-
           {!addExistingClient && (
-            <>
-              <div>
-                <label htmlFor="expiry" className="block mb-1.5">
-                  <LabelWithTooltip
-                    label="Client Expiry Date"
-                    tip="Optional. If set, the client will be marked as expired after this date/time."
-                  />
-                </label>
-                <div className="relative">
-                  <input
-                    id="expiry"
-                    type="datetime-local"
-                    min={moment().format('YYYY-MM-DDTHH:mm')}
-                    onChange={(e) =>
-                      setExpireAt(e.target.value ? moment(e.target.value) : null)
-                    }
-                    className="w-full border border-slate-200 rounded-lg px-4 py-3 pr-10 text-sm text-slate-700
+
+            <div>
+              <label htmlFor="expiry" className="block mb-1.5">
+                <LabelWithTooltip
+                  label="Client Expiry Date"
+                  tip="Optional. If set, the client will be marked as expired after this date/time."
+                />
+              </label>
+              <div className="relative">
+                <input
+                  id="expiry"
+                  type="datetime-local"
+                  min={moment().format('YYYY-MM-DDTHH:mm')}
+                  onChange={(e) =>
+                    setExpireAt(e.target.value ? moment(e.target.value) : null)
+                  }
+                  className="w-full border border-slate-200 rounded-lg px-4 py-3 pr-10 text-sm text-slate-700
                   focus:outline-none focus:ring-2 focus:ring-[#1a6b3c]/30 focus:border-[#1a6b3c]
                   transition-all bg-slate-50/60 appearance-none"
-                  />
-                </div>
+                />
               </div>
-            </>
+            </div>
           )}
+      </div>
+      {/* Alert */}
+      {alert && (
+        <div className="mb-5 py-5">
+          <AlertBanner severity={alertSeverity} message={alert} />
         </div>
-
-        {/* ── Actions ── */}
-        <div className="mt-8 flex items-center justify-end gap-3">
+      )}
+      {/* ── Actions ── */}
+      <div className="mt-8 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          onClick={handleClose}
+          className="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-300
+              rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors"
+        >
+          Cancel
+        </button>
+        {addExistingClient ? (
           <button
             type="button"
-            onClick={handleClose}
-            className="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-300
-              rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            onClick={addClient}
+            disabled={loading}
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
+              rounded-lg transition-colors shadow-sm shadow-green-200"
           >
-            Cancel
+            Add Client
           </button>
-          {addExistingClient ? (
-            <button
-              type="button"
-              onClick={addClient}
-              disabled={loading}
-              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+        ) : (
+          <button
+            type="button"
+            onClick={registerClient}
+            disabled={loading}
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
               hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
               rounded-lg transition-colors shadow-sm shadow-green-200"
-            >
-              Add Client
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={registerClient}
-              disabled={loading}
-              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
-              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
-              rounded-lg transition-colors shadow-sm shadow-green-200"
-            >
-              Register
-            </button>
-          )}
-        </div>
-      </div >
+          >
+            Register
+          </button>
+        )}
+      </div>
+    </div >
     </div >
   );
 }
