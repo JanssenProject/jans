@@ -262,7 +262,14 @@ const UserDetails = ({
     if (!parts.every((part) => base64UrlPattern.test(part))) return false;
     try {
       const decode = (str: string) =>
-        JSON.parse(atob(str.replace(/-/g, "+").replace(/_/g, "/")));
+        JSON.parse(
+          atob(
+            str
+              .replace(/-/g, "+")
+              .replace(/_/g, "/")
+              .padEnd(str.length + (4 - (str.length % 4)) % 4, "=")
+          )
+        );
       const header = decode(parts[0]);
       const payload = decode(parts[1]);
       return typeof header === "object" && header !== null && "alg" in header &&
@@ -285,7 +292,7 @@ const UserDetails = ({
     expandedState: keyof typeof expanded;
     showPayload: boolean;
     setShowPayload: (v: boolean) => void;
-    rawToken: string;
+    rawToken: string | undefined;
     decoded: IJWT;
     isValidJWT: boolean;
   }) => (

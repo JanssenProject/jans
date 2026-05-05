@@ -209,6 +209,24 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       });
     });
 
+  const resolveOpenIDConfig = async (issuerValue: string) => {
+    let opConfigurationEndpoint: string;
+    let issuerUrl: string;
+    if (issuerValue.includes('.well-known/openid-configuration')) {
+      opConfigurationEndpoint = issuerValue;
+      issuerUrl = issuerValue.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
+    } else {
+      issuerUrl = issuerValue.replace(/\/$/, '');
+      opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
+    }
+    const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
+    if (!openidConfig?.data) {
+      setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error');
+      return null;
+    }
+    return { issuerUrl, configData: openidConfig.data };
+  };
+
   // ── Register ───────────────────────────────────────────────────────────────
 
   const addClient = async (): Promise<void> => {
@@ -232,29 +250,11 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         return;
       }
 
-      let opConfigurationEndpoint: string;
-      let issuerUrl: string;
-
-      if (issuer.includes('.well-known/openid-configuration')) {
-        opConfigurationEndpoint = issuer;
-        issuerUrl = issuer.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
-      } else {
-        issuerUrl = issuer.replace(/\/$/, '');
-        opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
-      }
+      const resolved = await resolveOpenIDConfig(issuer);
+      if (!resolved) return;
+      const { issuerUrl, configData } = resolved;
 
       const scopes = selectedScopes.map((s) => s.name).join(' ');
-      const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
-
-      if (!openidConfig?.data) {
-        setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error'); return;
-      }
-
-      const configData = openidConfig.data;
-
-      if (!configData.registration_endpoint) {
-        setAlert('OpenID configuration does not contain a registration endpoint'); setAlertSeverity('error'); return;
-      }
 
       await storeOpenIDConfiguration(configData);
 
@@ -277,7 +277,6 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         registrationDate: Date.now(),
         openidConfiguration: configData,
       };
-      console.log('Storing new client:', newClient);
       await storeOIDCClient(newClient);
 
       setAlert('Added Client successfully into Tarp!');
@@ -302,25 +301,11 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
         return;
       }
 
-      let opConfigurationEndpoint: string;
-      let issuerUrl: string;
-
-      if (issuer.includes('.well-known/openid-configuration')) {
-        opConfigurationEndpoint = issuer;
-        issuerUrl = issuer.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
-      } else {
-        issuerUrl = issuer.replace(/\/$/, '');
-        opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
-      }
+      const resolved = await resolveOpenIDConfig(issuer);
+      if (!resolved) return;
+      const { issuerUrl, configData } = resolved;
 
       const scopes = selectedScopes.map((s) => s.name).join(' ');
-      const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
-
-      if (!openidConfig?.data) {
-        setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error'); return;
-      }
-
-      const configData = openidConfig.data;
 
       if (!configData.registration_endpoint) {
         setAlert('OpenID configuration does not contain a registration endpoint'); setAlertSeverity('error'); return;
@@ -555,7 +540,10 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
             <input
               type="checkbox"
               checked={addExistingClient}
-              onChange={(e) => setAddExistingClient(e.target.checked)}
+              onChange={(e) => {
+                setAddExistingClient(e.target.checked);
+                if (e.target.checked) setExpireAt(null);
+              }}
               className="sr-only peer"
             />
             <span
@@ -621,7 +609,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
                 </label>
                 <input
                   id="clientSecret"
-                  type="text"
+                  type="password"
                   onChange={(e) => setClientSecret(e.target.value)}
                   placeholder="Enter existing client secret"
                   className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
@@ -655,48 +643,48 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
               </div>
             </div>
           )}
-      </div>
-      {/* Alert */}
-      {alert && (
-        <div className="mb-5 py-5">
-          <AlertBanner severity={alertSeverity} message={alert} />
         </div>
-      )}
-      {/* ── Actions ── */}
-      <div className="mt-8 flex items-center justify-end gap-3">
-        <button
-          type="button"
-          onClick={handleClose}
-          className="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-300
-              rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors"
-        >
-          Cancel
-        </button>
-        {addExistingClient ? (
-          <button
-            type="button"
-            onClick={addClient}
-            disabled={loading}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
-              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
-              rounded-lg transition-colors shadow-sm shadow-green-200"
-          >
-            Add Client
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={registerClient}
-            disabled={loading}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
-              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
-              rounded-lg transition-colors shadow-sm shadow-green-200"
-          >
-            Register
-          </button>
+        {/* Alert */}
+        {alert && (
+          <div className="mb-5 py-5">
+            <AlertBanner severity={alertSeverity} message={alert} />
+          </div>
         )}
-      </div>
-    </div >
+        {/* ── Actions ── */}
+        <div className="mt-8 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-300
+              rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors"
+          >
+            Cancel
+          </button>
+          {addExistingClient ? (
+            <button
+              type="button"
+              onClick={addClient}
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
+              rounded-lg transition-colors shadow-sm shadow-green-200"
+            >
+              Add Client
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={registerClient}
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
+              rounded-lg transition-colors shadow-sm shadow-green-200"
+            >
+              Register
+            </button>
+          )}
+        </div>
+      </div >
     </div >
   );
 }
