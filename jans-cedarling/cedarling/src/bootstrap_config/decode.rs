@@ -137,8 +137,12 @@ impl BootstrapConfig {
         let data_store_config = build_data_store_config(raw);
 
         let http_client_config = HttpClientConfig {
+            #[cfg(not(target_arch = "wasm32"))]
             max_retries: raw.http_client_request_max_retries,
+            #[cfg(target_arch = "wasm32")]
+            max_retries: HttpClientConfig::DEFAULT_MAX_RETRIES,
             retry_delay: Duration::from_millis(raw.http_client_request_retry_delay),
+            #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Duration::from_millis(raw.http_client_request_timeout_millis),
         };
 

@@ -72,6 +72,7 @@ impl Default for HttpClientConfig {
         Self {
             max_retries: 3,
             retry_delay: Self::DEFAULT_RETRY_DELAY,
+            #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Self::DEFAULT_REQUEST_TIMEOUT,
         }
     }
@@ -90,13 +91,10 @@ impl HttpClient {
         builder: ClientBuilder,
         conf: HttpClientConfig,
     ) -> Result<Self, InitializeHttpClientError> {
-        let mut builder = builder;
         #[cfg(not(target_arch = "wasm32"))]
-        {
-            builder = builder
-                .timeout(conf.request_timeout)
-                .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
-        }
+        let builder = builder
+            .timeout(conf.request_timeout)
+            .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
 
         let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
@@ -211,7 +209,7 @@ impl Response {
 /// Error type for the [`HttpClient`] - re-export from [`http_utils`] for compatibility
 pub(crate) type HttpClientError = HttpRequestError;
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
     use crate::http::{HttpClient, HttpClientConfig};
 

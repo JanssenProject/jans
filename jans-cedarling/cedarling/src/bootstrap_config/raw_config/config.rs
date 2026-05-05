@@ -13,8 +13,9 @@ use super::default_values::{
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
     default_http_client_max_retries, default_http_client_request_timeout_millis,
-    default_http_client_retry_delay, default_stdout_buffer_limit, default_stdout_timeout_millis,
+    default_stdout_buffer_limit, default_stdout_timeout_millis,
 };
+use super::default_values::default_http_client_retry_delay;
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
