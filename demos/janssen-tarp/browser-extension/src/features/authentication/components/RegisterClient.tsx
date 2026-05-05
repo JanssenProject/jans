@@ -4,7 +4,7 @@ import axios from 'axios';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { Spinner} from '../../../shared/components/Common';
+import { Spinner } from '../../../shared/components/Common';
 import { LabelWithTooltip } from '../../../shared/components/Common';
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -22,9 +22,9 @@ type RegisterClientProps = {
 const AlertBanner = ({ severity, message }: { severity: AlertSeverity; message: string }) => {
   const styles: Record<AlertSeverity, string> = {
     success: 'bg-emerald-50 border-emerald-300 text-emerald-800',
-    error:   'bg-red-50   border-red-300   text-red-800',
+    error: 'bg-red-50   border-red-300   text-red-800',
     warning: 'bg-amber-50 border-amber-300 text-amber-800',
-    info:    'bg-blue-50  border-blue-300  text-blue-800',
+    info: 'bg-blue-50  border-blue-300  text-blue-800',
   };
   const icons: Record<AlertSeverity, string> = {
     success: '✓', error: '✕', warning: '⚠', info: 'ℹ',
@@ -38,7 +38,7 @@ const AlertBanner = ({ severity, message }: { severity: AlertSeverity; message: 
 };
 
 /** Scope tag pill */
-const ScopeTag = ({ name, onRemove }: { name: string; onRemove: () => void }) => (
+const Tag = ({ name, onRemove }: { name: string; onRemove: () => void }) => (
   <span className="inline-flex items-center gap-1 bg-[#d1fae5] text-[#065f46] text-xs font-semibold px-2.5 py-1 rounded-full">
     {name}
     <button
@@ -58,12 +58,16 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
   const [scopeInput, setScopeInput] = React.useState('');
   const [expireAt, setExpireAt] = React.useState<Moment | null>(null);
   const [issuer, setIssuer] = React.useState<string | null>(null);
+  const [clientId, setClientId] = React.useState<string | null>(null);
+  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
   const [issuerError, setIssuerError] = React.useState('');
   const [alert, setAlert] = React.useState('');
   const [alertSeverity, setAlertSeverity] = React.useState<AlertSeverity>('success');
   const [loading, setLoading] = React.useState(false);
-
+  const [addExistingClient, setAddExistingClient] = React.useState(false);
   const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.';
+  const [redirectUrlCopied, setRedirectUrlCopied] = React.useState(false);
+
 
   // Reset state when dialog opens
   React.useEffect(() => {
@@ -74,10 +78,14 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       setSelectedScopes([{ name: 'openid' }]);
       setExpireAt(null);
       setIssuer(null);
+      setClientId(null);
+      setClientSecret(null);
+      setAddExistingClient(false);
     }
   }, [isOpen]);
 
   const handleClose = () => {
+    setAddExistingClient(false);
     handleDialog(false);
   };
 
@@ -114,6 +122,16 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       console.error('Error registering OIDC client:', err);
       setAlert('Error in registering OIDC client. Check error log on console.');
       setAlertSeverity('error');
+    }
+  };
+
+  const copyRedirectUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(chrome.identity.getRedirectURL());
+      setRedirectUrlCopied(true);
+      setTimeout(() => setRedirectUrlCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy redirect URL:', err);
     }
   };
 
@@ -192,6 +210,76 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
     });
 
   // ── Register ───────────────────────────────────────────────────────────────
+
+  const addClient = async (): Promise<void> => {
+    try {
+      setLoading(true);
+
+      if (!issuer) {
+        setIssuerError('Issuer cannot be left blank. Either enter correct Issuer or OpenID Configuration URL.');
+        return;
+      }
+
+      let opConfigurationEndpoint: string;
+      let issuerUrl: string;
+
+      if (issuer.includes('.well-known/openid-configuration')) {
+        opConfigurationEndpoint = issuer;
+        issuerUrl = issuer.replace(/\/?\.well-known\/openid-configuration\/?$/, '');
+      } else {
+        issuerUrl = issuer.replace(/\/$/, '');
+        opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
+      }
+
+      const scopes = selectedScopes.map((s) => s.name).join(' ');
+      const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
+
+      if (!openidConfig?.data) {
+        setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error'); return;
+      }
+
+      const configData = openidConfig.data;
+
+      if (!configData.registration_endpoint) {
+        setAlert('OpenID configuration does not contain a registration endpoint'); setAlertSeverity('error'); return;
+      }
+
+      await storeOpenIDConfiguration(configData);
+
+      const newClient: OIDCClient = {
+        id: uuidv4(),
+        opHost: issuerUrl,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        scope: scopes,
+        redirectUris: [chrome.identity.getRedirectURL()],
+        authorizationEndpoint: configData.authorization_endpoint,
+        tokenEndpoint: configData.token_endpoint,
+        userinfoEndpoint: configData.userinfo_endpoint,
+        acrValuesSupported: configData.acr_values_supported,
+        endSessionEndpoint: configData.end_session_endpoint,
+        responseType: ['code'],
+        postLogoutRedirectUris: [chrome.identity.getRedirectURL('logout')],
+        expireAt: expireAt ? expireAt.valueOf() : undefined,
+        showClientExpiry: !!expireAt,
+        registrationDate: Date.now(),
+        openidConfiguration: configData,
+      };
+      console.log('Storing new client:', newClient);
+      await storeOIDCClient(newClient);
+
+      setAlert('Added Client successfully into Tarp!');
+      setAlertSeverity('success');
+      setAddExistingClient(false)
+      handleClose();
+    } catch (err) {
+      console.error('Error in adding Client into Tarp:', err);
+      setAlert(err instanceof Error ? err.message : REGISTRATION_ERROR);
+      setAlertSeverity('error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const registerClient = async (): Promise<void> => {
     try {
@@ -303,7 +391,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       />
 
       {/* Modal card */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8 max-h-[90vh] overflow-y-auto">
 
         {/* Loading overlay */}
         {loading && <Spinner />}
@@ -357,30 +445,6 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
               <p className="mt-1.5 text-xs text-red-600">{issuerError}</p>
             )}
           </div>
-
-          {/* ── Client Expiry Date ── */}
-          <div>
-            <label htmlFor="expiry" className="block mb-1.5">
-              <LabelWithTooltip
-                label="Client Expiry Date"
-                tip="Optional. If set, the client will be marked as expired after this date/time."
-              />
-            </label>
-            <div className="relative">
-              <input
-                id="expiry"
-                type="datetime-local"
-                min={moment().format('YYYY-MM-DDTHH:mm')}
-                onChange={(e) =>
-                  setExpireAt(e.target.value ? moment(e.target.value) : null)
-                }
-                className="w-full border border-slate-200 rounded-lg px-4 py-3 pr-10 text-sm text-slate-700
-                  focus:outline-none focus:ring-2 focus:ring-[#1a6b3c]/30 focus:border-[#1a6b3c]
-                  transition-all bg-slate-50/60 appearance-none"
-              />
-            </div>
-          </div>
-
           {/* ── Scopes ── */}
           <div>
             <label htmlFor="scopes" className="block mb-1.5">
@@ -390,7 +454,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
               />
             </label>
 
-            {/* Tag container */}
+            {/* Scopes */}
             <div
               className="min-h-[48px] w-full border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap gap-1.5
                 focus-within:ring-2 focus-within:ring-[#1a6b3c]/30 focus-within:border-[#1a6b3c]
@@ -398,7 +462,7 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
               onClick={() => document.getElementById('scopes')?.focus()}
             >
               {selectedScopes.map((s) => (
-                <ScopeTag key={s.name} name={s.name} onRemove={() => removeScope(s.name)} />
+                <Tag key={s.name} name={s.name} onRemove={() => removeScope(s.name)} />
               ))}
               <input
                 id="scopes"
@@ -414,6 +478,176 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
             </div>
             <p className="mt-1 text-xs text-slate-400">Type scope and Press Enter to add a scope.</p>
           </div>
+          {/* -- add existing client -- */}
+          <label className="flex items-center gap-3 cursor-pointer select-none group">
+            <input
+              type="checkbox"
+              checked={addExistingClient}
+              onChange={(e) => setAddExistingClient(e.target.checked)}
+              className="sr-only peer"
+            />
+            <span
+              aria-hidden="true"
+              className={`w-5 h-5 flex-shrink-0 rounded flex items-center justify-center border-2 transition-colors
+                ${addExistingClient
+                  ? 'bg-[#22a05a] border-[#22a05a]'
+                  : 'bg-white border-slate-300 group-hover:border-[`#22a05a`] peer-focus:ring-2 peer-focus:ring-[`#1a6b3c`]/30'
+                }`}
+            >
+              {addExistingClient && (
+                <svg viewBox="0 0 12 10" fill="none" className="w-3 h-3">
+                  <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </span>
+            <span className="flex items-center gap-1.5 text-sm font-medium text-[#1a3a2a]">
+              Add an existing client
+              <span className="relative inline-flex items-center">
+                {/* Inline tooltip for checkbox label */}
+                <span className="group/tip relative">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+                    className="w-4 h-4 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs
+                    rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none
+                    opacity-0 group-hover/tip:opacity-100 transition-opacity">
+                    If your OP does not support Dynamic Client Registration, you can manually add an existing client to Tarp.
+                  </span>
+                </span>
+              </span>
+            </span>
+          </label>
+          {addExistingClient && (
+            <>
+              <div>
+                <label htmlFor="clientId" className="block mb-1.5">
+                  <LabelWithTooltip
+                    label="Client ID *"
+                    tip="The client ID of the existing client you want to add."
+                  />
+                </label>
+                <input
+                  id="clientId"
+                  type="text"
+                  onChange={(e) => setClientId(e.target.value)}
+                  autoFocus
+                  placeholder="Enter existing client ID"
+                  // onBlur={validateIssuer}
+                  className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:border-[#1a6b3c] transition-all bg-slate-50/60`}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="clientSecret" className="block mb-1.5">
+                  <LabelWithTooltip
+                    label="Client Secret *"
+                    tip="The client secret of the existing client you want to add."
+                  />
+                </label>
+                <input
+                  id="clientSecret"
+                  type="text"
+                  onChange={(e) => setClientSecret(e.target.value)}
+                  autoFocus
+                  placeholder="Enter existing client secret"
+                  className={`w-full border rounded-lg px-4 py-3 text-sm text-slate-700 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:border-[#1a6b3c] transition-all bg-slate-50/60`}
+                />
+              </div>
+
+              {/* ── Info panel ── */}
+              <div className="bg-blue-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-green-800 space-y-1">
+                    <p className="font-semibold">The OpenID client should have the following configuration to work properly with Tarp:</p>
+                    <ul className="space-y-0.5 text-sm">
+                      <li>
+                        · <strong>Grant Types</strong>: Should include <code>authorization_code</code>.
+                      </li>
+                      <li>
+                        · <strong>Response Types</strong>: Should include <code>code</code>.
+                      </li>
+                      <li>
+                        · <strong>Userinfo Signed Response Algorithm</strong>: Should be set to a valid algorithm (e.g., RS256).
+                      </li>
+                      <li>
+                        · <strong>Access Token as JWT</strong>: Should be set to <code>true</code> so that Tarp can decode the access token and show its claims.
+                      </li>
+                      <li>
+                        · <strong>Jans Include Claims In Id Token</strong>: Can be set to <code>true</code> if required for Cedarling authorization.
+                      </li>
+                      <li className="flex items-center gap-2 flex-wrap">
+                        · <strong>Redirect URIs</strong>: Need to include the Tarp redirect URI in your OIDC client.
+                        <button
+                          type="button"
+                          onClick={copyRedirectUrl}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md border transition-all
+      ${redirectUrlCopied
+                              ? 'bg-green-100 border-green-400 text-green-700'
+                              : 'bg-white border-green-300 text-green-700 hover:bg-green-50'
+                            }`}
+                        >
+                          {redirectUrlCopied ? (
+                            <>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
+                                <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
+                                <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                              </svg>
+                              Copy Redirect URI
+                            </>
+                          )}
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </>
+
+          )}
+
+          {/* ── Client Expiry Date ── */}
+
+          {!addExistingClient && (
+            <>
+              <div>
+                <label htmlFor="expiry" className="block mb-1.5">
+                  <LabelWithTooltip
+                    label="Client Expiry Date"
+                    tip="Optional. If set, the client will be marked as expired after this date/time."
+                  />
+                </label>
+                <div className="relative">
+                  <input
+                    id="expiry"
+                    type="datetime-local"
+                    min={moment().format('YYYY-MM-DDTHH:mm')}
+                    onChange={(e) =>
+                      setExpireAt(e.target.value ? moment(e.target.value) : null)
+                    }
+                    className="w-full border border-slate-200 rounded-lg px-4 py-3 pr-10 text-sm text-slate-700
+                  focus:outline-none focus:ring-2 focus:ring-[#1a6b3c]/30 focus:border-[#1a6b3c]
+                  transition-all bg-slate-50/60 appearance-none"
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── Actions ── */}
@@ -426,18 +660,31 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
           >
             Cancel
           </button>
-          <button
-            type="button"
-            onClick={registerClient}
-            disabled={loading}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+          {addExistingClient ? (
+            <button
+              type="button"
+              onClick={addClient}
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
               hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
               rounded-lg transition-colors shadow-sm shadow-green-200"
-          >
-            Register
-          </button>
+            >
+              Add Client
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={registerClient}
+              disabled={loading}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#22a05a]
+              hover:bg-[#1a8a4a] active:bg-[#167a40] disabled:opacity-60 disabled:cursor-not-allowed
+              rounded-lg transition-colors shadow-sm shadow-green-200"
+            >
+              Register
+            </button>
+          )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
