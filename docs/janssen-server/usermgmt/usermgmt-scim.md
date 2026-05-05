@@ -15,7 +15,7 @@ For your reference, the current version of the standard is governed by the follo
 
 ## Installation
 
-The API is available as a component of Jans Server. Upon [installation](https://docs.jans.io/v1.0.14/admin/install/vm-install/vm-requirements/) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
+The API is available as a component of Jans Server. Upon [installation](https://docs.jans.io/v1.0.14/admin/install/vm-install/vm-requirements/), you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
 
 1. Run `python3 /opt/jans/jans-setup/setup.py --install-scim`
 
@@ -41,8 +41,8 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |`https://jans.io/scim/groups.write`|Modify group resources|
 |`https://jans.io/scim/fido.read`|Query fido resources|
 |`https://jans.io/scim/fido.write`|Modify fido resources|
-|`https://jans.io/scim/fido2.read`|Query fido 2 resources|
-|`https://jans.io/scim/fido2.write`|Modify fido 2 resources|
+|`https://jans.io/scim/fido2.read`|Query fido2 resources|
+|`https://jans.io/scim/fido2.write`|Modify fido2 resources|
 |`https://jans.io/scim/all-resources.search`|Access the root .search endpoint|
 |`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
@@ -81,7 +81,7 @@ You can refer to [here](../../janssen-server/config-guide/scim-config/user-confi
 
 ## Creating Resource
 
-### Create an User
+### Create a User
 
 You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#create-an-user) for this topic
 
@@ -105,21 +105,21 @@ You can refer to [here](../../janssen-server/scim/monitoring.md#how-is-scim-data
 
 ## FIDO Devices
 
-You can refer to [here](../../janssen-server/fido/monitoring.md#fido-devices) for this topic.
+You can refer to [here](../../janssen-server/scim/monitoring.md#fido-devices) for this topic.
 
-## FIDO 2 devices
+## FIDO2 devices
 
-You can refer to [here](../../janssen-server/fido/monitoring.md#fido2-devices) for this topic.
+You can refer to [here](../../janssen-server/scim/monitoring.md#fido2-devices) for this topic.
 
 ## Potential performance issues with Group endpoints
 
 In SCIM a group resource basically consists of an identifier, a display name, and a collection of members associated to it. Also, every member is made up of a user identifier, his display name, and other attributes. As a consequence, retrieving group information requires making a correlation with existing user data. Since Gluu database model does not follow a relational database pattern this may entail a considerable amount of user queries when groups contain thousands of members.
 
-While this could have been workarounded by storing members' display names inside group entries, this brings additional problems to deal with.
+While this could have been worked-around by storing members' display names inside group entries, this brings additional problems to deal with.
 
 Another source of potential overhead stems from creation and modification of groups where many new users are associated to a given group: by default checks are made to guarantee only existing users are attached to groups, thus requiring continuous database queries.
 
-Currently there are two ways to lower the amount of database lookups required for SCIM group operations:
+Currently, there are two ways to lower the amount of database lookups required for SCIM group operations:
 
 * Explicitly excluding display names from responses
 * Pass the overhead bypass flag to skip members validations
@@ -131,7 +131,7 @@ This approach is particularly useful in search and retrievals when users' displa
 The second is a stronger approach that turns off validation of incoming members data: if the usage of a POST/PUT/PATCH operation implies adding members, their existence is not verified, they will simply get added. Here, the client application is responsible for sending accurate data. To use this approach add a query or header parameter named `Group-Overhead-Bypass` with any value. Note under this mode of operation:
 
 * Display names are never returned regardless of `attributes` or `excludedAttributes` parameters values
-* Remove/replace patch operations that involve display names in path filters are ignored, eg: `"path": "members[value eq \"2819c223\" or display eq \"Joe\"]"`
+* Remove/replace patch operations that involve display names in path filters are ignored, e.g: `"path": "members[value eq \"2819c223\" or display eq \"Joe\"]"`
 
 
 ## User Registration Process with SCIM
@@ -143,13 +143,13 @@ SCIM service has many use cases. One interesting and often arising is that of co
 
 Here, you have some useful tips before you start:
 
-1. Choose a toolset you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:
+1. Choose a tool-set you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:
 
       * You will be able to use at least the following verbs: GET, POST, PUT, and DELETE
 
       * You can send headers in your requests as well as reading them from the service response
 
-2. If not supported natively, choose a library to facilitate JSON content manipulation. As you have already noticed we have been dealing with JSON for requests as well as for responses. Experience shows that being able to map from objects (or data structures) of your language to Json and viceversa helps saving hours of coding.
+2. If not supported natively, choose a library to facilitate JSON content manipulation. As you have already noticed we have been dealing with JSON for requests as well as for responses. Experience shows that being able to map from objects (or data structures) of your language to Json and vice-versa helps save hours of coding.
 
 3. Shape your data model early. List the attributes your application will operate upon and correlate with those found in the SCIM user schema. You can learn about the schema in [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644). At least, take a look at the JSON-formatted schema that your Jans Server shows: visit `https://<host-name>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User`
 

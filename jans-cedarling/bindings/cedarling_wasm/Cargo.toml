@@ -29,7 +29,7 @@ wasm-bindgen-test = "0.3.49"
 lto = true
 strip = "symbols"
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ['-O4', '--enable-reference-types', '--enable-gc']
+wasm-opt = ['-O4', '--enable-reference-types']
 
 [dev-dependencies]
 # is used in testing
