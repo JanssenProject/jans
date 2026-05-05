@@ -58,7 +58,6 @@
 //! - **`InvalidSoftwareRoles`**: Software roles claim is not an array
 //! - **`InvalidExpirationTime`**: Expiration time is not a number
 //! - **`InvalidIssuedAtTime`**: Issued at time is not a number
-//! - **`HttpClientError`**: HTTP client initialization failed
 //! - **`JwksFetchError`**: Failed to fetch JWKS from IDP
 //! - **`MissingKeyId`**: JWT header missing key ID
 //! - **`KeyNotFound`**: Key not found in JWKS
@@ -74,7 +73,7 @@
 //! is then included in the DCR request to the Identity Provider.
 
 use crate::{
-    http::{HttpClient, InitializeHttpClientError},
+    http::HttpClient,
     jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
 };
 use base64::Engine;
@@ -430,10 +429,6 @@ pub(crate) enum SsaValidationError {
     /// Issued at time is not a valid number
     #[error("iat must be a number")]
     InvalidIssuedAtTime,
-
-    /// Failed to initialize HTTP client for JWKS fetching
-    #[error("failed to initialize HTTP client: {0}")]
-    HttpClientError(#[from] InitializeHttpClientError),
 
     /// Failed to fetch JWKS due to network or HTTP errors
     #[error("failed to fetch JWKS (network/HTTP error): {0}")]
