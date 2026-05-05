@@ -83,8 +83,8 @@ async fn prepare_cedarling_with_jwt_validation(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store =
-        serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE).expect("a valid YAML policy store");
+    let mut policy_store = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE)
+        .expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
