@@ -101,11 +101,11 @@ pub(crate) async fn init_logger(
     lock_config: Option<&LockServiceConfig>,
     metrics: Arc<MetricsCollector>,
 ) -> Result<Logger, InitLockServiceError> {
-    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name));
+    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name.clone()));
     let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
         let lock_service =
-            LockService::new(pdp_id, lock_config, Some(logger_weak), metrics).await?;
+            LockService::new(pdp_id, lock_config, Some(logger_weak), metrics, app_name).await?;
         logger.set_lock_service(lock_service);
     }
     Ok(logger)

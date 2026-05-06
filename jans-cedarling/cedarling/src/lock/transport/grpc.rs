@@ -20,14 +20,14 @@ use crate::{
     lock::{
         LockLogEntry,
         proto::{
-            BulkLogRequest, BulkTelemetryRequest, LogEntry, TelemetryEntry,
-            audit_service_client::AuditServiceClient,
+            BulkHealthRequest, BulkLogRequest, BulkTelemetryRequest, HealthEntry, LogEntry,
+            TelemetryEntry, audit_service_client::AuditServiceClient,
         },
         transport::{
             self, AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
             mapping::{
-                CedarlingLogEntry, CedarlingMetricsEntry, LockServerLogEntry,
-                LockServerMetricsEntry,
+                CedarlingLogEntry, CedarlingMetricsEntry, LockServerHealthEntry,
+                LockServerLogEntry, LockServerMetricsEntry,
             },
         },
     },
@@ -118,9 +118,42 @@ impl AuditTransport for GrpcTransport {
                 .collect();
 
                 let mut request = Request::new(BulkTelemetryRequest { entries });
-                request.metadata_mut().insert("authorization", token);
+                request
+                    .metadata_mut()
+                    .insert("authorization", token.clone());
 
                 client.process_bulk_telemetry(request).await?
+            },
+            AuditKind::Health(_) => {
+                let entries: Vec<LockServerHealthEntry> = entries
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(idx, v)| match serde_json::from_str(v) {
+                        Ok(e) => Some(e),
+                        Err(e) => {
+                            self.logger.log_any(LockLogEntry::warn(format!(
+                                "failed to parse health entry[{idx}]: {e}"
+                            )));
+                            None
+                        },
+                    })
+                    .collect();
+
+                if entries.is_empty() {
+                    return Err(TransportError::Serialization(
+                        "all health entries were malformed, nothing to send".to_string(),
+                    ));
+                }
+
+                let proto_entries: Vec<HealthEntry> =
+                    entries.into_iter().map(health_json_to_proto).collect();
+
+                let mut request = Request::new(BulkHealthRequest {
+                    entries: proto_entries,
+                });
+                request.metadata_mut().insert("authorization", token);
+
+                client.process_bulk_health(request).await?
             },
         };
 
@@ -175,6 +208,18 @@ fn telemetry_json_to_proto(entry: LockServerMetricsEntry) -> TelemetryEntry {
     }
 }
 
+/// Converts a [`LockServerHealthEntry`] into a [`HealthEntry`]
+fn health_json_to_proto(entry: LockServerHealthEntry) -> HealthEntry {
+    HealthEntry {
+        creation_date: parse_timestamp(&entry.creation_date),
+        event_time: parse_timestamp(&entry.event_time),
+        service: entry.service,
+        node_name: entry.node_name,
+        status: entry.status,
+        engine_status: entry.engine_status,
+    }
+}
+
 // Parse a RFC3339 timestamp string into a protobuf Timestamp
 fn parse_timestamp(s: &str) -> Option<Timestamp> {
     chrono::DateTime::parse_from_rfc3339(s)
@@ -205,6 +250,7 @@ mod test {
     struct MockAuditService {
         log_sender: mpsc::UnboundedSender<Vec<LogEntry>>,
         telemetry_sender: mpsc::UnboundedSender<Vec<TelemetryEntry>>,
+        health_sender: mpsc::UnboundedSender<Vec<HealthEntry>>,
         should_fail: bool,
     }
 
@@ -219,9 +265,32 @@ mod test {
 
         async fn process_bulk_health(
             &self,
-            _: Request<proto::BulkHealthRequest>,
+            request: Request<proto::BulkHealthRequest>,
         ) -> Result<Response<AuditResponse>, Status> {
-            unimplemented!()
+            if self.should_fail {
+                return Ok(Response::new(AuditResponse {
+                    success: false,
+                    message: "Server error".to_string(),
+                }));
+            }
+
+            let auth = request
+                .metadata()
+                .get("authorization")
+                .and_then(|v| v.to_str().ok());
+
+            assert!(
+                matches!(auth, Some(token) if token.starts_with("Bearer ")),
+                "expected Bearer token in authorization header, got {auth:?}"
+            );
+
+            let entries = request.into_inner().entries;
+            self.health_sender.send(entries).unwrap();
+
+            Ok(Response::new(AuditResponse {
+                success: true,
+                message: "OK".to_string(),
+            }))
         }
 
         async fn process_log(
@@ -305,12 +374,15 @@ mod test {
         SocketAddr,
         mpsc::UnboundedReceiver<Vec<LogEntry>>,
         mpsc::UnboundedReceiver<Vec<TelemetryEntry>>,
+        mpsc::UnboundedReceiver<Vec<HealthEntry>>,
     ) {
         let (tx, rx) = mpsc::unbounded_channel();
         let (telemetry_tx, telemetry_rx) = mpsc::unbounded_channel();
+        let (health_tx, health_rx) = mpsc::unbounded_channel();
         let service = MockAuditService {
             log_sender: tx,
             telemetry_sender: telemetry_tx,
+            health_sender: health_tx,
             should_fail,
         };
 
@@ -325,7 +397,7 @@ mod test {
                 .unwrap();
         });
 
-        (addr, rx, telemetry_rx)
+        (addr, rx, telemetry_rx, health_rx)
     }
 
     #[test]
@@ -402,7 +474,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_success() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -441,7 +513,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_empty() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         transport
@@ -458,7 +530,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
-        let (addr, _, _) = start_mock_server(false).await;
+        let (addr, _, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec!["not valid json".to_string().into_boxed_str()];
@@ -478,7 +550,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_server_error() {
-        let (addr, _, _) = start_mock_server(true).await;
+        let (addr, _, _, _) = start_mock_server(true).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -511,7 +583,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_partial_malformed() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -556,7 +628,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_multiple_entries() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -612,7 +684,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_with_all_fields() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -659,7 +731,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_with_missing_optional_fields() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -692,7 +764,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_large_batch() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries: Vec<_> = (0..100)
@@ -727,7 +799,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_telemetry_success() {
-        let (addr, _, mut telemetry_rx) = start_mock_server(false).await;
+        let (addr, _, mut telemetry_rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
@@ -841,5 +913,182 @@ mod test {
             proto_entry.event_time.as_ref().unwrap().seconds,
             -2_208_988_800
         );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_success() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("health check should be sent successfully");
+
+        let received = health_rx.try_recv().unwrap();
+        assert_eq!(received.len(), 1);
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[0].node_name, "test-pdp");
+        assert_eq!(received[0].status, "running");
+        assert_eq!(received[0].engine_status.get("core").unwrap(), "success");
+    }
+
+    #[tokio::test]
+    async fn test_send_health_empty() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        transport
+            .send(
+                &[],
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("empty health check should succeed");
+
+        assert!(health_rx.try_recv().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_send_health_malformed_json() {
+        let (addr, _, _, _) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec!["not valid json".to_string().into_boxed_str()];
+
+        let error = transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect_err("this should cause a serialization error");
+        assert!(
+            matches!(error, TransportError::Serialization(_)),
+            "expected serialization error, got {error:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_server_error() {
+        let (addr, _, _, _) = start_mock_server(true).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        let error = transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect_err("this should cause a server error");
+
+        assert!(
+            matches!(error, TransportError::GrpcServer(_)),
+            "expected server error, got {error:?}",
+        );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_large_batch() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries: Vec<_> = (0..100)
+            .map(|i| {
+                json!({
+                    "creation_date": "2026-03-23T11:50:37.504Z",
+                    "event_time": "2026-03-23T11:50:37.504Z",
+                    "service": format!("service-{i}"),
+                    "node_name": "node-1",
+                    "status": "running",
+                    "engine_status": {
+                        "core": "success"
+                    }
+                })
+                .to_string()
+                .into_boxed_str()
+            })
+            .collect();
+
+        transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("health checks should be sent successfully");
+
+        let received = health_rx.try_recv().unwrap();
+        assert_eq!(received.len(), 100);
+        assert_eq!(received[0].service, "service-0");
+        assert_eq!(received[99].service, "service-99");
+    }
+
+    #[test]
+    fn test_health_json_to_proto_conversion() {
+        let entry = LockServerHealthEntry {
+            creation_date: "2026-03-23T11:50:37.504Z".to_string(),
+            event_time: "2026-03-23T11:50:37.504Z".to_string(),
+            service: "test_app".to_string(),
+            node_name: "test-pdp".to_string(),
+            status: "running".to_string(),
+            engine_status: [("core".to_string(), "success".to_string())]
+                .into_iter()
+                .collect(),
+        };
+
+        let proto = health_json_to_proto(entry);
+
+        assert_eq!(
+            proto.creation_date,
+            Some(Timestamp {
+                seconds: 1_774_266_637,
+                nanos: 504_000_000
+            })
+        );
+        assert_eq!(
+            proto.event_time,
+            Some(Timestamp {
+                seconds: 1_774_266_637,
+                nanos: 504_000_000,
+            })
+        );
+        assert_eq!(proto.service, "test_app");
+        assert_eq!(proto.node_name, "test-pdp");
+        assert_eq!(proto.status, "running");
+        assert_eq!(proto.engine_status.get("core").unwrap(), "success");
     }
 }

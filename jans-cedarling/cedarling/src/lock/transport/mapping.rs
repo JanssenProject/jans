@@ -66,6 +66,18 @@ pub(super) struct LockServerLogEntry {
     pub context_information: Option<Value>,
 }
 
+/// Serializes into the lock server's expected health format.
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct LockServerHealthEntry {
+    pub creation_date: String,
+    pub event_time: String,
+    pub service: String,
+    pub node_name: String,
+    pub status: String,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub engine_status: HashMap<String, String>,
+}
+
 /// Serializes into the lock server's expected telemetry format (3-map model).
 #[derive(Debug, Serialize)]
 pub(super) struct LockServerMetricsEntry {

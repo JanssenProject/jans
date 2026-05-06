@@ -150,6 +150,10 @@ impl Cedarling {
         )
         .await?;
 
+        if let Some(registry) = log.health_registry() {
+            registry.register("core", || "success".to_string());
+        }
+
         let service_config = ServiceConfig::new(config)
             .await
             .inspect(|_| {
