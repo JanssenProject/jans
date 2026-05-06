@@ -56,6 +56,9 @@ ATTRIBUTE_ALG_PROPERTIES = (
     'txTokenSignedResponseAlg',
     'txTokenEncryptedResponseAlg',
     'txTokenEncryptedResponseEnc',
+    'authorizationSigningAlgValuesSupported',
+    'authorizationEncryptionAlgValuesSupported',
+    'authorizationEncryptionEncValuesSupported',
     )
 APP = get_app()
 
@@ -810,6 +813,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
                  'tx_token_encryption_enc_values_supported'),
 
+                (_("Authorization Signing Alg"), 'authorizationSigningAlgValuesSupported',
+                  'authorization_signing_alg_values_supported'),
+                (_("Authorization Encryption Alg"), 'authorizationEncryptionAlgValuesSupported',
+                  'authorization_encryption_alg_values_supported'),
+                (_("Authorization Encryption Enc"), 'authorizationEncryptionEncValuesSupported',
+                  'authorization_encryption_enc_values_supported'),
 
         ):
 
