@@ -32,6 +32,16 @@ use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
 
+struct StatusListUpdateCtx {
+    ttl: u64,
+    status_list_url: Url,
+    decoding_key: Option<Arc<DecodingKey>>,
+    validator: Arc<RwLock<JwtValidator>>,
+    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
+    logger: Option<Logger>,
+    http_client: HttpClient,
+}
+
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
@@ -97,18 +107,21 @@ impl StatusListCache {
         // spawn a background task to handle updating the statuslist if the JWT has a TTL
         // claim
         if let Some(ttl) = ttl {
-            crate::http::spawn_task(keep_status_list_updated(
+            let ctx = StatusListUpdateCtx {
                 ttl,
-                status_list_url.clone(),
+                status_list_url: status_list_url.clone(),
                 decoding_key,
                 validator,
-                self.status_lists.clone(),
+                status_lists: self.status_lists.clone(),
                 logger,
+                http_client: http_client.clone(),
+            };
+            crate::http::spawn_task(keep_status_list_updated(
                 // callback is called on updated status list
                 move || {
                     token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
                 },
-                http_client.clone(),
+                ctx,
             ));
         }
 
@@ -126,18 +139,20 @@ impl StatusListCache {
 
 /// Keeps the statuslist form the given URL updated based on the TTL
 /// `cb` will be called when status list updated
-async fn keep_status_list_updated<F>(
-    mut ttl: u64,
-    status_list_url: Url,
-    decoding_key: Option<Arc<DecodingKey>>,
-    validator: Arc<RwLock<JwtValidator>>,
-    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
-    logger: Option<Logger>,
-    cb: F,
-    http_client: HttpClient,
-) where
+async fn keep_status_list_updated<F>(cb: F, ctx: StatusListUpdateCtx)
+where
     F: Fn(),
 {
+    let StatusListUpdateCtx {
+        mut ttl,
+        status_list_url,
+        decoding_key,
+        validator,
+        status_lists,
+        logger,
+        http_client,
+    } = ctx;
+
     loop {
         sleep(Duration::from_secs(ttl)).await;
 
