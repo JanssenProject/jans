@@ -778,7 +778,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for alg_prefix in ('authorization', ):
             for alg_type in ('_signing_alg_values_supported', '_encryption_alg_values_supported', '_encryption_enc_values_supported'):
                 alg_name = alg_prefix + alg_type
-                if alg_name not in self.myparent.cli_object.openid_configuration:
+                if alg_name in self.myparent.cli_object.openid_configuration:
                     fall_back_open_id_dict[alg_name] = alg_name
                 else:
                     fall_back_open_id_dict[alg_name] = 'id_token' + alg_type
