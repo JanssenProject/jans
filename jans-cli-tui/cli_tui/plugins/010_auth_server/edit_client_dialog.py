@@ -56,9 +56,9 @@ ATTRIBUTE_ALG_PROPERTIES = (
     'txTokenSignedResponseAlg',
     'txTokenEncryptedResponseAlg',
     'txTokenEncryptedResponseEnc',
-    'authorizationSigningAlgValuesSupported',
-    'authorizationEncryptionAlgValuesSupported',
-    'authorizationEncryptionEncValuesSupported',
+    'authorizationSignedResponseAlg',
+    'authorizationEncryptedResponseAlg',
+    'authorizationEncryptedResponseEnc',
     )
 APP = get_app()
 
@@ -774,6 +774,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.drop_down_select_first = []
 
+        fall_back_open_id_dict = {}
+        for alg_prefix in ('authorization', ):
+            for alg_type in ('_signing_alg_values_supported', '_encryption_alg_values_supported', '_encryption_enc_values_supported'):
+                alg_name = alg_prefix + alg_type
+                if alg_name not in self.myparent.cli_object.openid_configuration:
+                    fall_back_open_id_dict[alg_name] = alg_name
+                else:
+                    fall_back_open_id_dict[alg_name] = 'id_token' + alg_type
+
         for title, swagger_key, openid_key in (
 
                 (_("ID Token Alg for Signing "), 'idTokenSignedResponseAlg',
@@ -813,12 +822,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
                  'tx_token_encryption_enc_values_supported'),
 
-                (_("Authorization Signing Alg"), 'authorizationSigningAlgValuesSupported',
-                  'authorization_signing_alg_values_supported'),
-                (_("Authorization Encryption Alg"), 'authorizationEncryptionAlgValuesSupported',
-                  'authorization_encryption_alg_values_supported'),
-                (_("Authorization Encryption Enc"), 'authorizationEncryptionEncValuesSupported',
-                  'authorization_encryption_enc_values_supported'),
+                (_("Authorization Signing Alg"), 'authorizationSignedResponseAlg',
+                  fall_back_open_id_dict['authorization_signing_alg_values_supported']),
+                (_("Authorization Encryption Alg"), 'authorizationEncryptedResponseAlg',
+                  fall_back_open_id_dict['authorization_encryption_alg_values_supported']),
+                (_("Authorization Encryption Enc"), 'authorizationEncryptedResponseEnc',
+                  fall_back_open_id_dict['authorization_encryption_enc_values_supported']),
 
         ):
 
