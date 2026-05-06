@@ -6,6 +6,8 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
+use crate::jwt_config::MIN_JWKS_REFRESH_SECS;
+
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
 pub(super) fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
@@ -50,6 +52,26 @@ where
 
     // Try normal deserialization
     T::deserialize(value).map_err(serde::de::Error::custom)
+}
+
+pub(super) fn deserialize_jwks_refresh_interval<'de, D>(
+    deserializer: D,
+) -> Result<Option<u64>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: Option<u64> = deserialize_or_parse_string_as_json(deserializer)?;
+    Ok(value.map(|v| v.max(MIN_JWKS_REFRESH_SECS)))
+}
+
+pub(super) fn deserialize_jwks_refresh_min_interval<'de, D>(
+    deserializer: D,
+) -> Result<u64, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: u64 = deserialize_or_parse_string_as_json(deserializer)?;
+    Ok(value.max(MIN_JWKS_REFRESH_SECS))
 }
 
 #[cfg(test)]
