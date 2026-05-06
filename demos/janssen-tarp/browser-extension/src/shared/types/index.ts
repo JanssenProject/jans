@@ -26,8 +26,8 @@ export interface OpenIDConfiguration {
 export interface OIDCClient {
   id: string;
   opHost: string;
-  clientId: string;
-  clientSecret: string;
+  clientId: string | null;
+  clientSecret: string | null;
   scope: string;
   redirectUris: string[];
   authorizationEndpoint: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Info } from "lucide-react";
-import { CircleQuestionMark } from 'lucide-react';
+import { CircleAlert } from 'lucide-react';
 
 export const LabelWithTooltipMultiLine = (
   label: React.ReactNode,
@@ -16,7 +16,7 @@ export const LabelWithTooltipMultiLine = (
         aria-label={`${label} help`}
         className="p-1 rounded-sm hover:bg-gray-100"
       >
-        <Info className="w-[18px] h-[18px] opacity-75" tabIndex={-1}/>
+        <Info className="w-[18px] h-[18px] opacity-75" tabIndex={-1} />
       </button>
 
       <div className="absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 group-hover:block">
@@ -42,10 +42,35 @@ export const LabelWithTooltip = ({ label, tip }: { label: string; tip: string })
           onMouseLeave={() => setShow(false)}
           className="text-slate-400 hover:text-slate-600 transition-colors"
         >
-          <CircleQuestionMark className="w-4 h-4"/>
+          <CircleAlert className="w-4 h-4" />
         </button>
         {show && (
           <span className="absolute z-50 left-6 top-1/2 -translate-y-1/2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
+            {tip}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+};
+
+export const LabelWithTooltipLeft = ({ label, tip }: { label: string; tip: string }) => {
+  const [show, setShow] = React.useState(false);
+  return (
+    <span className="flex items-center gap-1.5 text-sm font-semibold text-[#1a3a2a]">
+      {label}
+      <span className="relative inline-flex items-center">
+        <button
+          tabIndex={-1}
+          type="button"
+          onMouseEnter={() => setShow(true)}
+          onMouseLeave={() => setShow(false)}
+          className="text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          <CircleAlert className="w-4 h-4" />
+        </button>
+        {show && (
+          <span className="absolute z-50 right-full top-1/2 -translate-y-1/2 mr-2 w-64 bg-[#1a3a2a] text-white text-xs rounded-lg px-3 py-2.5 shadow-xl leading-relaxed pointer-events-none">
             {tip}
           </span>
         )}
