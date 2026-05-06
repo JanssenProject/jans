@@ -5,7 +5,7 @@
 
 #![allow(clippy::cast_precision_loss)]
 
-use cedarling::{
+use cedarling::{HttpClientConfig,
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
     EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
@@ -96,6 +96,7 @@ async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>>
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 

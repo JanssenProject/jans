@@ -6,7 +6,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::{
+use cedarling::{HttpClientConfig,
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
     EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
     PolicyStoreConfig, TokenInput,
@@ -112,6 +112,7 @@ async fn init_cedarling_multi_issuer(
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

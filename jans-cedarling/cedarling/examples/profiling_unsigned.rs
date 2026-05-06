@@ -6,7 +6,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::{
+use cedarling::{HttpClientConfig,
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, JwtConfig,
     LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
@@ -156,6 +156,7 @@ async fn init_cedarling() -> Cedarling {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await
     .expect("should initialize cedarling")
