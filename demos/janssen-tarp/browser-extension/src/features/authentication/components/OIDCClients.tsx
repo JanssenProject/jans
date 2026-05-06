@@ -11,7 +11,7 @@ import RegisterClient from './RegisterClient';
 import AuthFlowInputs from './AuthFlowInputs';
 import { ClientDetails } from '../type/Authentication';
 import { SuccessAlert } from '../../../shared/components/Common';
-
+import { LabelWithTooltipLeft } from '../../../shared/components/Common';
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -61,8 +61,7 @@ function ClientRow({
     ? Math.floor((row.expireAt - Date.now()) / 1000)
     : -1;
 
-  const isEnabled =
-    row.showClientExpiry && lifetime > 0;
+  const isEnabled = !row.showClientExpiry || lifetime > 0;
 
   const handleDialog = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -96,14 +95,20 @@ function ClientRow({
 
         <td className="px-6 py-5">
           <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-              isEnabled
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-gray-100 text-gray-600'
-            }`}
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${isEnabled
+              ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-gray-100 text-gray-600'
+              }`}
           >
-            {isEnabled ? 'Enabled' : 'Disabled'}
+            {isEnabled ? 'Enabled' : 'Disabled'}{" "}
+            {!row.showClientExpiry && isEnabled && (
+              <LabelWithTooltipLeft
+                label=""
+                tip="Tarp does not have expiry information for this client."
+              />
+            )}
           </span>
+
         </td>
 
         <td className="px-6 py-5">
@@ -243,7 +248,7 @@ export default function OIDCClients({
               paginatedRows.map((row, index) => (
                 <ClientRow
                   key={row.clientId}
-                  row={{...row} as any}
+                  row={{ ...row } as any}
                   index={index}
                   notifyOnDataChange={notifyOnDataChange}
                   onDelete={handleDelete}
