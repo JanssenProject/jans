@@ -44,14 +44,14 @@ pub(super) fn default_log_max_retries() -> u32 {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(super) fn default_http_client_request_timeout_millis() -> u64 {
-    u64::try_from(HttpClientConfig::DEFAULT_REQUEST_TIMEOUT.as_millis()).unwrap_or(u64::MAX)
+pub(super) fn default_http_client_request_timeout() -> u64 {
+    HttpClientConfig::DEFAULT_REQUEST_TIMEOUT.as_secs()
 }
 
 pub(super) fn default_http_client_max_retries() -> u32 {
     HttpClientConfig::DEFAULT_MAX_RETRIES
 }
 
-pub(super) fn default_http_client_retry_delay() -> u64 {
-    u64::try_from(HttpClientConfig::DEFAULT_RETRY_DELAY.as_millis()).unwrap_or(u64::MAX)
+pub(super) fn default_http_client_retry_delay_secs() -> u64 {
+    HttpClientConfig::DEFAULT_RETRY_DELAY.as_secs()
 }
