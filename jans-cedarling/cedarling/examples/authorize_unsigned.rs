@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
+use cedarling::{HttpClientConfig,
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
     EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned, log_config::StdOutLoggerMode,
@@ -39,6 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 
