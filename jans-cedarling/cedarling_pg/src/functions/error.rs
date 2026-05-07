@@ -3,6 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+//! Authorization-path error type and audit log entry for `cedarling_pg`.
+//!
+//! [`CedarlingError`] is the common error currency for the `functions/` authorize path.
+//! Each subsystem (engine, tokens, resource, policy) maintains its own error type;
+//! the `From` impls below funnel them here at the authorize boundary.
+
 use chrono::{DateTime, Utc};
 use serde_json::{json, Value};
 use thiserror::Error;
@@ -11,91 +17,61 @@ use uuid::Uuid;
 use crate::authz_bridge::{AuthorizeBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::guc_config::CedarlingLogLevelGuc;
-use crate::resource::ResourceEntityDataError;
+use crate::policy::{PolicyError, SchemaError};
+use crate::resource::row::RowBuildError;
 use crate::token_bundle::TokenBundleError;
 
-/// One error type for the whole extension.
-//
-// Some variants are unused until their producers (policy versioning,
-// schema validation, cache introspection, direct SPI surfaces). They're part of the
-// public error API now so downstream `From` impls and match arms don't churn.
 #[allow(dead_code)]
 #[derive(Debug, Error)]
 pub enum CedarlingError {
-    /// A JWT / token bundle failed structural or semantic validation (format, `exp`, `nbf`,
-    /// issuer, audience, cross-token consistency). Distinct from [`Self::TokenBundle`] which
-    /// only covers JSON shape.
     #[error("token validation failed: {0}")]
     TokenValidation(String),
 
-    /// The token bundle JSON could not be parsed into the expected `[{{mapping, payload}}]` or
-    /// `{{mapping: jwt}}` shape.
     #[error("token bundle shape invalid: {0}")]
     TokenBundle(String),
 
-    /// A resource / principal `EntityData` JSON could not be built (missing
-    /// `cedar_entity_mapping`, bad JSON, non-object root, etc.).
     #[error("resource construction failed: {0}")]
     ResourceConstruction(String),
 
-    /// The Cedar [`AuthorizeMultiIssuerRequest`](cedarling::AuthorizeMultiIssuerRequest)
-    /// / [`RequestUnsigned`](cedarling::RequestUnsigned) failed its own pre-evaluation
-    /// validation step (bad action UID, context not an object, etc.).
     #[error("request invalid: {0}")]
     RequestInvalid(String),
 
-    /// Cedar policy evaluation itself returned an error (not a `Deny` — a hard failure).
     #[error("policy evaluation failed: {0}")]
     PolicyEvaluation(String),
 
-    /// Loading or swapping the policy set failed.
     #[error("policy loading failed: {0}")]
     PolicyLoading(String),
 
-    /// A Cedar schema validation check failed.
     #[error("schema validation failed: {0}")]
     SchemaValidation(String),
 
-    /// The process-wide Cedarling engine could not be initialized or has a cached init failure.
     #[error("engine unavailable: {0}")]
     Engine(String),
 
-    /// GUC or other extension configuration is invalid or missing.
     #[error("configuration invalid: {0}")]
     Configuration(String),
 
-    /// The authorization-decision cache misbehaved (lock poisoned, etc.). Recoverable.
     #[error("cache error: {0}")]
     Cache(String),
 
-    /// A JSON parse failed outside of a more specific context.
     #[error("JSON parse error: {0}")]
     JsonParsing(String),
 
-    /// An SPI call or catalog query failed.
     #[error("database error: {0}")]
     Database(String),
 
-    /// Cedar returned a clean `Deny`. This is the one variant that does **not** indicate a bug
-    /// — it's the expected outcome when policy rules do not permit the request.
     #[error("authorization denied")]
     AuthorizationDenied,
 }
 
-/// Short, stable categorization string for a [`CedarlingError`]. Intended for metrics and
-/// audit-log grouping — format should be treated as a stable API.
 pub type ErrorCategory = &'static str;
 
-/// Record emitted to the server log when a [`CedarlingError`] is surfaced from the authorize
-/// path. Serializes to JSON via [`AuditLogEntry::to_json`].
 #[derive(Debug, Clone)]
 pub struct AuditLogEntry {
     pub error_id: Uuid,
     pub category: ErrorCategory,
     pub timestamp: DateTime<Utc>,
     pub detail: String,
-    /// `fail_closed` or `fail_open`, depending on the effective `cedarling.fail_mode` at the
-    /// time the error was surfaced. Filled in by the authorize path, not by this module.
     pub fail_mode_applied: &'static str,
 }
 
@@ -124,10 +100,6 @@ impl AuditLogEntry {
 }
 
 impl CedarlingError {
-    /// Whether this error should result in a `Deny` decision when in fail-closed mode.
-    ///
-    /// Every variant returns `true`; kept as a method so future variants must opt out
-    /// explicitly (the fail-safe invariant).
     #[must_use]
     pub const fn should_deny(&self) -> bool {
         match self {
@@ -147,7 +119,6 @@ impl CedarlingError {
         }
     }
 
-    /// Stable, short category string for metrics/audit grouping.
     #[must_use]
     pub const fn category(&self) -> ErrorCategory {
         match self {
@@ -167,18 +138,15 @@ impl CedarlingError {
         }
     }
 
-    /// Recommended minimum log level for this error. Follows [`CedarlingLogLevelGuc`].
     #[must_use]
     pub const fn log_level(&self) -> CedarlingLogLevelGuc {
         match self {
-            // Operator-visible subsystem failures → WARN: worth attention but not a crash.
             Self::Engine(_)
             | Self::PolicyEvaluation(_)
             | Self::PolicyLoading(_)
             | Self::SchemaValidation(_)
             | Self::Cache(_)
             | Self::Database(_) => CedarlingLogLevelGuc::Warn,
-            // Caller-shape problems → INFO: expected in the wild, not a system health signal.
             Self::TokenValidation(_)
             | Self::TokenBundle(_)
             | Self::ResourceConstruction(_)
@@ -189,28 +157,22 @@ impl CedarlingError {
         }
     }
 
-    /// Build an [`AuditLogEntry`] for this error.
     #[must_use]
     pub fn to_audit_entry(&self, fail_mode_applied: &'static str) -> AuditLogEntry {
         AuditLogEntry::new(self, fail_mode_applied)
     }
 }
 
-// ---- From impls ------------------------------------------------------------
-//
-// Module-specific errors keep their own types for unit-testability, but the authorize path
-// sees only [`CedarlingError`]. Each From impl redacts detail that could carry secrets.
+// ---- From impls (module errors → CedarlingError) --------------------------------
 
 impl From<TokenBundleError> for CedarlingError {
     fn from(value: TokenBundleError) -> Self {
-        // `TokenBundleError` display strings describe *shape* (array vs object), not payload
-        // content, so they are safe to include verbatim.
         Self::TokenBundle(value.to_string())
     }
 }
 
-impl From<ResourceEntityDataError> for CedarlingError {
-    fn from(value: ResourceEntityDataError) -> Self {
+impl From<RowBuildError> for CedarlingError {
+    fn from(value: RowBuildError) -> Self {
         Self::ResourceConstruction(value.to_string())
     }
 }
@@ -235,7 +197,9 @@ impl From<AuthorizeBridgeError> for CedarlingError {
     fn from(value: AuthorizeBridgeError) -> Self {
         match value {
             AuthorizeBridgeError::TokenBundle(e) => e.into(),
-            AuthorizeBridgeError::Resource(e) => e.into(),
+            AuthorizeBridgeError::Resource(e) => {
+                Self::ResourceConstruction(e.to_string())
+            },
             AuthorizeBridgeError::RequestInvalid(msg) => Self::RequestInvalid(msg),
             AuthorizeBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
         }
@@ -248,7 +212,9 @@ impl From<UnsignedBridgeError> for CedarlingError {
             UnsignedBridgeError::Principal(e) => {
                 Self::ResourceConstruction(format!("principal: {e}"))
             },
-            UnsignedBridgeError::Resource(e) => e.into(),
+            UnsignedBridgeError::Resource(e) => {
+                Self::ResourceConstruction(e.to_string())
+            },
             UnsignedBridgeError::ContextParse(e) => Self::JsonParsing(format!("context: {e}")),
             UnsignedBridgeError::ContextNotObject => {
                 Self::RequestInvalid("context must be a JSON object".into())
@@ -264,11 +230,21 @@ impl From<serde_json::Error> for CedarlingError {
     }
 }
 
+impl From<PolicyError> for CedarlingError {
+    fn from(value: PolicyError) -> Self {
+        Self::PolicyLoading(value.to_string())
+    }
+}
+
+impl From<SchemaError> for CedarlingError {
+    fn from(value: SchemaError) -> Self {
+        Self::SchemaValidation(value.to_string())
+    }
+}
+
 fn classify_cedar_authorize_error(err: &cedarling::AuthorizeError) -> CedarlingError {
     use cedarling::AuthorizeError;
     match err {
-        // Token-processing failures are validation problems, even though Cedarling surfaces
-        // them via `AuthorizeError`.
         AuthorizeError::ProcessTokens(_) => {
             CedarlingError::TokenValidation("JWT/token processing failed (details redacted)".into())
         },
@@ -296,7 +272,6 @@ mod tests {
 
     #[test]
     fn every_variant_denies_in_fail_closed() {
-        // The fail-safe invariant: every variant must opt in to denial.
         for err in sample_errors() {
             assert!(
                 err.should_deny(),
@@ -351,15 +326,9 @@ mod tests {
     }
 
     #[test]
-    fn from_token_bundle_error_redacts_to_shape_message() {
+    fn from_token_bundle_error_maps_to_token_bundle() {
         let e: CedarlingError = TokenBundleError::Empty.into();
         assert!(matches!(e, CedarlingError::TokenBundle(_)));
-    }
-
-    #[test]
-    fn from_resource_error_maps_to_resource_construction() {
-        let e: CedarlingError = ResourceEntityDataError::Empty.into();
-        assert!(matches!(e, CedarlingError::ResourceConstruction(_)));
     }
 
     #[test]

@@ -3,86 +3,21 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! JSONB-based resource authorization helpers for RLS policies that already have row data.
-//!
-//! `cedarling_build_resource` converts a JSONB document (with optional `entity_type` / `entity_id`
-//! overrides) into the canonical `EntityData` JSON string expected by `cedarling_authorize_unsigned`.
-//!
-//! `cedarling_authorized_row` wraps the unsigned authorization path for callers that pass resource
-//! data as JSONB — e.g. `row_to_json(t)::jsonb` inside an RLS policy predicate:
-//!
-//! ```sql
-//! CREATE POLICY p ON my_table
-//!   USING (cedarling_authorized_row(
-//!     row_to_json(my_table)::jsonb,
-//!     'Jans::Action::"Read"'
-//!   ));
-//! ```
+//! Row-level authorization helpers for RLS policies using pre-built JSONB resource data.
 
 use pgrx::datum::{AnyElement, JsonB};
 use pgrx::prelude::*;
 use serde_json::json;
 
-use crate::authorized::{finalize_decision, finalize_error};
 use crate::authz_bridge;
 use crate::authz_cache;
 use crate::engine;
 use crate::error::CedarlingError;
 use crate::extension_log;
+use crate::functions::authorized::{finalize_decision, finalize_error};
 use crate::guc_config;
-use crate::resource;
 use crate::status;
 use crate::trace::{push_trace, AuthorizationTrace};
-
-/// Build a Cedarling `EntityData` JSON string from a JSONB document.
-///
-/// When both `entity_type` and `entity_id` are provided they are injected as
-/// `cedar_entity_mapping` (overwriting any existing mapping in the JSONB). When either is `NULL`
-/// the caller must embed `cedar_entity_mapping` in the JSONB itself.
-///
-/// Raises a PostgreSQL `ERROR` if the resulting document is not a valid `EntityData`.
-#[pg_extern]
-pub fn cedarling_build_resource(
-    resource: pgrx::datum::JsonB,
-    entity_type: Option<&str>,
-    entity_id: Option<&str>,
-) -> String {
-    let mut value = resource.0;
-    if let (Some(et), Some(eid)) = (entity_type, entity_id) {
-        if let Some(obj) = value.as_object_mut() {
-            obj.insert(
-                "cedar_entity_mapping".to_string(),
-                json!({ "entity_type": et, "id": eid }),
-            );
-        }
-    }
-    let json_str = match serde_json::to_string(&value) {
-        Ok(s) => s,
-        Err(e) => pgrx::error!("cedarling_build_resource: serialization error: {e}"),
-    };
-    if let Err(e) = resource::resource_entity_data_from_json_str(&json_str) {
-        pgrx::error!("cedarling_build_resource: invalid EntityData: {e}");
-    }
-    json_str
-}
-
-/// Build a Cedarling `EntityData` JSON string from a composite row (`anyelement`).
-///
-/// SQL name is `cedarling_build_resource_row` so it does not overload `cedarling_build_resource`
-/// (`jsonb`, …): PostgreSQL cannot reliably resolve two `cedarling_build_resource` targets when
-/// one uses polymorphic `anyelement`.
-#[pg_extern(name = "cedarling_build_resource_row")]
-pub fn cedarling_build_resource_anyelement(record: AnyElement) -> String {
-    match crate::resource::row::build_resource_json_from_row(record) {
-        Ok(json_str) => {
-            if let Err(e) = resource::resource_entity_data_from_json_str(&json_str) {
-                pgrx::error!("cedarling_build_resource_row: invalid EntityData: {e}");
-            }
-            json_str
-        },
-        Err(e) => pgrx::error!("cedarling_build_resource_row: {e}"),
-    }
-}
 
 /// Authorize a JSONB resource under unsigned Cedar policy (no JWT tokens required).
 ///
@@ -200,8 +135,8 @@ pub fn cedarling_authorized_row(
 
 /// AnyElement wrapper for row-based unsigned authorization.
 ///
-/// This function materializes the row to canonical Cedar `EntityData` JSON and then
-/// reuses the existing JSONB unsigned path (`cedarling_authorized_row`).
+/// Materializes the row to canonical Cedar `EntityData` JSON and then reuses the JSONB
+/// unsigned path (`cedarling_authorized_row`).
 #[pg_extern(name = "cedarling_authorized_row")]
 pub fn cedarling_authorized_row_from_anyelement(
     record: AnyElement,
@@ -210,7 +145,7 @@ pub fn cedarling_authorized_row_from_anyelement(
 ) -> bool {
     let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
         Ok(v) => v,
-        Err(e) => return finalize_error(&e),
+        Err(e) => return finalize_error(&CedarlingError::from(e)),
     };
     let resource_value: serde_json::Value = match serde_json::from_str(&resource_json) {
         Ok(v) => v,
@@ -221,16 +156,15 @@ pub fn cedarling_authorized_row_from_anyelement(
 
 /// AnyElement wrapper for JWT/multi-issuer authorization.
 ///
-/// Reads tokens from the function argument fallback chain in `cedarling_authorized`:
-/// explicit bundle (none here) -> `cedarling.tokens` GUC.
+/// Reads tokens from the fallback chain: explicit bundle (none here) → `cedarling.tokens` GUC.
 #[pg_extern]
 pub fn cedarling_authorized_row_jwt(record: AnyElement, action: Option<&str>) -> bool {
     let action = action.unwrap_or("Read");
     let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
         Ok(v) => v,
-        Err(e) => return finalize_error(&e),
+        Err(e) => return finalize_error(&CedarlingError::from(e)),
     };
-    crate::authorized::cedarling_authorized(&resource_json, None, action)
+    crate::functions::authorized::cedarling_authorized(&resource_json, None, action)
 }
 
 #[cfg(test)]
@@ -238,23 +172,6 @@ mod tests {
     use serde_json::json;
 
     use super::*;
-
-    #[test]
-    fn build_resource_logic_injects_cedar_mapping() {
-        let mut value = json!({ "owner": "alice", "level": 3 });
-        if let Some(obj) = value.as_object_mut() {
-            obj.insert(
-                "cedar_entity_mapping".to_string(),
-                json!({ "entity_type": "Jans::Document", "id": "doc-42" }),
-            );
-        }
-        let json_str = serde_json::to_string(&value).expect("serialize");
-        let entity = resource::resource_entity_data_from_json_str(&json_str)
-            .expect("should parse with injected mapping");
-        assert_eq!(entity.cedar_mapping.entity_type, "Jans::Document");
-        assert_eq!(entity.cedar_mapping.id, "doc-42");
-        assert_eq!(entity.attributes.get("owner"), Some(&json!("alice")));
-    }
 
     #[test]
     fn context_null_treated_as_empty_object() {

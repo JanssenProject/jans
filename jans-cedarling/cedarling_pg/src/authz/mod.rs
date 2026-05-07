@@ -8,3 +8,6 @@
 pub(crate) mod bridge;
 pub(crate) mod cache;
 pub(crate) mod where_clause;
+
+#[cfg(feature = "pg_test")]
+pub(crate) mod pg_test_where;

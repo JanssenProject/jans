@@ -11,7 +11,7 @@ use pgrx::prelude::*;
 
 use crate::authz_bridge::{AuthorizeBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
-use crate::error::CedarlingError;
+use crate::functions::error::CedarlingError;
 use crate::guc_config::{log_level, CedarlingLogLevelGuc};
 
 #[inline]

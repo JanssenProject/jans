@@ -3,23 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Catalog DDL that ships with the extension.
+//! Catalog DDL bundled into `CREATE EXTENSION cedarling_pg;` via [`extension_sql!`](pgrx::extension_sql).
 //!
-//! Everything here is wrapped in [`extension_sql!`](pgrx::extension_sql) so `cargo pgrx schema`
-//! bundles it into the install script (`cedarling_pg--0.1.0.sql`). The runtime does not create
-//! these tables itself — they appear as part of `CREATE EXTENSION cedarling_pg;`.
-//!
-//! Table design constraints:
-//!
-//! - Everything lives under the `cedarling` schema to keep the public namespace clean.
-//! - `cedarling.mask_rules` is a simple (table, column) registry Keeping the schema now lets us
-//!   deliver masking without a follow-up migration.
-//! - `cedarling.policy_history` records the result of `cedarling_use_policy` /
-//!   `cedarling_rollback_policy` calls. We want a persistent audit trail even across restarts,
-//!   so it's a regular table rather than process-local state.
-//! - Grants: USAGE on the schema to PUBLIC (so RLS policies invoking our functions work for
-//!   any role), but write access to catalog tables is left to the extension owner. Operators
-//!   can grant more as needed.
+//! All objects live in the `cedarling` schema. `PUBLIC` gets `USAGE`; write access to catalog
+//! tables is left to the extension owner.
 
 use pgrx::extension_sql;
 
@@ -30,8 +17,8 @@ CREATE SCHEMA IF NOT EXISTS cedarling;
 GRANT USAGE ON SCHEMA cedarling TO PUBLIC;
 
 -- Per-(table, column) masking configuration.
--- mask_type is one of: 'null', 'redact', 'partial', 'range', 'hash', 'fixed'.
--- mask_value is mask_type-dependent (Phase 3 uses it for 'partial', 'range', 'fixed').
+-- mask_type: 'null' | 'redact' | 'partial' | 'range' | 'hash' | 'fixed'.
+-- mask_value: type-specific parameter (pattern, range bounds, fixed string).
 CREATE TABLE IF NOT EXISTS cedarling.mask_rules (
     table_name   text  NOT NULL,
     column_name  text  NOT NULL,
@@ -72,6 +59,15 @@ CREATE TABLE IF NOT EXISTS cedarling.entity_map (
     updated_at   timestamptz NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE cedarling.entity_map IS 'Optional overrides for table -> Cedar entity mapping used by row authorization.';
+
+-- Named policy-version registry. cedarling_use_policy() resolves a name here before
+-- treating the argument as a filesystem path.
+CREATE TABLE IF NOT EXISTS cedarling.policy_versions (
+    name            text        PRIMARY KEY,
+    bootstrap_path  text        NOT NULL,
+    registered_at   timestamptz NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for cedarling_use_policy / cedarling_register_policy_version.';
 ",
     name = "cedarling_pg_catalog",
 );

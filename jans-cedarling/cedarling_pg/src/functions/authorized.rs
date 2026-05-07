@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! SQL-facing authorization for `RLS` and similar: [`cedarling_authorized`] (JWT / multi-issuer)
+//! SQL-facing authorization functions: [`cedarling_authorized`] (JWT / multi-issuer)
 //! and [`cedarling_authorize_unsigned`] (pre-built principal + resource entities, no JWTs).
 
 use pgrx::prelude::*;
@@ -29,7 +29,7 @@ use crate::trace::{push_trace, AuthorizationTrace};
 ///
 /// **Errors:** JWT / engine / parse failures are **not** raised as SQL errors by default: the
 /// function returns `false` when [`CedarlingFailMode::Closed`] and `true` when
-/// [`CedarlingFailMode::Open`] (“fail open”), per `cedarling.fail_mode`. Shadow mode always
+/// [`CedarlingFailMode::Open`] ("fail open"), per `cedarling.fail_mode`. Shadow mode always
 /// returns `true` regardless of error class.
 ///
 /// **Logging:** structured messages go to the server log at or above [`guc_config::CedarlingLogLevelGuc`]
@@ -268,8 +268,6 @@ pub(crate) fn finalize_decision(decision: bool) -> bool {
 /// fail-open takes effect and `cedarling.audit_fail_open` is true.
 pub(crate) fn finalize_error(err: &CedarlingError) -> bool {
     if matches!(guc_config::mode(), CedarlingMode::Shadow) {
-        // Shadow mode: never let an error change observable behavior. The error was already
-        // logged by the caller; don't raise further noise.
         return true;
     }
     match guc_config::fail_mode() {

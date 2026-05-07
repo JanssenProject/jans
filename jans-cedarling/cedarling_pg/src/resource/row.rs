@@ -8,11 +8,22 @@
 use pgrx::datum::{AnyElement, Datum, DatumWithOid, JsonB};
 use pgrx::prelude::*;
 use serde_json::{json, Value};
+use thiserror::Error;
 
-use crate::error::CedarlingError;
 use crate::resource::schema_map;
 
-pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, CedarlingError> {
+/// Module-level error for row-to-JSON and resource-build operations.
+#[derive(Debug, Error)]
+pub(crate) enum RowBuildError {
+    #[error("SPI error: {0}")]
+    Spi(#[from] pgrx::spi::Error),
+    #[error("JSON serialization error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("row materialization failed: {0}")]
+    Materialization(String),
+}
+
+pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, RowBuildError> {
     let (mut value, table_oid) = row_to_json_and_table_oid(row)?;
 
     let Some(obj) = value.as_object_mut() else {
@@ -21,7 +32,7 @@ pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, Ce
     };
 
     if obj.contains_key("cedar_entity_mapping") {
-        return serde_json::to_string(obj).map_err(|e| CedarlingError::JsonParsing(e.to_string()));
+        return Ok(serde_json::to_string(obj)?);
     }
 
     let mapping = table_oid
@@ -38,7 +49,7 @@ pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, Ce
             "id": entity_id,
         }),
     );
-    serde_json::to_string(&value).map_err(|e| CedarlingError::JsonParsing(e.to_string()))
+    Ok(serde_json::to_string(&value)?)
 }
 
 /// [`IntoDatum`] for [`AnyElement`] uses PostgreSQL's `anyelement` type OID, so SPI would bind
@@ -54,7 +65,9 @@ fn datum_with_oid_for_spi(row: &AnyElement) -> DatumWithOid<'_> {
     }
 }
 
-fn row_to_json_and_table_oid(row: AnyElement) -> Result<(Value, Option<pg_sys::Oid>), CedarlingError> {
+fn row_to_json_and_table_oid(
+    row: AnyElement,
+) -> Result<(Value, Option<pg_sys::Oid>), RowBuildError> {
     let mut out_json: Option<Value> = None;
     let mut out_oid: Option<pg_sys::Oid> = None;
     Spi::connect(|client| {
@@ -78,11 +91,9 @@ fn row_to_json_and_table_oid(row: AnyElement) -> Result<(Value, Option<pg_sys::O
             break;
         }
         Ok::<(), pgrx::spi::Error>(())
-    })
-    .map_err(|e| CedarlingError::Database(e.to_string()))?;
-
-    let json_value = out_json.ok_or_else(|| {
-        CedarlingError::ResourceConstruction("unable to materialize row as JSONB".to_string())
     })?;
+
+    let json_value = out_json
+        .ok_or_else(|| RowBuildError::Materialization("unable to materialize row as JSONB".into()))?;
     Ok((json_value, out_oid))
 }

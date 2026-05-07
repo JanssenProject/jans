@@ -3,26 +3,20 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! SQL-exposed function namespace facade.
+//! SQL-exposed function namespace.
 //!
-//! This module provides the target tree shape from the implementation plan while
-//! preserving current file ownership during incremental migration.
+//! Top-level authorization, row helpers, and build-resource functions live here as real
+//! submodules. Remaining pg_extern functions in other domain modules are re-exported via
+//! thin inline aliases below.
 #![allow(unused_imports)]
 
-pub(crate) mod authorized {
-    pub(crate) use crate::authorized::*;
-}
+pub(crate) mod authorized;
+pub(crate) mod authorized_row;
+pub(crate) mod build_resource;
+pub(crate) mod error;
 
-pub(crate) mod authorized_row {
-    pub(crate) use crate::row_authz::{
-        cedarling_authorized_row, cedarling_authorized_row_from_anyelement,
-        cedarling_authorized_row_jwt,
-    };
-}
-
-pub(crate) mod build_resource {
-    pub(crate) use crate::row_authz::{cedarling_build_resource, cedarling_build_resource_anyelement};
-}
+#[cfg(feature = "pg_test")]
+pub(crate) mod pg_test_rls_unsigned;
 
 pub(crate) mod where_fn {
     pub(crate) use crate::authz::where_clause::cedarling_where;
@@ -42,15 +36,14 @@ pub(crate) mod status {
 
 pub(crate) mod policy {
     pub(crate) use crate::policy::versions::{
-        cedarling_diff_policies, cedarling_rollback_policy, cedarling_use_policy,
+        cedarling_diff_policies, cedarling_register_policy_version, cedarling_rollback_policy,
+        cedarling_use_policy,
     };
 }
 
 pub(crate) mod schema {
     pub(crate) use crate::policy::schema::cedarling_validate_schema;
 }
-
-pub(crate) mod mask;
 
 pub(crate) mod tokens {
     pub(crate) use crate::tokens::sql::{

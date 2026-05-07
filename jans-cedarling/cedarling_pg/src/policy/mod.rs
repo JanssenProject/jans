@@ -3,7 +3,24 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Policy namespace facade.
+//! Policy management: version registry, schema validation, and policy diffs.
 
-pub(crate) mod versions;
+use thiserror::Error;
+
 pub(crate) mod schema;
+pub(crate) mod versions;
+
+pub(crate) use schema::SchemaError;
+
+/// Module-level error for policy operations (loading, registry SPI, rollback).
+#[derive(Debug, Error)]
+pub(crate) enum PolicyError {
+    #[error("SPI error: {0}")]
+    Spi(#[from] pgrx::spi::Error),
+    #[error("policy load failed: {0}")]
+    #[allow(dead_code)]
+    Load(String),
+    #[error("registry error: {0}")]
+    #[allow(dead_code)]
+    Registry(String),
+}

@@ -58,9 +58,19 @@ pub enum CedarlingStrategy {
     #[name = c"filter"]
     Filter,
     /// Return the row but mask one or more columns according to `cedarling.mask_rules`.
-    /// The masking subsystem is delivered in Phase 3.
     #[name = c"mask"]
     Mask,
+}
+
+/// Diff algorithm used by `cedarling_diff_policies`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, PostgresGucEnum)]
+pub enum CedarlingDiffMode {
+    /// Per-policy-id structural diff via `cedar_policy::PolicySet` (default).
+    #[name = c"structural"]
+    Structural,
+    /// Line-oriented text diff (legacy behaviour).
+    #[name = c"lines"]
+    Lines,
 }
 
 static MODE: GucSetting<CedarlingMode> =
@@ -80,6 +90,9 @@ static BOOTSTRAP_CONFIG: GucSetting<Option<CString>> = GucSetting::<Option<CStri
 static POLICY_VERSION: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 static TRACE_BUFFER_SIZE: GucSetting<i32> = GucSetting::<i32>::new(1024);
 static POLICY_HISTORY_SIZE: GucSetting<i32> = GucSetting::<i32>::new(16);
+static DIFF_MODE: GucSetting<CedarlingDiffMode> =
+    GucSetting::<CedarlingDiffMode>::new(CedarlingDiffMode::Structural);
+static SCHEMA_VALIDATE_STRICT: GucSetting<bool> = GucSetting::<bool>::new(true);
 
 /// Current `cedarling.mode`.
 #[must_use]
@@ -175,6 +188,18 @@ pub fn trace_buffer_size() -> i32 {
 #[must_use]
 pub fn policy_history_size() -> i32 {
     POLICY_HISTORY_SIZE.get()
+}
+
+/// Current `cedarling.diff_mode` (`structural` or `lines`).
+#[must_use]
+pub fn diff_mode() -> CedarlingDiffMode {
+    DIFF_MODE.get()
+}
+
+/// Current `cedarling.schema_validate_strict`.
+#[must_use]
+pub fn schema_validate_strict() -> bool {
+    SCHEMA_VALIDATE_STRICT.get()
 }
 
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
@@ -342,6 +367,24 @@ unsafe fn register_gucs_inner() {
         &POLICY_HISTORY_SIZE,
         0,
         100_000,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_enum_guc(
+        c"cedarling.diff_mode",
+        c"Algorithm used by cedarling_diff_policies.",
+        c"structural: per-policy-id diff via cedar_policy::PolicySet (default). lines: legacy line-oriented text diff.",
+        &DIFF_MODE,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_bool_guc(
+        c"cedarling.schema_validate_strict",
+        c"Use strict Cedar parser-based schema validation.",
+        c"true: parse with cedar_policy::Schema and run type compatibility checks; false: legacy lexical identifier extraction.",
+        &SCHEMA_VALIDATE_STRICT,
         GucContext::Userset,
         GucFlags::empty(),
     );
