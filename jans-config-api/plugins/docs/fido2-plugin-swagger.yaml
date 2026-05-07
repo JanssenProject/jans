@@ -1553,9 +1553,6 @@ components:
           type: object
           additionalProperties:
             type: object
-        fallbackEvents:
-          type: integer
-          format: int64
         errorCounts:
           type: object
           additionalProperties:
@@ -1566,40 +1563,43 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         period:
           type: string
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationSuccessRate:
+        authenticationSuccessRate:
           type: number
           format: double
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
+        authenticationAvgDuration:
           type: number
           format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccessRate:
+        registrationSuccesses:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationSuccessRate:
           type: number
           format: double
-        authenticationAvgDuration:
+        registrationAvgDuration:
           type: number
           format: double
         baseDn:
