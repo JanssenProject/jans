@@ -25,7 +25,7 @@ In Janssen Server, consent happens during the authorization flow after user auth
 
 ## Consent administration
 
-### End-user self service
+### End-user self-service
 
 Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server.
 
