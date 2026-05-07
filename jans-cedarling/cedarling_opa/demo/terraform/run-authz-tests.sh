@@ -176,6 +176,7 @@ while IFS= read -r case_json; do
                 },
                 context: {
                     current_time: $cur_time
+                }
             }
         }')
 

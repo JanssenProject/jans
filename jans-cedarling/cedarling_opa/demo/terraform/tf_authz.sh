@@ -111,6 +111,7 @@ PAYLOAD=$(jq -n \
             },
             context: {
                 current_time: $cur_time
+            }
         }
     }')
 
