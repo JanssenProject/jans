@@ -30,6 +30,10 @@ on:
   pull_request:
     branches: [main]
 
+defaults:
+  run:
+    working-directory: jans-cedarling/cedarling_opa
+
 jobs:
   # ── Plan (allowed for any branch, any role that has Plan permission) ────────
   terraform-plan:

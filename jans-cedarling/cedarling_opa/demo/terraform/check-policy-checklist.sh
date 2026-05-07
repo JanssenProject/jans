@@ -99,7 +99,7 @@ role_in_permissions_table() {
 role_in_test_cases() {
   local role="$1"
   local escaped_role
-  escaped_role="$(printf '%s' "$role" | sed 's/[.^$*+?{}[\]\\|()]/\\&/g')"
+  escaped_role="$(printf '%s' "$role" | sed 's/[][\\^$.*+?{}|()]/\\&/g')"
   grep -E '^[[:space:]]+roles:[[:space:]]' "$TEST_CASES_FILE" \
     | grep -qE "(^|[[:space:],\"'])${escaped_role}([[:space:],\"']|$)"
 }

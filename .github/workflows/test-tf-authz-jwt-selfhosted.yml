@@ -76,9 +76,11 @@ on:
   push:
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+      - '.github/workflows/test-tf-authz-jwt-selfhosted.yml'
   pull_request:
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+      - '.github/workflows/test-tf-authz-jwt-selfhosted.yml'
 
 jobs:
   test-selfhosted-opa:
@@ -183,7 +185,10 @@ jobs:
             echo "       but the decision was '${DECISION}'." >&2
             echo "Full response:" >&2
             echo "${RESPONSE}" | jq . >&2
-            docker logs terraform-jwt-opa-cedarling-1
+            docker compose \
+              -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.yml \
+              -f jans-cedarling/cedarling_opa/demo/terraform-jwt/docker-compose.prod.yml \
+              logs opa-cedarling >&2 || true
             exit 1
           fi
 

@@ -303,3 +303,15 @@ test_cases:
     subcommand:  destroy
     expected:    ALLOWED
     policy_note: admin-permit-all grants Destroy on production even though Developer alone cannot
+
+  # ── Deny-by-default (no matching role) ──────────────────────────────────────
+  # Cedar is deny-by-default: a principal with no recognised role must always be
+  # denied regardless of action or workspace.
+
+  - name:        "No role — plan on staging (must be DENIED)"
+    user_id:     ci-unknown-bot
+    roles:       NoRole
+    workspace:   staging
+    subcommand:  plan
+    expected:    DENIED
+    policy_note: deny-by-default / no matching role

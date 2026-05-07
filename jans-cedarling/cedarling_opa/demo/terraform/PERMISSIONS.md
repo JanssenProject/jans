@@ -140,15 +140,12 @@ The schema lives in `policy-store/schema.cedarschema`.
 `Refresh` sub-command). Roles and workspaces are untyped entity literals in
 Cedar — they do not need to be listed in the schema ahead of time.
 
-```
+```cedar
 # schema.cedarschema — adding a hypothetical new action
 action Plan, Apply, Destroy, Refresh      # ← add the new action name here
     appliesTo {
         principal: [User],
         resource:  [TerraformWorkspace],
-        context: {
-            current_time: Long,
-        }
     };
 ```
 
@@ -340,7 +337,7 @@ a `Refresh` sub-command).
 The existing schema already covers the `dev` workspace and the `ReadOnly` role
 without any modification:
 
-```
+```cedar
 # policy-store/schema.cedarschema — unchanged
 namespace Infra {
     entity Role;
@@ -351,7 +348,6 @@ namespace Infra {
         appliesTo {
             principal: [User],
             resource:  [TerraformWorkspace],
-            context: { current_time: Long }
         };
 }
 ```

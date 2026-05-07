@@ -81,17 +81,15 @@ for cmd in curl jq; do
 done
 
 # ─── Build the OPA query payload ─────────────────────────────────────────────
-CURRENT_TIME=$(date +%s)
 
 # Convert comma-separated roles to a JSON array
 ROLES_JSON=$(echo "${TF_USER_ROLES}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | jq -R . | jq -s .)
 
 PAYLOAD=$(jq -n \
-    --arg user_id      "${TF_USER_ID}" \
-    --arg workspace    "${TF_WORKSPACE}" \
-    --arg action       "Infra::Action::\"${CEDAR_ACTION}\"" \
-    --argjson roles    "${ROLES_JSON}" \
-    --argjson cur_time "${CURRENT_TIME}" \
+    --arg user_id   "${TF_USER_ID}" \
+    --arg workspace "${TF_WORKSPACE}" \
+    --arg action    "Infra::Action::\"${CEDAR_ACTION}\"" \
+    --argjson roles "${ROLES_JSON}" \
     '{
         input: {
             principal: {
@@ -108,9 +106,6 @@ PAYLOAD=$(jq -n \
                     entity_type: "Infra::TerraformWorkspace",
                     id: $workspace
                 }
-            },
-            context: {
-                current_time: $cur_time
             }
         }
     }')
@@ -123,7 +118,8 @@ echo "  Workspace: ${TF_WORKSPACE}  →  Infra::TerraformWorkspace::\"${TF_WORKS
 echo ""
 
 # ─── Query the Cedarling-OPA server ─────────────────────────────────────────
-RESPONSE=$(curl -sf -X POST "${OPA_URL}/v1/data/infra/terraform" \
+RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 \
+    -X POST "${OPA_URL}/v1/data/infra/terraform" \
     -H "Content-Type: application/json" \
     -d "${PAYLOAD}") || {
     echo "tf_authz: ERROR — could not reach OPA server at ${OPA_URL}" >&2

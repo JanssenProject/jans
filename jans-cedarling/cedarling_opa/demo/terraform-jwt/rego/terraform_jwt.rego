@@ -22,7 +22,11 @@ allow if {
 
 # decision mirrors result.decision for direct per-rule access at
 # /v1/data/infra/terraform_jwt/decision without unpacking the Cedarling result.
-decision := result.decision
+# Defaults ensure callers get a deterministic value even when Cedarling returns no result.
+default decision := false
+decision := result.decision if result
 
 # reasons exposes the matching Cedar policy IDs for observability and audit logs.
-reasons := result.reasons
+# Defaults to empty array so callers never receive an undefined response.
+default reasons := []
+reasons := result.reasons if result

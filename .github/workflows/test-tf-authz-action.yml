@@ -9,6 +9,9 @@
 
 name: Test tf-authz composite action
 
+permissions:
+  contents: read
+
 on:
   push:
     paths:

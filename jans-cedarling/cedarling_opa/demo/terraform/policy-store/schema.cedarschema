@@ -18,8 +18,5 @@ namespace Infra {
         appliesTo {
             principal: [User],
             resource:  [TerraformWorkspace],
-            context: {
-                current_time: Long,
-            }
         };
 }

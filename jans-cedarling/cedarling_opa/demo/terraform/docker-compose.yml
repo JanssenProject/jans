@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile.demo
     depends_on:
       opa-cedarling:
-        condition: service_started
+        condition: service_healthy
     environment:
       OPA_URL: http://opa-cedarling:8181
     profiles:

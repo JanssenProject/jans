@@ -21,6 +21,10 @@ variable "workspace" {
 resource "local_file" "deployment_marker" {
   content  = "Deployed to workspace: ${var.workspace}\nTimestamp: ${timestamp()}\n"
   filename = "${path.module}/output-${var.workspace}.txt"
+
+  lifecycle {
+    ignore_changes = [content]
+  }
 }
 
 output "deployed_to" {

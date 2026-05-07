@@ -57,10 +57,21 @@ echo ""
 echo "OPA server: $OPA_URL"
 echo ""
 
-echo "Waiting for OPA to be ready..."
-until curl -sf "$OPA_URL/health" >/dev/null 2>&1; do
-    sleep 1
+echo "Waiting for OPA to be ready (up to 60 s)..."
+_opa_ready=0
+for _i in $(seq 1 30); do
+    if curl -sf "$OPA_URL/health" >/dev/null 2>&1; then
+        _opa_ready=1
+        break
+    fi
+    echo "  attempt ${_i}/30 — not ready, retrying in 2 s..."
+    sleep 2
 done
+if [ "${_opa_ready}" -eq 0 ]; then
+    echo "ERROR: OPA did not become healthy within 60 s." >&2
+    echo "       Check that opa-cedarling is running: docker compose logs opa-cedarling" >&2
+    exit 1
+fi
 echo "OPA is ready."
 echo ""
 

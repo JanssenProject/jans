@@ -46,6 +46,10 @@ on:
   pull_request:
     branches: [main]
 
+defaults:
+  run:
+    working-directory: jans-cedarling/cedarling_opa
+
 jobs:
   # ── Plan (allowed on any branch from the trusted repo) ────────────────────
   terraform-plan:

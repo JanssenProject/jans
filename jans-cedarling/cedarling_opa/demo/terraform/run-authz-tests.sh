@@ -150,14 +150,11 @@ while IFS= read -r case_json; do
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
         | jq -R . | jq -s .)
 
-    CURRENT_TIME=$(date +%s)
-
     PAYLOAD=$(jq -n \
         --arg user_id   "${USER_ID}" \
         --arg workspace "${WORKSPACE}" \
         --arg action    "Infra::Action::\"${CEDAR_ACTION}\"" \
-        --argjson roles    "${ROLES_JSON}" \
-        --argjson cur_time "${CURRENT_TIME}" \
+        --argjson roles "${ROLES_JSON}" \
         '{
             input: {
                 principal: {
@@ -174,15 +171,13 @@ while IFS= read -r case_json; do
                         entity_type: "Infra::TerraformWorkspace",
                         id: $workspace
                     }
-                },
-                context: {
-                    current_time: $cur_time
                 }
             }
         }')
 
     # Query OPA
-    RESPONSE=$(curl -sf -X POST "${OPA_URL}/v1/data/infra/terraform" \
+    RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 \
+        -X POST "${OPA_URL}/v1/data/infra/terraform" \
         -H "Content-Type: application/json" \
         -d "${PAYLOAD}" 2>&1) || {
         echo "  [FAIL] ${NAME}"

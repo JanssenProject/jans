@@ -48,7 +48,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
-        run: terraform -chdir=demo/terraform-jwt init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
 
       - name: Terraform plan (JWT-authorized)
         uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
@@ -76,7 +76,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
-        run: terraform -chdir=demo/terraform-jwt init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
 
       - name: Terraform apply — staging (JWT-authorized)
         uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
@@ -111,7 +111,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
-        run: terraform -chdir=demo/terraform-jwt init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
 
       - name: Terraform apply — production (JWT-authorized + Environment approval)
         uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
