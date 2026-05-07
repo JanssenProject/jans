@@ -44,7 +44,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2026-02-22 08:12'
+ENV CN_BUILD_DATE='2026-05-04 10:08'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -75,7 +75,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+ENV JANS_SOURCE_VERSION=ee1efbfcb8e14d59d5eed0456f76e9e54f906628
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 

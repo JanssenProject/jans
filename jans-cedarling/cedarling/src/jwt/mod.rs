@@ -92,6 +92,7 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
@@ -153,6 +154,7 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
         metrics: Arc<MetricsCollector>,
+        http_client: HttpClient,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
@@ -186,6 +188,7 @@ impl JwtService {
             token_cache: token_cache.clone(),
             logger: logger.clone(),
             loading_state: loading_state.clone(),
+            http_client,
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
             jwks_cancel_token: jwks_cancel_token.clone(),
         };
@@ -546,11 +549,24 @@ mod test {
     use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::http::HttpClient;
+    use crate::http::HttpClientConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
     use std::sync::Arc;
+    use std::sync::LazyLock;
+    use std::time::Duration;
     use tokio::test;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
@@ -612,6 +628,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -649,6 +666,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -676,6 +694,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -744,6 +763,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -811,6 +831,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -854,6 +875,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -898,6 +920,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -978,6 +1001,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -1028,6 +1052,7 @@ mod test {
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
