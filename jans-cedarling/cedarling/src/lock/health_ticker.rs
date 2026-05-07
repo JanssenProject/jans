@@ -219,6 +219,7 @@ mod test {
         registry.register("core", || HealthStatus::Success);
         registry.register("policy_store", || HealthStatus::Success);
         registry.register("trusted_issuers", || HealthStatus::Failure);
+        registry.register("data", || HealthStatus::Success);
         let ticker = ticker_with_registry(registry);
         let entry = ticker.build_health_entry();
         assert_eq!(
