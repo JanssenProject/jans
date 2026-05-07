@@ -9,8 +9,8 @@ use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, HttpClientConfig, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -46,4 +46,5 @@ static BSCONFIG_LOCAL: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapCon
     max_base64_size: None,
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
+    http_client_config: HttpClientConfig::default(),
 });

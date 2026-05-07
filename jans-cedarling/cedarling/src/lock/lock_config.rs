@@ -8,8 +8,8 @@
 
 use std::str::FromStr;
 
-use super::init_http_client;
-use http_utils::{Backoff, HttpRequestError, Sender};
+use crate::http::{HttpClient, InitializeHttpClientError};
+use http_utils::HttpRequestError;
 use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
@@ -59,18 +59,20 @@ pub(super) struct ConfigEndpoints {
     pub sse: Option<Url>,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum GetLockConfigError {
+    #[error(transparent)]
+    InitializeHttpClient(#[from] InitializeHttpClientError),
+    #[error(transparent)]
+    Request(#[from] HttpRequestError),
+}
+
 impl LockConfig {
     pub(super) async fn get(
         lock_config_url: &url::Url,
-        accept_invalid_certs: bool,
-    ) -> Result<Self, HttpRequestError> {
-        let client = init_http_client(None, accept_invalid_certs)
-            .map_err(HttpRequestError::InitializeHttpClient)?;
-
-        let mut sender = Sender::new(Backoff::default_exponential());
-
-        let config: LockConfig = sender.send(|| client.get(lock_config_url.as_ref())).await?;
-
+        http_client: &HttpClient,
+    ) -> Result<Self, GetLockConfigError> {
+        let config: LockConfig = http_client.get_json(lock_config_url.as_ref()).await?;
         Ok(config)
     }
 }

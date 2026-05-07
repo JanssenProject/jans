@@ -5,12 +5,10 @@
 
 //! REST transport implementation for Lock Server communication.
 
-use std::sync::Arc;
-
 use async_trait::async_trait;
-use reqwest::Client;
 
 use crate::{
+    http::HttpClient,
     lock::{
         LockLogEntry,
         transport::{
@@ -25,13 +23,13 @@ use crate::{
 };
 
 pub(crate) struct RestTransport {
-    client: Arc<Client>,
+    client: HttpClient,
     logger: Option<Logger>,
 }
 
 impl RestTransport {
     /// Construct a new [`RestTransport`]
-    pub(crate) fn new(client: Arc<Client>, logger: Option<Logger>) -> Self {
+    pub(crate) fn new(client: HttpClient, logger: Option<Logger>) -> Self {
         Self { client, logger }
     }
 }
@@ -57,6 +55,7 @@ impl AuditTransport for RestTransport {
                 >(entries, "log", warn)?;
 
                 self.client
+                    .raw_client
                     .post(url.as_str())
                     .json(&entries)
                     .send()
@@ -70,6 +69,7 @@ impl AuditTransport for RestTransport {
                 >(entries, "telemetry", warn)?;
 
                 self.client
+                    .raw_client
                     .post(url.as_str())
                     .json(&entries)
                     .send()
@@ -112,7 +112,7 @@ impl AuditTransport for RestTransport {
 
 #[cfg(test)]
 mod test {
-    use crate::lock::transport::TransportError;
+    use crate::{HttpClientConfig, lock::transport::TransportError};
 
     use super::*;
 
@@ -120,8 +120,8 @@ mod test {
     use serde_json::json;
     use url::Url;
 
-    fn create_test_client() -> Arc<Client> {
-        Arc::new(Client::builder().build().unwrap())
+    fn create_test_client() -> HttpClient {
+        HttpClient::new(HttpClientConfig::default()).expect("Http client should be initialized")
     }
 
     fn mock_log_endpoint(server: &mut ServerGuard) -> mockito::Mock {
