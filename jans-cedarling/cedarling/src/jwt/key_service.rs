@@ -8,6 +8,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::LogWriter;
 use crate::common::issuer_utils::IssClaim;
+use crate::http::HttpClient;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
@@ -111,8 +112,9 @@ impl KeyService {
         &self,
         openid_config: &OpenIdConfig,
         logger: Option<&Logger>,
+        http_client: HttpClient,
     ) -> Result<(), KeyServiceError> {
-        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
+        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri, &http_client)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
@@ -187,8 +189,9 @@ impl KeyService {
         &self,
         openid_config: &OpenIdConfig,
         logger: Option<&Logger>,
+        http_client: &HttpClient,
     ) -> Result<Option<u64>, KeyServiceError> {
-        let (jwks, max_age) = JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri)
+        let (jwks, max_age) = JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri, http_client)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
@@ -313,10 +316,25 @@ pub enum FetchKeysError {
 
 #[cfg(test)]
 mod test {
+    use std::sync::LazyLock;
+    use std::time::Duration;
+
     use super::*;
-    use crate::jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256};
+    use crate::{
+        http::{HttpClient, HttpClientConfig},
+        jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256},
+    };
     use jsonwebtoken::Algorithm;
     use serde_json::json;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     fn can_insert_and_get_keys_from_str() {
@@ -403,12 +421,19 @@ mod test {
 
         let key_service = KeyService::default();
 
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
         key_service
-            .get_keys_using_oidc(&server1.openid_config(), None)
+            .get_keys_using_oidc(&server1.openid_config(), None, http_client.clone())
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .get_keys_using_oidc(&server2.openid_config(), None)
+            .get_keys_using_oidc(&server2.openid_config(), None, http_client)
             .await
             .expect("fetch keys for issuer 2");
 
@@ -482,7 +507,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh with cache-control header should succeed");
 
@@ -528,7 +553,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh without cache-control header should succeed");
 
@@ -558,7 +583,7 @@ mod test {
         let key_service = KeyService::default();
 
         key_service
-            .get_keys_using_oidc(&openid_config, None)
+            .get_keys_using_oidc(&openid_config, None, HTTP_CLIENT.clone())
             .await
             .expect("initial key fetch should succeed");
 
@@ -579,7 +604,7 @@ mod test {
             .expect("should rotate signing key");
 
         key_service
-            .refresh_keys_using_oidc(&server.openid_config(), None)
+            .refresh_keys_using_oidc(&server.openid_config(), None, &HTTP_CLIENT)
             .await
             .expect("refresh should succeed");
 

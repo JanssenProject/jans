@@ -139,11 +139,12 @@ def _transform_api_dynamic_config(conf):
         conf["auditLogConf"]["ignoreHttpMethod"].append("GET")
         should_update = True
 
+    audit_log_date_fmt = "dd-MM-yyyy HH:mm:ss.SSS"
     for k, v in [
         ("logData", True),
         ("auditLogFilePath", "/opt/jans/jetty/jans-config-api/logs/"),
         ("auditLogFileName", "configapi-audit.log"),
-        ("auditLogDateFormat", "dd-MM-YYYY"),
+        ("auditLogDateFormat", audit_log_date_fmt),
         ("ignoreAnnotation", ["ignoreAudit"]),
         ("ignoreObjectMapping", [
             {"name": "loggingRequest", "text": ["action=FETCH"]},
@@ -153,6 +154,11 @@ def _transform_api_dynamic_config(conf):
         if k not in conf["auditLogConf"]:
             conf["auditLogConf"][k] = v
             should_update = True
+
+    # address issue https://github.com/JanssenProject/jans/issues/13894
+    if conf["auditLogConf"]["auditLogDateFormat"] != audit_log_date_fmt:
+        conf["auditLogConf"]["auditLogDateFormat"] = audit_log_date_fmt
+        should_update = True
 
     # finalized conf and flag to determine update process
     return conf, should_update

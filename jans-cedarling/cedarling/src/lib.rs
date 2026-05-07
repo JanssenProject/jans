@@ -44,7 +44,6 @@ pub use crate::context_data_api::{
     DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
     ValidationError, ValidationResult, ValueMappingError,
 };
-pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
@@ -54,6 +53,7 @@ pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
+pub use http::HttpClientConfig;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -147,6 +147,7 @@ impl Cedarling {
             app_name,
             config.lock_config.as_ref(),
             metrics.clone(),
+            config.http_client_config,
         )
         .await?;
 

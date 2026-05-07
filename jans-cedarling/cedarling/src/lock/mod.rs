@@ -122,10 +122,12 @@ mod proto {
 use crate::app_types::PdpID;
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
+use crate::http::{HttpClient, InitializeHttpClientError};
+use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::interface::Loggable;
 use crate::log::{LogType, LoggerWeak};
-use crate::{LockServiceConfig, LockTransport, LogWriter};
+use crate::{HttpClientConfig, LockServiceConfig, LockTransport, LogWriter};
 use futures::channel::mpsc;
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
@@ -161,26 +163,29 @@ pub(crate) struct LockService {
 pub(crate) fn init_http_client(
     default_headers: Option<HeaderMap>,
     accept_invalid_certs: bool,
-) -> Result<Client, reqwest::Error> {
+    conf: HttpClientConfig,
+) -> Result<HttpClient, InitializeHttpClientError> {
     let headers = default_headers.unwrap_or_default();
+    let builder = Client::builder();
 
-    if accept_invalid_certs {
+    let builder = if accept_invalid_certs {
         // NOTE: WASM builds fail when calling .danger_accept_invalid_certs
         #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
         {
-            Client::builder().default_headers(headers).build()
+            builder.default_headers(headers)
         }
 
         #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
         {
-            Client::builder()
+            builder
                 .default_headers(headers)
                 .danger_accept_invalid_certs(true)
-                .build()
         }
     } else {
-        Client::builder().default_headers(headers).build()
-    }
+        Client::builder().default_headers(headers)
+    };
+
+    HttpClient::new_with_builder(builder, conf)
 }
 
 impl LockService {
@@ -189,13 +194,12 @@ impl LockService {
         bootstrap_conf: &LockServiceConfig,
         logger: Option<LoggerWeak>,
         metrics: Arc<MetricsCollector>,
+        http_conf: HttpClientConfig,
     ) -> Result<Self, InitLockServiceError> {
+        let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
+
         // Get lock config from the config uri endpoint first
-        let lock_config = LockConfig::get(
-            &bootstrap_conf.config_uri,
-            bootstrap_conf.accept_invalid_certs,
-        )
-        .await?;
+        let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
 
         // Validate SSA JWT if provided
         if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
@@ -207,7 +211,7 @@ impl LockService {
             );
 
             // Validate the SSA JWT
-            validate_ssa_jwt(ssa_jwt, &jwks_uri, bootstrap_conf.accept_invalid_certs)
+            validate_ssa_jwt(ssa_jwt, &jwks_uri, &http_client)
                 .await
                 .map_err(|e| {
                     InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {e}"))
@@ -220,6 +224,7 @@ impl LockService {
             &lock_config.issuer_oidc_url,
             bootstrap_conf.ssa_jwt.as_ref(),
             bootstrap_conf.accept_invalid_certs,
+            http_conf,
         )
         .await?;
 
@@ -233,6 +238,7 @@ impl LockService {
                     log_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
+                    http_conf,
                 )?;
                 Some(worker)
             },
@@ -252,6 +258,7 @@ impl LockService {
                     telemetry_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
+                    http_conf,
                 )?;
 
                 Some(worker)
@@ -327,6 +334,7 @@ fn create_worker(
     audit_interval: Duration,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
+    http_conf: HttpClientConfig,
 ) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
     let (tx, rx) = mpsc::channel::<SerializedAuditEntry>(bootstrap_conf.log_channel_capacity);
 
@@ -339,10 +347,11 @@ fn create_worker(
             auth_header.set_sensitive(true);
             headers.insert("Authorization", auth_header);
 
-            let http_client = Arc::new(init_http_client(
+            let http_client = init_http_client(
                 Some(headers),
                 bootstrap_conf.accept_invalid_certs,
-            )?);
+                http_conf,
+            )?;
 
             let transport = Arc::new(RestTransport::new(
                 http_client,
@@ -414,16 +423,16 @@ impl LogWriter for LockService {
 
 #[derive(Debug, thiserror::Error)]
 pub enum InitLockServiceError {
+    #[error("init http lock client: {0}")]
+    InitHttpClient(#[from] InitializeHttpClientError),
     #[error("the provided CEDARLING_LOCK_SSA_JWT is either malformed or expired: {0}")]
     InvalidSsaJwt(String),
     #[error(
         "failed to GET lock server config from the `.well-known/lock-server-configuration` endpoint: {0}"
     )]
-    GetLockConfig(#[from] http_utils::HttpRequestError),
+    GetLockConfig(#[from] GetLockConfigError),
     #[error("failed to dynamically register client for the Lock server's auth: {0}")]
     ClientRegistration(#[from] ClientRegistrationError),
-    #[error("failed to initialize the Lock logger's HttpClient: {0}")]
-    InitHttpClient(#[from] reqwest::Error),
     #[error("transport error: {0}")]
     TransportError(#[from] transport::TransportError),
     #[error("failed to parse access token: {0}")]
@@ -491,7 +500,7 @@ mod test {
 
         // Test startup
         let metrics = Arc::new(MetricsCollector::new(0));
-        let logger = LockService::new(pdp_id, &config, None, metrics)
+        let logger = LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default())
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();
@@ -551,7 +560,7 @@ mod test {
 
         // Test startup without SSA
         let metrics = Arc::new(MetricsCollector::new(0));
-        let logger = LockService::new(pdp_id, &config, None, metrics)
+        let logger = LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default())
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();
@@ -607,7 +616,8 @@ mod test {
 
         // Test startup with invalid SSA should fail
         let metrics = Arc::new(MetricsCollector::new(0));
-        let result = LockService::new(pdp_id, &config, None, metrics).await;
+        let result =
+            LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default()).await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),

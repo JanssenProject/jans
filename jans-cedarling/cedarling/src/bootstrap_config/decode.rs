@@ -13,6 +13,7 @@ use std::fs;
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::str::FromStr;
+use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
@@ -21,6 +22,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
+use crate::HttpClientConfig;
 use crate::context_data_api::DataStoreConfig;
 use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
@@ -134,6 +136,13 @@ impl BootstrapConfig {
         // Build `DataStoreConfig` from raw config, using defaults if not specified
         let data_store_config = build_data_store_config(raw);
 
+        let http_client_config = HttpClientConfig {
+            max_retries: raw.http_client_request_max_retries,
+            retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
+            #[cfg(not(target_arch = "wasm32"))]
+            request_timeout: Duration::from_secs(raw.http_client_request_timeout),
+        };
+
         Ok(Self {
             application_name: raw.application_name.clone(),
             log_config,
@@ -144,6 +153,7 @@ impl BootstrapConfig {
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,
             data_store_config,
+            http_client_config,
         })
     }
 }
