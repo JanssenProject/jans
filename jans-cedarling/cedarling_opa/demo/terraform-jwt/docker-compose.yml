@@ -1,7 +1,7 @@
 services:
   opa-cedarling:
     # Pre-built image published by the Janssen CI pipeline.
-    # To pin to a specific release, replace "latest" with a version tag, e.g.:
+    # To pin to a specific release, replace "0.0.0-nightly" with a version tag, e.g.:
     #   image: ghcr.io/janssenproject/jans/cedarling-opa:2.0.0-1
     image: ghcr.io/janssenproject/jans/cedarling-opa:0.0.0-nightly
     # Mount the JWT demo-specific files into the path the command references.

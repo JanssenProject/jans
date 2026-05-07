@@ -2,11 +2,11 @@
 
 This demo shows how to use the **Cedarling-OPA plugin** to gate `terraform plan`, `terraform apply`, and `terraform destroy` with fine-grained Cedar policies. Before any Terraform command reaches the cloud, a shell wrapper queries OPA (backed by a Cedarling instance) and enforces a role-based authorization model:
 
-| Role      | Plan | Apply | Destroy |
-|-----------|:----:|:-----:|:-------:|
-| Developer |  ✓   |   ✗   |    ✗    |
-| Ops       |  ✓   | ✓ (non-prod only) | ✗ |
-| Admin     |  ✓   |   ✓   |    ✓    |
+| Role      |       Plan        |       Apply       | Destroy |
+|-----------|:-----------------:|:-----------------:|:-------:|
+| Developer |         ✓         |         ✗         |    ✗    |
+| Ops       | ✓ (non-prod only) | ✓ (non-prod only) |    ✗    |
+| Admin     |         ✓         |         ✓         |    ✓    |
 
 See [PERMISSIONS.md](./PERMISSIONS.md) for the full permission matrix, including multi-role combinations and a complete decision table.
 
@@ -302,7 +302,7 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: hashicorp/setup-terraform@v3
 

@@ -362,7 +362,7 @@ terraform-apply-production:
     contents: read
 
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - uses: hashicorp/setup-terraform@v3
 
     - name: Fetch GitHub OIDC token
@@ -410,7 +410,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init

@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       # ── Self-hosted OPA (Option B) ──────────────────────────────────────────
       # Uncomment this step (and set OPA_URL to http://localhost:8181 in the env
@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       # ── Self-hosted OPA (Option B) — see plan job for full description ──────
       # - name: Start OPA (self-hosted, production mode)
@@ -208,7 +208,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       # ── Self-hosted OPA (Option B) — see plan job for full description ──────
       # - name: Start OPA (self-hosted, production mode)

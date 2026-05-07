@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Start OPA (self-hosted, production mode)
         working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
@@ -370,7 +370,7 @@ jobs:
     # crafted in-step; no real GitHub OIDC token is requested.
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Start OPA (demo mode — JWT signature validation disabled)
         # The base docker-compose.yml (without the prod overlay) starts OPA with
@@ -976,7 +976,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Start OPA (self-hosted, production mode)
         working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt

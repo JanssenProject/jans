@@ -47,11 +47,11 @@ Two Terraform authorization demos are available. Use this table to decide which 
 
 The demo uses three roles and three workspaces:
 
-| Role      | `terraform plan` | `terraform apply` | `terraform destroy` |
-|-----------|:----------------:|:-----------------:|:-------------------:|
-| Developer |        ✓         |         ✗         |          ✗          |
-| Ops       |        ✓         | ✓ (non-prod only) |          ✗          |
-| Admin     |        ✓         |         ✓         |          ✓          |
+| Role      | `terraform plan`  | `terraform apply` | `terraform destroy` |
+|-----------|:-----------------:|:-----------------:|:-------------------:|
+| Developer |         ✓         |         ✗         |          ✗          |
+| Ops       | ✓ (non-prod only) | ✓ (non-prod only) |          ✗          |
+| Admin     |         ✓         |         ✓         |          ✓          |
 
 Workspaces: `dev`, `staging`, `production`.
 
