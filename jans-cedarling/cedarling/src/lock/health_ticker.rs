@@ -28,7 +28,7 @@ pub(super) struct HealthTickerParams {
     pub(super) registry: HealthRegistry,
 }
 
-pub(crate) struct HealthTicker<T: AuditTransport> {
+pub(super) struct HealthTicker<T: AuditTransport> {
     transport: Arc<T>,
     health_url: Url,
     pdp_id: String,
@@ -39,7 +39,7 @@ pub(crate) struct HealthTicker<T: AuditTransport> {
 }
 
 impl<T: AuditTransport + 'static> HealthTicker<T> {
-    pub(crate) fn spawn(
+    pub(super) fn spawn(
         transport: Arc<T>,
         params: HealthTickerParams,
     ) -> (CancellationToken, JoinHandle<()>) {
