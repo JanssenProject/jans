@@ -206,7 +206,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 me = jarm_widget.me
                 prop_name = me.window.jans_name
                 value = me.value
-                self.data['attributes'][prop_name] = value
+                if value not in (None, ''):
+                    self.data['attributes'][prop_name] = value
 
         if self.save_handler:
             self.save_handler(self)
