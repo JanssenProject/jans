@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::lock::health_registry::HealthStatus;
 use crate::log::MetricsLogEntry;
 
 #[derive(Debug, thiserror::Error)]
@@ -75,7 +76,7 @@ pub(crate) struct LockServerHealthEntry {
     pub node_name: String,
     pub status: String,
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    pub engine_status: HashMap<String, String>,
+    pub engine_status: HashMap<String, HealthStatus>,
 }
 
 /// Serializes into the lock server's expected telemetry format (3-map model).

@@ -11,7 +11,25 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-type HealthCheckFn = Arc<dyn Fn() -> String + Send + Sync>;
+use serde::{Deserialize, Serialize};
+
+type HealthCheckFn = Arc<dyn Fn() -> HealthStatus + Send + Sync>;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub(crate) enum HealthStatus {
+    Success,
+    Failure,
+}
+
+impl std::fmt::Display for HealthStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            HealthStatus::Success => write!(f, "success"),
+            HealthStatus::Failure => write!(f, "failure"),
+        }
+    }
+}
 
 /// A registered health check with a name and callback.
 struct RegisteredCheck {
@@ -23,9 +41,15 @@ struct RegisteredCheck {
 ///
 /// Created during `LockService` initialization, shared with cedarling subsystems
 /// so they can register their health status callbacks.
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub(crate) struct HealthRegistry {
     checks: Arc<RwLock<Vec<RegisteredCheck>>>,
+}
+
+impl Default for HealthRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl std::fmt::Debug for HealthRegistry {
@@ -43,11 +67,11 @@ impl HealthRegistry {
 
     /// Register a health check callback.
     ///
-    /// The callback should return `"success"` if the subsystem is healthy,
-    /// or `"failure"` (or another descriptive error string) if not.
+    /// The callback should return [`HealthStatus::Success`] if the subsystem is healthy,
+    /// or [`HealthStatus::Failure`] if not.
     pub(crate) fn register<F>(&self, name: &str, check: F)
     where
-        F: Fn() -> String + Send + Sync + 'static,
+        F: Fn() -> HealthStatus + Send + Sync + 'static,
     {
         let mut checks = self
             .checks
@@ -61,8 +85,8 @@ impl HealthRegistry {
 
     /// Collect health statuses from all registered checks.
     ///
-    /// Returns a map of component name to status string.
-    pub(crate) fn collect(&self) -> HashMap<String, String> {
+    /// Returns a map of component name to status.
+    pub(crate) fn collect(&self) -> HashMap<String, HealthStatus> {
         let checks = self
             .checks
             .read()
@@ -71,5 +95,71 @@ impl HealthRegistry {
             .iter()
             .map(|c| (c.name.clone(), (c.check)()))
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_collect_empty() {
+        let registry = HealthRegistry::new();
+        let result = registry.collect();
+        assert!(result.is_empty(), "expected empty map for empty registry");
+    }
+
+    #[test]
+    fn test_register_and_collect() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        let result = registry.collect();
+        assert_eq!(result.len(), 1, "expected one entry");
+        assert_eq!(
+            result.get("core"),
+            Some(&HealthStatus::Success),
+            "expected Success status for core"
+        );
+    }
+
+    #[test]
+    fn test_register_multiple_distinct() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        registry.register("data", || HealthStatus::Success);
+        registry.register("policy_store", || HealthStatus::Failure);
+        let result = registry.collect();
+        assert_eq!(result.len(), 3, "expected three distinct entries");
+        assert_eq!(result.get("core"), Some(&HealthStatus::Success));
+        assert_eq!(result.get("data"), Some(&HealthStatus::Success));
+        assert_eq!(result.get("policy_store"), Some(&HealthStatus::Failure));
+    }
+
+    #[test]
+    fn test_register_same_name_twice() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        registry.register("core", || HealthStatus::Failure);
+        let result = registry.collect();
+        // the last insertion wins
+        assert_eq!(result.len(), 1, "expected only one entry after dedup");
+        assert_eq!(
+            result.get("core"),
+            Some(&HealthStatus::Failure),
+            "expected the second registration to take precedence"
+        );
+    }
+
+    #[test]
+    fn test_register_same_name_mixed_statuses() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Failure);
+        registry.register("data", || HealthStatus::Success);
+        registry.register("core", || HealthStatus::Success);
+        let result = registry.collect();
+
+        assert_eq!(result.len(), 2, "expected two deduplicated entries");
+        assert_eq!(result.get("core"), Some(&HealthStatus::Success));
+        assert_eq!(result.get("data"), Some(&HealthStatus::Success));
     }
 }

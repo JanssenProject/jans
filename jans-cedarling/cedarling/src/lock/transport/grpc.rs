@@ -216,7 +216,11 @@ fn health_json_to_proto(entry: LockServerHealthEntry) -> HealthEntry {
         service: entry.service,
         node_name: entry.node_name,
         status: entry.status,
-        engine_status: entry.engine_status,
+        engine_status: entry
+            .engine_status
+            .into_iter()
+            .map(|(k, v)| (k, v.to_string()))
+            .collect(),
     }
 }
 
@@ -240,9 +244,12 @@ mod test {
     use tokio_stream::wrappers::TcpListenerStream;
     use tonic::{Response, Status, transport::Server};
 
-    use crate::lock::proto::{
-        self, AuditResponse,
-        audit_service_server::{AuditService, AuditServiceServer},
+    use crate::lock::{
+        health_registry::HealthStatus,
+        proto::{
+            self, AuditResponse,
+            audit_service_server::{AuditService, AuditServiceServer},
+        },
     };
 
     // Mock gRPC server for testing
@@ -1065,7 +1072,7 @@ mod test {
             service: "test_app".to_string(),
             node_name: "test-pdp".to_string(),
             status: "running".to_string(),
-            engine_status: [("core".to_string(), "success".to_string())]
+            engine_status: [("core".to_string(), HealthStatus::Success)]
                 .into_iter()
                 .collect(),
         };

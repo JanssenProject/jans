@@ -58,6 +58,7 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
+use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
@@ -151,10 +152,6 @@ impl Cedarling {
         )
         .await?;
 
-        if let Some(registry) = log.health_registry() {
-            registry.register("core", || "success".to_string());
-        }
-
         let service_config = ServiceConfig::new(config)
             .await
             .inspect(|_| {
@@ -201,6 +198,17 @@ impl Cedarling {
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
+        }
+
+        if let Some(registry) = log.health_registry() {
+            registry.register("core", || HealthStatus::Success);
+            registry.register("policy_load", move || {
+                if policy_count > 0 {
+                    HealthStatus::Success
+                } else {
+                    HealthStatus::Failure
+                }
+            });
         }
 
         Ok(Cedarling {

@@ -126,7 +126,7 @@ use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
 use crate::http::{HttpClient, InitializeHttpClientError};
 use crate::lock::health_registry::HealthRegistry;
-use crate::lock::health_ticker::HealthTicker;
+use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::interface::Loggable;
@@ -293,17 +293,17 @@ impl LockService {
 
                 let ticker = create_health_ticker(
                     HealthTickerParams {
-                        bootstrap_conf,
                         health_url: health_endpoint.0,
-                        access_token: &client_creds.access_token,
                         pdp_id,
                         app_name,
                         health_interval,
                         logger: logger.clone(),
                         registry: registry.clone(),
                     },
+                    bootstrap_conf,
+                    &client_creds.access_token,
                     http_conf,
-                );
+                )?;
 
                 (Some(ticker), Some(registry))
             },
@@ -446,73 +446,44 @@ fn create_worker(
     }
 }
 
-struct HealthTickerParams<'a> {
-    bootstrap_conf: &'a LockServiceConfig,
-    health_url: url::Url,
-    access_token: &'a str,
-    pdp_id: PdpID,
-    app_name: Option<ApplicationName>,
-    health_interval: Duration,
-    logger: Option<LoggerWeak>,
-    registry: HealthRegistry,
-}
-
 fn create_health_ticker(
-    params: HealthTickerParams<'_>,
+    params: HealthTickerParams,
+    bootstrap_conf: &LockServiceConfig,
+    access_token: &str,
     http_conf: HttpClientConfig,
-) -> (CancellationToken, crate::http::JoinHandle<()>) {
-    match params.bootstrap_conf.transport {
+) -> Result<(CancellationToken, crate::http::JoinHandle<()>), InitLockServiceError> {
+    match bootstrap_conf.transport {
         LockTransport::Rest => {
             let mut headers = HeaderMap::new();
-            let mut auth_header = HeaderValue::from_str(&format!("Bearer {}", params.access_token))
-                .expect("valid authorization header value");
+            let mut auth_header = HeaderValue::from_str(&format!("Bearer {access_token}"))
+                .map_err(|e| InitLockServiceError::InvalidAccessToken(e.to_string()))?;
             auth_header.set_sensitive(true);
             headers.insert("Authorization", auth_header);
 
             let http_client = init_http_client(
                 Some(headers),
-                params.bootstrap_conf.accept_invalid_certs,
+                bootstrap_conf.accept_invalid_certs,
                 http_conf,
-            )
-            .expect("health ticker HTTP client initialization");
+            )?;
 
             let transport = Arc::new(RestTransport::new(
                 http_client,
                 params.logger.as_ref().and_then(std::sync::Weak::upgrade),
             ));
 
-            HealthTicker::spawn(
-                transport,
-                params.health_url,
-                params.pdp_id,
-                params.app_name,
-                params.health_interval,
-                params.logger,
-                params.registry,
-            )
+            Ok(HealthTicker::spawn(transport, params))
         },
         #[cfg(feature = "grpc")]
         LockTransport::Grpc => {
             use transport::grpc::GrpcTransport;
 
-            let transport = Arc::new(
-                GrpcTransport::new(
-                    params.health_url.origin().ascii_serialization(),
-                    params.access_token,
-                    params.logger.as_ref().and_then(std::sync::Weak::upgrade),
-                )
-                .expect("health ticker gRPC transport initialization"),
-            );
+            let transport = Arc::new(GrpcTransport::new(
+                params.health_url.origin().ascii_serialization(),
+                access_token,
+                params.logger.as_ref().and_then(std::sync::Weak::upgrade),
+            )?);
 
-            HealthTicker::spawn(
-                transport,
-                params.health_url,
-                params.pdp_id,
-                params.app_name,
-                params.health_interval,
-                params.logger,
-                params.registry,
-            )
+            Ok(HealthTicker::spawn(transport, params))
         },
     }
 }
@@ -1022,7 +993,7 @@ mod test {
         };
 
         let metrics = Arc::new(MetricsCollector::new(0));
-        let _ = LockService::new(
+        let _lock = LockService::new(
             pdp_id,
             &config,
             None,

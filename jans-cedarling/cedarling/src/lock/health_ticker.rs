@@ -11,13 +11,22 @@ use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
-use super::health_registry::HealthRegistry;
+use super::health_registry::{HealthRegistry, HealthStatus};
 use super::transport::mapping::LockServerHealthEntry;
 use super::transport::{AuditKind, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
 use crate::log::{LogWriter, LoggerWeak};
+
+pub(super) struct HealthTickerParams {
+    pub(super) health_url: url::Url,
+    pub(super) pdp_id: PdpID,
+    pub(super) app_name: Option<ApplicationName>,
+    pub(super) health_interval: Duration,
+    pub(super) logger: Option<LoggerWeak>,
+    pub(super) registry: HealthRegistry,
+}
 
 pub(crate) struct HealthTicker<T: AuditTransport> {
     transport: Arc<T>,
@@ -32,22 +41,17 @@ pub(crate) struct HealthTicker<T: AuditTransport> {
 impl<T: AuditTransport + 'static> HealthTicker<T> {
     pub(crate) fn spawn(
         transport: Arc<T>,
-        health_url: Url,
-        pdp_id: PdpID,
-        app_name: Option<ApplicationName>,
-        interval: Duration,
-        logger: Option<LoggerWeak>,
-        registry: HealthRegistry,
+        params: HealthTickerParams,
     ) -> (CancellationToken, JoinHandle<()>) {
         let cancel_tkn = CancellationToken::new();
         let ticker = Self {
             transport,
-            health_url,
-            pdp_id: pdp_id.to_string(),
-            app_name: app_name.map_or_else(String::new, |n| n.0),
-            interval,
-            logger,
-            registry,
+            health_url: params.health_url,
+            pdp_id: params.pdp_id.to_string(),
+            app_name: params.app_name.map_or_else(String::new, |n| n.0),
+            interval: params.health_interval,
+            logger: params.logger,
+            registry: params.registry,
         };
         let handle = spawn_task(ticker.run(cancel_tkn.clone()));
         (cancel_tkn, handle)
@@ -101,7 +105,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
 
         let overall_status = if engine_status.is_empty() {
             "unknown"
-        } else if engine_status.values().all(|s| s == "success") {
+        } else if engine_status.values().all(|s| *s == HealthStatus::Success) {
             "running"
         } else {
             "degraded"
