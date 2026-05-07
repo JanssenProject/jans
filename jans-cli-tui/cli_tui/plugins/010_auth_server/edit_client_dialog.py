@@ -836,7 +836,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                 (_("JWS alg for Signing"), 'jansAuthSignedRespAlg',
                   fall_back_open_id_dict['authorization_signing_alg_values_supported']),
-                (_("JWS alg fot Encryption"), 'jansAuthEncRespAlg',
+                (_("JWS alg for Encryption"), 'jansAuthEncRespAlg',
                   fall_back_open_id_dict['authorization_encryption_alg_values_supported']),
                 (_("JWS enc for Encryption"), 'jansAuthEncRespEnc',
                   fall_back_open_id_dict['authorization_encryption_enc_values_supported']),
@@ -870,7 +870,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 encryption_signing.append(enc_widget)
 
         jarm_frame = Frame(
-            title="JARM",
+            title=_("JARM"),
             body=HSplit(children=self.jarm_signing_widgets),
         )
 
