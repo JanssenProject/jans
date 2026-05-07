@@ -165,12 +165,9 @@ impl Sender {
                         .unwrap_or("unknown error")
                         .to_string();
                     backoff.snooze().await.map_err(|_| {
-                        HttpRequestError::new(
-                            HttpRequestReasonError::MaxRetriesExceeded,
-                            status,
-                        )
-                        .with_retry_count(attempt)
-                        .with_last_error(err_msg)
+                        HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, status)
+                            .with_retry_count(attempt)
+                            .with_last_error(err_msg)
                     })?;
                     continue;
                 },

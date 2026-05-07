@@ -98,6 +98,7 @@ impl AuditTransport for RestTransport {
                 }
 
                 self.client
+                    .raw_client
                     .post(url.as_str())
                     .json(&entries)
                     .send()

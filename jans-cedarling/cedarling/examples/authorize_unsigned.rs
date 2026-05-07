@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{HttpClientConfig,
+use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    EntityData, HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned, log_config::StdOutLoggerMode,
 };
 use serde_json::json;
