@@ -49,17 +49,20 @@ from view_uma_dialog import ViewUMADialog
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
-ATTRIBUTE_ALG_PROPERTIES = (
+ATTRIBUTE_ALG_PROPERTIES = [
     'introspectionSignedResponseAlg',
     'introspectionEncryptedResponseAlg',
     'introspectionEncryptedResponseEnc',
     'txTokenSignedResponseAlg',
     'txTokenEncryptedResponseAlg',
     'txTokenEncryptedResponseEnc',
-    'authorizationSignedResponseAlg',
-    'authorizationEncryptedResponseAlg',
-    'authorizationEncryptedResponseEnc',
-    )
+    ]
+JARM_SIGNING_ATTRIBUTES = [
+    'jansAuthSignedRespAlg',
+    'jansAuthEncRespAlg',
+    'jansAuthEncRespEnc'
+]
+
 APP = get_app()
 
 
@@ -197,6 +200,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
         exp_date = self.data.pop('expirationDate', None)
         if exp_date:
             self.data['expirationDate'] = exp_date.strftime(ISOFORMAT)
+
+        for jarm_widget in self.jarm_signing_widgets:
+            if hasattr(jarm_widget, 'me'):
+                me = jarm_widget.me
+                prop_name = me.window.jans_name
+                value = me.value
+                self.data['attributes'][prop_name] = value
 
         if self.save_handler:
             self.save_handler(self)
@@ -772,6 +782,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 style=cli_style.check_box),
         ]
 
+
+        self.jarm_signing_widgets = []
         self.drop_down_select_first = []
 
         fall_back_open_id_dict = {}
@@ -822,11 +834,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
                  'tx_token_encryption_enc_values_supported'),
 
-                (_("Authorization Signing Alg"), 'authorizationSignedResponseAlg',
+                (_("JWS alg for Signing"), 'jansAuthSignedRespAlg',
                   fall_back_open_id_dict['authorization_signing_alg_values_supported']),
-                (_("Authorization Encryption Alg"), 'authorizationEncryptedResponseAlg',
+                (_("JWS alg fot Encryption"), 'jansAuthEncRespAlg',
                   fall_back_open_id_dict['authorization_encryption_alg_values_supported']),
-                (_("Authorization Encryption Enc"), 'authorizationEncryptedResponseEnc',
+                (_("JWS enc for Encryption"), 'jansAuthEncRespEnc',
                   fall_back_open_id_dict['authorization_encryption_enc_values_supported']),
 
         ):
@@ -836,9 +848,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
             values = [(alg, alg) for alg in self.myparent.cli_object.openid_configuration.get(
                 openid_key, [])]
 
-            value = self.data.get('attributes', {}).get(swagger_key) if swagger_key in ATTRIBUTE_ALG_PROPERTIES else self.data.get(swagger_key)
+            if swagger_key in ATTRIBUTE_ALG_PROPERTIES + JARM_SIGNING_ATTRIBUTES:
+                value = (self.data.get('attributes') or {}).get(swagger_key)
+            else:
+                value = self.data.get(swagger_key)
 
-            encryption_signing.append(self.myparent.getTitledWidget(
+            enc_widget = self.myparent.getTitledWidget(
                 title,
                 name=swagger_key,
                 widget=DropDownWidget(
@@ -847,7 +862,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 ),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, swagger_key),
-                style='class:outh-client-dropdown'))
+                style='class:outh-client-dropdown')
+
+            if swagger_key in JARM_SIGNING_ATTRIBUTES:
+                self.jarm_signing_widgets.append(enc_widget)
+            else:
+                encryption_signing.append(enc_widget)
+
+        jarm_frame = Frame(
+            title="JARM",
+            body=HSplit(children=self.jarm_signing_widgets),
+        )
+
+        encryption_signing.append(jarm_frame)
 
         self.tabs['Encryption/Signing'] = HSplit(encryption_signing)
 
