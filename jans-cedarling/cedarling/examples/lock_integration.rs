@@ -6,7 +6,7 @@
 // run this example using `cargo run --example lock_integration`
 
 use cedarling::log_config::StdOutLoggerMode;
-use cedarling::{
+use cedarling::{HttpClientConfig,
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
     EntityData, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
@@ -64,6 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 

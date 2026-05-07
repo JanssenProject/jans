@@ -44,6 +44,7 @@ public class ProvidingIndividuallyRequestedVoluntaryClaims extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid");
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -51,6 +52,8 @@ public class ProvidingIndividuallyRequestedVoluntaryClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(scopes);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.EMAIL,
                 JwtClaimName.PICTURE));
@@ -66,7 +69,7 @@ public class ProvidingIndividuallyRequestedVoluntaryClaims extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();

@@ -8,8 +8,7 @@
 use std::collections::HashMap;
 
 use super::{init_http_client, lock_config::Url};
-use crate::app_types::PdpID;
-use http_utils::{Backoff, Sender};
+use crate::{HttpClientConfig, app_types::PdpID, http::InitializeHttpClientError};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
@@ -22,22 +21,13 @@ pub(super) async fn register_client(
     oidc_endpoint: &Url,
     ssa_jwt: Option<&String>,
     accept_invalid_certs: bool,
+    http_conf: HttpClientConfig,
 ) -> Result<ClientCredentials, ClientRegistrationError> {
-    let client = init_http_client(None, accept_invalid_certs)?;
-
-    #[cfg(not(test))]
-    let mut sender = Sender::new(Backoff::default_exponential());
-
-    // We implement a faster retry for the tests
-    #[cfg(test)]
-    let mut sender = {
-        use std::time::Duration;
-        Sender::new(Backoff::new_exponential(Duration::from_millis(10), Some(3)))
-    };
+    let client = init_http_client(None, accept_invalid_certs, http_conf)?;
 
     // Get openid config
-    let oidc: OpenidConfig = sender
-        .send(|| client.get(oidc_endpoint.0.as_str()))
+    let oidc: OpenidConfig = client
+        .get_json(oidc_endpoint.0.as_str())
         .await
         .map_err(ClientRegistrationError::GetOpenidConfig)?;
 
@@ -58,8 +48,8 @@ pub(super) async fn register_client(
     let ClientIdAndSecret {
         client_id,
         client_secret,
-    } = sender
-        .send(|| {
+    } = client
+        .post_json(|client| {
             client
                 .post(&oidc.registration_endpoint)
                 .header("Content-Type", "application/json")
@@ -76,8 +66,8 @@ pub(super) async fn register_client(
     // this should never fail since this is a hard-coded valid JSON
     .expect("serialize form data");
 
-    let AccessToken { access_token } = sender
-        .send(|| {
+    let AccessToken { access_token } = client
+        .post_json(|client| {
             client
                 .post(&oidc.token_endpoint)
                 .basic_auth(&client_id, Some(&client_secret))
@@ -110,7 +100,7 @@ pub enum ClientRegistrationError {
     #[error("failed to get access token: {0}")]
     GetAccessToken(#[source] http_utils::HttpRequestError),
     #[error("failed to initialize HTTP client: {0}")]
-    InitializeHttpClient(#[from] reqwest::Error),
+    InitializeHttpClient(#[from] InitializeHttpClientError),
 }
 
 #[derive(Debug, Deserialize)]
@@ -157,6 +147,7 @@ mod tests {
             &super::super::lock_config::Url(oidc_url),
             Some(&ssa_jwt.to_string()),
             false,
+            crate::http::HttpClientConfig::default(),
         )
         .await;
 
@@ -185,6 +176,7 @@ mod tests {
             &super::super::lock_config::Url(oidc_url),
             None,
             false,
+            crate::http::HttpClientConfig::default(),
         )
         .await;
 
