@@ -57,7 +57,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         (cancel_tkn, handle)
     }
 
-    pub(crate) async fn run(self, cancel_tkn: CancellationToken) {
+    async fn run(self, cancel_tkn: CancellationToken) {
         let mut ticker = interval(self.interval);
         ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
         ticker.tick().await;
@@ -120,5 +120,119 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
             status: overall_status,
             engine_status,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::lock::transport::{SerializedAuditEntry, TransportResult};
+    use std::sync::Arc;
+    use url::Url;
+
+    /// No-op transport that does nothing on send.
+    struct NoopTransport;
+
+    #[async_trait::async_trait]
+    impl AuditTransport for NoopTransport {
+        async fn send(
+            &self,
+            _entries: &[SerializedAuditEntry],
+            _audit_kind: &AuditKind,
+        ) -> TransportResult<()> {
+            Ok(())
+        }
+    }
+
+    /// Build a minimal [`HealthTicker`] with the given registry and a noop transport.
+    /// The other fields use dummy values since `build_health_entry` ignores them.
+    fn ticker_with_registry(registry: HealthRegistry) -> HealthTicker<NoopTransport> {
+        HealthTicker {
+            transport: Arc::new(NoopTransport),
+            health_url: Url::parse("http://localhost/health").unwrap(),
+            pdp_id: PdpID::new().to_string(),
+            app_name: String::new(),
+            interval: Duration::from_secs(10),
+            logger: None,
+            registry,
+        }
+    }
+
+    #[test]
+    fn test_build_health_entry_empty() {
+        let registry = HealthRegistry::new();
+        let ticker = ticker_with_registry(registry);
+        let entry = ticker.build_health_entry();
+        assert_eq!(
+            entry.status, "unknown",
+            "empty registry should report 'unknown'"
+        );
+        assert!(
+            entry.engine_status.is_empty(),
+            "empty registry should have empty engine_status"
+        );
+    }
+
+    #[test]
+    fn test_build_health_entry_all_success() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        registry.register("data", || HealthStatus::Success);
+        let ticker = ticker_with_registry(registry);
+        let entry = ticker.build_health_entry();
+        assert_eq!(
+            entry.status, "running",
+            "all success should report 'running'"
+        );
+        assert_eq!(entry.engine_status.len(), 2);
+    }
+
+    #[test]
+    fn test_build_health_entry_any_failure() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        registry.register("data", || HealthStatus::Failure);
+        let ticker = ticker_with_registry(registry);
+        let entry = ticker.build_health_entry();
+        assert_eq!(
+            entry.status, "degraded",
+            "any failure should report 'degraded'"
+        );
+    }
+
+    #[test]
+    fn test_build_health_entry_all_failure() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Failure);
+        registry.register("data", || HealthStatus::Failure);
+        let ticker = ticker_with_registry(registry);
+        let entry = ticker.build_health_entry();
+        assert_eq!(
+            entry.status, "degraded",
+            "all failure should report 'degraded'"
+        );
+    }
+
+    #[test]
+    fn test_build_health_entry_mixed() {
+        let registry = HealthRegistry::new();
+        registry.register("core", || HealthStatus::Success);
+        registry.register("policy_store", || HealthStatus::Success);
+        registry.register("trusted_issuers", || HealthStatus::Failure);
+        let ticker = ticker_with_registry(registry);
+        let entry = ticker.build_health_entry();
+        assert_eq!(
+            entry.status, "degraded",
+            "mixed status with any failure should report 'degraded'"
+        );
+        assert_eq!(entry.engine_status.len(), 4);
+        assert_eq!(
+            entry.engine_status.get("core"),
+            Some(&HealthStatus::Success)
+        );
+        assert_eq!(
+            entry.engine_status.get("trusted_issuers"),
+            Some(&HealthStatus::Failure)
+        );
     }
 }
