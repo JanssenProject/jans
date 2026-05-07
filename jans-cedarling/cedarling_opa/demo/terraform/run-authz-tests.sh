@@ -149,10 +149,13 @@ while IFS= read -r case_json; do
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
         | jq -R . | jq -s .)
 
+    CURRENT_TIME=$(date +%s)
+
     PAYLOAD=$(jq -n \
         --arg user_id   "${USER_ID}" \
         --arg workspace "${WORKSPACE}" \
         --arg action    "Infra::Action::\"${CEDAR_ACTION}\"" \
+        --argjson cur_time "${CURRENT_TIME}" \
         --argjson roles "${ROLES_JSON}" \
         '{
             input: {
@@ -170,7 +173,9 @@ while IFS= read -r case_json; do
                         entity_type: "Infra::TerraformWorkspace",
                         id: $workspace
                     }
-                }
+                },
+                context: {
+                    current_time: $cur_time
             }
         }')
 

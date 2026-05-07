@@ -146,6 +146,9 @@ action Plan, Apply, Destroy, Refresh      # ← add the new action name here
     appliesTo {
         principal: [User],
         resource:  [TerraformWorkspace],
+        context: {
+            current_time: Long,
+        }        
     };
 ```
 
@@ -348,6 +351,7 @@ namespace Infra {
         appliesTo {
             principal: [User],
             resource:  [TerraformWorkspace],
+            context: { current_time: Long }
         };
 }
 ```

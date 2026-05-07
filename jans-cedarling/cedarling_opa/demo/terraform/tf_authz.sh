@@ -81,6 +81,7 @@ for cmd in curl jq; do
 done
 
 # ─── Build the OPA query payload ─────────────────────────────────────────────
+CURRENT_TIME=$(date +%s)
 
 # Convert comma-separated roles to a JSON array
 ROLES_JSON=$(echo "${TF_USER_ROLES}" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | jq -R . | jq -s .)
@@ -89,6 +90,7 @@ PAYLOAD=$(jq -n \
     --arg user_id   "${TF_USER_ID}" \
     --arg workspace "${TF_WORKSPACE}" \
     --arg action    "Infra::Action::\"${CEDAR_ACTION}\"" \
+    --argjson cur_time "${CURRENT_TIME}" \
     --argjson roles "${ROLES_JSON}" \
     '{
         input: {
@@ -106,7 +108,9 @@ PAYLOAD=$(jq -n \
                     entity_type: "Infra::TerraformWorkspace",
                     id: $workspace
                 }
-            }
+            },
+            context: {
+                current_time: $cur_time
         }
     }')
 
