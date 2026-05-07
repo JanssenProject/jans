@@ -104,7 +104,7 @@ jobs:
         run: |
           echo "Waiting for OPA /health endpoint (up to 60 s)..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+            if curl -sf --connect-timeout 5 --max-time 10 http://localhost:8181/health > /dev/null 2>&1; then
               echo "OPA is healthy after $((i * 2)) s."
               exit 0
             fi
@@ -121,7 +121,7 @@ jobs:
       - name: Fetch GitHub OIDC token
         id: get-token
         run: |
-          TOKEN=$(curl -sf \
+          TOKEN=$(curl -sf --connect-timeout 5 --max-time 10 \
             -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
             | jq -r '.value')
@@ -129,8 +129,8 @@ jobs:
             echo "ERROR: failed to obtain GitHub OIDC token." >&2
             exit 1
           fi
-          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
           echo "::add-mask::${TOKEN}"
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
 
       - name: "Authorize Plan — expect ALLOW (ci-permit-plan matches this repo)"
         env:
@@ -156,7 +156,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Plan / staging)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -218,7 +218,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Destroy / staging)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -275,7 +275,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / main branch / staging)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -331,7 +331,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / production / no environment claim)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -389,7 +389,7 @@ jobs:
         run: |
           echo "Waiting for OPA /health endpoint (up to 60 s)..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+            if curl -sf --connect-timeout 5 --max-time 10 http://localhost:8181/health > /dev/null 2>&1; then
               echo "OPA is healthy after $((i * 2)) s."
               exit 0
             fi
@@ -450,7 +450,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / production / wrong repository)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -526,7 +526,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / staging / wrong repository)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -602,7 +602,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / staging / wrong Git ref)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -679,7 +679,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / production / wrong Git ref)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -757,7 +757,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / production / wrong issuer)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -834,7 +834,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / staging / wrong issuer)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -910,7 +910,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Plan / staging / wrong issuer)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2
@@ -992,7 +992,7 @@ jobs:
         run: |
           echo "Waiting for OPA /health endpoint (up to 60 s)..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+            if curl -sf --connect-timeout 5 --max-time 10 http://localhost:8181/health > /dev/null 2>&1; then
               echo "OPA is healthy after $((i * 2)) s."
               exit 0
             fi
@@ -1009,7 +1009,7 @@ jobs:
       - name: Fetch GitHub OIDC token (environment-scoped)
         id: get-token
         run: |
-          TOKEN=$(curl -sf \
+          TOKEN=$(curl -sf --connect-timeout 5 --max-time 10 \
             -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
             | jq -r '.value')
@@ -1017,8 +1017,8 @@ jobs:
             echo "ERROR: failed to obtain GitHub OIDC token." >&2
             exit 1
           fi
-          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
           echo "::add-mask::${TOKEN}"
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
 
       - name: "Authorize Apply / production with environment — expect ALLOW (ci-permit-apply-prod-via-environment)"
         env:
@@ -1044,7 +1044,7 @@ jobs:
             }')
 
           echo "Sending authorize request (Apply / production / environment-scoped token)..."
-          RESPONSE=$(curl -sf -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
+          RESPONSE=$(curl -sf --connect-timeout 5 --max-time 10 -X POST http://localhost:8181/v1/data/infra/terraform_jwt \
             -H "Content-Type: application/json" \
             -d "${PAYLOAD}") || {
             echo "ERROR: OPA authorize endpoint did not respond." >&2

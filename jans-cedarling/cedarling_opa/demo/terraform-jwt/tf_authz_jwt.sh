@@ -60,6 +60,12 @@ if [[ "${1:-}" == "--fetch-token" ]]; then
         exit 1
     fi
     # GitHub's token endpoint returns { "count": N, "value": "<jwt>" }
+    for cmd in curl jq; do
+        if ! command -v "${cmd}" &>/dev/null; then
+            echo "tf_authz_jwt: ERROR — '${cmd}' is required but not installed." >&2
+            exit 1
+        fi
+    done
     TOKEN=$(curl -sf \
         -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
         "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \

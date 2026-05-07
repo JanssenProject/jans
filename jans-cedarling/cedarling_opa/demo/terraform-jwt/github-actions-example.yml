@@ -100,8 +100,8 @@ jobs:
         id: get-token
         run: |
           TOKEN=$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)
-          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Terraform init
         run: terraform -chdir=demo/terraform-jwt init
@@ -165,8 +165,8 @@ jobs:
         id: get-token
         run: |
           TOKEN=$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)
-          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Terraform init
         run: terraform -chdir=demo/terraform-jwt init
@@ -237,8 +237,8 @@ jobs:
         id: get-token
         run: |
           TOKEN=$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)
-          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Terraform init
         run: terraform -chdir=demo/terraform-jwt init

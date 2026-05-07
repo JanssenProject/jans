@@ -84,8 +84,7 @@ def parse_cases(path):
                 key, _, val = stripped.partition(':')
                 key = key.strip()
                 val = val.strip().strip('"')
-                if val:
-                    current[key] = val
+                current[key] = val
 
     if current is not None:
         cases.append(current)
