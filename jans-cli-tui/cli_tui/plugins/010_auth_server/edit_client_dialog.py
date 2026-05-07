@@ -202,12 +202,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.data['expirationDate'] = exp_date.strftime(ISOFORMAT)
 
         for jarm_widget in self.jarm_signing_widgets:
-            if hasattr(jarm_widget, 'me'):
-                me = jarm_widget.me
-                prop_name = me.window.jans_name
-                value = me.value
-                if value not in (None, ''):
-                    self.data['attributes'][prop_name] = value
+            prop_name = jarm_widget.jans_name
+            value = self.get_value_from_widget(jarm_widget)
+            if value:  # only persist when a value was actually selected
+                self.data['attributes'][prop_name] = value
 
         if self.save_handler:
             self.save_handler(self)
