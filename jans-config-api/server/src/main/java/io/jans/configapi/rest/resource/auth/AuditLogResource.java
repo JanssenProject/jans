@@ -392,14 +392,10 @@ public class AuditLogResource extends ConfigBaseResource {
             return null;
         }
         String trimmed = dateStr.trim();
-        if (log.isInfoEnabled()) {
-            log.info(" Parse Date dateStr:{}, trimmed:{}", escapeLog(dateStr), escapeLog(trimmed));
-        }
-
         DateTimeFormatter dateTimeFormatter = this.getDateTimeFormatter(dateStr);
 
         if (log.isInfoEnabled()) {
-            log.info(" Parse Date dateStr:{}, dateTimeFormatter:{}", dateStr, dateTimeFormatter);
+            log.info(" Parse Date dateStr:{}, dateTimeFormatter:{}", escapeLog(dateStr), dateTimeFormatter);
         }
         if (dateTimeFormatter != null) {
             try {
