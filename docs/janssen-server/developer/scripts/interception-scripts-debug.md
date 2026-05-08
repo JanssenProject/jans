@@ -40,7 +40,7 @@ The minimum system requirement for running all jans services are `8GB RAM`, `4 C
 
 ### Install Janssen
 
-1. Install [Helm](https://helm.sh/docs/using_helm/)
+1. Install [Helm](https://helm.sh/docs/intro/install/)
 
 1. Install Janssen
 
