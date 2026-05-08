@@ -99,8 +99,8 @@ public class AuditLogResource extends ConfigBaseResource {
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "start_date") String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "end_date") String endDate)
+            @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').", schema = @Schema(type = "string")) @QueryParam(value = "start_date") String startDate,
+            @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').", schema = @Schema(type = "string")) @QueryParam(value = "end_date") String endDate)
 
     {
         if (log.isInfoEnabled()) {
@@ -248,6 +248,12 @@ public class AuditLogResource extends ConfigBaseResource {
                 || (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate))) {
             return logEntries;
         }
+
+        // Validate & parse
+        validateDate(startDate, endDate);
+        LocalDateTime startLocal = StringUtils.isNotBlank(startDate) ? parseDate(startDate) : null;
+        LocalDateTime endLocal = StringUtils.isNotBlank(endDate) ? parseDate(endDate) : null;
+
         List<String> filteredLogEntries = new ArrayList<>();
         try {
             String datePattern = (StringUtils.isNotBlank(getAuditDateFormat()) ? getAuditDateFormat()
@@ -264,12 +270,12 @@ public class AuditLogResource extends ConfigBaseResource {
                     LocalDateTime logEntryLocalDate = getDate(timestampPart, formatter);
                     log.debug("{}, timestampPart:{}, logEntryLocalDate:{}, {}", "\n\n", timestampPart,
                             logEntryLocalDate, "\n\n");
-                    if (isValidlogEntry(startDate, endDate, logEntryLocalDate)) {
+                    if (isValidlogEntry(startLocal, endLocal, logEntryLocalDate)) {
                         filteredLogEntries.add(line);
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (DateTimeParseException ex) {
             log.error("Error while filtering log file with startDate:{} and endDate:{} is:{}", escapeLog(startDate),
                     escapeLog(endDate), ex);
             return logEntries;
@@ -278,8 +284,8 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private void validateDate(String startDate, String endDate) {
-        if (log.isInfoEnabled()) {
-            log.info(" Validate Date startDate:{}, endDate:{}", escapeLog(startDate), escapeLog(endDate));
+        if (log.isDebugEnabled()) {
+            log.debug(" Validate Date startDate:{}, endDate:{}", escapeLog(startDate), escapeLog(endDate));
         }
 
         StringBuilder sb = new StringBuilder();
@@ -294,7 +300,7 @@ public class AuditLogResource extends ConfigBaseResource {
                     log.debug(" startLocal:{} {}", escapeLog(startLocal), "\n\n");
                 }
             } catch (DateTimeParseException dtpe) {
-                sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
+                sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
             }
         }
 
@@ -306,7 +312,7 @@ public class AuditLogResource extends ConfigBaseResource {
                     log.debug(" endLocal:{} {}", escapeLog(endLocal), "\n\n");
                 }
             } catch (DateTimeParseException dtpe) {
-                sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
+                sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
             }
         }
 
@@ -320,40 +326,24 @@ public class AuditLogResource extends ConfigBaseResource {
         }
     }
 
-    private boolean isValidlogEntry(String startDate, String endDate, LocalDateTime logEntryLocalDate) {
+    private boolean isValidlogEntry(LocalDateTime startLocalDate, LocalDateTime endLocalDate,
+            LocalDateTime logEntryLocalDate) {
         if (log.isDebugEnabled()) {
-            log.debug(" startDate:{}, endDate:{}, logEntryLocalDate:{}", escapeLog(startDate), escapeLog(endDate),
-                    logEntryLocalDate);
+            log.debug(" startLocalDate:{}, endLocalDate:{}, logEntryLocalDate:{}", escapeLog(startLocalDate),
+                    escapeLog(endLocalDate), logEntryLocalDate);
         }
 
         boolean isValid = false;
 
-        // validate date
-        validateDate(startDate, endDate);
-
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate);
-        }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate);
-        }
-
         if (logEntryLocalDate != null) {
-            if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)
+            if (startLocalDate != null && endLocalDate != null
                     && ((logEntryLocalDate.isEqual(startLocalDate) || logEntryLocalDate.isAfter(startLocalDate))
                             && (logEntryLocalDate.isEqual(endLocalDate) || logEntryLocalDate.isBefore(endLocalDate)))) {
                 isValid = true;
-            } else if ((StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)
+            } else if ((startLocalDate != null && endLocalDate == null
                     && (logEntryLocalDate.isEqual(startLocalDate) || logEntryLocalDate.isAfter(startLocalDate)))
 
-                    || (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)
+                    || (startLocalDate == null && endLocalDate != null
                             && (logEntryLocalDate.isEqual(endLocalDate) || logEntryLocalDate.isBefore(endLocalDate)))) {
                 isValid = true;
             }
@@ -442,10 +432,6 @@ public class AuditLogResource extends ConfigBaseResource {
     private DateTimeFormatter getDateTimeFormatter(String dateStr) {
         if (log.isDebugEnabled()) {
             log.debug(" Get DateTimeFormatter for dateStr:{} ", escapeLog(dateStr));
-        }
-
-        if (StringUtils.isBlank(dateStr)) {
-            throwInternalServerException(" Date is null or blank");
         }
 
         if (log.isDebugEnabled()) {
