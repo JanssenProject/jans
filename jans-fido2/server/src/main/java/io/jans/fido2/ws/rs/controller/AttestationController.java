@@ -7,12 +7,14 @@
 package io.jans.fido2.ws.rs.controller;
 
 import org.slf4j.Logger;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.error.Fido2RPError;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
@@ -24,6 +26,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
@@ -90,6 +93,15 @@ public class AttestationController {
 			return processor.process();
 		} catch (WebApplicationException e) {
 			throw e;
+		} catch (Fido2RuntimeException ex) {
+			Fido2RPError formatted = ex.getFormattedMessage();
+			log.error("Fido2 runtime error - status: {}, errorMessage: {}",
+					formatted.getStatus(), formatted.getErrorMessage(), ex);
+			throw new WebApplicationException(Response
+					.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(formatted)
+					.type(MediaType.APPLICATION_JSON_TYPE)
+					.build());
 		} catch (Exception e) {
 			log.error("Unknown Error: {}", e.getMessage(), e);
 			throw errorResponseFactory.unknownError(e.getMessage());
