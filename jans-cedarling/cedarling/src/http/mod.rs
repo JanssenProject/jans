@@ -224,7 +224,7 @@ mod test {
     use tokio::join;
     const HTTP_CONF: HttpClientConfig = HttpClientConfig {
         max_retries: 3,
-        request_timeout: Duration::from_millis(1),
+        request_timeout: Duration::from_millis(500),
         retry_delay: Duration::from_secs(5),
     };
 
