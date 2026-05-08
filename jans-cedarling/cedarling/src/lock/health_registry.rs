@@ -77,6 +77,7 @@ impl HealthRegistry {
             .checks
             .write()
             .expect("health registry write lock poisoned");
+        checks.retain(|c| c.name != name);
         checks.push(RegisteredCheck {
             name: name.to_string(),
             check: Arc::new(check),
