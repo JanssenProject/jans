@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/cedarling/integrations/cedarling-krakend/">
+        <link rel="canonical" href="https://docs.jans.io/head/cedarling/integrations/terraform-authz-overview/">
       
       
-        <link rel="prev" href="../../developer/sidecar/cedarling-sidecar-tutorial/">
+        <link rel="prev" href="../cedarling-opa/">
       
       
-        <link rel="next" href="../cedarling-opa/">
+        <link rel="next" href="../terraform-authz/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>KrakenD - Janssen Documentation</title>
+        <title>Overview - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-krakend-plugin" class="md-skip">
+        <a href="#terraform-authorization-with-cedarling-opa" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              KrakenD
+              Overview
             
           </span>
         </div>
@@ -952,37 +952,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    KrakenD
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cedarling-krakend/" class="md-nav__link">
         
   
   
@@ -998,92 +971,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#functionality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Functionality
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#downloading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Downloading
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Building
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites-for-testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites for testing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1121,37 +1008,37 @@
                 
   
   
-  
-  
     
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
   
   
   
-    <a href="../terraform-authz-overview/" class="md-nav__link">
+    
+    
       
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_3" id="__nav_3_7_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1165,12 +1052,197 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Terraform Authorization
   
 
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#which-flow-should-i-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which flow should I use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-decision-flowchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick-decision flowchart
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-both-flows-share" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What both flows share
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unsigned Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz-jwt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1219,10 +1291,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#functionality" class="md-nav__link">
+  <a href="#which-flow-should-i-use" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Functionality
+        Which flow should I use?
       
     </span>
   </a>
@@ -1230,10 +1302,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#downloading" class="md-nav__link">
+  <a href="#quick-decision-flowchart" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloading
+        Quick-decision flowchart
       
     </span>
   </a>
@@ -1241,10 +1313,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
+  <a href="#what-both-flows-share" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building
+        What both flows share
       
     </span>
   </a>
@@ -1252,32 +1324,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites-for-testing" class="md-nav__link">
+  <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites for testing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running
+        Next steps
       
     </span>
   </a>
@@ -1328,10 +1378,28 @@
     
     
       <li class="md-path__item">
-        <a href="./" class="md-path__link">
+        <a href="../cedarling-krakend/" class="md-path__link">
           
   <span class="md-ellipsis">
     Integrations
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Terraform Authorization
   </span>
 
         </a>
@@ -1369,7 +1437,21 @@
       
       
       
-        <span class="md-tag">KrakenD</span>
+        <span class="md-tag">Infrastructure</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">OPA</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Terraform</span>
       
     
   </nav>
@@ -1379,194 +1461,94 @@
   
 
 
-<h1 id="cedarling-krakend-plugin">Cedarling KrakenD Plugin<a class="headerlink" href="#cedarling-krakend-plugin" title="Permanent link">#</a></h1>
-<p>This is a <a href="https://www.krakend.io/docs/extending/http-server-plugins/">KrakenD HTTP server plugin</a> that intercepts a call to a selected endpoint, uses the embedded <a href="https://docs.jans.io/head/cedarling/cedarling-getting-started/">Cedarling</a> PDP and allows access only if the authorization result is <code>true</code>.</p>
-<h2 id="functionality">Functionality<a class="headerlink" href="#functionality" title="Permanent link">#</a></h2>
-<ol>
-<li>During startup, the KrakenD plugin reads the environment variables and initializes a Cedarling instance</li>
-<li>When the protected endpoint is called, the plugin intercepts the call and creates a Cedarling authorization request.</li>
-<li>If the result of the authorization request is <code>true</code>, the plugin allows the endpoint to respond. Otherwise, the plugin responds with <code>403 Forbidden</code></li>
-</ol>
-<p><a href="https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0DSKkBrSDAEWgAdwBXLTAKACMB7YYZgWwtVAGMRuGYAGdo9etxR8BSIXHQlgEniH6DgeAsTLKpqmXPjI0mLOPxESpALQA+C9tIAuaJjAgk6AF4wjqdNjQAGYonAA6GCQAbiChGByK0FGoHoxQwvSwCkJ2DlYuAOIAogAq0AD0FKHAkLw1CBHQ1gAS0ABEAILUwAAWzCggXkigzBguAEKQqJAo0AA8AFIA6iW2bfR5ZHZ+JtguAN5twtSMAFa1wG1Oh+zawleHSLy8kMLCAPq3JFdtiytrAF8AQAaCJtFCvZjUFAvB5tYAATwokB+C1kwicTmaJRKAAV3gAlSAAR2or0uwLaIAQP2EnEg72pbUpVWYyL0rzaEWubR6UwQMweILa0PAcL6wkuTjaAEYAEwAdgAdAAGVVKmXMtrcXo-SrVC6IZlg1nsXjMMXSnpsChtIEgsFPEYYOEYJAJVHozEdOogUaYsJtYolQN2gH0TwaYAoMmZRD+Uy5LT5aDR2ObGy2LIgRQHbUGuqIRkYILMK7tTClu30SDgYQwIKeetx4wBLBJyxkFyNuuQDbJrZZ7LAFwAFhVAGZoAAxfqMakCjA1jAIIA">Sequence Diagram</a></p>
-<h2 id="downloading">Downloading<a class="headerlink" href="#downloading" title="Permanent link">#</a></h2>
-<p>The cedarling-krakend plugin builds are available via <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen releases</a>. Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version <code>2.9.0</code> for Windows will not work on other versions or operating systems. The build tags are formatted as follows:</p>
-<div class="highlight"><pre><span></span><code>cedarling-krakend-&lt;architecture&gt;-&lt;krakend version and platform&gt;-&lt;Janssen version&gt;.so
-</code></pre></div>
-<p>Use the following table to find which build you need:</p>
+<h1 id="terraform-authorization-with-cedarling-opa">Terraform Authorization with Cedarling-OPA<a class="headerlink" href="#terraform-authorization-with-cedarling-opa" title="Permanent link">#</a></h1>
+<p>This page is the starting point for gating Terraform operations with Cedar policies and the Cedarling-OPA plugin. Two flows are available — read the comparison table below to choose the one that fits your situation, then follow the linked guide.</p>
+<h2 id="which-flow-should-i-use">Which flow should I use?<a class="headerlink" href="#which-flow-should-i-use" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
 <th></th>
-<th>amd64</th>
-<th>arm64</th>
+<th><strong><a href="../terraform-authz/">Unsigned flow</a></strong></th>
+<th><strong><a href="../terraform-authz-jwt/">JWT flow</a></strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Docker</td>
-<td><code>amd64-builder-2.9.0-0.0.0.so</code></td>
-<td><code>arm64-builder-2.9.0-0.0.0.so</code></td>
+<td><strong>Identity source</strong></td>
+<td>Environment variables asserted by the caller</td>
+<td>Signed GitHub Actions OIDC token</td>
 </tr>
 <tr>
-<td>On-premise</td>
-<td><code>amd64-builder-2.9.0-linux-generic-0.0.0.so</code></td>
-<td><code>arm64-builder-2.9.0-linux-generic-0.0.0.so</code></td>
+<td><strong>Signature validation</strong></td>
+<td>None — <code>CEDARLING_JWT_SIG_VALIDATION: "disabled"</code></td>
+<td>Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token</td>
+</tr>
+<tr>
+<td><strong>Trusted issuer config</strong></td>
+<td>Not required — no <code>trusted-issuers/</code> directory needed</td>
+<td>Required — <code>policy-store/trusted-issuers/github-actions.json</code> must declare the issuer endpoint</td>
+</tr>
+<tr>
+<td><strong>Principal model</strong></td>
+<td><code>Infra::User</code> with asserted <code>role</code> attribute</td>
+<td><code>CI::GitHubWorkflow</code> with verified JWT claims (<code>repository</code>, <code>ref</code>, <code>environment</code>)</td>
+</tr>
+<tr>
+<td><strong>Cedarling built-in</strong></td>
+<td><code>authorize_unsigned</code></td>
+<td><code>authorize_multi_issuer</code></td>
+</tr>
+<tr>
+<td><strong>Secret management</strong></td>
+<td>Requires <code>TF_USER_ID</code> / <code>TF_USER_ROLES</code> set by the operator</td>
+<td>No secrets — GitHub issues the OIDC token automatically</td>
+</tr>
+<tr>
+<td><strong>Production approval gate</strong></td>
+<td>Role-based policy only</td>
+<td><code>environment</code> JWT claim proves GitHub Environment approval by a human reviewer</td>
+</tr>
+<tr>
+<td><strong>Best suited for</strong></td>
+<td>Local development, human operators, simple setups</td>
+<td>CI/CD pipelines (GitHub Actions), automated deployments requiring cryptographic identity</td>
 </tr>
 </tbody>
 </table>
-<p>If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.</p>
-<h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
-<ul>
-<li>Clone the <code>cedarling-krakend</code> folder of the Janssen Repository:
-  <div class="highlight"><pre><span></span><code>git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans
-cd jans
-git sparse-checkout init --cone
-git checkout main
-git sparse-checkout set jans-cedarling
-cd cedarling-krakend
-</code></pre></div></li>
-<li>Download the dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform:</li>
-<li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
-</ul>
-</li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
-<li>
-<p>Build the plugin, replacing <code>&lt;x.y.z&gt;</code> with the KrakenD version you want to build against:</p>
-</li>
-<li>
-<p>For Docker targets:</p>
-</li>
-</ul>
-<div class="highlight"><pre><span></span><code>docker run -it -v &quot;$PWD:/app&quot; -w /app krakend/builder:&lt;x.y.z&gt; go build -buildmode=plugin -o cedarling-krakend.so .
-</code></pre></div>
-<ul>
-<li>For on-premise installations:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>docker run -it -v &quot;$PWD:/app&quot; -w /app krakend/builder:&lt;x.y.z&gt;-linux-generic go build -buildmode=plugin -o cedarling-krakend.so .
-</code></pre></div>
-<ul>
-<li>For ARM64 Docker targets:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span><span class="w"> </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CGO_ENABLED=1&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CC=aarch64-linux-musl-gcc&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOARCH=arm64&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>krakend/builder:&lt;x.y.z&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>cedarling-krakend.so<span class="w"> </span>.
-</code></pre></div>
-<ul>
-<li>For ARM64 on-premise installs:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span><span class="w"> </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CGO_ENABLED=1&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CC=aarch64-linux-gnu-gcc&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOARCH=arm64&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>krakend/builder:&lt;x.y.z&gt;-linux-generic<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-gnu-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>cedarling-krakend.so<span class="w"> </span>.
-</code></pre></div>
-<h2 id="prerequisites-for-testing">Prerequisites for testing<a class="headerlink" href="#prerequisites-for-testing" title="Permanent link">#</a></h2>
-<p>To test the plugin, you will need:</p>
-<ul>
-<li>A cedarling policy store with a policy for our gateway. To create this, please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World#1-author-policies">these</a> steps.</li>
-<li>For our demo, we will use this sample policy as outlined in the instructions:
-  <div class="highlight"><pre><span></span><code>@id(&quot;allow_one&quot;)
-permit(
-  principal is gatewayDemo::Workload,
-  action == gatewayDemo::Action::&quot;GET&quot;,
-  resource is gatewayDemo::HTTP_Request
-)
-when {
-    principal has access_token.scope &amp;&amp;
-    principal.access_token.scope.contains(&quot;profile&quot;)
-};
-</code></pre></div></li>
-<li>This policy will allow access so long as the access token contains the <code>profile</code> scope.</li>
-<li>A <a href="https://www.krakend.io/docs/overview/installing/">KrakenD server installation</a>. For development purposes, the binary install is recommended. For production setups, the Docker method is recommended.</li>
-<li>The plugin <code>.so</code> file for your architecture. For Mac OS hosts, ARM64 is required.</li>
-<li>The dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform:</li>
-<li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
-</ul>
-</li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
-<li>A configuration file. Sample configuration is provided in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json">krakend.json</a>.</li>
-</ul>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<p>Check the sample configuration in <code>krakend.json</code> to see an example KrakenD configuration which loads the plugin. The following table describes the plugin-specific configuration keys. These keys are mandatory and must be provided. Additional configuration is described in <a href="https://www.krakend.io/docs/configuration/structure/">KrakenD documentation</a>.</p>
-<p>The <code>namespace</code> field in the configuration needs to be the cedar namespace you used when creating the policy store. By default, Agama Lab sets the namespace to <code>Jans</code>. If you are following the demo, you will use the same name.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Example</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>path</td>
-<td>String</td>
-<td>/protected</td>
-<td>KrakenD endpoint to protect</td>
-</tr>
-<tr>
-<td>namespace</td>
-<td>String</td>
-<td>Jans</td>
-<td>Cedar namespace being used by the policy store</td>
-</tr>
-</tbody>
-</table>
-<h2 id="running">Running<a class="headerlink" href="#running" title="Permanent link">#</a></h2>
-<p><strong>Warning</strong>: Windows and Mac OS are untested. Only Linux has been fully tested against KrakenD.</p>
-<ol>
-<li>Place <code>krakend.json</code> and the dynamic shared object file(s) in your current working directory</li>
-<li>Create a folder named <code>plugin</code> in the current working directory and place the plugin <code>.so</code> file in that folder</li>
-<li>
-<p>To properly load the shared library, Linux and Mac OS platforms need to be told where to find your shared object file. On Windows this is detected automatically so long as the object file is placed in the current working directory.</p>
-</li>
-<li>
-<p>Mac OS: <code>export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH</code></p>
-</li>
-<li>
-<p>Linux: <code>export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH</code></p>
-<p>On Linux, you can verify the dynamic linking like so:</p>
-<div class="highlight"><pre><span></span><code>$ ldd plugin/*.so
-...
-libcedarling_go.so =&gt; /path/to/current/directory/libcedarling_go.so
-</code></pre></div>
-</li>
-<li>
-<p>Set the Cedarling <a href="https://docs.jans.io/head/cedarling/cedarling-properties/">bootstrap</a> variables in your environment.</p>
-</li>
-<li>
-<p>For gateway functionality, at minimum you will need the following properties set:</p>
-</li>
-</ol>
-<div class="highlight"><pre><span></span><code>CEDARLING_APPLICATION_NAME=Gateway
-CEDARLING_POLICY_STORE_URI=&lt;Your policy store URI&gt;
-</code></pre></div>
-<ol>
-<li>Run the KrakenD server: <code>krakend run -c krakend.json</code></li>
-<li>KrakenD is running on <code>http://127.0.0.1:8080</code></li>
-<li>Test with no authentication: <code>curl http://127.0.0.1:8080/protected</code>. You should get a 403 Forbidden</li>
-<li>Test with authentication (a sample token is provided):</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ACCESS_TOKEN</span><span class="o">=</span>eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g
+<p><strong>Choose the unsigned flow</strong> if you are running Terraform locally or in a simple script where the caller's identity is trusted by convention and you do not need cryptographic proof of origin.</p>
+<p><strong>Choose the JWT flow</strong> if you are deploying from a CI/CD pipeline and want Cedarling to verify the pipeline's identity cryptographically — eliminating the need for shared secrets and enabling enforceable production approval gates.</p>
+<h2 id="quick-decision-flowchart">Quick-decision flowchart<a class="headerlink" href="#quick-decision-flowchart" title="Permanent link">#</a></h2>
+<p>Not sure which flow fits? Work through the three questions below:</p>
+<pre class="mermaid"><code>flowchart TD
+    A([Start]) --&gt; B{Running in a\nCI/CD pipeline?}
 
-curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span>
-</code></pre></div>
-<p>KrakenD is configured to respond with the health check response if authentication succeeds.</p>
+    B -- No --&gt; C{Do you need\ncryptographic proof\nof identity?}
+    B -- Yes --&gt; D{Using\nGitHub Actions?}
+
+    C -- No --&gt; UNSIGNED[Unsigned flow\nterraform-authz.md]
+    C -- Yes --&gt; D
+
+    D -- No --&gt; UNSIGNED
+    D -- Yes --&gt; E{Need an enforceable\nproduction approval gate\nor want to avoid shared secrets?}
+
+    E -- No --&gt; UNSIGNED
+    E -- Yes --&gt; JWT[JWT flow\nterraform-authz-jwt.md]
+
+    style UNSIGNED fill:#d4edda,stroke:#28a745,color:#155724
+    style JWT fill:#cce5ff,stroke:#0d6efd,color:#004085</code></pre>
+<h2 id="what-both-flows-share">What both flows share<a class="headerlink" href="#what-both-flows-share" title="Permanent link">#</a></h2>
+<p>Both demos are built on the same foundation:</p>
+<ul>
+<li>The <strong><a href="../cedarling-opa/">Cedarling-OPA plugin</a></strong> — a custom OPA plugin that embeds Cedarling as a built-in function.</li>
+<li>The <strong>same Cedar policy store format</strong> — <code>metadata.json</code>, <code>schema.cedarschema</code>, and a <code>policies/</code> subdirectory.</li>
+<li>The <strong>same OPA binary</strong> — only the Rego built-in call and the principal model differ.</li>
+<li><strong>Cedar's default-deny posture</strong> — any action not explicitly permitted by a <code>permit</code> rule is denied without requiring a <code>forbid</code> rule.</li>
+</ul>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">#</a></h2>
+<ul>
+<li><strong><a href="../terraform-authz/">Unsigned Terraform authorization guide</a></strong> — role-based access control for human operators using <code>authorize_unsigned</code>.</li>
+<li><strong><a href="../terraform-authz-jwt/">JWT Terraform authorization guide</a></strong> — cryptographic identity for CI/CD pipelines using <code>authorize_multi_issuer</code> with GitHub Actions OIDC tokens.</li>
+</ul>
 
 
 
@@ -1589,7 +1571,7 @@ curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </sp
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 8, 2026 08:00:33 UTC"><span class="timeago" datetime="2026-05-08T08:00:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 8, 2026 08:00:33 UTC">2026-05-08</span>
   </span>
 
     
@@ -1599,7 +1581,7 @@ curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </sp
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 23, 2025 10:24:12 UTC"><span class="timeago" datetime="2025-01-23T10:24:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 23, 2025 10:24:12 UTC">2025-01-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 8, 2026 08:00:33 UTC"><span class="timeago" datetime="2026-05-08T08:00:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 8, 2026 08:00:33 UTC">2026-05-08</span>
   </span>
 
     
