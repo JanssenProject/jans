@@ -15,7 +15,7 @@ For a stable, production-ready environment that natively supports Persistent Vol
 
 !!! tip "Testing/Dev Alternative"
 
-    If you are only testing and do not need PVs, you can use a single-node Docker installation. The Linux single-node are **4 CPU cores**, **16 GB RAM**, **50 GB SSD**, and ports **80** and **443** open
+    If you are only testing and do not need PVs, you can use a single-node Docker installation. Make sure the Linux single-node has **4 CPU cores**, **16 GB RAM**, **50 GB SSD**, and ports **80** and **443** open.
 
     ```bash
     docker run -d \

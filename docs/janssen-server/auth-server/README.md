@@ -64,7 +64,7 @@ FAPI-CIBA OpenID Providers for the latest results.
 **User Managed Access (UMA)**
 
 * [Federated Authorization for User-Managed Access (UMA) 2.0](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-federated-authz-2.0.html)
-* [User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.htmlFederated Authorization for User-Managed Access (UMA) 2.0)
+* [User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html)
 
 For the above specifications, Auth Server implements many features--all of the
 MUST's, but also many of the SHOULD's and MAY's. If you find any discrepancies,
