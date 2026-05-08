@@ -135,7 +135,7 @@ public class AuditLogResource extends ConfigBaseResource {
 
     private List<String> getLogEntries(String file, String pattern) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetch log file:{}, pattern:{}", file, pattern);
+            log.debug("Fetch log file:{}, pattern:{}", file, escapeLog(pattern));
         }
 
         List<String> logEntries = new ArrayList<>();
@@ -174,7 +174,8 @@ public class AuditLogResource extends ConfigBaseResource {
                 getStartIndex(logEntriesList, startIndex);
                 int toIndex = (startIndex + limit <= logEntriesList.size()) ? startIndex + limit
                         : logEntriesList.size();
-                log.debug("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
+                log.debug("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
+                        escapeLog(toIndex));
 
                 // Extract paginated data
                 List<String> sublist = logEntriesList.subList(startIndex, toIndex);
@@ -268,7 +269,8 @@ public class AuditLogResource extends ConfigBaseResource {
                 }
             }
         } catch (Exception ex) {
-            log.error("Error while filtering log file with startDate:{} and endDate:{} is:{}", startDate, endDate, ex);
+            log.error("Error while filtering log file with startDate:{} and endDate:{} is:{}", escapeLog(startDate),
+                    escapeLog(endDate), ex);
             return logEntries;
         }
         return filteredLogEntries;
@@ -287,7 +289,7 @@ public class AuditLogResource extends ConfigBaseResource {
         if (StringUtils.isNotBlank(startDate)) {
             try {
                 startLocal = parseDate(startDate);
-                log.debug(" startDate:{} {}", startLocal, "\n\n");
+                log.debug(" startLocal:{} {}", startLocal, "\n\n");
             } catch (DateTimeParseException dtpe) {
                 sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
             }
@@ -355,7 +357,7 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private LocalDateTime getDate(String strDate, DateTimeFormatter formatter) throws DateTimeParseException {
-        log.debug(" Get Date strDate:{}, formatter:{}", strDate, formatter);
+        log.debug(" Get Date strDate:{}, formatter:{}", escapeLog(strDate), formatter);
         LocalDateTime logDateTime = null;
         try {
             if (StringUtils.isNotBlank(strDate)) {
