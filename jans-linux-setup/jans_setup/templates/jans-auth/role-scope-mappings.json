@@ -1115,7 +1115,8 @@
         "https://jans.io/oauth/config/ssa.write",
         "https://jans.io/oauth/config/uma.readonly",
         "https://jans.io/oauth/config/uma.write",
-        "https://jans.io/oauth/config/uma.admin"
+        "https://jans.io/oauth/config/uma.admin",
+        "https://jans.io/oauth/config/fido2-metrics.readonly"
       ]
     }
   ]
