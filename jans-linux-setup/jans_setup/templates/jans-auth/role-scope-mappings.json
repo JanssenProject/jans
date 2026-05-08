@@ -978,14 +978,14 @@
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
-      "tag": "fido2-metrics"
+      "tag": "fido2"
     },
     {
       "permission": "https://jans.io/oauth/config/fido2.admin",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
-      "tag": "fido2-metrics"
+      "tag": "fido2"
     }
   ],
   "rolePermissionMapping": [
