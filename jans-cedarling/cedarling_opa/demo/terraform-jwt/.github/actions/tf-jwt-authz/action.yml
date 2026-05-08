@@ -1,0 +1,153 @@
+name: 'Terraform JWT Authorization'
+description: >
+  Fetch a GitHub OIDC token, authorize the Terraform command via Cedarling-OPA,
+  and run Terraform only when the Cedar policies permit it.
+  Requires the parent job to have `permissions: id-token: write`.
+
+inputs:
+  opa_url:
+    description: 'Base URL of the Cedarling-OPA server (e.g. http://opa-service:8181)'
+    required: true
+  workspace:
+    description: 'Target Terraform workspace — must match a CI::TerraformWorkspace entity (e.g. dev | staging | production)'
+    required: true
+  terraform_command:
+    description: >
+      Terraform sub-command (and any extra flags) to authorize and run.
+      For gated commands use e.g. "plan", "apply -auto-approve", "destroy -auto-approve".
+      Non-auth commands (init, fmt, validate) are forwarded to Terraform directly.
+    required: true
+  opa_policy_path:
+    description: 'OPA policy path to query, appended to /v1/data/ (default: infra/terraform_jwt)'
+    required: false
+    default: 'infra/terraform_jwt'
+  terraform_working_directory:
+    description: 'Directory from which to run Terraform (relative to the repo root, default: .)'
+    required: false
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    # ── Step 1: Fetch the GitHub OIDC token ───────────────────────────────────
+    # GitHub sets ACTIONS_ID_TOKEN_REQUEST_URL and ACTIONS_ID_TOKEN_REQUEST_TOKEN
+    # automatically when the job has `permissions: id-token: write`.
+    # The token is masked in logs immediately after it is obtained.
+    - name: Fetch GitHub OIDC token
+      id: fetch-token
+      shell: bash
+      run: |
+        if [[ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" || -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]]; then
+          echo "::error::ACTIONS_ID_TOKEN_REQUEST_URL / ACTIONS_ID_TOKEN_REQUEST_TOKEN are not set."
+          echo "::error::Make sure the parent job has 'permissions: id-token: write'."
+          exit 1
+        fi
+
+        TOKEN=$(curl -sf \
+          -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
+          | jq -r '.value')
+
+        if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+          echo "::error::Failed to obtain a GitHub OIDC token from the token endpoint."
+          exit 1
+        fi
+
+        echo "::add-mask::${TOKEN}"
+        echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+
+    # ── Step 2: Authorize via Cedarling-OPA and run Terraform ─────────────────
+    # Maps the Terraform sub-command to a Cedar action, builds the
+    # authorize_multi_issuer payload, queries OPA, and either runs Terraform
+    # (ALLOWED) or fails the step (DENIED).
+    - name: Authorize and run Terraform
+      shell: bash
+      working-directory: ${{ inputs.terraform_working_directory }}
+      env:
+        TF_JWT: ${{ steps.fetch-token.outputs.token }}
+        TF_WORKSPACE: ${{ inputs.workspace }}
+        OPA_URL: ${{ inputs.opa_url }}
+        TF_COMMAND: ${{ inputs.terraform_command }}
+        OPA_POLICY_PATH: ${{ inputs.opa_policy_path }}
+      run: |
+        # ── Map sub-command → Cedar action ────────────────────────────────────
+        TF_SUBCOMMAND=$(echo "${TF_COMMAND}" | awk '{print $1}')
+        case "${TF_SUBCOMMAND}" in
+          plan)    CEDAR_ACTION="Plan" ;;
+          apply)   CEDAR_ACTION="Apply" ;;
+          destroy) CEDAR_ACTION="Destroy" ;;
+          *)
+            # No authorization check for init, fmt, validate, output, etc.
+            # shellcheck disable=SC2086
+            exec terraform ${TF_COMMAND}
+            ;;
+        esac
+
+        # ── Decode JWT claims for display (Cedarling verifies the signature) ──
+        JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)
+        JWT_PAYLOAD=$(echo "${JWT_PAYLOAD_B64}" | tr -- '-_' '+/' | awk '{
+            n = length($0) % 4;
+            if (n == 2) print $0 "==";
+            else if (n == 3) print $0 "=";
+            else print $0;
+        }' | base64 -d 2>/dev/null || echo '{}')
+
+        JWT_REPO=$(echo "${JWT_PAYLOAD}" | jq -r '.repository // "unknown"')
+        JWT_REF=$(echo "${JWT_PAYLOAD}"  | jq -r '.ref         // "unknown"')
+        JWT_ENV=$(echo "${JWT_PAYLOAD}"  | jq -r '.environment // "(none)"')
+
+        # ── Build the authorize_multi_issuer payload ───────────────────────────
+        CURRENT_TIME=$(date +%s)
+        PAYLOAD=$(jq -n \
+          --arg jwt       "${TF_JWT}" \
+          --arg workspace "${TF_WORKSPACE}" \
+          --arg action    "CI::Action::\"${CEDAR_ACTION}\"" \
+          --argjson cur   "${CURRENT_TIME}" \
+          '{
+            input: {
+              tokens: [{ mapping: "CI::GitHubWorkflow", payload: $jwt }],
+              action: $action,
+              resource: {
+                cedar_entity_mapping: {
+                  entity_type: "CI::TerraformWorkspace",
+                  id: $workspace
+                }
+              },
+              context: { current_time: $cur }
+            }
+          }')
+
+        echo "tf-jwt-authz: checking authorization..."
+        echo "  Repository:  ${JWT_REPO}"
+        echo "  Ref:         ${JWT_REF}"
+        echo "  Environment: ${JWT_ENV}"
+        echo "  Action:      terraform ${TF_SUBCOMMAND}  →  CI::Action::\"${CEDAR_ACTION}\""
+        echo "  Workspace:   ${TF_WORKSPACE}  →  CI::TerraformWorkspace::\"${TF_WORKSPACE}\""
+        echo ""
+
+        # ── Query the Cedarling-OPA server ────────────────────────────────────
+        RESPONSE=$(curl -sf -X POST "${OPA_URL}/v1/data/${OPA_POLICY_PATH}" \
+          -H "Content-Type: application/json" \
+          -d "${PAYLOAD}") || {
+          echo "::error::Could not reach OPA server at ${OPA_URL}. Is opa-cedarling running?"
+          exit 1
+        }
+
+        DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+
+        # ── Enforce the decision ──────────────────────────────────────────────
+        if [[ "${DECISION}" == "true" ]]; then
+          REASONS=$(echo "${RESPONSE}" | jq -r '.result.result.reasons // [] | join(", ")')
+          echo "tf-jwt-authz: ALLOWED"
+          [[ -n "${REASONS}" ]] && echo "  Granted by Cedar policy: ${REASONS}"
+          echo ""
+          # shellcheck disable=SC2086
+          exec terraform ${TF_COMMAND}
+        else
+          echo "::error::tf-jwt-authz: DENIED"
+          echo "::error::The pipeline is not permitted to run 'terraform ${TF_SUBCOMMAND}' on workspace '${TF_WORKSPACE}'."
+          echo "::error::JWT claims — repository: ${JWT_REPO}  ref: ${JWT_REF}  environment: ${JWT_ENV}"
+          CEDAR_ERRORS=$(echo "${RESPONSE}" | jq -r '.result.result.errors // [] | join(", ")')
+          [[ -n "${CEDAR_ERRORS}" ]] && echo "::error::Cedarling errors: ${CEDAR_ERRORS}"
+          exit 1
+        fi
