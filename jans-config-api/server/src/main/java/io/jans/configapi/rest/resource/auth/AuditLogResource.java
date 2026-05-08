@@ -121,11 +121,11 @@ public class AuditLogResource extends ConfigBaseResource {
 
         // Get data based on pattern and date filter
         List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern);
-        log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
+        log.debug("Log fetched - logEntriesList:{}", logEntriesList);
 
         // Date filter
         logEntriesList = filterLogByDate(logEntriesList, startDate, endDate);
-        log.debug("Log fetched  - logEntriesList:{}", logEntriesList);
+        log.debug("Log filtered By Date - logEntriesList:{}", logEntriesList);
 
         LogPagedResult logPagedResult = getLogPagedResult(logEntriesList, startIndex, limit);
         log.debug("Audit Log PagedResult:{}", logPagedResult);
@@ -174,8 +174,10 @@ public class AuditLogResource extends ConfigBaseResource {
                 getStartIndex(logEntriesList, startIndex);
                 int toIndex = (startIndex + limit <= logEntriesList.size()) ? startIndex + limit
                         : logEntriesList.size();
-                log.debug("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
-                        escapeLog(toIndex));
+                if (log.isDebugEnabled()) {
+                    log.debug("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
+                            escapeLog(toIndex));
+                }
 
                 // Extract paginated data
                 List<String> sublist = logEntriesList.subList(startIndex, toIndex);
@@ -225,7 +227,6 @@ public class AuditLogResource extends ConfigBaseResource {
         }
 
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
-
             try {
                 logEntriesList.get(startIndex);
             } catch (IndexOutOfBoundsException ioe) {
@@ -289,7 +290,9 @@ public class AuditLogResource extends ConfigBaseResource {
         if (StringUtils.isNotBlank(startDate)) {
             try {
                 startLocal = parseDate(startDate);
-                log.debug(" startLocal:{} {}", startLocal, "\n\n");
+                if (log.isDebugEnabled()) {
+                    log.debug(" startLocal:{} {}", escapeLog(startLocal), "\n\n");
+                }
             } catch (DateTimeParseException dtpe) {
                 sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
             }
@@ -299,7 +302,9 @@ public class AuditLogResource extends ConfigBaseResource {
         if (StringUtils.isNotBlank(endDate)) {
             try {
                 endLocal = parseDate(endDate);
-                log.debug(" endLocal:{} {}", endLocal, "\n\n");
+                if (log.isDebugEnabled()) {
+                    log.debug(" endLocal:{} {}", escapeLog(endLocal), "\n\n");
+                }
             } catch (DateTimeParseException dtpe) {
                 sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
             }
@@ -357,7 +362,10 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private LocalDateTime getDate(String strDate, DateTimeFormatter formatter) throws DateTimeParseException {
-        log.debug(" Get Date strDate:{}, formatter:{}", escapeLog(strDate), formatter);
+        if (log.isDebugEnabled()) {
+            log.debug(" Get Date strDate:{}, formatter:{}", escapeLog(strDate), formatter);
+        }
+
         LocalDateTime logDateTime = null;
         try {
             if (StringUtils.isNotBlank(strDate)) {
@@ -371,16 +379,18 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private LocalDateTime parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
-        log.debug(" Parse Date date:{}, formatter:{}", date, formatter);
+        if (log.isDebugEnabled()) {
+            log.debug(" Parse Date date:{}, formatter:{}", escapeLog(date), formatter);
+        }
         return LocalDateTime.parse(date, formatter);
     }
 
     /**
      * Parses a user-supplied date string in either ISO-8601 date-time format (e.g.
-     * dd-MM-yyyy'T'HH:mm:ss.SSS'Z') or legacy dd-MM-yyyy format. Returns the date part as
-     * LocalDateTime for range comparison.
+     * dd-MM-yyyy'T'HH:mm:ss.SSS'Z') or legacy dd-MM-yyyy format. Returns the date
+     * part as LocalDateTime for range comparison.
      *
-     * @param dateStr           the date or date-time string from the API request
+     * @param dateStr the date or date-time string from the API request
      *
      * @return LocalDateTime for the given string, or null if dateStr is blank
      * @throws DateTimeParseException if the string cannot be parsed with any
@@ -391,7 +401,7 @@ public class AuditLogResource extends ConfigBaseResource {
             return null;
         }
         String trimmed = dateStr.trim();
-        DateTimeFormatter dateTimeFormatter = this.getDateTimeFormatter(dateStr);
+        DateTimeFormatter dateTimeFormatter = this.getDateTimeFormatter(trimmed);
 
         if (log.isInfoEnabled()) {
             log.info(" Parse Date dateStr:{}, dateTimeFormatter:{}", escapeLog(dateStr), dateTimeFormatter);
@@ -430,13 +440,19 @@ public class AuditLogResource extends ConfigBaseResource {
     }
 
     private DateTimeFormatter getDateTimeFormatter(String dateStr) {
-        log.debug(" Get DateTimeFormatter for dateStr:{} ", dateStr);
+        if (log.isDebugEnabled()) {
+            log.debug(" Get DateTimeFormatter for dateStr:{} ", escapeLog(dateStr));
+        }
 
         if (StringUtils.isBlank(dateStr)) {
             throwInternalServerException(" Date is null or blank");
         }
 
-        log.debug(" Get DateTimeFormatter for dateStr:{}, dateStr.length():{} ", dateStr, dateStr.length());
+        if (log.isDebugEnabled()) {
+            log.debug(" Get DateTimeFormatter for dateStr:{}, dateStr.length():{} ", escapeLog(dateStr),
+                    dateStr.length());
+        }
+
         if (dateStr.length() == DEFAULT_DATE_FORMAT.length()) {
             return new DateTimeFormatterBuilder().append(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT))
                     .parseDefaulting(HOUR_OF_DAY, 0).parseDefaulting(MINUTE_OF_HOUR, 0)
