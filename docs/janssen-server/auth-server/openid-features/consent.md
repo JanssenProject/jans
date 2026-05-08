@@ -29,7 +29,7 @@ In Janssen Server, consent happens during the authorization flow after user auth
 
 Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server.
 
-Casa's consent management plugin gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server.
+Casa's [consent management plugin](../../../casa/plugins/consent-management.md) gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server.
 
 ### Using API
 
@@ -81,7 +81,7 @@ Janssen supports customizing consent management beyond the default implementatio
 
 Refer to [Consent Gathering](../../../script-catalog/consent_gathering/consent-gathering.md) for implementation details and examples.
 
-### Related OpenID Connect Behavior
+## Related OpenID Connect Behavior
 
 - `prompt=consent` requests explicit consent interaction in the authorization flow.
 - `prompt=none` does not allow interactive consent and returns an error if consent is required.
