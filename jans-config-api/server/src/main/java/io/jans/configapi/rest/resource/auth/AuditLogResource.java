@@ -377,13 +377,12 @@ public class AuditLogResource extends ConfigBaseResource {
 
     /**
      * Parses a user-supplied date string in either ISO-8601 date-time format (e.g.
-     * yyyy-MM-ddTHH:mm:ssZ) or legacy dd-MM-yyyy format. Returns the date part as
-     * LocalDate for range comparison.
+     * dd-MM-yyyy'T'HH:mm:ss.SSS'Z') or legacy dd-MM-yyyy format. Returns the date part as
+     * LocalDateTime for range comparison.
      *
      * @param dateStr           the date or date-time string from the API request
-     * @param fallbackFormatter optional configured audit log date format (e.g.
-     *                          dd-MM-yyyy)
-     * @return LocalDate for the given string, or null if dateStr is blank
+     *
+     * @return LocalDateTime for the given string, or null if dateStr is blank
      * @throws DateTimeParseException if the string cannot be parsed with any
      *                                supported format
      */
