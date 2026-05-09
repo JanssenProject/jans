@@ -35,7 +35,12 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-vers
 chmod u+x start_janssen_aio_demo.sh
 ```
 
-Next, execute the script. You will need to provide your fully qualified domain name (FQDN), the persistence type (`MYSQL` or `PGSQL`), the Janssen version (leave empty `""` for the default), and your Virtual Machine's IP address in place of `<VM_IP>`.
+Next, execute the script. You will need to provide the following details:
+
+- Fully qualified domain name (FQDN)
+- Persistence type (`MYSQL` or `PGSQL`)
+- Janssen version (leave empty `""` for the default)
+- Virtual Machine's Public IP address in place of `<VM_IP>`
 
 
 === "MySQL"
