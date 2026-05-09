@@ -19,7 +19,7 @@
         <link rel="prev" href="../../helm-install/post-install/">
       
       
-        <link rel="next" href="../../setup/">
+        <link rel="next" href="../../../kubernetes-ops/">
       
       
         
@@ -1025,8 +1025,6 @@
       
         
       
-        
-      
     
     
     
@@ -1092,6 +1090,8 @@
       
         
           
+        
+      
         
       
         
@@ -1410,34 +1410,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../setup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Setup Instructions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2270,7 +2242,13 @@
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh<span class="w"> </span>
 chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.sh
 </code></pre></div>
-<p>Next, execute the script. You will need to provide your fully qualified domain name (FQDN), the persistence type (<code>MYSQL</code> or <code>PGSQL</code>), the Janssen version (leave empty <code>""</code> for the default), and your Virtual Machine's IP address in place of <code>&lt;VM_IP&gt;</code>.</p>
+<p>Next, execute the script. You will need to provide the following details:</p>
+<ul>
+<li>Fully qualified domain name (FQDN)</li>
+<li>Persistence type (<code>MYSQL</code> or <code>PGSQL</code>)</li>
+<li>Janssen version (leave empty <code>""</code> for the default)</li>
+<li>Virtual Machine's Public IP address in place of <code>&lt;VM_IP&gt;</code></li>
+</ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">MySQL</label><label for="__tabbed_1_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2289,10 +2267,10 @@ chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.s
 [I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ...
 [I] Waiting 120 seconds for services to initialize before starting health checks. Hang on...
 [W] Janssen is not ready yet; retrying in 10 seconds ...
-[I] Janssen is ready to accept request
+[I] Janssen is ready to accept requests
 </code></pre></div>
 <h2 id="verify-installation-by-accessing-standard-endpoints">Verify Installation By Accessing Standard Endpoints<a class="headerlink" href="#verify-installation-by-accessing-standard-endpoints" title="Permanent link">#</a></h2>
-<p>To access Janssen Server standard endpoints from outside of the Docker container, your system's <code>/etc/hosts</code> file needs to be updated. Open the file and add the IP domain record, which should be the IP of the instance where Docker is installed (your <code>&lt;VM_IP&gt;</code>), followed by the hostname used during installation (<code>demoexample.jans.io</code>).</p>
+<p>To access Janssen Server standard endpoints from outside the Docker container, your system's <code>/etc/hosts</code> file needs to be updated. Open the file and add the IP domain record, which should be the IP of the instance where Docker is installed (your <code>&lt;VM_IP&gt;</code>), followed by the hostname used during installation (<code>demoexample.jans.io</code>).</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># For example</span>
 <span class="m">172</span>.22.0.3<span class="w">      </span>demoexample.jans.io
 </code></pre></div>
@@ -2303,7 +2281,7 @@ chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.s
 <p>Janssen Server can be configured using the Text-based User Interface (TUI). </p>
 <ol>
 <li>
-<p>Download the <code>jans-cli-tui</code>:</p>
+<p>Download the <code>jans-cli-tui</code> from the <a href="https://github.com/JanssenProject/jans/releases/latest">release</a> assets depending on your OS. For example:</p>
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
 </code></pre></div>
 </li>
@@ -2332,7 +2310,7 @@ chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.s
 <h2 id="uninstall-remove-the-janssen-server">Uninstall / Remove the Janssen Server<a class="headerlink" href="#uninstall-remove-the-janssen-server" title="Permanent link">#</a></h2>
 <p>This Docker-based installation uses <code>docker compose</code> under the hood to create the network and containers, and it stores volume data and templates in a local <code>jans-aio-demo</code> directory.</p>
 <p>Run the command below in the same directory where you executed the installation script to stop the containers, remove them, and clean up the generated files and volumes:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>down<span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>down<span class="w"> </span>-v<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>jans-aio-demo<span class="w"> </span>compose.yaml
 </code></pre></div>
 <p>Console messages like below confirm the successful removal:</p>
 <div class="highlight"><pre><span></span><code>[+] down 6/6
@@ -2365,7 +2343,7 @@ chmod<span class="w"> </span>u+x<span class="w"> </span>start_janssen_aio_demo.s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 23, 2026 05:06:26 UTC"><span class="timeago" datetime="2026-04-23T05:06:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 23, 2026 05:06:26 UTC">2026-04-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 9, 2026 14:51:31 UTC"><span class="timeago" datetime="2026-05-09T14:51:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 9, 2026 14:51:31 UTC">2026-05-09</span>
   </span>
 
     

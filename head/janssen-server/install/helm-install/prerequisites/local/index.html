@@ -1025,8 +1025,6 @@
       
         
       
-        
-      
     
     
     
@@ -1092,6 +1090,8 @@
       
         
           
+        
+      
         
       
         
@@ -1455,23 +1455,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="System Requirements">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#resource-breakdown-by-service" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Breakdown by Service
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1734,34 +1717,6 @@
   
 
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../setup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Setup Instructions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2371,23 +2326,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="System Requirements">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#resource-breakdown-by-service" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Breakdown by Service
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -2621,87 +2559,8 @@
 <li>4 CPU cores</li>
 <li>50 GB hard-disk</li>
 </ul>
-<h3 id="resource-breakdown-by-service">Resource Breakdown by Service<a class="headerlink" href="#resource-breakdown-by-service" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Service</th>
-<th>CPU</th>
-<th>RAM</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Auth server</td>
-<td>2.5</td>
-<td>2.5GB</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>FIDO2</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>No</td>
-</tr>
-<tr>
-<td>SCIM</td>
-<td>1</td>
-<td>1GB</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Config job</td>
-<td>0.3</td>
-<td>0.3GB</td>
-<td>Yes (fresh installs)</td>
-</tr>
-<tr>
-<td>Persistence job</td>
-<td>0.3</td>
-<td>0.3GB</td>
-<td>Yes (fresh installs)</td>
-</tr>
-<tr>
-<td>Nginx</td>
-<td>1</td>
-<td>1GB</td>
-<td>Yes (if not using ALB/Istio)</td>
-</tr>
-<tr>
-<td>Auth-key-rotation</td>
-<td>0.3</td>
-<td>0.3GB</td>
-<td>Strongly recommended</td>
-</tr>
-<tr>
-<td>Config-API</td>
-<td>1</td>
-<td>1GB</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Casa</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Link</td>
-<td>0.5</td>
-<td>1GB</td>
-<td>No</td>
-</tr>
-<tr>
-<td>SAML</td>
-<td>0.5</td>
-<td>1GB</td>
-<td>No</td>
-</tr>
-</tbody>
-</table>
 <h2 id="quick-start-script">Quick Start Script<a class="headerlink" href="#quick-start-script" title="Permanent link">#</a></h2>
-<p>Start a fresh Ubuntu 18.04/20.04/22.04 VM with ports 443 and 80 open, then run:</p>
+<p>Start a fresh Ubuntu VM with ports 443 and 80 open, then run:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-
 wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
 </code></pre></div>
@@ -2733,8 +2592,8 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
 <h2 id="manual-setup">Manual Setup<a class="headerlink" href="#manual-setup" title="Permanent link">#</a></h2>
 <p>If you prefer manual setup:</p>
 <ol>
-<li>Install <a href="https://minikube.sigs.k8s.io/docs/start/">Minikube</a> or <a href="https://microk8s.io/">MicroK8s</a></li>
-<li>Install <a href="https://helm.sh/docs/intro/install/">Helm3</a></li>
+<li>Install <a href="https://minikube.sigs.k8s.io/docs/start/">Minikube</a> or <a href="https://github.com/canonical/microk8s/tree/master#quickstart">MicroK8s</a></li>
+<li>Install <a href="https://helm.sh/docs/intro/install/">Helm</a></li>
 <li>Create the namespace:
    <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>jans
 </code></pre></div></li>
@@ -2763,7 +2622,7 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 9, 2026 14:51:31 UTC"><span class="timeago" datetime="2026-05-09T14:51:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 9, 2026 14:51:31 UTC">2026-05-09</span>
   </span>
 
     
