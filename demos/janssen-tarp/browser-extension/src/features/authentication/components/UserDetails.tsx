@@ -209,15 +209,78 @@ const UserDetails = ({
       return performSilentLogout(idToken, config);
     }
 
-    return new Promise<void>((resolve) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: buildLogoutUrl(idToken, config),
-          interactive: true,
-        },
-        () => resolve()
+    const currentWindow = await new Promise<chrome.windows.Window>((res, rej) =>
+      chrome.windows.getCurrent((win) => {
+        if (!win) return rej(new Error('Could not get current window'));
+        res(win);
+      })
+    );
+
+    if (currentWindow.incognito) {
+      // ── Incognito fallback ────────────────────────────────────────────────
+      const logoutUrl = buildLogoutUrl(idToken, config);
+      const postLogoutRedirect = chrome.identity.getRedirectURL('logout');
+
+      const popup = await new Promise<chrome.windows.Window>((res, rej) =>
+        chrome.windows.create(
+          {
+            url: logoutUrl,
+            type: 'popup',
+            width: 600,
+            height: 700,
+            incognito: true,
+            focused: true,
+          },
+          (win) => {
+            if (!win) return rej(new Error('Failed to create logout popup window'));
+            res(win);
+          }
+        )
       );
-    });
+
+      const tabId = popup.tabs?.[0]?.id;
+      if (!tabId) return;
+
+      await new Promise<void>((resolve) => {
+        const listener = (
+          updatedTabId: number,
+          _changeInfo: chrome.tabs.TabChangeInfo,
+          tab: chrome.tabs.Tab
+        ) => {
+          if (updatedTabId !== tabId) return;
+          const url = tab.url ?? '';
+
+          if (url.startsWith(postLogoutRedirect)) {
+            chrome.tabs.onUpdated.removeListener(listener);
+            chrome.windows.remove(popup.id!);
+            resolve();
+          }
+        };
+
+        chrome.tabs.onUpdated.addListener(listener);
+
+        // Resolve if user closes popup manually
+        chrome.windows.onRemoved.addListener(function onClosed(winId) {
+          if (winId === popup.id) {
+            chrome.windows.onRemoved.removeListener(onClosed);
+            chrome.tabs.onUpdated.removeListener(listener);
+            resolve(); // logout still completes locally
+          }
+        });
+      });
+
+    } else {
+      // ── Normal flow ───────────────────────────────────────────────────────
+      return new Promise<void>((resolve) => {
+        chrome.identity.launchWebAuthFlow(
+          {
+            url: buildLogoutUrl(idToken, config),
+            interactive: true,
+          },
+          () => resolve()
+        );
+      });
+    }
   }
 
   async function performSilentLogout(

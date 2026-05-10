@@ -121,12 +121,81 @@ export default function AuthFlowInputs({
         });
       }
 
-      const resultUrl: string = await new Promise((resolve, reject) => {
-        chrome.identity.launchWebAuthFlow({ url: authzUrl, interactive: true }, (responseUrl) => {
-          if (chrome.runtime.lastError || !responseUrl)
-            reject(new Error(chrome.runtime.lastError?.message || 'No redirect URL'));
-          else resolve(responseUrl);
-        });
+      const resultUrl: string = await new Promise(async (resolve, reject) => {
+        // Detect if we're in incognito
+        const currentWindow = await new Promise<chrome.windows.Window>((res) =>
+          chrome.windows.getCurrent(res)
+        );
+
+        if (currentWindow.incognito) {
+          // ── Incognito fallback: manual popup window ──────────────────────────
+          const redirectBase = Array.isArray(client?.redirectUris)
+            ? client.redirectUris[0]
+            : chrome.identity.getRedirectURL();
+
+          // Open a real browser popup
+          const popup = await new Promise<chrome.windows.Window>((res, rej) =>
+            chrome.windows.create(
+              {
+                url: authzUrl,
+                type: 'popup',
+                width: 600,
+                height: 700,
+                incognito: true,
+                focused: true,
+              },
+              (win) => {
+                if (!win) return rej(new Error('Failed to create auth popup window'));
+                res(win);
+              }
+            )
+          );
+
+          // Poll the popup tab for the redirect URL
+          const tabId = popup.tabs?.[0]?.id;
+          if (!tabId) return reject(new Error('Could not open auth popup'));
+
+          const listener = (
+            updatedTabId: number,
+            changeInfo: chrome.tabs.TabChangeInfo,
+            tab: chrome.tabs.Tab
+          ) => {
+            if (updatedTabId !== tabId) return;
+            const url = tab.url ?? '';
+
+            if (url.startsWith(redirectBase)) {
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.windows.remove(popup.id!);
+              resolve(url);
+            }
+
+            // Detect errors returned to the redirect URI
+            if (changeInfo.status === 'complete' && url.includes('error=')) {
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.windows.remove(popup.id!);
+              reject(new Error(`Auth error in redirect: ${url}`));
+            }
+          };
+
+          chrome.tabs.onUpdated.addListener(listener);
+
+          // Handle user closing the popup manually
+          chrome.windows.onRemoved.addListener(function onClosed(winId) {
+            if (winId === popup.id) {
+              chrome.windows.onRemoved.removeListener(onClosed);
+              chrome.tabs.onUpdated.removeListener(listener);
+              reject(new Error('Authentication cancelled by user'));
+            }
+          });
+
+        } else {
+          // ── Normal flow ──────────────────────────────────────────────────────
+          chrome.identity.launchWebAuthFlow({ url: authzUrl, interactive: true }, (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl)
+              reject(new Error(chrome.runtime.lastError?.message || 'No redirect URL'));
+            else resolve(responseUrl);
+          });
+        }
       });
 
       if (resultUrl) {
