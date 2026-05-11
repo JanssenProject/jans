@@ -6,9 +6,10 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::{HttpClientConfig,
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, JwtConfig,
-    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use serde::Deserialize;
 use serde_json::json;
