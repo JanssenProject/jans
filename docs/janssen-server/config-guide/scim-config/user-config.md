@@ -555,7 +555,7 @@ In response `user.json` we will get
       "groups": [
         {
           "value": "60B7",
-          "display": "Jannsen Manager Group",
+          "display": "Janssen Manager Group",
           "type": "direct",
           "$ref": "https://raju.jans13.me/jans-scim/restv1/v2/Groups/60B7"
         }

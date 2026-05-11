@@ -103,6 +103,8 @@
 //! - Issue access tokens for Lock Server communication
 //! - Provide JWKS endpoint for key validation
 
+pub(crate) mod health_registry;
+mod health_ticker;
 mod lock_config;
 mod log_entry;
 mod log_worker;
@@ -119,10 +121,12 @@ mod proto {
     tonic::include_proto!("io.jans.lock.audit");
 }
 
-use crate::app_types::PdpID;
+use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
 use crate::http::{HttpClient, InitializeHttpClientError};
+use crate::lock::health_registry::HealthRegistry;
+use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::interface::Loggable;
@@ -156,8 +160,17 @@ pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
     telemetry_ticker: Option<(CancellationToken, crate::http::JoinHandle<()>)>,
+    health_ticker: Option<(CancellationToken, crate::http::JoinHandle<()>)>,
+    health_registry: Option<HealthRegistry>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
+}
+
+impl LockService {
+    /// Returns the shared health registry for registering subsystem health checks.
+    pub(crate) fn health_registry(&self) -> Option<&HealthRegistry> {
+        self.health_registry.as_ref()
+    }
 }
 
 pub(crate) fn init_http_client(
@@ -194,6 +207,7 @@ impl LockService {
         bootstrap_conf: &LockServiceConfig,
         logger: Option<LoggerWeak>,
         metrics: Arc<MetricsCollector>,
+        app_name: Option<ApplicationName>,
         http_conf: HttpClientConfig,
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
@@ -270,10 +284,38 @@ impl LockService {
             TelemetryTicker::spawn(metrics, logger.clone(), telemetry_interval)
         });
 
+        let (health_ticker, health_registry) = match (
+            bootstrap_conf.health_interval,
+            lock_config.audit_endpoints.health,
+        ) {
+            (Some(health_interval), Some(health_endpoint)) => {
+                let registry = HealthRegistry::new();
+
+                let ticker = create_health_ticker(
+                    HealthTickerParams {
+                        health_url: health_endpoint.0,
+                        pdp_id,
+                        app_name,
+                        health_interval,
+                        logger: logger.clone(),
+                        registry: registry.clone(),
+                    },
+                    bootstrap_conf,
+                    &client_creds.access_token,
+                    http_conf,
+                )?;
+
+                (Some(ticker), Some(registry))
+            },
+            _ => (None, None),
+        };
+
         Ok(Self {
             log_worker,
             telemetry_worker,
             telemetry_ticker,
+            health_ticker,
+            health_registry,
             logger,
             cancel_tkn,
         })
@@ -282,6 +324,10 @@ impl LockService {
     pub(crate) async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
         if let Some((cancel_tkn, handle)) = self.telemetry_ticker.take() {
+            cancel_tkn.cancel();
+            () = handle.await_result().await;
+        }
+        if let Some((cancel_tkn, handle)) = self.health_ticker.take() {
             cancel_tkn.cancel();
             () = handle.await_result().await;
         }
@@ -400,6 +446,48 @@ fn create_worker(
     }
 }
 
+fn create_health_ticker(
+    params: HealthTickerParams,
+    bootstrap_conf: &LockServiceConfig,
+    access_token: &str,
+    http_conf: HttpClientConfig,
+) -> Result<(CancellationToken, crate::http::JoinHandle<()>), InitLockServiceError> {
+    match bootstrap_conf.transport {
+        LockTransport::Rest => {
+            let mut headers = HeaderMap::new();
+            let mut auth_header = HeaderValue::from_str(&format!("Bearer {access_token}"))
+                .map_err(|e| InitLockServiceError::InvalidAccessToken(e.to_string()))?;
+            auth_header.set_sensitive(true);
+            headers.insert("Authorization", auth_header);
+
+            let http_client = init_http_client(
+                Some(headers),
+                bootstrap_conf.accept_invalid_certs,
+                http_conf,
+            )?;
+
+            let transport = Arc::new(RestTransport::new(
+                http_client,
+                params.logger.as_ref().and_then(std::sync::Weak::upgrade),
+            ));
+
+            Ok(HealthTicker::spawn(transport, params))
+        },
+        #[cfg(feature = "grpc")]
+        LockTransport::Grpc => {
+            use transport::grpc::GrpcTransport;
+
+            let transport = Arc::new(GrpcTransport::new(
+                params.health_url.origin().ascii_serialization(),
+                access_token,
+                params.logger.as_ref().and_then(std::sync::Weak::upgrade),
+            )?);
+
+            Ok(HealthTicker::spawn(transport, params))
+        },
+    }
+}
+
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
         match entry.get_log_kind() {
@@ -500,9 +588,16 @@ mod test {
 
         // Test startup
         let metrics = Arc::new(MetricsCollector::new(0));
-        let logger = LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default())
-            .await
-            .expect("build lock logger");
+        let logger = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock logger");
         lock_config_endpoint.assert();
         oidc_endpoint.assert();
         jwks_endpoint.assert();
@@ -560,9 +655,16 @@ mod test {
 
         // Test startup without SSA
         let metrics = Arc::new(MetricsCollector::new(0));
-        let logger = LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default())
-            .await
-            .expect("build lock logger");
+        let logger = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock logger");
         lock_config_endpoint.assert();
         oidc_endpoint.assert();
         dcr_endpoint.assert();
@@ -616,8 +718,15 @@ mod test {
 
         // Test startup with invalid SSA should fail
         let metrics = Arc::new(MetricsCollector::new(0));
-        let result =
-            LockService::new(pdp_id, &config, None, metrics, HttpClientConfig::default()).await;
+        let result = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await;
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
@@ -844,5 +953,64 @@ mod test {
         fn get_tags(&self) -> Vec<&str> {
             Vec::new()
         }
+    }
+
+    fn mock_health_endpoint(server: &mut ServerGuard) -> Mock {
+        server
+            .mock("POST", "/jans-auth/v1/audit/health/bulk")
+            .match_body(mockito::Matcher::Any)
+            .with_status(200)
+            .expect_at_least(2)
+            .create()
+    }
+
+    #[tokio::test]
+    async fn test_lock_service_health_checks() {
+        let pdp_id = PdpID::new();
+
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, lock_config_endpoint) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
+        let dcr_endpoint = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
+        let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
+        let health_endpoint = mock_health_endpoint(&mut mock_lock_server);
+
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: None,
+            log_interval: None,
+            health_interval: Some(Duration::from_millis(100)),
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        };
+
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let _lock = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock logger");
+        lock_config_endpoint.assert();
+        oidc_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
+
+        // Wait for health checks to be sent
+        sleep(Duration::from_secs(1)).await;
+
+        health_endpoint.assert();
     }
 }

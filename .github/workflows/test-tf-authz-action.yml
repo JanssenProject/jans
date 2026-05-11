@@ -1,0 +1,244 @@
+# End-to-end tests for the tf-authz composite action.
+#
+# Test scenarios are defined in test-cases.yml alongside the policy files.
+# Add new ALLOWED/DENIED cases there — no changes to this workflow are needed.
+#
+# Note: OPA is started with `docker compose` rather than `jobs.<job>.services` because
+# service containers launch before `actions/checkout`, making it impossible to
+# bind-mount the repo's config/rego/policy-store files into the container.
+
+name: Test tf-authz composite action
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz/**'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/tf_authz.sh'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/docker-compose.yml'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/**/*.rego'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/policy-store/**'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/opa-config.json'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/test-cases.yml'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
+  pull_request:
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz/**'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/tf_authz.sh'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/docker-compose.yml'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/**/*.rego'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/policy-store/**'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/opa-config.json'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/test-cases.yml'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
+      - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
+
+jobs:
+  test-authz-action:
+    name: Test tf-authz composite action (data-driven)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 2
+
+      - name: Check PERMISSIONS.md is in sync with Cedar policy IDs
+        run: |
+          POLICY_DIR="jans-cedarling/cedarling_opa/demo/terraform/policy-store/policies"
+          PERMISSIONS_FILE="jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md"
+
+          # Forward check: every Cedar @id() annotation is documented in PERMISSIONS.md.
+          missing=()
+          while IFS= read -r id; do
+            if ! grep -qF "$id" "$PERMISSIONS_FILE"; then
+              missing+=("$id")
+            fi
+          done < <(grep -rh '@id(' "$POLICY_DIR"/*.cedar | sed 's/.*@id("\([^"]*\)").*/\1/')
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "ERROR: The following Cedar policy @id() values are not mentioned in PERMISSIONS.md:" >&2
+            for id in "${missing[@]}"; do
+              echo "  - $id" >&2
+            done
+            echo "" >&2
+            echo "Please update PERMISSIONS.md to document every policy rule." >&2
+            exit 1
+          fi
+          echo "OK: PERMISSIONS.md mentions every Cedar policy @id() annotation."
+
+          # Reverse check: every policy ID documented in PERMISSIONS.md exists as a Cedar @id().
+          # The "Complete Decision Table" section is the authoritative source of documented
+          # policy IDs — every policy governing an authorization decision must have a row
+          # there. IDs are extracted using the project naming convention [a-z]+-permit-[a-z0-9-]+,
+          # which scopes the search to that section and avoids false positives from
+          # path-prefixed examples in the "How to extend" prose (e.g.
+          # policy-store/policies/readonly-permit-plan.cedar) and .cedarschema references.
+          declare -A cedar_id_set
+          while IFS= read -r id; do
+            cedar_id_set[$id]=1
+          done < <(grep -rh '@id(' "$POLICY_DIR"/*.cedar | sed 's/.*@id("\([^"]*\)").*/\1/')
+
+          orphaned=()
+          while IFS= read -r id; do
+            if [[ -z "${cedar_id_set[$id]}" ]]; then
+              orphaned+=("$id")
+            fi
+          done < <(
+            awk '/^## Complete Decision Table/{found=1; next} /^---/ && found{found=0; next} found && /^\|/' \
+              "$PERMISSIONS_FILE" \
+              | grep -oE '[a-z]+-permit-[a-z0-9-]+' | sort -u
+          )
+
+          if [ ${#orphaned[@]} -gt 0 ]; then
+            echo "ERROR: The following policy IDs appear in PERMISSIONS.md but have no matching Cedar @id() annotation:" >&2
+            for id in "${orphaned[@]}"; do
+              echo "  - $id" >&2
+            done
+            echo "" >&2
+            echo "Please remove stale entries from PERMISSIONS.md or restore the missing Cedar policy files." >&2
+            exit 1
+          fi
+          echo "OK: Every policy ID documented in PERMISSIONS.md has a matching Cedar @id() annotation."
+
+      - name: Check new/modified Cedar policies follow the role-addition checklist
+        run: |
+          POLICY_DIR="jans-cedarling/cedarling_opa/demo/terraform/policy-store/policies"
+          SCRIPT="jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh"
+
+          # On a pull_request event compare against the base branch.
+          # On a push event compare against the previous commit.
+          # Fall back to checking all .cedar files when history is unavailable.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_REF="HEAD~1"
+          fi
+
+          changed_files=()
+          while IFS= read -r f; do
+            changed_files+=("$f")
+          done < <(
+            git diff --name-only --diff-filter=AM "$BASE_REF" HEAD -- "${POLICY_DIR}/*.cedar" \
+              2>/dev/null || true
+          )
+
+          if [ ${#changed_files[@]} -eq 0 ]; then
+            echo "No .cedar files were added or modified in this push — checking all policies as a baseline."
+            bash "$SCRIPT"
+          else
+            echo "Checking ${#changed_files[@]} added/modified .cedar file(s):"
+            for f in "${changed_files[@]}"; do echo "  $f"; done
+            bash "$SCRIPT" "${changed_files[@]}"
+          fi
+
+      - name: Self-test check-policy-checklist.sh (validate script contract)
+        run: |
+          SCRIPT="jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh"
+          POLICY_DIR="jans-cedarling/cedarling_opa/demo/terraform/policy-store/policies"
+
+          # Confirm the script accepts repo-root-relative paths as produced by
+          # `git diff --name-only` and passes for known-good policies.
+          echo "--- Self-test 1: repo-relative path resolution (must PASS) ---"
+          bash "$SCRIPT" \
+            "${POLICY_DIR}/admin-permit-all.cedar" \
+            "${POLICY_DIR}/developer-permit-plan.cedar" \
+            "${POLICY_DIR}/ops-permit-plan-apply.cedar"
+
+          # Confirm the script exits 1 and prints a clear error when a new role
+          # has no entry in PERMISSIONS.md or test-cases.yml.
+          echo "--- Self-test 2: unknown role detection (must FAIL with exit 1) ---"
+          TMPFILE="$(mktemp /tmp/selftest-XXXXXX.cedar)"
+          cat > "$TMPFILE" << 'EOF'
+          @id("selftest-permit-plan")
+          permit (
+              principal in Infra::Role::"SelfTestUnknownRole",
+              action == Infra::Action::"Plan",
+              resource
+          );
+          EOF
+          if bash "$SCRIPT" "$TMPFILE"; then
+            echo "ERROR: script should have failed for an undocumented role but it passed." >&2
+            rm -f "$TMPFILE"
+            exit 1
+          fi
+          echo "OK: script correctly rejected undocumented role."
+          rm -f "$TMPFILE"
+
+          # Confirm the script exits 1 when all explicit paths are unresolvable.
+          echo "--- Self-test 3: unresolvable path detection (must FAIL with exit 1) ---"
+          if bash "$SCRIPT" "nonexistent-policy.cedar"; then
+            echo "ERROR: script should have failed for an unresolvable path but it passed." >&2
+            exit 1
+          fi
+          echo "OK: script correctly failed when given an unresolvable path."
+
+          echo "All self-tests passed."
+
+      - name: Start opa-cedarling service
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Wait for opa-cedarling to be healthy
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
+              echo "opa-cedarling is ready."
+              exit 0
+            fi
+            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
+            sleep 2
+          done
+          echo "ERROR: opa-cedarling did not become healthy within 60 s." >&2
+          docker compose -f docker-compose.yml logs opa-cedarling >&2 || true
+          exit 1
+
+      - name: Run Cedar policy test cases
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform
+        env:
+          OPA_URL: http://localhost:8181
+        run: bash run-authz-tests.sh
+
+      # Smoke-test the composite action wrapper directly so regressions in the
+      # action's own logic (payload building, curl invocation, exit-code handling)
+      # are caught independently of the data-driven OPA checks above.
+
+      - name: 'Smoke — ALLOWED: composite action (Ops/plan/staging)'
+        uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
+        with:
+          tf_user_id:    ci-ops-bot
+          tf_user_roles: Ops
+          tf_workspace:  staging
+          tf_subcommand: plan
+          opa_url:       http://localhost:8181
+
+      - name: 'Smoke — DENIED: composite action (Developer/apply/staging)'
+        id: smoke-denied
+        continue-on-error: true
+        uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
+        with:
+          tf_user_id:    ci-dev-bot
+          tf_user_roles: Developer
+          tf_workspace:  staging
+          tf_subcommand: apply
+          opa_url:       http://localhost:8181
+
+      - name: Assert composite action blocked the unauthorized operation
+        run: |
+          if [ "${{ steps.smoke-denied.outcome }}" != "failure" ]; then
+            echo "ERROR: Expected the unauthorized Terraform apply to be blocked (exit 1), but it succeeded." >&2
+            exit 1
+          fi
+          echo "Confirmed: unauthorized Terraform apply was correctly blocked by Cedar policy."
+
+      - name: Stop OPA
+        if: always()
+        working-directory: jans-cedarling/cedarling_opa/demo/terraform
+        run: docker compose -f docker-compose.yml down || true
