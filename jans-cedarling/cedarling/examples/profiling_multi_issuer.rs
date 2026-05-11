@@ -6,10 +6,10 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::{HttpClientConfig,
+use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, TokenInput,
+    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use serde_json::json;
 use std::collections::HashSet;

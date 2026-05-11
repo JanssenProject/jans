@@ -28,7 +28,6 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.server.BaseTest;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.security.KeyStoreException;
@@ -44,52 +43,34 @@ import static org.testng.AssertJUnit.assertNotNull;
  */
 public class JwtCrossCheckTest extends BaseTest {
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs256CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS256);
+    public void rs256CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs384CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS384);
+    public void rs384CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs512CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS512);
+    public void rs512CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void es256CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES256);
+    public void es256CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void es384CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES384);
+    public void es384CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void es512CrossCheck(final String dnName,
-                                final String keyStoreFile,
-                                final String keyStoreSecret) throws Exception {
-        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES512);
+    public void es512CrossCheck() throws Exception {
+        crossCheck(getCryptoProvider(), SignatureAlgorithm.ES512);
     }
 
     private void crossCheck(AuthCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm) throws Exception {
