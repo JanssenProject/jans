@@ -7,7 +7,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    EntityData, HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
@@ -96,6 +96,7 @@ async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>>
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 

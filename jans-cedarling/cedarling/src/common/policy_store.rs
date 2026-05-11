@@ -130,7 +130,7 @@ pub struct TrustedIssuersValidationError {
 /// When loaded from the new directory/archive format, includes optional metadata
 /// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
-pub struct PolicyStoreWithID {
+pub(crate) struct PolicyStoreWithID {
     /// ID of policy store
     pub(crate) id: String,
     /// Policy store value

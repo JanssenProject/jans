@@ -15,6 +15,7 @@ use url::Url;
 use crate::{
     LogLevel, LogWriter,
     async_sleep::sleep,
+    http::HttpClient,
     jwt::{
         IssuerConfig, TokenCache,
         decode::{DecodeJwtError, decode_jwt},
@@ -31,6 +32,16 @@ use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
 
+struct StatusListUpdateCtx {
+    ttl: u64,
+    status_list_url: Url,
+    decoding_key: Option<Arc<DecodingKey>>,
+    validator: Arc<RwLock<JwtValidator>>,
+    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
+    logger: Option<Logger>,
+    http_client: HttpClient,
+}
+
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
@@ -46,6 +57,7 @@ impl StatusListCache {
         key_service: &KeyService,
         token_cache: TokenCache,
         logger: Option<Logger>,
+        http_client: HttpClient,
     ) -> Result<(), UpdateStatusListError> {
         let openid_config = iss_config
             .openid_config
@@ -55,7 +67,7 @@ impl StatusListCache {
             .status_list_endpoint
             .as_ref()
             .ok_or(UpdateStatusListError::MissingStatusListUri)?;
-        let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url)
+        let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url, &http_client)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
         let iss = iss_config.policy.iss_claim();
@@ -95,17 +107,21 @@ impl StatusListCache {
         // spawn a background task to handle updating the statuslist if the JWT has a TTL
         // claim
         if let Some(ttl) = ttl {
-            crate::http::spawn_task(keep_status_list_updated(
+            let ctx = StatusListUpdateCtx {
                 ttl,
-                status_list_url.clone(),
+                status_list_url: status_list_url.clone(),
                 decoding_key,
                 validator,
-                self.status_lists.clone(),
+                status_lists: self.status_lists.clone(),
                 logger,
+                http_client: http_client.clone(),
+            };
+            crate::http::spawn_task(keep_status_list_updated(
                 // callback is called on updated status list
                 move || {
                     token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
                 },
+                ctx,
             ));
         }
 
@@ -123,34 +139,38 @@ impl StatusListCache {
 
 /// Keeps the statuslist form the given URL updated based on the TTL
 /// `cb` will be called when status list updated
-async fn keep_status_list_updated<F>(
-    mut ttl: u64,
-    status_list_url: Url,
-    decoding_key: Option<Arc<DecodingKey>>,
-    validator: Arc<RwLock<JwtValidator>>,
-    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
-    logger: Option<Logger>,
-    cb: F,
-) where
+async fn keep_status_list_updated<F>(cb: F, ctx: StatusListUpdateCtx)
+where
     F: Fn(),
 {
+    let StatusListUpdateCtx {
+        mut ttl,
+        status_list_url,
+        decoding_key,
+        validator,
+        status_lists,
+        logger,
+        http_client,
+    } = ctx;
+
     loop {
         sleep(Duration::from_secs(ttl)).await;
 
-        let status_list_jwt = match StatusListJwtStr::get_from_url(&status_list_url).await {
-            Ok(jwt) => jwt,
-            Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "failed to fetch an updated the status list from '{0}': {1}",
-                        status_list_url.as_str(),
-                        e
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
-                continue;
-            },
-        };
+        let status_list_jwt =
+            match StatusListJwtStr::get_from_url(&status_list_url, &http_client).await {
+                Ok(jwt) => jwt,
+                Err(e) => {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "failed to fetch an updated the status list from '{0}': {1}",
+                            status_list_url.as_str(),
+                            e
+                        ),
+                        Some(LogLevel::ERROR),
+                    ));
+                    continue;
+                },
+            };
 
         let result = {
             validator
@@ -242,18 +262,26 @@ mod test {
     use super::*;
     use crate::JwtConfig;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::http::HttpClientConfig;
     use crate::jwt::test_utils::MockServer;
     use std::collections::HashSet;
     use std::time::Duration;
 
     #[tokio::test]
     async fn keep_status_list_updated() {
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
         // Setup
         let validators = JwtValidatorCache::default();
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), None)
+            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
             .await
             .unwrap();
         // we initialize the status list with a 1 sec ttl
@@ -291,6 +319,7 @@ mod test {
                 &key_service,
                 TokenCache::default(),
                 None,
+                http_client,
             )
             .await
             .unwrap();
