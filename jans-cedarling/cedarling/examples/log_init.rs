@@ -10,9 +10,9 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LogConfig,
-    LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-    log_config::StdOutLoggerMode,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, HttpClientConfig, JwtConfig,
+    LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, log_config::StdOutLoggerMode,
 };
 use std::env;
 
@@ -61,6 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 

@@ -3,6 +3,8 @@ name = "cedarling_c"
 version = "0.1.0"
 edition = "2024"
 description = "C bindings for the Jans Cedarling authorization engine"
+license = "Apache-2.0"
+publish = false
 
 [lib]
 name = "cedarling_c"

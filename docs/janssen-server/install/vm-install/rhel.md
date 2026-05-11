@@ -224,7 +224,7 @@ You will lose all data related to Janssen Server.
 
 Are you sure to uninstall Janssen Server? [yes/N] yes
 
-Uninstalling Jannsen Server...
+Uninstalling Janssen Server...
 Removing /etc/default/jans-config-api
 Stopping jans-config-api
 Removing /etc/default/jans-scim

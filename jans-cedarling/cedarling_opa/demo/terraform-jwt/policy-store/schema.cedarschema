@@ -1,0 +1,44 @@
+namespace CI {
+    // URL type for TrustedIssuer's issuer_entity_id attribute.
+    type Url = {"host": String, "path": String, "protocol": String};
+
+    // Cedarling builds one TrustedIssuer entity per issuer in policy-store/trusted-issuers/.
+    // The issuer name field must equal the Cedar namespace ("CI") so the entity type resolves correctly.
+    entity TrustedIssuer = {"issuer_entity_id": Url};
+
+    // A GitHub Actions workflow run authenticated via OIDC JWT.
+    // Cedarling maps verified JWT claims to these attributes when the token mapping
+    // is "CI::GitHubWorkflow" (see policy-store/trusted-issuers/github-actions.json).
+    entity GitHubWorkflow {
+        iss:          TrustedIssuer,
+        sub:          String,
+        repository:   String,
+        ref:          String,
+        workflow:     String,
+        // Optional: only present when the job targets a GitHub Environment and
+        // required reviewers have approved. Always use `has environment` before accessing.
+        environment?: String,
+    } tags Set<String>;
+
+    // A named Terraform workspace / environment target, e.g. "dev", "staging", "production".
+    entity TerraformWorkspace;
+
+    // Injected automatically by Cedarling's multi-issuer context builder.
+    // Access token claims in Cedar policies via context.tokens.ci_githubworkflow.<attr>.
+    type TokensContext = {
+        ci_githubworkflow?: GitHubWorkflow,
+        total_token_count: Long,
+    };
+
+    // Actions map to Terraform sub-commands:
+    //   Plan → terraform plan  |  Apply → terraform apply  |  Destroy → terraform destroy
+    action Plan, Apply, Destroy
+        appliesTo {
+            principal: [GitHubWorkflow],
+            resource:  [TerraformWorkspace],
+            context: {
+                current_time: Long,
+                tokens: TokensContext,
+            }
+        };
+}

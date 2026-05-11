@@ -5,19 +5,17 @@
 
 //! REST transport implementation for Lock Server communication.
 
-use std::sync::Arc;
-
 use async_trait::async_trait;
-use reqwest::Client;
 
 use crate::{
+    http::HttpClient,
     lock::{
         LockLogEntry,
         transport::{
-            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportResult,
+            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
             mapping::{
-                CedarlingLogEntry, CedarlingMetricsEntry, LockServerLogEntry,
-                LockServerMetricsEntry,
+                CedarlingLogEntry, CedarlingMetricsEntry, LockServerHealthEntry,
+                LockServerLogEntry, LockServerMetricsEntry,
             },
         },
     },
@@ -25,13 +23,13 @@ use crate::{
 };
 
 pub(crate) struct RestTransport {
-    client: Arc<Client>,
+    client: HttpClient,
     logger: Option<Logger>,
 }
 
 impl RestTransport {
     /// Construct a new [`RestTransport`]
-    pub(crate) fn new(client: Arc<Client>, logger: Option<Logger>) -> Self {
+    pub(crate) fn new(client: HttpClient, logger: Option<Logger>) -> Self {
         Self { client, logger }
     }
 }
@@ -57,6 +55,7 @@ impl AuditTransport for RestTransport {
                 >(entries, "log", warn)?;
 
                 self.client
+                    .raw_client
                     .post(url.as_str())
                     .json(&entries)
                     .send()
@@ -70,6 +69,36 @@ impl AuditTransport for RestTransport {
                 >(entries, "telemetry", warn)?;
 
                 self.client
+                    .raw_client
+                    .post(url.as_str())
+                    .json(&entries)
+                    .send()
+                    .await?
+                    .error_for_status()?;
+            },
+            AuditKind::Health(url) => {
+                let entries: Vec<LockServerHealthEntry> = entries
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(idx, v)| match serde_json::from_str(v) {
+                        Ok(e) => Some(e),
+                        Err(e) => {
+                            self.logger.log_any(LockLogEntry::warn(format!(
+                                "failed to parse health entry[{idx}]: {e}"
+                            )));
+                            None
+                        },
+                    })
+                    .collect();
+
+                if entries.is_empty() {
+                    return Err(TransportError::Serialization(
+                        "all health entries were malformed, nothing to send".to_string(),
+                    ));
+                }
+
+                self.client
+                    .raw_client
                     .post(url.as_str())
                     .json(&entries)
                     .send()
@@ -84,7 +113,7 @@ impl AuditTransport for RestTransport {
 
 #[cfg(test)]
 mod test {
-    use crate::lock::transport::TransportError;
+    use crate::{HttpClientConfig, lock::transport::TransportError};
 
     use super::*;
 
@@ -92,8 +121,8 @@ mod test {
     use serde_json::json;
     use url::Url;
 
-    fn create_test_client() -> Arc<Client> {
-        Arc::new(Client::builder().build().unwrap())
+    fn create_test_client() -> HttpClient {
+        HttpClient::new(HttpClientConfig::default()).expect("Http client should be initialized")
     }
 
     fn mock_log_endpoint(server: &mut ServerGuard) -> mockito::Mock {
@@ -357,6 +386,222 @@ mod test {
             .await
             .expect("telemetry should be sent successfully");
 
+        mock.assert();
+    }
+
+    fn mock_health_endpoint(server: &mut ServerGuard) -> mockito::Mock {
+        server
+            .mock("POST", "/audit/health/bulk")
+            .match_header("content-type", "application/json")
+            .with_status(200)
+            .create()
+    }
+
+    #[tokio::test]
+    async fn test_send_health_success() {
+        let mut server = Server::new_async().await;
+        let mock = mock_health_endpoint(&mut server);
+
+        let endpoint: Url = format!("{}/audit/health/bulk", server.url())
+            .parse()
+            .expect("valid health endpoint URL");
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send(&entries, &AuditKind::Health(endpoint))
+            .await
+            .expect("health check should be sent successfully");
+
+        mock.assert();
+    }
+
+    #[tokio::test]
+    async fn test_send_health_empty() {
+        let server = Server::new_async().await;
+        let endpoint: Url = format!("{}/audit/health/bulk", server.url())
+            .parse()
+            .unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        transport
+            .send(&[], &AuditKind::Health(endpoint))
+            .await
+            .expect("health check should be sent successfully");
+    }
+
+    #[tokio::test]
+    async fn test_send_health_server_error_500() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("POST", "/audit/health/bulk")
+            .with_status(500)
+            .with_body("Internal Server Error")
+            .create();
+
+        let endpoint: Url = format!("{}/audit/health/bulk", server.url())
+            .parse()
+            .unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        let error = transport
+            .send(&entries, &AuditKind::Health(endpoint))
+            .await
+            .expect_err("this should cause a server error");
+        assert!(
+            matches!(error, TransportError::Rest(_)),
+            "expected reqwest error, got {error:?}"
+        );
+        mock.assert();
+    }
+
+    #[tokio::test]
+    async fn test_send_health_client_error_400() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("POST", "/audit/health/bulk")
+            .with_status(400)
+            .with_body("Bad Request")
+            .create();
+
+        let endpoint: Url = format!("{}/audit/health/bulk", server.url())
+            .parse()
+            .unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        let error = transport
+            .send(&entries, &AuditKind::Health(endpoint))
+            .await
+            .expect_err("this should cause a client error");
+        assert!(
+            matches!(error, TransportError::Rest(_)),
+            "expected reqwest error, got {error:?}"
+        );
+        mock.assert();
+    }
+
+    #[tokio::test]
+    async fn test_send_health_network_failure() {
+        let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            json!({
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "node_name": "test-pdp",
+                "status": "running",
+                "engine_status": {
+                    "core": "success"
+                }
+            })
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        let error = transport
+            .send(&entries, &AuditKind::Health(endpoint))
+            .await
+            .expect_err("this should cause a network error");
+        assert!(
+            matches!(error, TransportError::Rest(_)),
+            "expected reqwest error, got {error:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_malformed_json() {
+        let endpoint: Url = "http://localhost:8080/audit/health/bulk".parse().unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries = vec![
+            "not valid json".to_string().into_boxed_str(),
+            "{ invalid json }".to_string().into_boxed_str(),
+        ];
+
+        let result = transport.send(&entries, &AuditKind::Health(endpoint)).await;
+        assert!(
+            matches!(result, Err(TransportError::Serialization(_))),
+            "expected serialization error"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_large_batch() {
+        let mut server = Server::new_async().await;
+        let mock = mock_health_endpoint(&mut server);
+
+        let endpoint: Url = format!("{}/audit/health/bulk", server.url())
+            .parse()
+            .unwrap();
+        let transport = RestTransport::new(create_test_client(), None);
+
+        let entries: Vec<_> = (0..1000)
+            .map(|_| {
+                json!({
+                    "creation_date": "2026-03-23T11:50:37.504Z",
+                    "event_time": "2026-03-23T11:50:37.504Z",
+                    "service": "test_app",
+                    "node_name": "test-pdp",
+                    "status": "running",
+                    "engine_status": {
+                        "core": "success"
+                    }
+                })
+                .to_string()
+                .into_boxed_str()
+            })
+            .collect();
+
+        transport
+            .send(&entries, &AuditKind::Health(endpoint))
+            .await
+            .expect("health checks should be sent successfully");
         mock.assert();
     }
 }

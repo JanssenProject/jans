@@ -91,8 +91,14 @@ impl<'a> ServiceFactory<'a> {
             let trusted_issuers = self.policy_store()?.trusted_issuers.clone();
             let logger = self.log_service();
             let service = Arc::new(
-                JwtService::new(config, trusted_issuers, Some(logger), self.metrics.clone())
-                    .await?,
+                JwtService::new(
+                    config,
+                    trusted_issuers,
+                    Some(logger),
+                    self.metrics.clone(),
+                    self.service_config.http_client.clone(),
+                )
+                .await?,
             );
             self.container.jwt_service = Some(service.clone());
             Ok(service)
