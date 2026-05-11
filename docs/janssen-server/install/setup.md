@@ -133,14 +133,14 @@ Below are the optional arguments:
 | -admin-password ADMIN_PASSWORD                     | Used as the Administrator password                                                                        |
 | -jans-max-mem JANS_MAX_MEM                         | Total memory (in KB) to be used by Janssen Server                                                         |
 | -properties-password PROPERTIES_PASSWORD           | Encoded setup.properties file password                                                                    |
-| -approved-issuer APPROVED_ISSUER                   | Api Approved Issuer                                                                                       |
+| -approved-issuer APPROVED_ISSUER                   | API Approved Issuer                                                                                       |
 | --force-download                                   | Force downloading files                                                                                   |
 | --download-exit                                    | Download files and exits                                                                                  |
 | -jans-app-version JANS_APP_VERSION                 | Version for Janssen applications                                                                          |
 | -jans-build JANS_BUILD                             | Build version for Janssen applications                                                                    |
 | -setup-branch SETUP_BRANCH                         | Janssen setup GitHub branch                                                                               |
 | --disable-config-api-security                      | Turn off oauth2 security validation for jans-config-api                                                   |
-| --cli-test-client                                  | Use config api test client for CLI                                                                        |
+| --cli-test-client                                  | Use config API test client for CLI                                                                        |
 | --import-ldif IMPORT_LDIF                          | Render LDIF templates from directory and import them in Database                                          |
 | -enable-script ENABLE_SCRIPT                       | inum of script to enable                                                                                  |
 | -disable-script DISABLE_SCRIPT                     | inum of script to disable                                                                                 |
@@ -155,7 +155,7 @@ Below are the optional arguments:
 | --no-scim                                          | Do not install Scim Server                                                                                |
 | --no-fido2                                         | Do not install Fido2 Server                                                                               |
 | --with-casa                                        | Install Gluu/Flex Casa Server                                                                             |
-| --load-config-api-test                             | Load Config Api Test Data                                                                                 |
+| --load-config-api-test                             | Load Config API Test Data                                                                                 |
 | --install-link                                     | Install Link Server                                                                                       |
 | -config-patch-creds CONFIG_PATCH_CREDS             | password:username for downloading auto test ciba password                                                 |
 | -test-client-id TEST_CLIENT_ID                     | ID of test client which has all available scopes. Must be in UUID format.                                 |
