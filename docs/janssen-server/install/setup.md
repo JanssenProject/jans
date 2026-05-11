@@ -131,14 +131,14 @@ Below are the optional arguments:
 | --dump-config-on-error | Dump configuration on error |
 | --no-progress | Use simple progress |
 | -admin-password ADMIN_PASSWORD | Used as the Administrator password |
-| -jans-max-mem JANS_MAX_MEM | Total memory (in KB) to be used by Jannsen Server |
+| -jans-max-mem JANS_MAX_MEM | Total memory (in KB) to be used by Janssen Server |
 | -properties-password PROPERTIES_PASSWORD | Encoded setup.properties file password |
 | -approved-issuer APPROVED_ISSUER | Api Approved Issuer |
 | --force-download | Force downloading files |
 | --download-exit | Download files and exits |
-| -jans-app-version JANS_APP_VERSION | Version for Jannsen applications |
+| -jans-app-version JANS_APP_VERSION | Version for Janssen applications |
 | -jans-build JANS_BUILD | Build version for Janssen applications |
-| -setup-branch SETUP_BRANCH | Jannsen setup github branch |
+| -setup-branch SETUP_BRANCH | Janssen setup github branch |
 | --disable-config-api-security | Turn off oauth2 security validation for jans-config-api |
 | --cli-test-client | Use config api test client for CLI |
 | --import-ldif IMPORT_LDIF | Render ldif templates from directory and import them in Database
