@@ -124,7 +124,7 @@ Below are the optional arguments:
 | -rdbm-port RDBM_PORT                               | RDBM port                                                                                                 |
 | -rdbm-db RDBM_DB                                   | RDBM database                                                                                             |
 | -rdbm-host RDBM_HOST                               | RDBM host                                                                                                 |
-| -rdbm-schema                                       | Jans Database Schema                                                                                      |
+| -rdbm-schema RDBM_SCHEMA                           | Jans Database Schema                                                                                      |
 | -remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN   | To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server |
 | --reset-rdbm-db                                    | Deletes all tables on target database. Warning! You will lose all data on target database.                |
 | --shell                                            | Drop into interactive shell before starting installation                                                  |
