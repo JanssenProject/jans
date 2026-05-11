@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, TokenInput,
+    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -83,8 +83,8 @@ async fn prepare_cedarling_with_jwt_validation(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store =
-        serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE).expect("a valid YAML policy store");
+    let mut policy_store = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE)
+        .expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
@@ -116,6 +116,7 @@ async fn prepare_cedarling_with_jwt_validation(
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

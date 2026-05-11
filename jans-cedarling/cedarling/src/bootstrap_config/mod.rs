@@ -26,7 +26,7 @@ use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
-use crate::context_data_api::DataStoreConfig;
+use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
 // Re-export types that need to be public
 pub use authorization_config::AuthorizationConfig;
@@ -62,6 +62,8 @@ pub struct BootstrapConfig {
     pub max_base64_size: Option<usize>,
     /// Data store configuration for the pushed data API.
     pub data_store_config: DataStoreConfig,
+    /// HTTP client settings shared across all outbound requests (timeouts, retries).
+    pub http_client_config: HttpClientConfig,
 }
 
 impl Default for BootstrapConfig {
@@ -88,6 +90,7 @@ impl Default for BootstrapConfig {
             max_default_entities: None,
             max_base64_size: None,
             data_store_config: DataStoreConfig::default(),
+            http_client_config: HttpClientConfig::default(),
         }
     }
 }

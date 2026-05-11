@@ -3,6 +3,7 @@ name = "cedarling_c"
 version = "0.1.0"
 edition = "2024"
 description = "C bindings for the Jans Cedarling authorization engine"
+license = "Apache-2.0"
 
 [lib]
 name = "cedarling_c"
@@ -15,3 +16,6 @@ cedarling = { path = "../../cedarling", features = ["blocking"] }
 
 [build-dependencies]
 cbindgen = "0.29.0"
+
+[package.metadata.cargo-machete]
+ignored = ["serde", "cbindgen"]
