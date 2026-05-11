@@ -239,7 +239,10 @@ const UserDetails = ({
       );
 
       const tabId = popup.tabs?.[0]?.id;
-      if (!tabId) return;
+      if (!tabId) {
+        chrome.windows.remove(popup.id!);
+        throw new Error('Could not open logout popup');
+      }
 
       await new Promise<void>((resolve, reject) => {
         const listener = (

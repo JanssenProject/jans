@@ -158,7 +158,10 @@ export default function AuthFlowInputs({
 
           // Poll the popup tab for the redirect URL
           const tabId = popup.tabs?.[0]?.id;
-          if (!tabId) return reject(new Error('Could not open auth popup'));
+          if (!tabId) {
+            chrome.windows.remove(popup.id!);
+            return reject(new Error('Could not open auth popup'));
+          }
 
           const listener = (
             updatedTabId: number,
