@@ -241,7 +241,7 @@ const UserDetails = ({
       const tabId = popup.tabs?.[0]?.id;
       if (!tabId) return;
 
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         const listener = (
           updatedTabId: number,
           _changeInfo: chrome.tabs.TabChangeInfo,
@@ -264,20 +264,31 @@ const UserDetails = ({
           if (winId === popup.id) {
             chrome.windows.onRemoved.removeListener(onClosed);
             chrome.tabs.onUpdated.removeListener(listener);
-            resolve(); // logout still completes locally
+            reject(new Error('Logout cancelled by user'));
           }
         });
       });
 
     } else {
       // ── Normal flow ───────────────────────────────────────────────────────
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         chrome.identity.launchWebAuthFlow(
           {
             url: buildLogoutUrl(idToken, config),
             interactive: true,
           },
-          () => resolve()
+          (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl) {
+              reject(
+                new Error(
+                  chrome.runtime.lastError?.message ??
+                  'Logout flow did not complete'
+                )
+              );
+              return;
+            }
+            resolve();
+          }
         );
       });
     }

@@ -121,14 +121,19 @@ export default function AuthFlowInputs({
         });
       }
 
-      const resultUrl: string = await new Promise(async (resolve, reject) => {
-        // Detect if we're in incognito
-        const currentWindow = await new Promise<chrome.windows.Window>((res) =>
-          chrome.windows.getCurrent(res)
-        );
+      const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
+        chrome.windows.getCurrent(res)
+      );
+      if (!currentWindow) {
+        throw new Error('Could not get current window');
+      }
 
-        if (currentWindow.incognito) {
+      const resultUrl: string = currentWindow.incognito
+        ? await new Promise<string>(async (resolve, reject) => {
+
           // ── Incognito fallback: manual popup window ──────────────────────────
+
+
           const redirectBase = Array.isArray(client?.redirectUris)
             ? client.redirectUris[0]
             : chrome.identity.getRedirectURL();
@@ -188,15 +193,16 @@ export default function AuthFlowInputs({
             }
           });
 
-        } else {
+        })
+        : await new Promise<string>((resolve, reject) => {
           // ── Normal flow ──────────────────────────────────────────────────────
           chrome.identity.launchWebAuthFlow({ url: authzUrl, interactive: true }, (responseUrl) => {
             if (chrome.runtime.lastError || !responseUrl)
               reject(new Error(chrome.runtime.lastError?.message || 'No redirect URL'));
             else resolve(responseUrl);
           });
-        }
-      });
+
+        });
 
       if (resultUrl) {
         const urlParams = new URLSearchParams(new URL(resultUrl).search);
