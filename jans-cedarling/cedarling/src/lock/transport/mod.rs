@@ -31,12 +31,13 @@ pub(super) type TransportResult<T> = Result<T, TransportError>;
 pub(super) enum AuditKind {
     Log(Url),
     Telemetry(Url),
+    Health(Url),
 }
 
 impl AuditKind {
     pub(super) fn url(&self) -> &Url {
         match self {
-            AuditKind::Log(url) | AuditKind::Telemetry(url) => url,
+            AuditKind::Log(url) | AuditKind::Telemetry(url) | AuditKind::Health(url) => url,
         }
     }
 }
@@ -46,6 +47,7 @@ impl Display for AuditKind {
         match self {
             AuditKind::Log(_) => write!(f, "log"),
             AuditKind::Telemetry(_) => write!(f, "telemetry"),
+            AuditKind::Health(_) => write!(f, "health"),
         }
     }
 }

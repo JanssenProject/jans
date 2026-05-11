@@ -5,9 +5,9 @@
 
 #![allow(clippy::cast_precision_loss)]
 
-use cedarling::{HttpClientConfig,
+use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityData, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    EntityData, HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;

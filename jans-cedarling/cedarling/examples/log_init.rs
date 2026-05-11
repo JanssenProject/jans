@@ -9,10 +9,10 @@
 // and `use std::env` prevents that compilation.
 #![cfg(not(target_family = "wasm"))]
 
-use cedarling::{HttpClientConfig,
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LogConfig,
-    LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-    log_config::StdOutLoggerMode,
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, HttpClientConfig, JwtConfig,
+    LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, log_config::StdOutLoggerMode,
 };
 use std::env;
 
