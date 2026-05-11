@@ -141,7 +141,7 @@ Below are the optional arguments:
 | -setup-branch SETUP_BRANCH                         | Janssen setup GitHub branch                                                                               |
 | --disable-config-api-security                      | Turn off oauth2 security validation for jans-config-api                                                   |
 | --cli-test-client                                  | Use config api test client for CLI                                                                        |
-| --import-ldif IMPORT_LDIF                          | Render ldif templates from directory and import them in Database                                          |
+| --import-ldif IMPORT_LDIF                          | Render LDIF templates from directory and import them in Database                                          |
 | -enable-script ENABLE_SCRIPT                       | inum of script to enable                                                                                  |
 | -disable-script DISABLE_SCRIPT                     | inum of script to disable                                                                                 |
 | -disable-selinux                                   | Disable SELinux                                                                                           |
@@ -151,7 +151,7 @@ Below are the optional arguments:
 | --allow-pre-released-features                      | Enable options to install experimental features, not yet officially supported                             |
 | --no-data                                          | Do not import any data to database backend, used for clustering                                           |
 | --no-jsauth                                        | Do not install OAuth2 Authorization Server                                                                |
-| --no-config-api                                    | Do not install Jans Auth Config Api                                                                       |
+| --no-config-api                                    | Do not install Jans Auth Config API                                                                       |
 | --no-scim                                          | Do not install Scim Server                                                                                |
 | --no-fido2                                         | Do not install Fido2 Server                                                                               |
 | --with-casa                                        | Install Gluu/Flex Casa Server                                                                             |
