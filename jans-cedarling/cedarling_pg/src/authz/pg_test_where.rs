@@ -325,3 +325,38 @@ pub fn run_unsigned_predicate_matches_rls_count_parity() {
 
     let _ = fs::remove_dir_all(&work);
 }
+
+/// `cedarling_explain` should include request/diagnostic/policy metadata on a successful call.
+///
+/// Uses `WhereOpen` which is an unconditional permit for `Jans::Issue` resources.
+pub fn run_explain_includes_policy_hits_and_policies() {
+    let work = setup_engine_with_where_policies("explain");
+    let result = crate::trace::cedarling_explain(
+        r#"{
+            "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "issue-1" },
+            "country": "US",
+            "tags": ["vip"]
+        }"#,
+        r#"Jans::Action::"WhereOpen""#,
+    );
+
+    let v = &result.0;
+    assert!(
+        v.get("error").is_none(),
+        "explain should succeed for WhereOpen; got: {v}"
+    );
+    assert!(
+        v.get("request_id").and_then(|x| x.as_str()).is_some(),
+        "successful explain must include request_id; got: {v}"
+    );
+    assert!(
+        v.get("policy_hits").and_then(|x| x.as_array()).is_some_and(|a| !a.is_empty()),
+        "successful explain should include non-empty policy_hits; got: {v}"
+    );
+    assert!(
+        v.get("policies").and_then(|x| x.as_array()).is_some_and(|a| !a.is_empty()),
+        "successful explain should include non-empty policies; got: {v}"
+    );
+
+    let _ = fs::remove_dir_all(&work);
+}

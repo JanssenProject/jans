@@ -63,6 +63,11 @@ fn cedarling_authorized_inner(
         ));
     };
 
+    let (resource_type, resource_id) = crate::trace::extract_entity_info(resource_trimmed);
+    let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
+
+    status::record_request();
+
     let context_from_guc = guc_config::context_utf8();
     let context_trimmed = context_from_guc.as_deref().unwrap_or("");
     let ttl = guc_config::cache_ttl_seconds();
@@ -76,16 +81,30 @@ fn cedarling_authorized_inner(
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
         status::record_cache_hit();
         status::record_decision(decision);
+        let timestamp = chrono::Utc::now().to_rfc3339();
+        push_trace(AuthorizationTrace {
+            timestamp,
+            action: action_trimmed.to_string(),
+            duration_ms: 0,
+            decision: Some(decision),
+            error_category: None,
+            request_id: String::new(),
+            resource_type,
+            resource_id,
+            principal_id: None,
+            shadow,
+            cache_hit: true,
+            policy_hits: vec![],
+            diag_errors: vec![],
+        });
         return finalize_decision(decision);
     }
-
-    status::record_request();
 
     let engine = match engine::global_cedarling() {
         Ok(e) => e,
         Err(e) => {
             extension_log::log_engine_failure(&e);
-            status::record_error();
+            status::record_error_msg(&e.to_string());
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -93,37 +112,53 @@ fn cedarling_authorized_inner(
     let start = std::time::Instant::now();
     let timestamp = chrono::Utc::now().to_rfc3339();
 
-    match authz_bridge::authorize_multi_issuer_decision(
+    match authz_bridge::authorize_multi_issuer_outcome(
         engine.as_ref(),
         token_str.as_str(),
         resource_trimmed,
         action_trimmed,
         context_from_guc.as_deref(),
     ) {
-        Ok(decision) => {
+        Ok(outcome) => {
             let duration_ms = start.elapsed().as_millis() as u64;
-            authz_cache::global_cache().store(ttl, cache_key, decision);
-            status::record_decision(decision);
+            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
+            status::record_decision(outcome.decision);
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
-                decision: Some(decision),
+                decision: Some(outcome.decision),
                 error_category: None,
+                request_id: outcome.request_id,
+                resource_type,
+                resource_id,
+                principal_id: None,
+                shadow,
+                cache_hit: false,
+                policy_hits: outcome.policy_hits,
+                diag_errors: outcome.diag_errors,
             });
-            finalize_decision(decision)
+            finalize_decision(outcome.decision)
         },
         Err(e) => {
             let duration_ms = start.elapsed().as_millis() as u64;
             extension_log::log_multi_issuer_bridge_failure(&e);
             let ce = CedarlingError::from(e);
-            status::record_error();
+            status::record_error_msg(&ce.to_string());
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
                 decision: None,
                 error_category: Some(ce.category()),
+                request_id: String::new(),
+                resource_type,
+                resource_id,
+                principal_id: None,
+                shadow,
+                cache_hit: false,
+                policy_hits: vec![],
+                diag_errors: vec![],
             });
             finalize_error(&ce)
         },
@@ -166,6 +201,20 @@ fn cedarling_authorize_unsigned_inner(
         ));
     }
 
+    let (resource_type, resource_id) = crate::trace::extract_entity_info(resource_trimmed);
+    // Derive principal_id from the principal JSON if one was provided.
+    let principal_id: Option<String> = principal_json
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(|s| {
+            let (_, id) = crate::trace::extract_entity_info(s);
+            if id.is_empty() { None } else { Some(id) }
+        })
+        .flatten();
+    let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
+
+    status::record_request();
+
     let principal_norm = principal_json
         .map(str::trim)
         .filter(|s| !s.is_empty())
@@ -183,10 +232,24 @@ fn cedarling_authorize_unsigned_inner(
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
         status::record_cache_hit();
         status::record_decision(decision);
+        let timestamp = chrono::Utc::now().to_rfc3339();
+        push_trace(AuthorizationTrace {
+            timestamp,
+            action: action_trimmed.to_string(),
+            duration_ms: 0,
+            decision: Some(decision),
+            error_category: None,
+            request_id: String::new(),
+            resource_type,
+            resource_id,
+            principal_id,
+            shadow,
+            cache_hit: true,
+            policy_hits: vec![],
+            diag_errors: vec![],
+        });
         return finalize_decision(decision);
     }
-
-    status::record_request();
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
         principal_json,
@@ -197,7 +260,7 @@ fn cedarling_authorize_unsigned_inner(
         Ok(r) => r,
         Err(e) => {
             extension_log::log_unsigned_bridge_failure(&e);
-            status::record_error();
+            status::record_error_msg(&e.to_string());
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -206,7 +269,7 @@ fn cedarling_authorize_unsigned_inner(
         Ok(e) => e,
         Err(e) => {
             extension_log::log_engine_failure(&e);
-            status::record_error();
+            status::record_error_msg(&e.to_string());
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -214,31 +277,47 @@ fn cedarling_authorize_unsigned_inner(
     let start = std::time::Instant::now();
     let timestamp = chrono::Utc::now().to_rfc3339();
 
-    match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
-        Ok(decision) => {
+    match authz_bridge::authorize_unsigned_outcome_for_request(engine.as_ref(), request) {
+        Ok(outcome) => {
             let duration_ms = start.elapsed().as_millis() as u64;
-            authz_cache::global_cache().store(ttl, cache_key, decision);
-            status::record_decision(decision);
+            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
+            status::record_decision(outcome.decision);
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
-                decision: Some(decision),
+                decision: Some(outcome.decision),
                 error_category: None,
+                request_id: outcome.request_id,
+                resource_type,
+                resource_id,
+                principal_id,
+                shadow,
+                cache_hit: false,
+                policy_hits: outcome.policy_hits,
+                diag_errors: outcome.diag_errors,
             });
-            finalize_decision(decision)
+            finalize_decision(outcome.decision)
         },
         Err(e) => {
             let duration_ms = start.elapsed().as_millis() as u64;
             extension_log::log_unsigned_bridge_failure(&e);
             let ce = CedarlingError::from(e);
-            status::record_error();
+            status::record_error_msg(&ce.to_string());
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
                 decision: None,
                 error_category: Some(ce.category()),
+                request_id: String::new(),
+                resource_type,
+                resource_id,
+                principal_id,
+                shadow,
+                cache_hit: false,
+                policy_hits: vec![],
+                diag_errors: vec![],
             });
             finalize_error(&ce)
         },

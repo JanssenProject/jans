@@ -15,7 +15,7 @@ use crate::engine;
 use crate::error::CedarlingError;
 use crate::extension_log;
 use crate::functions::authorized::{finalize_decision, finalize_error};
-use crate::guc_config;
+use crate::guc_config::{self, CedarlingMode};
 use crate::status;
 use crate::trace::{push_trace, AuthorizationTrace};
 
@@ -60,6 +60,11 @@ pub fn cedarling_authorized_row(
         Err(e) => return finalize_error(&CedarlingError::JsonParsing(e.to_string())),
     };
 
+    let (resource_type, resource_id) = crate::trace::extract_entity_info(&resource_str);
+    let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
+
+    status::record_request();
+
     let ttl = guc_config::cache_ttl_seconds();
     let cache_key = authz_cache::unsigned_key(
         authz_cache::policy_segment_from_bootstrap_path(),
@@ -71,10 +76,24 @@ pub fn cedarling_authorized_row(
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
         status::record_cache_hit();
         status::record_decision(decision);
+        let timestamp = chrono::Utc::now().to_rfc3339();
+        push_trace(AuthorizationTrace {
+            timestamp,
+            action: action_trimmed.to_string(),
+            duration_ms: 0,
+            decision: Some(decision),
+            error_category: None,
+            request_id: String::new(),
+            resource_type,
+            resource_id,
+            principal_id: None,
+            shadow,
+            cache_hit: true,
+            policy_hits: vec![],
+            diag_errors: vec![],
+        });
         return finalize_decision(decision);
     }
-
-    status::record_request();
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
         None,
@@ -85,7 +104,7 @@ pub fn cedarling_authorized_row(
         Ok(r) => r,
         Err(e) => {
             extension_log::log_unsigned_bridge_failure(&e);
-            status::record_error();
+            status::record_error_msg(&e.to_string());
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -94,7 +113,7 @@ pub fn cedarling_authorized_row(
         Ok(e) => e,
         Err(e) => {
             extension_log::log_engine_failure(&e);
-            status::record_error();
+            status::record_error_msg(&e.to_string());
             return finalize_error(&CedarlingError::from(e));
         },
     };
@@ -102,31 +121,47 @@ pub fn cedarling_authorized_row(
     let start = std::time::Instant::now();
     let timestamp = chrono::Utc::now().to_rfc3339();
 
-    match authz_bridge::authorize_unsigned_decision_for_request(engine.as_ref(), request) {
-        Ok(decision) => {
+    match authz_bridge::authorize_unsigned_outcome_for_request(engine.as_ref(), request) {
+        Ok(outcome) => {
             let duration_ms = start.elapsed().as_millis() as u64;
-            authz_cache::global_cache().store(ttl, cache_key, decision);
-            status::record_decision(decision);
+            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
+            status::record_decision(outcome.decision);
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
-                decision: Some(decision),
+                decision: Some(outcome.decision),
                 error_category: None,
+                request_id: outcome.request_id,
+                resource_type,
+                resource_id,
+                principal_id: None,
+                shadow,
+                cache_hit: false,
+                policy_hits: outcome.policy_hits,
+                diag_errors: outcome.diag_errors,
             });
-            finalize_decision(decision)
+            finalize_decision(outcome.decision)
         },
         Err(e) => {
             let duration_ms = start.elapsed().as_millis() as u64;
             extension_log::log_unsigned_bridge_failure(&e);
             let ce = CedarlingError::from(e);
-            status::record_error();
+            status::record_error_msg(&ce.to_string());
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
                 duration_ms,
                 decision: None,
                 error_category: Some(ce.category()),
+                request_id: String::new(),
+                resource_type,
+                resource_id,
+                principal_id: None,
+                shadow,
+                cache_hit: false,
+                policy_hits: vec![],
+                diag_errors: vec![],
             });
             finalize_error(&ce)
         },

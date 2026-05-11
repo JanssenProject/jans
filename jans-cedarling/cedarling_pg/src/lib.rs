@@ -92,6 +92,7 @@ const _: fn(&str) -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engi
     engine::try_init_cedarling_from_bootstrap_path;
 const _: fn() -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
     engine::global_cedarling;
+const _: fn() -> Option<std::sync::Arc<cedarling::blocking::Cedarling>> = engine::peek_cedarling;
 const _: fn() -> guc_config::CedarlingMode = guc_config::mode;
 const _: fn() -> guc_config::CedarlingLogLevelGuc = guc_config::log_level;
 const _: fn() -> guc_config::CedarlingStrategy = guc_config::strategy;
@@ -130,6 +131,19 @@ const _: fn(
     cedarling::RequestUnsigned,
 ) -> Result<bool, authz_bridge::UnsignedBridgeError> =
     authz_bridge::authorize_unsigned_decision_for_request;
+const _: fn(
+    &cedarling::blocking::Cedarling,
+    &str,
+    &str,
+    &str,
+    Option<&str>,
+) -> Result<authz_bridge::AuthorizeOutcome, authz_bridge::AuthorizeBridgeError> =
+    authz_bridge::authorize_multi_issuer_outcome;
+const _: fn(
+    &cedarling::blocking::Cedarling,
+    cedarling::RequestUnsigned,
+) -> Result<authz_bridge::AuthorizeOutcome, authz_bridge::UnsignedBridgeError> =
+    authz_bridge::authorize_unsigned_outcome_for_request;
 #[allow(clippy::type_complexity)]
 const _: fn(
     &cedarling::blocking::Cedarling,
@@ -921,6 +935,11 @@ mod tests {
     #[pg_test]
     fn test_cedarling_where_unsigned_predicate_matches_rls_count_parity() {
         crate::authz::pg_test_where::run_unsigned_predicate_matches_rls_count_parity();
+    }
+
+    #[pg_test]
+    fn test_cedarling_explain_includes_policy_hits_and_policies() {
+        crate::authz::pg_test_where::run_explain_includes_policy_hits_and_policies();
     }
 
     #[pg_test]

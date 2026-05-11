@@ -15,6 +15,14 @@ use thiserror::Error;
 use crate::resource;
 use crate::token_bundle;
 
+/// A richer authorization result that includes decision plus diagnostics.
+pub struct AuthorizeOutcome {
+    pub decision: bool,
+    pub request_id: String,
+    pub policy_hits: Vec<String>,
+    pub diag_errors: Vec<String>,
+}
+
 /// Errors building or running a multi-issuer authorization call.
 #[derive(Debug, Error)]
 pub enum AuthorizeBridgeError {
@@ -43,17 +51,14 @@ pub enum UnsignedBridgeError {
     Authorize(#[from] cedarling::AuthorizeError),
 }
 
-/// Parses `token_bundle_json` and `resource_json`, validates the request, and returns Cedar’s decision bit (`true` = allow).
-///
-/// The name uses **`decision`** (not “allow”) because it mirrors [`MultiIssuerAuthorizeResult::decision`](cedarling::MultiIssuerAuthorizeResult):
-/// `false` means deny. “Allow” alone would read like a grant API rather than a boolean outcome.
-pub fn authorize_multi_issuer_decision(
+/// Parses `token_bundle_json` and `resource_json`, validates the request, and returns a rich [`AuthorizeOutcome`].
+pub fn authorize_multi_issuer_outcome(
     engine: &Cedarling,
     token_bundle_json: &str,
     resource_json: &str,
     action: &str,
     context_json: Option<&str>,
-) -> Result<bool, AuthorizeBridgeError> {
+) -> Result<AuthorizeOutcome, AuthorizeBridgeError> {
     let tokens = token_bundle::parse_token_inputs_from_json(token_bundle_json)?;
 
     let resource = resource::resource_entity_data_from_json_str(resource_json)?;
@@ -65,7 +70,29 @@ pub fn authorize_multi_issuer_decision(
         .validate()
         .map_err(|e| AuthorizeBridgeError::RequestInvalid(e.to_string()))?;
     let result = engine.authorize_multi_issuer(request)?;
-    Ok(result.decision)
+    let diagnostics = result.response.diagnostics();
+    let policy_hits: Vec<String> = diagnostics.reason().map(|id| id.to_string()).collect();
+    let diag_errors: Vec<String> = diagnostics.errors().map(|e| e.to_string()).collect();
+    Ok(AuthorizeOutcome {
+        decision: result.decision,
+        request_id: result.request_id,
+        policy_hits,
+        diag_errors,
+    })
+}
+
+/// Parses `token_bundle_json` and `resource_json`, validates the request, and returns Cedar’s decision bit (`true` = allow).
+///
+/// The name uses **`decision`** (not “allow”) because it mirrors [`MultiIssuerAuthorizeResult::decision`](cedarling::MultiIssuerAuthorizeResult):
+/// `false` means deny. “Allow” alone would read like a grant API rather than a boolean outcome.
+pub fn authorize_multi_issuer_decision(
+    engine: &Cedarling,
+    token_bundle_json: &str,
+    resource_json: &str,
+    action: &str,
+    context_json: Option<&str>,
+) -> Result<bool, AuthorizeBridgeError> {
+    Ok(authorize_multi_issuer_outcome(engine, token_bundle_json, resource_json, action, context_json)?.decision)
 }
 
 fn parse_optional_context_json_object(
@@ -138,13 +165,29 @@ pub fn unsigned_request_from_json_parts(
     })
 }
 
+/// Runs [`Cedarling::authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) on a built request, returning a rich [`AuthorizeOutcome`].
+pub fn authorize_unsigned_outcome_for_request(
+    engine: &Cedarling,
+    request: RequestUnsigned,
+) -> Result<AuthorizeOutcome, UnsignedBridgeError> {
+    let result = engine.authorize_unsigned(request)?;
+    let diagnostics = result.response.diagnostics();
+    let policy_hits: Vec<String> = diagnostics.reason().map(|id| id.to_string()).collect();
+    let diag_errors: Vec<String> = diagnostics.errors().map(|e| e.to_string()).collect();
+    Ok(AuthorizeOutcome {
+        decision: result.decision,
+        request_id: result.request_id,
+        policy_hits,
+        diag_errors,
+    })
+}
+
 /// Runs [`Cedarling::authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) on a built request.
 pub fn authorize_unsigned_decision_for_request(
     engine: &Cedarling,
     request: RequestUnsigned,
 ) -> Result<bool, UnsignedBridgeError> {
-    let result = engine.authorize_unsigned(request)?;
-    Ok(result.decision)
+    Ok(authorize_unsigned_outcome_for_request(engine, request)?.decision)
 }
 
 /// Parses JSON parts then returns Cedar’s decision bit (`true` = allow).

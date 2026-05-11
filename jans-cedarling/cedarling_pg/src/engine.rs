@@ -128,6 +128,14 @@ pub fn rollback_policy() -> Result<Option<(String, String)>, EngineError> {
     Ok(None)
 }
 
+/// Returns the loaded engine without triggering initialization. Returns `None` if uninitialized, failed, or mutex poisoned.
+pub fn peek_cedarling() -> Option<std::sync::Arc<cedarling::blocking::Cedarling>> {
+    ENGINE.lock().ok().and_then(|slot| match &*slot {
+        EngineSlot::Ready(inner) => Some(inner.current.clone()),
+        _ => None,
+    })
+}
+
 fn lock_engine_slot() -> Result<MutexGuard<'static, EngineSlot>, EngineError> {
     ENGINE
         .lock()

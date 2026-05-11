@@ -101,6 +101,7 @@ pub fn cedarling_use_policy(version: &str) -> bool {
     let detail = json!({ "result": "ok", "cache_cleared": true });
     let _ = insert_policy_history("use", &resolved.version_guc_value, previous.as_deref(), &detail);
     let _ = trim_policy_history();
+    crate::status::record_policy_update();
     true
 }
 
@@ -160,6 +161,7 @@ pub fn cedarling_rollback_policy() -> bool {
     });
     let _ = insert_policy_history("rollback", &rolled_to, Some(&rolled_from), &detail);
     let _ = trim_policy_history();
+    crate::status::record_policy_update();
     true
 }
 
