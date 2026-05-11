@@ -77,68 +77,69 @@ export default function AuthFlowInputs({
   // ── Auth flow ──────────────────────────────────────────────────────────────
 
   const triggerCodeFlow = async () => {
-  if (!validateJson(additionalParams)) return;
+    if (!validateJson(additionalParams)) return;
 
-  try {
-    setLoading(true);
-    setErrorMessage('');
+    try {
+      setLoading(true);
+      setErrorMessage('');
 
-    const redirectBase = Array.isArray(client?.redirectUris)
-      ? client.redirectUris[0]
-      : chrome.identity.getRedirectURL();
+      const redirectBase =
+        Array.isArray(client?.redirectUris) && client.redirectUris[0]
+          ? client.redirectUris[0]
+          : chrome.identity.getRedirectURL();
 
-    const { secret, hashed } = await Utils.generateRandomChallengePair();
+      const { secret, hashed } = await Utils.generateRandomChallengePair();
 
-    let scopes = selectedScopes.map((s) => s.name).join(' ');
-    if (!scopes) scopes = String(client?.scope ?? '');
+      let scopes = selectedScopes.map((s) => s.name).join(' ');
+      if (!scopes) scopes = String(client?.scope ?? '');
 
-    const options: ILooseObject = {
-      scope: scopes,
-      response_type: Array.isArray(client?.responseType)
-        ? client.responseType[0]
-        : undefined,
-      redirect_uri: redirectBase,
-      client_id: client?.clientId,
-      code_challenge_method: 'S256',
-      code_challenge: hashed,
-      nonce: uuidv4(),
-    };
+      const options: ILooseObject = {
+        scope: scopes,
+        response_type: Array.isArray(client?.responseType)
+          ? client.responseType[0]
+          : undefined,
+        redirect_uri: redirectBase,
+        client_id: client?.clientId,
+        code_challenge_method: 'S256',
+        code_challenge: hashed,
+        nonce: uuidv4(),
+      };
 
-    if (selectedAcr) options.acr_values = selectedAcr.name;
+      if (selectedAcr) options.acr_values = selectedAcr.name;
 
-    let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
+      let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
 
-    if (additionalParams.trim()) {
-      // Persist updated additionalParams back to storage
-      chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: any[] }) => {
-        if (result.oidcClients) {
-          const clientArr = result.oidcClients.map((obj) =>
-            obj.clientId === client.clientId
-              ? { ...obj, additionalParams: additionalParams.trim() }
-              : obj,
-          );
-          chrome.storage.local.set({ oidcClients: clientArr });
-        }
-      });
+      if (additionalParams.trim()) {
+        // Persist updated additionalParams back to storage
+        chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: any[] }) => {
+          if (result.oidcClients) {
+            const clientArr = result.oidcClients.map((obj) =>
+              obj.clientId === client.clientId
+                ? { ...obj, additionalParams: additionalParams.trim() }
+                : obj,
+            );
+            chrome.storage.local.set({ oidcClients: clientArr });
+          }
+        });
 
-      const parsed = JSON.parse(additionalParams);
-      Object.keys(parsed).forEach((key) => {
-        authzUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(parsed[key])}`;
-      });
-    }
+        const parsed = JSON.parse(additionalParams);
+        Object.keys(parsed).forEach((key) => {
+          authzUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(parsed[key])}`;
+        });
+      }
 
-    const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
-      chrome.windows.getCurrent(res),
-    );
+      const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
+        chrome.windows.getCurrent(res),
+      );
 
-    if (!currentWindow) throw new Error('Could not get current window');
+      if (!currentWindow) throw new Error('Could not get current window');
 
-    const resultUrl: string = currentWindow.incognito
-      ? await awaitRedirectInIncognitoPopup(
+      const resultUrl: string = currentWindow.incognito
+        ? await awaitRedirectInIncognitoPopup(
           authzUrl,
           (u) => u.startsWith(redirectBase),
         )
-      : await new Promise<string>((resolve, reject) => {
+        : await new Promise<string>((resolve, reject) => {
           chrome.identity.launchWebAuthFlow(
             { url: authzUrl, interactive: true },
             (responseUrl) => {
@@ -150,66 +151,65 @@ export default function AuthFlowInputs({
           );
         });
 
-    const urlParams = new URLSearchParams(new URL(resultUrl).search);
-    const code = urlParams.get('code');
-    const errorDesc = urlParams.get('error_description');
+      const urlParams = new URLSearchParams(new URL(resultUrl).search);
+      const code = urlParams.get('code');
+      const errorDesc = urlParams.get('error_description');
 
-    if (errorDesc) throw new Error(errorDesc);
-    if (!code) throw new Error('Error in authentication. The authorization-code is null.');
+      if (errorDesc) throw new Error(errorDesc);
+      if (!code) throw new Error('Error in authentication. The authorization-code is null.');
 
-    const tokenReqData = qs.stringify({
-      redirect_uri: redirectBase,
-      grant_type: 'authorization_code',
-      code_verifier: secret,
-      client_id: client?.clientId,
-      code,
-      scope: scopes,
-    });
+      const tokenReqData = qs.stringify({
+        redirect_uri: redirectBase,
+        grant_type: 'authorization_code',
+        code_verifier: secret,
+        client_id: client?.clientId,
+        code,
+        scope: scopes,
+      });
 
-    const tokenResponse = await axios({
-      method: 'POST',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
-      },
-      data: tokenReqData,
-      url: client.tokenEndpoint,
-    });
+      const tokenResponse = await axios({
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
+        },
+        data: tokenReqData,
+        url: client.tokenEndpoint,
+      });
 
-    if (!tokenResponse?.data?.access_token) {
-      throw new Error(
-        `Error in authentication. Token response does not contain access_token. ${
-          tokenResponse?.data?.error_description ??
+      if (!tokenResponse?.data?.access_token) {
+        throw new Error(
+          `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description ??
           tokenResponse?.data?.error ??
           ''
-        }`,
-      );
+          }`,
+        );
+      }
+
+      const userInfoResponse = await axios({
+        method: 'GET',
+        headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
+        url: client.userinfoEndpoint,
+      });
+
+      await chrome.storage.local.set({
+        loginDetails: {
+          access_token: tokenResponse.data.access_token,
+          userDetails: userInfoResponse.data,
+          id_token: tokenResponse.data.id_token,
+          displayToken,
+        },
+      });
+
+      notifyOnDataChange();
+      handleClose();
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
     }
-
-    const userInfoResponse = await axios({
-      method: 'GET',
-      headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
-      url: client.userinfoEndpoint,
-    });
-
-    await chrome.storage.local.set({
-      loginDetails: {
-        access_token: tokenResponse.data.access_token,
-        userDetails: userInfoResponse.data,
-        id_token: tokenResponse.data.id_token,
-        displayToken,
-      },
-    });
-
-    notifyOnDataChange();
-    handleClose();
-  } catch (err) {
-    console.error(err);
-    setErrorMessage(err instanceof Error ? err.message : String(err));
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
