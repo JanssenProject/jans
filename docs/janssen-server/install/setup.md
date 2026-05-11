@@ -99,66 +99,66 @@ Use this script to configure your Jans Server and to add initial data. If setup.
 
 Below are the optional arguments:
 
-| Argument | Description                                                                                               |
-| --- |-----------------------------------------------------------------------------------------------------------|
-| -h, --help | show this help message and exit                                                                           |
-| --version | show program's version number and exit                                                                    |
-| -c | Use command line instead of TUI                                                                           |
-| -d D | Installation directory                                                                                    |
-| -f F | Specify setup.properties file                                                                             |
-| -n  | No interactive prompt before install starts. Run with -f                                                  |
-| -N, --no-httpd | No apache httpd server                                                                                    |
-| -u | Update hosts file with IP address / hostname                                                              |
-| -csx | Collect setup properties, save and exit                                                                   |
-| -remote-rdbm {mysql,pgsql} | Enables using remote RDBM server                                                                          |
-| -local-rdbm {mysql,pgsql} | Enables installing/configuring local RDBM server                                                          |
-| -ip-address IP_ADDRESS | Used primarily by Apache httpd for the Listen directive                                                   |
-| -host-name HOST_NAME | Internet-facing FQDN that is used to generate certificates and metadata.                                  |
-| -org-name ORG_NAME | Organization name field used for generating X.509 certificates                                            |
-| -email EMAIL | Email address for support at your organization used for generating X.509 certificates                     |
-| -city CITY | City field used for generating X.509 certificates                                                         |
-| -state STATE | State field used for generating X.509 certificates                                                        |
-| -country COUNTRY | Two letters country code used for generating X.509 certificates                                           |
-| -rdbm-user RDBM_USER | RDBM username                                                                                             |
-| -rdbm-password RDBM_PASSWORD | RDBM password                                                                                             |
-| -rdbm-port RDBM_PORT | RDBM port                                                                                                 |
-| -rdbm-db RDBM_DB | RDBM database                                                                                             |
-| -rdbm-host RDBM_HOST | RDBM host                                                                                                 |
-| -rdbm-schema | Jans Database Schema                                                                                      |
-| -remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN | To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server |
-| --reset-rdbm-db | Deletes all tables on target database. Warning! You will lose all data on target database.                |
-| --shell | Drop into interactive shell before starting installation                                                  |
-| --dump-config-on-error | Dump configuration on error                                                                               |
-| --no-progress | Use simple progress                                                                                       |
-| -admin-password ADMIN_PASSWORD | Used as the Administrator password                                                                        |
-| -jans-max-mem JANS_MAX_MEM | Total memory (in KB) to be used by Janssen Server                                                         |
-| -properties-password PROPERTIES_PASSWORD | Encoded setup.properties file password                                                                    |
-| -approved-issuer APPROVED_ISSUER | Api Approved Issuer                                                                                       |
-| --force-download | Force downloading files                                                                                   |
-| --download-exit | Download files and exits                                                                                  |
-| -jans-app-version JANS_APP_VERSION | Version for Janssen applications                                                                          |
-| -jans-build JANS_BUILD | Build version for Janssen applications                                                                    |
-| -setup-branch SETUP_BRANCH | Janssen setup GitHub branch                                                                               |
-| --disable-config-api-security | Turn off oauth2 security validation for jans-config-api                                                   |
-| --cli-test-client | Use config api test client for CLI                                                                        |
-| --import-ldif IMPORT_LDIF | Render ldif templates from directory and import them in Database                                          
-| -enable-script ENABLE_SCRIPT | inum of script to enable                                                                                  |
-| -disable-script DISABLE_SCRIPT | inum of script to disable                                                                                 |
-| -disable-selinux | Disable SELinux                                                                                           |
-| -w | Get the development head war files                                                                        |
-| -t | Load test data                                                                                            |
-| -x | Load test data and exit                                                                                   |
-| --allow-pre-released-features | Enable options to install experimental features, not yet officially supported                             |
-| --no-data | Do not import any data to database backend, used for clustering                                           |
-| --no-jsauth | Do not install OAuth2 Authorization Server                                                                |
-| --no-config-api | Do not install Jans Auth Config Api                                                                       |
-| --no-scim | Do not install Scim Server                                                                                |
-| --no-fido2 | Do not install Fido2 Server                                                                               |
-| --with-casa | Install Gluu/Flex Casa Server                                                                             |
-| --load-config-api-test | Load Config Api Test Data                                                                                 |
-| --install-link | Install Link Server                                                                                       |
-| -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password                                                 |
-| -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format.                                 |
-| -test-client-pw TEST_CLIENT_PW | Secret for test client                                                                                    |
+| Argument                                           | Description                                                                                               |
+|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| -h, --help                                         | show this help message and exit                                                                           |
+| --version                                          | show program's version number and exit                                                                    |
+| -c                                                 | Use command line instead of TUI                                                                           |
+| -d D                                               | Installation directory                                                                                    |
+| -f F                                               | Specify setup.properties file                                                                             |
+| -n                                                 | No interactive prompt before install starts. Run with -f                                                  |
+| -N, --no-httpd                                     | No apache httpd server                                                                                    |
+| -u                                                 | Update hosts file with IP address / hostname                                                              |
+| -csx                                               | Collect setup properties, save and exit                                                                   |
+| -remote-rdbm {mysql,pgsql}                         | Enables using remote RDBM server                                                                          |
+| -local-rdbm {mysql,pgsql}                          | Enables installing/configuring local RDBM server                                                          |
+| -ip-address IP_ADDRESS                             | Used primarily by Apache httpd for the Listen directive                                                   |
+| -host-name HOST_NAME                               | Internet-facing FQDN that is used to generate certificates and metadata.                                  |
+| -org-name ORG_NAME                                 | Organization name field used for generating X.509 certificates                                            |
+| -email EMAIL                                       | Email address for support at your organization used for generating X.509 certificates                     |
+| -city CITY                                         | City field used for generating X.509 certificates                                                         |
+| -state STATE                                       | State field used for generating X.509 certificates                                                        |
+| -country COUNTRY                                   | Two letters country code used for generating X.509 certificates                                           |
+| -rdbm-user RDBM_USER                               | RDBM username                                                                                             |
+| -rdbm-password RDBM_PASSWORD                       | RDBM password                                                                                             |
+| -rdbm-port RDBM_PORT                               | RDBM port                                                                                                 |
+| -rdbm-db RDBM_DB                                   | RDBM database                                                                                             |
+| -rdbm-host RDBM_HOST                               | RDBM host                                                                                                 |
+| -rdbm-schema                                       | Jans Database Schema                                                                                      |
+| -remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN   | To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server |
+| --reset-rdbm-db                                    | Deletes all tables on target database. Warning! You will lose all data on target database.                |
+| --shell                                            | Drop into interactive shell before starting installation                                                  |
+| --dump-config-on-error                             | Dump configuration on error                                                                               |
+| --no-progress                                      | Use simple progress                                                                                       |
+| -admin-password ADMIN_PASSWORD                     | Used as the Administrator password                                                                        |
+| -jans-max-mem JANS_MAX_MEM                         | Total memory (in KB) to be used by Janssen Server                                                         |
+| -properties-password PROPERTIES_PASSWORD           | Encoded setup.properties file password                                                                    |
+| -approved-issuer APPROVED_ISSUER                   | Api Approved Issuer                                                                                       |
+| --force-download                                   | Force downloading files                                                                                   |
+| --download-exit                                    | Download files and exits                                                                                  |
+| -jans-app-version JANS_APP_VERSION                 | Version for Janssen applications                                                                          |
+| -jans-build JANS_BUILD                             | Build version for Janssen applications                                                                    |
+| -setup-branch SETUP_BRANCH                         | Janssen setup GitHub branch                                                                               |
+| --disable-config-api-security                      | Turn off oauth2 security validation for jans-config-api                                                   |
+| --cli-test-client                                  | Use config api test client for CLI                                                                        |
+| --import-ldif IMPORT_LDIF                          | Render ldif templates from directory and import them in Database                                          |
+| -enable-script ENABLE_SCRIPT                       | inum of script to enable                                                                                  |
+| -disable-script DISABLE_SCRIPT                     | inum of script to disable                                                                                 |
+| -disable-selinux                                   | Disable SELinux                                                                                           |
+| -w                                                 | Get the development head war files                                                                        |
+| -t                                                 | Load test data                                                                                            |
+| -x                                                 | Load test data and exit                                                                                   |
+| --allow-pre-released-features                      | Enable options to install experimental features, not yet officially supported                             |
+| --no-data                                          | Do not import any data to database backend, used for clustering                                           |
+| --no-jsauth                                        | Do not install OAuth2 Authorization Server                                                                |
+| --no-config-api                                    | Do not install Jans Auth Config Api                                                                       |
+| --no-scim                                          | Do not install Scim Server                                                                                |
+| --no-fido2                                         | Do not install Fido2 Server                                                                               |
+| --with-casa                                        | Install Gluu/Flex Casa Server                                                                             |
+| --load-config-api-test                             | Load Config Api Test Data                                                                                 |
+| --install-link                                     | Install Link Server                                                                                       |
+| -config-patch-creds CONFIG_PATCH_CREDS             | password:username for downloading auto test ciba password                                                 |
+| -test-client-id TEST_CLIENT_ID                     | ID of test client which has all available scopes. Must be in UUID format.                                 |
+| -test-client-pw TEST_CLIENT_PW                     | Secret for test client                                                                                    |
 | -test-client-redirect-uri TEST_CLIENT_REDIRECT_URI | Redirect URI for test client                                                                              |
-| --test-client-trusted | Make test client trusted                                                                                  |
+| --test-client-trusted                              | Make test client trusted                                                                                  |
