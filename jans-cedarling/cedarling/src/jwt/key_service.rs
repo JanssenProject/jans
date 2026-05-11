@@ -191,9 +191,10 @@ impl KeyService {
         logger: Option<&Logger>,
         http_client: &HttpClient,
     ) -> Result<Option<u64>, KeyServiceError> {
-        let (jwks, max_age) = JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri, http_client)
-            .await
-            .map_err(KeyServiceError::GetJwks)?;
+        let (jwks, max_age) =
+            JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri, http_client)
+                .await
+                .map_err(KeyServiceError::GetJwks)?;
 
         self.insert_jwk_set(openid_config, logger, jwks)?;
 

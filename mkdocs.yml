@@ -476,6 +476,7 @@ nav:
         - RHEL: janssen-server/install/vm-install/rhel.md
         - Suse: janssen-server/install/vm-install/suse.md
         - Dynamic Download: janssen-server/install/vm-install/dynamic-download.md
+        - Setup Instructions: janssen-server/install/setup.md
       - Helm Deployments:
         - janssen-server/install/helm-install/README.md
         - Platform Setup:
@@ -490,7 +491,6 @@ nav:
         - Post-Installation: janssen-server/install/helm-install/post-install.md
       - Docker:
         - Quick Start: janssen-server/install/docker-install/quick-start.md
-      - Setup Instructions: janssen-server/install/setup.md
     - Kubernetes Operations:
       - janssen-server/kubernetes-ops/README.md
       - Upgrade: janssen-server/kubernetes-ops/upgrade.md
