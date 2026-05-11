@@ -59,6 +59,8 @@ At runtime:
 
 You can configure them using the [Janssen TUI](../../config-guide/config-tools/jans-tui/README.md).
 
+![tui-jarm-properties](../../../assets/tui-client-jarm-properties.png)
+
 ## Important endpoints and discovery metadata
 
 ### Authorization endpoint
