@@ -43,7 +43,7 @@ parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable 
 parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
-parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
+parser.add_argument('--setup-branch', help="Janssen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
 parser.add_argument('-force-download', help="Force downloading files", action='store_true')
 parser.add_argument('--github-access-token', help="Github access token to retrieve openbanking setup profile")
@@ -219,7 +219,7 @@ def uninstall_jans():
             else:
                 print("Please type \033[1m yes \033[0m to uninstall")
 
-    print("Uninstalling Jannsen Server...")
+    print("Uninstalling Janssen Server...")
 
     service_list = os.listdir(jetty_home)
 
