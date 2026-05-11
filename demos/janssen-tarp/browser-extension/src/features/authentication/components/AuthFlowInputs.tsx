@@ -9,6 +9,7 @@ import { Spinner } from '../../../shared/components/Common';
 import { MultiSelectDropdown } from '../../../shared/components/multiSelect/MultiSelectDropdown';
 import { Dropdown } from '../../../shared/components/Dropdown';
 import { LabelWithTooltip } from '../../../shared/components/Common';
+import { awaitRedirectInIncognitoPopup } from '../../../shared/components/IncognitoPopupFlow';
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Option = { name: string; label?: string; create?: boolean };
@@ -76,194 +77,139 @@ export default function AuthFlowInputs({
   // ── Auth flow ──────────────────────────────────────────────────────────────
 
   const triggerCodeFlow = async () => {
-    if (!validateJson(additionalParams)) return;
+  if (!validateJson(additionalParams)) return;
 
-    try {
-      setLoading(true);
-      setErrorMessage('');
+  try {
+    setLoading(true);
+    setErrorMessage('');
 
-      const redirectUrl = Array.isArray(client?.redirectUris) ? client.redirectUris[0] : undefined;
-      const { secret, hashed } = await Utils.generateRandomChallengePair();
+    const redirectBase = Array.isArray(client?.redirectUris)
+      ? client.redirectUris[0]
+      : chrome.identity.getRedirectURL();
 
-      let scopes = selectedScopes.map((s) => s.name).join(' ');
-      if (!scopes) scopes = String(client?.scope ?? '');
+    const { secret, hashed } = await Utils.generateRandomChallengePair();
 
-      const options: ILooseObject = {
-        scope: scopes,
-        response_type: Array.isArray(client?.responseType) ? client.responseType[0] : undefined,
-        redirect_uri: redirectUrl,
-        client_id: client?.clientId,
-        code_challenge_method: 'S256',
-        code_challenge: hashed,
-        nonce: uuidv4(),
-      };
+    let scopes = selectedScopes.map((s) => s.name).join(' ');
+    if (!scopes) scopes = String(client?.scope ?? '');
 
-      if (selectedAcr) options.acr_values = selectedAcr.name;
+    const options: ILooseObject = {
+      scope: scopes,
+      response_type: Array.isArray(client?.responseType)
+        ? client.responseType[0]
+        : undefined,
+      redirect_uri: redirectBase,
+      client_id: client?.clientId,
+      code_challenge_method: 'S256',
+      code_challenge: hashed,
+      nonce: uuidv4(),
+    };
 
-      let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
+    if (selectedAcr) options.acr_values = selectedAcr.name;
 
-      if (additionalParams.trim()) {
-        const updatedClient = { ...client, additionalParams: additionalParams.trim() };
-        chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: any[] }) => {
-          if (result.oidcClients) {
-            const clientArr = result.oidcClients.map((obj) =>
-              obj.clientId === updatedClient.clientId
-                ? { ...obj, additionalParams: updatedClient.additionalParams }
-                : obj
-            );
-            chrome.storage.local.set({ oidcClients: clientArr });
-          }
-        });
+    let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
 
-        const parsed = JSON.parse(additionalParams);
-        Object.keys(parsed).forEach((key) => {
-          authzUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(parsed[key])}`;
-        });
-      }
-
-      const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
-        chrome.windows.getCurrent(res)
-      );
-      if (!currentWindow) {
-        throw new Error('Could not get current window');
-      }
-
-      const resultUrl: string = currentWindow.incognito
-        ? await new Promise<string>(async (resolve, reject) => {
-
-          // ── Incognito fallback: manual popup window ──────────────────────────
-
-
-          const redirectBase = Array.isArray(client?.redirectUris)
-            ? client.redirectUris[0]
-            : chrome.identity.getRedirectURL();
-
-          // Open a real browser popup
-          const popup = await new Promise<chrome.windows.Window>((res, rej) =>
-            chrome.windows.create(
-              {
-                url: authzUrl,
-                type: 'popup',
-                width: 600,
-                height: 700,
-                incognito: true,
-                focused: true,
-              },
-              (win) => {
-                if (!win) return rej(new Error('Failed to create auth popup window'));
-                res(win);
-              }
-            )
+    if (additionalParams.trim()) {
+      // Persist updated additionalParams back to storage
+      chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: any[] }) => {
+        if (result.oidcClients) {
+          const clientArr = result.oidcClients.map((obj) =>
+            obj.clientId === client.clientId
+              ? { ...obj, additionalParams: additionalParams.trim() }
+              : obj,
           );
-
-          // Poll the popup tab for the redirect URL
-          const tabId = popup.tabs?.[0]?.id;
-          if (!tabId) {
-            chrome.windows.remove(popup.id!);
-            return reject(new Error('Could not open auth popup'));
-          }
-
-          const listener = (
-            updatedTabId: number,
-            changeInfo: chrome.tabs.TabChangeInfo,
-            tab: chrome.tabs.Tab
-          ) => {
-            if (updatedTabId !== tabId) return;
-            const url = tab.url ?? '';
-
-            if (url.startsWith(redirectBase)) {
-              chrome.tabs.onUpdated.removeListener(listener);
-              chrome.windows.remove(popup.id!);
-              resolve(url);
-            }
-
-            // Detect errors returned to the redirect URI
-            if (changeInfo.status === 'complete' && url.includes('error=')) {
-              chrome.tabs.onUpdated.removeListener(listener);
-              chrome.windows.remove(popup.id!);
-              reject(new Error(`Auth error in redirect: ${url}`));
-            }
-          };
-
-          chrome.tabs.onUpdated.addListener(listener);
-
-          // Handle user closing the popup manually
-          chrome.windows.onRemoved.addListener(function onClosed(winId) {
-            if (winId === popup.id) {
-              chrome.windows.onRemoved.removeListener(onClosed);
-              chrome.tabs.onUpdated.removeListener(listener);
-              reject(new Error('Authentication cancelled by user'));
-            }
-          });
-
-        })
-        : await new Promise<string>((resolve, reject) => {
-          // ── Normal flow ──────────────────────────────────────────────────────
-          chrome.identity.launchWebAuthFlow({ url: authzUrl, interactive: true }, (responseUrl) => {
-            if (chrome.runtime.lastError || !responseUrl)
-              reject(new Error(chrome.runtime.lastError?.message || 'No redirect URL'));
-            else resolve(responseUrl);
-          });
-
-        });
-
-      if (resultUrl) {
-        const urlParams = new URLSearchParams(new URL(resultUrl).search);
-        const code = urlParams.get('code');
-        const errorDesc = urlParams.get('error_description');
-        if (errorDesc) throw new Error(errorDesc);
-        if (!code) throw new Error('Error in authentication. The authorization-code is null.');
-
-        const tokenReqData = qs.stringify({
-          redirect_uri: redirectUrl,
-          grant_type: 'authorization_code',
-          code_verifier: secret,
-          client_id: client?.clientId,
-          code,
-          scope: scopes,
-        });
-
-        const tokenResponse = await axios({
-          method: 'POST',
-          headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
-          },
-          data: tokenReqData,
-          url: client.tokenEndpoint,
-        });
-
-        if (!tokenResponse?.data?.access_token) {
-          throw new Error(
-            `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description || tokenResponse?.data?.error || ''}`
-          );
+          chrome.storage.local.set({ oidcClients: clientArr });
         }
+      });
 
-        const userInfoResponse = await axios({
-          method: 'GET',
-          headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
-          url: client.userinfoEndpoint,
-        });
-
-        await chrome.storage.local.set({
-          loginDetails: {
-            access_token: tokenResponse.data.access_token,
-            userDetails: userInfoResponse.data,
-            id_token: tokenResponse.data.id_token,
-            displayToken,
-          },
-        });
-
-        notifyOnDataChange();
-        handleClose();
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMessage(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
+      const parsed = JSON.parse(additionalParams);
+      Object.keys(parsed).forEach((key) => {
+        authzUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(parsed[key])}`;
+      });
     }
-  };
+
+    const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
+      chrome.windows.getCurrent(res),
+    );
+
+    if (!currentWindow) throw new Error('Could not get current window');
+
+    const resultUrl: string = currentWindow.incognito
+      ? await awaitRedirectInIncognitoPopup(
+          authzUrl,
+          (u) => u.startsWith(redirectBase),
+        )
+      : await new Promise<string>((resolve, reject) => {
+          chrome.identity.launchWebAuthFlow(
+            { url: authzUrl, interactive: true },
+            (responseUrl) => {
+              if (chrome.runtime.lastError || !responseUrl)
+                reject(new Error(chrome.runtime.lastError?.message ?? 'No redirect URL'));
+              else
+                resolve(responseUrl);
+            },
+          );
+        });
+
+    const urlParams = new URLSearchParams(new URL(resultUrl).search);
+    const code = urlParams.get('code');
+    const errorDesc = urlParams.get('error_description');
+
+    if (errorDesc) throw new Error(errorDesc);
+    if (!code) throw new Error('Error in authentication. The authorization-code is null.');
+
+    const tokenReqData = qs.stringify({
+      redirect_uri: redirectBase,
+      grant_type: 'authorization_code',
+      code_verifier: secret,
+      client_id: client?.clientId,
+      code,
+      scope: scopes,
+    });
+
+    const tokenResponse = await axios({
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
+      },
+      data: tokenReqData,
+      url: client.tokenEndpoint,
+    });
+
+    if (!tokenResponse?.data?.access_token) {
+      throw new Error(
+        `Error in authentication. Token response does not contain access_token. ${
+          tokenResponse?.data?.error_description ??
+          tokenResponse?.data?.error ??
+          ''
+        }`,
+      );
+    }
+
+    const userInfoResponse = await axios({
+      method: 'GET',
+      headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
+      url: client.userinfoEndpoint,
+    });
+
+    await chrome.storage.local.set({
+      loginDetails: {
+        access_token: tokenResponse.data.access_token,
+        userDetails: userInfoResponse.data,
+        id_token: tokenResponse.data.id_token,
+        displayToken,
+      },
+    });
+
+    notifyOnDataChange();
+    handleClose();
+  } catch (err) {
+    console.error(err);
+    setErrorMessage(err instanceof Error ? err.message : String(err));
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
