@@ -110,7 +110,7 @@ public class AuditLogResource extends ConfigBaseResource {
                     escapeLog(endDate));
         }
 
-        return Response.ok(this.doSearch(pattern, startIndex, limit, startDate, endDate)).build();
+        return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit, startDate, endDate)).build();
     }
 
     private LogPagedResult doSearch(String pattern, int startIndex, int limit, String startDate, String endDate) {
@@ -140,15 +140,6 @@ public class AuditLogResource extends ConfigBaseResource {
             log.debug("Fetch log file:{}, strPattern:{}", file, escapeLog(strPattern));
         }
 
-        if (StringUtils.isBlank(strPattern)) {
-            strPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
-        }
-
-        // Limit input length first
-        if (strPattern.length() > 100) {
-            throwBadRequestException(strPattern);
-        }
-
         Pattern pattern = Pattern.compile(strPattern);
         if (log.isDebugEnabled()) {
             log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), pattern);
@@ -161,6 +152,26 @@ public class AuditLogResource extends ConfigBaseResource {
             throwInternalServerException(" Error while fetching logs", ex);
         }
         return logEntries;
+    }
+
+    private String getPattern(String strPattern) {
+        String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
+        if (StringUtils.isNotBlank(strPattern)) {
+
+            // Limit input length first
+            if (strPattern.length() > 100) {
+                throwBadRequestException(strPattern);
+            }
+            searchPattern = strPattern;
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("^.*");
+        stringBuilder.append(searchPattern);
+        stringBuilder.append(".*$");
+        searchPattern = stringBuilder.toString();
+
+        return searchPattern;
     }
 
     private LogPagedResult getLogPagedResult(List<String> logEntriesList, int startIndex, int limit) {
