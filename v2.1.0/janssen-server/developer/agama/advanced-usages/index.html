@@ -1,0 +1,1813 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/janssen-server/developer/agama/advanced-usages/">
+      
+      
+        <link rel="prev" href="../agama-best-practices/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Advanced Usages - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#advanced-usages" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Advanced Usages
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../cedarling/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agama
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../agama/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../agama/language-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://janssenproject.github.io/developer-docs/agama/transpiler/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../agama/execution-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../agama/gama-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gama Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jans-agama-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../engine-bridge-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engine Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../projects-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows-navigation-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Navigation & UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../native-applications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native Applications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agama-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Usages
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Usages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ui-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UI templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output encoding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localization-and-internationalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Localization and internationalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Localization and internationalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-to-as-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access to AS labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reusable-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reusable templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cancellation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cancellation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cancellation-bubble-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cancellation bubble-up
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#engine-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Engine internals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Engine internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flow-advance-and-navigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow advance and navigation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-transpilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code transpilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-engine-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other engine characteristics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ui-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UI templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output encoding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localization-and-internationalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Localization and internationalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Localization and internationalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-to-as-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access to AS labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reusable-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reusable templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cancellation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cancellation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cancellation-bubble-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cancellation bubble-up
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#engine-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Engine internals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Engine internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flow-advance-and-navigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow advance and navigation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-transpilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code transpilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-engine-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other engine characteristics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">agama</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="advanced-usages">Advanced usages<a class="headerlink" href="#advanced-usages" title="Permanent link">#</a></h1>
+<h2 id="ui-templates">UI templates<a class="headerlink" href="#ui-templates" title="Permanent link">#</a></h2>
+<h3 id="template-overrides">Template overrides<a class="headerlink" href="#template-overrides" title="Permanent link">#</a></h3>
+<p><a href="../../../../agama/language-reference/#template-overrides">Template overrides</a> is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience.</p>
+<p>To start, use <a href="../../../../agama/language-reference/#subflows"><code>Trigger</code></a> to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:</p>
+<ol>
+<li>Remove the <code>https://.../fl/</code> portion of the URL</li>
+<li>Split the URL obtained into two pieces: a <em>folder</em> name and a <em>remainder</em>. The remainder starts after the last slash found in the URL, and usually ends in <code>.fls</code></li>
+<li>In your Janssen server, locate the directory <code>/opt/jans/jetty/jans-auth/agama/ftl</code></li>
+<li><code>cd</code> to the directory specified by the <em>folder</em></li>
+<li>List the contents of the directory and pick the <em>filename</em> that best matches the <em>remainder</em></li>
+</ol>
+<p>Save a copy of every selected file in the directory associated to your flow (<code>basePath</code> directive) or in a subdirectory of it. Rename the files if desired too.</p>
+<p>Now, build the <code>Override templates</code> directive passing several pairs of strings separated by lines or spaces. Every pair consists of a string specifying the original template location, that is, <code>&lt;folder&gt;/&lt;filename&gt;</code> followed by the path to the new template version relative to the base path of your flow.</p>
+<h3 id="output-encoding">Output encoding<a class="headerlink" href="#output-encoding" title="Permanent link">#</a></h3>
+<p>By default, the engine sends rendered pages using <code>UTF-8</code> character encoding. To specify a different encoding the <code>ftl</code> directive can be used in pages, for instance, <code>&lt;#ftl encoding="ISO-8859-5"&gt;</code>. Always place this at the top of a template.</p>
+<h3 id="localization-and-internationalization">Localization and internationalization<a class="headerlink" href="#localization-and-internationalization" title="Permanent link">#</a></h3>
+<p>To allow templates render text according to users' language or country, you can add a file named <code>labels.txt</code> to the <code>web</code> directory of a project. There you can place the so-called "internationalization labels" (common UI-related messages) as per your needs. The file is expected to have a structure as follows:</p>
+<div class="highlight"><pre><span></span><code>key = value
+
+... more key/value pairs
+
+[ locale ID 1 ]
+
+key/value pairs for this locale
+
+[ locale ID 2 ]
+
+key/value pairs for this locale
+
+...
+[ locale ID n ]
+
+key/value pairs for this locale
+</code></pre></div>
+<p>Note how the file is split into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class <code>java.util.Locale</code>). In this case, a locale represents a language, country/region, and variant combination. Examples of locale IDs are:</p>
+<ul>
+<li><code>de_CH</code>: German as used in Switzerland</li>
+<li><code>ca_ES_VALENCIA</code>: Catalan as used in Spain (province of Valencia)</li>
+<li><code>th_TH_TH</code>: Thai as used in Thailand together with Thai digits</li>
+<li><code>ja</code>: Japanese (in general)</li>
+</ul>
+<p>There may be several sections regarding the same language, like <code>de_CH</code>, <code>de_DE</code>, <code>de_LU</code>, and plain <code>de</code>. Agama engine will pick the text from the section that best maches the settings of the end-user browser (normally, this is supplied through the <code>Accept-Language</code> HTTP header). As an example, if the browser's preferred language is German from Luxembourg, the lookup is made in <code>de_LU</code> section. If no text is found there, the <code>de</code> section is tried. The opening "no locale" section is used as a last resort - that's why it is said to contain the "default" labels.</p>
+<p>To reference a label from a template an expression like <code>${labels("&lt;KEY&gt;")}</code> can be used. This will retrieve the proper text using the rules just described. When the lookup fails thoroughly (no way to found a label matching the key), the four character string <code>null</code> is returned. This helps to easily locate template issues if any.</p>
+<p>A value (message) associated to a key can contain placeholders where data can be injected. Suppose the following key/value pair:</p>
+<div class="highlight"><pre><span></span><code>disk.count = The disk {1} contains {0} file(s)
+</code></pre></div>
+<p>Using <code>${labels("disk.count")}</code> will just retrieve the message as is, however, positional arguments can be passed. As an example, <code>${labels("disk.count", 7, "SSD-NVME-123")}</code> will generate <code>The disk SSD-NVME-123 contains 7 file(s)</code>. Note parameters are not restricted to literals (fixed values) like <code>0</code>, <code>false</code>, or <code>"world"</code>. Variables can also be used. It is recommended to employ literals/variables whose data types are string, number, date, or boolean only.</p>
+<p>Labels are global: not only can they be accessed from the project where they are originally defined but from any other project. This allows <a href="#template-overrides">template overrides</a> to work smoothly, however, it brings the possibility of key collisions, that is, two or more projects defining labels with the same keys. To mitigate this problem, it is recommended to prefix all keys with the name/identifier of the originating project, like:</p>
+<div class="highlight"><pre><span></span><code>myproject.salutation = hello!
+
+[es]
+myproject.salutation = hola!
+
+[it]
+myproject.salutation = ciao!
+</code></pre></div>
+<p>When leaving <code>salutation</code> alone, it is likely other projects added to the server in the future may contain their own version of <code>salutation</code> leading to unexpected results.</p>
+<p>Additional notes:</p>
+<ul>
+<li>Language codes should follow the ISO 639 alpha-2 standard</li>
+<li>Country/region codes should be driven by ISO 3166 alpha-2 or UN M.49 numeric-3 area code</li>
+<li>Except for the locale section headings, the syntax of <code>labels.txt</code> adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with <code>!</code> or <code>#</code>  is ignored and thus can be used as a comment or note </li>
+<li>When positional arguments are passed, Java class <code>java.text.MessageFormat</code> is internally employed. This allows  powerful formatting and proper handling of plurals. If for some reason, formatting fails, the resulting string will be <code>error!</code>. Check the server logs and try to simplify your message in this case</li>
+</ul>
+<h4 id="access-to-as-labels">Access to AS labels<a class="headerlink" href="#access-to-as-labels" title="Permanent link">#</a></h4>
+<p>The jans-auth server comes with a series of files known as "resource bundles" that follow the naming <code>jans-auth_xx.properties</code> where <code>xx</code> represents an ISO 639 language code. Bundles can be added or overridden by placing suitable properties files in directory <code>/opt/jans/jetty/jans-auth/custom/i18n</code>. Strings stored in these bundles can be accessed from templates using expressions like <code>${msgs.&lt;KEY&gt;}</code>. As most keys in resource bundles contain dot characters, the alternative notation <code>${msgs["KEY"]}</code> works better for FreeMarker, for example <code>${msgs["login.errorMessage"]}</code>.</p>
+<p>Whenever possible, it is recommended to place your internationalization labels in the <code>web</code> folder of the project and use the <code>${labels(...</code> notation instead. Note <code>msgs</code> has no support for parameterized placeholders: strings are all static.</p>
+<h3 id="reusable-templates">Reusable templates<a class="headerlink" href="#reusable-templates" title="Permanent link">#</a></h3>
+<p>A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker, composition can be achieved by means of <a href="https://freemarker.apache.org/docs/ref_directive_macro.html">macros</a>. These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.</p>
+<p>Agama already makes use of macros for this purpose. Take a look at the <code>ftlh</code> files found at <code>/opt/jans/jetty/jans-auth/agama</code>. These templates are used to present errors, like timeouts, flow crashes, etc.</p>
+<p><strong>Example:</strong></p>
+<p>Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>FreeMarker comments are of the form <code>&lt;#-- This won't be printed in the output --&gt;</code></p>
+</div>
+<p>One way to structure the solution is the following:</p>
+<div class="highlight"><pre><span></span><code>&lt;#-- aside.ftlh --&gt;
+
+&lt;#macro sidebar&gt;
+
+&lt;aside&gt;
+  &lt;h2&gt;Recommended tracks&lt;/h2&gt;
+  &lt;nav&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Efilnikufesin&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;P.O.N.X.&lt;/a&gt;&lt;/li&gt;
+      &lt;!--li&gt;&lt;a href=&quot;#&quot;&gt;Planet caravan&lt;/a&gt;&lt;/li--&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/aside&gt;
+
+&lt;/#macro&gt;
+</code></pre></div>
+<p><code>aside.ftlh</code> has static markup for a sidebar. It is defined inside a macro called <code>sidebar</code>.</p>
+<div class="highlight"><pre><span></span><code>&lt;#-- commons.ftlh --&gt;
+
+&lt;#import &quot;aside.ftlh&quot; as sbar&gt;
+
+&lt;#macro header&gt;
+
+&lt;header&gt;
+  &lt;h1&gt;Welcome&lt;/h1&gt;
+  &lt;nav&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Sign Up&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;/#macro&gt;
+
+&lt;#macro main useSidebar=false&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;@header/&gt;
+    &lt;#if useSidebar&gt;
+       &lt;@sbar.sidebar/&gt;
+    &lt;/#if&gt;
+    &lt;#nested&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+&lt;/#macro&gt;
+</code></pre></div>
+<p><code>commons.ftlh</code> template imports <code>aside.ftlh</code> associating it with the shortname <code>sbar</code>. Additionally:</p>
+<ul>
+<li>
+<p>It defines two macros: <code>header</code> and <code>main</code>. The macro <code>header</code> generates a static navigation menu</p>
+</li>
+<li>
+<p><code>main</code> macro is the skeleton of a very simple HTML page </p>
+</li>
+<li>
+<p><code>main</code> has a parameter named <code>useSidebar</code> whose default is <code>false</code> </p>
+</li>
+<li>
+<p>The <code>sidebar</code> macro is called using <code>&lt;@sbar.sidebar/&gt;</code> while <code>header</code> with <code>&lt;@header/&gt;</code> (local macro) </p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>&lt;#-- index.ftlh --&gt;
+
+&lt;#import &quot;commons.ftlh&quot; as com&gt;
+&lt;@com.main useSidebar=true&gt;
+
+&lt;article&gt;
+  &lt;h1&gt;This is the index page!&lt;/h1&gt;
+  &lt;p&gt;Temporibus ut nisi quibusdam iusto vitae similique laudantium. Minima cumque ducimus sit ut dolores. Autem quam soluta illo et omnis expedita voluptas magnam. Sit aperiam laboriosam magnam et amet deleniti. Sit et velit unde quibusdam esse ullam voluptatem. Enim sint blanditiis dolores. Laborum velit eos dolor ad quaerat. Quo tempora excepturi enim dolor harum sunt ipsa. Quis sit dolorem harum ipsa fuga voluptatem commodi.
+  &lt;/p&gt;
+&lt;/article&gt;
+
+&lt;/@com.main&gt;
+</code></pre></div>
+<p><code>index.ftlh</code> is the homepage:</p>
+<ul>
+<li>
+<p>Template <code>commons.ftlh</code> is imported and its macro <code>main</code> called passing <code>true</code> for <code>useSidebar</code></p>
+</li>
+<li>
+<p>The markup inside <code>&lt;@com.main...</code> tag is the content to be "inserted" when the <code>&lt;#nested&gt;</code> directive is reached  </p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>&lt;#-- about.ftlh --&gt;
+
+&lt;#import &quot;commons.ftlh&quot; as com&gt;
+&lt;@com.main&gt;
+
+&lt;article&gt;
+  &lt;h1&gt;About us&lt;/h1&gt;
+  &lt;p&gt;We don&#39;t know ourselves very well.&lt;/p&gt;
+&lt;/article&gt;
+
+&lt;/@com.main&gt;
+</code></pre></div>
+<p><code>about.ftlh</code> is the "about us" page. It works like the homepage except the sidebar will not be shown.</p>
+<h2 id="cancellation">Cancellation<a class="headerlink" href="#cancellation" title="Permanent link">#</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Ensure you have previously gone through the contents of this <a href="../flows-navigation-ui/">page</a> before proceeding</p>
+</div>
+<p>This is a feature that in conjuction with <a href="#template-overrides">template overrides</a> allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?</p>
+<p>Clearly a page at flow A can be overridden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named <code>_abort</code>.</p>
+<p>POSTing this way will provoke the associated <code>Trigger</code> call to return a value like <code>{ aborted: true, data: ..., url: ... }</code> where <code>data</code> is a <em>map</em> consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The <code>url</code> property will hold the URL where cancellation took place relative to <code>https://your-server/jans-auth/fl/</code>.</p>
+<p>As an example, suppose there exists two flows that allow users to enter and validate a one-time passcode (OTP), one flow sends the OTP via e-mail while the other through an SMS. Assume these flows receive a user identifier as input and render a single UI page each to enter the received OTP. If we are interested in building a flow that prompts for username/password credentials and use the SMS-based OTP flow with a customization that consists of showing a link like "Didn't get an SMS?, send the passcode to my e-mail", the following is a sketch of an implementation:</p>
+<div class="highlight"><pre><span></span><code>...
+//validate username/password
+...
+
+result = Trigger co.acme.SmsOTP userId
+    Override templates &quot;path/to/enter_otp.ftlh&quot; &quot;cust_enter_otp.ftlh&quot;
+
+When result.aborted is true
+    //The user clicked on &quot;send the passcode to my e-mail&quot;
+    result = Trigger co.acme.EmailOTP userId
+
+When result.success is true
+    result.data = { userId: userId }
+
+Finish result
+</code></pre></div>
+<p>The overridden template <code>cust_enter_otp.ftlh</code> would have a form like:</p>
+<div class="highlight"><pre><span></span><code>...
+&lt;form method=&quot;post&quot; enctype=&quot;application/x-www-form-urlencoded&quot;&gt;
+    &lt;button type=&quot;submit&quot; name=&quot;_abort&quot;&gt;
+        Didn&#39;t get an SMS?, send the passcode to my e-mail&lt;/button&gt;
+&lt;/form&gt;
+</code></pre></div>
+<p>Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an <code>RRF</code> directive is in execution. When a flow is aborted and the control returned to a parent, there is no way to "resume" execution of the flow target of the cancellation.</p>
+<h3 id="cancellation-bubble-up">Cancellation bubble-up<a class="headerlink" href="#cancellation-bubble-up" title="Permanent link">#</a></h3>
+<p>In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is <code>Trigger</code>ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of <code>Trigger</code> invocations.</p>
+<p>As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overridden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.</p>
+<p>Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:</p>
+<ol>
+<li>
+<p><code>path</code> is as found in C's <code>RRF</code> instruction</p>
+</li>
+<li>
+<p><code>path</code> is looked up on the list provided in B's <code>Override templates</code>. If a match is found, <code>path</code> is updated accordingly </p>
+</li>
+<li>
+<p><code>path</code> is looked up on the list provided in A's <code>Override templates</code>. If a match is found, <code>path</code> is updated accordingly</p>
+</li>
+<li>
+<p>The page referenced by <code>path</code> is rendered</p>
+</li>
+</ol>
+<h2 id="engine-internals">Engine internals<a class="headerlink" href="#engine-internals" title="Permanent link">#</a></h2>
+<p>Here we provide insight on some behavioral aspects of the engine that may result of interest to developers.</p>
+<h3 id="flow-advance-and-navigation">Flow advance and navigation<a class="headerlink" href="#flow-advance-and-navigation" title="Permanent link">#</a></h3>
+<p>Once a web page (or a response in general) is replied to a client (e.g. web browser), a POST is required to <a href="../flows-navigation-ui/#user-data-retrieval">make the flow proceed</a>. The POST is expected to be sent to the current URL only, otherwise, a 404 error will be thrown. The engine will then respond with a redirect (usually 301) so the client will GET the next URL to be rendered. This pattern of navigation is known as "POST-REDIRECT-GET".</p>
+<p>There is a clear correspondence of the "current URL" with the physical path of the template rendered. As an example, if the browser location shows <code>https://&lt;your-host&gt;/jans-auth/fl/foo/bar.fls</code>, the involved template is stored at <code>/opt/jans/jetty/jans-auth/agama/ftl/foo</code> and has name <code>bar</code>. This makes flows more predictable and easier to reason about.</p>
+<p>Note however URLs are not manipulable: an attempt to set the browser location to a URL corresponding to a different template will not make that template be rendered or provoke any unexpected jump in the flow control. Instead, an error page is shown that allows users to re-take where they left off or to restart from scratch. In other words, navigation honors the "current flow URL" avoiding attempts to re-visit past stages or make unexpected moves to future ones.</p>
+<p>Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages.</p>
+<h3 id="code-transpilation">Code transpilation<a class="headerlink" href="#code-transpilation" title="Permanent link">#</a></h3>
+<p>The engine has some timers running in the background. One of them <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java">transpiles code</a> when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through <a href="https://github.com/mozilla/rhino">Mozilla Rhino</a> by using a transformation chain like  (DSL) flow code -&gt; (ANTLR4) parse tree -&gt; (XML) abstract syntax tree -&gt; JS.</p>
+<p>The transformation chain guarantees that a flow written in Agama DSL cannot:</p>
+<ul>
+<li>Access Java classes/instances not specified in the original flow code (i.e. the only bridge to Java world is via <code>Call</code>s)</li>
+<li>Access/modify the standard javascript built-in objects directly</li>
+<li>Conflict with javascript keywords</li>
+</ul>
+<p><strong>Notes</strong></p>
+<ul>
+<li>You can find the (ANTLR4) DSL grammar <a href="https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/antlr4/io/jans/agama/antlr/AuthnFlow.g4">here</a>.</li>
+<li>The last step of the transformation chain is carried out by means of <a href="https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/resources/JSGenerator.ftl">this</a> Freemarker transformer</li>
+</ul>
+<h3 id="other-engine-characteristics">Other engine characteristics<a class="headerlink" href="#other-engine-characteristics" title="Permanent link">#</a></h3>
+<p>Some interesting facts for the curious:</p>
+<ul>
+<li>The engine does not use asynchronous paradigms: no events, callbacks, extra threads, etc. All computations remain in the classic request/response servlet lifecycle familiar to most Java developers</li>
+<li><em>Continuations</em> allow to express a flow as if it were a straight sequence of commands despite there are actual pauses in the middle: the gaps between an HTTP response and the next request</li>
+<li>Currently Mozilla Rhino seems to be the only mechanism that brings continuations into the Java language</li>
+<li>In order to preserve server statelessness, continuations are persisted to storage at every flow pause. This way the proper state can be restored when the continuation is resumed in the upcoming HTTP request</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 6, 2023 16:44:10 UTC"><span class="timeago" datetime="2023-06-06T16:44:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 6, 2023 16:44:10 UTC">2023-06-06</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../../js/timeago.min.js"></script>
+      
+        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

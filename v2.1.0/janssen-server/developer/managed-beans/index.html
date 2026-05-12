@@ -1,0 +1,3179 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/janssen-server/developer/managed-beans/">
+      
+      
+        <link rel="prev" href="../xframe/">
+      
+      
+        <link rel="next" href="../customization/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Managed Beans - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#managed-beans" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Managed Beans
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../cedarling/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Janssen Server
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../architecture/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Concepts
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture & Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../planning/components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../auth-server/endpoints/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth Server Internals
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_2_4" id="__nav_1_2_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    External Libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CORS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    X-Frame-Options
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managed Beans
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managed Beans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ready-to-use-code-in-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready-to-use code in Custom script:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ready-to-use code in Custom script:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-a-bean-inside-a-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Obtaining a bean inside a custom script:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commonly-used-beans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commonly used beans:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commonly used beans:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-authenticationservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. AuthenticationService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-userservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. UserService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. UserService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-add-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        a. Add a user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-add-user-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        b. Add user attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-get-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        c. Get User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-get-specific-user-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        d. Get specific User attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-replace-user-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        e. Replace user attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f-remove-user-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        f. Remove user attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#g-update-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        g. Update users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-customattribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. CustomAttribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-sessionidservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. SessionIdService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-grantservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. GrantService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-clientservice-provides-operations-with-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. ClientService : Provides operations with clients.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-httpservice-httpservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. HttpService: HttpService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-cacheservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. CacheService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-facesservice-provides-utilities-to-properly-build-encoded-urls-and-make-redirections-this-class-is-used-a-great-deal-in-custom-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. FacesService : Provides utilities to properly build encoded URLs and make redirections. This class is used a great deal in custom scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-facesmessages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. FacesMessages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-stringhelper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. StringHelper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. StringHelper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#isnotemptystring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isNotEmptyString
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equalsignorecase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        equalsIgnoreCase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isempty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isEmpty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tolowercase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        toLowerCase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base64urlencode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        base64urlencode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-encryptionservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. EncryptionService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. EncryptionService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-base64util" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Base64Util
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../customization/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customization
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../contribute/implementation-design/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Design
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../auth-server/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate & Authenticate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../config-guide/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Identity
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../test-debug/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test & Debug
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy & Operate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../CHANGELOG/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Releases
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ready-to-use-code-in-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready-to-use code in Custom script:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ready-to-use code in Custom script:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-a-bean-inside-a-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Obtaining a bean inside a custom script:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commonly-used-beans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commonly used beans:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commonly used beans:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-authenticationservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. AuthenticationService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-userservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. UserService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. UserService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-add-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        a. Add a user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-add-user-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        b. Add user attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-get-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        c. Get User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-get-specific-user-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        d. Get specific User attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-replace-user-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        e. Replace user attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f-remove-user-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        f. Remove user attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#g-update-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        g. Update users
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-customattribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. CustomAttribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-sessionidservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. SessionIdService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-grantservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. GrantService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-clientservice-provides-operations-with-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. ClientService : Provides operations with clients.
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-httpservice-httpservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. HttpService: HttpService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-cacheservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. CacheService
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-facesservice-provides-utilities-to-properly-build-encoded-urls-and-make-redirections-this-class-is-used-a-great-deal-in-custom-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. FacesService : Provides utilities to properly build encoded URLs and make redirections. This class is used a great deal in custom scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-facesmessages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. FacesMessages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-stringhelper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. StringHelper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. StringHelper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#isnotemptystring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isNotEmptyString
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equalsignorecase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        equalsIgnoreCase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isempty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isEmpty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tolowercase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        toLowerCase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base64urlencode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        base64urlencode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-encryptionservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. EncryptionService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. EncryptionService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-base64util" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Base64Util
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../getting-started/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Janssen Server
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../architecture/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Architecture & Concepts
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">CdiUtil</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">bean</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="managed-beans">Managed Beans<a class="headerlink" href="#managed-beans" title="Permanent link">#</a></h1>
+<h2 id="ready-to-use-code-in-custom-script">Ready-to-use code in Custom script:<a class="headerlink" href="#ready-to-use-code-in-custom-script" title="Permanent link">#</a></h2>
+<p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
+The most useful functions are implemented through a set of beans which can be re-used in all custom scripts.</p>
+<h3 id="obtaining-a-bean-inside-a-custom-script">Obtaining a bean inside a custom script:<a class="headerlink" href="#obtaining-a-bean-inside-a-custom-script" title="Permanent link">#</a></h3>
+<p><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/service/cdi/util/CdiUtil.java">CdiUtil</a> used to obtain managed beans inside a custom script.</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><T> T bean(Class<T> clazz)</td>
+<td>Gets the managed bean belonging to the class passed as parameter</td>
+</tr>
+</tbody>
+</table>
+<p>Usage (jython code):
+Suppose UserService and AuthenticationService beans have to be referenced in the code, it can be done as below:</p>
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.service import UserService
+from io.jans.as.server.service import AuthenticationService
+...
+userService = CdiUtil.bean(UserService)
+authenticationService = CdiUtil.bean(AuthenticationService)
+</code></pre></div>
+<h2 id="commonly-used-beans">Commonly used beans:<a class="headerlink" href="#commonly-used-beans" title="Permanent link">#</a></h2>
+<h3 id="1-authenticationservice">1. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/AuthenticationService.java">AuthenticationService</a><a class="headerlink" href="#1-authenticationservice" title="Permanent link">#</a></h3>
+<p>Allows to authenticate a user or obtain the current authenticated user
+<br/>
+Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>boolean authenticate(String userName)</code></td>
+<td>Performs authentication for the user whose identifier (<code>userName</code>) is passed as parameter</td>
+</tr>
+<tr>
+<td><code>boolean authenticate(String userName, String password)</code></td>
+<td>Performs authentication for the user whose identifier (<code>userName</code>) is passed as parameter. The <code>password</code> supplied must be the correct password of the user in question</td>
+</tr>
+<tr>
+<td><code>User getAuthenticatedUser()</code></td>
+<td>Returns a representation of the currently authenticated user. <code>null</code> if no user is currently authenticated. See <a href="#usage">User</a> data object</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.service import AuthenticationService
+...
+
+#1. authenticate a user using username and password
+authenticationService = CdiUtil.bean(AuthenticationService)
+logged_in = authenticationService.authenticate(user_name, user_password)
+
+# 2. authenticate method without passing password parameter
+logged_in = authenticationService.authenticate(user_name)
+
+#3. obtain an authenticated user
+user = authenticationService.getAuthenticatedUser()
+userName = user.getUserId()
+emailIds = user.getAttribute(&quot;oxEmailAlternate&quot;)
+</code></pre></div></p>
+<h3 id="2-userservice">2.  <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/service/common/UserService.java">UserService</a><a class="headerlink" href="#2-userservice" title="Permanent link">#</a></h3>
+<p>Allows CRUD operations for users to the local persistence.</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>User addUser(User user, boolean active)</code></td>
+<td>Creates a new user based on the representation passed as parameter. <code>active</code> parameter denotes whether user status (<code>gluuStatus</code> attribute) will be <code>active</code> or <code>register</code></td>
+</tr>
+<tr>
+<td><code>User addUserAttribute(String userId, String attributeName, String attributeValue)</code></td>
+<td>Adds an attribute to the user identified by <code>userId</code> in the database with the name and value passed. Returns a representation of the modified user or <code>null</code> in case of failure or if such name/attribute is already part of such user</td>
+</tr>
+<tr>
+<td><code>boolean addUserAttribute(User user, String attributeName, String attributeValue)</code></td>
+<td>Adds an attribute to the <code>user</code> object with the name and value passed. This method only alters the <code>user</code> argument and does not persist changes. Returns <code>false</code> if such name/attribute is already part of <code>user</code></td>
+</tr>
+<tr>
+<td><code>User addUserAttributeByUserInum(String userInum, String attributeName, String attributeValue)</code></td>
+<td>Adds an attribute to the user whose <code>inum</code>  attribute (in the database) equals to <code>userInum</code> using the name and value passed. Returns a representation of the modified user or <code>null</code> in case of failure or if such name/attribute is already part of such user</td>
+</tr>
+<tr>
+<td><code>CustomAttribute getCustomAttribute(User user, String attributeName)</code></td>
+<td>Gets a representation of the attribute whose name is passed for the user in question (<code>user</code>). Returns <code>null</code> if no such attribute is populated</td>
+</tr>
+<tr>
+<td><code>String getDnForUser(String inum)</code></td>
+<td>Obtains the DN (distinguished name) of the user whose <code>inum</code> attribute equals to <code>userInum</code> (no check that such user may exist is actually made)</td>
+</tr>
+<tr>
+<td><code>User getUser(String userId, String... returnAttributes)</code></td>
+<td>Retrieves a user representation for the user identified with <code>userId</code> containing only the attributes requested (<code>returnAttributes</code>). <code>null</code> is returned if no such user exists</td>
+</tr>
+<tr>
+<td><code>User getUserByAttribute(String attributeName, String attributeValue)</code></td>
+<td>Retrieves a user (first available) such that the attribute referenced (<code>attributeName</code>) has the value passed (<code>attributeValue</code>). <code>null</code> is returned if no such user exists</td>
+</tr>
+<tr>
+<td><code>String getUserInum(String userId)</code></td>
+<td>Retrieves the <code>inum</code> database attribute for the user identified with <code>userId</code>.<code>null</code> is returned if no such user exists</td>
+</tr>
+<tr>
+<td><code>User removeUserAttribute(String userId, String attributeName, String attributeValue)</code></td>
+<td>Removes <code>attributeValue</code> from the values of the attribute whose name is passed (<code>attributeName</code>) for the user identified with <code>userId</code></td>
+</tr>
+<tr>
+<td><code>User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue)</code></td>
+<td>Updates the user identified with <code>userId</code> by replacing the value of the attribute <code>attributeName</code> with the value passed. <code>null</code> is returned if no such user exists</td>
+</tr>
+<tr>
+<td><code>void setCustomAttribute(User user, String attributeName, String attributeValue)</code></td>
+<td>Sets the value of the attribute <code>attributeName</code> with the single value <code>attributeValue</code> for the user representation passes as parameter. This method does not persist changes</td>
+</tr>
+<tr>
+<td><code>User updateUser(User user)</code></td>
+<td>Updates the user represented by <code>user</code> object in the database</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h4>
+<h4 id="a-add-a-user">a. Add a user<a class="headerlink" href="#a-add-a-user" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>from  io.jans.as.common.service.common import UserService
+from io.jans.orm.model.base import CustomObjectAttribute;
+...
+
+new_user = User()
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;address&quot;, Arrays.asList(&quot;London&quot;, &quot;Texas&quot;, &quot;Kiev&quot;)));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;jansGuid&quot;, &quot;test_value&quot;));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;birthdate&quot;, new Date()));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;jansActive&quot;, false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;scimCustomThird&quot;, 18));
+found_user.setUserRole(UserRole.ADMIN);
+found_user.setMemberOf(Arrays.asList(&quot;group_1&quot;, &quot;group_2&quot;, &quot;group_3&quot;));
+
+CustomObjectAttribute multiValuedSingleValue = new CustomObjectAttribute(&quot;oxExternalUid&quot;, &quot;multivalued_single_valued&quot;);
+multiValuedSingleValue.setMultiValued(true);
+foundUser.getCustomAttributes().add(multiValuedSingleValue);
+
+new_user = CdiUtil.bean(UserService).addUser(new_user, True)
+</code></pre></div>
+<h4 id="b-add-user-attributes">b. Add user attributes<a class="headerlink" href="#b-add-user-attributes" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>userObject = userService.addUserAttribute(user_name, &quot;oxExternalUid&quot;, cert_user_external_uid, true)
+</code></pre></div>
+<h4 id="c-get-user">c. Get User<a class="headerlink" href="#c-get-user" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code># example 1 - get User by userId
+user = userService.getUser(user_name)
+
+# example 2 - get User by User-Id only if attribute oxExternalUid is populated
+user = userService.getUser(user_name, &quot;oxExternalUid&quot;)
+customAttributeValue = userService.getCustomAttribute(user, &quot;oxExternalUid&quot;)
+</code></pre></div>
+<h4 id="d-get-specific-user-attribute">d. Get specific User attribute<a class="headerlink" href="#d-get-specific-user-attribute" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>status_attribute_value = userService.getCustomAttribute(find_user_by_uid, &quot;gluuStatus&quot;)
+</code></pre></div>
+<h4 id="e-replace-user-attributes">e. Replace user attributes<a class="headerlink" href="#e-replace-user-attributes" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>userService.replaceUserAttribute(user_name, &quot;oxOTPCache&quot;, cachedOTP, localTotpKey)
+</code></pre></div>
+<h4 id="f-remove-user-attribute">f. Remove user attribute<a class="headerlink" href="#f-remove-user-attribute" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>userService.removeUserAttribute(user.getUserId(),&quot;oxTrustExternalId&quot;, &quot;wwpass:%s&quot;%puid)
+</code></pre></div>
+<h4 id="g-update-users">g. Update users<a class="headerlink" href="#g-update-users" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>found_user = userService.getUser(user_name)
+
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;address&quot;, Arrays.asList(&quot;London&quot;, &quot;Texas&quot;, &quot;Kiev&quot;)));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;jansGuid&quot;, &quot;test_value&quot;));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;birthdate&quot;, new Date()));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;jansActive&quot;, false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;jansActive&quot;, false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute(&quot;scimCustomThird&quot;, 18));
+found_user.setUserRole(UserRole.ADMIN);
+found_user.setMemberOf(Arrays.asList(&quot;group_1&quot;, &quot;group_2&quot;, &quot;group_3&quot;));
+
+userService.updateUser(found_user)
+</code></pre></div>
+<h3 id="4-user">4.  <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a><a class="headerlink" href="#4-user" title="Permanent link">#</a></h3>
+<p>A class employed to represent a user entry in the persistence. Provides getters and setters to retrieve and assign value(s) for attributes</p>
+<h3 id="5-customattribute">5. <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/model/src/main/java/io/jans/orm/model/base/CustomAttribute.java">CustomAttribute</a><a class="headerlink" href="#5-customattribute" title="Permanent link">#</a></h3>
+<p>A class that models an attribute. An attribute has a name and a collection of associated values</p>
+<h3 id="6-identity">6. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/security/Identity.java">Identity</a><a class="headerlink" href="#6-identity" title="Permanent link">#</a></h3>
+<p>The authentication flow in jans-auth server is stateless and the instance is preserved because the Identity parameters (another name for session parameters) are persisted in databases.
+A function in the <code>PersonAuthenticationType</code> script called <code>getExtraParametersForStep</code> should be overridden to include any new session variable. The underlying Jans-auth server takes care of retrieving it, persisting it etc.</p>
+<p><div class="highlight"><pre><span></span><code>def getExtraParametersForStep(self, configurationAttributes, step):
+       return Arrays.asList(&quot;sessionParamName1&quot;, &quot;sessionParamName2&quot;, &quot;sessionParamName3&quot;)
+</code></pre></div>
+Bean details:
+|Signature|Description|
+|-|-|
+|<code>Object getWorkingParameter(String name)</code>|Retrieves a working parameter by name previously set via <code>setWorkingParameter</code>|
+|<code>void setWorkingParameter(String name, Object value)</code>|Binds data to a name for further use in an authentication flow. Recommended values to store are <code>String</code>s|
+|<code>SessionId getSessionId()</code>|Retrieves a reference to the associated server session object, see <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/SessionId.java">SessionId</a>|</p>
+<p>Usage
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.security import Identity
+identity = CdiUtil.bean(Identity)
+
+#1.
+newExpDate = identity.getWorkingParameter(&quot;expDate&quot;)
+
+#2.
+identity.setWorkingParameter(&quot;expDate&quot;, expDate)
+
+#3.
+session_attributes = identity.getSessionId().getSessionAttributes()
+session_attributes.containsKey(&quot;remote_ip&quot;)
+</code></pre></div></p>
+<h3 id="8-sessionidservice">8. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/SessionIdService.java">SessionIdService</a><a class="headerlink" href="#8-sessionidservice" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>#1. get session
+sessionIdservice = CdiUtil.bean(SessionIdService).getSessionId()
+
+#2. update session
+
+sessionIdservice.getSessionAttributes().put(key, value)
+sessionIdservice.updateSessionId(session)
+</code></pre></div>
+<h3 id="9-grantservice">9. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/GrantService.java">GrantService</a><a class="headerlink" href="#9-grantservice" title="Permanent link">#</a></h3>
+<h3 id="10-clientservice-provides-operations-with-clients">10. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/ClientService.java">ClientService</a> : Provides operations with clients.<a class="headerlink" href="#10-clientservice-provides-operations-with-clients" title="Permanent link">#</a></h3>
+<p>Usage:
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.service import ClientService
+
+clientService = CdiUtil.bean(ClientService)
+client = clientService.getClient(clientId)
+</code></pre></div></p>
+<h3 id="7-httpservice-httpservice">7. HttpService: <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/net/HttpService.java">HttpService</a><a class="headerlink" href="#7-httpservice-httpservice" title="Permanent link">#</a></h3>
+<p>Provides utility methods to execute HTTP requests, manipulate responses, etc</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HttpClient getHttpsClient()</code></td>
+<td>Returns an instance of <code>org.apache.http.client.HttpClient</code> (see oxcore-util class <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/net/SslDefaultHttpClient.java">SslDefaultHttpClient</a>)</td>
+</tr>
+<tr>
+<td><code>HttpServiceResponse executeGet(HttpClient httpClient, String requestUri)</code></td>
+<td>Perform a GET on the URI requested. Returns an instance of <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/net/HttpServiceResponse.java">io.jans.as.server.model.net.HttpServiceResponse</a>  (a wrapper on <code>org.apache.http.HttpResponse</code>)</td>
+</tr>
+<tr>
+<td><code>byte[] getResponseContent(HttpResponse httpResponse)</code></td>
+<td>Consumes the bytes of the associated response. Returns <code>null</code> if the response status code is not 200 (OK)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-cacheservice">8.  <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/cache/src/main/java/io/jans/service/CacheService.java">CacheService</a><a class="headerlink" href="#8-cacheservice" title="Permanent link">#</a></h3>
+<p>Provides a unified means to interact with the underlying cache provider configured in the Jans-auth Server</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>void clear()</code></td>
+<td>Flushes the whole cache</td>
+</tr>
+<tr>
+<td><code>Object get(String key)</code></td>
+<td>Retrieves the value of <code>key</code> in the cache. <code>null</code> if there is no such key present</td>
+</tr>
+<tr>
+<td><code>void put(int expirationInSeconds, String key, Object object)</code></td>
+<td>Puts an object in the cache associated to the key passed. An expiration in seconds can be provided</td>
+</tr>
+<tr>
+<td><code>put(String key, Object object)</code></td>
+<td>Puts an object in the cache associated to the key passed. The expiration used is the default expiration configured in Gluu</td>
+</tr>
+<tr>
+<td><code>void remove(String key)</code></td>
+<td>Removes an entry from the cache</td>
+</tr>
+</tbody>
+</table>
+<h3 id="9-facesservice-provides-utilities-to-properly-build-encoded-urls-and-make-redirections-this-class-is-used-a-great-deal-in-custom-scripts">9. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/jsf-util/src/main/java/io/jans/jsf2/service/FacesService.java">FacesService</a> : Provides utilities to properly build encoded URLs and make redirections. This class is used a great deal in custom scripts<a class="headerlink" href="#9-facesservice-provides-utilities-to-properly-build-encoded-urls-and-make-redirections-this-class-is-used-a-great-deal-in-custom-scripts" title="Permanent link">#</a></h3>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>void redirectToExternalURL(String url)</code></td>
+<td>Redirects the user's browser to the URL passed as parameter</td>
+</tr>
+<tr>
+<td><code>String encodeParameters(String url, Map&lt;String, Object&gt; parameters)</code></td>
+<td>Builds a URL by appending query parameters as supplied in <code>parameters</code> map. Every value in the map is properly URL-encoded</td>
+</tr>
+</tbody>
+</table>
+<h3 id="10-facesmessages">10.  <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java">FacesMessages</a><a class="headerlink" href="#10-facesmessages" title="Permanent link">#</a></h3>
+<p>Allows manipulation of JSF context messages</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>void add(Severity severity, String message)</code></td>
+<td>Adds a message to the JSF context with the severity (<code>javax.faces.application.FacesMessage.Severity</code>) specified</td>
+</tr>
+<tr>
+<td><code>void clear()</code></td>
+<td>Clears the messages of the JSF context</td>
+</tr>
+<tr>
+<td><code>String evalAsString(String expression)</code></td>
+<td>Evaluates an EL expression using the JSF context and returns the result as a String</td>
+</tr>
+<tr>
+<td><code>void setKeepMessages()</code></td>
+<td>Sets the "keep messages" property of the JSF flash</td>
+</tr>
+</tbody>
+</table>
+<h3 id="11-stringhelper">11. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/util/StringHelper.java">StringHelper</a><a class="headerlink" href="#11-stringhelper" title="Permanent link">#</a></h3>
+<p>Provides many utility methods that often arise in the manipulation of Strings
+Usage:</p>
+<div class="highlight"><pre><span></span><code>from io.jans.util import StringHelper
+</code></pre></div>
+<ol>
+<li>
+<h4 id="isnotemptystring">isNotEmptyString<a class="headerlink" href="#isnotemptystring" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>if StringHelper.isNotEmptyString(user_name):
+  # do something
+</code></pre></div>
+</li>
+<li>
+<h4 id="equalsignorecase">equalsIgnoreCase<a class="headerlink" href="#equalsignorecase" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>if StringHelper.equalsIgnoreCase(authentication_mode, &quot;one_step&quot;):
+  # do something
+</code></pre></div>
+</li>
+<li>
+<h4 id="isempty">isEmpty<a class="headerlink" href="#isempty" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>if StringHelper.isEmpty(auth_method):
+  # do something
+</code></pre></div>
+</li>
+<li>
+<h4 id="split">split<a class="headerlink" href="#split" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>allowedClientsListArray = StringHelper.split(allowedClientsList, &quot;,&quot;)
+</code></pre></div>
+</li>
+<li>
+<h4 id="tolowercase">toLowerCase<a class="headerlink" href="#tolowercase" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>remoteAttribute = StringHelper.toLowerCase(remoteAttributesListArray[i])
+</code></pre></div>
+</li>
+<li>
+<h4 id="base64urlencode">base64urlencode<a class="headerlink" href="#base64urlencode" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>StringUtils.base64urlencode(input);
+</code></pre></div></li>
+</ol>
+<h3 id="13-encryptionservice">13. <a href="https://github.com/JanssenProject/jans/blob/main/jans-scim/service/src/main/java/io/jans/scim/service/EncryptionService.java">EncryptionService</a><a class="headerlink" href="#13-encryptionservice" title="Permanent link">#</a></h3>
+<p>Allows to encrypt/decrypt strings using a 3DES cipher whose salt is found in <code>/etc/jans/conf/salt</code></p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String decrypt(String encryptedString)</td>
+<td>Decrypts the encrypted string supplied</td>
+</tr>
+<tr>
+<td>Properties decryptAllProperties(Properties connectionProperties)</td>
+<td>Returns a <code>java.util.Properties</code> object with all decrypted values found in <code>connectionProperties</code></td>
+</tr>
+<tr>
+<td><code>String encrypt(String unencryptedString)</code></td>
+<td>Encrypts the string supplied</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage_1">Usage:<a class="headerlink" href="#usage_1" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>from io.jans.as.common.service.common import EncryptionService
+....
+
+encryptionService = CdiUtil.bean(EncryptionService)
+pwd_decrypted = encryptionService.decrypt(&quot;stringtobedecrypted&quot;)
+</code></pre></div>
+<h3 id="14-base64util">14. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java">Base64Util</a><a class="headerlink" href="#14-base64util" title="Permanent link">#</a></h3>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code>from io.jans.as.model.util import Base64Util
+....
+
+Base64Util.base64urldecodeToString(input_string)
+
+Base64Util.base64urlencode(input_string.encode(&#39;utf-8&#39;)));
+</code></pre></div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 17, 2022 14:24:49 UTC"><span class="timeago" datetime="2022-08-17T14:24:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 17, 2022 14:24:49 UTC">2022-08-17</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

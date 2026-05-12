@@ -1,0 +1,2472 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/cedarling/reference/cedarling-interfaces/">
+      
+      
+        <link rel="prev" href="../cedarling-multi-issuer/">
+      
+      
+        <link rel="next" href="../cedarling-policy-store/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Interfaces - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cedarling-interfaces" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Interfaces
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-authz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-multi-issuer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Issuer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interfaces
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Init
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authz
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authz">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Introspection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policymetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyMetadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authz-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authz Result
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authz Result">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authorizeresult-for-authorize_unsigned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuthorizeResult (for authorize_unsigned)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiissuerauthorizeresult-for-authorize_multi_issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MultiIssuerAuthorizeResult (for authorize_multi_issuer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context Data API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-data-in-cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Data in Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-loading-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Loading Info
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuer Loading Info">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-policy-store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-lock-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../integrations/cedarling-krakend/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Init
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authz
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authz">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Introspection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policymetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyMetadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authz-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authz Result
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authz Result">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authorizeresult-for-authorize_unsigned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuthorizeResult (for authorize_unsigned)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiissuerauthorizeresult-for-authorize_multi_issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MultiIssuerAuthorizeResult (for authorize_multi_issuer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context Data API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-data-in-cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Data in Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-loading-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Loading Info
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuer Loading Info">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../cedarling-authz/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">interfaces</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="cedarling-interfaces">Cedarling Interfaces<a class="headerlink" href="#cedarling-interfaces" title="Permanent link">#</a></h1>
+<p>Cedarling provides a number of methods to interface with the Cedar engine.
+These are described below.</p>
+<h2 id="init">Init<a class="headerlink" href="#init" title="Permanent link">#</a></h2>
+<p>These methods are used to create a <code>BootstrapConfig</code> object, which is needed to initialize a Cedarling instance. <a href="../cedarling-properties/">Bootstrap properties</a> are required to do this.</p>
+<ul>
+<li>
+<p><code>load_from_file(path)</code></p>
+<p>Creates a <code>BootstrapConfig</code> object by loading properties from a file</p>
+</li>
+<li>
+<p><code>load_from_json(config_json)</code></p>
+<p>Creates a <code>BootstrapConfig</code> object by reading in a string encoded JSON object containing properties.</p>
+</li>
+<li>
+<p><code>from_env(options)</code></p>
+<p>Creates a <code>BootstrapConfig</code> object by reading environment variables. If a dictionary is passed in, it will override environment variables.</p>
+</li>
+<li>
+<p><code>Cedarling(bootstrap_config)</code></p>
+<p>Initializes an instance of the Cedarling engine by reading the bootstrap configuration.</p>
+</li>
+</ul>
+<h2 id="authz">Authz<a class="headerlink" href="#authz" title="Permanent link">#</a></h2>
+<p>These methods are called to create an authorization request, run authorization, and get decisions back.</p>
+<ul>
+<li>
+<p><code>EntityData(cedar_mapping, attributes)</code></p>
+<p>Creates a principal or resource entity.</p>
+</li>
+<li>
+<p><code>cedar_mapping</code>: A <code>CedarEntityMapping</code> object with <code>entity_type</code> (Cedar type name) and <code>id</code> (entity ID).</p>
+</li>
+<li>
+<p><code>attributes</code>: A map of attribute names to values.</p>
+</li>
+<li>
+<p><code>from_json(json_str)</code> — Creates an <code>EntityData</code> from a JSON string (Rust).</p>
+</li>
+<li>
+<p><code>from_dict(value)</code> — Creates an <code>EntityData</code> from a dictionary (Python bindings).</p>
+<p><strong>Note on field naming:</strong> The Rust struct field is named <code>cedar_mapping</code>, but it serializes to <code>cedar_entity_mapping</code> in JSON (via <code>#[serde(rename)]</code>). When constructing in Rust, use <code>cedar_mapping</code>. When passing JSON (via <code>from_json</code>) or a Python dict (via <code>from_dict</code>), use <code>cedar_entity_mapping</code> as the key.</p>
+</li>
+<li>
+<p><code>RequestUnsigned(principal, action, resource, context)</code></p>
+<p>Creates a <code>RequestUnsigned</code> object which contains inputs for Cedarling's unsigned authorization call.</p>
+</li>
+<li>
+<p><code>principal</code>: Optional <code>EntityData</code>. When omitted, Cedarling evaluates the request with Cedar's partial evaluator. See <a href="../cedarling-authz/#optional-principal-and-partial-evaluation">Optional principal and partial evaluation</a>.</p>
+</li>
+<li>
+<p><code>TokenInput(mapping, payload)</code></p>
+<p>Creates a <code>TokenInput</code> object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.</p>
+</li>
+<li>
+<p><code>mapping</code>: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")</p>
+</li>
+<li>
+<p><code>payload</code>: The JWT token string</p>
+</li>
+<li>
+<p><code>AuthorizeMultiIssuerRequest(tokens, action, resource, context)</code></p>
+<p>Creates an <code>AuthorizeMultiIssuerRequest</code> object for multi-issuer authorization.</p>
+</li>
+<li>
+<p><code>tokens</code>: Array of <code>TokenInput</code> objects</p>
+</li>
+<li><code>action</code>: The action to be authorized (required)</li>
+<li><code>resource</code>: The resource entity being accessed (required)</li>
+<li>
+<p><code>context</code>: Optional additional context for policy evaluation</p>
+</li>
+<li>
+<p><code>authorize_unsigned(request)</code></p>
+<p>Runs unsigned authorization against the provided <code>RequestUnsigned</code> object. A trusted issuer is not required for this call.</p>
+</li>
+<li>
+<p><code>authorize_multi_issuer(request)</code></p>
+<p>Runs multi-issuer authorization against the provided <code>AuthorizeMultiIssuerRequest</code> object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.</p>
+</li>
+</ul>
+<h3 id="policy-introspection">Policy Introspection<a class="headerlink" href="#policy-introspection" title="Permanent link">#</a></h3>
+<p>These methods return metadata about policies that are potentially applicable to a given authorization request, <strong>without executing authorization</strong>. This is useful for admin tooling, policy auditing, and debugging.</p>
+<p>Both methods perform scope-level filtering only (principal/action/resource constraints). Policies with <code>when</code>/<code>unless</code> conditions may still not apply at evaluation time — the returned set is a superset of truly applicable policies.</p>
+<ul>
+<li>
+<p><code>get_matching_policies_unsigned(principal, actions, resources)</code></p>
+<p>Returns metadata for all policies whose scope constraints are compatible with the given principal, actions, and resources.</p>
+</li>
+<li>
+<p><code>principal</code>: Optional <code>EntityData</code> — its <code>entity_type</code> is matched against policy principal constraints. Pass <code>None</code>/<code>null</code> to match policies regardless of principal type.</p>
+</li>
+<li><code>actions</code>: Array of action strings (e.g., <code>Jans::Action::"Read"</code>) — matched against policy action constraints</li>
+<li><code>resources</code>: Array of <code>EntityData</code> objects — their <code>entity_type</code> is matched against policy resource constraints</li>
+</ul>
+<p>Returns a list of <code>PolicyMetadata</code> objects.</p>
+<ul>
+<li>
+<p><code>get_matching_policies_multi_issuer(tokens, actions, resources)</code></p>
+<p>Returns metadata for all policies whose scope constraints are compatible with the given token-derived principals, actions, and resources. Tokens are validated and their mapping types are used as principal entity types.</p>
+</li>
+<li>
+<p><code>tokens</code>: Array of <code>TokenInput</code> objects — their <code>mapping</code> field is used as the principal entity type</p>
+</li>
+<li><code>actions</code>: Array of action strings</li>
+<li><code>resources</code>: Array of <code>EntityData</code> objects</li>
+</ul>
+<p>Returns a list of <code>PolicyMetadata</code> objects.</p>
+<h4 id="policymetadata">PolicyMetadata<a class="headerlink" href="#policymetadata" title="Permanent link">#</a></h4>
+<p>Each returned <code>PolicyMetadata</code> object contains:</p>
+<ul>
+<li><code>id</code>: The policy ID (string)</li>
+<li><code>annotations</code>: Key-value pairs from Cedar policy annotations (<code>@key("value")</code>), returned as a map of strings</li>
+<li><code>source</code>: The Cedar policy source code in human-readable Cedar syntax</li>
+</ul>
+<h4 id="example-rust">Example (Rust)<a class="headerlink" href="#example-rust" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">Cedarling</span><span class="p">,</span><span class="w"> </span><span class="n">EntityData</span><span class="p">,</span><span class="w"> </span><span class="n">CedarEntityMapping</span><span class="p">,</span><span class="w"> </span><span class="n">PolicyMetadata</span><span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">principal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user1&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
+<span class="p">});</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">actions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="s">r#&quot;Jans::Action::&quot;Read&quot;&quot;#</span><span class="p">.</span><span class="n">to_string</span><span class="p">()];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">resources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Document&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;doc1&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
+<span class="p">}];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span>
+<span class="w">    </span><span class="p">.</span><span class="n">get_matching_policies_unsigned</span><span class="p">(</span><span class="n">principal</span><span class="p">.</span><span class="n">as_ref</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">resources</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;failed to get matching policies&quot;</span><span class="p">);</span>
+
+<span class="k">for</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">policies</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Policy: {} (annotations: {:?})&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">annotations</span><span class="p">);</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Source:</span><span class="se">\n</span><span class="s">{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">source</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="authz-result">Authz Result<a class="headerlink" href="#authz-result" title="Permanent link">#</a></h3>
+<p>The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.</p>
+<h4 id="authorizeresult-for-authorize_unsigned">AuthorizeResult (for <code>authorize_unsigned</code>)<a class="headerlink" href="#authorizeresult-for-authorize_unsigned" title="Permanent link">#</a></h4>
+<ul>
+<li>
+<p><code>decision</code></p>
+<p>A boolean field representing the authorization decision (<code>true</code> = allow, <code>false</code> = deny).</p>
+</li>
+<li>
+<p><code>response</code></p>
+<p>The Cedar <code>Response</code> object for this authorization call:</p>
+</li>
+<li>
+<p><code>decision()</code>: Cedar <code>Decision</code> (<code>Allow</code> or <code>Deny</code>)</p>
+</li>
+<li>
+<p><code>diagnostics()</code>: Detailed information including <code>reason()</code> (set of policy IDs — for partial-evaluation Deny outcomes this includes the residual policy IDs) and <code>errors()</code> (list of evaluation errors)</p>
+</li>
+<li>
+<p><code>request_id</code></p>
+<p>The request ID for this authorization call, used for log retrieval when running in memory log mode.</p>
+</li>
+<li>
+<p><code>cedar_decision()</code></p>
+<p>Returns the Cedar <code>Decision</code> enum (<code>Allow</code> or <code>Deny</code>) based on the <code>decision</code> field.</p>
+</li>
+</ul>
+<h4 id="multiissuerauthorizeresult-for-authorize_multi_issuer">MultiIssuerAuthorizeResult (for <code>authorize_multi_issuer</code>)<a class="headerlink" href="#multiissuerauthorizeresult-for-authorize_multi_issuer" title="Permanent link">#</a></h4>
+<ul>
+<li>
+<p><code>decision</code></p>
+<p>A boolean field representing whether the authorization request is allowed (<code>true</code>) or denied (<code>false</code>)</p>
+</li>
+<li>
+<p><code>response</code></p>
+<p>The Cedar policy engine response containing detailed decision information</p>
+</li>
+<li>
+<p><code>decision()</code> - Returns the decision (Allow/Deny)</p>
+</li>
+<li>
+<p><code>diagnostics()</code> - Returns diagnostics including reasons and errors</p>
+<ul>
+<li><code>reason()</code> - Set of policy IDs that contributed to an Allow decision</li>
+<li><code>errors()</code> - List of errors encountered during policy evaluation</li>
+</ul>
+</li>
+<li>
+<p><code>request_id</code></p>
+<p>The request ID for this authorization call, used for log retrieval and auditing</p>
+</li>
+</ul>
+<h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">#</a></h2>
+<p>These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in <code>memory</code> mode.</p>
+<ul>
+<li>
+<p><code>pop_logs()</code></p>
+<p>Removes and returns the latest log from the memory of the Cedarling instance</p>
+</li>
+<li>
+<p><code>get_log_by_id(id)</code></p>
+<p>Retrieves a log given the ID of an active log entry.</p>
+</li>
+<li>
+<p><code>get_log_ids()</code></p>
+<p>Returns the list of all active log entries in Cedarling's memory.</p>
+</li>
+<li>
+<p><code>get_logs_by_tag(tag)</code></p>
+<p>Returns the list of all logs with a given tag. A tag can be either the type of log (System, Decision, Metric) or the <a href="../cedarling-logs/#system-log-levels">log level</a></p>
+</li>
+<li>
+<p><code>get_logs_by_request_id(request_id)</code></p>
+<p>Returns the list of all logs with a given request ID. This request ID is obtained from an authorization result.</p>
+</li>
+<li>
+<p><code>get_logs_by_request_id_and_tag(request_id, tag)</code></p>
+<p>Returns the list of all logs with a given request ID <strong>and</strong> tag.</p>
+</li>
+</ul>
+<h2 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h2>
+<p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace. This enables dynamic, runtime-based authorization decisions without modifying policies.</p>
+<h3 id="push-data">Push Data<a class="headerlink" href="#push-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>push_data_ctx(key, value, ttl_secs)</code></li>
+</ul>
+<p>Pushes a value into the data store with an optional TTL (Time To Live).</p>
+<ul>
+<li><code>key</code>: The key for the data entry (string)</li>
+<li><code>value</code>: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)</li>
+<li><code>ttl_secs</code>: Optional TTL in seconds. If not provided, uses the default TTL from configuration.</li>
+</ul>
+<p><strong>Returns:</strong> <code>None</code> on success (or a boolean success flag, depending on the binding).</p>
+<p><strong>Errors:</strong> The method may raise the following errors:
+  - <code>InvalidKey</code>: When the key is empty
+  - <code>StorageLimitExceeded</code>: When the configured storage capacity (<code>max_entries</code>) is exceeded
+  - <code>ValueTooLarge</code>: When the entry size (including metadata) exceeds <code>max_entry_size</code>
+  - <code>TTLExceeded</code>: When the requested TTL exceeds the configured <code>max_ttl</code> limit</p>
+<p>If the key already exists, the value will be replaced.</p>
+<h3 id="get-data">Get Data<a class="headerlink" href="#get-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_data_ctx(key)</code></li>
+</ul>
+<p>Retrieves a value from the data store by key.</p>
+<ul>
+<li><code>key</code>: The key to retrieve (string)</li>
+</ul>
+<p>Returns the value if found, or <code>None</code>/<code>null</code> if the key doesn't exist or the entry has expired.</p>
+<h3 id="get-data-entry">Get Data Entry<a class="headerlink" href="#get-data-entry" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_data_entry_ctx(key)</code></li>
+</ul>
+<p>Retrieves a data entry with full metadata by key.</p>
+<ul>
+<li><code>key</code>: The key to retrieve (string)</li>
+</ul>
+<p>Returns a <code>DataEntry</code> object containing:
+  - <code>key</code>: The entry key
+  - <code>value</code>: The stored value
+  - <code>data_type</code>: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
+  - <code>created_at</code>: Timestamp when the entry was created (RFC 3339 format)
+  - <code>expires_at</code>: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
+  - <code>access_count</code>: Number of times this entry has been accessed</p>
+<h3 id="remove-data">Remove Data<a class="headerlink" href="#remove-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>remove_data_ctx(key)</code></li>
+</ul>
+<p>Removes a value from the data store by key.</p>
+<ul>
+<li><code>key</code>: The key to remove (string)</li>
+</ul>
+<p>Returns <code>true</code> if the key existed and was removed, <code>false</code> otherwise.</p>
+<h3 id="clear-data">Clear Data<a class="headerlink" href="#clear-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>clear_data_ctx()</code></li>
+</ul>
+<p>Removes all entries from the data store.</p>
+<h3 id="list-data">List Data<a class="headerlink" href="#list-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>list_data_ctx()</code></li>
+</ul>
+<p>Returns a list of all entries with their metadata.</p>
+<p>Returns an array of <code>DataEntry</code> objects containing key, value, type, and timing metadata.</p>
+<h3 id="get-statistics">Get Statistics<a class="headerlink" href="#get-statistics" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_stats_ctx()</code></li>
+</ul>
+<p>Returns statistics about the data store.</p>
+<p>Returns a <code>DataStoreStats</code> object containing:
+  - <code>entry_count</code>: Number of entries currently stored
+  - <code>max_entries</code>: Maximum number of entries allowed (0 = unlimited)
+  - <code>max_entry_size</code>: Maximum size per entry in bytes (0 = unlimited)
+  - <code>metrics_enabled</code>: Whether metrics tracking is enabled
+  - <code>total_size_bytes</code>: Total size of all entries in bytes
+  - <code>avg_entry_size_bytes</code>: Average size per entry in bytes
+  - <code>capacity_usage_percent</code>: Percentage of capacity used (0.0-100.0)
+  - <code>memory_alert_threshold</code>: Memory usage threshold percentage (from config)
+  - <code>memory_alert_triggered</code>: Whether memory usage exceeds the alert threshold</p>
+<h3 id="schema-requirements">Schema Requirements<a class="headerlink" href="#schema-requirements" title="Permanent link">#</a></h3>
+<p>To use the Context Data API, your Cedar schema must include a <code>data</code> field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.</p>
+<div class="highlight"><pre><span></span><code>namespace MyApp {
+  // Define the structure of nested data objects
+  type DataConfig = {
+    &quot;enabled&quot;: Bool
+  };
+
+  // Define all possible fields that can be pushed via push_data_ctx
+  // Use optional fields (?) since not all keys may be present at evaluation time
+  type DataContext = {
+    &quot;user_level&quot;?: String,
+    &quot;feature_enabled&quot;?: Bool,
+    &quot;config&quot;?: DataConfig
+  };
+
+  action &quot;read&quot; appliesTo {
+    principal: [User],
+    resource: [Document],
+    context: {
+      &quot;data&quot;?: DataContext,
+      // ... other context fields
+    }
+  };
+}
+</code></pre></div>
+<p>The <code>data</code> field should be optional (<code>"data"?</code>) since it is only present when data has been pushed via <code>push_data_ctx</code>. Each key you plan to push must be declared in the <code>DataContext</code> type — Cedar will reject values with undeclared fields.</p>
+<p>Always use <code>has</code> checks in policies before accessing data fields, since they are optional:</p>
+<div class="highlight"><pre><span></span><code>context has data &amp;&amp; context.data has user_level &amp;&amp; context.data.user_level == &quot;premium&quot;
+</code></pre></div>
+<h3 id="using-data-in-cedar-policies">Using Data in Cedar Policies<a class="headerlink" href="#using-data-in-cedar-policies" title="Permanent link">#</a></h3>
+<p>Data pushed via the Context Data API is automatically available in Cedar policies under the <code>context.data</code> namespace. The <code>context.data</code> values follow a three-tier resolution precedence:</p>
+<ol>
+<li><strong>Inline request context values</strong> (highest precedence): Values provided directly in the authorization request context override all other sources.</li>
+<li><strong>Pushed data</strong> (from the Context Data API): Data pushed via <code>push_data_ctx</code> overrides the default context.</li>
+<li><strong>Default context</strong> (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.</li>
+</ol>
+<p>When keys collide, higher-precedence values shadow lower-precedence ones. The <code>context.data</code> namespace combines values from all three sources, with inline values taking precedence over pushed data, and pushed data taking precedence over default context values.</p>
+<p><strong>Example with safe key and attribute checks:</strong></p>
+<div class="highlight"><pre><span></span><code>permit(
+    principal,
+    action == Action::&quot;read&quot;,
+    resource
+) when {
+    context.data has &quot;user:123&quot; &amp;&amp;
+    context.data[&quot;user:123&quot;] has &quot;role&quot; &amp;&amp;
+    context.data[&quot;user:123&quot;].role.contains(&quot;admin&quot;)
+};
+</code></pre></div>
+<p>The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.</p>
+<h2 id="trusted-issuer-loading-info">Trusted Issuer Loading Info<a class="headerlink" href="#trusted-issuer-loading-info" title="Permanent link">#</a></h2>
+<p>The <code>TrustedIssuerLoadingInfo</code> trait provides information about the loading status of trusted issuers. This is useful for health checks, diagnostics, and verifying that Cedarling has successfully loaded the expected issuers before processing authorization requests.</p>
+<p>This interface is particularly useful when <code>CEDARLING_TRUSTED_ISSUER_LOADER_TYPE</code> is set to <code>ASYNC</code>. In async mode, Cedarling starts accepting requests immediately while issuers load in the background. Use these methods to check whether all issuers are ready before relying on authorization results.</p>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p><code>is_trusted_issuer_loaded_by_name(issuer_id)</code> — Returns <code>true</code> if the trusted issuer with the given policy store key is loaded.</p>
+</li>
+<li>
+<p><code>is_trusted_issuer_loaded_by_iss(iss_claim)</code> — Returns <code>true</code> if the trusted issuer with the given <code>iss</code> claim value is loaded.</p>
+</li>
+<li>
+<p><code>total_issuers()</code> — Returns the total number of trusted issuers expected to be loaded (from the policy store configuration).</p>
+</li>
+<li>
+<p><code>loaded_trusted_issuers_count()</code> — Returns the number of trusted issuers that have been successfully loaded.</p>
+</li>
+<li>
+<p><code>loaded_trusted_issuer_ids()</code> — Returns the set of issuer IDs that have been successfully loaded.</p>
+</li>
+<li>
+<p><code>failed_trusted_issuer_ids()</code> — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count.</p>
+</li>
+</ul>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">Cedarling</span><span class="p">,</span><span class="w"> </span><span class="n">TrustedIssuerLoadingInfo</span><span class="p">};</span>
+
+<span class="k">fn</span><span class="w"> </span><span class="nf">check_health</span><span class="p">(</span><span class="n">cedarling</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">Cedarling</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">total_issuers</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">loaded_trusted_issuers_count</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">failed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">failed_trusted_issuer_ids</span><span class="p">();</span>
+
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Issuers: {loaded}/{total} loaded&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">failed</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Failed issuers: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">failed</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 16, 2025 15:29:48 UTC"><span class="timeago" datetime="2025-05-16T15:29:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 16, 2025 15:29:48 UTC">2025-05-16</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

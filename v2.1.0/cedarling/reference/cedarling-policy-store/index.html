@@ -1,0 +1,3365 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/cedarling/reference/cedarling-policy-store/">
+      
+      
+        <link rel="prev" href="../cedarling-interfaces/">
+      
+      
+        <link rel="next" href="../cedarling-properties/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Policy Store - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cedarling-policy-store" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Policy Store
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-authz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-multi-issuer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Issuer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Store
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#policy-store-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Store Formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Store Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Legacy Single-File Format (JSON/YAML)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-new-directory-based-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. New Directory-Based Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. New Directory-Based Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadatajson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-policies-per-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple policies per file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-archive-cjar-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Archive (.cjar) Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-loading-from-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced: Loading from Bytes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-single-file-format-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Single-File Format (JSON)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default Entities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Default Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Conflict Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Policies Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policy_content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        policy_content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-of-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example of policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuers-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuers Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuers Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-metadata-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Metadata Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-policy-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Policy store
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-issuer-token-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Token Entities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Issuer Token Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-entity-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Entity Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accessing-token-claims-in-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing Token Claims in Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-collection-in-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Collection in Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements-for-multi-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements for Multi-Issuer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Requirements for Multi-Issuer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-token-entity-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Token Entity Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-context-type-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Context Type Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-these-changes-are-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why These Changes Are Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-update-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Update Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-examples-using-token-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Examples Using Token Entities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-configuration-for-multi-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Configuration for Multi-Issuer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-and-schema-authoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy and Schema Authoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy and Schema Authoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum-cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimum Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-on-test-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note on test fixtures
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-lock-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../integrations/cedarling-krakend/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#policy-store-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Store Formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Store Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Legacy Single-File Format (JSON/YAML)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-new-directory-based-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. New Directory-Based Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. New Directory-Based Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadatajson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-policies-per-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple policies per file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-archive-cjar-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Archive (.cjar) Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-loading-from-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced: Loading from Bytes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-single-file-format-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Single-File Format (JSON)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default Entities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Default Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Conflict Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Policies Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policy_content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        policy_content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-of-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example of policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuers-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuers Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuers Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-metadata-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Metadata Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-policy-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Policy store
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-issuer-token-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Token Entities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Issuer Token Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-entity-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Entity Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accessing-token-claims-in-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing Token Claims in Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-collection-in-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Collection in Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements-for-multi-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements for Multi-Issuer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Requirements for Multi-Issuer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-token-entity-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Token Entity Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-context-type-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Context Type Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-these-changes-are-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why These Changes Are Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-update-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Update Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-examples-using-token-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Examples Using Token Entities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-configuration-for-multi-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Configuration for Multi-Issuer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-and-schema-authoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy and Schema Authoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy and Schema Authoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum-cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimum Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-on-test-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note on test fixtures
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../cedarling-authz/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">lock</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">policy store</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="cedarling-policy-store">Cedarling Policy Store<a class="headerlink" href="#cedarling-policy-store" title="Permanent link">#</a></h1>
+<p>The Policy Store provides:</p>
+<ol>
+<li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
+<li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
+<li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
+<li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
+</ol>
+<p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
+<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code> and <code>CEDARLING_POLICY_STORE_URI</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
+<h2 id="policy-store-formats">Policy Store Formats<a class="headerlink" href="#policy-store-formats" title="Permanent link">#</a></h2>
+<p>Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Detection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_URI</code> ending in <code>.cjar</code></td>
+<td>Cedar Archive from URL</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_URI</code> (other)</td>
+<td>Legacy JSON from Lock Server</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> pointing to directory</td>
+<td>Directory-based format</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.cjar</code> extension</td>
+<td>Cedar Archive file</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.json</code> extension</td>
+<td>JSON file</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.yaml</code>/<code>.yml</code> extension</td>
+<td>YAML file</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-legacy-single-file-format-jsonyaml">1. Legacy Single-File Format (JSON/YAML)<a class="headerlink" href="#1-legacy-single-file-format-jsonyaml" title="Permanent link">#</a></h3>
+<p>The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.</p>
+<h3 id="2-new-directory-based-format">2. New Directory-Based Format<a class="headerlink" href="#2-new-directory-based-format" title="Permanent link">#</a></h3>
+<p>The new directory-based format uses human-readable Cedar files organized in a structured directory:</p>
+<div class="highlight"><pre><span></span><code>policy-store/
+├── metadata.json           # Required: Store identification and versioning
+├── schema.cedarschema      # Required: Cedar schema in human-readable format
+├── policies/               # Required: Directory containing .cedar policy files
+│   ├── allow-read.cedar
+│   └── deny-guest.cedar
+├── templates/              # Optional: Directory containing .cedar template files
+├── entities/               # Optional: Directory containing .json entity files
+└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+</code></pre></div>
+<h4 id="metadatajson">metadata.json<a class="headerlink" href="#metadatajson" title="Permanent link">#</a></h4>
+<p>Contains policy store identification and versioning:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Application Policies&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Optional description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;created_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01T00:00:00Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;updated_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-02T00:00:00Z&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="policy-files">Policy Files<a class="headerlink" href="#policy-files" title="Permanent link">#</a></h4>
+<p>Policies are stored as human-readable <code>.cedar</code> files in the <code>policies/</code> directory:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;allow-read&quot;)
+permit(
+    principal,
+    action == MyApp::Action::&quot;read&quot;,
+    resource
+);
+</code></pre></div>
+<p>When a <code>.cedar</code> file contains <strong>multiple</strong> policies, each policy must have its
+own Cedar <code>@id("...")</code> annotation so every policy has a stable, unique id (the
+loader does not fall back to the filename in that case).</p>
+<p>For a <strong>single-policy</strong> file, <code>@id("...")</code> is optional: if it is omitted, the
+parser still accepts the file and derives the policy id from the filename
+(without the <code>.cedar</code> extension), after validation.</p>
+<h5 id="multiple-policies-per-file">Multiple policies per file<a class="headerlink" href="#multiple-policies-per-file" title="Permanent link">#</a></h5>
+<p>A single <code>.cedar</code> file may contain more than one policy. In that case each policy
+must have its own <code>@id("...")</code> annotation:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;researcher-search&quot;)
+permit(
+    principal == User::&quot;researcher&quot;,
+    action == Action::&quot;search&quot;,
+    resource
+);
+
+@id(&quot;researcher-edit&quot;)
+permit(
+    principal == User::&quot;researcher&quot;,
+    action == Action::&quot;edit&quot;,
+    resource
+);
+</code></pre></div>
+<h4 id="template-files">Template Files<a class="headerlink" href="#template-files" title="Permanent link">#</a></h4>
+<p>Templates are stored as human-readable <code>.cedar</code> files in the <code>templates/</code> directory:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;resource-access-template&quot;)
+permit(
+    principal == ?principal,
+    action,
+    resource == ?resource
+);
+</code></pre></div>
+<p>Each template file must have an <code>@id</code> annotation and use Cedar's template slot syntax (<code>?principal</code>, <code>?resource</code>).</p>
+<h4 id="entity-files">Entity Files<a class="headerlink" href="#entity-files" title="Permanent link">#</a></h4>
+<p>Entity files in the <code>entities/</code> directory use the Cedar JSON entity format as a <strong>JSON array</strong>. Each file can contain one or more entity definitions:</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-dolphins&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Dolphins Division&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;org_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100129&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-dolphin.sea&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Atlantic&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Pacific&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Indian&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Role&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Administrator&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;delete&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>Each entity requires:</p>
+<ul>
+<li><strong><code>uid</code></strong>: Object with <code>type</code> (Cedar entity type name, e.g., <code>"Jans::Organization"</code>) and <code>id</code> (unique entity identifier)</li>
+<li><strong><code>attrs</code></strong>: Object containing entity attributes matching your Cedar schema</li>
+<li><strong><code>parents</code></strong>: Optional array of parent entity references for hierarchical relationships</li>
+</ul>
+<p>Example with parent relationships (<code>entities/users.json</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alice Smith&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@example.com&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Organization&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-dolphins&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<h4 id="trusted-issuer-files">Trusted Issuer Files<a class="headerlink" href="#trusted-issuer-files" title="Permanent link">#</a></h4>
+<p>Trusted issuer configuration files in the <code>trusted-issuers/</code> directory define identity providers that can issue tokens. Each file contains a JSON object mapping issuer IDs to their configurations:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;jans_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Server&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Primary Janssen Identity Provider&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.example.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Each trusted issuer configuration includes:</p>
+<ul>
+<li><strong><code>name</code></strong>: Human-readable name for the issuer (used as namespace for <code>TrustedIssuer</code> entity)</li>
+<li><strong><code>description</code></strong>: Optional description of the issuer</li>
+<li><strong><code>openid_configuration_endpoint</code></strong>: HTTPS URL for the OpenID Connect discovery endpoint</li>
+<li><strong><code>token_metadata</code></strong>: Map of token types to their metadata configuration (see <a href="#token-metadata-schema">Token Metadata Schema</a>)</li>
+</ul>
+<p>You can define multiple issuers in a single file or split them across multiple files in the <code>trusted-issuers/</code> directory.</p>
+<h4 id="cedar-archive-cjar-format">Cedar Archive (.cjar) Format<a class="headerlink" href="#cedar-archive-cjar-format" title="Permanent link">#</a></h4>
+<p>The directory structure can be packaged as a <code>.cjar</code> file (ZIP archive) for distribution:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create a .cjar archive from a policy store directory</span>
+<span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
+</code></pre></div>
+<p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>init_from_archive_bytes()</code> for custom fetch scenarios.</p>
+<h2 id="advanced-loading-from-bytes">Advanced: Loading from Bytes<a class="headerlink" href="#advanced-loading-from-bytes" title="Permanent link">#</a></h2>
+<p>For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:</p>
+<ul>
+<li><strong>WASM</strong>: Use <code>init_from_archive_bytes(config, bytes)</code> function</li>
+<li><strong>Rust</strong>: Use <code>PolicyStoreSource::ArchiveBytes(Vec&lt;u8&gt;)</code> or <code>load_policy_store_archive_bytes()</code> function</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// WASM example with custom fetch</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="legacy-single-file-format-json">Legacy Single-File Format (JSON)<a class="headerlink" href="#legacy-single-file-format-json" title="Permanent link">#</a></h2>
+<p>The following sections document the legacy single-file JSON format.</p>
+<h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
+<p>The JSON Schema accepted by Cedarling is defined as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;some_unique_string_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DoveCRM Policy Store&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DoveCRM policies, schema, and trusted JWT issuers.&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
+<li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
+<li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
+<li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
+<li><strong>default_entities</strong> : (<em>Object</em>) Optional map of entity IDs to encoded/default entity payloads. See <a href="#default-entities">Default Entities</a>.</li>
+</ul>
+<h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
+<p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
+<p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span>
+<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;cedar&quot; or &quot;cedar-json&quot;</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;namespace Jans {\ntype Url = {&quot;</span><span class="err">hos</span><span class="kc">t</span><span class="s2">&quot;: String, &quot;</span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="s2">&quot;: String, &quot;</span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="s2">&quot;: String};...&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Where <em>String</em> - The schema in cedar-json format, encoded as Base64. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
+</code></pre></div>
+<h2 id="default-entities">Default Entities<a class="headerlink" href="#default-entities" title="Permanent link">#</a></h2>
+<p>Default entities allow you to preload static entity records that are available to every authorization request. Cedarling loads these at startup alongside policies and schema.</p>
+<p>Format:</p>
+<ul>
+<li>Each entry is a simple key-value pair where the key is the entity ID and the value is a Base64-encoded JSON object representing the entity payload.</li>
+<li>Default entities support two formats:</li>
+<li><strong>Cedar format</strong>: <code>{"uid": {"type": "...", "id": "..."}, "attrs": {...}, "parents": [...]}</code></li>
+<li><strong>Legacy format</strong>: <code>{"entity_type": "...", "entity_id": "...", ...attributes...}</code> (for backward compatibility)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Example of the decoded payloads for two default entities:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1694c954f8d9&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;o&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Dolphins Division&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;org_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100129&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-dolphin.sea&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Atlantic&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Pacific&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Indian&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::PriceList&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;74d109b20248&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025 Price List&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;15020&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">9.95</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;15050&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.95</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;services&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;51001&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">99.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;51020&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">299.0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>Cedar policies can reference these entities directly by type and ID, just like any other entity present during evaluation.</li>
+<li>A common use case is defining an organization entity and writing policies that compare runtime attributes (e.g., <code>resource.org_id</code>) to attributes on the default entity.</li>
+</ul>
+<h3 id="entity-conflict-resolution">Entity Conflict Resolution<a class="headerlink" href="#entity-conflict-resolution" title="Permanent link">#</a></h3>
+<p>When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving <strong>request entities precedence</strong> over default entities. This ensures that runtime data can override static configurations while maintaining consistency.</p>
+<p>Example: If a resource entity with UID <code>"org1"</code> is passed in an authorization request, and a default entity with the same UID exists, the resource entity's attributes will be used instead of the default entity's attributes.</p>
+<h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
+<p>The <code>policies</code> field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a <code>unique_policy_id</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;unique_policy_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy for Unique Id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>unique_policy_id</strong>: (<em>String</em>) A unique policy ID used to for tracking and auditing purposes.</li>
+<li><strong>name</strong> : (<em>String</em>) A name for the policy</li>
+<li><strong>description</strong> : (<em>String</em>) A brief description of cedar policy</li>
+<li><strong>creation_date</strong> : (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
+<li><strong>policy_content</strong> : (<em>String</em> | <em>Object</em>) The Cedar Policy. See <a href="#policy_content">policy_content</a> below.</li>
+</ul>
+<h3 id="policy_content"><code>policy_content</code><a class="headerlink" href="#policy_content" title="Permanent link">#</a></h3>
+<p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
+<p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span>
+<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ONLY &quot;cedar&quot; for now due to limitations in cedar-policy crate</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(\n    principal is Jans::User,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Where <em>String</em> - The policy in cedar format, encoded as Base64. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
+</code></pre></div>
+<h3 id="example-of-policies">Example of <code>policies</code><a class="headerlink" href="#example-of-policies" title="Permanent link">#</a></h3>
+<p>Here is a non-normative example of the <code>policies</code> field:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-first&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example for principal workload&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;0fo1kl928Afa0sc9123scma0123891asklajsh1233ab&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-second&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;1fo1kl928Afa0sc9123scma0123891asklajsh1233ac&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-third&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(...) where {...}&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;2fo1kl928Afa0sc9123scma0123891asklajsh1233ad&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-fourth&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h2 id="trusted-issuers-schema">Trusted Issuers Schema<a class="headerlink" href="#trusted-issuers-schema" title="Permanent link">#</a></h2>
+<p>This record contains the information needed to validate tokens from this issuer:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="err">...</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="err">...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;another_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
+<li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
+<li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
+<li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the <a href="../cedarling-entities/#trusted-issuer">Trusted Issuer</a> that Cedarling automatically creates at startup.</li>
+<li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+</ul>
+<h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
+<p>The Token Entity Metadata Schema defines how tokens are mapped and validated within Cedarling. It specifies the Cedar entity type for each token, which claim to use as the entity ID, and which claims are required.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_token&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;principal_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Acme::Workload&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;some_custom_claim&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>"trusted"</code> (bool, Default: true): Allows toggling configuration without deleting the object. When set to <code>false</code>, tokens of this type will be ignored.</li>
+<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: <code>"Acme::Access_token"</code>.</li>
+<li>
+<p><code>"token_id"</code> (string, Default: <code>"jti"</code>): The JWT claim that will be used as the ID for the Token Entity.</p>
+</li>
+<li>
+<p><code>"principal_mapping"</code> (array[string], Default: <code>[]</code>): Describes where references of the created token entity should be included.</p>
+</li>
+<li><code>"required_claims"</code> (array[string], Default: <code>[]</code>): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 Section 4.1</a> (e.g., <code>exp</code>, <code>nbf</code>), the claim will also be validated according to the standard.</li>
+</ul>
+<h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
+<p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_policy_encoded_in_base64&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema_encoded_in_base64&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;1694c954f8d9&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;74d109b20248&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="multi-issuer-token-entities">Multi-Issuer Token Entities<a class="headerlink" href="#multi-issuer-token-entities" title="Permanent link">#</a></h2>
+<p>When using the <code>authorize_multi_issuer</code> method, Cedarling creates token entities dynamically without requiring predefined User/Workload principals. This section describes how these token entities are structured and made available in policies.</p>
+<blockquote>
+<p><strong>⚠️ SCHEMA REQUIREMENT</strong>: Multi-issuer authorization requires specific Cedar schema modifications. Your schema <strong>must</strong> include the multi-issuer token structure or authorization will fail with schema validation errors. See <a href="#schema-requirements-for-multi-issuer">Schema Requirements</a> below.</p>
+</blockquote>
+<h3 id="token-entity-structure">Token Entity Structure<a class="headerlink" href="#token-entity-structure" title="Permanent link">#</a></h3>
+<p>Each validated token in a multi-issuer authorization request becomes a Cedar entity with the following structure:</p>
+<p><strong>Required Attributes</strong> (stored as entity attributes):</p>
+<ul>
+<li><code>token_type</code> (String): The entity type name (e.g., "Jans::Access_Token", "Acme::DolphinToken")</li>
+<li><code>jti</code> (String): Unique token identifier from JWT</li>
+<li><code>iss?</code> (TrustedIssuer): JWT issuer claim value (derived from iss to TrustedIssuer); optional when the token has not been verified or the issuer could not be determined.</li>
+<li><code>exp</code> (Long): Token expiration timestamp</li>
+<li><code>validated_at</code> (Long): Timestamp when Cedarling validated the token</li>
+</ul>
+<p><strong>Optional Attributes</strong> (JWT claims stored as entity tags):</p>
+<ul>
+<li>All other JWT claims are stored as <strong>entity tags</strong> with <code>Set&lt;String&gt;</code> type by default</li>
+<li>Examples: <code>scope</code>, <code>aud</code>, <code>sub</code>, <code>client_id</code>, custom claims</li>
+</ul>
+<p><strong>Complete Example</strong>:</p>
+<div class="highlight"><pre><span></span><code>namespace Jans{
+  entity Access_token = {
+    &quot;token_type&quot;: String,        // Required: Entity type name
+    &quot;jti&quot;: String,               // Required: Token ID
+    &quot;iss&quot;: Jans::TrustedIssuer,  // Required: JWT issuer
+    &quot;exp&quot;: Long,                 // Required: Expiration
+    &quot;validated_at&quot;: Long,        // Required: Validation timestamp
+    // Optional JWT claims (must be optional)
+    &quot;aud&quot;?: String,
+    &quot;iat&quot;?: Long,
+    &quot;scope&quot;?: Set&lt;String&gt;,
+    // ... other claims
+  } tags Set&lt;String&gt;;            // Required: For dynamic claim storage
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+}
+</code></pre></div>
+<p><strong>Important Notes</strong>:</p>
+<ul>
+<li>All token entity attributes (except the five required ones) <strong>must be optional</strong> (<code>?</code>) to support tokens with varying claim structures</li>
+<li>JWT claims not defined as attributes are stored as <strong>entity tags</strong> (Set<String> by default)</li>
+<li>The <code>tags Set&lt;String&gt;</code> declaration is required for dynamic JWT claim access</li>
+</ul>
+<h3 id="accessing-token-claims-in-policies">Accessing Token Claims in Policies<a class="headerlink" href="#accessing-token-claims-in-policies" title="Permanent link">#</a></h3>
+<p>JWT claims are accessed using Cedar's tag syntax:</p>
+<div class="highlight"><pre><span></span><code>// Check if token has a claim
+context.tokens.acme_access_token.hasTag(&quot;scope&quot;)
+
+// Get claim value (returns a Set)
+context.tokens.acme_access_token.getTag(&quot;scope&quot;)
+
+// Check if Set contains specific value
+context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:profile&quot;)
+</code></pre></div>
+<p><strong>Examples of claim access</strong>:</p>
+<div class="highlight"><pre><span></span><code>// Single-valued claim (stored as single-element Set)
+context.tokens.acme_access_token.hasTag(&quot;sub&quot;) &amp;&amp;
+context.tokens.acme_access_token.getTag(&quot;sub&quot;).contains(&quot;user123&quot;)
+
+// Multi-valued claim (stored as Set)
+context.tokens.acme_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:profile&quot;)
+
+// Audience claim (typically multi-valued)
+context.tokens.acme_access_token.hasTag(&quot;aud&quot;) &amp;&amp;
+context.tokens.acme_access_token.getTag(&quot;aud&quot;).contains(&quot;my-client-id&quot;)
+
+// Custom claim
+context.tokens.dolphin_dolphintoken.hasTag(&quot;waiver&quot;) &amp;&amp;
+context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;)
+</code></pre></div>
+<h3 id="token-collection-in-context">Token Collection in Context<a class="headerlink" href="#token-collection-in-context" title="Permanent link">#</a></h3>
+<p>Validated tokens are organized into a <code>tokens</code> collection in the Cedar context using predictable naming:</p>
+<div class="highlight"><pre><span></span><code>entity Tokens = {
+  // Format: {issuer_name}_{token_type}
+  &quot;acme_access_token&quot;: Token,           // Access token from Acme
+  &quot;acme_id_token&quot;: Token,               // ID token from Acme
+  &quot;google_id_token&quot;: Token,             // ID token from Google
+  &quot;dolphin_dolphintoken&quot;: Token,  // Custom token type from Dolphin
+  &quot;total_token_count&quot;: Long,            // Number of validated tokens
+};
+</code></pre></div>
+<p>The naming follows this pattern:</p>
+<ul>
+<li><strong>Issuer name</strong>: From trusted issuer metadata <code>name</code> field, or hostname from JWT <code>iss</code> claim</li>
+<li><strong>Token type</strong>: Extracted from the <code>mapping</code> field (e.g., "Jans::Access_Token" → "access_token")</li>
+<li>Both converted to lowercase with underscores replacing special characters</li>
+</ul>
+<h3 id="schema-requirements-for-multi-issuer">Schema Requirements for Multi-Issuer<a class="headerlink" href="#schema-requirements-for-multi-issuer" title="Permanent link">#</a></h3>
+<h4 id="1-token-entity-schema">1. Token Entity Schema<a class="headerlink" href="#1-token-entity-schema" title="Permanent link">#</a></h4>
+<p>All token entities <strong>must</strong> include these five required attributes and declare tags.</p>
+<p>Each trusted issuer gets its own Cedar namespace. The <code>TrustedIssuer</code> entity type must be defined in each issuer's namespace separately, since Cedar namespaces are independent. Token entities reference their own namespace's <code>TrustedIssuer</code> via the <code>iss</code> attribute.</p>
+<p>For example, if you have two issuers (Acme and Dolphin), you will have <code>Acme::TrustedIssuer</code> and <code>Dolphin::TrustedIssuer</code> — each with the same structure but in separate namespaces:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,        // Entity type (e.g., &quot;Acme::Access_token&quot;)
+    jti?: String,               // JWT ID - unique token identifier
+    iss?: TrustedIssuer,        // Issuer entity reference
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Validation timestamp
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,               // Audience
+    iat?: Long,                 // Issued at
+    scope?: Set&lt;String&gt;,        // OAuth scopes
+    client_id?: String,         // Client ID
+    sub?: String,               // Subject
+    // Add other claims as needed
+  } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
+
+  entity id_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: Set&lt;String&gt;,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    phone_number?: String,
+    role?: Set&lt;String&gt;,
+    acr?: String,
+    amr?: Set&lt;String&gt;,
+    azp?: String,
+    birthdate?: String,
+    // Add other claims as needed
+  } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
+
+  entity Userinfo_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    birthdate?: String,
+    phone_number?: String,
+    role?: Set&lt;String&gt;,
+    // Add other claims as needed
+  } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
+};
+
+// Dolphin namespace: token entities for the Dolphin IDP.
+// Note: TrustedIssuer is defined again — each namespace needs its own copy.
+namespace Dolphin {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: String,
+    iat?: Long,
+    scope?: Set&lt;String&gt;,
+    // Add other claims as needed
+  } tags Set&lt;String&gt;;
+};
+</code></pre></div>
+<h4 id="2-custom-token-types">2. Custom Token Types<a class="headerlink" href="#2-custom-token-types" title="Permanent link">#</a></h4>
+<p>For custom token types, follow the same pattern:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Dolphin namespace: custom token entities for the Dolphin service.
+namespace Dolphin {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity DolphinToken = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Custom token-specific attributes (all optional)
+    waiver?: String,
+    location?: String,
+    clearance_level?: Long,
+  } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
+};
+</code></pre></div>
+<h4 id="3-context-type-schema">3. Context Type Schema<a class="headerlink" href="#3-context-type-schema" title="Permanent link">#</a></h4>
+<p>The Context type <strong>must</strong> include a <code>tokens</code> field:</p>
+<div class="highlight"><pre><span></span><code>type Context = {
+  // Standard context fields
+  network?: String,
+  network_type?: String,
+  user_agent?: String,
+  operating_system?: String,
+  device_health?: Set&lt;String&gt;,
+  current_time?: Long,
+  geolocation?: Set&lt;String&gt;,
+  fraud_indicators?: Set&lt;String&gt;,
+
+  // *** REQUIRED FOR MULTI-ISSUER ***
+  tokens?: TokensContext,
+};
+
+type TokensContext = {
+  total_token_count: Long,      // Required field
+  // Individual token fields added dynamically:
+  // Pattern: {issuer_name}_{token_type}
+  // Example: acme_access_token, google_id_token
+};
+</code></pre></div>
+<h4 id="key-requirements">Key Requirements<a class="headerlink" href="#key-requirements" title="Permanent link">#</a></h4>
+<ol>
+<li><strong>Required Attributes</strong>: Add <code>token_type</code>, <code>jti</code>, <code>issuer</code>, <code>exp</code>, <code>validated_at</code> to all token entities</li>
+<li><strong>Optional Modifier</strong>: All attributes must be optional (<code>?</code>) to support varying token structures</li>
+<li><strong>Tags Declaration</strong>: All token entities must declare <code>tags Set&lt;String&gt;</code> for dynamic JWT claims</li>
+<li><strong>Context Update</strong>: Add <code>tokens?: TokensContext</code> field to your Context type</li>
+<li><strong>Consistency</strong>: Use the same attribute names across all token entity types</li>
+</ol>
+<h4 id="why-these-changes-are-required">Why These Changes Are Required<a class="headerlink" href="#why-these-changes-are-required" title="Permanent link">#</a></h4>
+<ul>
+<li><strong>Schema Validation</strong>: Cedar validates all entities against the schema; missing required attributes cause authorization failures</li>
+<li><strong>Dynamic Claims</strong>: JWT claims vary by issuer and token type; tags allow flexible claim storage</li>
+<li><strong>Context Structure</strong>: Multi-issuer authorization places token entities in <code>context.tokens.*</code> which requires schema support</li>
+<li><strong>Compatibility</strong>: Optional attributes ensure schema works with both standard and multi-issuer authorization</li>
+</ul>
+<h4 id="schema-update-checklist">Schema Update Checklist<a class="headerlink" href="#schema-update-checklist" title="Permanent link">#</a></h4>
+<p>Before using multi-issuer authorization, verify your schema has:</p>
+<ul>
+<li>Added five required attributes to all token entities (token_type, jti, issuer, exp, validated_at)</li>
+<li>Made all token entity attributes optional (<code>?</code>)</li>
+<li>Added <code>tags Set&lt;String&gt;</code> declaration to all token entities</li>
+<li>Added <code>tokens?: TokensContext</code> field to Context type</li>
+<li>Defined <code>TokensContext</code> type with <code>total_token_count: Long</code></li>
+</ul>
+<h3 id="policy-examples-using-token-entities">Policy Examples Using Token Entities<a class="headerlink" href="#policy-examples-using-token-entities" title="Permanent link">#</a></h3>
+<p><strong>Simple token validation</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Jans::Action::&quot;Read&quot;,
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &amp;&amp;
+  context.tokens.acme_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+  context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:documents&quot;)
+};
+</code></pre></div>
+<p><strong>Multi-issuer validation</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Trade::Action::&quot;Vote&quot;,
+  resource in Trade::Election
+) when {
+  // Require token from trade association
+  context has tokens.trade_association_access_token &amp;&amp;
+  context.tokens.trade_association_access_token.hasTag(&quot;member_status&quot;) &amp;&amp;
+  context.tokens.trade_association_access_token.getTag(&quot;member_status&quot;).contains(&quot;Corporate Member&quot;) &amp;&amp;
+  // AND token from employer
+  context has tokens.company_access_token &amp;&amp;
+  context.tokens.company_access_token.hasTag(&quot;employee_id&quot;)
+};
+</code></pre></div>
+<p><strong>Custom token type</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Acme::Action::&quot;SwimWithDolphin&quot;,
+  resource == Acme::Aquarium::&quot;Miami&quot;
+) when {
+  context has tokens.dolphin_dolphintoken &amp;&amp;
+  context.tokens.dolphin_dolphintoken.hasTag(&quot;waiver&quot;) &amp;&amp;
+  context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;) &amp;&amp;
+  context.tokens.dolphin_dolphintoken.hasTag(&quot;clearance_level&quot;) &amp;&amp;
+  context.tokens.dolphin_dolphintoken.getTag(&quot;clearance_level&quot;).contains(5)
+};
+</code></pre></div>
+<h3 id="trusted-issuer-configuration-for-multi-issuer">Trusted Issuer Configuration for Multi-Issuer<a class="headerlink" href="#trusted-issuer-configuration-for-multi-issuer" title="Permanent link">#</a></h3>
+<p>The <code>name</code> field in trusted issuer configuration is critical for multi-issuer authorization:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;acme_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;acme_access_token&quot; and depict namespace for `TrustedIssuer` cedar type</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Corporation IDP&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dolphin_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;dolphin_dolphintoken&quot; and depict namespace for `TrustedIssuer` cedar type</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin Service Provider&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.dolphin.sea/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dolphin_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::DolphinToken&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Note</strong>: The <code>name</code> field ensures predictable and secure token entity naming in the policy evaluation context.
+And is used as <strong>namespace</strong> for <code>TrustedIssuer</code> cedar type.</p>
+<h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
+<p>You can manually create your Cedar policies and schema in
+<a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>.
+Make sure you run the cedar command line tool to validate both your schema and policies.</p>
+<p>The easiest way to author your policy store is to use the Policy Designer in
+<a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>. This tool helps you define the policies, schema and
+trusted IDPs and to publish a policy store to a Github repository.</p>
+<h3 id="minimum-cedar-schema">Minimum Cedar Schema<a class="headerlink" href="#minimum-cedar-schema" title="Permanent link">#</a></h3>
+<p>There are no mandatory entity types — your schema depends on which authorization interface you use:</p>
+<ul>
+<li><strong><code>authorize_unsigned</code></strong>: Define any principal, resource, and action types your application needs. Entity types and attributes are entirely up to you.</li>
+<li><strong><code>authorize_multi_issuer</code></strong>: Token entities require specific attributes and <code>tags Set&lt;String&gt;</code> declaration. See <a href="#schema-requirements-for-multi-issuer">Schema Requirements for Multi-Issuer</a>.</li>
+</ul>
+<p>Here is an example of a minimal schema for <code>authorize_unsigned</code>:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// MyApp namespace: your business entities.
+namespace MyApp {
+  entity Role;
+  entity User in [Role] = {
+    sub: String,
+    email?: String,
+  };
+
+  entity Document = {
+    owner: String,
+  };
+
+  action &quot;Read&quot; appliesTo {
+    principal: [User, Role],
+    resource: [Document],
+    context: {}
+  };
+};
+</code></pre></div>
+<p>For <code>authorize_multi_issuer</code>, add token entities with the required structure. See the <a href="#multi-issuer-token-entities">Multi-Issuer Token Entities</a> section for a complete example.</p>
+<h2 id="note-on-test-fixtures">Note on test fixtures<a class="headerlink" href="#note-on-test-fixtures" title="Permanent link">#</a></h2>
+<p>You will notice that test fixtures in the cedarling code base are quite often in yaml rather than in json.</p>
+<p>yaml is intended for <strong>cedarling internal use only</strong>.</p>
+<p>The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 15, 2026 12:57:53 UTC"><span class="timeago" datetime="2026-04-15T12:57:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 15, 2026 12:57:53 UTC">2026-04-15</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 8, 2024 06:55:54 UTC"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 8, 2024 06:55:54 UTC">2024-10-08</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

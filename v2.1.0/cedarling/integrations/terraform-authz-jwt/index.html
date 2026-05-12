@@ -1,0 +1,2571 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/cedarling/integrations/terraform-authz-jwt/">
+      
+      
+        <link rel="prev" href="../terraform-authz/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>JWT Flow - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#terraform-authorization-with-github-actions-oidc-jwts" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              JWT Flow
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/cedarling-authz/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-krakend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    KrakenD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-opa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_3" id="__nav_3_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Authorization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Terraform Authorization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unsigned Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Flow
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-jwts-for-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why JWTs for CI/CD?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-rego-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Rego Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OPA Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted issuer file format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-authorization-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Authorization Wrapper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Authorization Wrapper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetching-the-github-oidc-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetching the GitHub OIDC token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#composite-action-reusable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composite Action (Reusable)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Composite Action (Reusable)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-demo-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Demo Locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparing-the-two-terraform-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing the Two Terraform Demos
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-jwts-for-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why JWTs for CI/CD?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-rego-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Rego Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OPA Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted issuer file format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-authorization-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Authorization Wrapper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Authorization Wrapper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetching-the-github-oidc-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetching the GitHub OIDC token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#composite-action-reusable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composite Action (Reusable)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Composite Action (Reusable)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-demo-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Demo Locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparing-the-two-terraform-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing the Two Terraform Demos
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../cedarling-krakend/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Integrations
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../terraform-authz-overview/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Terraform Authorization
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">CI/CD</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">GitHub Actions</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">JWT</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">OIDC</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">OPA</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Terraform</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="terraform-authorization-with-github-actions-oidc-jwts">Terraform Authorization with GitHub Actions OIDC JWTs<a class="headerlink" href="#terraform-authorization-with-github-actions-oidc-jwts" title="Permanent link">#</a></h1>
+<div class="admonition tip">
+<p class="admonition-title">Not sure which flow to use?</p>
+<p>See the <a href="../terraform-authz-overview/">Terraform authorization overview</a> for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.</p>
+</div>
+<p>This guide shows a CI/CD-first variant of the <a href="../terraform-authz/">Terraform authorization demo</a>. Instead of asserting the operator's identity through environment variables (as in the unsigned demo), the pipeline authenticates itself with a <strong>signed GitHub Actions OIDC token</strong>. Cedarling validates the JWT cryptographically and evaluates Cedar policies that check JWT claims — no service-account secrets or long-lived credentials required.</p>
+<h2 id="why-jwts-for-cicd">Why JWTs for CI/CD?<a class="headerlink" href="#why-jwts-for-cicd" title="Permanent link">#</a></h2>
+<p>The unsigned demo works well for human operators running Terraform locally. In an enterprise CI/CD pipeline, a different model is more appropriate:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Unsigned demo</th>
+<th>JWT demo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity source</td>
+<td>Environment variables (self-asserted)</td>
+<td>GitHub-signed OIDC token</td>
+</tr>
+<tr>
+<td>Secret management</td>
+<td>Requires secrets/service account creds</td>
+<td>No secrets needed</td>
+</tr>
+<tr>
+<td>Claim verification</td>
+<td>Trust the caller</td>
+<td>Cedarling verifies signature via JWKS</td>
+</tr>
+<tr>
+<td>Branch enforcement</td>
+<td>Manual, honor-system</td>
+<td>Verified <code>ref</code> claim in JWT</td>
+</tr>
+<tr>
+<td>Production approval gate</td>
+<td>Not built-in</td>
+<td><code>environment</code> claim proves GitHub approval</td>
+</tr>
+</tbody>
+</table>
+<p>GitHub Actions automatically issues an OIDC token to every job that has <code>permissions: id-token: write</code>. The token is signed by GitHub's private key and contains claims that describe the workflow:</p>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Example value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>iss</code></td>
+<td><code>https://token.actions.githubusercontent.com</code></td>
+<td>Issuer — GitHub's OIDC endpoint</td>
+</tr>
+<tr>
+<td><code>sub</code></td>
+<td><code>repo:org/myrepo:ref:refs/heads/main</code></td>
+<td>Subject — identifies the workflow</td>
+</tr>
+<tr>
+<td><code>repository</code></td>
+<td><code>org/myrepo</code></td>
+<td>Source repository</td>
+</tr>
+<tr>
+<td><code>ref</code></td>
+<td><code>refs/heads/main</code></td>
+<td>Git ref that triggered the run</td>
+</tr>
+<tr>
+<td><code>workflow</code></td>
+<td><code>.github/workflows/terraform.yml</code></td>
+<td>Workflow file path</td>
+</tr>
+<tr>
+<td><code>environment</code></td>
+<td><code>production</code></td>
+<td>GitHub Environment (only present after human approval)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="authorization-model">Authorization Model<a class="headerlink" href="#authorization-model" title="Permanent link">#</a></h2>
+<p>The demo implements a graduated trust model for CI pipelines:</p>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Workspace</th>
+<th style="text-align: center;">Plan</th>
+<th style="text-align: center;">Apply</th>
+<th style="text-align: center;">Destroy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Any branch, trusted repo</td>
+<td>any</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td><code>main</code> branch, trusted repo</td>
+<td>dev / staging</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td><code>main</code> branch, trusted repo + Environment approved</td>
+<td>production</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Any CI workflow</td>
+<td>any</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">see above</td>
+<td style="text-align: center;">✗ (never)</td>
+</tr>
+</tbody>
+</table>
+<p><code>Destroy</code> is permanently off-limits for CI. A human operator using the <a href="../terraform-authz/">unsigned wrapper</a> with Admin-role membership is required to destroy infrastructure.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant GH as GitHub Actions runner
+    participant GHTOKEN as GitHub token endpoint
+    participant Wrapper as tf_authz_jwt.sh
+    participant OPA
+    participant Rego
+    participant Cedarling
+    participant JWKS as GitHub JWKS
+    participant Cedar as Cedar Policies
+
+    GH-&gt;&gt;GHTOKEN: Request OIDC token (id-token: write)
+    GHTOKEN--&gt;&gt;GH: Signed JWT { repository, ref, environment, ... }
+
+    GH-&gt;&gt;Wrapper: terraform apply (TF_JWT=&lt;jwt&gt;)
+    Wrapper-&gt;&gt;OPA: POST /v1/data/infra/terraform_jwt
+    OPA-&gt;&gt;Rego: evaluate infra.terraform_jwt
+    Rego-&gt;&gt;Cedarling: cedarling.opa.authorize_multi_issuer(input)
+    Cedarling-&gt;&gt;JWKS: Fetch public keys (cached)
+    JWKS--&gt;&gt;Cedarling: JWK set
+    Cedarling-&gt;&gt;Cedarling: Verify JWT signature + expiry
+    Cedarling-&gt;&gt;Cedarling: Map claims → CI::GitHubWorkflow entity
+    Cedarling-&gt;&gt;Cedar: Evaluate policies
+    Cedar--&gt;&gt;Cedarling: decision + matching policy IDs
+    Cedarling--&gt;&gt;Rego: { decision, reasons, errors }
+    Rego--&gt;&gt;OPA: { allow, reasons }
+    OPA--&gt;&gt;Wrapper: HTTP 200 { result: { allow: true|false } }
+    alt ALLOWED
+        Wrapper-&gt;&gt;GH: terraform apply proceeds
+    else DENIED
+        Wrapper-&gt;&gt;GH: exit 1 + deny message with JWT claims
+    end</code></pre>
+<h2 id="cedar-schema">Cedar Schema<a class="headerlink" href="#cedar-schema" title="Permanent link">#</a></h2>
+<p>The schema defines the principal entity that Cedarling populates from the verified JWT claims:</p>
+<div class="highlight"><pre><span></span><code>namespace CI {
+    // URL type for TrustedIssuer&#39;s issuer_entity_id attribute.
+    type Url = {&quot;host&quot;: String, &quot;path&quot;: String, &quot;protocol&quot;: String};
+
+    // Cedarling builds one TrustedIssuer entity per issuer in policy-store/trusted-issuers/.
+    // The issuer name field must equal the Cedar namespace (&quot;CI&quot;) so the entity type resolves correctly.
+    entity TrustedIssuer = {&quot;issuer_entity_id&quot;: Url};
+
+    // A GitHub Actions workflow run authenticated via OIDC JWT.
+    // Cedarling maps verified JWT claims to these attributes when the token mapping
+    // is &quot;CI::GitHubWorkflow&quot; (see policy-store/trusted-issuers/github-actions.json).
+    entity GitHubWorkflow {
+        iss:          TrustedIssuer,
+        sub:          String,
+        repository:   String,
+        ref:          String,
+        workflow:     String,
+        // Optional: only present when the job targets a GitHub Environment and
+        // required reviewers have approved. Always use `has environment` before accessing.
+        environment?: String,
+    } tags Set&lt;String&gt;;
+
+    // A named Terraform workspace / environment target, e.g. &quot;dev&quot;, &quot;staging&quot;, &quot;production&quot;.
+    entity TerraformWorkspace;
+
+    // Injected automatically by Cedarling&#39;s multi-issuer context builder.
+    // Access token claims in Cedar policies via context.tokens.ci_githubworkflow.&lt;attr&gt;.
+    type TokensContext = {
+        ci_githubworkflow?: GitHubWorkflow,
+        total_token_count: Long,
+    };
+
+    // Actions map to Terraform sub-commands:
+    //   Plan → terraform plan  |  Apply → terraform apply  |  Destroy → terraform destroy
+    action Plan, Apply, Destroy
+        appliesTo {
+            principal: [GitHubWorkflow],
+            resource:  [TerraformWorkspace],
+            context: {
+                current_time: Long,
+                tokens: TokensContext,
+            }
+        };
+}
+</code></pre></div>
+<p>The <code>environment</code> attribute is the key to production gating: GitHub only populates the <code>environment</code> claim when the job targets a configured GitHub Environment <strong>and</strong> the required reviewers have approved. Cedarling verifies this claim cryptographically, so the approval is unforgeable.</p>
+<p>Note that Cedar policies access JWT claims through <code>context.tokens.ci_githubworkflow</code> (the <code>TokensContext</code> injected by Cedarling's multi-issuer context builder) rather than directly on the <code>principal</code>.</p>
+<h2 id="cedar-policies">Cedar Policies<a class="headerlink" href="#cedar-policies" title="Permanent link">#</a></h2>
+<p>Three policy files cover all CI scenarios.</p>
+<p>JWT claims are accessed through <code>context.tokens.ci_githubworkflow</code> — the token context injected by Cedarling's multi-issuer context builder. Each policy also guards on the <code>iss</code> claim to ensure the token comes from the expected GitHub OIDC endpoint.</p>
+<p><strong>Plan — allowed from the trusted repo on any branch:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;ci-permit-plan&quot;)
+permit (
+    principal,
+    action == CI::Action::&quot;Plan&quot;,
+    resource
+) when {
+    context.tokens has ci_githubworkflow &amp;&amp;
+    context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::&quot;https://token.actions.githubusercontent.com&quot; &amp;&amp;
+    (
+        context.tokens.ci_githubworkflow.repository == &quot;octoorg/myrepo&quot; ||
+        context.tokens.ci_githubworkflow.repository == &quot;JanssenProject/jans&quot;
+    )
+};
+</code></pre></div></p>
+<p><strong>Apply — allowed from main to non-production workspaces:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;ci-permit-apply-main-non-prod&quot;)
+permit (
+    principal,
+    action == CI::Action::&quot;Apply&quot;,
+    resource
+) when {
+    context.tokens has ci_githubworkflow &amp;&amp;
+    context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::&quot;https://token.actions.githubusercontent.com&quot; &amp;&amp;
+    (
+        context.tokens.ci_githubworkflow.repository == &quot;octoorg/myrepo&quot; ||
+        context.tokens.ci_githubworkflow.repository == &quot;JanssenProject/jans&quot;
+    ) &amp;&amp;
+    context.tokens.ci_githubworkflow.ref == &quot;refs/heads/main&quot; &amp;&amp;
+    resource != CI::TerraformWorkspace::&quot;production&quot;
+};
+</code></pre></div></p>
+<p><strong>Apply to production — requires <code>main</code> branch and GitHub Environment approval:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;ci-permit-apply-prod-via-environment&quot;)
+permit (
+    principal,
+    action == CI::Action::&quot;Apply&quot;,
+    resource == CI::TerraformWorkspace::&quot;production&quot;
+) when {
+    context.tokens has ci_githubworkflow &amp;&amp;
+    context.tokens.ci_githubworkflow.iss == CI::TrustedIssuer::&quot;https://token.actions.githubusercontent.com&quot; &amp;&amp;
+    (
+        context.tokens.ci_githubworkflow.repository == &quot;octoorg/myrepo&quot; ||
+        context.tokens.ci_githubworkflow.repository == &quot;JanssenProject/jans&quot;
+    ) &amp;&amp;
+    context.tokens.ci_githubworkflow.ref == &quot;refs/heads/main&quot; &amp;&amp;
+    // `has` guard required: `environment` is optional — absent on plan and non-prod-apply tokens.
+    context.tokens.ci_githubworkflow has environment &amp;&amp;
+    context.tokens.ci_githubworkflow.environment == &quot;production&quot;
+};
+</code></pre></div></p>
+<p>No <code>permit</code> for <code>Destroy</code> means all CI destroy attempts are implicitly denied.</p>
+<h2 id="opa-rego-policy">OPA Rego Policy<a class="headerlink" href="#opa-rego-policy" title="Permanent link">#</a></h2>
+<p>The Rego adapter calls <code>cedarling.opa.authorize_multi_issuer</code> instead of <code>authorize_unsigned</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">package</span><span class="w"> </span><span class="n">infra</span><span class="p">.</span><span class="n">terraform_jwt</span>
+
+<span class="k">default</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">false</span>
+
+<span class="n">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">opa</span><span class="p">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+<span class="n">allow</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">true</span>
+<span class="p">}</span>
+
+<span class="n">decision</span><span class="w">    </span><span class="o">:=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span>
+<span class="n">reasons</span><span class="w">     </span><span class="o">:=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">reasons</span>
+</code></pre></div>
+<p>The input payload structure differs from the unsigned variant — the JWT is passed in a <code>tokens</code> array:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CI::GitHubWorkflow&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64url-encoded OIDC JWT&gt;&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CI::Action::\&quot;Apply\&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CI::TerraformWorkspace&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1776826458</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>mapping</code> field tells Cedarling which Cedar entity type to instantiate from the JWT claims. Cedarling validates the JWT, maps the verified claims to <code>CI::GitHubWorkflow</code> attributes (as declared in the Cedar schema and trusted issuer configuration), and then makes the entity available to Cedar policies through <code>context.tokens.ci_githubworkflow</code>.</p>
+<h2 id="opa-configuration">OPA Configuration<a class="headerlink" href="#opa-configuration" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedarling_opa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;stderr&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bootstrap_config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TerraformJwtAuthz&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;never&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/app/demo/terraform-jwt/policy-store&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Key differences from the unsigned config:</p>
+<ul>
+<li><code>CEDARLING_JWT_SIG_VALIDATION: "enabled"</code> — Cedarling fetches GitHub's JWKS and validates every token's signature.</li>
+<li>Trusted issuer configuration lives in <code>policy-store/trusted-issuers/github-actions.json</code>, not in the OPA bootstrap config. That file declares GitHub's OIDC endpoint (<code>https://token.actions.githubusercontent.com</code>) as the trusted issuer and specifies which entity type (<code>CI::GitHubWorkflow</code>) to build from the token claims. Cedarling discovers the JWKS automatically via the issuer's OpenID Connect discovery document.</li>
+</ul>
+<h3 id="trusted-issuer-file-format">Trusted issuer file format<a class="headerlink" href="#trusted-issuer-file-format" title="Permanent link">#</a></h3>
+<p><code>policy-store/trusted-issuers/github-actions.json</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CI&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GitHub Actions OIDC token issuer. The name &#39;CI&#39; must match the Cedar namespace so Cedarling can build the CI::TrustedIssuer entity. Cedarling locates this issuer by matching the JWT iss claim against the origin of configuration_endpoint.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://token.actions.githubusercontent.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;CI::GitHubWorkflow&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CI::GitHubWorkflow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Field reference:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Must match the Cedar namespace used in your policies and schema (e.g. <code>CI</code> maps to <code>CI::*</code> entity types). Cedarling also uses this value when constructing the <code>CI::TrustedIssuer</code> entity.</td>
+</tr>
+<tr>
+<td><code>configuration_endpoint</code></td>
+<td>URL of the issuer's OpenID Connect discovery document (<code>.well-known/openid-configuration</code>). Cedarling fetches the <code>jwks_uri</code> from this document and uses it to validate JWT signatures automatically. To use a different issuer (GitLab, Okta, etc.) replace this URL with the issuer's own discovery endpoint.</td>
+</tr>
+<tr>
+<td><code>token_metadata</code></td>
+<td>A map from Cedar entity type name to per-token settings. Each key must be a fully-qualified Cedar entity type (e.g. <code>CI::GitHubWorkflow</code>).</td>
+</tr>
+<tr>
+<td><code>entity_type_name</code></td>
+<td>The Cedar entity type Cedarling instantiates from the verified JWT claims. Must match the key in <code>token_metadata</code> and the type declared in your Cedar schema.</td>
+</tr>
+<tr>
+<td><code>token_id</code></td>
+<td>JWT claim used as the Cedar entity's unique ID (typically <code>jti</code>).</td>
+</tr>
+<tr>
+<td><code>required_claims</code></td>
+<td>List of JWT claim names that must be present for the token to be considered valid. Set to <code>[]</code> to enforce no additional claims beyond signature validation.</td>
+</tr>
+</tbody>
+</table>
+<p>To adapt this configuration for another issuer, create a new JSON file in <code>policy-store/trusted-issuers/</code> (one file per issuer), update <code>name</code> to the Cedar namespace you want to use, point <code>configuration_endpoint</code> at the new issuer's discovery URL, and adjust <code>entity_type_name</code> to match the Cedar entity type declared in your schema.</p>
+<h2 id="the-authorization-wrapper">The Authorization Wrapper<a class="headerlink" href="#the-authorization-wrapper" title="Permanent link">#</a></h2>
+<p><code>tf_authz_jwt.sh</code> has the same interface as <code>tf_authz.sh</code> but sources identity from the JWT instead of environment variables:</p>
+<h3 id="fetching-the-github-oidc-token">Fetching the GitHub OIDC token<a class="headerlink" href="#fetching-the-github-oidc-token" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_JWT</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>./demo/terraform-jwt/tf_authz_jwt.sh<span class="w"> </span>--fetch-token<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>This calls the <code>ACTIONS_ID_TOKEN_REQUEST_URL</code> endpoint using the <code>ACTIONS_ID_TOKEN_REQUEST_TOKEN</code> credential that GitHub injects automatically into any runner job with <code>permissions: id-token: write</code>.</p>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th style="text-align: center;">Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TF_JWT</code></td>
+<td style="text-align: center;"><strong>yes</strong></td>
+<td>—</td>
+<td>Signed OIDC JWT (GitHub or custom issuer)</td>
+</tr>
+<tr>
+<td><code>TF_WORKSPACE</code></td>
+<td style="text-align: center;">no</td>
+<td><code>dev</code></td>
+<td>Target workspace (<code>dev</code>, <code>staging</code>, <code>production</code>)</td>
+</tr>
+<tr>
+<td><code>OPA_URL</code></td>
+<td style="text-align: center;">no</td>
+<td><code>http://localhost:8181</code></td>
+<td>OPA server base URL</td>
+</tr>
+<tr>
+<td><code>TERRAFORM_BIN</code></td>
+<td style="text-align: center;">no</td>
+<td><code>terraform</code></td>
+<td>Path to the terraform binary</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_JWT</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>./demo/terraform-jwt/tf_authz_jwt.sh<span class="w"> </span>--fetch-token<span class="k">)</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_WORKSPACE</span><span class="o">=</span>staging
+
+./demo/terraform-jwt/tf_authz_jwt.sh<span class="w"> </span>plan
+./demo/terraform-jwt/tf_authz_jwt.sh<span class="w"> </span>apply<span class="w"> </span>-auto-approve
+./demo/terraform-jwt/tf_authz_jwt.sh<span class="w"> </span>destroy<span class="w"> </span>-auto-approve<span class="w">  </span><span class="c1"># always DENIED for CI</span>
+</code></pre></div>
+<h2 id="github-actions-integration">GitHub Actions Integration<a class="headerlink" href="#github-actions-integration" title="Permanent link">#</a></h2>
+<p>The following excerpt from <code>github-actions-example.yml</code> shows the production-deploy job:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">terraform-apply-production</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">  </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">terraform-apply-staging</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.ref == &#39;refs/heads/main&#39;</span>
+<span class="w">  </span><span class="c1"># GitHub only sets environment: &quot;production&quot; in the OIDC token after the</span>
+<span class="w">  </span><span class="c1"># required reviewers approve this environment gate.</span>
+<span class="w">  </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">  </span><span class="nt">permissions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">id-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+<span class="w">    </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span>
+
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hashicorp/setup-terraform@v3</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Fetch GitHub OIDC token</span>
+<span class="w">      </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">get-token</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">TOKEN=$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)</span>
+<span class="w">        </span><span class="no">echo &quot;token=$TOKEN&quot; &gt;&gt; &quot;$GITHUB_OUTPUT&quot;</span>
+<span class="w">        </span><span class="no">echo &quot;::add-mask::$TOKEN&quot;</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Terraform apply — production</span>
+<span class="w">      </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">TF_JWT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ steps.get-token.outputs.token }}</span>
+<span class="w">        </span><span class="nt">TF_WORKSPACE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./demo/terraform-jwt/tf_authz_jwt.sh apply -auto-approve</span>
+</code></pre></div>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/cedarling_opa/demo/terraform-jwt/github-actions-example.yml">full workflow file</a> for the plan and staging jobs.</p>
+<h2 id="composite-action-reusable">Composite Action (Reusable)<a class="headerlink" href="#composite-action-reusable" title="Permanent link">#</a></h2>
+<p>For teams that want to adopt JWT authorization without copying the wrapper script into every repository, a pre-built GitHub Actions composite action is available at <code>demo/terraform-jwt/.github/actions/tf-jwt-authz/</code>. It encapsulates the full flow — OIDC token fetch, OPA query, decision enforcement, and Terraform execution — in a single <code>uses:</code> step.</p>
+<h3 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th style="text-align: center;">Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opa_url</code></td>
+<td style="text-align: center;"><strong>yes</strong></td>
+<td>—</td>
+<td>Base URL of the Cedarling-OPA server (e.g. <code>http://opa-service:8181</code>)</td>
+</tr>
+<tr>
+<td><code>workspace</code></td>
+<td style="text-align: center;"><strong>yes</strong></td>
+<td>—</td>
+<td>Target Terraform workspace (<code>dev</code>, <code>staging</code>, <code>production</code>)</td>
+</tr>
+<tr>
+<td><code>terraform_command</code></td>
+<td style="text-align: center;"><strong>yes</strong></td>
+<td>—</td>
+<td>Sub-command (and flags) to authorize and run (e.g. <code>plan</code>, <code>apply -auto-approve</code>)</td>
+</tr>
+<tr>
+<td><code>opa_policy_path</code></td>
+<td style="text-align: center;">no</td>
+<td><code>infra/terraform_jwt</code></td>
+<td>OPA path appended to <code>/v1/data/</code></td>
+</tr>
+<tr>
+<td><code>terraform_working_directory</code></td>
+<td style="text-align: center;">no</td>
+<td><code>.</code></td>
+<td>Directory from which to run Terraform (relative to the repo root)</td>
+</tr>
+</tbody>
+</table>
+<p>The action requires the parent job to have <code>permissions: id-token: write</code> so that GitHub can issue the OIDC token.</p>
+<h3 id="usage_1">Usage<a class="headerlink" href="#usage_1" title="Permanent link">#</a></h3>
+<p>Replace the manual token-fetch and <code>tf_authz_jwt.sh</code> call with a single step:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">terraform-plan</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">permissions</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">id-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span><span class="w">   </span><span class="c1"># Required — GitHub issues the OIDC token for this job</span>
+<span class="w">      </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hashicorp/setup-terraform@v3</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Terraform init</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">terraform init</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Terraform plan (JWT-authorized)</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">opa_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ vars.OPA_URL }}</span>
+<span class="w">          </span><span class="nt">workspace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
+<span class="w">          </span><span class="nt">terraform_command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plan</span>
+</code></pre></div>
+<p>See <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/cedarling_opa/demo/terraform-jwt/github-actions-example-composite.yml"><code>github-actions-example-composite.yml</code></a> for a complete workflow with plan, staging apply, and production apply jobs.</p>
+<h3 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h3>
+<p>The composite action runs two steps internally:</p>
+<ol>
+<li><strong>Fetch GitHub OIDC token</strong> — calls <code>ACTIONS_ID_TOKEN_REQUEST_URL</code> (automatically set by GitHub when <code>id-token: write</code> is present), extracts the signed JWT, and immediately masks it in the log.</li>
+<li><strong>Authorize and run Terraform</strong> — maps the sub-command to a Cedar action (<code>Plan</code>, <code>Apply</code>, or <code>Destroy</code>), builds the <code>authorize_multi_issuer</code> OPA payload, queries the Cedarling-OPA server, and either runs <code>terraform &lt;command&gt;</code> (ALLOWED) or fails the step with the denial reason (DENIED). Non-auth commands (<code>init</code>, <code>fmt</code>, <code>validate</code>) are forwarded to Terraform directly without an OPA call.</li>
+</ol>
+<h2 id="running-the-demo-locally">Running the Demo Locally<a class="headerlink" href="#running-the-demo-locally" title="Permanent link">#</a></h2>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/cedarling_opa/demo/terraform-jwt/README.md">demo README</a> for step-by-step instructions including:</p>
+<ul>
+<li>Starting the Cedarling-OPA server in demo mode (signature validation off for local testing)</li>
+<li>Generating self-signed test JWTs with Python</li>
+<li>Testing all authorization scenarios with the wrapper and with raw <code>curl</code></li>
+</ul>
+<h2 id="comparing-the-two-terraform-demos">Comparing the Two Terraform Demos<a class="headerlink" href="#comparing-the-two-terraform-demos" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><a href="../terraform-authz/">Unsigned demo</a></th>
+<th>JWT demo (this page)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity source</strong></td>
+<td>Environment variables (self-asserted)</td>
+<td>GitHub OIDC token (cryptographically signed)</td>
+</tr>
+<tr>
+<td><strong>Signature validation</strong></td>
+<td>None — <code>CEDARLING_JWT_SIG_VALIDATION: "disabled"</code></td>
+<td>Enabled — Cedarling fetches GitHub's JWKS and verifies every token</td>
+</tr>
+<tr>
+<td><strong>Trusted issuer config</strong></td>
+<td>Not required — no <code>trusted-issuers/</code> directory needed</td>
+<td>Required — <code>policy-store/trusted-issuers/github-actions.json</code> declares the issuer</td>
+</tr>
+<tr>
+<td><strong>Cedarling built-in</strong></td>
+<td><code>authorize_unsigned</code></td>
+<td><code>authorize_multi_issuer</code></td>
+</tr>
+<tr>
+<td><strong>OPA endpoint</strong></td>
+<td><code>/v1/data/infra/terraform</code></td>
+<td><code>/v1/data/infra/terraform_jwt</code></td>
+</tr>
+<tr>
+<td><strong>Cedar namespace</strong></td>
+<td><code>Infra</code></td>
+<td><code>CI</code></td>
+</tr>
+<tr>
+<td><strong>Principal entity</strong></td>
+<td><code>Infra::User</code> (role-based)</td>
+<td><code>CI::GitHubWorkflow</code> (claim-based)</td>
+</tr>
+<tr>
+<td><strong>Secret management</strong></td>
+<td>Requires <code>TF_USER_ID</code> / <code>TF_USER_ROLES</code></td>
+<td>No secrets — OIDC token issued automatically</td>
+</tr>
+<tr>
+<td><strong>Prod approval gate</strong></td>
+<td>Role-based policy only</td>
+<td><code>environment</code> JWT claim proves GitHub Environment approval</td>
+</tr>
+<tr>
+<td><strong>Best suited for</strong></td>
+<td>Human operators, local development</td>
+<td>CI/CD pipelines requiring cryptographic identity</td>
+</tr>
+</tbody>
+</table>
+<p>Both demos use the same Cedar policy store format, the same OPA plugin, and the same <code>opa-cedarling</code> binary — only the Rego built-in and the principal model differ.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 8, 2026 08:00:33 UTC"><span class="timeago" datetime="2026-05-08T08:00:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 8, 2026 08:00:33 UTC">2026-05-08</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 8, 2026 08:00:33 UTC"><span class="timeago" datetime="2026-05-08T08:00:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 8, 2026 08:00:33 UTC">2026-05-08</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>

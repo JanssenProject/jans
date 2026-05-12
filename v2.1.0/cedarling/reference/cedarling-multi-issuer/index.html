@@ -1,0 +1,3308 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.1.0/cedarling/reference/cedarling-multi-issuer/">
+      
+      
+        <link rel="prev" href="../cedarling-authz/">
+      
+      
+        <link rel="next" href="../cedarling-interfaces/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Multi-Issuer - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#multi-issuer-authorization-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multi-Issuer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-authz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Issuer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Issuer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-request-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Request Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-token-processing-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Token Processing Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-token-entity-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Token Entity Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-token-collection-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Token Collection Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-case-1-federation-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 1: Federation Scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-2-api-gateway-with-multiple-upstream-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 2: API Gateway with Multiple Upstream Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-3-multi-organization-voting-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 3: Multi-Organization Voting System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-4-healthcare-hipaa-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 4: Healthcare HIPAA Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-5-zero-trust-network-with-custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 5: Zero Trust Network with Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-schema-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Schema Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-these-changes-are-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why These Changes Are Needed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-core-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating Core Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#declaring-the-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declaring the action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-store-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Store Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-token-schema-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Token Schema Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-context-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Context Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-schema-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Schema Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Validation Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-deterministic-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Deterministic Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-descriptive-issuer-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Use Descriptive Issuer Names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-start-schema-less-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Start Schema-Less for Development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-implement-comprehensive-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Implement Comprehensive Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-handle-failed-tokens-gracefully" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Handle Failed Tokens Gracefully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-test-with-multiple-issuer-combinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Test with Multiple Issuer Combinations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-policy-store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-lock-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../integrations/cedarling-krakend/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-request-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Request Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-token-processing-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Token Processing Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-token-entity-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Token Entity Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-token-collection-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Token Collection Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-case-1-federation-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 1: Federation Scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-2-api-gateway-with-multiple-upstream-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 2: API Gateway with Multiple Upstream Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-3-multi-organization-voting-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 3: Multi-Organization Voting System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-4-healthcare-hipaa-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 4: Healthcare HIPAA Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-5-zero-trust-network-with-custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 5: Zero Trust Network with Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-schema-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Schema Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-these-changes-are-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why These Changes Are Needed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-core-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating Core Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#declaring-the-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Declaring the action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-store-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Store Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cedar-schema-for-multi-issuer-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema for Multi-Issuer Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cedar Schema for Multi-Issuer Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-token-schema-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Token Schema Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-token-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-context-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Context Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-schema-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Schema Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Validation Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-deterministic-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Deterministic Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-issuer-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted Issuer Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-descriptive-issuer-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Use Descriptive Issuer Names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-start-schema-less-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Start Schema-Less for Development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-implement-comprehensive-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Implement Comprehensive Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-handle-failed-tokens-gracefully" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Handle Failed Tokens Gracefully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-test-with-multiple-issuer-combinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Test with Multiple Issuer Combinations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../cedarling-authz/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">federation</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">lock</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">multi-issuer</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="multi-issuer-authorization-guide">Multi-Issuer Authorization Guide<a class="headerlink" href="#multi-issuer-authorization-guide" title="Permanent link">#</a></h1>
+<p>This guide provides a comprehensive overview of Cedarling's multi-issuer authorization feature, including concepts, implementation patterns, and real-world use cases.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>Multi-issuer authorization (<code>authorize_multi_issuer</code>) enables applications to make authorization decisions based on multiple JWT tokens from different identity providers in a single request. Unlike traditional authorization that creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.</p>
+<h3 id="key-benefits">Key Benefits<a class="headerlink" href="#key-benefits" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Federation Support</strong>: Native support for tokens from multiple identity providers</li>
+<li><strong>Capability-Based Authorization</strong>: Make decisions based on capabilities asserted by different issuers</li>
+<li><strong>Zero Trust Architecture</strong>: Each token represents verification from a different trust boundary</li>
+<li><strong>Flexible Token Types</strong>: Support for custom token types beyond standard OAuth/OIDC tokens</li>
+<li><strong>API Gateway Ready</strong>: Ideal for API gateways validating tokens from various upstream services</li>
+</ul>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
+<h3 id="1-request-structure">1. Request Structure<a class="headerlink" href="#1-request-structure" title="Permanent link">#</a></h3>
+<p>A multi-issuer authorization request consists of:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGciOiJIUzI1NiIs...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGciOiJFZERTQSIs...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::DolphinToken&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ey1b6cfMef21084633a7...&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Document&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;doc-123&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;classification&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;confidential&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ip_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1730000000</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-token-processing-pipeline">2. Token Processing Pipeline<a class="headerlink" href="#2-token-processing-pipeline" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────┐
+│ 1. Token Input                                          │
+│    Array of tokens with explicit type mappings         │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│ 2. Token Validation                                     │
+│    - Signature verification                             │
+│    - Time-based validation (exp, nbf)                   │
+│    - Status validation (revocation check)               │
+│    - Trusted issuer verification                        │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│ 3. Entity Creation                                      │
+│    - Create Cedar entity for each valid token          │
+│    - Store token metadata (type, jti, issuer, exp)     │
+│    - Store JWT claims as entity tags (Set&lt;String&gt;)     │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│ 4. Token Collection Assembly                            │
+│    - Organize tokens with predictable naming           │
+│    - Pattern: {issuer_name}_{token_type}               │
+│    - Example: acme_access_token, google_id_token       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│ 5. Policy Evaluation                                    │
+│    - Evaluate Cedar policies without principal         │
+│    - Policies reference context.tokens.{name}          │
+│    - Return authorization decision                      │
+└─────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="3-token-entity-structure">3. Token Entity Structure<a class="headerlink" href="#3-token-entity-structure" title="Permanent link">#</a></h3>
+<p>Each validated token becomes a Cedar entity:</p>
+<div class="highlight"><pre><span></span><code>entity Token = {
+  &quot;token_type&quot;?: String,        // e.g., &quot;Jans::Access_Token&quot;
+  &quot;jti&quot;?: String,               // Token ID
+  &quot;iss&quot;?: Jans::TrustedIssuer,  // JWT iss claim
+  &quot;exp&quot;?: Long,                 // Expiration timestamp
+  &quot;validated_at&quot;?: Long         // Validation timestamp
+} tags Set&lt;String&gt;;
+</code></pre></div>
+<p><strong>All JWT claims are stored as tags</strong> and accessed using Cedar's tag operations:</p>
+<div class="highlight"><pre><span></span><code>context.tokens.acme_access_token.hasTag(&quot;scope&quot;)
+context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:profile&quot;)
+</code></pre></div>
+<h3 id="4-token-collection-naming">4. Token Collection Naming<a class="headerlink" href="#4-token-collection-naming" title="Permanent link">#</a></h3>
+<p>Tokens are organized in the context using a deterministic naming algorithm:</p>
+<p><strong>Pattern</strong>: <code>{issuer_name}_{token_type}</code></p>
+<p><strong>Issuer Name Resolution</strong>:</p>
+<ol>
+<li>Look up issuer in trusted issuer metadata</li>
+<li>Use the <code>name</code> field from configuration</li>
+<li>If no <code>name</code> field, extract hostname from JWT <code>iss</code> claim</li>
+<li>Convert to lowercase, replace special characters with underscores</li>
+</ol>
+<p><strong>Token Type Resolution</strong>:</p>
+<ol>
+<li>Extract from <code>mapping</code> field (e.g., "Jans::Access_Token")</li>
+<li>Split by namespace separator ("::"), and use the last segment.</li>
+<li>Convert to lowercase, preserve underscores</li>
+</ol>
+<p><strong>Examples</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>JWT Issuer</th>
+<th>Trusted Issuer Name</th>
+<th>Token Mapping</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://idp.acme.com/auth</code></td>
+<td><code>"Acme"</code></td>
+<td><code>Jans::Access_Token</code></td>
+<td><code>acme_access_token</code></td>
+</tr>
+<tr>
+<td><code>https://accounts.google.com</code></td>
+<td><code>"Google"</code></td>
+<td><code>Jans::Id_Token</code></td>
+<td><code>google_id_token</code></td>
+</tr>
+<tr>
+<td><code>https://idp.dolphin.sea/auth</code></td>
+<td><code>"Dolphin"</code></td>
+<td><code>Acme::DolphinToken</code></td>
+<td><code>dolphin_dolphintoken</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">#</a></h2>
+<h3 id="use-case-1-federation-scenario">Use Case 1: Federation Scenario<a class="headerlink" href="#use-case-1-federation-scenario" title="Permanent link">#</a></h3>
+<p><strong>Scenario</strong>: A collaborative platform accepts tokens from multiple corporate identity providers.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Users can authenticate with their corporate IDP</li>
+<li>Authorization requires valid token from user's organization</li>
+<li>Different organizations have different permission structures</li>
+</ul>
+<p><strong>Implementation</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># User presents tokens from their corporate IDP and the platform IDP</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;&lt;acme_corp_token&gt;&quot;</span>  <span class="c1"># From Acme Corp IDP</span>
+    <span class="p">),</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Platform::Access_Token&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;&lt;platform_token&gt;&quot;</span>  <span class="c1"># From platform IDP</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">request</span> <span class="o">=</span> <span class="n">AuthorizeMultiIssuerRequest</span><span class="p">(</span>
+    <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Platform::Action::&quot;ShareDocument&quot;&#39;</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">document</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ip_address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.168.1.100&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Policy</strong>:</p>
+<div class="highlight"><pre><span></span><code>// Allow sharing if user has valid tokens from both IDPs
+permit(
+  principal,
+  action == Platform::Action::&quot;ShareDocument&quot;,
+  resource in Platform::Document
+) when {
+  // Verify corporate IDP token with employee status
+  context has tokens.acme_corp_access_token &amp;&amp;
+  context.tokens.acme_corp_access_token.hasTag(&quot;employee_status&quot;) &amp;&amp;
+  context.tokens.acme_corp_access_token.getTag(&quot;employee_status&quot;).contains(&quot;active&quot;) &amp;&amp;
+
+  // Verify platform token with sharing scope
+  context has tokens.platform_access_token &amp;&amp;
+  context.tokens.platform_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+  context.tokens.platform_access_token.getTag(&quot;scope&quot;).contains(&quot;share:documents&quot;)
+};
+</code></pre></div>
+<h3 id="use-case-2-api-gateway-with-multiple-upstream-services">Use Case 2: API Gateway with Multiple Upstream Services<a class="headerlink" href="#use-case-2-api-gateway-with-multiple-upstream-services" title="Permanent link">#</a></h3>
+<p><strong>Scenario</strong>: An API gateway needs to validate tokens from various upstream microservices.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Each microservice issues its own JWT tokens</li>
+<li>Gateway validates all tokens before forwarding requests</li>
+<li>Authorization based on combination of service capabilities</li>
+</ul>
+<p><strong>Implementation</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Gateway receives tokens from multiple services</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;AuthService::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">authServiceToken</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;PaymentService::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">paymentServiceToken</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;UserService::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">userServiceToken</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Gateway::Action::&quot;ProcessPayment&quot;&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Gateway::Transaction&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;txn-12345&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">currency</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">ip</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Policy</strong>:</p>
+<div class="highlight"><pre><span></span><code>// Require tokens from all three services for payment processing
+permit(
+  principal,
+  action == Gateway::Action::&quot;ProcessPayment&quot;,
+  resource in Gateway::Transaction
+) when {
+  // Auth service token with authenticated user
+  context has tokens.auth_service_access_token &amp;&amp;
+  context.tokens.auth_service_access_token.hasTag(&quot;authenticated&quot;) &amp;&amp;
+
+  // Payment service token with sufficient balance
+  context has tokens.payment_service_access_token &amp;&amp;
+  context.tokens.payment_service_access_token.hasTag(&quot;balance_verified&quot;) &amp;&amp;
+
+  // User service token with kyc_verified status
+  context has tokens.user_service_access_token &amp;&amp;
+  context.tokens.user_service_access_token.hasTag(&quot;kyc_verified&quot;) &amp;&amp;
+  context.tokens.user_service_access_token.getTag(&quot;kyc_verified&quot;).contains(&quot;true&quot;)
+};
+</code></pre></div>
+<h3 id="use-case-3-multi-organization-voting-system">Use Case 3: Multi-Organization Voting System<a class="headerlink" href="#use-case-3-multi-organization-voting-system" title="Permanent link">#</a></h3>
+<p><strong>Scenario</strong>: A trade association requires tokens from both the association and member organizations for voting.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>User must have valid membership token from trade association</li>
+<li>User must have valid employee token from their organization</li>
+<li>Organization must be a corporate member</li>
+<li>User must be designated as voting representative</li>
+</ul>
+<p><strong>Implementation</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">TokenInput</span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Mapping</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TradeAssociation::MemberToken&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="nx">memberToken</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Mapping</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="nx">employeeToken</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">AuthorizeMultiIssuerRequest</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Tokens</span><span class="p">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="s">`TradeAssociation::Action::&quot;Vote&quot;`</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Resource</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
+<span class="w">            </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TradeAssociation::Election&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">ID</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;election-2025&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;election_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;board&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;year&quot;</span><span class="p">:</span><span class="w">          </span><span class="mi">2025</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">AuthorizeMultiIssuer</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Policy</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == TradeAssociation::Action::&quot;Vote&quot;,
+  resource in TradeAssociation::Election
+) when {
+  // Require corporate membership token
+  context has tokens.trade_association_member_token &amp;&amp;
+  context.tokens.trade_association_member_token.hasTag(&quot;member_status&quot;) &amp;&amp;
+  context.tokens.trade_association_member_token.getTag(&quot;member_status&quot;).contains(&quot;Corporate Member&quot;) &amp;&amp;
+
+  // Require employee token with voting representative designation
+  context has tokens.company_access_token &amp;&amp;
+  context.tokens.company_access_token.hasTag(&quot;role&quot;) &amp;&amp;
+  context.tokens.company_access_token.getTag(&quot;role&quot;).contains(&quot;voting_representative&quot;)
+};
+</code></pre></div>
+<h3 id="use-case-4-healthcare-hipaa-compliance">Use Case 4: Healthcare HIPAA Compliance<a class="headerlink" href="#use-case-4-healthcare-hipaa-compliance" title="Permanent link">#</a></h3>
+<p><strong>Scenario</strong>: Healthcare system requires multiple consent tokens for accessing medical records.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Patient consent token required</li>
+<li>Provider credentials token required</li>
+<li>Facility authorization token required</li>
+<li>Purpose of use must match all tokens</li>
+</ul>
+<p><strong>Implementation</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Healthcare::PatientConsent&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="n">patient_consent_token</span>
+    <span class="p">),</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Healthcare::ProviderCredentials&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="n">provider_credentials_token</span>
+    <span class="p">),</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Healthcare::FacilityAuth&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="n">facility_token</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">request</span> <span class="o">=</span> <span class="n">AuthorizeMultiIssuerRequest</span><span class="p">(</span>
+    <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Healthcare::Action::&quot;AccessMedicalRecord&quot;&#39;</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">medical_record</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;purpose_of_use&quot;</span><span class="p">:</span> <span class="s2">&quot;TREATMENT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;emergency&quot;</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Policy</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Healthcare::Action::&quot;AccessMedicalRecord&quot;,
+  resource in Healthcare::MedicalRecord
+) when {
+  // Patient consent token
+  context has tokens.patient_consent &amp;&amp;
+  context.tokens.patient_consent.hasTag(&quot;consent_status&quot;) &amp;&amp;
+  context.tokens.patient_consent.getTag(&quot;consent_status&quot;).contains(&quot;granted&quot;) &amp;&amp;
+  context.tokens.patient_consent.hasTag(&quot;expiry&quot;) &amp;&amp;
+  context.tokens.patient_consent.getTag(&quot;expiry&quot;).contains(&quot;2025-12-31&quot;) &amp;&amp;
+
+  // Provider credentials token
+  context has tokens.provider_credentials &amp;&amp;
+  context.tokens.provider_credentials.hasTag(&quot;license_status&quot;) &amp;&amp;
+  context.tokens.provider_credentials.getTag(&quot;license_status&quot;).contains(&quot;active&quot;) &amp;&amp;
+  context.tokens.provider_credentials.hasTag(&quot;specialty&quot;) &amp;&amp;
+
+  // Facility authorization token
+  context has tokens.facility_auth &amp;&amp;
+  context.tokens.facility_auth.hasTag(&quot;facility_type&quot;) &amp;&amp;
+  context.tokens.facility_auth.getTag(&quot;facility_type&quot;).contains(&quot;hospital&quot;) &amp;&amp;
+
+  // Purpose of use alignment
+  context has purpose_of_use &amp;&amp;
+  context.purpose_of_use == &quot;TREATMENT&quot;
+};
+</code></pre></div>
+<h3 id="use-case-5-zero-trust-network-with-custom-token-types">Use Case 5: Zero Trust Network with Custom Token Types<a class="headerlink" href="#use-case-5-zero-trust-network-with-custom-token-types" title="Permanent link">#</a></h3>
+<p><strong>Scenario</strong>: A zero-trust architecture uses custom tokens for device attestation, network verification, and user authentication.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Device attestation token from hardware TPM</li>
+<li>Network security token from network controller</li>
+<li>User authentication token from IDP</li>
+<li>All three required for accessing sensitive resources</li>
+</ul>
+<p><strong>Implementation</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Security::DeviceAttestation&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">deviceAttestationToken</span><span class="p">,</span><span class="w"> </span><span class="c1">// From device TPM</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Security::NetworkToken&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">networkToken</span><span class="p">,</span><span class="w"> </span><span class="c1">// From network controller</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="nx">userAccessToken</span><span class="p">,</span><span class="w"> </span><span class="c1">// From IDP</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Security::Action::&quot;AccessClassified&quot;&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Security::Document&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;classified-123&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">classification</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;SECRET&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">compartment</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;SPECIAL_ACCESS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">location</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;secure_facility&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><strong>Policy</strong>:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Security::Action::&quot;AccessClassified&quot;,
+  resource in Security::Document
+) when {
+  // Device attestation with hardware-backed key
+  context has tokens.device_attestation &amp;&amp;
+  context.tokens.device_attestation.hasTag(&quot;tpm_verified&quot;) &amp;&amp;
+  context.tokens.device_attestation.getTag(&quot;tpm_verified&quot;).contains(&quot;true&quot;) &amp;&amp;
+  context.tokens.device_attestation.hasTag(&quot;encryption_level&quot;) &amp;&amp;
+  context.tokens.device_attestation.getTag(&quot;encryption_level&quot;).contains(&quot;FIPS-140-2&quot;) &amp;&amp;
+
+  // Network token from secure network
+  context has tokens.network_token &amp;&amp;
+  context.tokens.network_token.hasTag(&quot;network_type&quot;) &amp;&amp;
+  context.tokens.network_token.getTag(&quot;network_type&quot;).contains(&quot;CLASSIFIED&quot;) &amp;&amp;
+  context.tokens.network_token.hasTag(&quot;segment&quot;) &amp;&amp;
+  context.tokens.network_token.getTag(&quot;segment&quot;).contains(&quot;HIGH_SIDE&quot;) &amp;&amp;
+
+  // User access token with clearance
+  context has tokens.user_access_token &amp;&amp;
+  context.tokens.user_access_token.hasTag(&quot;clearance_level&quot;) &amp;&amp;
+  context.tokens.user_access_token.getTag(&quot;clearance_level&quot;).contains(&quot;SECRET&quot;) &amp;&amp;
+
+  // Location verification
+  context has location &amp;&amp;
+  context.location == &quot;secure_facility&quot;
+};
+</code></pre></div>
+<h2 id="configuration-guide">Configuration Guide<a class="headerlink" href="#configuration-guide" title="Permanent link">#</a></h2>
+<h3 id="schema-requirements">Schema Requirements<a class="headerlink" href="#schema-requirements" title="Permanent link">#</a></h3>
+<p><strong>IMPORTANT</strong>: Multi-issuer authorization requires specific Cedar schema modifications. Without these changes, authorization will fail with schema validation errors.</p>
+<h4 id="required-schema-changes">Required Schema Changes<a class="headerlink" href="#required-schema-changes" title="Permanent link">#</a></h4>
+<p>Multi-issuer authorization creates token entities dynamically and places them in the Cedar context. Your schema must support:</p>
+<p><strong>1. Token Entity Structure</strong></p>
+<p>Token entities must have these required attributes:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    token_type?: String,        // Required for multi-issuer
+    jti?: String,               // Required for multi-issuer
+    iss?: TrustedIssuer,        // Required for multi-issuer
+    exp?: Long,                 // Required for multi-issuer
+    validated_at?: Long,        // Required for multi-issuer
+    // Other JWT claims as optional attributes
+    aud?: String,
+    iat?: Long,
+    scope?: Set&lt;String&gt;,
+    // ...
+  } tags Set&lt;String&gt;;           // Required for dynamic JWT claims
+};
+</code></pre></div>
+<p><strong>2. Context Structure</strong></p>
+<p>The Context type must include a <code>tokens</code> field:</p>
+<div class="highlight"><pre><span></span><code>type Context = {
+  network?: String,
+  // ... other context fields
+  tokens?: TokensContext,   // Required for multi-issuer
+};
+
+type TokensContext = {
+  total_token_count: Long,  // Required
+  // Individual token fields added dynamically
+};
+</code></pre></div>
+<p><strong>3. Making Attributes Optional</strong></p>
+<p>All token entity attributes (except the core multi-issuer fields) must be optional (<code>?</code>) to prevent schema validation errors. This is because multi-issuer tokens may not have all the claims that standard authorization tokens have.</p>
+<h4 id="why-these-changes-are-needed">Why These Changes Are Needed<a class="headerlink" href="#why-these-changes-are-needed" title="Permanent link">#</a></h4>
+<ul>
+<li><strong>Dynamic token entities</strong>: Multi-issuer authorization creates token entities on-the-fly without User/Workload principals</li>
+<li><strong>Tag-based claims</strong>: JWT claims are stored as entity tags (<code>Set&lt;String&gt;</code> by default) for flexible access</li>
+<li><strong>Context structure</strong>: Tokens are organized in <code>context.tokens.{issuer}_{token_type}</code> format</li>
+<li><strong>Schema validation</strong>: Cedar validates entities against the schema; missing required fields cause errors</li>
+</ul>
+<h4 id="updating-core-schema">Updating Core Schema<a class="headerlink" href="#updating-core-schema" title="Permanent link">#</a></h4>
+<p>If you're using the default <code>cedarling_core.cedarschema</code> from Agama Lab, it has been updated to support multi-issuer authorization. If you have a custom schema, make sure to apply these changes.</p>
+<h3 id="cedar-schema-for-multi-issuer-actions">Cedar Schema for Multi-Issuer Actions<a class="headerlink" href="#cedar-schema-for-multi-issuer-actions" title="Permanent link">#</a></h3>
+<p>Multi-issuer authorization runs Cedar's partial evaluator with <strong>no principal</strong> — <code>authorize_multi_issuer</code> does not accept one, and none is constructed internally. Actions used in multi-issuer requests must declare this in their <code>appliesTo</code>, and policies referencing those actions must leave the principal unconstrained.</p>
+<h4 id="declaring-the-action">Declaring the action<a class="headerlink" href="#declaring-the-action" title="Permanent link">#</a></h4>
+<p>Cedar's schema validator rejects an empty <code>principal</code> list (<code>for action '...', 'principal' is '[]', which is invalid</code>). To declare an action that runs without a principal, declare a placeholder entity type purely to satisfy the schema and reference it in <code>appliesTo</code>:</p>
+<div class="highlight"><pre><span></span><code>entity Any;
+
+action &quot;ReadArtifact&quot; appliesTo {
+  principal: [Any],
+  resource: [Artifact],
+  context: Context
+};
+</code></pre></div>
+<p>No instance of <code>Any</code> is ever constructed at runtime. <code>authorize_multi_issuer</code> invokes the action with <code>principal: None</code> and Cedar's partial evaluator runs against the policies. The placeholder entity type exists only so the schema parses.</p>
+<h4 id="writing-the-policy">Writing the policy<a class="headerlink" href="#writing-the-policy" title="Permanent link">#</a></h4>
+<p>Policies for multi-issuer actions must use the unconstrained <code>permit(principal, ...)</code> head — do not add <code>principal == ...</code> or <code>principal is ...</code>, because no principal exists at evaluation time:</p>
+<div class="highlight"><pre><span></span><code>permit(
+  principal,
+  action == Action::&quot;ReadArtifact&quot;,
+  resource == Artifact::&quot;doc-1&quot;
+) when {
+  context.tokens.AcmeCorp_access_token.scope.contains(&quot;read&quot;)
+};
+</code></pre></div>
+<p>If a policy does constrain the principal, Cedar's partial evaluator cannot fully evaluate it and emits a residual. Residual-dependent requests <strong>fail closed with Deny</strong> in Cedarling; the request's diagnostics list the residual policy ids so they can be located and fixed.</p>
+<h3 id="policy-store-configuration">Policy Store Configuration<a class="headerlink" href="#policy-store-configuration" title="Permanent link">#</a></h3>
+<p>Configure trusted issuers with the <code>name</code> field for predictable token naming:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;acme_corp_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Corporation Identity Provider&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;google_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google Identity Provider&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google::Id_Token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;custom_service_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomService&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Custom Service Provider&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://service.example.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;custom_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomService::ServiceToken&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="cedar-schema-for-multi-issuer-tokens">Cedar Schema for Multi-Issuer Tokens<a class="headerlink" href="#cedar-schema-for-multi-issuer-tokens" title="Permanent link">#</a></h3>
+<h4 id="core-token-schema-structure">Core Token Schema Structure<a class="headerlink" href="#core-token-schema-structure" title="Permanent link">#</a></h4>
+<p>Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  // Core token entity structure compatible with multi-issuer authorization
+  entity Access_token = {
+    // Required multi-issuer attributes
+    token_type?: String,        // Entity type name (e.g., &quot;Acme::Access_token&quot;)
+    jti?: String,               // JWT ID - unique token identifier
+    iss?: TrustedIssuer,        // Issuer entity reference
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Timestamp when token was validated
+
+    // Optional JWT claims (make all optional for compatibility)
+    aud?: String,               // Audience
+    iat?: Long,                 // Issued at
+    scope?: Set&lt;String&gt;,        // OAuth scopes
+    client_id?: String,         // Client identifier
+    sub?: String,               // Subject
+    // Add other JWT claims as needed
+  } tags Set&lt;String&gt;;           // Tags store dynamic JWT claims
+
+  entity id_token = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims
+    aud?: Set&lt;String&gt;,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    phone_number?: String,
+    role?: Set&lt;String&gt;,
+    acr?: String,
+    amr?: Set&lt;String&gt;,
+    // Add other JWT claims as needed
+  } tags Set&lt;String&gt;;
+
+  entity Userinfo_token = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims
+    aud?: String,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    birthdate?: String,
+    phone_number?: String,
+    role?: Set&lt;String&gt;,
+    // Add other JWT claims as needed
+  } tags Set&lt;String&gt;;
+};
+</code></pre></div>
+<h4 id="custom-token-types">Custom Token Types<a class="headerlink" href="#custom-token-types" title="Permanent link">#</a></h4>
+<p>For custom token types, follow the same pattern:</p>
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Custom namespace: custom service token entities.
+namespace Custom {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity ServiceToken = {
+    // Required multi-issuer attributes
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Custom token-specific attributes
+    service_id?: String,
+    permissions?: Set&lt;String&gt;,
+    service_tier?: String,
+  } tags Set&lt;String&gt;;
+};
+</code></pre></div>
+<h4 id="complete-context-schema">Complete Context Schema<a class="headerlink" href="#complete-context-schema" title="Permanent link">#</a></h4>
+<p>Define the Context type to include the tokens field:</p>
+<div class="highlight"><pre><span></span><code>type Context = {
+  // Standard context fields
+  network?: String,
+  network_type?: String,
+  user_agent?: String,
+  operating_system?: String,
+  device_health?: Set&lt;String&gt;,
+  current_time?: Long,
+  geolocation?: Set&lt;String&gt;,
+  fraud_indicators?: Set&lt;String&gt;,
+
+  // Multi-issuer tokens context (required)
+  tokens?: TokensContext,
+};
+
+type TokensContext = {
+  total_token_count: Long,
+  // Individual token fields are added dynamically by Cedarling
+  // Pattern: {issuer_name}_{token_type} (e.g., acme_access_token)
+};
+</code></pre></div>
+<h4 id="key-schema-principles">Key Schema Principles<a class="headerlink" href="#key-schema-principles" title="Permanent link">#</a></h4>
+<ol>
+<li><strong>Optional Attributes</strong>: All token attributes must be optional (<code>?</code>) to support both standard and multi-issuer authorization</li>
+<li><strong>Tags Declaration</strong>: All token entities must declare <code>tags Set&lt;String&gt;</code> for dynamic JWT claim storage</li>
+<li><strong>Context Integration</strong>: The Context type must include an optional <code>tokens</code> field</li>
+<li><strong>Consistency</strong>: Use the same attribute names across all token types (token_type, jti, issuer, exp, validated_at)</li>
+</ol>
+<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">#</a></h2>
+<h3 id="token-validation-failures">Token Validation Failures<a class="headerlink" href="#token-validation-failures" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Individual token validation failures are handled gracefully</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;valid_token&quot;</span><span class="p">),</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;invalid_token&quot;</span><span class="p">),</span>  <span class="c1"># Will be ignored</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Acme::CustomToken&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;valid_custom_token&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># Authorization continues with valid tokens</span>
+<span class="c1"># Invalid tokens are logged but don&#39;t block processing</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</code></pre></div>
+<p>However, if every token is invalid, Cedarling will raise an error. <strong>It is important that users always handle errors gracefully.</strong></p>
+<h3 id="non-deterministic-tokens">Non-Deterministic Tokens<a class="headerlink" href="#non-deterministic-tokens" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ERROR: Multiple tokens of same type from same issuer</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token1&quot;</span><span class="p">),</span>  <span class="c1"># From Jans::Access_Token</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token2&quot;</span><span class="p">),</span>  <span class="c1"># Also from Jans::Access_Token - ERROR!</span>
+<span class="p">]</span>
+
+<span class="c1"># This non-deterministic.</span>
+<span class="c1"># Which token should policies reference?</span>
+<span class="c1"># Cedarling processes only the first item and writes log messages for all subsequent items that are skipped.</span>
+</code></pre></div>
+<h3 id="trusted-issuer-validation">Trusted Issuer Validation<a class="headerlink" href="#trusted-issuer-validation" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Tokens from unknown issuers are rejected</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span>
+        <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+        <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token_from_unknown_issuer&quot;</span>  <span class="c1"># ERROR if issuer not in trusted issuers</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># Only tokens from issuers configured in policy store are accepted</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">#</a></h2>
+<h3 id="1-use-descriptive-issuer-names">1. Use Descriptive Issuer Names<a class="headerlink" href="#1-use-descriptive-issuer-names" title="Permanent link">#</a></h3>
+<p>Configure clear, predictable issuer names in your policy store:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Good - clear and predictable</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Issuer1&quot;</span><span class="w"> </span><span class="c1">// Bad - unclear what this represents</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-start-schema-less-for-development">2. Start Schema-Less for Development<a class="headerlink" href="#2-start-schema-less-for-development" title="Permanent link">#</a></h3>
+<p>Begin without Cedar schemas for rapid development:</p>
+<ul>
+<li>All claims stored in tags as <code>Set&lt;String&gt;</code>  </li>
+<li>Flexible and forgiving during development  </li>
+<li>Add schemas later for production type safety  </li>
+</ul>
+<h3 id="3-implement-comprehensive-logging">3. Implement Comprehensive Logging<a class="headerlink" href="#3-implement-comprehensive-logging" title="Permanent link">#</a></h3>
+<p>Monitor token validation and policy evaluation:</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c1"># Retrieve logs for debugging</span>
+<span class="n">logs</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">get_logs_by_request_id</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">request_id</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">logs</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Log: </span><span class="si">{</span><span class="n">log</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="4-handle-failed-tokens-gracefully">4. Handle Failed Tokens Gracefully<a class="headerlink" href="#4-handle-failed-tokens-gracefully" title="Permanent link">#</a></h3>
+<p>Design policies to work with partial token sets:</p>
+<div class="highlight"><pre><span></span><code>// Allow if EITHER token is present
+permit(
+  principal,
+  action == Jans::Action::&quot;Read&quot;,
+  resource in Jans::Document
+) when {
+  (context has tokens.acme_access_token &amp;&amp;
+   context.tokens.acme_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+   context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read&quot;)) ||
+  (context has tokens.google_access_token &amp;&amp;
+   context.tokens.google_access_token.hasTag(&quot;scope&quot;) &amp;&amp;
+   context.tokens.google_access_token.getTag(&quot;scope&quot;).contains(&quot;read&quot;))
+};
+</code></pre></div>
+<h3 id="5-test-with-multiple-issuer-combinations">5. Test with Multiple Issuer Combinations<a class="headerlink" href="#5-test-with-multiple-issuer-combinations" title="Permanent link">#</a></h3>
+<p>Test policies with various token combinations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Test with all tokens</span>
+<span class="n">all_tokens_result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">all_tokens_request</span><span class="p">)</span>
+
+<span class="c1"># Test with subset of tokens</span>
+<span class="n">partial_tokens_result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">partial_tokens_request</span><span class="p">)</span>
+
+<span class="c1"># Test with invalid tokens mixed in</span>
+<span class="n">mixed_tokens_result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">mixed_tokens_request</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../cedarling-authz/">Cedarling Authorization</a></li>
+<li><a href="../cedarling-interfaces/">Cedarling Interfaces</a></li>
+<li><a href="../cedarling-policy-store/">Policy Store Configuration</a></li>
+<li><a href="../../tutorials/python/">Python Examples</a></li>
+<li><a href="../../tutorials/go/">Go Examples</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 20, 2025 14:25:12 UTC"><span class="timeago" datetime="2025-11-20T14:25:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 20, 2025 14:25:12 UTC">2025-11-20</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>
