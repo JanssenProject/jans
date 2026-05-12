@@ -1,5 +1,53 @@
 # Changelog
 
+## [2.1.0](https://github.com/JanssenProject/jans/compare/v2.0.0...v2.1.0) (2026-05-12)
+
+
+### Features
+
+* add ability in tarp to use the details of client already regist… ([#14008](https://github.com/JanssenProject/jans/issues/14008)) ([fdb7edb](https://github.com/JanssenProject/jans/commit/fdb7edb46f292f5c77527c01383edbe118060119))
+* add opensearch-cedarling plugin ([#13921](https://github.com/JanssenProject/jans/issues/13921)) ([e0ee855](https://github.com/JanssenProject/jans/commit/e0ee85575ff87ebed9034e767826eb120a2e74d1))
+* add terraform and terraform JWT implementations with cedarling opa ([#13988](https://github.com/JanssenProject/jans/issues/13988)) ([0ea4187](https://github.com/JanssenProject/jans/commit/0ea4187439f80a20dbcb447ed4a6f8537c2a6651))
+* added SimpleUser class wrapper ([#13986](https://github.com/JanssenProject/jans/issues/13986)) ([05e040b](https://github.com/JanssenProject/jans/commit/05e040b3574f88ff40d3a4c2f5569135ae0f86d1))
+* **cloud-native:** create archived public keys in jansArchJwk table ([#13928](https://github.com/JanssenProject/jans/issues/13928)) ([577a372](https://github.com/JanssenProject/jans/commit/577a3727d57ff55af1c0daa9ed89610841ac45e1))
+* **cloud-native:** map fido2-metrics READ scope to admin role ([#14046](https://github.com/JanssenProject/jans/issues/14046)) ([281dab0](https://github.com/JanssenProject/jans/commit/281dab07aeaaa91d09ac569c137b7b68eef95caa))
+* **jans-auth-server:** improved Invalid Request message for Authorization Endpoint [#2775](https://github.com/JanssenProject/jans/issues/2775) ([#14004](https://github.com/JanssenProject/jans/issues/14004)) ([667f096](https://github.com/JanssenProject/jans/commit/667f096935368bf5ab326b43a6a0c358d0331b70))
+* **jans-auth-server:** removed arquillian server side tests which are old and duplicates client tests checks ([#14057](https://github.com/JanssenProject/jans/issues/14057)) ([c287a6b](https://github.com/JanssenProject/jans/commit/c287a6b9234e4ef52b46bb68584992f492abf211))
+* **jans-auth-server:** removed arquillian server side tests which are old and duplicates client tests checks [#14056](https://github.com/JanssenProject/jans/issues/14056) ([c287a6b](https://github.com/JanssenProject/jans/commit/c287a6b9234e4ef52b46bb68584992f492abf211))
+* **jans-cedarling:** add automatic jwks key rotation ([#13956](https://github.com/JanssenProject/jans/issues/13956)) ([ee1efbf](https://github.com/JanssenProject/jans/commit/ee1efbfcb8e14d59d5eed0456f76e9e54f906628))
+* **jans-cedarling:** add benchmarks for cedarling binding platforms ([#13985](https://github.com/JanssenProject/jans/issues/13985)) ([9705689](https://github.com/JanssenProject/jans/commit/9705689cd23a68e47caddb988f8a8861ca8d91f0))
+* **jans-cedarling:** add cedarling_opa plugin functionality ([#13861](https://github.com/JanssenProject/jans/issues/13861)) ([57f3fe8](https://github.com/JanssenProject/jans/commit/57f3fe8954ec726828a7fc09c979ef717c321501))
+* **jans-cedarling:** implement collecting and sending telemetry for the lock server ([#13787](https://github.com/JanssenProject/jans/issues/13787)) ([1ee8912](https://github.com/JanssenProject/jans/commit/1ee8912a49408975a3406eb06ed376c1ddfdfd71))
+* **jans-cedarling:** implement sending health checks to the lock server ([#14023](https://github.com/JanssenProject/jans/issues/14023)) ([cb1a9a2](https://github.com/JanssenProject/jans/commit/cb1a9a23d662289668af5b16ec15c76da3175673))
+* **jans-cli-tui:** create TUI client with SSA ([#13923](https://github.com/JanssenProject/jans/issues/13923)) ([554bf00](https://github.com/JanssenProject/jans/commit/554bf007413a0788edd25e091875797c9398269c))
+* **jans-fido2:** make Apple WebAuthn root CA subject DN configurable ([#13737](https://github.com/JanssenProject/jans/issues/13737)) ([16e7a46](https://github.com/JanssenProject/jans/commit/16e7a4681473587282c65203ba9c628fd9e18754))
+* **jans-linux-setup:** map fido2-metrics READ scope to admin role (used in admin ui) by default  ([#14040](https://github.com/JanssenProject/jans/issues/14040)) ([5eb5ebb](https://github.com/JanssenProject/jans/commit/5eb5ebb879fed3c8314df30784e6d45a65cd730f))
+* **jans-orm:** allow to persist JSONObject ([#13939](https://github.com/JanssenProject/jans/issues/13939)) ([dbd7ae6](https://github.com/JanssenProject/jans/commit/dbd7ae60660de7d490301b43c81d0a0839d0f836))
+* **jans-tarp:** UI/UX improvement in jans-tarp ([#13995](https://github.com/JanssenProject/jans/issues/13995)) ([069e29f](https://github.com/JanssenProject/jans/commit/069e29f2049ed0147cf0ef09cb4dbd5ad5a177fe))
+
+
+### Bug Fixes
+
+* auth code flow not working in incognito mode ([#14053](https://github.com/JanssenProject/jans/issues/14053)) ([8a78926](https://github.com/JanssenProject/jans/commit/8a789265bc73187aff9d87134e788e311938aedc))
+* **cloud-native:** audit log filter returns entries beyond the specified end date ([#14006](https://github.com/JanssenProject/jans/issues/14006)) ([f5e1e8a](https://github.com/JanssenProject/jans/commit/f5e1e8a804a3cea74be3ff9980a8a453a74d7fb7))
+* **config-api:** audit log filter returns entries beyond the specified end date ([#13920](https://github.com/JanssenProject/jans/issues/13920)) ([dc1bcc3](https://github.com/JanssenProject/jans/commit/dc1bcc3e8cc64fc9daab3124bb58235cf94e5724))
+* **config-api:** lock stats endpoint not working  ([#13925](https://github.com/JanssenProject/jans/issues/13925)) ([d86a77e](https://github.com/JanssenProject/jans/commit/d86a77e4268df7b4fd9db837e31d914c81c7f307))
+* **docs:** fix broken links ([#13958](https://github.com/JanssenProject/jans/issues/13958)) ([bc6ecaf](https://github.com/JanssenProject/jans/commit/bc6ecaf5133631c93ff25d5a7a6dc0ed101db946))
+* **jans-auth-server:** "unknown" in consent screen [#13868](https://github.com/JanssenProject/jans/issues/13868) ([#14014](https://github.com/JanssenProject/jans/issues/14014)) ([33a3747](https://github.com/JanssenProject/jans/commit/33a37474b2633532560ea2df5f010f8d80462eac))
+* **jans-auth-server:** added nested jwt into JWE for address claim tests [#13895](https://github.com/JanssenProject/jans/issues/13895) ([#13922](https://github.com/JanssenProject/jans/issues/13922)) ([67a1787](https://github.com/JanssenProject/jans/commit/67a17876e5791b377e157c2efbc93705d2fa4ac2))
+* **jans-auth-server:** corrected tests execution on jenkins for LogoutStatusJwtHttpTest ([#13899](https://github.com/JanssenProject/jans/issues/13899)) ([e138eec](https://github.com/JanssenProject/jans/commit/e138eec0b1d86355949ea475abf5e7f4d10705ed))
+* **jans-auth-server:** migrated encryption tests to use nested jws to reflect changes on AS side [#13895](https://github.com/JanssenProject/jans/issues/13895) ([#13972](https://github.com/JanssenProject/jans/issues/13972)) ([dc5a4ce](https://github.com/JanssenProject/jans/commit/dc5a4ce6636046389f0de421a066551a078e4459))
+* **jans-cedarling:** add request timeouts to outbound HTTP clients ([#14003](https://github.com/JanssenProject/jans/issues/14003)) ([a1b4975](https://github.com/JanssenProject/jans/commit/a1b497568d85b4d4e9aef64471e7de875db4db17))
+* **jans-cedarling:** swap unmaintained serde_yml and add cargo-audit CI ([7fd5cb9](https://github.com/JanssenProject/jans/commit/7fd5cb9b9b2ecdf5e0bdf6287adb1d5e29b4878b))
+* **jans-cedarling:** use local build instead of assets for sidecar ([#13944](https://github.com/JanssenProject/jans/issues/13944)) ([2236015](https://github.com/JanssenProject/jans/commit/2236015b8695b307ad2fc518eb6de37d519b9c48))
+* **jans-cli-tui:** client authorization algs ([#14019](https://github.com/JanssenProject/jans/issues/14019)) ([cd3998a](https://github.com/JanssenProject/jans/commit/cd3998ad48cfb3283fd714afcba5659eff39a7dc))
+* **jans-cli-tui:** omit missing properties for asset mappings ([#13934](https://github.com/JanssenProject/jans/issues/13934)) ([cb1a96c](https://github.com/JanssenProject/jans/commit/cb1a96c8783bd233b8b97961deef1405256a0244))
+* **jans-cli-tui:** some scripts are missing for clients ([#13983](https://github.com/JanssenProject/jans/issues/13983)) ([bded1b4](https://github.com/JanssenProject/jans/commit/bded1b447397973f304dcfd07d1586f53e2e9d93))
+* **jans-fido2:** implement processAaidEntry to store AAID-keyed TOC e… ([#13993](https://github.com/JanssenProject/jans/issues/13993)) ([889f05c](https://github.com/JanssenProject/jans/commit/889f05c795d83b22bffca1dbf4e99181f4ce0de4))
+* **jans-fido2:** implement processAaidEntry to store AAID-keyed TOC entries in metadata map ([889f05c](https://github.com/JanssenProject/jans/commit/889f05c795d83b22bffca1dbf4e99181f4ce0de4))
+* **jans-linux-setup:** install MySQL from official repo for Debian 13 ([#13945](https://github.com/JanssenProject/jans/issues/13945)) ([4d040eb](https://github.com/JanssenProject/jans/commit/4d040eb85bcf02ed4c544df25f9c3ae2064a75c0))
+* opensearch-cedarling plugin compilation ([#13954](https://github.com/JanssenProject/jans/issues/13954)) ([fe7014f](https://github.com/JanssenProject/jans/commit/fe7014fb0d8dcbc37a4f90256d39105fafef5dc1))
+
 ## 2.0.0 (2026-04-20)
 
 

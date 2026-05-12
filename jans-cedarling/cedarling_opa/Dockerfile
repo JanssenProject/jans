@@ -35,7 +35,7 @@ EXPOSE 8181
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-opa" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.1.0-1" \
     org.opencontainers.image.title="Cedarling OPA" \
     org.opencontainers.image.description="Janssen Cedarling OPA"
 ENTRYPOINT ["/app/opa-cedarling"]
