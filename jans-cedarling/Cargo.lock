@@ -615,7 +615,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling"
-version = "0.0.0"
+version = "2.1.0"
 dependencies = [
  "ahash",
  "async-trait",
@@ -693,7 +693,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_python"
-version = "0.0.0"
+version = "2.1.0"
 dependencies = [
  "cedarling",
  "pyo3",
