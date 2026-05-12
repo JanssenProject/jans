@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.0-nightly</version>
+	<version>2.1.0</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -39,15 +39,6 @@
 		<swagger.version>2.2.10</swagger.version>
 
 		<jetty.version>12.0.25</jetty.version>
-
-        <arquillian.version>1.4.0.Final</arquillian.version>
-        <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
-        <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
-        <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
-		<arquillian.test.version>1.7.0.Alpha10</arquillian.test.version>
-		<arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
-		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
-
 
 		<shrinkwrap.version>2.1.0</shrinkwrap.version>
 		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
@@ -309,47 +300,6 @@
                 <scope>test</scope>
 			</dependency>
 
-            <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-bom</artifactId>
-                <version>${arquillian.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.arquillian.graphene</groupId>
-                <artifactId>graphene-webdriver</artifactId>
-                <version>${arquillian.graphene.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.extension</groupId>
-                <artifactId>arquillian-drone-bom</artifactId>
-                <version>${arquillian.drone.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.extension</groupId>
-                <artifactId>arquillian-drone-webdriver-depchain</artifactId>
-                <version>${arquillian.drone.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian.extension</groupId>
-				<artifactId>arquillian-rest-client-impl-3x</artifactId>
-				<version>${arquillian.rest.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-			    <groupId>org.eu.ingwar.tools</groupId>
-			    <artifactId>arquillian-suite-extension</artifactId>
-			    <version>1.2.0</version>
-			    <scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>

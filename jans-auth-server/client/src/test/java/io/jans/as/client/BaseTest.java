@@ -60,6 +60,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.Reporter;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
@@ -119,6 +120,12 @@ public abstract class BaseTest {
     protected String loginFormLoginButton;
     protected String authorizeFormDoNotAllowButton;
     private String authorizeFormAllowButton;
+
+    @AfterMethod
+    public void tearDown() {
+        privateKey = null;
+        sharedKey = null;
+    }
 
     public static boolean isJsonError(String str) {
         try {
@@ -1210,6 +1217,38 @@ public abstract class BaseTest {
         registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
         registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
         registerRequest.setScope(Tester.standardScopes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
+
+        return registerResponse;
+    }
+
+    public RegisterResponse registerClientWithJwks(
+            final String redirectUris, final List<ResponseType> responseTypes, final String sectorIdentifierUri,
+            final SignatureAlgorithm signatureAlgorithm,
+            final KeyEncryptionAlgorithm keyEncryptionAlgorithm, final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setAuthorizationSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setRequestObjectSigningAlg(signatureAlgorithm);
+        registerRequest.setRequestObjectEncryptionAlg(keyEncryptionAlgorithm);
+        registerRequest.setRequestObjectEncryptionEnc(blockEncryptionAlgorithm);
+        registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setScope(Tester.standardScopes);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

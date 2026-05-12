@@ -6,6 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
+import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
@@ -21,7 +22,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
@@ -395,14 +395,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -410,7 +411,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -426,7 +427,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -476,14 +477,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -491,7 +493,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -507,7 +509,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -558,14 +560,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -573,7 +576,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -588,7 +591,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String clientId = response.getClientId();
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -638,14 +641,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -653,7 +657,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -669,7 +673,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -719,14 +723,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -734,7 +739,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -752,7 +757,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = response.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -804,14 +809,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -819,7 +825,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -835,7 +841,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -885,14 +891,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodPS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodPS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -900,7 +907,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -916,7 +923,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -966,14 +973,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodPS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -981,7 +989,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -997,7 +1005,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1047,14 +1055,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodPS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1062,7 +1071,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1078,7 +1087,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1128,14 +1137,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS256X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1143,7 +1153,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1159,7 +1169,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1209,14 +1219,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS384X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS384X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1224,7 +1235,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1240,7 +1251,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1290,14 +1301,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS512X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS512X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1305,7 +1317,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1321,7 +1333,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1371,14 +1383,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES256X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES256X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1386,7 +1399,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1402,7 +1415,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1452,14 +1465,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES384X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1467,7 +1481,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1483,7 +1497,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1533,14 +1547,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512X509Cert(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES512X509Cert");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1548,7 +1563,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1564,7 +1579,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AbstractCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1863,7 +1878,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl", "sectorIdentifierUri"})
-    @Test // This tests requires a place to publish a request object via HTTPS
+    @Test(enabled = false) // This tests requires a place to publish a request object via HTTPS
     public void requestFileMethod(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             @Optional final String requestFileBasePath, final String requestFileBaseUrl, final String sectorIdentifierUri) throws Exception {
@@ -1873,6 +1888,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             return;
         }
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
@@ -1883,6 +1899,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1895,7 +1912,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1915,8 +1932,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
-            String fileName = UUID.randomUUID().toString() + ".txt";
+            String fileName = UUID.randomUUID() + ".txt";
             String filePath = requestFileBasePath + File.separator + fileName;
             String fileUrl = requestFileBaseUrl + "/" + fileName;// + "#" + hash;
             FileWriter fw = new FileWriter(filePath);
@@ -2004,225 +2020,6 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBaseUrl", "sectorIdentifierUri"})
-    @Test
-    public void requestFileMethodFail2(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String requestFileBaseUrl, final String sectorIdentifierUri) {
-        try {
-            showTitle("requestFileMethodFail2");
-
-            List<ResponseType> responseTypes = Arrays.asList(
-                    ResponseType.TOKEN,
-                    ResponseType.ID_TOKEN);
-
-            // 1. Register client
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                    StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-            registerRequest.setScope(Tester.standardScopes);
-
-            RegisterClient registerClient = newRegisterClient(registerRequest);
-            RegisterResponse registerResponse = registerClient.exec();
-
-            showClient(registerClient);
-            AssertBuilder.registerResponse(registerResponse).created().check();
-
-            String clientId = registerResponse.getClientId();
-
-            // 2. Authorization Request
-            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-            String nonce = UUID.randomUUID().toString();
-            String state = UUID.randomUUID().toString();
-
-            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-            authorizationRequest.setState(state);
-            authorizationRequest.setAuthUsername(userId);
-            authorizationRequest.setAuthPassword(userSecret);
-
-            authorizationRequest.setRequestUri(requestFileBaseUrl + "/FAKE_REQUEST_URI");
-
-            AuthorizeClient authorizeClient = newAuthorizeClient(authorizationRequest);
-            AuthorizationResponse response = authorizeClient.exec();
-
-            showClient(authorizeClient);
-            assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
-            assertNotNull(response.getErrorType(), "The error type is null");
-            assertNotNull(response.getErrorDescription(), "The error description is null");
-            assertNotNull(response.getState(), "The state is null");
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl", "sectorIdentifierUri"})
-    @Test // This tests requires a place to publish a request object via HTTPS
-    public void requestFileMethodFail3(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            @Optional final String requestFileBasePath, final String requestFileBaseUrl, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestFileMethodFail3");
-
-        if (StringHelper.isEmpty(requestFileBasePath)) {
-            return;
-        }
-
-        List<ResponseType> responseTypes = Arrays.asList(
-                ResponseType.TOKEN,
-                ResponseType.ID_TOKEN);
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setScope(Tester.standardScopes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Authorization Request
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        authorizationRequest.setState(state);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
-
-        try {
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-            String hash = "INVALID_HASH";
-            String fileName = UUID.randomUUID().toString() + ".txt";
-            String filePath = requestFileBasePath + File.separator + fileName;
-            String fileUrl = requestFileBaseUrl + "/" + fileName + "#" + hash;
-            FileWriter fw = new FileWriter(filePath);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(authJwt);
-            bw.close();
-            fw.close();
-            authorizationRequest.setRequestUri(fileUrl);
-            System.out.println("Request JWT: " + authJwt);
-            System.out.println("Request File Path: " + filePath);
-            System.out.println("Request File URL: " + fileUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse response = authorizeClient.exec();
-
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
-        assertNotNull(response.getState(), "The state is null");
-    }
-
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
-    @Test
-    public void requestParameterMethodAlgNone(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String sectorIdentifierUri) {
-        try {
-            showTitle("requestParameterMethodAlgNone");
-
-            List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
-
-            // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                    StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
-            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-            registerRequest.setScope(Tester.standardScopes);
-
-            RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-            registerClient.setRequest(registerRequest);
-            RegisterResponse response = registerClient.exec();
-
-            showClient(registerClient);
-            AssertBuilder.registerResponse(response).created().check();
-
-            String clientId = response.getClientId();
-
-            // 2. Request authorization
-            AbstractCryptoProvider cryptoProvider = createCryptoProviderWithAllowedNone();
-
-            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-            String nonce = UUID.randomUUID().toString();
-            String state = UUID.randomUUID().toString();
-
-            AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-            request.setState(state);
-            request.setAuthUsername(userId);
-            request.setAuthPassword(userSecret);
-            request.getPrompts().add(Prompt.NONE);
-
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.NONE, cryptoProvider);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-            request.setRequest(authJwt);
-
-            AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-            authorizeClient.setRequest(request);
-            AuthorizationResponse response1 = authorizeClient.exec();
-
-            showClient(authorizeClient);
-            assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
-            assertNotNull(response1.getLocation(), "The location is null");
-            assertNotNull(response1.getAccessToken(), "The accessToken is null");
-            assertNotNull(response1.getTokenType(), "The tokenType is null");
-            assertNotNull(response1.getIdToken(), "The idToken is null");
-            assertNotNull(response1.getState(), "The state is null");
-
-            String accessToken = response1.getAccessToken();
-
-            // 3. Request user info
-            UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-            UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
-
-            showClient(userInfoClient);
-            AssertBuilder.userInfoResponse(response3)
-                    .notNullClaimsPersonalData()
-                    .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.ADDRESS)
-                    .check();
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgRSAOAEPEncA256GCM(
@@ -2231,6 +2028,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         try {
             showTitle("requestParameterMethodAlgRSAOAEPEncA256GCM");
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
@@ -2240,6 +2038,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setScope(Tester.standardScopes);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2258,7 +2057,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -2270,18 +2069,27 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
-                    KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
-            jwtAuthorizationRequest.setKeyId(keyId);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+            String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                    request,
+                    SignatureAlgorithm.RS256,
+                    cryptoContext.getKeyId(Algorithm.RS256),
+                    KeyEncryptionAlgorithm.RSA_OAEP,
+                    BlockEncryptionAlgorithm.A256GCM,
+                    keyId,
+                    jwks,
+                    cryptoProvider,
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE}))
+                    ),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.NAME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
+                            new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false))
+                    )
+            );
             request.setRequest(authJwt);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2320,6 +2128,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         try {
             showTitle("requestParameterMethodAlgRSA15EncA128CBCPLUSHS256");
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
@@ -2329,6 +2138,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setScope(Tester.standardScopes);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2347,8 +2157,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-
+            AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
             String state = UUID.randomUUID().toString();
@@ -2359,18 +2168,27 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
-                    KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, cryptoProvider);
-            jwtAuthorizationRequest.setKeyId(keyId);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+            String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                    request,
+                    SignatureAlgorithm.RS256,
+                    cryptoContext.getKeyId(Algorithm.RS256),
+                    KeyEncryptionAlgorithm.RSA1_5,
+                    BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
+                    keyId,
+                    jwks,
+                    cryptoProvider,
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE}))
+                    ),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.NAME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
+                            new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false))
+                    )
+            );
             request.setRequest(authJwt);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2409,6 +2227,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         try {
             showTitle("requestParameterMethodAlgRSA15EncA256CBCPLUSHS512");
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
@@ -2418,6 +2237,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setScope(Tester.standardScopes);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2436,7 +2256,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -2448,18 +2268,27 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
-                    KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, cryptoProvider);
-            jwtAuthorizationRequest.setKeyId(keyId);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+            String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                    request,
+                    SignatureAlgorithm.RS256,
+                    cryptoContext.getKeyId(Algorithm.RS256),
+                    KeyEncryptionAlgorithm.RSA1_5,
+                    BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
+                    keyId,
+                    jwks,
+                    cryptoProvider,
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE}))
+                    ),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.NAME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
+                            new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false))
+                    )
+            );
             request.setRequest(authJwt);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2498,6 +2327,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         try {
             showTitle("requestParameterMethodAlgA128KWEncA128GCM");
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
@@ -2507,6 +2337,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setScope(Tester.standardScopes);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2529,17 +2360,26 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
-                    request, KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM, clientSecret);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+            String authJwt = TestCryptoContext.createJweWithNestedJws(
+                    request,
+                    SignatureAlgorithm.RS256,
+                    cryptoContext.getKeyId(Algorithm.RS256),
+                    KeyEncryptionAlgorithm.A128KW,
+                    BlockEncryptionAlgorithm.A128GCM,
+                    clientSecret,
+                    cryptoContext.getCryptoProvider(),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE}))
+                    ),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.NAME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
+                            new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false))
+                    )
+            );
             request.setRequest(authJwt);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2578,6 +2418,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         try {
             showTitle("requestParameterMethodAlgA256KWEncA256GCM");
 
+
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
@@ -2587,6 +2429,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setScope(Tester.standardScopes);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2609,17 +2452,26 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
-                    request, KeyEncryptionAlgorithm.A256KW, BlockEncryptionAlgorithm.A256GCM, clientSecret);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+            String authJwt = TestCryptoContext.createJweWithNestedJws(
+                    request,
+                    SignatureAlgorithm.RS256,
+                    cryptoContext.getKeyId(Algorithm.RS256),
+                    KeyEncryptionAlgorithm.A256KW,
+                    BlockEncryptionAlgorithm.A256GCM,
+                    clientSecret,
+                    cryptoContext.getCryptoProvider(),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE}))
+                    ),
+                    Lists.newArrayList(
+                            new Claim(JwtClaimName.NAME, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)),
+                            new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()),
+                            new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false))
+                    )
+            );
             request.setRequest(authJwt);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);

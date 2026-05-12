@@ -6,6 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
+import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
@@ -1101,14 +1102,15 @@ public class MultivaluedClaims extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RSA1_5);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1118,7 +1120,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -1154,8 +1156,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
@@ -1178,14 +1179,15 @@ public class MultivaluedClaims extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RSA1_5);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1195,7 +1197,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -1231,8 +1233,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
@@ -1255,14 +1256,15 @@ public class MultivaluedClaims extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA_OAEP_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestWithMultivaluedClaimAlgRSAOAEPEncA256GCM");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1272,7 +1274,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
@@ -1308,8 +1310,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        PrivateKey privateKey = cryptoContext.getCryptoProvider().getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
         AssertBuilder.jwe(jwe)
@@ -1350,6 +1351,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1409,13 +1411,15 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimHS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1429,6 +1433,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1441,7 +1446,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1490,13 +1495,15 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimHS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimHS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1510,6 +1517,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1522,7 +1530,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1571,13 +1579,15 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
             "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimHS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1591,6 +1601,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1603,7 +1614,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1652,14 +1663,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimRS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1672,8 +1685,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1685,7 +1699,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1738,14 +1752,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimRS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimRS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1758,8 +1774,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1771,7 +1788,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1823,14 +1840,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "RS512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimRS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimRS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1843,8 +1862,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1856,7 +1876,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1908,14 +1928,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimES256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimES256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -1928,8 +1950,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1941,7 +1964,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1991,14 +2014,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimES384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2011,8 +2036,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2024,7 +2050,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2074,14 +2100,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "ES512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimES512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2094,8 +2122,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2107,7 +2136,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2164,14 +2193,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS256_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimPS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimPS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2184,8 +2215,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2197,7 +2229,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2254,14 +2286,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS384_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimPS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS384);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2274,8 +2308,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2287,7 +2322,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2337,14 +2372,16 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri", "PS512_keyId", "clientJwksUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri, final String keyId, final String clientJwksUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimPS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS512);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2357,8 +2394,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2370,7 +2408,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2430,6 +2468,7 @@ public class MultivaluedClaims extends BaseTest {
         showTitle("authorizationRequestObjectWithMultivaluedClaimAlgA128KWEncA128GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -2443,7 +2482,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2463,15 +2504,17 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
                 KeyEncryptionAlgorithm.A128KW,
                 BlockEncryptionAlgorithm.A128GCM,
-                clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                clientSecret,
+                cryptoContext.getCryptoProvider(),
+                Lists.newArrayList(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)), new Claim("member_of", ClaimValue.createEssential(true))),
+                Lists.newArrayList(new Claim("member_of", ClaimValue.createEssential(true)))
+        );
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2514,6 +2557,7 @@ public class MultivaluedClaims extends BaseTest {
         showTitle("authorizationRequestObjectWithMultivaluedClaimAlgA256KWEncA256GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -2527,7 +2571,9 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2547,15 +2593,17 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+        String authJwt = TestCryptoContext.createJweWithNestedJws(
                 authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
                 KeyEncryptionAlgorithm.A256KW,
                 BlockEncryptionAlgorithm.A256GCM,
-                clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                clientSecret,
+                cryptoContext.getCryptoProvider(),
+                Lists.newArrayList(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)), new Claim("member_of", ClaimValue.createEssential(true))),
+                Lists.newArrayList(new Claim("member_of", ClaimValue.createEssential(true)))
+        );
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2591,14 +2639,15 @@ public class MultivaluedClaims extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA1_5_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String clientKeyId = cryptoContext.getKeyId(Algorithm.RSA1_5);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -2608,7 +2657,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -2616,6 +2665,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2631,10 +2681,10 @@ public class MultivaluedClaims extends BaseTest {
         JwkResponse jwkResponse = jwkClient.exec();
         String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA1_5);
         assertNotNull(serverKeyId);
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
 
         // 3. Request authorization
-        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2643,13 +2693,18 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
+                serverKeyId,
+                jwks,
+                cryptoProvider,
+                Lists.newArrayList(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)), new Claim("member_of", ClaimValue.createEssential(true))),
+                Lists.newArrayList(new Claim("member_of", ClaimValue.createEssential(true)))
+        );
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2686,17 +2741,17 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA1_5_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String clientKeyId = cryptoContext.getKeyId(Algorithm.RSA1_5);
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -2704,7 +2759,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -2712,6 +2767,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2730,7 +2786,7 @@ public class MultivaluedClaims extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2739,13 +2795,18 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
+                serverKeyId,
+                jwks,
+                cryptoProvider,
+                Lists.newArrayList(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)), new Claim("member_of", ClaimValue.createEssential(true))),
+                Lists.newArrayList(new Claim("member_of", ClaimValue.createEssential(true)))
+        );
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
@@ -2782,17 +2843,17 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "dnName", "keyStoreFile", "keyStoreSecret", "RSA_OAEP_keyId",
-            "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String clientKeyId,
-            final String clientJwksUri, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationRequestObjectWithMultivaluedClaimAlgRSAOAEPEncA256GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String clientKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -2800,7 +2861,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.testScopes);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
@@ -2808,6 +2869,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setClaims(Arrays.asList("member_of"));
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2826,7 +2888,7 @@ public class MultivaluedClaims extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -2835,13 +2897,18 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("member_of", ClaimValue.createEssential(true)));
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM,
+                serverKeyId,
+                jwks,
+                cryptoProvider,
+                Lists.newArrayList(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)), new Claim("member_of", ClaimValue.createEssential(true))),
+                Lists.newArrayList(new Claim("member_of", ClaimValue.createEssential(true)))
+        );
         authorizationRequest.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);

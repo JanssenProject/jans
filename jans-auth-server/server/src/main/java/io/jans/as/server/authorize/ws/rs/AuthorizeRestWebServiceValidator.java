@@ -186,12 +186,14 @@ public class AuthorizeRestWebServiceValidator {
     public void validate(AuthzRequest authzRequest, List<io.jans.as.model.common.ResponseType> responseTypes, Client client) {
         final ResponseMode responseMode = authzRequest.getResponseModeEnum();
         final String redirectUri = authzRequest.getRedirectUri();
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, authzRequest.getPromptList(), authzRequest.getNonce(), appConfiguration.isFapi(), responseMode)) {
+        final String reason = AuthorizeParamsValidator.validateParamsWithReason(responseTypes, authzRequest.getPromptList(), authzRequest.getNonce(), appConfiguration.isFapi(), responseMode);
 
+        if (reason != null) {
+            log.debug("Failed to validate request parameters. Reason: {}", reason);
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                        AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState()));
+                        AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), reason));
                 throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest()).build());
             } else {
                 throw new WebApplicationException(Response
@@ -397,7 +399,7 @@ public class AuthorizeRestWebServiceValidator {
         final boolean requirePkce = isTrue(appConfiguration.getRequirePkce()) || client.getAttributes().getRequirePkce();
         if (requirePkce && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "PKCE is required but code_challenge is missing");
         }
     }
 

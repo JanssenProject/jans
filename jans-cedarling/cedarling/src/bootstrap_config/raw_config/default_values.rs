@@ -7,7 +7,7 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use crate::{JwtConfig, lock_config::LockServiceConfig};
+use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
 
 pub(super) fn default_jti() -> String {
     "jti".to_string()
@@ -19,6 +19,10 @@ pub(super) fn default_true() -> bool {
 
 pub(super) fn default_token_cache_capacity() -> usize {
     JwtConfig::default().token_cache_capacity
+}
+
+pub(super) fn default_jwks_refresh_min_interval() -> u64 {
+    JwtConfig::default().jwks_refresh_min_interval
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -37,4 +41,17 @@ pub(super) fn default_log_channel_capacity() -> usize {
 
 pub(super) fn default_log_max_retries() -> u32 {
     LockServiceConfig::DEFAULT_LOG_MAX_RETRIES
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(super) fn default_http_client_request_timeout() -> u64 {
+    HttpClientConfig::DEFAULT_REQUEST_TIMEOUT.as_secs()
+}
+
+pub(super) fn default_http_client_max_retries() -> u32 {
+    HttpClientConfig::DEFAULT_MAX_RETRIES
+}
+
+pub(super) fn default_http_client_retry_delay_secs() -> u64 {
+    HttpClientConfig::DEFAULT_RETRY_DELAY.as_secs()
 }
