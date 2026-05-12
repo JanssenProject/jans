@@ -25,20 +25,20 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # KC scheduler
 # ============
 
-ENV SCHEDULER_HOME=/opt/kc-scheduler
+#ENV SCHEDULER_HOME=/opt/kc-scheduler
 
-RUN mkdir -p ${SCHEDULER_HOME}/bin \
-    ${SCHEDULER_HOME}/conf \
-    ${SCHEDULER_HOME}/lib \
-    ${SCHEDULER_HOME}/logs
+#RUN mkdir -p ${SCHEDULER_HOME}/bin \
+#   ${SCHEDULER_HOME}/conf \
+#   ${SCHEDULER_HOME}/lib \
+#    ${SCHEDULER_HOME}/logs
 
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
-    && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
-    && rm -rf /tmp/kc-scheduler.zip \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
+#RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
+ #   && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
+  #  && rm -rf /tmp/kc-scheduler.zip \
+   # && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
 
-RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
-    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
+#RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
+#    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
 
 # ===========
 # Assets sync
