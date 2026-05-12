@@ -140,7 +140,13 @@ public class AuditLogResource extends ConfigBaseResource {
             log.debug("Fetch log file:{}, strPattern:{}", file, escapeLog(strPattern));
         }
 
-        Pattern pattern = Pattern.compile(strPattern);
+        Pattern pattern = null;
+        try {
+            pattern = Pattern.compile(strPattern);
+        } catch (PatternSyntaxException pse) {
+            log.error("Invalid regex pattern: {}", escapeLog(strPattern), pse);
+            throwBadRequestException("Invalid search pattern syntax");
+        }
         if (log.isDebugEnabled()) {
             log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), pattern);
         }
