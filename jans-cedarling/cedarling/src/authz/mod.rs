@@ -17,12 +17,13 @@ use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
+    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, Decision, DecisionLogEntry, Diagnostics,
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
+use metrics::MetricsCollector;
 use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
 use serde_json::json;
 use smol_str::SmolStr;
@@ -34,7 +35,9 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod error_metrics;
 mod errors;
+pub(crate) mod metrics;
 
 pub(crate) mod request;
 
@@ -50,6 +53,8 @@ pub(crate) struct AuthzConfig {
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
+    /// Shared metrics collector for telemetry
+    pub metrics: Arc<MetricsCollector>,
 }
 
 /// Authorization Service
@@ -113,14 +118,21 @@ impl Authz {
         let request_id = gen_uuid7();
 
         // Validate the request structure
-        request.validate()?;
+        request.validate().inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let schema = &self.config.policy_store.schema;
 
         let validated_tokens = self
             .config
             .jwt_service
-            .validate_multi_issuer_tokens(&request.tokens)?;
+            .validate_multi_issuer_tokens(&request.tokens)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let entities_data = self
             .config
@@ -130,9 +142,18 @@ impl Authz {
                 &request.resource,
                 self.config.log_service.as_ref(),
             )
-            .map_err(AuthorizeError::MultiIssuerEntity)?;
+            .map_err(|e| {
+                self.config.metrics.record_error(&e);
+                self.config.metrics.record_authz_error();
+                AuthorizeError::MultiIssuerEntity(e)
+            })?;
 
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         // Capture pushed data info for logging before context is built
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
@@ -143,21 +164,37 @@ impl Authz {
             &schema.schema,
             &action,
             &pushed_data,
-        )?;
+        )
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let resource_uid = entities_data.resource.uid();
 
-        let entities = entities_data.entities(Some(&schema.schema))?;
+        let entities = entities_data
+            .entities(Some(&schema.schema))
+            .map_err(AuthorizeError::ValidateEntities)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         // Multi-issuer authorization does not use a principal
         // Authorization is based solely on the context (tokens)
-        let authz_result = self.execute_authorize(ExecuteAuthorizeParameters {
-            entities: &entities,
-            principal: None,
-            action: action.clone(),
-            resource: resource_uid.clone(),
-            context,
-        })?;
+        let authz_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: None,
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let authz_info = AuthorizeInfo {
             principal: "None (multi-issuer)".to_string(),
@@ -234,6 +271,20 @@ impl Authz {
         });
         self.config.log_service.log_fn(debug_log_fn);
 
+        // Record metrics
+        let decision = Decision::from(result.decision);
+        let policy_decisions = multi_diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        self.config.metrics.record_evaluation(
+            decision_time_micro_sec,
+            decision,
+            false,
+            policy_decisions,
+        );
+
         Ok(result)
     }
 
@@ -255,7 +306,12 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
         // Parse action UID.
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let BuiltEntitiesUnsigned {
             principal,
@@ -264,7 +320,11 @@ impl Authz {
         } = self
             .config
             .entity_builder
-            .build_entities_unsigned(request)?;
+            .build_entities_unsigned(request)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
         let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
 
@@ -278,13 +338,21 @@ impl Authz {
             &schema.schema,
             &action,
             &pushed_data,
-        )?;
+        )
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let entities = Entities::from_entities(
             principal.into_iter().chain([resource]),
             Some(&schema.schema),
         )
-        .map_err(Box::new)?;
+        .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let response = self.execute_authorize(ExecuteAuthorizeParameters {
             entities: &entities,
@@ -360,6 +428,20 @@ impl Authz {
         if !result.decision {
             self.log_failed_diagnostics(&diagnostics, request_id);
         }
+
+        // Record metrics
+        let decision = Decision::from(result.decision);
+        let policy_decisions = diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        self.config.metrics.record_evaluation(
+            decision_time_micro_sec,
+            decision,
+            true,
+            policy_decisions,
+        );
 
         Ok(result)
     }

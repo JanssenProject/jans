@@ -3,18 +3,17 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::LazyLock;
-
-use crate::common::issuer_utils::IssClaim;
+use crate::{
+    common::issuer_utils::IssClaim,
+    http::{HttpClient, HttpClientError},
+};
 
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
-use reqwest::{Client, header::ToStrError};
+use reqwest::header::{CACHE_CONTROL, ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
-
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 // async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.
@@ -22,12 +21,29 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-pub(super) trait GetFromUrl<T> {
+pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
     /// Send a get request to receive the resource from a URL
-    async fn get_from_url(url: &Url) -> Result<T, HttpError>;
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError> {
+        // add delay to simulate network latency and test async behavior
+        // it would be great to implement delay in mock server, but mockito doesn't support it.
+        #[cfg(test)]
+        {
+            use std::time::Duration;
+            use tokio::time::sleep;
+
+            sleep(Duration::from_millis(1)).await;
+        }
+
+        let result = client
+            .get_json::<T>(url.as_str())
+            .await
+            .map_err(HttpError::Request)?;
+
+        Ok(result)
+    }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub(super) struct OpenIdConfig {
     pub issuer: IssClaim,
     #[serde(deserialize_with = "deserialize_url")]
@@ -61,66 +77,55 @@ where
     Ok(url)
 }
 
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        // add delay to simulate network latency and test async behavior of trusted issuers loading
-        // it would be great to implement delay in mock server, but mockito doesn't support it.
-        #[cfg(test)]
-        {
-            use std::time::Duration;
-            use tokio::time::sleep;
+impl GetFromUrl<OpenIdConfig> for OpenIdConfig {}
 
-            sleep(Duration::from_millis(1)).await;
-        }
+impl GetFromUrl<JwkSet> for JwkSet {}
 
-        let openid_config = HTTP_CLIENT
-            .get(url.as_str())
-            .send()
+impl JwkSet {
+    pub(super) async fn get_from_url_with_max_age(
+        url: &Url,
+        client: &HttpClient,
+    ) -> Result<(Self, Option<u64>), HttpError> {
+        let response = client
+            .get_with_retry(url.as_str())
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<OpenIdConfig>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
+            .map_err(HttpError::Request)?;
 
-        Ok(openid_config)
-    }
-}
+        let max_age = response
+            .headers()
+            .get(CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok())
+            .and_then(parse_max_age);
 
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<JwkSet> for JwkSet {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let jwk_set = HTTP_CLIENT
-            .get(url.as_str())
-            .send()
-            .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
+        let jwk_set = response
             .json::<JwkSet>()
             .await
             .map_err(HttpError::JsonDeserializeResponse)?;
 
-        Ok(jwk_set)
+        Ok((jwk_set, max_age))
     }
+}
+
+/// Parses `max-age=<seconds>` from a `Cache-Control` header value.
+fn parse_max_age(cache_control: &str) -> Option<u64> {
+    cache_control
+        .split(',')
+        .map(str::trim)
+        .filter_map(|directive| directive.split_once('='))
+        .find(|(name, _)| name.trim().eq_ignore_ascii_case("max-age"))
+        .and_then(|(_, value)| value.trim().parse::<u64>().ok())
 }
 
 // NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
 impl StatusListJwtStr {
-    pub(super) async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let response = HTTP_CLIENT
-            .get(url.as_str())
-            .header("Content-Type", "application/statuslist+jwt")
-            .send()
+    pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
+        let response = client
+            .get_with_retry_with(url.as_str(), |b| {
+                b.header("Accept", "application/statuslist+jwt")
+            })
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?;
+            .map_err(HttpError::Request)?;
 
         if let Some(content_type) = response.headers().get("Content-Type") {
             let content_type = content_type
@@ -143,16 +148,50 @@ impl StatusListJwtStr {
 
 #[derive(Debug, thiserror::Error)]
 pub enum HttpError {
-    #[error("failed to complete GET request: {0}")]
-    GetRequest(#[source] reqwest::Error),
-    #[error("received an error response: {0}")]
-    ErrorCode(#[source] reqwest::Error),
-    #[error("failed to deserialize respose from JSON: {0}")]
+    #[error("HTTP request failed: {0}")]
+    Request(#[from] HttpClientError),
+    #[error("failed to deserialize response from JSON: {0}")]
     JsonDeserializeResponse(#[source] reqwest::Error),
-    #[error("failed to read the respose text: {0}")]
+    #[error("failed to read the response text: {0}")]
     ReadTextResponse(#[source] reqwest::Error),
     #[error("the value of the '{0}' header is invalid: {1}")]
     InvalidHeader(String, ToStrError),
     #[error("{0}")]
     Unsupported(String),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_max_age;
+
+    #[test]
+    fn parses_max_age_from_cache_control_header() {
+        let max_age = parse_max_age("public, max-age=172800, immutable");
+
+        assert_eq!(
+            max_age,
+            Some(172_800),
+            "expected to parse max-age directive from Cache-Control header"
+        );
+    }
+
+    #[test]
+    fn ignores_invalid_max_age_value() {
+        let max_age = parse_max_age("public, max-age=abc");
+
+        assert_eq!(
+            max_age, None,
+            "expected invalid max-age value to be ignored"
+        );
+    }
+
+    #[test]
+    fn returns_none_when_max_age_missing() {
+        let max_age = parse_max_age("no-cache, no-store");
+
+        assert_eq!(
+            max_age, None,
+            "expected no max-age when directive is missing"
+        );
+    }
 }

@@ -544,12 +544,12 @@ class JansCliApp(Application):
     def jans_creds_dialog(self, *params: Any) -> None:
         body = HSplit([
             self.getTitledText(_("OP Hostname"), name='jans_host', value=config_cli.host or '',
-                               jans_help=_("FQN name of Jannsen Config Api Server"),
+                               jans_help=_("FQN name of Janssen Config Api Server"),
                                style=cli_style.edit_text_required),
             self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '',
-                               jans_help=_("Jannsen Config Api Client ID"), style=cli_style.edit_text_required),
+                               jans_help=_("Janssen Config Api Client ID"), style=cli_style.edit_text_required),
             self.getTitledText(_("Client Secret"), name='jca_client_secret', value=config_cli.client_secret or '',
-                               password=True, jans_help=_("Jannsen Config Api Client Secret"),
+                               password=True, jans_help=_("Janssen Config Api Client Secret"),
                                style=cli_style.edit_text_required),
             self.getTitledText(_("Logging Directory"), name='log_dir', value=config_cli.log_dir or '',
                                jans_help=_("Logging Directory"), style=cli_style.edit_text),

@@ -7,13 +7,19 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_log_channel_capacity, default_log_max_retries,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
     default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
-use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::default_values::{
+    default_http_client_request_timeout, default_stdout_buffer_limit, default_stdout_timeout_millis,
+};
 use super::feature_types::{FeatureToggle, LoggerType};
-use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
+use super::json_util::{
+    deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
+    deserialize_or_parse_string_as_json, parse_option_string,
+};
 use crate::JwtConfig;
 use crate::LockTransport;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
@@ -335,6 +341,50 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_workers: WorkersCount,
+    // =========================================================================
+    // HTTP CLIENT CONFIGURATION
+    // =========================================================================
+    /// Per-request timeout in seconds.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_TIMEOUT",
+        default = "default_http_client_request_timeout",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_timeout: u64,
+    /// Maximum number of retry attempts per request.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
+        default = "default_http_client_max_retries",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_max_retries: u32,
+
+    /// Base delay between retries in seconds.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_RETRY_DELAY",
+        default = "default_http_client_retry_delay_secs",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_retry_delay: u64,
+
+    /// Optional override for JWKS periodic refresh interval in seconds.
+    /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
+    /// If omitted, the server-driven interval or a 1-hour fallback is used.
+    /// Values below 5 seconds are clamped to 5.
+    #[serde(rename = "CEDARLING_JWKS_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_jwks_refresh_interval")]
+    pub jwks_refresh_interval: Option<u64>,
+
+    /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
+    /// Prevents abuse from invalid JWT floods triggering excessive re-fetches.
+    /// Default: 30 seconds. Values below 5 seconds are clamped to 5.
+    #[serde(
+        rename = "CEDARLING_JWKS_REFRESH_MIN_INTERVAL",
+        default = "default_jwks_refresh_min_interval"
+    )]
+    #[serde(deserialize_with = "deserialize_jwks_refresh_min_interval")]
+    pub jwks_refresh_min_interval: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -382,6 +432,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::jwt_config::MIN_JWKS_REFRESH_SECS;
     use std::{
         env,
         sync::{LazyLock, Mutex},
@@ -659,6 +710,75 @@ mod tests {
                     WorkersCount::MAX,
                     "Default worker count should be {}",
                     WorkersCount::MAX.get()
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_from_env_var() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "30"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "60"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(30),
+                    "JWKS refresh interval should match environment value"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, 60,
+                    "JWKS refresh min interval should match environment value"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_clamps_min() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "0"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "0"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(MIN_JWKS_REFRESH_SECS),
+                    "JWKS refresh interval should be clamped to minimum"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, MIN_JWKS_REFRESH_SECS,
+                    "JWKS refresh min interval should be clamped to minimum"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_clamps_below_min() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "3"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "3"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(MIN_JWKS_REFRESH_SECS),
+                    "JWKS refresh interval should be clamped to minimum"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, MIN_JWKS_REFRESH_SECS,
+                    "JWKS refresh min interval should be clamped to minimum"
                 );
             },
         );

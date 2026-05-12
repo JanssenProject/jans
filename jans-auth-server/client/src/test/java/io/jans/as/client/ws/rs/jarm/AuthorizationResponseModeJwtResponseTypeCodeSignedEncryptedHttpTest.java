@@ -6,6 +6,7 @@
 package io.jans.as.client.ws.rs.jarm;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
@@ -19,7 +20,9 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.StringUtils;
 import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -37,22 +40,37 @@ import static org.testng.Assert.*;
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest extends BaseTest {
 
-	
-    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
-            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+
+    @Parameters({ "redirectUri", "redirectUris", "sectorIdentifierUri" })
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithUnregisteredRequestUrFails(final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithUnregisteredRequestUrFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
-                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
-                BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -64,10 +82,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
                 redirectUri + "987987", null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider1);
+                SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -89,11 +107,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider2);
+                SignatureAlgorithm.PS256, cryptoProvider);
 
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
@@ -129,21 +146,36 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "RS256_keyId", "dnName",
-            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Parameters({ "redirectUri", "redirectUris", "sectorIdentifierUri" })
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectSignedbyRS256AlgorithmFails(final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectSignedbyRS256AlgorithmFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.RS256);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
-                clientJwksUri, SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP,
-                BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -155,10 +187,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
                 redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.RS256, cryptoProvider1);
+                SignatureAlgorithm.RS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -181,11 +213,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.RS256, cryptoProvider2);
+                SignatureAlgorithm.RS256, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         jweAuthorizationRequest.setKeyId(signingKeyId);
@@ -220,21 +251,36 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
-            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Parameters({ "redirectUri", "redirectUris", "sectorIdentifierUri" })
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithNoneSigningAlgorithmFails(final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithNoneSigningAlgorithmFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
-                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
-                BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -246,10 +292,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
                 redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider1);
+                SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -272,11 +318,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.NONE, cryptoProvider2);
+                SignatureAlgorithm.NONE, cryptoProvider);
 
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
@@ -313,20 +358,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
-            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Parameters({ "redirectUri", "redirectUris", "sectorIdentifierUri" })
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithInvalidSignatureFails(final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithinvalidSignatureFails");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
-                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
-                BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -338,10 +398,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
                 redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider1);
+                SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -364,10 +424,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider2);
+                SignatureAlgorithm.PS256, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         jweAuthorizationRequest.setKeyId(signingKeyId);
@@ -403,21 +462,36 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
-            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Parameters({ "redirectUri", "redirectUris", "sectorIdentifierUri" })
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutEncryptionFails(final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutEncryptionFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
-                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
-                BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -429,10 +503,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
                 redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider1);
+                SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -455,11 +529,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                SignatureAlgorithm.PS256, cryptoProvider2);
+                SignatureAlgorithm.PS256, cryptoProvider);
 
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
@@ -493,22 +566,37 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
-    }	
-    
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    }
+
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutExpFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutExpFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -519,9 +607,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -537,11 +625,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -563,20 +650,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutNbfFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutNbfFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -587,9 +689,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setResponseTypes(responseTypes);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
         jwsAuthorizationRequest.setScopes(scope);
@@ -607,11 +709,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -633,20 +734,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutScopeFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutScopeFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -657,9 +773,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -676,11 +792,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -702,20 +817,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutNonceFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutNonceFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -726,9 +856,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, nonce);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
         jwsAuthorizationRequest.setState(state);
@@ -745,11 +875,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -771,20 +900,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutRedirectUriFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithoutRedirectUriFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -795,9 +939,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(null);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -813,11 +957,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -839,20 +982,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureExpiredRequestObjectFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureExpiredRequestObjectFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -863,9 +1021,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -881,11 +1039,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -906,20 +1063,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithBadAudFails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithBadAudFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -930,9 +1102,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
@@ -949,11 +1121,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -973,20 +1144,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithExpOver60Fails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithExpOver60Fails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -997,9 +1183,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -1015,11 +1201,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -1040,20 +1225,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithNbfOver60Ffails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectWithNbfOver60Ffails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1064,9 +1264,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -1082,11 +1282,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -1107,20 +1306,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "RS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"audience", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureSignedRequestObjectWithRS256Fails(
-            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
+            final String audience, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
         showTitle("ensureSignedRequestObjectWithRS256Fails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.RS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1131,9 +1345,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider1); // RS256 Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider); // RS256 Request Object is not permitted by the FAPI-RW specification.
 
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud(audience);
@@ -1155,11 +1369,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -1179,20 +1392,34 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"audience", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectSignatureAlgorithmIsNotNone(
-            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
+            final String audience, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectSignatureAlgorithmIsNotNone");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1204,9 +1431,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
         authorizationRequest.setState(state);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider1); // none Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider); // none Request Object is not permitted by the FAPI-RW specification.
         jwsAuthorizationRequest.setAud(audience);
         jwsAuthorizationRequest.setIss(clientId);
         jwsAuthorizationRequest.setScopes(scope);
@@ -1227,11 +1454,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -1250,20 +1476,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRedirectUriInAuthorizationRequest(
-            final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRedirectUriInAuthorizationRequest");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1274,9 +1515,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, null, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(null);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
@@ -1292,11 +1533,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
@@ -1318,20 +1558,35 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"audience", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRegisteredRedirectUri(
-            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String audience, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRegisteredRedirectUri");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String encryptionKeyId = cryptoContext.getKeyId(Algorithm.RSA_OAEP);
+        String signingKeyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
+        registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1342,9 +1597,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud(audience);
         jwsAuthorizationRequest.setIss(clientId);
@@ -1365,11 +1620,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(serverKeyId);
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        privateKey = cryptoProvider.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);

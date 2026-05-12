@@ -13,7 +13,7 @@ This guide covers deploying the Janssen Shibboleth IDP on Kubernetes using Helm.
 ## Prerequisites
 
 - Kubernetes 1.25+
-- Helm 3.x
+- Helm
 - Janssen Helm repository configured
 - PersistentVolume provisioner (for configuration storage)
 - Ingress controller (nginx, traefik, etc.)

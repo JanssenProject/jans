@@ -10,10 +10,11 @@ license = "MIT"
 repository = "https://github.com/uzyn/sparkv"
 readme = "README.md"
 homepage = "https://crates.io/crates/sparkv"
+publish = false
 
 [dependencies]
 thiserror = { workspace = true }
 chrono = { workspace = true }
 
 [dev-dependencies]
-serde_json = "*"
+serde_json = { workspace = true }

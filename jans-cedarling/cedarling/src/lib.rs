@@ -37,13 +37,13 @@ mod tests;
 use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
+use crate::authz::metrics::MetricsCollector;
 use crate::context_data_api::DataStore;
 pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
     DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
     ValidationError, ValidationResult, ValueMappingError,
 };
-pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
@@ -53,10 +53,12 @@ pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
+pub use http::HttpClientConfig;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
+use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
@@ -128,11 +130,25 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
 
-        let log = log::init_logger(
+        let metrics = Arc::new(
+            if config
+                .lock_config
+                .as_ref()
+                .is_some_and(|c| c.telemetry_interval.is_some())
+            {
+                MetricsCollector::new(0)
+            } else {
+                MetricsCollector::disabled()
+            },
+        );
+
+        let log = crate::log::init_logger(
             &config.log_config,
             pdp_id,
             app_name,
             config.lock_config.as_ref(),
+            metrics.clone(),
+            config.http_client_config,
         )
         .await?;
 
@@ -158,15 +174,41 @@ impl Cedarling {
                 );
             })?;
 
-        // Initialize data store first so it can be passed to authz service
-        let data = Arc::new(DataStore::new(config.data_store_config.clone())?);
+        let policy_count = service_config
+            .policy_store
+            .policies
+            .get_set()
+            .num_of_policies();
+        metrics.set_policy_count(policy_count);
 
-        let mut service_factory =
-            ServiceFactory::new(config, service_config, log.clone(), data.clone());
+        // Initialize data store first so it can be passed to authz service
+        let data = Arc::new(DataStore::new(
+            config.data_store_config.clone(),
+            metrics.clone(),
+        )?);
+
+        let mut service_factory = ServiceFactory::new(
+            config,
+            service_config,
+            log.clone(),
+            data.clone(),
+            metrics.clone(),
+        );
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
+        }
+
+        if let Some(registry) = log.health_registry() {
+            registry.register("core", || HealthStatus::Success);
+            registry.register("policy_load", move || {
+                if policy_count > 0 {
+                    HealthStatus::Success
+                } else {
+                    HealthStatus::Failure
+                }
+            });
         }
 
         Ok(Cedarling {
