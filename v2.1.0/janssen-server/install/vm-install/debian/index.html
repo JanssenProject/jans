@@ -2452,7 +2452,7 @@
 <li>
 <p>Download the release package from the GitHub Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.1.0/jans_2.1.0~debian13_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -2469,16 +2469,16 @@
 <ul>
 <li>
 <p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.1.0/jans-debian13-2.1.0-stable.bundle<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
 <p>Verify the signature:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--bundle<span class="w"> </span>jans-debian13-replace-janssen-version-stable.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>jans-debian13-2.1.0-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>jans_replace-janssen-version~debian13_amd64.deb
+<span class="w">  </span>jans_2.1.0~debian13_amd64.deb
 </code></pre></div>
 <p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
@@ -2488,18 +2488,18 @@
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb.sha256sum<span class="w"> </span>-P<span class="w"> </span>/tmp
-sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_replace-janssen-version~debian13_amd64.deb.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.1.0/jans_2.1.0~debian13_amd64.deb.sha256sum<span class="w"> </span>-P<span class="w"> </span>/tmp
+sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_2.1.0~debian13_amd64.deb.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_replace-janssen-version~debian13_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_2.1.0~debian13_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./jans_replace-janssen-version~debian13_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./jans_2.1.0~debian13_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -2583,7 +2583,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (replace-janssen-version~debian13_amd64) ...
+Removing jans (2.1.0~debian13_amd64) ...
 Checking to make sure service is down...
 </code></pre></div>
 
