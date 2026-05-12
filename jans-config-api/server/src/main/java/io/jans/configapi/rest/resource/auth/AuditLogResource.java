@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.regex.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -109,7 +110,7 @@ public class AuditLogResource extends ConfigBaseResource {
                     escapeLog(endDate));
         }
 
-        return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit, startDate, endDate)).build();
+        return Response.ok(this.doSearch(pattern, startIndex, limit, startDate, endDate)).build();
     }
 
     private LogPagedResult doSearch(String pattern, int startIndex, int limit, String startDate, String endDate) {
@@ -133,30 +134,33 @@ public class AuditLogResource extends ConfigBaseResource {
 
     }
 
-    private List<String> getLogEntries(String file, String pattern) {
+    private List<String> getLogEntries(String file, String strPattern) {
+
         if (log.isDebugEnabled()) {
-            log.debug("Fetch log file:{}, pattern:{}", file, escapeLog(pattern));
+            log.debug("Fetch log file:{}, strPattern:{}", file, escapeLog(strPattern));
+        }
+
+        if (StringUtils.isBlank(strPattern)) {
+            strPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
+        }
+
+        // Limit input length first
+        if (strPattern.length() > 100) {
+            throwBadRequestException(strPattern);
+        }
+
+        Pattern pattern = Pattern.compile(strPattern);
+        if (log.isDebugEnabled()) {
+            log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), pattern);
         }
 
         List<String> logEntries = new ArrayList<>();
         try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
-            logEntries = stream.filter(s -> s.matches(pattern)).collect(Collectors.toList());
+            logEntries = stream.filter(pattern.asPredicate()).collect(Collectors.toList());
         } catch (IOException ex) {
             throwInternalServerException(" Error while fetching logs", ex);
         }
         return logEntries;
-    }
-
-    private String getPattern(String pattern) {
-        String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
-        if (StringUtils.isNotBlank(pattern)) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("^.*");
-            stringBuilder.append(pattern);
-            stringBuilder.append(".*$");
-            searchPattern = stringBuilder.toString();
-        }
-        return searchPattern;
     }
 
     private LogPagedResult getLogPagedResult(List<String> logEntriesList, int startIndex, int limit) {
@@ -300,7 +304,8 @@ public class AuditLogResource extends ConfigBaseResource {
                     log.debug(" startLocal:{} {}", escapeLog(startLocal), "\n\n");
                 }
             } catch (DateTimeParseException dtpe) {
-                sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
+                sb.append(
+                        "Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
             }
         }
 
@@ -312,7 +317,8 @@ public class AuditLogResource extends ConfigBaseResource {
                     log.debug(" endLocal:{} {}", escapeLog(endLocal), "\n\n");
                 }
             } catch (DateTimeParseException dtpe) {
-                sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
+                sb.append(
+                        "End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z').");
             }
         }
 
