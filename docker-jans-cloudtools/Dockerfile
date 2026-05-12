@@ -14,8 +14,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=2.1.0
-ENV CN_BUILD_DATE='2026-05-12 08:35'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-12-18 08:20'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -25,26 +25,26 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # KC scheduler
 # ============
 
-#ENV SCHEDULER_HOME=/opt/kc-scheduler
+ENV SCHEDULER_HOME=/opt/kc-scheduler
 
-#RUN mkdir -p ${SCHEDULER_HOME}/bin \
-#   ${SCHEDULER_HOME}/conf \
-#   ${SCHEDULER_HOME}/lib \
-#    ${SCHEDULER_HOME}/logs
+RUN mkdir -p ${SCHEDULER_HOME}/bin \
+    ${SCHEDULER_HOME}/conf \
+    ${SCHEDULER_HOME}/lib \
+    ${SCHEDULER_HOME}/logs
 
-#RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
- #   && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
-  #  && rm -rf /tmp/kc-scheduler.zip \
-   # && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
+    && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
+    && rm -rf /tmp/kc-scheduler.zip \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
 
-#RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
-#    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
+RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
+    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
 
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=8a789265bc73187aff9d87134e788e311938aedc
+ENV JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -153,7 +153,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cloudtools" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="2.1.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Cloud Tools" \
     org.opencontainers.image.description="Tools to run various helper commands for the cluster"
 
@@ -172,7 +172,7 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 RUN chown -R 1000:0 /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
-    #&& chown -R 1000:0 /opt/kc-scheduler \
+    && chown -R 1000:0 /opt/kc-scheduler \
     && chown -R 1000:0 /app/templates
 
 USER 1000
