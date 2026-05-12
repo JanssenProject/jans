@@ -45,7 +45,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=2.1.0
-ENV CN_BUILD_DATE='2026-05-11 11:37'
+ENV CN_BUILD_DATE='2026-05-12 08:42'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 

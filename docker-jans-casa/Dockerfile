@@ -33,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=2.1.0
-ENV CN_BUILD_DATE='2026-05-11 11:52'
+ENV CN_BUILD_DATE='2026-05-12 08:58'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
