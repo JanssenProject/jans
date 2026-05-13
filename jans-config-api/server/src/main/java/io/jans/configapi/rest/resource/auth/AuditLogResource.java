@@ -189,7 +189,7 @@ public class AuditLogResource extends ConfigBaseResource {
 
             // Limit input length first
             if (strPattern.length() > 100) {
-                throwBadRequestException(strPattern);
+                throwBadRequestException("Search pattern exceeds the maximum allowed length of 100 characters");
             }
             searchPattern = Pattern.quote(strPattern);
         }
@@ -214,16 +214,17 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
 
                 // verify start and limit index
-                getStartIndex(logEntriesList, startIndex);
-                int toIndex = (startIndex + limit <= logEntriesList.size()) ? startIndex + limit
-                        : logEntriesList.size();
+                int fromIndex = startIndex - 1;
+                getStartIndex(logEntriesList, fromIndex);
+                int toIndex = Math.min(fromIndex + limit, logEntriesList.size());
+
                 if (log.isDebugEnabled()) {
-                    log.debug("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
-                            escapeLog(toIndex));
+                    log.debug("Final startIndex:{}, fromIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex),
+                            fromIndex, escapeLog(limit), escapeLog(toIndex));
                 }
 
                 // Extract paginated data
-                List<String> sublist = logEntriesList.subList(startIndex, toIndex);
+                List<String> sublist = logEntriesList.subList(fromIndex, toIndex);
 
                 logPagedResult.setStart(startIndex);
                 logPagedResult.setEntriesCount(limit);
@@ -314,7 +315,7 @@ public class AuditLogResource extends ConfigBaseResource {
                     String timestampPart = line.substring(0, datePattern.length());
                     log.debug("timestampPart:{} ", timestampPart);
                     LocalDateTime logEntryLocalDate = getDate(timestampPart, formatter);
-                    log.debug("timestampPart:{}, logEntryLocalDate:{}",timestampPart, logEntryLocalDate);
+                    log.debug("timestampPart:{}, logEntryLocalDate:{}", timestampPart, logEntryLocalDate);
                     if (isValidlogEntry(startLocal, endLocal, logEntryLocalDate)) {
                         filteredLogEntries.add(line);
                     }
