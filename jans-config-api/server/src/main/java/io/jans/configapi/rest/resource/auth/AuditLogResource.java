@@ -162,12 +162,11 @@ public class AuditLogResource extends ConfigBaseResource {
             log.debug("Fetch log logEntriesList:{}, strPattern:{}", logEntriesList, escapeLog(strPattern));
         }
 
-        Pattern pattern = null;
-
         if (StringUtils.isBlank(strPattern)) {
             return logEntriesList;
         }
 
+        Pattern pattern = null;
         try {
             pattern = Pattern.compile(strPattern);
         } catch (PatternSyntaxException pse) {
@@ -200,7 +199,7 @@ public class AuditLogResource extends ConfigBaseResource {
         if (log.isDebugEnabled()) {
             log.debug("Audit searchPattern:{}", searchPattern);
         }
-        
+
         return searchPattern;
     }
 
