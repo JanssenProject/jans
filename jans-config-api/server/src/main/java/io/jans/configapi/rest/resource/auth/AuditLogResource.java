@@ -70,8 +70,7 @@ public class AuditLogResource extends ConfigBaseResource {
      * Searches and returns paginated audit log entries filtered by an optional
      * pattern and date range.
      *
-     * @param pattern    a substring or regex to filter log lines; blank returns all
-     *                   entries
+     * @param pattern    a substring to filter log lines; blank returns all entries
      * @param startIndex the 1-based index of the first result to return
      * @param limit      maximum number of results to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
@@ -170,7 +169,7 @@ public class AuditLogResource extends ConfigBaseResource {
         try {
             pattern = Pattern.compile(strPattern);
         } catch (PatternSyntaxException pse) {
-            log.error("Invalid regex pattern: {}", escapeLog(strPattern), pse);
+            log.error("Invalid pattern: {}", escapeLog(strPattern), pse);
             throwBadRequestException("Invalid search pattern syntax");
             return logEntriesList;
         }
@@ -297,6 +296,9 @@ public class AuditLogResource extends ConfigBaseResource {
         validateDate(startDate, endDate);
         LocalDateTime startLocal = StringUtils.isNotBlank(startDate) ? parseDate(startDate) : null;
         LocalDateTime endLocal = StringUtils.isNotBlank(endDate) ? parseDate(endDate) : null;
+        if (StringUtils.isNotBlank(endDate) && !endDate.contains("T") && !endDate.contains(" ")) {
+            endLocal = endLocal.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
+        }
 
         List<String> filteredLogEntries = new ArrayList<>();
         try {
