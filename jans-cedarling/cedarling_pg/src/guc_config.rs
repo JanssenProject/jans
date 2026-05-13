@@ -93,6 +93,7 @@ static POLICY_HISTORY_SIZE: GucSetting<i32> = GucSetting::<i32>::new(16);
 static DIFF_MODE: GucSetting<CedarlingDiffMode> =
     GucSetting::<CedarlingDiffMode>::new(CedarlingDiffMode::Structural);
 static SCHEMA_VALIDATE_STRICT: GucSetting<bool> = GucSetting::<bool>::new(true);
+static MASK_HASH_SALT: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 
 /// Current `cedarling.mode`.
 #[must_use]
@@ -200,6 +201,20 @@ pub fn diff_mode() -> CedarlingDiffMode {
 #[must_use]
 pub fn schema_validate_strict() -> bool {
     SCHEMA_VALIDATE_STRICT.get()
+}
+
+/// Current `cedarling.mask_hash_salt` as raw bytes.
+///
+/// Returns an empty `Vec` when the GUC is unset or blank — callers must treat an empty salt as
+/// "salt not configured" and return `[HASH_SALT_REQUIRED]` instead of hashing.
+#[must_use]
+pub fn mask_hash_salt_bytes() -> Vec<u8> {
+    MASK_HASH_SALT
+        .get()
+        .and_then(|c| c.into_string().ok())
+        .filter(|s| !s.trim().is_empty())
+        .map(|s| s.into_bytes())
+        .unwrap_or_default()
 }
 
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
@@ -386,6 +401,15 @@ unsafe fn register_gucs_inner() {
         c"true: parse with cedar_policy::Schema and run type compatibility checks; false: legacy lexical identifier extraction.",
         &SCHEMA_VALIDATE_STRICT,
         GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_string_guc(
+        c"cedarling.mask_hash_salt",
+        c"Salt for SHA-256 hash masking.",
+        c"Required when mask_type = 'hash'. Empty / unset disables hash masking (returns [HASH_SALT_REQUIRED]). Set to a random secret value kept outside the database.",
+        &MASK_HASH_SALT,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 }

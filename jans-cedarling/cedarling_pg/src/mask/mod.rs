@@ -3,16 +3,35 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! SQL masking helpers backed by `cedarling.mask_rules`.
+//! SQL masking helpers backed by `cedarling.mask_rules` + the built-in default registry.
+
+pub(crate) mod config;
+pub(crate) mod types;
 
 use std::collections::BTreeMap;
-use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Mutex;
 
 use pgrx::prelude::*;
 use serde_json::{json, Value};
 
+use crate::guc_config;
+use crate::mask::config::{default_mask_for_column, lookup_explicit_rules};
+use crate::mask::types::MaskType;
+
 static LAST_MASKED_ROW: Mutex<Option<Value>> = Mutex::new(None);
+
+#[cfg(not(test))]
+fn warn_hash_salt_missing(col: &str, table_name: &str) {
+    warning!(
+        "cedarling_pg: cedarling.mask_hash_salt is not set; hash masking for column \
+         '{col}' in table '{table_name}' requires a salt"
+    );
+}
+
+#[cfg(test)]
+fn warn_hash_salt_missing(_col: &str, _table_name: &str) {
+    // Unit tests run outside Postgres; keep this path side-effect free.
+}
 
 /// Upsert a masking rule in `cedarling.mask_rules`.
 #[pg_extern]
@@ -40,7 +59,7 @@ pub fn cedarling_set_mask_config(
     .is_ok()
 }
 
-/// Preview masking logic as a pure SQL function.
+/// Preview masking logic as a pure SQL function — useful for interactive testing.
 #[pg_extern]
 pub fn cedarling_test_masking(
     original_value: Option<&str>,
@@ -48,55 +67,28 @@ pub fn cedarling_test_masking(
     mask_type: &str,
     mask_config: Option<&str>,
 ) -> Option<String> {
-    apply_mask(original_value, mask_type, mask_config)
+    let salt = guc_config::mask_hash_salt_bytes();
+    let mt = MaskType::from_parts(mask_type, mask_config);
+    let result = mt.apply(original_value, &salt);
+    if matches!(mt, MaskType::Hash) && result.as_deref() == Some("[HASH_SALT_REQUIRED]") {
+        warning!("cedarling_pg: cedarling.mask_hash_salt is not set; hash masking requires a salt");
+    }
+    result
 }
 
-/// Return masking rules for a table/action as JSON.
+/// Return masking rules for a table/action as a JSONB document.
+///
+/// Each rule entry includes `column`, `mask_type`, `mask_value`, `condition_sql`, and `data_type`.
 #[pg_extern]
 pub fn cedarling_mask_plan(table_name: &str, action: Option<&str>) -> pgrx::datum::JsonB {
     let action_value = action.unwrap_or("Read");
     let mut rules: Vec<Value> = Vec::new();
     let _ = Spi::connect(|client| {
-        let q = "SELECT column_name, mask_type, mask_value
-                 FROM cedarling.mask_rules
-                 WHERE table_name = $1
-                 ORDER BY column_name";
-        let rows = client.select(q, None, &[table_name.into()])?;
-        for row in rows {
-            let col = row
-                .get_by_name::<String, _>("column_name")?
-                .unwrap_or_default();
-            let mt = row
-                .get_by_name::<String, _>("mask_type")?
-                .unwrap_or_default();
-            let mv = row.get_by_name::<String, _>("mask_value")?;
-            rules.push(json!({
-                "column": col,
-                "mask_type": mt,
-                "mask_value": mv
-            }));
-        }
-        Ok::<(), pgrx::spi::Error>(())
-    });
-    pgrx::datum::JsonB(json!({
-        "table_name": table_name,
-        "action": action_value,
-        "rules": rules
-    }))
-}
-
-/// Apply configured masking rules to a JSONB row.
-#[pg_extern]
-pub fn cedarling_mask_row(
-    row_json: pgrx::datum::JsonB,
-    table_name: &str,
-    _action: Option<&str>,
-) -> pgrx::datum::JsonB {
-    let mut out = row_json.0;
-    let mut rules: BTreeMap<String, (String, Option<String>)> = BTreeMap::new();
-    let _ = Spi::connect(|client| {
         let rows = client.select(
-            "SELECT column_name, mask_type, mask_value FROM cedarling.mask_rules WHERE table_name = $1",
+            "SELECT column_name, mask_type, mask_value, condition_sql, data_type
+             FROM cedarling.mask_rules
+             WHERE table_name = $1
+             ORDER BY column_name",
             None,
             &[table_name.into()],
         )?;
@@ -108,37 +100,46 @@ pub fn cedarling_mask_row(
                 .get_by_name::<String, _>("mask_type")?
                 .unwrap_or_default();
             let mv = row.get_by_name::<String, _>("mask_value")?;
-            rules.insert(col, (mt, mv));
+            let cs = row.get_by_name::<String, _>("condition_sql")?;
+            let dt = row.get_by_name::<String, _>("data_type")?;
+            rules.push(json!({
+                "column":        col,
+                "mask_type":     mt,
+                "mask_value":    mv,
+                "condition_sql": cs,
+                "data_type":     dt,
+            }));
         }
         Ok::<(), pgrx::spi::Error>(())
     });
-
-    if let Some(obj) = out.as_object_mut() {
-        for (col, (mask_type, mask_value)) in rules {
-            if let Some(existing) = obj.get(&col).cloned() {
-                let as_str = match existing {
-                    Value::String(s) => Some(s),
-                    Value::Null => None,
-                    other => Some(other.to_string()),
-                };
-                let masked = apply_mask(as_str.as_deref(), &mask_type, mask_value.as_deref());
-                obj.insert(
-                    col,
-                    match masked {
-                        Some(s) => Value::String(s),
-                        None => Value::Null,
-                    },
-                );
-            }
-        }
-    }
-    if let Ok(mut slot) = LAST_MASKED_ROW.lock() {
-        *slot = Some(out.clone());
-    }
-    pgrx::datum::JsonB(out)
+    pgrx::datum::JsonB(json!({
+        "table_name": table_name,
+        "action":     action_value,
+        "rules":      rules,
+    }))
 }
 
-/// Return the last masked row produced in this backend process.
+/// Apply configured masking rules to a JSONB row, stash the result for [`cedarling_get_masked_row`],
+/// and return the masked JSONB.
+///
+/// Explicit rules in `cedarling.mask_rules` take precedence; the built-in default registry is
+/// applied to columns that have no explicit rule but whose name matches a known sensitive pattern.
+/// Type-preserving: `Range`-masked columns are written as JSON numbers.
+#[pg_extern]
+pub fn cedarling_mask_row(
+    row_json: pgrx::datum::JsonB,
+    table_name: &str,
+    _action: Option<&str>,
+) -> pgrx::datum::JsonB {
+    let salt = guc_config::mask_hash_salt_bytes();
+    let masked = compute_masked_row_inner(&row_json.0, table_name, &salt);
+    if let Ok(mut slot) = LAST_MASKED_ROW.lock() {
+        *slot = Some(masked.clone());
+    }
+    pgrx::datum::JsonB(masked)
+}
+
+/// Return the last masked row produced by this backend process (or `NULL` if none).
 #[pg_extern]
 pub fn cedarling_get_masked_row() -> Option<pgrx::datum::JsonB> {
     LAST_MASKED_ROW
@@ -147,51 +148,147 @@ pub fn cedarling_get_masked_row() -> Option<pgrx::datum::JsonB> {
         .and_then(|g| g.clone().map(pgrx::datum::JsonB))
 }
 
-fn apply_mask(value: Option<&str>, mask_type: &str, mask_cfg: Option<&str>) -> Option<String> {
-    let input = value.unwrap_or_default();
-    match mask_type.trim().to_ascii_lowercase().as_str() {
-        "null" => None,
-        "redact" => Some("***REDACTED***".to_string()),
-        "fixed" => Some(mask_cfg.unwrap_or("***").to_string()),
-        "partial" => {
-            if input.len() <= 4 {
-                Some("****".to_string())
+/// Compute the masked version of `row`, stash it in [`LAST_MASKED_ROW`], and return it.
+///
+/// Called from `cedarling_authorized_row` when `cedarling.strategy = mask` and the Cedar
+/// engine returned a deny decision.
+pub(crate) fn compute_and_stash_masked_row(row: &Value, table_name: &str, salt: &[u8]) -> Value {
+    let masked = compute_masked_row_inner(row, table_name, salt);
+    if let Ok(mut slot) = LAST_MASKED_ROW.lock() {
+        *slot = Some(masked.clone());
+    }
+    masked
+}
+
+/// Core masking logic: explicit catalog rules + default registry fallback, type-preserving output.
+fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value {
+    let mut out = row.clone();
+    let explicit: BTreeMap<String, MaskType> =
+        lookup_explicit_rules(table_name).into_iter().collect();
+
+    if let Some(obj) = out.as_object_mut() {
+        let column_names: Vec<String> = obj.keys().cloned().collect();
+        for col in &column_names {
+            // Explicit rule wins; fall back to default registry.
+            let mask_opt = explicit
+                .get(col)
+                .cloned()
+                .or_else(|| default_mask_for_column(col));
+            let Some(mask) = mask_opt else { continue };
+
+            let original = match obj.get(col) {
+                Some(Value::String(s)) => Some(s.as_str()),
+                Some(Value::Null) => None,
+                Some(other) => {
+                    // Stringify numbers / booleans so they can be passed to apply()
+                    let s = other.to_string();
+                    // We can't borrow `s` after this point, so clone into a temp owned value.
+                    let tmp = s.clone();
+                    let masked_val = apply_with_type_preservation(&mask, Some(tmp.as_str()), salt);
+                    obj.insert(col.clone(), masked_val);
+                    continue;
+                },
+                None => None,
+            };
+
+            if matches!(mask, MaskType::Hash)
+                && mask.apply(original, salt).as_deref() == Some("[HASH_SALT_REQUIRED]")
+            {
+                warn_hash_salt_missing(col, table_name);
+            }
+
+            let masked_val = apply_with_type_preservation(&mask, original, salt);
+            obj.insert(col.clone(), masked_val);
+        }
+    }
+    out
+}
+
+/// Apply `mask` and convert the result to the appropriate JSON value type.
+///
+/// `Range` returns a JSON `Number`; all other variants return `String` or `Null`.
+fn apply_with_type_preservation(mask: &MaskType, original: Option<&str>, salt: &[u8]) -> Value {
+    match mask.apply(original, salt) {
+        None => Value::Null,
+        Some(s) if mask.preserves_numeric() => {
+            if let Ok(n) = s.parse::<i64>() {
+                Value::Number(n.into())
             } else {
-                let keep = &input[input.len() - 4..];
-                Some(format!("****{keep}"))
+                Value::String(s)
             }
         },
-        "hash" => {
-            let mut h = DefaultHasher::new();
-            input.hash(&mut h);
-            Some(format!("hash:{:016x}", h.finish()))
-        },
-        "range" => {
-            let placeholder = mask_cfg.unwrap_or("0-0");
-            Some(placeholder.to_string())
-        },
-        _ => Some(input.to_string()),
+        Some(s) => Value::String(s),
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
 
+    const SALT: &[u8] = b"cedarling-pg-test-salt";
+
+    fn masked_row(row: Value, table: &str) -> Value {
+        compute_masked_row_inner(&row, table, SALT)
+    }
+
     #[test]
-    fn apply_mask_variants_behave() {
-        assert_eq!(
-            apply_mask(Some("abcd"), "redact", None),
-            Some("***REDACTED***".into())
+    fn redact_mask_applied_to_explicit_rule() {
+        // We can't call SPI in unit tests, so test the inner logic by passing explicit rules
+        // directly through types.
+        let mt = MaskType::Redact;
+        let result = apply_with_type_preservation(&mt, Some("alice@example.com"), SALT);
+        assert_eq!(result, Value::String("***REDACTED***".to_string()));
+    }
+
+    #[test]
+    fn range_mask_produces_json_number() {
+        let mt = MaskType::Range {
+            min: 50_000,
+            max: 150_000,
+        };
+        let result = apply_with_type_preservation(&mt, Some("alice"), SALT);
+        assert!(
+            result.is_number(),
+            "Range should produce JSON Number, got: {result}"
         );
-        assert_eq!(
-            apply_mask(Some("abcdef"), "partial", None),
-            Some("****cdef".into())
+        let n = result.as_i64().expect("should be integer");
+        assert!((50_000..=150_000).contains(&n));
+    }
+
+    #[test]
+    fn null_mask_produces_json_null() {
+        let mt = MaskType::Null;
+        let result = apply_with_type_preservation(&mt, Some("something"), SALT);
+        assert!(result.is_null());
+    }
+
+    #[test]
+    fn compute_masked_row_applies_default_registry_to_email_column() {
+        // In unit tests, lookup_explicit_rules returns empty (no SPI).
+        let row = json!({"user_email": "alice@example.org", "name": "alice"});
+        let result = masked_row(row, "test_tbl_no_explicit_rules");
+        // user_email matches default registry → should be masked
+        let email_val = result.get("user_email").unwrap();
+        assert_ne!(
+            email_val.as_str(),
+            Some("alice@example.org"),
+            "email should be masked by default registry"
         );
-        assert_eq!(apply_mask(Some("abcdef"), "null", None), None);
+        // name has no default match → preserved
+        assert_eq!(result.get("name").and_then(|v| v.as_str()), Some("alice"));
+    }
+
+    #[test]
+    fn compute_masked_row_masks_password_column() {
+        let row = json!({"password": "s3cr3t", "role": "user"});
+        let result = masked_row(row, "test_tbl");
         assert_eq!(
-            apply_mask(Some("abcdef"), "fixed", Some("X")),
-            Some("X".into())
+            result.get("password").and_then(|v| v.as_str()),
+            Some("[PROTECTED]"),
+            "password should be masked to [PROTECTED]"
         );
+        assert_eq!(result.get("role").and_then(|v| v.as_str()), Some("user"));
     }
 }
