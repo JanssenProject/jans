@@ -6,14 +6,11 @@
 
 package io.jans.as.server;
 
-import io.jans.as.server.util.Deployments;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+import io.jans.util.security.SecurityProviderUtility;
 import org.apache.commons.io.IOUtils;
-import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
-import org.jboss.shrinkwrap.api.Archive;
 import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
@@ -32,17 +29,11 @@ import java.util.Properties;
  * @author Sergey Manoylo
  * @version December 29, 2021
  */
-@ArquillianSuiteDeployment
-public abstract class ConfigurableTest extends Arquillian {
+public abstract class ConfigurableTest {
 
     public static FileConfiguration testData;
     public boolean initialized = false;
-
-    @Deployment
-//    @OverProtocol("Servlet 3.0")
-    public static Archive<?> createDeployment() {
-        return Deployments.createDeployment();
-    }
+    private TestServerCryptoContext cryptoContext;
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
@@ -82,69 +73,17 @@ public abstract class ConfigurableTest extends Arquillian {
         // Override test parameters
         context.getSuite().getXmlSuite().setParameters(parameters);
 
+        SecurityProviderUtility.installBCProvider();
+        cryptoContext = TestServerCryptoContext.getInstance();
+
         initialized = true;
     }
 
-    /**
-     * Data Provider, that returns correct arrays, which should be used, when JEE testing platform Arquillian is used.
-     *
-     * @author Sergey Manoylo
-     * @version December 29, 2021
-     */
-    public static class ArquillianDataProvider {
-
-        private static final Map<String, Integer> calls = new HashMap<String, Integer>();   // contains map: data provider - number of call (counter value) of the function 'provide'
-
-        /**
-         * Constructor.
-         * <p>
-         * Private, so only public static functions should be called.
-         */
-        private ArquillianDataProvider() {
-        }
-
-        /**
-         * Returns Array of Data, that should be used by testing framework TestNG.
-         * <p>
-         * This function returns two-dimensional array, when this function
-         * is called 1-st time for some defined provider name.
-         * <p>
-         * This function returns row of the two-dimensional array, when this function
-         * is called 2-nd - N-st time.
-         * Number of the row of the two-dimensional array, == (number of call - 1).
-         *
-         * @param providerName Provider Name.
-         * @param providerData Data of the provider (two-dimensional array).
-         * @return current array (two-dimensional array or row).
-         */
-        public synchronized static Object[][] provide(final String providerName, final Object[][] providerData) {
-            if (calls.containsKey(providerName)) {
-                // get instance and increase calls counter
-                Object[][] testCase = new Object[][]{providerData[calls.get(providerName)]};
-                calls.put(providerName, (calls.get(providerName) + 1) % providerData.length);
-                return testCase;
-            } else {
-                calls.put(providerName, 0);
-                return providerData;
-            }
-        }
-
-        /**
-         * Clears counter of calls for all providers.
-         */
-        public synchronized static void initCalls() {
-            calls.clear();
-        }
-
-        /**
-         * Clears counter of calls for some provider.
-         *
-         * @param providerName Provider Name.
-         */
-        public synchronized static void initCalls(final String providerName) {
-            calls.put(providerName, 0);
-        }
-
+    public TestServerCryptoContext getCryptoContext() {
+        return cryptoContext;
     }
 
+    public AuthCryptoProvider getCryptoProvider() {
+        return cryptoContext.getCryptoProvider();
+    }
 }

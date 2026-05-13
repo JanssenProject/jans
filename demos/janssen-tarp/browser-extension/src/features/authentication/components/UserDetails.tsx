@@ -15,6 +15,7 @@ import {
   LoginDetails,
   IJWT,
 } from "../../../shared/types";
+import { awaitRedirectInIncognitoPopup } from "../../../shared/components/IncognitoPopupFlow";
 
 type UserDetailsProps = {
   data?: any;
@@ -199,25 +200,42 @@ const UserDetails = ({
       );
     });
   }
-
   async function performRemoteLogout(
     idToken: string,
     config: OpenIDConfiguration,
-    forceSilent = false
+    forceSilent = false,
   ) {
     if (forceSilent) {
       return performSilentLogout(idToken, config);
     }
 
-    return new Promise<void>((resolve) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: buildLogoutUrl(idToken, config),
-          interactive: true,
-        },
-        () => resolve()
+    const currentWindow = await new Promise<chrome.windows.Window>((resolve, reject) =>
+      chrome.windows.getCurrent((win) => {
+        if (!win) return reject(new Error('Could not get current window'));
+        resolve(win);
+      }),
+    );
+
+    if (currentWindow.incognito) {
+      const postLogoutRedirect = chrome.identity.getRedirectURL('logout');
+
+      await awaitRedirectInIncognitoPopup(
+        buildLogoutUrl(idToken, config),
+        (u) => u.startsWith(postLogoutRedirect),
       );
-    });
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow(
+          { url: buildLogoutUrl(idToken, config), interactive: true },
+          (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl)
+              reject(new Error(chrome.runtime.lastError?.message ?? 'Logout flow did not complete'));
+            else
+              resolve();
+          },
+        );
+      });
+    }
   }
 
   async function performSilentLogout(
