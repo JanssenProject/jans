@@ -346,11 +346,22 @@ impl EntityBuilder {
         // Determine entity type name using the same logic as regular entity builder
         let entity_type = determine_token_entity_type(token);
 
-        // Generate entity ID using the same logic as the regular entity builder
-        // This ensures consistent behavior between regular and multi-issuer entity builders
+        // Resolve token_id from the trusted issuer's token_metadata config,
+        // falling back to "jti" when the issuer or metadata entry is not found.
+        let token_id_claim: &str = token
+            .iss
+            .as_deref()
+            .and_then(|iss| {
+                iss.token_metadata
+                    .values()
+                    .find(|m| m.entity_type_name == entity_type)
+                    .map(|m| m.token_id.as_str())
+            })
+            .unwrap_or("jti");
+
         let entity_id_srcs = vec![EntityIdSrc::Token {
             token,
-            claim: "jti",
+            claim: token_id_claim,
         }];
         let entity_id = get_first_valid_entity_id(&entity_id_srcs)
             .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
@@ -414,33 +425,33 @@ impl EntityBuilder {
         token: &Token,
     ) -> Result<String, MultiIssuerEntityError> {
         let issuer = token
-            .get_claim_val("iss")
-            .and_then(|iss| iss.as_str())
+            .extract_normalized_issuer()
             .ok_or(MultiIssuerEntityError::MissingIssuer)?;
 
-        let issuer_simplified = self.resolve_issuer_name(issuer);
+        let issuer_simplified = self.resolve_issuer_name(&issuer);
         let token_type_simplified = simplify_token_type(token_name);
 
         Ok(format!("{issuer_simplified}_{token_type_simplified}"))
     }
 
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
-    fn resolve_issuer_name(&self, issuer: &str) -> String {
+    fn resolve_issuer_name(&self, issuer: &IssClaim) -> String {
         // First, try to find the issuer in trusted issuer metadata
         if let Some(trusted_issuer) = self.issuers_index.find(issuer) {
             return sanitize_issuer_name(&trusted_issuer.name);
         }
 
         // Fallback to hostname from JWT iss claim
-        let hostname = issuer
+        let issuer_str = issuer.as_str();
+        let hostname = issuer_str
             .replace("https://", "")
             .replace("http://", "")
             .split('/')
             .next()
-            .unwrap_or(issuer)
+            .unwrap_or(issuer_str)
             .split(':')
             .next()
-            .unwrap_or(issuer)
+            .unwrap_or(issuer_str)
             .to_string();
 
         sanitize_issuer_name(&hostname)
@@ -543,13 +554,14 @@ mod tests {
         let builder = create_test_entity_builder();
 
         // Test with trusted issuer metadata
-        let result = builder.resolve_issuer_name("https://idp.acme.com/auth");
+        let result = builder.resolve_issuer_name(&IssClaim::new("https://idp.acme.com/auth"));
         assert_eq!(result, "acme");
 
-        let result = builder.resolve_issuer_name("https://idp.dolphin.sea/auth");
+        let result = builder.resolve_issuer_name(&IssClaim::new("https://idp.dolphin.sea/auth"));
         assert_eq!(result, "dolphin");
 
-        let result = builder.resolve_issuer_name("https://login.microsoftonline.com/tenant");
+        let result =
+            builder.resolve_issuer_name(&IssClaim::new("https://login.microsoftonline.com/tenant"));
         assert_eq!(result, "microsoft");
     }
 
@@ -558,7 +570,8 @@ mod tests {
         let builder = create_test_entity_builder();
 
         // Test fallback to hostname for unknown issuer
-        let result = builder.resolve_issuer_name("https://unknown.issuer.com/auth");
+        let result =
+            builder.resolve_issuer_name(&IssClaim::new("https://unknown.issuer.com/auth"));
         assert_eq!(result, "unknown_issuer_com");
     }
 

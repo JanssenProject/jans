@@ -133,7 +133,7 @@ impl EntityBuilder {
     #[cfg(test)]
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        self.issuers_index.find(issuer).cloned()
+        self.issuers_index.find(&IssClaim::new(issuer)).cloned()
     }
 }
 
