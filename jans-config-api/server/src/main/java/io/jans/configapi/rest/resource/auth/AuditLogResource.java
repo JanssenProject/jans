@@ -113,6 +113,25 @@ public class AuditLogResource extends ConfigBaseResource {
         return Response.ok(this.doSearch(getPattern(pattern), startIndex, limit, startDate, endDate)).build();
     }
 
+    /* Helper methods */
+
+    private List<String> getLogEntries(String file) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Fetch log file:{}", file);
+        }
+
+        List<String> logEntries = new ArrayList<>();
+
+        try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
+            logEntries = stream.collect(Collectors.toList());
+        } catch (IOException ex) {
+            throwInternalServerException(" Error while fetching logs", ex);
+        }
+        return logEntries;
+
+    }
+
     private LogPagedResult doSearch(String pattern, int startIndex, int limit, String startDate, String endDate) {
         if (log.isDebugEnabled()) {
             log.debug("Search Attribute filters with pattern:{}, startIndex:{}, limit:{}, startDate:{}, endDate:{}",
@@ -121,12 +140,15 @@ public class AuditLogResource extends ConfigBaseResource {
         }
 
         // Get data based on pattern and date filter
-        List<String> logEntriesList = getLogEntries(getAuditLogFile(), pattern);
-        log.debug("Log fetched - logEntriesList:{}", logEntriesList);
+        List<String> logEntriesList = getLogEntries(getAuditLogFile());
+        log.trace("Log fetched - logEntriesList:{}", logEntriesList);
+
+        // pattern filter
+        logEntriesList = filterLogByPattern(logEntriesList, pattern);
+        log.trace("Log fetched - logEntriesList:{}", logEntriesList);
 
         // Date filter
         logEntriesList = filterLogByDate(logEntriesList, startDate, endDate);
-        log.debug("Log filtered By Date - logEntriesList:{}", logEntriesList);
 
         LogPagedResult logPagedResult = getLogPagedResult(logEntriesList, startIndex, limit);
         log.debug("Audit Log PagedResult:{}", logPagedResult);
@@ -134,30 +156,33 @@ public class AuditLogResource extends ConfigBaseResource {
 
     }
 
-    private List<String> getLogEntries(String file, String strPattern) {
+    private List<String> filterLogByPattern(List<String> logEntriesList, String strPattern) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Fetch log file:{}, strPattern:{}", file, escapeLog(strPattern));
+            log.debug("Fetch log logEntriesList:{}, strPattern:{}", logEntriesList, escapeLog(strPattern));
         }
 
         Pattern pattern = null;
+
+        if (StringUtils.isBlank(strPattern)) {
+            return logEntriesList;
+        }
+
         try {
             pattern = Pattern.compile(strPattern);
         } catch (PatternSyntaxException pse) {
             log.error("Invalid regex pattern: {}", escapeLog(strPattern), pse);
             throwBadRequestException("Invalid search pattern syntax");
+            return logEntriesList;
         }
         if (log.isDebugEnabled()) {
             log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), pattern);
         }
 
-        List<String> logEntries = new ArrayList<>();
-        try (Stream<String> stream = Files.lines(java.nio.file.Path.of(file))) {
-            logEntries = stream.filter(pattern.asPredicate()).collect(Collectors.toList());
-        } catch (IOException ex) {
-            throwInternalServerException(" Error while fetching logs", ex);
-        }
-        return logEntries;
+        List<String> logEntriesfilterByPattern = logEntriesList.stream().filter(pattern.asPredicate())
+                .collect(Collectors.toList());
+        log.debug(" logEntriesfilterByPattern:{}", logEntriesfilterByPattern);
+        return logEntriesfilterByPattern;
     }
 
     private String getPattern(String strPattern) {
@@ -168,15 +193,14 @@ public class AuditLogResource extends ConfigBaseResource {
             if (strPattern.length() > 100) {
                 throwBadRequestException(strPattern);
             }
-            searchPattern = strPattern;
+            searchPattern = Pattern.quote(strPattern);
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("^.*");
-        stringBuilder.append(searchPattern);
-        stringBuilder.append(".*$");
-        searchPattern = stringBuilder.toString();
-
+        searchPattern = "^.*" + searchPattern + ".*$";
+        if (log.isDebugEnabled()) {
+            log.debug("Audit searchPattern:{}", searchPattern);
+        }
+        
         return searchPattern;
     }
 
