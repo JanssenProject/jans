@@ -22,15 +22,18 @@ func authorizeBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*ast.Term,
 	if err := ast.As(input.Value, &in); err != nil {
 		return nil, err
 	}
-	instance, release := cedarlingopa.GetCedarlingInstance()
-	if instance == nil {
-		return errorAsResult(fmt.Errorf("Cedarling uninitialized"))
-	}
-	result, err := instance.AuthorizeMultiIssuer(in)
+	var result cedarling_go.MultiIssuerAuthorizeResult
+	err := cedarlingopa.WithCedarlingInstance(func(instance *cedarling_go.Cedarling) error {
+		res, err := instance.AuthorizeMultiIssuer(in)
+		if err != nil {
+			return err
+		}
+		result = res
+		return nil
+	})
 	if err != nil {
 		return errorAsResult(fmt.Errorf("Authorize failed: %w", err))
 	}
-	defer release()
 	reasons := result.Response.Reason()
 	if reasons == nil {
 		reasons = []string{}
