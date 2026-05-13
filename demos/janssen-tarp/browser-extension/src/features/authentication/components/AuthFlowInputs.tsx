@@ -9,6 +9,7 @@ import { Spinner } from '../../../shared/components/Common';
 import { MultiSelectDropdown } from '../../../shared/components/multiSelect/MultiSelectDropdown';
 import { Dropdown } from '../../../shared/components/Dropdown';
 import { LabelWithTooltip } from '../../../shared/components/Common';
+import { awaitRedirectInIncognitoPopup } from '../../../shared/components/IncognitoPopupFlow';
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Option = { name: string; label?: string; create?: boolean };
@@ -82,7 +83,11 @@ export default function AuthFlowInputs({
       setLoading(true);
       setErrorMessage('');
 
-      const redirectUrl = Array.isArray(client?.redirectUris) ? client.redirectUris[0] : undefined;
+      const redirectBase =
+        Array.isArray(client?.redirectUris) && client.redirectUris[0]
+          ? client.redirectUris[0]
+          : chrome.identity.getRedirectURL();
+
       const { secret, hashed } = await Utils.generateRandomChallengePair();
 
       let scopes = selectedScopes.map((s) => s.name).join(' ');
@@ -90,8 +95,10 @@ export default function AuthFlowInputs({
 
       const options: ILooseObject = {
         scope: scopes,
-        response_type: Array.isArray(client?.responseType) ? client.responseType[0] : undefined,
-        redirect_uri: redirectUrl,
+        response_type: Array.isArray(client?.responseType)
+          ? client.responseType[0]
+          : undefined,
+        redirect_uri: redirectBase,
         client_id: client?.clientId,
         code_challenge_method: 'S256',
         code_challenge: hashed,
@@ -103,13 +110,13 @@ export default function AuthFlowInputs({
       let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
 
       if (additionalParams.trim()) {
-        const updatedClient = { ...client, additionalParams: additionalParams.trim() };
+        // Persist updated additionalParams back to storage
         chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: any[] }) => {
           if (result.oidcClients) {
             const clientArr = result.oidcClients.map((obj) =>
-              obj.clientId === updatedClient.clientId
-                ? { ...obj, additionalParams: updatedClient.additionalParams }
-                : obj
+              obj.clientId === client.clientId
+                ? { ...obj, additionalParams: additionalParams.trim() }
+                : obj,
             );
             chrome.storage.local.set({ oidcClients: clientArr });
           }
@@ -121,64 +128,81 @@ export default function AuthFlowInputs({
         });
       }
 
-      const resultUrl: string = await new Promise((resolve, reject) => {
-        chrome.identity.launchWebAuthFlow({ url: authzUrl, interactive: true }, (responseUrl) => {
-          if (chrome.runtime.lastError || !responseUrl)
-            reject(new Error(chrome.runtime.lastError?.message || 'No redirect URL'));
-          else resolve(responseUrl);
+      const currentWindow = await new Promise<chrome.windows.Window | undefined>((res) =>
+        chrome.windows.getCurrent(res),
+      );
+
+      if (!currentWindow) throw new Error('Could not get current window');
+
+      const resultUrl: string = currentWindow.incognito
+        ? await awaitRedirectInIncognitoPopup(
+          authzUrl,
+          (u) => u.startsWith(redirectBase),
+        )
+        : await new Promise<string>((resolve, reject) => {
+          chrome.identity.launchWebAuthFlow(
+            { url: authzUrl, interactive: true },
+            (responseUrl) => {
+              if (chrome.runtime.lastError || !responseUrl)
+                reject(new Error(chrome.runtime.lastError?.message ?? 'No redirect URL'));
+              else
+                resolve(responseUrl);
+            },
+          );
         });
+
+      const urlParams = new URLSearchParams(new URL(resultUrl).search);
+      const code = urlParams.get('code');
+      const errorDesc = urlParams.get('error_description');
+
+      if (errorDesc) throw new Error(errorDesc);
+      if (!code) throw new Error('Error in authentication. The authorization-code is null.');
+
+      const tokenReqData = qs.stringify({
+        redirect_uri: redirectBase,
+        grant_type: 'authorization_code',
+        code_verifier: secret,
+        client_id: client?.clientId,
+        code,
+        scope: scopes,
       });
 
-      if (resultUrl) {
-        const urlParams = new URLSearchParams(new URL(resultUrl).search);
-        const code = urlParams.get('code');
-        const errorDesc = urlParams.get('error_description');
-        if (errorDesc) throw new Error(errorDesc);
-        if (!code) throw new Error('Error in authentication. The authorization-code is null.');
+      const tokenResponse = await axios({
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
+        },
+        data: tokenReqData,
+        url: client.tokenEndpoint,
+      });
 
-        const tokenReqData = qs.stringify({
-          redirect_uri: redirectUrl,
-          grant_type: 'authorization_code',
-          code_verifier: secret,
-          client_id: client?.clientId,
-          code,
-          scope: scopes,
-        });
-
-        const tokenResponse = await axios({
-          method: 'POST',
-          headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic ' + btoa(`${client?.clientId}:${client?.clientSecret}`),
-          },
-          data: tokenReqData,
-          url: client.tokenEndpoint,
-        });
-
-        if (!tokenResponse?.data?.access_token) {
-          throw new Error(
-            `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description || tokenResponse?.data?.error || ''}`
-          );
-        }
-
-        const userInfoResponse = await axios({
-          method: 'GET',
-          headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
-          url: client.userinfoEndpoint,
-        });
-
-        await chrome.storage.local.set({
-          loginDetails: {
-            access_token: tokenResponse.data.access_token,
-            userDetails: userInfoResponse.data,
-            id_token: tokenResponse.data.id_token,
-            displayToken,
-          },
-        });
-
-        notifyOnDataChange();
-        handleClose();
+      if (!tokenResponse?.data?.access_token) {
+        throw new Error(
+          `Error in authentication. Token response does not contain access_token. ${tokenResponse?.data?.error_description ??
+          tokenResponse?.data?.error ??
+          ''
+          }`,
+        );
       }
+
+      const userInfoResponse = await axios({
+        method: 'GET',
+        headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
+        url: client.userinfoEndpoint,
+      });
+
+      await chrome.storage.local.set({
+        loginDetails: {
+          access_token: tokenResponse.data.access_token,
+          userDetails: userInfoResponse.data,
+          id_token: tokenResponse.data.id_token,
+          displayToken,
+        },
+      });
+
+      notifyOnDataChange();
+      handleClose();
     } catch (err) {
       console.error(err);
       setErrorMessage(err instanceof Error ? err.message : String(err));
