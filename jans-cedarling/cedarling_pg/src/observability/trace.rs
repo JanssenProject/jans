@@ -73,6 +73,8 @@ pub(crate) struct AuthorizationTrace {
     pub policy_hits: Vec<String>,
     /// Diagnostic errors from Cedar (`response.diagnostics().errors()`).
     pub diag_errors: Vec<String>,
+    /// `true` when `cedarling.strategy = mask` converted a deny into a masked-row allow.
+    pub masked: bool,
 }
 
 static RING: Mutex<VecDeque<AuthorizationTrace>> = Mutex::new(VecDeque::new());
@@ -138,6 +140,9 @@ fn trace_to_value(t: &AuthorizationTrace) -> Value {
     }
     if let Some(pid) = &t.principal_id {
         obj["principal_id"] = json!(pid);
+    }
+    if t.masked {
+        obj["masked"] = json!(true);
     }
     obj
 }
@@ -310,6 +315,7 @@ mod tests {
             cache_hit: false,
             policy_hits: vec![],
             diag_errors: vec![],
+            masked: false,
         }
     }
 
@@ -382,6 +388,7 @@ mod tests {
                 cache_hit: false,
                 policy_hits: vec![],
                 diag_errors: vec![],
+                masked: false,
             });
         }
         let buf = RING.lock().expect("lock");

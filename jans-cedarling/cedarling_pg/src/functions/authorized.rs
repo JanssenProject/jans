@@ -96,6 +96,7 @@ fn cedarling_authorized_inner(
             cache_hit: true,
             policy_hits: vec![],
             diag_errors: vec![],
+            masked: false,
         });
         return finalize_decision(decision);
     }
@@ -137,6 +138,7 @@ fn cedarling_authorized_inner(
                 cache_hit: false,
                 policy_hits: outcome.policy_hits,
                 diag_errors: outcome.diag_errors,
+                masked: false,
             });
             finalize_decision(outcome.decision)
         },
@@ -159,6 +161,7 @@ fn cedarling_authorized_inner(
                 cache_hit: false,
                 policy_hits: vec![],
                 diag_errors: vec![],
+                masked: false,
             });
             finalize_error(&ce)
         },
@@ -247,6 +250,7 @@ fn cedarling_authorize_unsigned_inner(
             cache_hit: true,
             policy_hits: vec![],
             diag_errors: vec![],
+            masked: false,
         });
         return finalize_decision(decision);
     }
@@ -296,6 +300,7 @@ fn cedarling_authorize_unsigned_inner(
                 cache_hit: false,
                 policy_hits: outcome.policy_hits,
                 diag_errors: outcome.diag_errors,
+                masked: false,
             });
             finalize_decision(outcome.decision)
         },
@@ -318,6 +323,7 @@ fn cedarling_authorize_unsigned_inner(
                 cache_hit: false,
                 policy_hits: vec![],
                 diag_errors: vec![],
+                masked: false,
             });
             finalize_error(&ce)
         },

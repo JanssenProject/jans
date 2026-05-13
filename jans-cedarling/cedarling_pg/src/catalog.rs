@@ -19,13 +19,17 @@ GRANT USAGE ON SCHEMA cedarling TO PUBLIC;
 -- Per-(table, column) masking configuration.
 -- mask_type: 'null' | 'redact' | 'partial' | 'range' | 'hash' | 'fixed'.
 -- mask_value: type-specific parameter (pattern, range bounds, fixed string).
+-- condition_sql: optional WHERE-clause condition under which the rule applies (NULL = always).
+-- data_type: optional explicit type hint for the column (NULL = inferred from context).
 CREATE TABLE IF NOT EXISTS cedarling.mask_rules (
-    table_name   text  NOT NULL,
-    column_name  text  NOT NULL,
-    mask_type    text  NOT NULL,
-    mask_value   text,
-    created_at   timestamptz NOT NULL DEFAULT now(),
-    updated_at   timestamptz NOT NULL DEFAULT now(),
+    table_name    text  NOT NULL,
+    column_name   text  NOT NULL,
+    mask_type     text  NOT NULL,
+    mask_value    text,
+    condition_sql text,
+    data_type     text,
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    updated_at    timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (table_name, column_name),
     CHECK (mask_type IN ('null', 'redact', 'partial', 'range', 'hash', 'fixed'))
 );

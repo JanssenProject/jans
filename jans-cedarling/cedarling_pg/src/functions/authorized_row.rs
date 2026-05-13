@@ -15,7 +15,7 @@ use crate::engine;
 use crate::error::CedarlingError;
 use crate::extension_log;
 use crate::functions::authorized::{finalize_decision, finalize_error};
-use crate::guc_config::{self, CedarlingMode};
+use crate::guc_config::{self, CedarlingMode, CedarlingStrategy};
 use crate::status;
 use crate::trace::{push_trace, AuthorizationTrace};
 
@@ -27,6 +27,12 @@ use crate::trace::{push_trace, AuthorizationTrace};
 ///
 /// Inherits the same mode / fail-mode / shadow semantics and caching as
 /// `cedarling_authorize_unsigned`. Suitable as an RLS `USING` predicate.
+///
+/// When `cedarling.strategy = mask` and the Cedar engine denies the request, this function:
+/// 1. Computes a masked version of the row (using `cedarling.mask_rules` + default registry).
+/// 2. Stashes it via `cedarling_get_masked_row()`.
+/// 3. Returns `true` so RLS includes the row (with masked sensitive columns).
+/// 4. Writes a trace with `decision=false, masked=true`.
 #[pg_extern]
 pub fn cedarling_authorized_row(
     resource: pgrx::datum::JsonB,
@@ -77,6 +83,10 @@ pub fn cedarling_authorized_row(
         status::record_cache_hit();
         status::record_decision(decision);
         let timestamp = chrono::Utc::now().to_rfc3339();
+
+        // Mask strategy on cached deny
+        let (final_decision, masked) = apply_mask_strategy(decision, &resource, &timestamp);
+
         push_trace(AuthorizationTrace {
             timestamp,
             action: action_trimmed.to_string(),
@@ -91,8 +101,9 @@ pub fn cedarling_authorized_row(
             cache_hit: true,
             policy_hits: vec![],
             diag_errors: vec![],
+            masked,
         });
-        return finalize_decision(decision);
+        return if masked { true } else { finalize_decision(final_decision) };
     }
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
@@ -105,7 +116,8 @@ pub fn cedarling_authorized_row(
         Err(e) => {
             extension_log::log_unsigned_bridge_failure(&e);
             status::record_error_msg(&e.to_string());
-            return finalize_error(&CedarlingError::from(e));
+            let ce = CedarlingError::from(e);
+            return finalize_with_mask_strategy_on_error(&ce, &resource);
         },
     };
 
@@ -114,7 +126,8 @@ pub fn cedarling_authorized_row(
         Err(e) => {
             extension_log::log_engine_failure(&e);
             status::record_error_msg(&e.to_string());
-            return finalize_error(&CedarlingError::from(e));
+            let ce = CedarlingError::from(e);
+            return finalize_with_mask_strategy_on_error(&ce, &resource);
         },
     };
 
@@ -126,6 +139,11 @@ pub fn cedarling_authorized_row(
             let duration_ms = start.elapsed().as_millis() as u64;
             authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
             status::record_decision(outcome.decision);
+
+            // Mask strategy on live deny
+            let (final_decision, masked) =
+                apply_mask_strategy(outcome.decision, &resource, &timestamp);
+
             push_trace(AuthorizationTrace {
                 timestamp,
                 action: action_trimmed.to_string(),
@@ -140,8 +158,9 @@ pub fn cedarling_authorized_row(
                 cache_hit: false,
                 policy_hits: outcome.policy_hits,
                 diag_errors: outcome.diag_errors,
+                masked,
             });
-            finalize_decision(outcome.decision)
+            if masked { true } else { finalize_decision(final_decision) }
         },
         Err(e) => {
             let duration_ms = start.elapsed().as_millis() as u64;
@@ -162,10 +181,43 @@ pub fn cedarling_authorized_row(
                 cache_hit: false,
                 policy_hits: vec![],
                 diag_errors: vec![],
+                masked: false,
             });
-            finalize_error(&ce)
+            finalize_with_mask_strategy_on_error(&ce, &resource)
         },
     }
+}
+
+/// Finalize an error through fail-open/fail-closed mode and then apply masking strategy.
+///
+/// This keeps `strategy=mask` behavior consistent for explicit deny decisions and
+/// deny-on-error outcomes (e.g. missing engine in fail-closed mode).
+fn finalize_with_mask_strategy_on_error(err: &CedarlingError, resource: &JsonB) -> bool {
+    let decision = finalize_error(err);
+    let (final_decision, masked) = apply_mask_strategy(decision, resource, "");
+    if masked { true } else { finalize_decision(final_decision) }
+}
+
+/// When `strategy=mask` and `decision=false`, compute + stash the masked row and return
+/// `(false, true)`. Otherwise return `(decision, false)`.
+fn apply_mask_strategy(
+    decision: bool,
+    resource: &JsonB,
+    _timestamp: &str,
+) -> (bool, bool) {
+    if decision || !matches!(guc_config::strategy(), CedarlingStrategy::Mask) {
+        return (decision, false);
+    }
+    let entity_type = resource
+        .0
+        .get("cedar_entity_mapping")
+        .and_then(|m| m.get("entity_type"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    let table_name = crate::mask::config::table_name_for_entity_type(entity_type);
+    let salt = guc_config::mask_hash_salt_bytes();
+    crate::mask::compute_and_stash_masked_row(&resource.0, &table_name, &salt);
+    (false, true)
 }
 
 /// AnyElement wrapper for row-based unsigned authorization.
@@ -227,5 +279,22 @@ mod tests {
         for err in &cases {
             assert!(err.should_deny(), "{err:?} must deny in fail-closed mode");
         }
+    }
+
+    #[test]
+    fn apply_mask_strategy_noop_when_decision_true() {
+        let resource = JsonB(json!({"cedar_entity_mapping": {"entity_type": "T", "id": "x"}}));
+        let (d, masked) = apply_mask_strategy(true, &resource, "ts");
+        assert!(d);
+        assert!(!masked);
+    }
+
+    #[test]
+    fn apply_mask_strategy_noop_when_strategy_filter() {
+        // strategy() returns Filter by default in tests (no pg GUC).
+        let resource = JsonB(json!({"cedar_entity_mapping": {"entity_type": "T", "id": "x"}}));
+        let (d, masked) = apply_mask_strategy(false, &resource, "ts");
+        assert!(!d);
+        assert!(!masked, "filter strategy should not mask");
     }
 }
