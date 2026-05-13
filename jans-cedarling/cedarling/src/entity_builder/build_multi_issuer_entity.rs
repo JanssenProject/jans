@@ -570,8 +570,7 @@ mod tests {
         let builder = create_test_entity_builder();
 
         // Test fallback to hostname for unknown issuer
-        let result =
-            builder.resolve_issuer_name(&IssClaim::new("https://unknown.issuer.com/auth"));
+        let result = builder.resolve_issuer_name(&IssClaim::new("https://unknown.issuer.com/auth"));
         assert_eq!(result, "unknown_issuer_com");
     }
 
