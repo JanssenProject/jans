@@ -13,7 +13,7 @@ use crate::{
 
 /// Fast lookup index for trusted issuers by `iss` claim.
 ///
-/// `iss` claim semantics vary across IdPs:
+/// `iss` claim semantics vary across `IdPs`:
 /// - origin only (Google: `https://accounts.google.com`),
 /// - origin + path (Microsoft tenant: `https://login.microsoftonline.com/{tenant}/v2.0`),
 /// - origin with trailing slash (Auth0).

@@ -1286,7 +1286,7 @@ async fn test_validation_empty_payload() {
 /// Token `iss` claim: `https://idp.dolphin.sea/` (trailing slash, like Auth0).
 /// Expected: validation succeeds.
 ///
-/// See bug: "Auth0 JWT Fails Validation With InvalidIssuer in Multi-Issuer Mode".
+/// See bug: "Auth0 JWT Fails Validation With `InvalidIssuer` in Multi-Issuer Mode".
 #[tokio::test]
 async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
