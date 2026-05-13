@@ -84,10 +84,14 @@ and the `backchannel_*` keys are stripped from the discovery document.
    flag is settable through the
    [config-api](../../config-guide/config-tools/config-api/README.md)
    under `/jans-config-api/api/v1/jans-auth-server/config`.
+   ![tui-include-ciba](../../../assets/tui-include-ciba.png)
 2. **Set the CIBA server properties** (see the next section).
+   ![tui-ciba-properties](../../../assets/tui-ciba-properties.png)
 3. **Configure each CIBA-enabled client** (see "Per-client configuration"
    below). A client whose `backchannel_token_delivery_mode` is unset
    cannot use CIBA, regardless of the server-wide flag.
+   ![tui-client-ciba](../../../assets/tui-client-ciba.png)
+
 
 ## Server-level properties
 
