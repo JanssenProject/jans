@@ -13,7 +13,7 @@ tags:
 > This page documents only the notification script.
 
 The Jans-Auth server implements [OpenID Connect Client Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html).
-This script is used to control/customize CIBA notifications — i.e. how
+This script is used to control/customize CIBA notifications — i.e., how
 the AS reaches the user's Authentication Device when a CIBA request is
 received.
 

@@ -27,7 +27,7 @@ rules, error codes, JWT signing requirements) read the spec.
 
 ## High-level flow
 
-```
+```text
    Relying Party (CD)            Janssen AS               End User (AD)
          |                            |                          |
          | 1. POST /bc-authorize      |                          |
