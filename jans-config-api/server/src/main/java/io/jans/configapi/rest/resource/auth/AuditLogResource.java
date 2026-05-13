@@ -165,7 +165,7 @@ public class AuditLogResource extends ConfigBaseResource {
             return logEntriesList;
         }
 
-        Pattern pattern = null;
+        Pattern pattern;
         try {
             pattern = Pattern.compile(strPattern);
         } catch (PatternSyntaxException pse) {
@@ -312,10 +312,9 @@ public class AuditLogResource extends ConfigBaseResource {
                 String line = logEntries.get(i);
                 if (StringUtils.isNotBlank(line) && line.length() > datePattern.length()) {
                     String timestampPart = line.substring(0, datePattern.length());
-                    log.debug("{}, timestampPart:{} , {}", "\n\n", timestampPart, "\n\n");
+                    log.debug("timestampPart:{} ", timestampPart);
                     LocalDateTime logEntryLocalDate = getDate(timestampPart, formatter);
-                    log.debug("{}, timestampPart:{}, logEntryLocalDate:{}, {}", "\n\n", timestampPart,
-                            logEntryLocalDate, "\n\n");
+                    log.debug("timestampPart:{}, logEntryLocalDate:{}",timestampPart, logEntryLocalDate);
                     if (isValidlogEntry(startLocal, endLocal, logEntryLocalDate)) {
                         filteredLogEntries.add(line);
                     }
@@ -343,7 +342,7 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
                 startLocal = parseDate(startDate);
                 if (log.isDebugEnabled()) {
-                    log.debug(" startLocal:{} {}", escapeLog(startLocal), "\n\n");
+                    log.debug(" startLocal:{}", escapeLog(startLocal));
                 }
             } catch (DateTimeParseException dtpe) {
                 sb.append(
@@ -356,7 +355,7 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
                 endLocal = parseDate(endDate);
                 if (log.isDebugEnabled()) {
-                    log.debug(" endLocal:{} {}", escapeLog(endLocal), "\n\n");
+                    log.debug(" endLocal:{}", escapeLog(endLocal));
                 }
             } catch (DateTimeParseException dtpe) {
                 sb.append(
@@ -368,7 +367,7 @@ public class AuditLogResource extends ConfigBaseResource {
             sb.append("Start date must be before or equal to end date.");
         }
 
-        log.debug(" validateDate error:{} {}", sb, "\n\n");
+        log.debug(" validateDate error:{}", sb);
         if (sb.length() > 0) {
             throwBadRequestException(sb.toString(), "INVALID_DATE");
         }
