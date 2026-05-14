@@ -82,6 +82,8 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
       - '.github/workflows/test-tf-authz-jwt-selfhosted.yml'
 
+permissions: {}
+
 jobs:
   test-selfhosted-opa:
     name: Self-hosted OPA (docker-compose.prod.yml) — health + authorize
