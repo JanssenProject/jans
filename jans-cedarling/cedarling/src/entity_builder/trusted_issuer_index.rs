@@ -39,7 +39,10 @@ impl TrustedIssuerIndex {
         let mut origin_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
         let mut url_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
 
-        for iss in issuers.values() {
+        let mut sorted: Vec<(&String, &TrustedIssuer)> = issuers.iter().collect();
+        sorted.sort_by(|a, b| a.0.cmp(b.0));
+
+        for (_, iss) in sorted {
             let origin = iss.iss_claim();
             let full_url = IssClaim::new(iss.get_oidc_endpoint().as_str());
             let issuer = Arc::new(iss.clone());
