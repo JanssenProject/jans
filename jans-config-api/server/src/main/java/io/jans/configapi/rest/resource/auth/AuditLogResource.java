@@ -71,7 +71,7 @@ public class AuditLogResource extends ConfigBaseResource {
      * pattern and date range.
      *
      * @param pattern    a substring to filter log lines; blank returns all entries
-     * @param startIndex the 1-based index of the first result to return
+     * @param startIndex index of the first result to return
      * @param limit      maximum number of results to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
@@ -214,17 +214,16 @@ public class AuditLogResource extends ConfigBaseResource {
             try {
 
                 // verify start and limit index
-                int fromIndex = startIndex - 1;
-                getStartIndex(logEntriesList, fromIndex);
-                int toIndex = Math.min(fromIndex + limit, logEntriesList.size());
-
+                getStartIndex(logEntriesList, startIndex);
+                int toIndex = (startIndex + limit <= logEntriesList.size()) ? startIndex + limit
+                        : logEntriesList.size();
                 if (log.isDebugEnabled()) {
-                    log.debug("Final startIndex:{}, fromIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex),
-                            fromIndex, escapeLog(limit), escapeLog(toIndex));
+                    log.debug("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
+                            escapeLog(toIndex));
                 }
 
                 // Extract paginated data
-                List<String> sublist = logEntriesList.subList(fromIndex, toIndex);
+                List<String> sublist = logEntriesList.subList(startIndex, toIndex);
 
                 logPagedResult.setStart(startIndex);
                 logPagedResult.setEntriesCount(limit);
@@ -295,8 +294,8 @@ public class AuditLogResource extends ConfigBaseResource {
 
         // Validate & parse
         validateDate(startDate, endDate);
-        LocalDateTime startLocal = StringUtils.isNotBlank(startDate) ? parseDate(startDate) : null;
-        LocalDateTime endLocal = StringUtils.isNotBlank(endDate) ? parseDate(endDate) : null;
+        LocalDateTime startLocal = parse(startDate);
+        LocalDateTime endLocal = parse(endDate);
         if (StringUtils.isNotBlank(endDate) && !endDate.contains("T") && !endDate.contains(" ")) {
             endLocal = endLocal.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
         }
@@ -414,6 +413,13 @@ public class AuditLogResource extends ConfigBaseResource {
             return logDateTime;
         }
         return logDateTime;
+    }
+
+    private LocalDateTime parse(String strDate) throws DateTimeParseException {
+        if (log.isDebugEnabled()) {
+            log.debug(" Parse Date strDate:{}", escapeLog(strDate));
+        }
+        return StringUtils.isNotBlank(strDate) ? parseDate(strDate) : null;
     }
 
     private LocalDateTime parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
