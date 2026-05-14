@@ -595,7 +595,7 @@ mod test {
             claims,
             trusted_iss: None,
         };
-        assert_eq!(result, expected);
+        assert_eq!(result, expected, "validate_jwt should accept trailing-slash iss and produce expected ValidatedJwt with claims and no trusted_iss");
     }
 
     #[test]
