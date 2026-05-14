@@ -73,9 +73,9 @@ public class AuditLogResource extends ConfigBaseResource {
      * @param pattern    a substring to filter log lines; blank returns all entries
      * @param startIndex index of the first result to return
      * @param limit      maximum number of results to return
-     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     * @param startDate  optional start date (dd-MM-yyyy or ISO-8601 date-time) to include entries on or
      *                   after this date
-     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     * @param endDate    optional end date (dd-MM-yyyy or ISO-8601 date-time) to include entries on or
      *                   before this date
      * @return a HTTP 200 Response containing a LogPagedResult with the matching log
      *         lines and pagination metadata
