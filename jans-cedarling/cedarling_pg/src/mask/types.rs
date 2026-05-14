@@ -130,8 +130,12 @@ fn deterministic_range(salt: &[u8], value: &str, min: i64, max: i64) -> i64 {
     let hash = h.finalize();
     let bytes: [u8; 8] = hash[24..32].try_into().unwrap_or([0u8; 8]);
     let hash_u64 = u64::from_be_bytes(bytes);
-    let range = (max - min + 1) as u64;
-    min + (hash_u64 % range) as i64
+    // `min < max` was checked above, so `max - min + 1` is positive and fits u64.
+    // The result of `hash_u64 % range` is in `0..range`, so adding it back to `min`
+    // (as i128 to avoid wraparound) lands cleanly in `[min, max]`.
+    let range = u64::try_from((i128::from(max) - i128::from(min)) + 1).unwrap_or(u64::MAX);
+    let offset = i64::try_from(hash_u64 % range).unwrap_or(i64::MAX);
+    min.saturating_add(offset)
 }
 
 /// Parse `"min-max"` range bounds, handling negative numbers via `rfind('-')`.
@@ -174,7 +178,7 @@ mod tests {
     #[test]
     fn identity_preserves_original() {
         assert_eq!(MaskType::Identity.apply(Some("keep"), &[]), Some("keep".to_string()));
-        assert_eq!(MaskType::Identity.apply(None, &[]), Some("".to_string()));
+        assert_eq!(MaskType::Identity.apply(None, &[]), Some(String::new()));
     }
 
     #[test]

@@ -18,9 +18,5 @@ pub(crate) enum PolicyError {
     #[error("SPI error: {0}")]
     Spi(#[from] pgrx::spi::Error),
     #[error("policy load failed: {0}")]
-    #[allow(dead_code)]
     Load(String),
-    #[error("registry error: {0}")]
-    #[allow(dead_code)]
-    Registry(String),
 }

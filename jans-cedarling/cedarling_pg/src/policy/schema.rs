@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Schema compatibility checks for a PostgreSQL table vs Cedar schema text.
+//! Schema compatibility checks for a `PostgreSQL` table vs Cedar schema text.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -53,7 +53,7 @@ enum Compatibility {
     Unknown,
 }
 
-/// Validate a PostgreSQL table shape against a Cedar schema file (text name variant).
+/// Validate a `PostgreSQL` table shape against a Cedar schema file (text name variant).
 ///
 /// By default (`cedarling.schema_validate_strict = true`) this uses Cedar's parser and performs
 /// typed compatibility checks. When strict mode is disabled, it falls back to the historical
@@ -81,7 +81,7 @@ pub fn cedarling_validate_schema(table_name: &str, cedar_schema_path: &str) -> p
     }
 }
 
-/// Validate a PostgreSQL table shape against a Cedar schema file (regclass / OID variant).
+/// Validate a `PostgreSQL` table shape against a Cedar schema file (regclass / OID variant).
 ///
 /// Accepts the table as an OID so callers can write
 /// `cedarling_validate_schema('mytable'::regclass::oid, '/path/schema')`.
@@ -136,8 +136,7 @@ fn validate_schema_strict_inner(table_oid: pg_sys::Oid, cedar_schema_path: &str)
             .map(|o| o.keys().cloned().collect())
             .unwrap_or_default();
         SchemaError::Validation(format!(
-            "entity type '{entity_type}' not found in resolved schema JSON (root keys: {:?})",
-            root_keys
+            "entity type '{entity_type}' not found in resolved schema JSON (root keys: {root_keys:?})"
         ))
     })?;
 
@@ -414,7 +413,7 @@ fn compatibility_for_column(col: &TableColumn, cedar_type: &str) -> Compatibilit
                 Compatibility::Mismatch
             }
         },
-        PgKind::String => {
+        PgKind::String | PgKind::Temporal => {
             if cedar_type == "String" {
                 Compatibility::Match
             } else {
@@ -423,13 +422,6 @@ fn compatibility_for_column(col: &TableColumn, cedar_type: &str) -> Compatibilit
         },
         PgKind::Bool => {
             if cedar_type == "Bool" {
-                Compatibility::Match
-            } else {
-                Compatibility::Mismatch
-            }
-        },
-        PgKind::Temporal => {
-            if cedar_type == "String" {
                 Compatibility::Match
             } else {
                 Compatibility::Mismatch
@@ -513,7 +505,7 @@ mod tests {
 
     #[test]
     fn extract_schema_identifiers_filters_keywords() {
-        let s = r#"entity User in Namespace { name: String, age: Long, is_ok: Bool }"#;
+        let s = r"entity User in Namespace { name: String, age: Long, is_ok: Bool }";
         let attrs = extract_schema_identifiers(s);
         assert!(attrs.contains("name"));
         assert!(attrs.contains("age"));

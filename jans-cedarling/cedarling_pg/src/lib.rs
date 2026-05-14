@@ -46,7 +46,7 @@ mod token_bundle {
     pub(crate) use crate::tokens::bundle::*;
 }
 
-#[allow(unused_imports)]
+#[cfg(feature = "pg_test")]
 mod token_sql {
     pub(crate) use crate::tokens::sql::*;
 }
@@ -115,6 +115,7 @@ const _: fn(&error::CedarlingError, &'static str) -> error::AuditLogEntry =
     error::CedarlingError::to_audit_entry;
 const _: fn(&str) -> Result<Vec<cedarling::TokenInput>, token_bundle::TokenBundleError> =
     token_bundle::parse_token_inputs_from_json;
+#[allow(clippy::type_complexity)]
 const _: fn(
     &cedarling::blocking::Cedarling,
     &str,
@@ -136,6 +137,7 @@ const _: fn(
     cedarling::RequestUnsigned,
 ) -> Result<bool, authz_bridge::UnsignedBridgeError> =
     authz_bridge::authorize_unsigned_decision_for_request;
+#[allow(clippy::type_complexity)]
 const _: fn(
     &cedarling::blocking::Cedarling,
     &str,
@@ -170,6 +172,7 @@ const _: fn(pgrx::datum::JsonB, &str, Option<&str>) -> pgrx::datum::JsonB =
     mask_sql::cedarling_mask_row;
 const _: fn() -> Option<pgrx::datum::JsonB> = mask_sql::cedarling_get_masked_row;
 const _: fn(&str, &str, &str, Option<&str>) -> bool = mask_sql::cedarling_set_mask_config;
+#[allow(clippy::type_complexity)]
 const _: fn(Option<&str>, Option<&str>, &str, Option<&str>) -> Option<String> =
     mask_sql::cedarling_test_masking;
 const _: fn(&str, &str) -> pgrx::datum::JsonB = schema_sql::cedarling_validate_schema;
@@ -1037,6 +1040,53 @@ mod tests {
     }
 
     #[pg_test]
+    fn test_mask_condition_sql_applies_only_when_expression_true() {
+        use pgrx::datum::JsonB;
+        use serde_json::json;
+
+        Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_condition'")
+            .expect("cleanup before test");
+        Spi::run(
+            r#"INSERT INTO cedarling.mask_rules(
+                   table_name, column_name, mask_type, mask_value, condition_sql, data_type
+               ) VALUES (
+                   'test_mask_condition',
+                   'pii_value',
+                   'redact',
+                   NULL,
+                   $$current_setting('cedarling.role', true) <> 'admin'$$,
+                   NULL
+               )"#,
+        )
+        .expect("insert conditional mask rule");
+
+        let row_user = JsonB(json!({"pii_value":"secret-value"}));
+        let row_admin = JsonB(json!({"pii_value":"secret-value"}));
+
+        Spi::run("SELECT set_config('cedarling.role', 'user', true)")
+            .expect("set local cedarling.role=user");
+        let masked_user = crate::mask_sql::cedarling_mask_row(row_user, "test_mask_condition", Some("Read"));
+        assert_eq!(
+            masked_user.0["pii_value"].as_str(),
+            Some("***REDACTED***"),
+            "rule should apply when condition_sql evaluates true"
+        );
+
+        Spi::run("SELECT set_config('cedarling.role', 'admin', true)")
+            .expect("set local cedarling.role=admin");
+        let masked_admin =
+            crate::mask_sql::cedarling_mask_row(row_admin, "test_mask_condition", Some("Read"));
+        assert_eq!(
+            masked_admin.0["pii_value"].as_str(),
+            Some("secret-value"),
+            "rule should not apply when condition_sql evaluates false"
+        );
+
+        Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_condition'")
+            .expect("cleanup conditional mask rule");
+    }
+
+    #[pg_test]
     fn test_cedarling_where_returns_false_without_tokens() {
         Spi::run("RESET cedarling.tokens").expect("RESET tokens");
         let pred = crate::where_sql::cedarling_where("some_table", "Jans::Action::\"Read\"", None);
@@ -1273,6 +1323,93 @@ mod tests {
         );
 
         Spi::run("DROP TABLE IF EXISTS cedarling_schema_byoid_probe").expect("drop probe table");
+        let _ = fs::remove_dir_all(&work);
+    }
+
+    #[pg_test]
+    fn test_status_transitions_to_degraded_after_forced_errors_with_engine_loaded() {
+        use std::fs;
+        use std::io::Write;
+
+        const POLICY_UNSIGNED: &str = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../test_files/policy-store_no_trusted_issuers.yaml"
+        ));
+
+        fn write_bootstrap(
+            dir: &std::path::Path,
+            policy_path: &std::path::Path,
+        ) -> std::path::PathBuf {
+            let bootstrap_path = dir.join("bootstrap.yaml");
+            let policy_lit = policy_path.to_string_lossy();
+            let contents = format!(
+                "CEDARLING_APPLICATION_NAME: cedarling_pg_status_test\n\
+                 CEDARLING_POLICY_STORE_URI: ''\n\
+                 CEDARLING_LOG_TYPE: memory\n\
+                 CEDARLING_LOG_LEVEL: DEBUG\n\
+                 CEDARLING_LOG_TTL: 60\n\
+                 CEDARLING_LOCAL_JWKS: null\n\
+                 CEDARLING_POLICY_STORE_LOCAL: null\n\
+                 CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
+                 CEDARLING_JWT_SIG_VALIDATION: disabled\n\
+                 CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
+                 CEDARLING_LOCK: disabled\n\
+                 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
+                 CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
+                 CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
+                 CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
+                 CEDARLING_LOCK_LISTEN_SSE: disabled\n"
+            );
+            let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
+            f.write_all(contents.as_bytes()).expect("write bootstrap");
+            bootstrap_path
+        }
+
+        let work = std::env::temp_dir().join(format!(
+            "cedarling_pg_status_degraded_{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&work);
+        fs::create_dir_all(&work).expect("temp work dir");
+        let policy_path = work.join("policy-store.yaml");
+        fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy store");
+        let bootstrap_path = write_bootstrap(&work, &policy_path);
+        let bootstrap_str = bootstrap_path.to_str().expect("bootstrap path utf8");
+        assert!(
+            crate::policy_sql::cedarling_use_policy(bootstrap_str),
+            "cedarling_use_policy must load engine for status transition test"
+        );
+
+        let before = crate::status::cedarling_status().0;
+        let total_before = before["total_requests"].as_u64().unwrap_or(0);
+        let errors_before = before["errors"].as_u64().unwrap_or(0);
+
+        // Need (errors+n)/(total+n) >= 0.25 -> n >= ceil((total - 4*errors)/3)
+        let deficit = i128::from(total_before) - 4 * i128::from(errors_before);
+        let mut needed = if deficit <= 0 {
+            0_u64
+        } else {
+            ((deficit + 2) / 3) as u64
+        };
+        // One extra to avoid boundary rounding surprises.
+        needed += 1;
+
+        let resource = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
+        let action = r#"T::Action::"A""#;
+        for _ in 0..needed {
+            let _ = crate::authorized::cedarling_authorize_unsigned(None, resource, action, "[]");
+        }
+
+        let after = crate::status::cedarling_status().0;
+        assert_eq!(
+            after["engine_loaded"], true,
+            "engine should remain loaded during degraded-status test"
+        );
+        assert_eq!(
+            after["status"], "degraded",
+            "status should degrade after forced error-rate increase; before={before}, after={after}"
+        );
+
         let _ = fs::remove_dir_all(&work);
     }
 

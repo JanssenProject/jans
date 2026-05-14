@@ -17,7 +17,7 @@ use crate::resource;
 /// `cedar_entity_mapping` (overwriting any existing mapping in the JSONB). When either is `NULL`
 /// the caller must embed `cedar_entity_mapping` in the JSONB itself.
 ///
-/// Raises a PostgreSQL `ERROR` if the resulting document is not a valid `EntityData`.
+/// Raises a `PostgreSQL` `ERROR` if the resulting document is not a valid `EntityData`.
 #[pg_extern]
 pub fn cedarling_build_resource(
     resource: pgrx::datum::JsonB,
@@ -46,7 +46,7 @@ pub fn cedarling_build_resource(
 /// Build a Cedarling `EntityData` JSON string from a composite row (`anyelement`).
 ///
 /// SQL name is `cedarling_build_resource_row` so it does not overload `cedarling_build_resource`
-/// (`jsonb`, …): PostgreSQL cannot reliably resolve two `cedarling_build_resource` targets when
+/// (`jsonb`, …): `PostgreSQL` cannot reliably resolve two `cedarling_build_resource` targets when
 /// one uses polymorphic `anyelement`.
 #[pg_extern(name = "cedarling_build_resource_row")]
 pub fn cedarling_build_resource_anyelement(record: AnyElement) -> String {

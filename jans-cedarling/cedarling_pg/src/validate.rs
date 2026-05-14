@@ -24,9 +24,7 @@ pub fn context_json_is_valid_object(s: &str) -> bool {
     if trimmed.is_empty() {
         return true;
     }
-    serde_json::from_str::<serde_json::Value>(trimmed)
-        .map(|v| v.is_object())
-        .unwrap_or(false)
+    serde_json::from_str::<serde_json::Value>(trimmed).is_ok_and(|v| v.is_object())
 }
 
 #[cfg(test)]

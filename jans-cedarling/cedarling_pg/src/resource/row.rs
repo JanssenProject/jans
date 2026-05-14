@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! AnyElement -> Cedar resource conversion.
+//! `AnyElement` -> Cedar resource conversion.
 
 use pgrx::datum::{AnyElement, Datum, DatumWithOid, JsonB};
 use pgrx::prelude::*;
@@ -52,8 +52,8 @@ pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, Ro
     Ok(serde_json::to_string(&value)?)
 }
 
-/// [`IntoDatum`] for [`AnyElement`] uses PostgreSQL's `anyelement` type OID, so SPI would bind
-/// `$1` as the `anyelement` pseudotype and PostgreSQL errors when evaluating `to_jsonb($1)`. Pass
+/// [`IntoDatum`] for [`AnyElement`] uses `PostgreSQL`'s `anyelement` type OID, so SPI would bind
+/// `$1` as the `anyelement` pseudotype and `PostgreSQL` errors when evaluating `to_jsonb($1)`. Pass
 /// the datum with the concrete type OID from [`AnyElement::oid`] instead.
 fn datum_with_oid_for_spi(row: &AnyElement) -> DatumWithOid<'_> {
     const _: () = assert!(std::mem::size_of::<Datum>() == std::mem::size_of::<pg_sys::Datum>());
@@ -71,24 +71,22 @@ fn row_to_json_and_table_oid(
     let mut out_json: Option<Value> = None;
     let mut out_oid: Option<pg_sys::Oid> = None;
     Spi::connect(|client| {
-        let rows = client.select(
+        let mut rows = client.select(
             "SELECT to_jsonb($1) AS row_json, t.typrelid::oid AS rel_oid
                FROM pg_type t
               WHERE t.oid = pg_typeof($1)::oid",
             None,
             &[datum_with_oid_for_spi(&row)],
         )?;
-        for r in rows {
+        if let Some(r) = rows.next() {
             let row_json = r
                 .get_by_name::<JsonB, _>("row_json")?
-                .map(|j| j.0)
-                .unwrap_or_else(|| json!({}));
+                .map_or_else(|| json!({}), |j| j.0);
             let rel_oid = r
                 .get_by_name::<pg_sys::Oid, _>("rel_oid")?
                 .filter(|v| *v != pg_sys::InvalidOid);
             out_json = Some(row_json);
             out_oid = rel_oid;
-            break;
         }
         Ok::<(), pgrx::spi::Error>(())
     })?;

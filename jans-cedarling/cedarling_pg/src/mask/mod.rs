@@ -10,18 +10,25 @@ pub(crate) mod types;
 
 use std::collections::BTreeMap;
 use std::sync::Mutex;
+#[cfg(not(test))]
+use std::sync::atomic::AtomicBool;
 
 use pgrx::prelude::*;
 use serde_json::{json, Value};
 
 use crate::guc_config;
-use crate::mask::config::{default_mask_for_column, lookup_explicit_rules};
+use crate::mask::config::{default_mask_for_column, lookup_explicit_rules, MaskRule};
 use crate::mask::types::MaskType;
 
 static LAST_MASKED_ROW: Mutex<Option<Value>> = Mutex::new(None);
+#[cfg(not(test))]
+static HASH_SALT_MISSING_WARNED: AtomicBool = AtomicBool::new(false);
 
 #[cfg(not(test))]
 fn warn_hash_salt_missing(col: &str, table_name: &str) {
+    if HASH_SALT_MISSING_WARNED.swap(true, std::sync::atomic::Ordering::Relaxed) {
+        return;
+    }
     warning!(
         "cedarling_pg: cedarling.mask_hash_salt is not set; hash masking for column \
          '{col}' in table '{table_name}' requires a salt"
@@ -126,6 +133,7 @@ pub fn cedarling_mask_plan(table_name: &str, action: Option<&str>) -> pgrx::datu
 /// applied to columns that have no explicit rule but whose name matches a known sensitive pattern.
 /// Type-preserving: `Range`-masked columns are written as JSON numbers.
 #[pg_extern]
+#[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
 pub fn cedarling_mask_row(
     row_json: pgrx::datum::JsonB,
     table_name: &str,
@@ -163,22 +171,23 @@ pub(crate) fn compute_and_stash_masked_row(row: &Value, table_name: &str, salt: 
 /// Core masking logic: explicit catalog rules + default registry fallback, type-preserving output.
 fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value {
     let mut out = row.clone();
-    let explicit: BTreeMap<String, MaskType> =
-        lookup_explicit_rules(table_name).into_iter().collect();
+    let explicit: BTreeMap<String, MaskRule> = lookup_explicit_rules(table_name)
+        .into_iter()
+        .map(|r| (r.column_name.clone(), r))
+        .collect();
 
     if let Some(obj) = out.as_object_mut() {
         let column_names: Vec<String> = obj.keys().cloned().collect();
         for col in &column_names {
-            // Explicit rule wins; fall back to default registry.
-            let mask_opt = explicit
-                .get(col)
-                .cloned()
-                .or_else(|| default_mask_for_column(col));
+            // Explicit rule wins when applicable; otherwise fall back to default registry.
+            let mask_opt = explicit.get(col).and_then(resolve_explicit_mask).or_else(|| {
+                default_mask_for_column(col)
+            });
             let Some(mask) = mask_opt else { continue };
 
             let original = match obj.get(col) {
                 Some(Value::String(s)) => Some(s.as_str()),
-                Some(Value::Null) => None,
+                Some(Value::Null) | None => None,
                 Some(other) => {
                     // Stringify numbers / booleans so they can be passed to apply()
                     let s = other.to_string();
@@ -188,7 +197,6 @@ fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value
                     obj.insert(col.clone(), masked_val);
                     continue;
                 },
-                None => None,
             };
 
             if matches!(mask, MaskType::Hash)
@@ -213,12 +221,48 @@ fn apply_with_type_preservation(mask: &MaskType, original: Option<&str>, salt: &
         Some(s) if mask.preserves_numeric() => {
             if let Ok(n) = s.parse::<i64>() {
                 Value::Number(n.into())
+            } else if let Ok(f) = s.parse::<f64>() {
+                serde_json::Number::from_f64(f).map_or(Value::String(s), Value::Number)
             } else {
                 Value::String(s)
             }
         },
         Some(s) => Value::String(s),
     }
+}
+
+fn resolve_explicit_mask(rule: &MaskRule) -> Option<MaskType> {
+    if let Some(condition_sql) = rule.condition_sql.as_deref() {
+        if condition_sql.trim().is_empty() {
+            return Some(rule.mask_type.clone());
+        }
+        if !evaluate_condition_sql(condition_sql) {
+            return None;
+        }
+    }
+    Some(rule.mask_type.clone())
+}
+
+#[cfg(not(test))]
+fn evaluate_condition_sql(condition_sql: &str) -> bool {
+    // condition_sql is extension-owned configuration, intentionally executed as SQL expression.
+    let sql = format!("SELECT COALESCE(({condition_sql}), false)::bool AS applies");
+    match Spi::get_one::<bool>(&sql) {
+        Ok(Some(v)) => v,
+        Ok(None) => false,
+        Err(e) => {
+            warning!(
+                "cedarling_pg: failed to evaluate condition_sql '{}': {}",
+                condition_sql, e
+            );
+            false
+        },
+    }
+}
+
+#[cfg(test)]
+fn evaluate_condition_sql(_condition_sql: &str) -> bool {
+    false
 }
 
 #[cfg(test)]
@@ -229,8 +273,8 @@ mod tests {
 
     const SALT: &[u8] = b"cedarling-pg-test-salt";
 
-    fn masked_row(row: Value, table: &str) -> Value {
-        compute_masked_row_inner(&row, table, SALT)
+    fn masked_row(row: &Value, table: &str) -> Value {
+        compute_masked_row_inner(row, table, SALT)
     }
 
     #[test]
@@ -268,7 +312,7 @@ mod tests {
     fn compute_masked_row_applies_default_registry_to_email_column() {
         // In unit tests, lookup_explicit_rules returns empty (no SPI).
         let row = json!({"user_email": "alice@example.org", "name": "alice"});
-        let result = masked_row(row, "test_tbl_no_explicit_rules");
+        let result = masked_row(&row, "test_tbl_no_explicit_rules");
         // user_email matches default registry → should be masked
         let email_val = result.get("user_email").unwrap();
         assert_ne!(
@@ -283,7 +327,7 @@ mod tests {
     #[test]
     fn compute_masked_row_masks_password_column() {
         let row = json!({"password": "s3cr3t", "role": "user"});
-        let result = masked_row(row, "test_tbl");
+        let result = masked_row(&row, "test_tbl");
         assert_eq!(
             result.get("password").and_then(|v| v.as_str()),
             Some("[PROTECTED]"),

@@ -105,7 +105,7 @@ fn quote_ident_safe(ident: &str) -> String {
 
 /// Pure-Rust equivalent of Postgres `quote_literal` for non-binary text:
 /// wraps in `'…'` and doubles internal `'`. Assumes
-/// `standard_conforming_strings = on` (PostgreSQL ≥ 9.1 default), so
+/// `standard_conforming_strings = on` (`PostgreSQL` ≥ 9.1 default), so
 /// backslashes are literal and need no special handling.
 fn quote_literal_safe(value: &str) -> String {
     format!("'{}'", value.replace('\'', "''"))
@@ -433,14 +433,13 @@ fn resolve_table_oid_via_spi(table_name: &str) -> Option<pg_sys::Oid> {
     // must fail-closed silently when the table can't be resolved.
     let mut found: Option<pg_sys::Oid> = None;
     let _ = Spi::connect(|client| {
-        let rows = client.select(
+        let mut rows = client.select(
             "SELECT to_regclass($1)::oid AS oid",
             None,
             &[table_name.into()],
         )?;
-        for row in rows {
+        if let Some(row) = rows.next() {
             found = row.get_by_name::<pg_sys::Oid, _>("oid")?;
-            break;
         }
         Ok::<(), pgrx::spi::Error>(())
     });
@@ -688,7 +687,7 @@ mod tests {
             meta(
                 "p1",
                 PolicyEffect::Permit,
-                r#"permit(principal, action, resource) when { resource.age >= 18 };"#,
+                r"permit(principal, action, resource) when { resource.age >= 18 };",
             ),
             meta(
                 "p2",
@@ -723,7 +722,7 @@ mod tests {
             meta(
                 "allow",
                 PolicyEffect::Permit,
-                r#"permit(principal, action, resource) when { resource.age >= 18 };"#,
+                r"permit(principal, action, resource) when { resource.age >= 18 };",
             ),
             meta(
                 "deny",

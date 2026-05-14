@@ -39,14 +39,6 @@ pub(crate) fn record_decision(allowed: bool) {
     }
 }
 
-/// Increments the error counter.
-///
-/// Kept for backward compatibility; prefer [`record_error_msg`] when an error message is available.
-#[allow(dead_code)]
-pub(crate) fn record_error() {
-    ERRORS.fetch_add(1, Ordering::Relaxed);
-}
-
 /// Increments the error counter and stores `msg` as the most recent error.
 pub(crate) fn record_error_msg(msg: &str) {
     ERRORS.fetch_add(1, Ordering::Relaxed);
@@ -96,6 +88,17 @@ fn engine_info_for_status() -> (bool, u64, u64) {
     (false, 0, 0)
 }
 
+/// Ratio of cache hits to total requests, expressed as a fraction in `[0.0, 1.0]`.
+///
+/// Both counters are `u64` for atomic arithmetic but in practice never exceed
+/// `2^32` per backend, well inside `f64`'s mantissa. The narrow `#[allow]` on
+/// the cast documents that the precision loss is bounded by Postgres backend
+/// lifetime, not by user input.
+#[allow(clippy::cast_precision_loss)]
+fn cache_hit_rate(cache_hits: u64, total: u64) -> f64 {
+    cache_hits as f64 / total as f64
+}
+
 fn classify_status(
     engine_loaded: bool,
     trusted_issuers_failed: u64,
@@ -105,7 +108,8 @@ fn classify_status(
     if !engine_loaded {
         "unhealthy"
     } else if trusted_issuers_failed > 0
-        || (total_requests > 0 && failed_requests as f64 / total_requests as f64 >= 0.25)
+        || (total_requests > 0
+            && failed_requests.saturating_mul(4) >= total_requests)
     {
         "degraded"
     } else {
@@ -115,7 +119,7 @@ fn classify_status(
 
 /// Returns per-backend authorization counters as a JSONB document.
 ///
-/// Counters are process-local and reset on PostgreSQL backend restart.
+/// Counters are process-local and reset on `PostgreSQL` backend restart.
 ///
 /// Fields:
 /// - `status`: `"healthy"` | `"degraded"` | `"unhealthy"`.
@@ -145,7 +149,7 @@ pub fn cedarling_status() -> pgrx::datum::JsonB {
     let successful_requests = allowed + denied;
     let failed_requests = errors;
     let cache_hit_rate = if total > 0 {
-        cache_hits as f64 / total as f64
+        cache_hit_rate(cache_hits, total)
     } else {
         0.0
     };
@@ -157,27 +161,29 @@ pub fn cedarling_status() -> pgrx::datum::JsonB {
 
     let start_time: serde_json::Value = START_TIME
         .get()
-        .map(|s| serde_json::Value::String(s.clone()))
-        .unwrap_or(serde_json::Value::Null);
+        .map_or(serde_json::Value::Null, |s| {
+            serde_json::Value::String(s.clone())
+        });
 
     let (last_error, last_error_time) = LAST_ERROR
         .lock()
         .ok()
         .and_then(|g| g.clone())
-        .map(|(msg, ts)| {
-            (
-                serde_json::Value::String(msg),
-                serde_json::Value::String(ts),
-            )
-        })
-        .unwrap_or((serde_json::Value::Null, serde_json::Value::Null));
+        .map_or(
+            (serde_json::Value::Null, serde_json::Value::Null),
+            |(msg, ts)| {
+                (
+                    serde_json::Value::String(msg),
+                    serde_json::Value::String(ts),
+                )
+            },
+        );
 
     let last_policy_update: serde_json::Value = LAST_POLICY_UPDATE
         .lock()
         .ok()
         .and_then(|g| g.clone())
-        .map(serde_json::Value::String)
-        .unwrap_or(serde_json::Value::Null);
+        .map_or(serde_json::Value::Null, serde_json::Value::String);
 
     let obj = json!({
         "status":                  status,
@@ -217,7 +223,7 @@ mod tests {
         record_request();
         record_decision(true);
         record_decision(false);
-        record_error();
+        record_error_msg("unit test error");
         record_cache_hit();
 
         assert_eq!(TOTAL_REQUESTS.load(Ordering::Relaxed), t0 + 1);

@@ -71,8 +71,8 @@ pub fn authorize_multi_issuer_outcome(
         .map_err(|e| AuthorizeBridgeError::RequestInvalid(e.to_string()))?;
     let result = engine.authorize_multi_issuer(request)?;
     let diagnostics = result.response.diagnostics();
-    let policy_hits: Vec<String> = diagnostics.reason().map(|id| id.to_string()).collect();
-    let diag_errors: Vec<String> = diagnostics.errors().map(|e| e.to_string()).collect();
+    let policy_hits: Vec<String> = diagnostics.reason().map(ToString::to_string).collect();
+    let diag_errors: Vec<String> = diagnostics.errors().map(ToString::to_string).collect();
     Ok(AuthorizeOutcome {
         decision: result.decision,
         request_id: result.request_id,
@@ -172,8 +172,8 @@ pub fn authorize_unsigned_outcome_for_request(
 ) -> Result<AuthorizeOutcome, UnsignedBridgeError> {
     let result = engine.authorize_unsigned(request)?;
     let diagnostics = result.response.diagnostics();
-    let policy_hits: Vec<String> = diagnostics.reason().map(|id| id.to_string()).collect();
-    let diag_errors: Vec<String> = diagnostics.errors().map(|e| e.to_string()).collect();
+    let policy_hits: Vec<String> = diagnostics.reason().map(ToString::to_string).collect();
+    let diag_errors: Vec<String> = diagnostics.errors().map(ToString::to_string).collect();
     Ok(AuthorizeOutcome {
         decision: result.decision,
         request_id: result.request_id,

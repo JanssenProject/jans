@@ -358,7 +358,7 @@ mod tests {
         assert!(d["modified"].as_array().is_some_and(|a| !a.is_empty()));
         // forbid policy is added
         assert!(d["added"].as_array().is_some_and(|a| !a.is_empty()));
-        assert!(d["removed"].as_array().is_some_and(|a| a.is_empty()));
+        assert!(d["removed"].as_array().is_some_and(Vec::is_empty));
     }
 
     #[test]

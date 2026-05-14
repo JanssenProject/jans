@@ -13,7 +13,7 @@
 
 use std::collections::VecDeque;
 use std::sync::{Mutex, OnceLock};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use chrono::Utc;
 use pgrx::prelude::*;
@@ -78,6 +78,16 @@ pub(crate) struct AuthorizationTrace {
 }
 
 static RING: Mutex<VecDeque<AuthorizationTrace>> = Mutex::new(VecDeque::new());
+
+/// Convert a `Duration` into whole milliseconds for trace records.
+///
+/// A backend process whose individual authorization call exceeds `u64::MAX`
+/// milliseconds (~584 million years) is not a configuration we need to model;
+/// saturating instead of panicking keeps the trace path infallible.
+#[inline]
+pub(crate) fn duration_millis(d: Duration) -> u64 {
+    u64::try_from(d.as_millis()).unwrap_or(u64::MAX)
+}
 
 /// Push a trace into the ring buffer. Oldest entry is silently dropped when the buffer is full.
 pub(crate) fn push_trace(trace: AuthorizationTrace) {
@@ -168,8 +178,9 @@ pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
     if max_traces == 0 {
         return pgrx::datum::JsonB(json!([]));
     }
-    let count = limit.unwrap_or(10).max(0) as usize;
-    let count = count.min(max_traces);
+    let count = usize::try_from(limit.unwrap_or(10).max(0))
+        .unwrap_or(0)
+        .min(max_traces);
     let arr: Vec<Value> = RING
         .lock()
         .map(|buf| buf.iter().rev().take(count).map(trace_to_value).collect())
@@ -182,7 +193,7 @@ pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
 /// **Bypasses the decision cache** and **does not increment `cedarling_status()` counters** —
 /// safe to call repeatedly for interactive debugging.
 ///
-/// `resource_json`: EntityData JSON (must contain `cedar_entity_mapping`).
+/// `resource_json`: `EntityData` JSON (must contain `cedar_entity_mapping`).
 /// `action`: full Cedar action UID (e.g. `Jans::Action::"Read"`).
 ///
 /// The returned object always contains `timestamp`, `action`, `duration_ms`, and `decision`
@@ -195,7 +206,7 @@ pub fn cedarling_explain(resource_json: &str, action: &str) -> pgrx::datum::Json
     let action_trimmed = action.trim();
     let resource_trimmed = resource_json.trim();
 
-    let elapsed_ms = || start.elapsed().as_millis() as u64;
+    let elapsed_ms = || crate::trace::duration_millis(start.elapsed());
 
     if action_trimmed.is_empty() {
         return pgrx::datum::JsonB(json!({

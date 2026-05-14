@@ -7,6 +7,14 @@
 
 use crate::mask::types::MaskType;
 
+/// One explicit masking rule row from `cedarling.mask_rules`.
+#[derive(Debug, Clone)]
+pub(crate) struct MaskRule {
+    pub(crate) column_name: String,
+    pub(crate) mask_type: MaskType,
+    pub(crate) condition_sql: Option<String>,
+}
+
 /// Return the built-in default mask for `col_name` when no explicit catalog rule exists.
 ///
 /// Matching is a case-insensitive substring check against well-known sensitive field names.
@@ -43,7 +51,7 @@ pub(crate) fn default_mask_for_column(col_name: &str) -> Option<MaskType> {
 /// warning (evaluating arbitrary SQL in this helper would require another SPI execution level).
 /// Returns `(column_name, MaskType)` pairs.
 #[cfg(test)]
-pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Vec<(String, MaskType)> {
+pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Vec<MaskRule> {
     // Unit tests run outside a Postgres backend; return no catalog rules so tests
     // validate pure masking behavior (default registry + type preservation) only.
     Vec::new()
@@ -55,7 +63,7 @@ pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Vec<(String, MaskType)
 /// warning (evaluating arbitrary SQL in this helper would require another SPI execution level).
 /// Returns `(column_name, MaskType)` pairs.
 #[cfg(not(test))]
-pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<(String, MaskType)> {
+pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<MaskRule> {
     let mut rules = Vec::new();
     let _ = pgrx::prelude::Spi::connect(|client| {
         let rows = client.select(
@@ -70,26 +78,23 @@ pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<(String, MaskType)>
             let Some(col) = row.get_by_name::<String, _>("column_name")? else {
                 continue;
             };
-            let condition_sql = row.get_by_name::<String, _>("condition_sql")?;
-            if condition_sql.is_some() {
-                pgrx::warning!(
-                    "cedarling_pg: mask rule for {table_name}.{col} has a condition_sql — \
-                     conditional rules are not evaluated by this helper and the rule is skipped"
-                );
-                continue;
-            }
             let mt = row
                 .get_by_name::<String, _>("mask_type")?
                 .unwrap_or_default();
             let mv = row.get_by_name::<String, _>("mask_value")?;
-            rules.push((col, MaskType::from_parts(&mt, mv.as_deref())));
+            let condition_sql = row.get_by_name::<String, _>("condition_sql")?;
+            rules.push(MaskRule {
+                column_name: col,
+                mask_type: MaskType::from_parts(&mt, mv.as_deref()),
+                condition_sql,
+            });
         }
         Ok::<(), pgrx::spi::Error>(())
     });
     rules
 }
 
-/// Resolve the PostgreSQL table name for a Cedar entity type.
+/// Resolve the `PostgreSQL` table name for a Cedar entity type.
 ///
 /// Checks `cedarling.entity_map` first; falls back to the lower-cased basename (after `::`)
 /// when no explicit mapping is registered.
@@ -102,7 +107,7 @@ pub(crate) fn table_name_for_entity_type(entity_type: &str) -> String {
         .to_ascii_lowercase()
 }
 
-/// Resolve the PostgreSQL table name for a Cedar entity type.
+/// Resolve the `PostgreSQL` table name for a Cedar entity type.
 ///
 /// Checks `cedarling.entity_map` first; falls back to the lower-cased basename (after `::`)
 /// when no explicit mapping is registered.

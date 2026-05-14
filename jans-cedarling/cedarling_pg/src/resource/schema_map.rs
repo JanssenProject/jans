@@ -39,28 +39,26 @@ pub(crate) fn mapping_for_table_oid(table_oid: pg_sys::Oid) -> Result<Option<Ent
 fn lookup_explicit_mapping(table_oid: pg_sys::Oid) -> Result<Option<EntityMapping>, CedarlingError> {
     let mut found: Option<EntityMapping> = None;
     Spi::connect(|client| {
-        let rows = client.select(
+        let mut rows = client.select(
             "SELECT entity_type, id_columns
              FROM cedarling.entity_map
              WHERE table_oid = $1::oid",
             None,
             &[table_oid.into()],
         )?;
-        for row in rows {
+        if let Some(row) = rows.next() {
             let entity_type = row
                 .get_by_name::<String, _>("entity_type")?
                 .unwrap_or_default()
                 .trim()
                 .to_string();
             let id_columns_raw = row.get_by_name::<Vec<String>, _>("id_columns")?;
-            if entity_type.is_empty() {
-                break;
+            if !entity_type.is_empty() {
+                found = Some(EntityMapping {
+                    entity_type,
+                    id_columns: sanitize_id_columns(id_columns_raw.unwrap_or_default()),
+                });
             }
-            found = Some(EntityMapping {
-                entity_type,
-                id_columns: sanitize_id_columns(id_columns_raw.unwrap_or_default()),
-            });
-            break;
         }
         Ok::<(), pgrx::spi::Error>(())
     })
@@ -71,14 +69,13 @@ fn lookup_explicit_mapping(table_oid: pg_sys::Oid) -> Result<Option<EntityMappin
 fn lookup_relname(table_oid: pg_sys::Oid) -> Result<String, CedarlingError> {
     let mut relname: Option<String> = None;
     Spi::connect(|client| {
-        let rows = client.select(
+        let mut rows = client.select(
             "SELECT relname::text AS relname FROM pg_class WHERE oid = $1::oid",
             None,
             &[table_oid.into()],
         )?;
-        for row in rows {
+        if let Some(row) = rows.next() {
             relname = row.get_by_name::<String, _>("relname")?;
-            break;
         }
         Ok::<(), pgrx::spi::Error>(())
     })
@@ -170,8 +167,7 @@ pub(crate) fn heuristic_entity_type(relname: &str) -> String {
             out.extend(chars);
             out
         })
-        .collect::<Vec<_>>()
-        .join("")
+        .collect()
 }
 
 /// Register or update an explicit table -> entity mapping.

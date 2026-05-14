@@ -34,6 +34,7 @@ use crate::trace::{push_trace, AuthorizationTrace};
 /// 3. Returns `true` so RLS includes the row (with masked sensitive columns).
 /// 4. Writes a trace with `decision=false, masked=true`.
 #[pg_extern]
+#[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
 pub fn cedarling_authorized_row(
     resource: pgrx::datum::JsonB,
     action: &str,
@@ -80,30 +81,14 @@ pub fn cedarling_authorized_row(
         &context_str,
     );
     if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        status::record_cache_hit();
-        status::record_decision(decision);
-        let timestamp = chrono::Utc::now().to_rfc3339();
-
-        // Mask strategy on cached deny
-        let (final_decision, masked) = apply_mask_strategy(decision, &resource, &timestamp);
-
-        push_trace(AuthorizationTrace {
-            timestamp,
-            action: action_trimmed.to_string(),
-            duration_ms: 0,
-            decision: Some(decision),
-            error_category: None,
-            request_id: String::new(),
-            resource_type,
-            resource_id,
-            principal_id: None,
+        return handle_row_cache_hit(
+            decision,
+            &resource,
+            action_trimmed,
+            &resource_type,
+            &resource_id,
             shadow,
-            cache_hit: true,
-            policy_hits: vec![],
-            diag_errors: vec![],
-            masked,
-        });
-        return if masked { true } else { finalize_decision(final_decision) };
+        );
     }
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
@@ -134,58 +119,119 @@ pub fn cedarling_authorized_row(
     let start = std::time::Instant::now();
     let timestamp = chrono::Utc::now().to_rfc3339();
 
+    let row_common = RowTraceCommon {
+        timestamp: &timestamp,
+        action: action_trimmed,
+        resource_type: &resource_type,
+        resource_id: &resource_id,
+        shadow,
+    };
     match authz_bridge::authorize_unsigned_outcome_for_request(engine.as_ref(), request) {
         Ok(outcome) => {
-            let duration_ms = start.elapsed().as_millis() as u64;
+            let duration_ms = crate::trace::duration_millis(start.elapsed());
             authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
-            status::record_decision(outcome.decision);
-
-            // Mask strategy on live deny
-            let (final_decision, masked) =
-                apply_mask_strategy(outcome.decision, &resource, &timestamp);
-
-            push_trace(AuthorizationTrace {
-                timestamp,
-                action: action_trimmed.to_string(),
-                duration_ms,
-                decision: Some(outcome.decision),
-                error_category: None,
-                request_id: outcome.request_id,
-                resource_type,
-                resource_id,
-                principal_id: None,
-                shadow,
-                cache_hit: false,
-                policy_hits: outcome.policy_hits,
-                diag_errors: outcome.diag_errors,
-                masked,
-            });
-            if masked { true } else { finalize_decision(final_decision) }
+            handle_row_success(&row_common, duration_ms, outcome, &resource)
         },
         Err(e) => {
-            let duration_ms = start.elapsed().as_millis() as u64;
+            let duration_ms = crate::trace::duration_millis(start.elapsed());
             extension_log::log_unsigned_bridge_failure(&e);
             let ce = CedarlingError::from(e);
-            status::record_error_msg(&ce.to_string());
-            push_trace(AuthorizationTrace {
-                timestamp,
-                action: action_trimmed.to_string(),
-                duration_ms,
-                decision: None,
-                error_category: Some(ce.category()),
-                request_id: String::new(),
-                resource_type,
-                resource_id,
-                principal_id: None,
-                shadow,
-                cache_hit: false,
-                policy_hits: vec![],
-                diag_errors: vec![],
-                masked: false,
-            });
-            finalize_with_mask_strategy_on_error(&ce, &resource)
+            handle_row_error(&row_common, duration_ms, &ce, &resource)
         },
     }
+}
+
+fn handle_row_cache_hit(
+    decision: bool,
+    resource: &JsonB,
+    action: &str,
+    resource_type: &str,
+    resource_id: &str,
+    shadow: bool,
+) -> bool {
+    status::record_cache_hit();
+    status::record_decision(decision);
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    let (final_decision, masked) = apply_mask_strategy(decision, resource, &timestamp);
+    push_trace(AuthorizationTrace {
+        timestamp,
+        action: action.to_string(),
+        duration_ms: 0,
+        decision: Some(decision),
+        error_category: None,
+        request_id: String::new(),
+        resource_type: resource_type.to_string(),
+        resource_id: resource_id.to_string(),
+        principal_id: None,
+        shadow,
+        cache_hit: true,
+        policy_hits: vec![],
+        diag_errors: vec![],
+        masked,
+    });
+    if masked { true } else { finalize_decision(final_decision) }
+}
+
+/// Common per-row trace fields shared by the success and error branches.
+struct RowTraceCommon<'a> {
+    timestamp: &'a str,
+    action: &'a str,
+    resource_type: &'a str,
+    resource_id: &'a str,
+    shadow: bool,
+}
+
+fn handle_row_success(
+    c: &RowTraceCommon<'_>,
+    duration_ms: u64,
+    outcome: crate::authz_bridge::AuthorizeOutcome,
+    resource: &JsonB,
+) -> bool {
+    status::record_decision(outcome.decision);
+    let (final_decision, masked) = apply_mask_strategy(outcome.decision, resource, c.timestamp);
+    push_trace(AuthorizationTrace {
+        timestamp: c.timestamp.to_string(),
+        action: c.action.to_string(),
+        duration_ms,
+        decision: Some(outcome.decision),
+        error_category: None,
+        request_id: outcome.request_id,
+        resource_type: c.resource_type.to_string(),
+        resource_id: c.resource_id.to_string(),
+        principal_id: None,
+        shadow: c.shadow,
+        cache_hit: false,
+        policy_hits: outcome.policy_hits,
+        diag_errors: outcome.diag_errors,
+        masked,
+    });
+    if masked { true } else { finalize_decision(final_decision) }
+}
+
+fn handle_row_error(
+    c: &RowTraceCommon<'_>,
+    duration_ms: u64,
+    ce: &CedarlingError,
+    resource: &JsonB,
+) -> bool {
+    status::record_error_msg(&ce.to_string());
+    push_trace(AuthorizationTrace {
+        timestamp: c.timestamp.to_string(),
+        action: c.action.to_string(),
+        duration_ms,
+        decision: None,
+        error_category: Some(ce.category()),
+        request_id: String::new(),
+        resource_type: c.resource_type.to_string(),
+        resource_id: c.resource_id.to_string(),
+        principal_id: None,
+        shadow: c.shadow,
+        cache_hit: false,
+        policy_hits: vec![],
+        diag_errors: vec![],
+        masked: false,
+    });
+    finalize_with_mask_strategy_on_error(ce, resource)
 }
 
 /// Finalize an error through fail-open/fail-closed mode and then apply masking strategy.
@@ -220,7 +266,7 @@ fn apply_mask_strategy(
     (false, true)
 }
 
-/// AnyElement wrapper for row-based unsigned authorization.
+/// `AnyElement` wrapper for row-based unsigned authorization.
 ///
 /// Materializes the row to canonical Cedar `EntityData` JSON and then reuses the JSONB
 /// unsigned path (`cedarling_authorized_row`).
@@ -241,7 +287,7 @@ pub fn cedarling_authorized_row_from_anyelement(
     cedarling_authorized_row(JsonB(resource_value), action, context)
 }
 
-/// AnyElement wrapper for JWT/multi-issuer authorization.
+/// `AnyElement` wrapper for JWT/multi-issuer authorization.
 ///
 /// Reads tokens from the fallback chain: explicit bundle (none here) → `cedarling.tokens` GUC.
 #[pg_extern]
@@ -263,8 +309,7 @@ mod tests {
     #[test]
     fn context_null_treated_as_empty_object() {
         let context_value = None::<pgrx::datum::JsonB>
-            .map(|j: pgrx::datum::JsonB| j.0)
-            .unwrap_or_else(|| json!({}));
+            .map_or_else(|| json!({}), |j: pgrx::datum::JsonB| j.0);
         assert!(context_value.is_object());
         assert_eq!(context_value, json!({}));
     }

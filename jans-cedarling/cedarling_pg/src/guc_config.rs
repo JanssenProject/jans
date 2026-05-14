@@ -213,7 +213,7 @@ pub fn mask_hash_salt_bytes() -> Vec<u8> {
         .get()
         .and_then(|c| c.into_string().ok())
         .filter(|s| !s.trim().is_empty())
-        .map(|s| s.into_bytes())
+        .map(String::into_bytes)
         .unwrap_or_default()
 }
 
@@ -255,6 +255,12 @@ unsafe extern "C-unwind" fn cedarling_context_check_hook(
 }
 
 unsafe fn register_gucs_inner() {
+    register_enum_gucs();
+    register_numeric_gucs();
+    register_string_gucs();
+}
+
+unsafe fn register_enum_gucs() {
     GucRegistry::define_enum_guc(
         c"cedarling.mode",
         c"Cedarling operation mode.",
@@ -291,6 +297,17 @@ unsafe fn register_gucs_inner() {
         GucFlags::empty(),
     );
 
+    GucRegistry::define_enum_guc(
+        c"cedarling.diff_mode",
+        c"Algorithm used by cedarling_diff_policies.",
+        c"structural: per-policy-id diff via cedar_policy::PolicySet (default). lines: legacy line-oriented text diff.",
+        &DIFF_MODE,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+}
+
+unsafe fn register_numeric_gucs() {
     GucRegistry::define_int_guc(
         c"cedarling.cache_ttl",
         c"Authorization result cache TTL in seconds.",
@@ -322,6 +339,39 @@ unsafe fn register_gucs_inner() {
         GucFlags::empty(),
     );
 
+    GucRegistry::define_int_guc(
+        c"cedarling.trace_buffer_size",
+        c"Maximum traces retained in the per-backend authorization ring buffer.",
+        c"0 disables in-memory trace retention. Range 0..=65536.",
+        &TRACE_BUFFER_SIZE,
+        0,
+        65_536,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_int_guc(
+        c"cedarling.policy_history_size",
+        c"Maximum rows retained in cedarling.policy_history.",
+        c"0 keeps no history rows; each policy operation prunes to this cap. Range 0..=100000.",
+        &POLICY_HISTORY_SIZE,
+        0,
+        100_000,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_bool_guc(
+        c"cedarling.schema_validate_strict",
+        c"Use strict Cedar parser-based schema validation.",
+        c"true: parse with cedar_policy::Schema and run type compatibility checks; false: legacy lexical identifier extraction.",
+        &SCHEMA_VALIDATE_STRICT,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+}
+
+unsafe fn register_string_gucs() {
     GucRegistry::define_string_guc_with_hooks(
         c"cedarling.tokens",
         c"JWT token bundle JSON for Cedarling.",
@@ -360,46 +410,6 @@ unsafe fn register_gucs_inner() {
         c"Policy version to pin this session to.",
         c"Empty / unset means the most recently loaded version. Values are matched against versions registered via cedarling_use_policy().",
         &POLICY_VERSION,
-        GucContext::Userset,
-        GucFlags::empty(),
-    );
-
-    GucRegistry::define_int_guc(
-        c"cedarling.trace_buffer_size",
-        c"Maximum traces retained in the per-backend authorization ring buffer.",
-        c"0 disables in-memory trace retention. Range 0..=65536.",
-        &TRACE_BUFFER_SIZE,
-        0,
-        65_536,
-        GucContext::Userset,
-        GucFlags::empty(),
-    );
-
-    GucRegistry::define_int_guc(
-        c"cedarling.policy_history_size",
-        c"Maximum rows retained in cedarling.policy_history.",
-        c"0 keeps no history rows; each policy operation prunes to this cap. Range 0..=100000.",
-        &POLICY_HISTORY_SIZE,
-        0,
-        100_000,
-        GucContext::Userset,
-        GucFlags::empty(),
-    );
-
-    GucRegistry::define_enum_guc(
-        c"cedarling.diff_mode",
-        c"Algorithm used by cedarling_diff_policies.",
-        c"structural: per-policy-id diff via cedar_policy::PolicySet (default). lines: legacy line-oriented text diff.",
-        &DIFF_MODE,
-        GucContext::Userset,
-        GucFlags::empty(),
-    );
-
-    GucRegistry::define_bool_guc(
-        c"cedarling.schema_validate_strict",
-        c"Use strict Cedar parser-based schema validation.",
-        c"true: parse with cedar_policy::Schema and run type compatibility checks; false: legacy lexical identifier extraction.",
-        &SCHEMA_VALIDATE_STRICT,
         GucContext::Userset,
         GucFlags::empty(),
     );

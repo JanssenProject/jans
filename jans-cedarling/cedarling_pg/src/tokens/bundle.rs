@@ -93,4 +93,25 @@ mod tests {
         let err = parse_token_inputs_from_json(r#"{"Acme::Access_Token":123}"#).unwrap_err();
         assert!(matches!(err, TokenBundleError::NonStringPayload { .. }));
     }
+
+    /// Phase 8c — no JWT in logs: invalid token-bundle JSON must not echo the
+    /// JWT body into the resulting error's Display. The mapping key is the
+    /// only field a `NonStringPayload` error can include, and a raw JWT
+    /// passed as the whole input is rejected by serde with a "expected value"
+    /// message, not by quoting the input.
+    #[test]
+    fn errors_do_not_echo_raw_jwt_bytes() {
+        let fake_jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsZWFreSJ9.sig_redacted";
+        // Pass the raw JWT (not a bundle) — serde rejects it as invalid JSON.
+        let err = parse_token_inputs_from_json(fake_jwt).unwrap_err();
+        let msg = err.to_string();
+        assert!(
+            !msg.contains(fake_jwt),
+            "token bundle error echoed JWT into message: {msg}"
+        );
+        assert!(
+            !msg.contains("eyJ"),
+            "token bundle error contains JWT prefix: {msg}"
+        );
+    }
 }
