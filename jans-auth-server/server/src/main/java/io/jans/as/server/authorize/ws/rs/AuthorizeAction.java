@@ -691,16 +691,23 @@ public class AuthorizeAction {
     }
 
     protected String fetchRequestUriContent(String reqUriWithoutFragment, String reqUriHash) throws NoSuchAlgorithmException, NoSuchProviderException {
-        try (Response clientResponse = RequestUriHttpClientHolder.INSTANCE.target(reqUriWithoutFragment).request().buildGet().invoke()) {
+        String entity = httpGet(reqUriWithoutFragment);
+        if (entity == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(reqUriHash)) {
+            return entity;
+        }
+        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+        return StringUtils.equals(reqUriHash, hash) ? entity : null;
+    }
+
+    String httpGet(String url) {
+        try (Response clientResponse = RequestUriHttpClientHolder.INSTANCE.target(url).request().buildGet().invoke()) {
             if (clientResponse.getStatus() != 200) {
                 return null;
             }
-            String entity = clientResponse.readEntity(String.class);
-            if (StringUtils.isBlank(reqUriHash)) {
-                return entity;
-            }
-            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-            return StringUtils.equals(reqUriHash, hash) ? entity : null;
+            return clientResponse.readEntity(String.class);
         }
     }
 

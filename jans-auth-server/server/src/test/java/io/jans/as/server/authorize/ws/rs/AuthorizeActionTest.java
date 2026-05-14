@@ -5,6 +5,8 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.auth.AuthenticationMode;
@@ -19,6 +21,7 @@ import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.service.net.NetworkService;
 import io.jans.util.OxConstants;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import org.mockito.InjectMocks;
@@ -26,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -33,8 +37,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -132,6 +135,11 @@ public class AuthorizeActionTest {
 
     @Mock
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
+
+    @BeforeClass
+    public void installBcProvider() {
+        SecurityProviderUtility.installBCProvider();
+    }
 
     @Test
     public void checkPermissionGranted_whenExceptionThrown_shouldDeny() {
@@ -262,5 +270,29 @@ public class AuthorizeActionTest {
         assertTrue(result.contains("email"));
         assertTrue(result.contains("given_name"));
         assertTrue(result.contains("auth_time"));
+    }
+
+    @Test
+    public void fetchRequestUriContent_whenHashMatchesBody_shouldReturnBody() throws Exception {
+        String body = "fake-request-jwt-body";
+        String matchingHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(body));
+        doReturn(body).when(authorizeAction).httpGet("https://allowed.example/jwt");
+
+        String result = authorizeAction.fetchRequestUriContent("https://allowed.example/jwt", matchingHash);
+
+        assertEquals(result, body);
+        verify(authorizeAction).httpGet("https://allowed.example/jwt");
+    }
+
+    @Test
+    public void fetchRequestUriContent_whenHashDoesNotMatchBody_shouldReturnNull() throws Exception {
+        String body = "fake-request-jwt-body";
+        String wrongHash = "this-is-not-the-real-hash";
+        doReturn(body).when(authorizeAction).httpGet("https://allowed.example/jwt");
+
+        String result = authorizeAction.fetchRequestUriContent("https://allowed.example/jwt", wrongHash);
+
+        assertNull(result, "tampered content with wrong fragment hash must be rejected");
+        verify(authorizeAction).httpGet("https://allowed.example/jwt");
     }
 }
