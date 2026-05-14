@@ -68,9 +68,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.*;
@@ -699,15 +701,44 @@ public class AuthorizeAction {
             return entity;
         }
         String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-        return StringUtils.equals(reqUriHash, hash) ? entity : null;
+        if (StringUtils.equals(reqUriHash, hash)) {
+            return entity;
+        }
+        log.warn("request_uri content integrity check failed, url = {}, expected hash = {}, computed hash = {}",
+                reqUriWithoutFragment, reqUriHash, hash);
+        return null;
     }
+
+    static final int REQUEST_URI_MAX_BYTES = 256 * 1024;
 
     String httpGet(String url) {
         try (Response clientResponse = RequestUriHttpClientHolder.INSTANCE.target(url).request().buildGet().invoke()) {
             if (clientResponse.getStatus() != 200) {
                 return null;
             }
-            return clientResponse.readEntity(String.class);
+            String contentLength = clientResponse.getHeaderString("Content-Length");
+            if (contentLength != null) {
+                try {
+                    if (Long.parseLong(contentLength) > REQUEST_URI_MAX_BYTES) {
+                        log.warn("request_uri response exceeds max size ({} bytes), url = {}, Content-Length = {}",
+                                REQUEST_URI_MAX_BYTES, url, contentLength);
+                        return null;
+                    }
+                } catch (NumberFormatException e) {
+                    // malformed Content-Length — fall through to bounded read
+                }
+            }
+            try (InputStream in = clientResponse.readEntity(InputStream.class)) {
+                byte[] bytes = in.readNBytes(REQUEST_URI_MAX_BYTES + 1);
+                if (bytes.length > REQUEST_URI_MAX_BYTES) {
+                    log.warn("request_uri response body exceeds max size ({} bytes), url = {}", REQUEST_URI_MAX_BYTES, url);
+                    return null;
+                }
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.warn("Failed to read request_uri response, url = {}: {}", url, e.getMessage());
+                return null;
+            }
         }
     }
 
