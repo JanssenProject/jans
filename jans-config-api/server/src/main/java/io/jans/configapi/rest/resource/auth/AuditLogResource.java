@@ -174,7 +174,7 @@ public class AuditLogResource extends ConfigBaseResource {
             return logEntriesList;
         }
         if (log.isDebugEnabled()) {
-            log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), pattern);
+            log.debug(" strPattern:{}, pattern:{}", escapeLog(strPattern), escapeLog(pattern));
         }
 
         List<String> logEntriesfilterByPattern = logEntriesList.stream().filter(pattern.asPredicate())
