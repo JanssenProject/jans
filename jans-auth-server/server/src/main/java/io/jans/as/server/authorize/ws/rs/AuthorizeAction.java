@@ -28,9 +28,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.auth.AuthenticationMode;
-import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.authorize.*;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.DefaultScope;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -65,6 +63,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -587,6 +587,8 @@ public class AuthorizeAction {
             return requestedClaims;
         }
 
+        populateFromStandaloneClaims(result);
+
         String requestJwt = request;
         if (StringUtils.isBlank(requestJwt) && StringUtils.isNotBlank(requestUri)) {
             requestJwt = fetchRequestJwt(client);
@@ -628,6 +630,27 @@ public class AuthorizeAction {
         } catch (EntryPersistenceException e) {
             log.error(e.getMessage(), e);
             return null;
+        }
+    }
+
+    private void populateFromStandaloneClaims(Set<String> result) {
+        if (StringUtils.isBlank(claims)) {
+            return;
+        }
+        try {
+            JSONObject claimsJson = new JSONObject(claims);
+            if (claimsJson.has("userinfo")) {
+                for (Claim claim : new UserInfoMember(claimsJson.getJSONObject("userinfo")).getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+            if (claimsJson.has("id_token")) {
+                for (Claim claim : new IdTokenMember(claimsJson.getJSONObject("id_token")).getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
         }
     }
 

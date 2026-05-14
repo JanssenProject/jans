@@ -246,6 +246,21 @@ public class AuthorizeActionTest {
         authorizeAction.getRequestedClaims();
         authorizeAction.getRequestedClaims();
 
-        verify(clientService, org.mockito.Mockito.times(1)).getClient("c1");
+        verify(clientService, times(1)).getClient("c1");
+    }
+
+    @Test
+    public void getRequestedClaims_whenStandaloneClaimsSetAndNoRequestJwt_shouldReturnClaimNames() {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setClaims("{\"userinfo\":{\"email\":null,\"given_name\":null},\"id_token\":{\"auth_time\":{\"essential\":true}}}");
+
+        Client client = new Client();
+        when(clientService.getClient("c1")).thenReturn(client);
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.contains("email"));
+        assertTrue(result.contains("given_name"));
+        assertTrue(result.contains("auth_time"));
     }
 }
