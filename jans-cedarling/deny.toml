@@ -35,9 +35,12 @@ confidence-threshold = 0.93
 exceptions = [{ allow = ["bzip2-1.0.6"], crate = "libbz2-rs-sys" }]
 
 [bans]
-# for now, we keep it at "warn" for duplicates and wildcards. This will be updated to "deny" in a follow-up PR after we propagate `publish = false` to the internal crates
+# `multiple-versions` stays at "warn" while 3x rand drift exists in Cargo.lock; revisit
+# once that's resolved upstream. `wildcards = "deny"` is safe because all internal path
+# deps live in crates marked `publish = false`, which `allow-wildcard-paths` exempts.
 multiple-versions = "warn"
-wildcards = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"
