@@ -10,6 +10,7 @@ use super::{
 };
 use crate::authz::AuthorizeEntitiesData;
 use crate::common::issuer_utils::IssClaim;
+use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::Token;
 use crate::log::interface::LogWriter;
@@ -347,17 +348,13 @@ impl EntityBuilder {
         let entity_type = determine_token_entity_type(token);
 
         // Resolve token_id from the trusted issuer's token_metadata config,
-        // falling back to "jti" when the issuer or metadata entry is not found.
+        // falling back to DEFAULT_TKN_ID when the issuer or metadata entry is not found.
         let token_id_claim: &str = token
             .iss
             .as_deref()
-            .and_then(|iss| {
-                iss.token_metadata
-                    .values()
-                    .find(|m| m.entity_type_name == entity_type)
-                    .map(|m| m.token_id.as_str())
-            })
-            .unwrap_or("jti");
+            .and_then(|iss| iss.token_metadata.get(&token.name))
+            .map(|m| m.token_id.as_str())
+            .unwrap_or(DEFAULT_TKN_ID);
 
         let entity_id_srcs = vec![EntityIdSrc::Token {
             token,
