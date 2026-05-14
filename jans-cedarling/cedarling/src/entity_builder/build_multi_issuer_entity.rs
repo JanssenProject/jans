@@ -353,8 +353,7 @@ impl EntityBuilder {
             .iss
             .as_deref()
             .and_then(|iss| iss.token_metadata.get(&token.name))
-            .map(|m| m.token_id.as_str())
-            .unwrap_or(DEFAULT_TKN_ID);
+            .map_or(DEFAULT_TKN_ID, |m| m.token_id.as_str());
 
         let entity_id_srcs = vec![EntityIdSrc::Token {
             token,
