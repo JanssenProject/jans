@@ -94,7 +94,7 @@ public class AuthorizeAction {
     private static final class RequestUriHttpClientHolder {
         private static final jakarta.ws.rs.client.Client INSTANCE = ClientBuilder.newBuilder()
                 .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
                 .build();
     }
 
