@@ -223,6 +223,7 @@ public class AuthorizeAction {
     private String sessionId;
 
     private String allowedScope;
+    private List<String> requestedClaims;
     private AuthzDetails authzDetails;
 
     public void checkUiLocales() {
@@ -467,7 +468,7 @@ public class AuthorizeAction {
                     && grantedScopes.size() == 1
                     && grantedScopes.contains(DefaultScope.OPEN_ID.toString())
                     && scope.equals(DefaultScope.OPEN_ID.toString())
-                    && claims == null && request == null;
+                    && claims == null && request == null && requestUri == null;
             if (isTrusted || canGrantAccess || isPairwiseWithOnlyOpenIdScope) {
                 permissionGranted(session);
                 return;
@@ -575,10 +576,15 @@ public class AuthorizeAction {
     }
 
     public List<String> getRequestedClaims() {
-        Set<String> result = new HashSet<>();
+        if (requestedClaims != null) {
+            return requestedClaims;
+        }
+
+        Set<String> result = new LinkedHashSet<>();
         Client client = loadClient();
         if (client == null) {
-            return new ArrayList<>(result);
+            requestedClaims = new ArrayList<>(result);
+            return requestedClaims;
         }
 
         String requestJwt = request;
@@ -587,7 +593,8 @@ public class AuthorizeAction {
         }
 
         if (StringUtils.isBlank(requestJwt)) {
-            return new ArrayList<>(result);
+            requestedClaims = new ArrayList<>(result);
+            return requestedClaims;
         }
 
         try {
@@ -608,7 +615,8 @@ public class AuthorizeAction {
             log.error(e.getMessage(), e);
         }
 
-        return new ArrayList<>(result);
+        requestedClaims = new ArrayList<>(result);
+        return requestedClaims;
     }
 
     private Client loadClient() {

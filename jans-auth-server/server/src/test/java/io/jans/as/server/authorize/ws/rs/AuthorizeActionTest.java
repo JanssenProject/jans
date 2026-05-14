@@ -237,4 +237,15 @@ public class AuthorizeActionTest {
         assertTrue(result.isEmpty());
         verify(authorizeAction).fetchRequestUriContent(eq("https://allowed.example/jwt"), eq(null));
     }
+
+    @Test
+    public void getRequestedClaims_whenCalledMultipleTimes_shouldCacheAndNotRepeatClientLookup() {
+        authorizeAction.setClientId("c1");
+
+        authorizeAction.getRequestedClaims();
+        authorizeAction.getRequestedClaims();
+        authorizeAction.getRequestedClaims();
+
+        verify(clientService, org.mockito.Mockito.times(1)).getClient("c1");
+    }
 }
