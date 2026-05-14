@@ -127,7 +127,8 @@ mod tests {
         assert!(
             issuer_index
                 .find(&IssClaim::new("https://login.microsoftonline.com/tenant"))
-                .is_none()
+                .is_none(),
+            "expected no issuer to be found in empty index for IssClaim::new(\"https://login.microsoftonline.com/tenant\")"
         );
     }
 
@@ -137,7 +138,8 @@ mod tests {
         assert!(
             issuer_index
                 .find(&IssClaim::new("https://account.google.com"))
-                .is_none()
+                .is_none(),
+            "expected no issuer to be found for IssClaim::new(\"https://account.google.com\")"
         );
     }
 
