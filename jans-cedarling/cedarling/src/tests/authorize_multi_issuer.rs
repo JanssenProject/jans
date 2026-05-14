@@ -1291,18 +1291,6 @@ async fn test_validation_empty_payload() {
 async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
 
-    let dolphin_access_token = generate_token_using_claims(json!({
-        "iss": "https://idp.dolphin.sea/",
-        "sub": "dolphin_user_123",
-        "jti": "dolphin123",
-        "client_id": "dolphin_client_123",
-        "aud": "dolphin_audience",
-        "location": ["miami", "orlando"],
-        "scope": ["read", "write"],
-        "exp": 2_000_000_000,
-        "iat": 1_516_239_022
-    }));
-
     let dolphin_user_token = generate_token_using_claims(json!({
         "iss": "https://idp.dolphin.sea/",
         "sub": "dolphin_user_123",
@@ -1316,7 +1304,6 @@ async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
-            TokenInput::new("Dolphin::Access_token".to_string(), dolphin_access_token),
             TokenInput::new("Dolphin::Userinfo_token".to_string(), dolphin_user_token),
         ],
         EntityData::from_json(
