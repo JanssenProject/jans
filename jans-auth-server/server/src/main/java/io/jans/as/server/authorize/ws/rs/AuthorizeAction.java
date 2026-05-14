@@ -6,13 +6,13 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import io.jans.as.model.authzdetails.AuthzDetail;
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -71,6 +71,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.*;
 
 import static io.jans.as.server.service.AcrService.isAgama;
@@ -564,66 +566,87 @@ public class AuthorizeAction {
     }
 
     public List<String> getRequestedClaims() {
-        Set<String> result = new HashSet<String>();
-        String requestJwt = request;
-
-        if (StringUtils.isBlank(requestJwt) && StringUtils.isNotBlank(requestUri)) {
-            try {
-                URI reqUri = new URI(requestUri);
-                String reqUriHash = reqUri.getFragment();
-                String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
-
-                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-                try {
-                    Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
-                    clientRequest.close();
-
-                    int status = clientResponse.getStatus();
-                    if (status == 200) {
-                        String entity = clientResponse.readEntity(String.class);
-
-                        if (StringUtils.isBlank(reqUriHash)) {
-                            requestJwt = entity;
-                        } else {
-                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-                            if (StringUtils.equals(reqUriHash, hash)) {
-                                requestJwt = entity;
-                            }
-                        }
-                    }
-                } finally {
-                    clientRequest.close();
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+        Set<String> result = new HashSet<>();
+        Client client = loadClient();
+        if (client == null) {
+            return new ArrayList<>(result);
         }
 
-        if (StringUtils.isNotBlank(requestJwt)) {
-            try {
-                Client client = clientService.getClient(clientId);
+        String requestJwt = request;
+        if (StringUtils.isBlank(requestJwt) && StringUtils.isNotBlank(requestUri)) {
+            requestJwt = fetchRequestJwt(client);
+        }
 
-                if (client != null) {
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+        if (StringUtils.isBlank(requestJwt)) {
+            return new ArrayList<>(result);
+        }
 
-                    if (jwtAuthorizationRequest.getUserInfoMember() != null) {
-                        for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
-                            result.add(claim.getName());
-                        }
-                    }
+        try {
+            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, requestJwt, client);
 
-                    if (jwtAuthorizationRequest.getIdTokenMember() != null) {
-                        for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
-                            result.add(claim.getName());
-                        }
-                    }
+            if (jwtAuthorizationRequest.getUserInfoMember() != null) {
+                for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
+                    result.add(claim.getName());
                 }
-            } catch (EntryPersistenceException | InvalidJwtException e) {
-                log.error(e.getMessage(), e);
             }
+
+            if (jwtAuthorizationRequest.getIdTokenMember() != null) {
+                for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+        } catch (InvalidJwtException e) {
+            log.error(e.getMessage(), e);
         }
 
         return new ArrayList<>(result);
+    }
+
+    private Client loadClient() {
+        if (StringUtils.isBlank(clientId)) {
+            return null;
+        }
+        try {
+            return clientService.getClient(clientId);
+        } catch (EntryPersistenceException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String fetchRequestJwt(Client client) {
+        try {
+            JwtAuthorizationRequest.validateRequestUri(requestUri, client, appConfiguration, state, errorResponseFactory);
+
+            URI reqUri = new URI(requestUri);
+            String reqUriHash = reqUri.getFragment();
+            String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+            return fetchRequestUriContent(reqUriWithoutFragment, reqUriHash);
+        } catch (WebApplicationException e) {
+            log.error("request_uri is forbidden by client allowlist or block list: " + requestUri, e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    protected String fetchRequestUriContent(String reqUriWithoutFragment, String reqUriHash) throws NoSuchAlgorithmException, NoSuchProviderException {
+        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        try {
+            Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
+            if (clientResponse.getStatus() != 200) {
+                return null;
+            }
+            String entity = clientResponse.readEntity(String.class);
+            if (StringUtils.isBlank(reqUriHash)) {
+                return entity;
+            }
+            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+            return StringUtils.equals(reqUriHash, hash) ? entity : null;
+        } finally {
+            clientRequest.close();
+        }
     }
 
     /**

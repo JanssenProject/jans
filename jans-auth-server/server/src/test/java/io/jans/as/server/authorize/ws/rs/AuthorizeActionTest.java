@@ -1,6 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -28,9 +29,10 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -172,5 +174,67 @@ public class AuthorizeActionTest {
         when(defaultAuthenticationMode.getName()).thenReturn("some_acr");
         final boolean skip = authorizeAction.shouldSkipScript(Lists.newArrayList());
         assertFalse(skip);
+    }
+
+    @Test
+    public void getRequestedClaims_whenClientIdMissing_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId(null);
+        authorizeAction.setRequestUri("https://evil.example/jwt");
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+        verify(clientService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriNotInClientAllowlist_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("https://evil.example/jwt");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[]{"https://allowed.example/jwt"});
+        when(clientService.getClient("c1")).thenReturn(client);
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriIsBlocklisted_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("http://169.254.169.254/latest/meta-data/");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[0]);
+        when(clientService.getClient("c1")).thenReturn(client);
+        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("http://169.254.169.254/*"));
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriIsAllowed_shouldInvokeFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("https://allowed.example/jwt");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[]{"https://allowed.example/jwt"});
+        when(clientService.getClient("c1")).thenReturn(client);
+        doReturn(null).when(authorizeAction).fetchRequestUriContent(anyString(), any());
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction).fetchRequestUriContent(eq("https://allowed.example/jwt"), eq(null));
     }
 }
