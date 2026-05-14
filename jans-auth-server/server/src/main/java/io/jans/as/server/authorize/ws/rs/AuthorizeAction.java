@@ -74,6 +74,7 @@ import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.server.service.AcrService.isAgama;
 import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
@@ -89,6 +90,14 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 public class AuthorizeAction {
 
     public static final String UNKNOWN = "Unknown";
+
+    private static final class RequestUriHttpClientHolder {
+        private static final jakarta.ws.rs.client.Client INSTANCE = ClientBuilder.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
     @Inject
     private Logger log;
 
@@ -624,17 +633,34 @@ public class AuthorizeAction {
 
             return fetchRequestUriContent(reqUriWithoutFragment, reqUriHash);
         } catch (WebApplicationException e) {
-            log.error("request_uri is forbidden by client allowlist or block list: " + requestUri, e);
+            log.warn("request_uri is forbidden by client allowlist or block list, clientId = {}, host = {}",
+                    clientId, safeHost(requestUri));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return null;
     }
 
-    protected String fetchRequestUriContent(String reqUriWithoutFragment, String reqUriHash) throws NoSuchAlgorithmException, NoSuchProviderException {
-        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+    private static String safeHost(String uri) {
+        if (StringUtils.isBlank(uri)) {
+            return "";
+        }
         try {
-            Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
+            URI parsed = new URI(uri);
+            String scheme = parsed.getScheme();
+            String host = parsed.getHost();
+            int port = parsed.getPort();
+            if (scheme == null || host == null) {
+                return "[unparseable]";
+            }
+            return scheme + "://" + host + (port > 0 ? ":" + port : "");
+        } catch (Exception e) {
+            return "[unparseable]";
+        }
+    }
+
+    protected String fetchRequestUriContent(String reqUriWithoutFragment, String reqUriHash) throws NoSuchAlgorithmException, NoSuchProviderException {
+        try (Response clientResponse = RequestUriHttpClientHolder.INSTANCE.target(reqUriWithoutFragment).request().buildGet().invoke()) {
             if (clientResponse.getStatus() != 200) {
                 return null;
             }
@@ -644,8 +670,6 @@ public class AuthorizeAction {
             }
             String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
             return StringUtils.equals(reqUriHash, hash) ? entity : null;
-        } finally {
-            clientRequest.close();
         }
     }
 
