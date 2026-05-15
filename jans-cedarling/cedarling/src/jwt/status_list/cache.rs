@@ -63,7 +63,7 @@ impl StatusListCache {
         logger: Option<Logger>,
         http_client: HttpClient,
     ) -> Result<(), UpdateStatusListError> {
-        let openid_config = if let Some(c) = iss_config.openid_config.as_ref() { c } else {
+        let Some(openid_config) = iss_config.openid_config.as_ref() else {
             if let Some(logger) = &logger {
                 logger.log_any(JwtLogEntry::new(
                     "issuer has no OpenID configuration; status validation skipped".into(),
@@ -72,7 +72,7 @@ impl StatusListCache {
             }
             return Ok(());
         };
-        let status_list_url = if let Some(url) = openid_config.status_list_endpoint.as_ref() { url } else {
+        let Some(status_list_url) = openid_config.status_list_endpoint.as_ref() else {
             if let Some(logger) = &logger {
                 logger.log_any(JwtLogEntry::new(
                     format!(
