@@ -13,6 +13,7 @@ use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 use crate::lock::LockService;
+use crate::lock::health_registry::HealthRegistry;
 use crate::log::BaseLogEntry;
 use crate::log::loggable_fn::LoggableFn;
 use serde::Serialize;
@@ -121,6 +122,15 @@ impl LogStrategy {
             .lock_service
             .write()
             .expect("obtain lock_service write lock") = Some(lock_service);
+    }
+
+    pub(crate) fn health_registry(&self) -> Option<HealthRegistry> {
+        self.lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .as_ref()
+            .and_then(|ls| ls.health_registry())
+            .cloned()
     }
 
     pub(crate) async fn shut_down(&self) {

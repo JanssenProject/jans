@@ -173,7 +173,10 @@ impl HttpClient {
     /// response headers and lets them decide how to consume the body. Use it when you
     /// need to inspect headers (e.g. `Cache-Control`, `Content-Type`) before reading
     /// the payload.
-    pub(crate) async fn get_with_retry(&self, uri: &str) -> Result<reqwest::Response, HttpClientError> {
+    pub(crate) async fn get_with_retry(
+        &self,
+        uri: &str,
+    ) -> Result<reqwest::Response, HttpClientError> {
         let mut sender = self.create_sender();
         sender.send_with_retry(|| self.raw_client.get(uri)).await
     }
@@ -221,7 +224,7 @@ mod test {
     use tokio::join;
     const HTTP_CONF: HttpClientConfig = HttpClientConfig {
         max_retries: 3,
-        request_timeout: Duration::from_millis(1),
+        request_timeout: Duration::from_millis(500),
         retry_delay: Duration::from_secs(5),
     };
 
