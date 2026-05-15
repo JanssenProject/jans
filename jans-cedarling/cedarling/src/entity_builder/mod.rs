@@ -180,28 +180,6 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
 #[derive(Default)]
 pub(super) struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
 
-impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
-    fn from(value: Vec<TokenPrincipalMapping>) -> Self {
-        Self(value.into_iter().fold(HashMap::new(), |mut acc, mapping| {
-            acc.entry(mapping.principal.clone())
-                .or_default()
-                .push((mapping.attr_name.clone(), mapping.expr.clone()));
-            acc
-        }))
-    }
-}
-
-/// Represents a token and it's UID
-#[derive(Clone)]
-pub(super) struct TokenPrincipalMapping {
-    /// The principal where token will be inserted
-    principal: String,
-    /// The name of the attribute of the token
-    attr_name: String,
-    /// An `EntityUID` reference to the token
-    expr: RestrictedExpression,
-}
-
 impl TokenPrincipalMappings {
     fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
         self.0.get(principal)
