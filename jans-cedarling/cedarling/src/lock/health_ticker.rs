@@ -48,7 +48,9 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
             transport,
             health_url: params.health_url,
             pdp_id: params.pdp_id.to_string(),
-            app_name: params.app_name.map_or_else(String::new, |n| n.0),
+            app_name: params
+                .app_name
+                .map_or_else(String::new, |n| n.0.to_string()),
             interval: params.health_interval,
             logger: params.logger,
             registry: params.registry,
