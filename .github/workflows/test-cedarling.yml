@@ -350,3 +350,85 @@ jobs:
         export LD_LIBRARY_PATH="${GITHUB_WORKSPACE}/target/release:${LD_LIBRARY_PATH}"
         mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
         python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
+
+  postgres_extension_tests:
+    # Exercises the cedarling_pg Postgres extension under pgrx-managed Postgres.
+    # The workspace-level rust_tests job already runs the non-pgrx unit tests and
+    # clippy; this job additionally:
+    #   1. runs the #[pg_test] suite against a real Postgres backend (cargo pgrx test)
+    #   2. regenerates sql/cedarling_pg--0.1.0.sql and fails if it drifts from the
+    #      committed copy, so the packaged schema stays in sync with #[pg_extern]s.
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        components: clippy
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Install Postgres build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
+          libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
+    - name: Install cargo-pgrx
+      run: cargo install --locked cargo-pgrx --version =0.18.0
+    - name: Initialize pgrx (pg16)
+      run: cargo pgrx init --pg16 download
+    - name: Run cedarling_pg pgrx tests
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx test --features pg16
+    - name: Regenerate extension SQL schema
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql
+    - name: Fail if committed SQL schema drifted
+      working-directory: jans-cedarling/cedarling_pg
+      run: |
+        git --no-pager diff --exit-code sql/cedarling_pg--0.1.0.sql \
+          || (echo "sql/cedarling_pg--0.1.0.sql is out of date; run 'cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql' and commit the result." && exit 1)
+
+    # Exercise the end-user (no Rust) install path on every PR. This builds
+    # the same artifact the release workflow ships, then installs it via the
+    # install-binary.sh script into a system Postgres and creates the
+    # extension. If this breaks, the release tarballs would break too.
+    - name: Build extension package (cargo pgrx package)
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx package --features pg16
+
+    - name: Install system PostgreSQL 16
+      run: |
+        sudo apt-get install -y --no-install-recommends postgresql-16 postgresql-server-dev-16
+        sudo systemctl start postgresql@16-main || sudo pg_ctlcluster 16 main start
+
+    - name: Install cedarling_pg from staged tarball
+      working-directory: jans-cedarling/cedarling_pg
+      run: |
+        set -euxo pipefail
+        version="$(grep -m1 '^version' Cargo.toml | sed -E 's/version *= *"([^"]+)"/\1/')"
+        stage="$(mktemp -d)"
+        base="cedarling_pg-${version}-pg16-x86_64-unknown-linux-gnu"
+        mkdir -p "${stage}/${base}"
+        cp -a "target/release/cedarling_pg-pg16/." "${stage}/${base}/"
+        install -m 0755 scripts/install-binary.sh "${stage}/${base}/install.sh"
+        tar -czf "${stage}/${base}.tar.gz" -C "${stage}" "${base}"
+
+        cd "${stage}"
+        tar -xzf "${base}.tar.gz"
+        cd "${base}"
+        PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config ./install.sh
+
+    - name: Verify CREATE EXTENSION works against system PostgreSQL
+      run: |
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE EXTENSION cedarling_pg;"
+        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM pg_proc WHERE proname LIKE 'cedarling_%';"
