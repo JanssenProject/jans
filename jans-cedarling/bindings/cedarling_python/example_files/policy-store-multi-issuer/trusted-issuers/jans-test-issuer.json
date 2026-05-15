@@ -6,20 +6,17 @@
     "access_token": {
       "trusted": true,
       "entity_type_name": "Jans::Access_Token",
-      "token_id": "jti",
-      "principal_mapping": ["Jans::Workload"]
+      "token_id": "jti"
     },
     "id_token": {
       "trusted": true,
       "entity_type_name": "Jans::Id_Token",
-      "token_id": "jti",
-      "principal_mapping": ["Jans::User"]
+      "token_id": "jti"
     },
     "userinfo_token": {
       "trusted": true,
       "entity_type_name": "Jans::Userinfo_Token",
-      "token_id": "jti",
-      "principal_mapping": ["Jans::User"]
+      "token_id": "jti"
     }
   }
 }
