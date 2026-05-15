@@ -1,6 +1,6 @@
 [package]
 name = "cedarling_pg"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 description = "PostgreSQL extension integrating Cedarling authorization (pgrx)."
 license = "Apache-2.0"
@@ -30,6 +30,7 @@ sparkv = { workspace = true }
 thiserror = { workspace = true }
 test_utils = { path = "../test_utils", optional = true }
 uuid = { version = "1.11", features = ["v4", "serde"] }
+sha2 = { workspace = true }
 
 [dependencies.pgrx-bench]
 version = "=0.18.0"
@@ -41,6 +42,9 @@ test_utils = { path = "../test_utils" }
 
 [dev-dependencies.pgrx-tests]
 version = "=0.18.0"
+
+[build-dependencies]
+pgrx-pg-config = "=0.18.0"
 
 [lints]
 workspace = true
