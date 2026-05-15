@@ -7,9 +7,10 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
-    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
+    default_enabled_feature_toggle, default_http_client_max_retries,
+    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_log_channel_capacity, default_log_max_retries, default_token_cache_capacity,
+    default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -151,7 +152,10 @@ pub struct BootstrapConfigRaw {
     ///
     /// When enabled, this requires the `iss` (Issuer) claim to be present in
     /// all tokens and the issuer URL must use the `https` scheme.
-    #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIG_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
 
@@ -162,7 +166,10 @@ pub struct BootstrapConfigRaw {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
 
@@ -253,10 +260,22 @@ pub struct BootstrapConfigRaw {
     pub lock_log_max_retries: u32,
 
     /// Maximum token cache TTL in seconds.
-    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
-    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
-    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
-    #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
+    ///
+    /// Caps how long a validated token may stay in the cache. The effective
+    /// TTL for an entry is `min(time-until-exp, max_ttl)` when both apply.
+    ///
+    /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
+    ///   tokens that do not carry an `exp` claim.
+    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
+    ///   claim; tokens without `exp` are not cached at all.
+    ///
+    /// Default: `5` seconds — small enough to pick up revocation / status-list
+    /// changes quickly, large enough to amortise repeated requests for the
+    /// same token.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_MAX_TTL",
+        default = "default_token_cache_max_ttl"
+    )]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
     /// Default value is 100.
