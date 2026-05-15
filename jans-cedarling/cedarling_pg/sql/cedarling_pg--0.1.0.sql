@@ -72,7 +72,7 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:178
+-- cedarling_pg/src/functions/authorized.rs:210
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned
 CREATE  FUNCTION "cedarling_authorize_unsigned"(
 	"principal_json" TEXT, /* Option < & str > */
@@ -85,7 +85,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:37
+-- cedarling_pg/src/functions/authorized.rs:108
 -- cedarling_pg::functions::authorized::cedarling_authorized
 CREATE  FUNCTION "cedarling_authorized"(
 	"resource_json" TEXT, /* & str */
@@ -109,7 +109,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:227
+-- cedarling_pg/src/functions/authorized_row.rs:273
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
@@ -122,7 +122,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:247
+-- cedarling_pg/src/functions/authorized_row.rs:293
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
@@ -186,7 +186,7 @@ AS 'MODULE_PATHNAME', 'cedarling_diff_policies_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:191
+-- cedarling_pg/src/observability/trace.rs:202
 -- cedarling_pg::observability::trace::cedarling_explain
 CREATE  FUNCTION "cedarling_explain"(
 	"resource_json" TEXT, /* & str */
@@ -198,7 +198,7 @@ AS 'MODULE_PATHNAME', 'cedarling_explain_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:150
+-- cedarling_pg/src/mask/mod.rs:151
 -- cedarling_pg::mask::cedarling_get_masked_row
 CREATE  FUNCTION "cedarling_get_masked_row"() RETURNS jsonb /* Option < pgrx :: datum :: JsonB > */
 STRICT
@@ -207,7 +207,7 @@ AS 'MODULE_PATHNAME', 'cedarling_get_masked_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:154
+-- cedarling_pg/src/observability/trace.rs:164
 -- cedarling_pg::observability::trace::cedarling_last_trace
 CREATE  FUNCTION "cedarling_last_trace"() RETURNS jsonb /* Option < pgrx :: datum :: JsonB > */
 STRICT
@@ -239,7 +239,7 @@ AS 'MODULE_PATHNAME', 'cedarling_mask_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:165
+-- cedarling_pg/src/observability/trace.rs:175
 -- cedarling_pg::observability::trace::cedarling_recent_traces
 CREATE  FUNCTION "cedarling_recent_traces"(
 	"limit" INT /* Option < i32 > */
@@ -307,7 +307,7 @@ AS 'MODULE_PATHNAME', 'cedarling_set_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/status.rs:129
+-- cedarling_pg/src/observability/status.rs:141
 -- cedarling_pg::observability::status::cedarling_status
 CREATE  FUNCTION "cedarling_status"() RETURNS jsonb /* pgrx :: datum :: JsonB */
 STRICT
@@ -376,7 +376,7 @@ AS 'MODULE_PATHNAME', 'cedarling_where_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/lib.rs:219
+-- cedarling_pg/src/lib.rs:200
 -- cedarling_pg::hello_cedarling_pg
 CREATE  FUNCTION "hello_cedarling_pg"() RETURNS TEXT /* & '_ str */
 STRICT
