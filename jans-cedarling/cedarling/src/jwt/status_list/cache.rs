@@ -51,7 +51,7 @@ pub(crate) struct StatusListCache {
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
     ///
-    /// If the issuer's OpenID configuration does not include a
+    /// If the issuer's `OpenID` configuration does not include a
     /// `status_list_endpoint`, the initialization is silently skipped with a
     /// WARN-level log message rather than failing.
     pub(crate) async fn init_for_iss(
@@ -63,33 +63,27 @@ impl StatusListCache {
         logger: Option<Logger>,
         http_client: HttpClient,
     ) -> Result<(), UpdateStatusListError> {
-        let openid_config = match iss_config.openid_config.as_ref() {
-            Some(c) => c,
-            None => {
-                if let Some(logger) = &logger {
-                    logger.log_any(JwtLogEntry::new(
-                        "issuer has no OpenID configuration; status validation skipped".into(),
-                        Some(LogLevel::WARN),
-                    ));
-                }
-                return Ok(());
-            },
+        let openid_config = if let Some(c) = iss_config.openid_config.as_ref() { c } else {
+            if let Some(logger) = &logger {
+                logger.log_any(JwtLogEntry::new(
+                    "issuer has no OpenID configuration; status validation skipped".into(),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(());
         };
-        let status_list_url = match openid_config.status_list_endpoint.as_ref() {
-            Some(url) => url,
-            None => {
-                if let Some(logger) = &logger {
-                    logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "issuer '{}' does not publish a status_list_endpoint; \
-                             status validation skipped",
-                            openid_config.issuer,
-                        ),
-                        Some(LogLevel::WARN),
-                    ));
-                }
-                return Ok(());
-            },
+        let status_list_url = if let Some(url) = openid_config.status_list_endpoint.as_ref() { url } else {
+            if let Some(logger) = &logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "issuer '{}' does not publish a status_list_endpoint; \
+                         status validation skipped",
+                        openid_config.issuer,
+                    ),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(());
         };
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url, &http_client)
             .await
