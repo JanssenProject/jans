@@ -6,13 +6,13 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import io.jans.as.model.authzdetails.AuthzDetail;
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -28,9 +28,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.auth.AuthenticationMode;
-import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.authorize.*;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.DefaultScope;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -65,13 +63,20 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.server.service.AcrService.isAgama;
 import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
@@ -87,6 +92,14 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 public class AuthorizeAction {
 
     public static final String UNKNOWN = "Unknown";
+
+    private static final class RequestUriHttpClientHolder {
+        private static final jakarta.ws.rs.client.Client INSTANCE = ClientBuilder.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .build();
+    }
+
     @Inject
     private Logger log;
 
@@ -212,6 +225,7 @@ public class AuthorizeAction {
     private String sessionId;
 
     private String allowedScope;
+    private List<String> requestedClaims;
     private AuthzDetails authzDetails;
 
     public void checkUiLocales() {
@@ -456,7 +470,7 @@ public class AuthorizeAction {
                     && grantedScopes.size() == 1
                     && grantedScopes.contains(DefaultScope.OPEN_ID.toString())
                     && scope.equals(DefaultScope.OPEN_ID.toString())
-                    && claims == null && request == null;
+                    && claims == null && request == null && requestUri == null;
             if (isTrusted || canGrantAccess || isPairwiseWithOnlyOpenIdScope) {
                 permissionGranted(session);
                 return;
@@ -564,66 +578,168 @@ public class AuthorizeAction {
     }
 
     public List<String> getRequestedClaims() {
-        Set<String> result = new HashSet<String>();
+        if (requestedClaims != null) {
+            return requestedClaims;
+        }
+
+        Set<String> result = new LinkedHashSet<>();
+        Client client = loadClient();
+        if (client == null) {
+            requestedClaims = new ArrayList<>(result);
+            return requestedClaims;
+        }
+
+        populateFromStandaloneClaims(result);
+
         String requestJwt = request;
-
         if (StringUtils.isBlank(requestJwt) && StringUtils.isNotBlank(requestUri)) {
-            try {
-                URI reqUri = new URI(requestUri);
-                String reqUriHash = reqUri.getFragment();
-                String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+            requestJwt = fetchRequestJwt(client);
+        }
 
-                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        if (StringUtils.isBlank(requestJwt)) {
+            requestedClaims = new ArrayList<>(result);
+            return requestedClaims;
+        }
+
+        try {
+            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, requestJwt, client);
+
+            if (jwtAuthorizationRequest.getUserInfoMember() != null) {
+                for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+
+            if (jwtAuthorizationRequest.getIdTokenMember() != null) {
+                for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+        } catch (InvalidJwtException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        requestedClaims = new ArrayList<>(result);
+        return requestedClaims;
+    }
+
+    private Client loadClient() {
+        if (StringUtils.isBlank(clientId)) {
+            return null;
+        }
+        try {
+            return clientService.getClient(clientId);
+        } catch (EntryPersistenceException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private void populateFromStandaloneClaims(Set<String> result) {
+        if (StringUtils.isBlank(claims)) {
+            return;
+        }
+        try {
+            JSONObject claimsJson = new JSONObject(claims);
+            if (claimsJson.has("userinfo")) {
+                for (Claim claim : new UserInfoMember(claimsJson.getJSONObject("userinfo")).getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+            if (claimsJson.has("id_token")) {
+                for (Claim claim : new IdTokenMember(claimsJson.getJSONObject("id_token")).getClaims()) {
+                    result.add(claim.getName());
+                }
+            }
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private String fetchRequestJwt(Client client) {
+        try {
+            JwtAuthorizationRequest.validateRequestUri(requestUri, client, appConfiguration, state, errorResponseFactory);
+
+            URI reqUri = new URI(requestUri);
+            String reqUriHash = reqUri.getFragment();
+            String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+            return fetchRequestUriContent(reqUriWithoutFragment, reqUriHash);
+        } catch (WebApplicationException e) {
+            log.warn("request_uri is forbidden by client allowlist or block list, clientId = {}, host = {}",
+                    clientId, safeHost(requestUri));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private static String safeHost(String uri) {
+        if (StringUtils.isBlank(uri)) {
+            return "";
+        }
+        try {
+            URI parsed = new URI(uri);
+            String scheme = parsed.getScheme();
+            String host = parsed.getHost();
+            int port = parsed.getPort();
+            if (scheme == null || host == null) {
+                return "[unparseable]";
+            }
+            return scheme + "://" + host + (port > 0 ? ":" + port : "");
+        } catch (Exception e) {
+            return "[unparseable]";
+        }
+    }
+
+    protected String fetchRequestUriContent(String reqUriWithoutFragment, String reqUriHash) throws NoSuchAlgorithmException, NoSuchProviderException {
+        String entity = httpGet(reqUriWithoutFragment);
+        if (entity == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(reqUriHash)) {
+            return entity;
+        }
+        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+        if (StringUtils.equals(reqUriHash, hash)) {
+            return entity;
+        }
+        log.warn("request_uri content integrity check failed, url = {}, expected hash = {}, computed hash = {}",
+                reqUriWithoutFragment, reqUriHash, hash);
+        return null;
+    }
+
+    static final int REQUEST_URI_MAX_BYTES = 256 * 1024;
+
+    String httpGet(String url) {
+        try (Response clientResponse = RequestUriHttpClientHolder.INSTANCE.target(url).request().buildGet().invoke()) {
+            if (clientResponse.getStatus() != 200) {
+                return null;
+            }
+            String contentLength = clientResponse.getHeaderString("Content-Length");
+            if (contentLength != null) {
                 try {
-                    Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
-                    clientRequest.close();
-
-                    int status = clientResponse.getStatus();
-                    if (status == 200) {
-                        String entity = clientResponse.readEntity(String.class);
-
-                        if (StringUtils.isBlank(reqUriHash)) {
-                            requestJwt = entity;
-                        } else {
-                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-                            if (StringUtils.equals(reqUriHash, hash)) {
-                                requestJwt = entity;
-                            }
-                        }
+                    if (Long.parseLong(contentLength) > REQUEST_URI_MAX_BYTES) {
+                        log.warn("request_uri response exceeds max size ({} bytes), url = {}, Content-Length = {}",
+                                REQUEST_URI_MAX_BYTES, url, contentLength);
+                        return null;
                     }
-                } finally {
-                    clientRequest.close();
+                } catch (NumberFormatException e) {
+                    // malformed Content-Length — fall through to bounded read
                 }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
+            }
+            try (InputStream in = clientResponse.readEntity(InputStream.class)) {
+                byte[] bytes = in.readNBytes(REQUEST_URI_MAX_BYTES + 1);
+                if (bytes.length > REQUEST_URI_MAX_BYTES) {
+                    log.warn("request_uri response body exceeds max size ({} bytes), url = {}", REQUEST_URI_MAX_BYTES, url);
+                    return null;
+                }
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.warn("Failed to read request_uri response, url = {}: {}", url, e.getMessage());
+                return null;
             }
         }
-
-        if (StringUtils.isNotBlank(requestJwt)) {
-            try {
-                Client client = clientService.getClient(clientId);
-
-                if (client != null) {
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-
-                    if (jwtAuthorizationRequest.getUserInfoMember() != null) {
-                        for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
-                            result.add(claim.getName());
-                        }
-                    }
-
-                    if (jwtAuthorizationRequest.getIdTokenMember() != null) {
-                        for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
-                            result.add(claim.getName());
-                        }
-                    }
-                }
-            } catch (EntryPersistenceException | InvalidJwtException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-
-        return new ArrayList<>(result);
     }
 
     /**

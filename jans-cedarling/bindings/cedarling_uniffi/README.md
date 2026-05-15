@@ -57,7 +57,13 @@ make android
 
 Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
 
-3. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
+3. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio.
+
+4. Press ctrl key twice on Android Studio to open Run Anything dialog.
+
+5. Enter `gradle wrapper --gradle-version 8.7` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}/jans-cedarling/bindings/cedarling_uniffi/androidApp/gradle/wrapper`.
+
+6. Run the project on simulator.
 
 ## Kotlin Binding
 

@@ -41,8 +41,9 @@ fn default_trusted() -> bool {
     true
 }
 
+pub(crate) const DEFAULT_TKN_ID: &str = "jti";
+
 fn default_token_id() -> String {
-    const DEFAULT_TKN_ID: &str = "jti";
     DEFAULT_TKN_ID.to_string()
 }
 
