@@ -767,6 +767,7 @@ dependencies = [
  "pgrx-pg-config",
  "pgrx-tests",
  "serde_json",
+ "sha2 0.10.9",
  "sparkv",
  "tempfile",
  "test_utils",
