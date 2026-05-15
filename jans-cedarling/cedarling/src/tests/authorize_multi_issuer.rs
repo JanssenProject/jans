@@ -1275,3 +1275,60 @@ async fn test_validation_empty_payload() {
         "Should fail when TokenInput has empty payload"
     );
 }
+
+/// Regression: Auth0-style JWT with trailing slash in `iss` claim is rejected
+/// with `InvalidIssuer` even though the configured trusted issuer normalizes
+/// to the same URL. The validator dispatch normalizes both sides via
+/// `IssClaim::new`, but `jsonwebtoken::Validation::set_issuer` does an exact
+/// string compare against the raw token claim afterwards.
+///
+/// Configured issuer: `https://idp.dolphin.sea` (no trailing slash).
+/// Token `iss` claim: `https://idp.dolphin.sea/` (trailing slash, like Auth0).
+/// Expected: validation succeeds.
+///
+/// See bug: "Auth0 JWT Fails Validation With `InvalidIssuer` in Multi-Issuer Mode".
+#[tokio::test]
+async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_user_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea/",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin_user_123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+        "role": ["admin", "user"]
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Dolphin::Userinfo_token".to_string(), dolphin_user_token),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "ApprovedDolphinFoods"
+                },
+                "name": "Approved Dolphin Foods"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"CheckRoleFoodApprover\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling.authorize_multi_issuer(request).await.expect(
+        "Token with trailing slash in iss claim should validate against \
+         normalized trusted issuer config",
+    );
+
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW when token iss has trailing slash but \
+         config issuer normalizes to same URL"
+    );
+}

@@ -1853,13 +1853,13 @@ paths:
       - name: start_date
         in: query
         description: "Start date/time for the log entries report. Accepted: dd-MM-yyyy\
-          \ or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
+          \ or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z')."
         schema:
           type: string
       - name: end_date
         in: query
         description: "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601\
-          \ date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
+          \ date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z')."
         schema:
           type: string
       responses:
@@ -15693,17 +15693,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16649,6 +16649,8 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16658,8 +16660,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
