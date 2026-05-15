@@ -68,6 +68,13 @@ pub(crate) struct RefJwtStatusList {
 #[derive(Debug, Clone)]
 pub(crate) struct JwtValidator {
     pub(crate) validation: Validation,
+    /// Expected issuer in canonical form.
+    ///
+    /// `jsonwebtoken::Validation::set_issuer` does byte-level equality against
+    /// the raw `iss` claim, so it rejects equivalent issuers that differ only
+    /// by trailing slash, case, default port, etc. We bypass it and run a
+    /// URL-aware check via [`IssClaim`] instead.
+    expected_iss: Option<IssClaim>,
     required_claims: HashSet<String>,
     validate_signature: bool,
     validate_status_list: bool,
@@ -88,9 +95,6 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthzRequestInput(tkn_name);
 
         let mut validation = Validation::new(algorithm);
-        if let Some(iss) = iss {
-            validation.set_issuer(&[iss]);
-        }
         validation.validate_exp = token_metadata.required_claims.contains("exp");
         validation.validate_nbf = token_metadata.required_claims.contains("nbf");
 
@@ -110,6 +114,7 @@ impl JwtValidator {
 
         let validator = JwtValidator {
             validation,
+            expected_iss: iss.cloned(),
             required_claims,
             validate_signature,
             validate_status_list,
@@ -132,9 +137,6 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(tkn_name));
 
         let mut validation = Validation::new(algorithm);
-        if let Some(iss) = iss {
-            validation.set_issuer(&[iss]);
-        }
         validation.validate_exp = token_metadata.required_claims.contains("exp");
         validation.validate_nbf = token_metadata.required_claims.contains("nbf");
 
@@ -151,6 +153,7 @@ impl JwtValidator {
 
         let validator = JwtValidator {
             validation,
+            expected_iss: iss.cloned(),
             required_claims,
             validate_signature,
             validate_status_list,
@@ -180,10 +183,6 @@ impl JwtValidator {
         validation.validate_aud = false;
         validation.sub = status_list_uri;
 
-        if let Some(iss) = iss {
-            validation.set_issuer(&[iss]);
-        }
-
         let required_claims = ["sub", "iat", "status_list"]
             .into_iter()
             .map(std::convert::Into::into)
@@ -197,6 +196,7 @@ impl JwtValidator {
 
         let validator = JwtValidator {
             validation,
+            expected_iss: iss.cloned(),
             required_claims,
             validate_signature,
             validate_status_list: false,
@@ -230,6 +230,12 @@ impl JwtValidator {
             self.validate_claims_without_signature(&validated_jwt)?;
             validated_jwt
         };
+
+        // URL-aware `iss` check — runs for both the signed and insecure paths.
+        // `jsonwebtoken` either skipped the iss check (signed path) because
+        // we never set `validation.iss`, or it doesn't run at all (insecure
+        // path). Either way we normalize through `IssClaim` here.
+        self.validate_iss(&validated_jwt.claims)?;
 
         // Custom implementation of requiring custom claims
         let missing_claims = self
@@ -323,29 +329,30 @@ impl JwtValidator {
             )));
         }
 
-        if let Some(expected_iss) = self.validation.iss.as_ref() {
-            match claims.get("iss") {
-                Some(Value::String(iss)) if !expected_iss.contains(iss) => {
-                    return Err(ValidateJwtError::ValidateJwt(new_error(
-                        ErrorKind::InvalidIssuer,
-                    )));
-                },
-                Some(Value::Array(iss_values)) => {
-                    let has_match = iss_values
-                        .iter()
-                        .filter_map(Value::as_str)
-                        .any(|iss| expected_iss.contains(iss));
-                    if !has_match {
-                        return Err(ValidateJwtError::ValidateJwt(new_error(
-                            ErrorKind::InvalidIssuer,
-                        )));
-                    }
-                },
-                _ => {},
-            }
-        }
-
         Ok(())
+    }
+
+    /// Validate the `iss` claim against [`Self::expected_iss`] using
+    /// canonical [`IssClaim`] equality.
+    ///
+    /// When an expected issuer is configured, the claim MUST be present and
+    /// MUST be a string (or array of strings) that normalizes to the
+    /// expected value. Missing / non-string `iss` is rejected — defaults to
+    /// safe rather than silently accepting tokens with no usable issuer.
+    fn validate_iss(&self, claims: &Value) -> Result<(), ValidateJwtError> {
+        let Some(expected) = self.expected_iss.as_ref() else {
+            return Ok(());
+        };
+        let invalid = || ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidIssuer));
+        let matched = match claims.get("iss") {
+            Some(Value::String(iss)) => IssClaim::new(iss) == *expected,
+            Some(Value::Array(iss_values)) => iss_values
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|iss| IssClaim::new(iss) == *expected),
+            _ => false,
+        };
+        if matched { Ok(()) } else { Err(invalid()) }
     }
 }
 
@@ -547,6 +554,102 @@ mod test {
         };
 
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn validates_jwt_when_token_iss_has_trailing_slash() {
+        // Trusted-issuer config holds the canonical (no-slash) origin.
+        // Token emits `iss` with a trailing slash (Auth0-style).
+        // These are semantically the same issuer and must pass validation.
+        let keys = generate_keys();
+        let expected_iss = "https://dev-vci4e3lpvw2symco231.eu.auth0.com";
+        let token_iss = "https://dev-vci4e3lpvw2symco231.eu.auth0.com/";
+
+        let claims = json!({
+            "iss": token_iss,
+            "sub": "1234567890",
+            "name": "John Doe",
+            "iat": 0,
+            "nbf": 10,
+            "exp": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(expected_iss)),
+            "access_token",
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        let result = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect("trailing-slash iss must validate against canonical expected iss");
+
+        let expected = ValidatedJwt {
+            claims,
+            trusted_iss: None,
+        };
+        assert_eq!(result, expected, "validate_jwt should accept trailing-slash iss and produce expected ValidatedJwt with claims and no trusted_iss");
+    }
+
+    #[test]
+    fn rejects_token_missing_iss_when_expected_iss_configured() {
+        // Security: when the validator was configured with an expected
+        // issuer, a token that omits the `iss` claim entirely (or sets it
+        // to a non-string value) must NOT be accepted just because there is
+        // nothing to compare against.
+        let keys = generate_keys();
+        let expected_iss = "https://issuer.example.com";
+
+        let claims_missing = json!({
+            "sub": "1234567890",
+            "iat": 0,
+            "nbf": 10,
+            "exp": u64::MAX,
+        });
+        let token_missing = generate_token_using_claims(&claims_missing, &keys)
+            .expect("Should generate token using keys");
+
+        let claims_non_string = json!({
+            "iss": 42,
+            "sub": "1234567890",
+            "iat": 0,
+            "nbf": 10,
+            "exp": u64::MAX,
+        });
+        let token_non_string = generate_token_using_claims(&claims_non_string, &keys)
+            .expect("Should generate token using keys");
+
+        let decoding_key = keys.decoding_key().unwrap();
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(expected_iss)),
+            "access_token",
+            &TEST_TKN_ENTITY_METADATA,
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        for token in [token_missing, token_non_string] {
+            let err = validator
+                .validate_jwt(&token, Some(decoding_key.clone()))
+                .expect_err("token without valid iss must be rejected");
+            assert!(
+                matches!(
+                    err,
+                    ValidateJwtError::ValidateJwt(ref e)
+                        if *e.kind() == jsonwebtoken::errors::ErrorKind::InvalidIssuer
+                ),
+                "expected InvalidIssuer, got {err:?}"
+            );
+        }
     }
 
     #[test]
