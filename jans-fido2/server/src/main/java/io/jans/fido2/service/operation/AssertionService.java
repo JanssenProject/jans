@@ -416,8 +416,11 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 
-		// TODO: incase of a bug, this the second argument should have been null, see
-		// old code to understand
+		// origin is already the normalized rpId (hostname only, scheme stripped) produced
+		// by CommonVerifiers.verifyRpDomain → networkService.getHost. Registration stores
+		// the same normalized value in jansApp via entity.setRpId(origin), so the filter
+		// is consistent on both sides. Passing null would leak credential IDs across RPs
+		// and corrupt the U2F applicationId picked up at line 448.
 		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, origin);
 
 		// f.getRegistrationData().getAttenstationRequest() null check is added to

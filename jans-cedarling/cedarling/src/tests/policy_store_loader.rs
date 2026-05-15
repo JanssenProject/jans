@@ -247,6 +247,7 @@ fn create_jwt_cedarling_config_with_loader(
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: crate::HttpClientConfig::default(),
     }
 }
 
@@ -809,9 +810,14 @@ permit(
     let archive_path = temp_dir.path().join("multi_template.cjar");
     fs::write(&archive_path, &archive).expect("Failed to write archive file");
 
-    let loaded = crate::load_policy_store(&crate::PolicyStoreConfig {
-        source: crate::PolicyStoreSource::CjarFile(archive_path),
-    })
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+    let loaded = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: crate::PolicyStoreSource::CjarFile(archive_path),
+        },
+        &http_client,
+    )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
 
