@@ -25,7 +25,9 @@ use crate::{
         status_list::{InitForIssArgs, StatusListCache},
         validation::JwtValidatorCache,
     },
-    jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
+    jwt_config::{
+        DEFAULT_JWKS_REFRESH_INTERVAL_SECS, MIN_STATUS_LIST_REFRESH_SECS, TrustedIssuerLoaderConfig,
+    },
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
 use http_utils::Backoff;
@@ -233,9 +235,14 @@ pub(super) async fn load_trusted_issuer(
                     token_cache: loader.token_cache.clone(),
                     logger: loader.logger.clone(),
                     http_client,
+                    // Defense-in-depth: `JwtConfig` is publicly constructible, so a
+                    // programmatic caller can bypass the bootstrap deserializer's
+                    // normalization. Clamp to the floor here, at the call site, so the
+                    // refresh task can never be scheduled at a tight interval.
                     refresh_interval_fallback: loader
                         .jwt_config
-                        .status_list_refresh_interval_fallback,
+                        .status_list_refresh_interval_fallback
+                        .max(MIN_STATUS_LIST_REFRESH_SECS),
                 },
             )
             .await?;
