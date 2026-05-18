@@ -250,8 +250,8 @@ impl DiagnosticsSummary {
 /// Policy diagnostic info
 #[derive(Debug, Default, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyInfo {
-    pub id: String,
-    pub description: Option<String>,
+    pub id: SmolStr,
+    pub description: Option<SmolStr>,
 }
 
 impl Hash for PolicyInfo {
@@ -274,13 +274,13 @@ impl Diagnostics {
         let reason = cedar_diagnostic
             .reason()
             .map(|policy_id| {
-                let id = policy_id.to_string();
+                let id: SmolStr = policy_id.to_string().into();
 
                 PolicyInfo {
                     description: policies
                         .get_policy_description(id.as_str())
-                        .map(std::string::ToString::to_string),
-                    id: policy_id.to_string(),
+                        .map(SmolStr::from),
+                    id,
                 }
             })
             .collect::<HashSet<_>>();

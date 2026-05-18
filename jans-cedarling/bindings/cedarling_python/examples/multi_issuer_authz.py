@@ -79,8 +79,6 @@ def main():
         "CEDARLING_POLICY_STORE_LOCAL_FN": str(
             EXAMPLE_FILES / "policy-store-multi-issuer"
         ),
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_LOG_TYPE": "std_out",
