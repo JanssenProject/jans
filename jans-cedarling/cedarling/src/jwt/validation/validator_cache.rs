@@ -318,7 +318,6 @@ mod test {
             &TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "AccessToken".into(),
-                principal_mapping: HashSet::default(),
                 token_id: "iss".into(),
                 required_claims: HashSet::new(),
             },

@@ -180,14 +180,11 @@ We will now add the policy store details in the Janssen Tarp that is installed i
      "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
      "CEDARLING_LOG_TYPE": "std_out",
      "CEDARLING_LOG_LEVEL": "INFO",
-     "CEDARLING_USER_AUTHZ": "enabled",
-     "CEDARLING_WORKLOAD_AUTHZ": "disabled",
      "CEDARLING_JWT_SIG_VALIDATION": "enabled",
      "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
      "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
        "HS256", "RS256"
-     ],
-     "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
+     ]
    }
    ```
 
@@ -360,14 +357,11 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
        "CEDARLING_LOG_TYPE": "std_out",
        "CEDARLING_LOG_LEVEL": "INFO",
-       "CEDARLING_USER_AUTHZ": "enabled",
-       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
          "HS256", "RS256"
-       ],
-       "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
+       ]
    }
    ```
 

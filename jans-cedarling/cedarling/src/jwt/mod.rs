@@ -601,7 +601,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -611,7 +610,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -734,7 +732,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -745,7 +742,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -813,7 +809,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -902,7 +897,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -983,7 +977,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },

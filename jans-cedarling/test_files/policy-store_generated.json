@@ -23,9 +23,7 @@
                     "openid_configuration_endpoint": "https://test-casa.gluu.info/.well-known/openid-configuration",
                     "token_metadata": {
                         "access_token": {
-                            "entity_type_name": "Jans::Access_token",
-                            "workload_id": "aud",
-                            "principal_mapping": ["Jans::Workload"]
+                            "entity_type_name": "Jans::Access_token"
                         }
                     }
                 }
