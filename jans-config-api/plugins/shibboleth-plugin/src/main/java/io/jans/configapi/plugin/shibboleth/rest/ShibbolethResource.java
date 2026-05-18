@@ -190,6 +190,9 @@ public class ShibbolethResource extends BaseResource {
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
+        if(trustRelationship==null){
+            throwBadRequestException(DATA_NULL_CHK, SHIBBOLETH_TRUST_RELATIONSHIP + "is null.");
+        }
         return Response.ok(trustRelationship.getReleasedAttributes()).build();
     }
 
@@ -490,7 +493,7 @@ public class ShibbolethResource extends BaseResource {
         double totalPages = (dataSize / limit);
         logger.debug("totalPages:{}", totalPages);
         if (totalPages < pageNo) {
-            throwBadRequestException("Total pages in paginatedare:{" + totalPages
+            throwBadRequestException("Total pages in paginated result are:{" + totalPages
                     + "}, but page provided in request is:{" + pageNo + "} ");
         }
         int startIndex = pageNo * limit;
@@ -512,7 +515,7 @@ public class ShibbolethResource extends BaseResource {
                     "Page toIndex:{ " + toIndex + " } calulated as per pageNo:{ " + pageNo + " } is incorrect");
         }
         pageDataList = dataList.subList(startIndex, toIndex);
-        logger.debug("toIndex:{}", toIndex, pageDataList);
+        logger.debug("toIndex:{}, pageDataList:{}", toIndex, pageDataList);
         return pageDataList;
     }
 
