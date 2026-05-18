@@ -14,6 +14,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +75,11 @@ public class EndSessionUtils {
         }
     }
 
-    public static String createFronthannelHtml(Set<String> logoutUris, String postLogoutUrl, String state) {
+    public static String createFrontChannelHtml(Set<String> logoutUris, String postLogoutUrl, String state) {
         String iframes = "";
         for (String logoutUri : logoutUris) {
-            iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\"></iframe>", logoutUri);
+            iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\"></iframe>",
+                    StringEscapeUtils.escapeHtml4(logoutUri));
         }
 
         String html = "<!DOCTYPE html>" +
@@ -96,7 +98,7 @@ public class EndSessionUtils {
 
             html += "<script>" +
                     "window.onload=function() {" +
-                    "window.location='" + postLogoutUrl + "'" +
+                    "window.location='" + StringEscapeUtils.escapeEcmaScript(postLogoutUrl) + "'" +
                     "}" +
                     "</script>";
         }
