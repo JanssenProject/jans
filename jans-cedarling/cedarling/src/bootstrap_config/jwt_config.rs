@@ -42,8 +42,10 @@ pub struct JwtConfig {
     /// Maximum TTL (in seconds) for cached tokens.
     /// Zero means no TTL limit is applied.
     ///
-    /// It is recommended to keep this value within a few minutes to prevent the
-    /// cache from growing excessively.
+    /// Defaults to [`Self::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS`] (5 seconds): small
+    /// enough that revocation / status-list changes are picked up promptly while
+    /// still serving repeated requests for the same token from cache. Keep this
+    /// value short (seconds, not minutes) to bound cache growth and staleness.
     pub token_cache_max_ttl_secs: usize,
     /// Maximum number of tokens the cache can store.
     pub token_cache_capacity: usize,
