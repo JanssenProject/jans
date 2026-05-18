@@ -8,7 +8,7 @@ mod archive_security_tests;
 pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
-mod token_entity_metadata;
+pub(crate) mod token_entity_metadata;
 
 use crate::common::{
     default_entities::DefaultEntitiesWithWarns,

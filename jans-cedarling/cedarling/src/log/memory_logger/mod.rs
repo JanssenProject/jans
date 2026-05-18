@@ -65,34 +65,31 @@ impl MemoryLogger {
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
         let json = to_json_value(entry);
-        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
-        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
-        let err = match set_result {
-            Ok(()) => return,
-            Err(Error::CapacityExceeded) => {
-                // remove oldest key and try again
 
-                let key_to_delete = storage
-                    .get_oldest_key_by_expiration()
-                    .map(|exp_entry| exp_entry.key.clone());
+        // Only hold the lock for the BTreeMap/index insert
+        let err = {
+            let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+            match storage.set(&entry_id, json, index_keys.as_slice()) {
+                Ok(()) => return,
+                Err(Error::CapacityExceeded) => {
+                    // Evict oldest and retry (rare path)
+                    let key_to_delete = storage
+                        .get_oldest_key_by_expiration()
+                        .map(|exp_entry| exp_entry.key.clone());
 
-                if let Some(key) = key_to_delete {
-                    storage.pop(&key);
-                }
+                    if let Some(key) = key_to_delete {
+                        storage.pop(&key);
+                    }
 
-                // It should be rare case, so instead of cloning the whole entry,
-                // in success case we convert raw value to json (here).
-                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
-                let json = to_json_value(entry);
-
-                // set_again
-                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
-                    err
-                } else {
-                    return;
-                }
-            },
-            Err(err) => err,
+                    let json = to_json_value(entry);
+                    if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
+                        err
+                    } else {
+                        return;
+                    }
+                },
+                Err(err) => err,
+            }
         };
         fallback::log(
             &format!("could not store LogEntry to memory: {err:?}"),
@@ -113,7 +110,9 @@ mod fallback {
 
     /// conform to Loggable requirement imposed by [`LogStrategy`]
     #[derive(serde::Serialize, Clone)]
-    struct StrWrap(String);
+    struct StrWrap {
+        msg: String,
+    }
 
     impl crate::log::interface::Indexed for StrWrap {
         fn get_id(&self) -> uuid7::Uuid {
@@ -165,7 +164,9 @@ mod fallback {
         );
 
         // a string is always serializable
-        log_strategy.log_any(StrWrap(msg.to_string()));
+        log_strategy.log_any(StrWrap {
+            msg: msg.to_string(),
+        });
     }
 }
 

@@ -479,7 +479,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         // default handling
-        final String html = EndSessionUtils.createFronthannelHtml(frontchannelUris, postLogoutRedirectUri, state);
+        final String html = EndSessionUtils.createFrontChannelHtml(frontchannelUris, postLogoutRedirectUri, state);
         log.debug("Constructed html logout page: {}", html);
         return okResponse(html);
     }
