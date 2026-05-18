@@ -63,6 +63,19 @@ public class EndSessionUtilsTest {
     }
 
     @Test
+    public void createFrontChannelHtml_whenPostLogoutUrlContainsScriptClose_shouldPreventTagClosure() {
+        String html = EndSessionUtils.createFrontChannelHtml(
+                Collections.emptySet(),
+                "https://rp.example/after?x=</script><script>alert(1)//",
+                null);
+
+        assertFalse(html.contains("</script><script>alert(1)"),
+                "raw </script> sequence in postLogoutUrl must not be able to close the embedded <script> block");
+        assertTrue(html.contains("<\\/script><script>alert(1)\\/\\/"),
+                "forward slashes in </script> must be JS-escaped so the HTML parser does not see a script close");
+    }
+
+    @Test
     public void appendState_whenStateAlreadyPresent_shouldNotDuplicate() {
         String out = EndSessionUtils.appendState("https://rp.example/after?state=foo", "bar");
         assertEquals(out, "https://rp.example/after?state=foo");
