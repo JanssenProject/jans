@@ -59,6 +59,16 @@ pub struct JwtConfig {
     pub jwks_refresh_interval: Option<u64>,
     /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
     pub jwks_refresh_min_interval: u64,
+    /// Fallback Status List JWT refresh interval in seconds.
+    ///
+    /// Used only when the Status List JWT fetched from the issuer does NOT contain a
+    /// `ttl` claim. When the JWT does contain `ttl`, that value is always respected
+    /// (per the IETF `oauth-status-list` spec) and this fallback is ignored.
+    ///
+    /// A value of `0` is treated as "use the default" so the cache cannot be left to
+    /// go stale forever. Non-zero values below `MIN_STATUS_LIST_REFRESH_SECS` (5) are
+    /// clamped to that minimum.
+    pub status_list_refresh_interval_fallback: u64,
 }
 
 /// Default periodic JWKS refresh interval when neither `Cache-Control: max-age`
@@ -67,6 +77,10 @@ pub(crate) const DEFAULT_JWKS_REFRESH_INTERVAL_SECS: u64 = 3600;
 
 /// Minimum allowed refresh interval, in seconds. Values below this are clamped.
 pub(crate) const MIN_JWKS_REFRESH_SECS: u64 = 5;
+
+/// Minimum allowed Status List JWT refresh interval (in seconds). Non-zero values
+/// below this are clamped up to this floor.
+pub(crate) const MIN_STATUS_LIST_REFRESH_SECS: u64 = 5;
 
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
@@ -82,12 +96,19 @@ impl Default for JwtConfig {
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             jwks_refresh_interval: None,
             jwks_refresh_min_interval: 30,
+            status_list_refresh_interval_fallback:
+                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
         };
         config.allow_all_algorithms()
     }
 }
 
 impl JwtConfig {
+    /// Default fallback for the Status List JWT refresh interval (in seconds),
+    /// applied when the Status List JWT has no `ttl` claim. Also used when the
+    /// bootstrap property is set to `0`.
+    pub const DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS: u64 = 300;
+
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     #[must_use]
     pub fn new_without_validation() -> Self {

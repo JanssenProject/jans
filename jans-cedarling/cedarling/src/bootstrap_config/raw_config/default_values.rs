@@ -7,7 +7,7 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
+use crate::{lock_config::LockServiceConfig, HttpClientConfig, JwtConfig};
 
 pub(super) fn default_jti() -> String {
     "jti".to_string()
@@ -23,6 +23,10 @@ pub(super) fn default_token_cache_capacity() -> usize {
 
 pub(super) fn default_jwks_refresh_min_interval() -> u64 {
     JwtConfig::default().jwks_refresh_min_interval
+}
+
+pub(super) fn default_status_list_refresh_interval_fallback() -> u64 {
+    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS
 }
 
 #[cfg(not(target_arch = "wasm32"))]

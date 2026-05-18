@@ -13,18 +13,18 @@ use jsonwebtoken::DecodingKey;
 use url::Url;
 
 use crate::{
-    LogLevel, LogWriter,
     async_sleep::sleep,
     http::HttpClient,
     jwt::{
-        IssuerConfig, TokenCache,
-        decode::{DecodeJwtError, decode_jwt},
+        decode::{decode_jwt, DecodeJwtError},
         key_service::KeyService,
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
+        IssuerConfig, TokenCache,
     },
     log::Logger,
+    LogLevel, LogWriter,
 };
 
 use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
@@ -34,12 +34,24 @@ type StatusListUri = String;
 
 struct StatusListUpdateCtx {
     ttl: u64,
+    /// Fallback refresh interval (seconds) used when an updated Status List JWT no
+    /// longer carries a `ttl` claim.
+    refresh_interval_fallback: u64,
     status_list_url: Url,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<RwLock<JwtValidator>>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
     http_client: HttpClient,
+}
+
+pub(crate) struct InitForIssArgs<'a> {
+    pub validators: &'a JwtValidatorCache,
+    pub key_service: &'a KeyService,
+    pub token_cache: TokenCache,
+    pub logger: Option<Logger>,
+    pub http_client: HttpClient,
+    pub refresh_interval_fallback: u64,
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -53,12 +65,16 @@ impl StatusListCache {
     pub(crate) async fn init_for_iss(
         &self,
         iss_config: &IssuerConfig,
-        validators: &JwtValidatorCache,
-        key_service: &KeyService,
-        token_cache: TokenCache,
-        logger: Option<Logger>,
-        http_client: HttpClient,
+        args: InitForIssArgs<'_>,
     ) -> Result<(), UpdateStatusListError> {
+        let InitForIssArgs {
+            validators,
+            key_service,
+            token_cache,
+            logger,
+            http_client,
+            refresh_interval_fallback,
+        } = args;
         let openid_config = iss_config
             .openid_config
             .as_ref()
@@ -101,29 +117,30 @@ impl StatusListCache {
         .try_into()
         .map_err(DecodeJwtError::DeserializeClaims)?;
 
-        let ttl = status_list_jwt.ttl;
+        // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim is authoritative
+        // for refresh cadence. When the issuer omits `ttl`, fall back to the bootstrap
+        // `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK` so the cache never goes
+        // stale forever.
+        let ttl = status_list_jwt.ttl.unwrap_or(refresh_interval_fallback);
         let status_list: StatusList = status_list_jwt.try_into()?;
 
-        // spawn a background task to handle updating the statuslist if the JWT has a TTL
-        // claim
-        if let Some(ttl) = ttl {
-            let ctx = StatusListUpdateCtx {
-                ttl,
-                status_list_url: status_list_url.clone(),
-                decoding_key,
-                validator,
-                status_lists: self.status_lists.clone(),
-                logger,
-                http_client: http_client.clone(),
-            };
-            crate::http::spawn_task(keep_status_list_updated(
-                // callback is called on updated status list
-                move || {
-                    token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
-                },
-                ctx,
-            ));
-        }
+        let ctx = StatusListUpdateCtx {
+            ttl,
+            refresh_interval_fallback,
+            status_list_url: status_list_url.clone(),
+            decoding_key,
+            validator,
+            status_lists: self.status_lists.clone(),
+            logger,
+            http_client: http_client.clone(),
+        };
+        crate::http::spawn_task(keep_status_list_updated(
+            // callback is called on updated status list
+            move || {
+                token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
+            },
+            ctx,
+        ));
 
         {
             let mut status_lists = self
@@ -145,6 +162,7 @@ where
 {
     let StatusListUpdateCtx {
         mut ttl,
+        refresh_interval_fallback,
         status_list_url,
         decoding_key,
         validator,
@@ -207,9 +225,9 @@ where
                 continue;
             },
         };
-        // if the TTL is disappears somehow, we will default to 10 mins
-        // otherwise, just update it to the new value
-        ttl = status_list_jwt.ttl.unwrap_or(600);
+        // If the refreshed JWT no longer has `ttl`, fall back to the configured
+        // fallback interval so the loop keeps a sane cadence.
+        ttl = status_list_jwt.ttl.unwrap_or(refresh_interval_fallback);
 
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
@@ -260,10 +278,10 @@ mod test {
     use jsonwebtoken::Algorithm;
 
     use super::*;
-    use crate::JwtConfig;
     use crate::common::policy_store::TrustedIssuer;
     use crate::http::HttpClientConfig;
     use crate::jwt::test_utils::MockServer;
+    use crate::JwtConfig;
     use std::collections::HashSet;
     use std::time::Duration;
 
@@ -315,11 +333,15 @@ mod test {
         status_list
             .init_for_iss(
                 &iss_config,
-                &validators,
-                &key_service,
-                TokenCache::default(),
-                None,
-                http_client,
+                InitForIssArgs {
+                    validators: &validators,
+                    key_service: &key_service,
+                    token_cache: TokenCache::default(),
+                    logger: None,
+                    http_client,
+                    refresh_interval_fallback:
+                        JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
+                },
             )
             .await
             .unwrap();
@@ -371,5 +393,94 @@ mod test {
                 "the status list was not updated",
             );
         }
+    }
+
+    /// When the Status List JWT has no `ttl` claim, the bootstrap-config
+    /// `status_list_refresh_interval_fallback` should be used so that the
+    /// background refresh task still runs.
+    #[tokio::test]
+    async fn refresh_fallback_used_when_jwt_has_no_ttl() {
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
+        let validators = JwtValidatorCache::default();
+        let key_service = KeyService::default();
+        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
+        key_service
+            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .await
+            .unwrap();
+        // initial JWT has no `ttl` claim - relies on fallback to schedule a refresh
+        mock_server
+            .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b1111_1110]);
+        let status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            HashMap::default(),
+        );
+
+        let iss_config = IssuerConfig {
+            issuer_id: "some_iss_id".into(),
+            policy: Arc::new(ti),
+            openid_config: Some(mock_server.openid_config()),
+        };
+        validators.init_for_iss(
+            &iss_config,
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: false,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+                ..Default::default()
+            },
+            &status_list,
+            None,
+        );
+        // 1-second fallback so the test runs fast
+        status_list
+            .init_for_iss(
+                &iss_config,
+                InitForIssArgs {
+                    validators: &validators,
+                    key_service: &key_service,
+                    token_cache: TokenCache::default(),
+                    logger: None,
+                    http_client,
+                    refresh_interval_fallback: 1,
+                },
+            )
+            .await
+            .unwrap();
+
+        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+
+        // Update server-side list (still without ttl) before refresh fires
+        mock_server
+            .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b0000_0001]);
+
+        tokio::time::sleep(Duration::from_secs(3)).await;
+
+        let lists = status_list
+            .status_lists
+            .read()
+            .expect("obtain status_lists read lock");
+        let got = lists
+            .get(&status_list_uri)
+            .expect("should have a status list");
+        assert_eq!(
+            *got,
+            StatusList {
+                bit_size: 1u8.try_into().unwrap(),
+                list: vec![0b0000_0001],
+            },
+            "fallback interval did not trigger a refresh",
+        );
     }
 }
