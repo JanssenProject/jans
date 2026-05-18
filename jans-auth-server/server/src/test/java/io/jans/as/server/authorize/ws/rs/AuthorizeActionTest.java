@@ -1,9 +1,12 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.auth.AuthenticationMode;
@@ -18,6 +21,7 @@ import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.service.net.NetworkService;
 import io.jans.util.OxConstants;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import org.mockito.InjectMocks;
@@ -25,14 +29,15 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -131,6 +136,11 @@ public class AuthorizeActionTest {
     @Mock
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
+    @BeforeClass
+    public void installBcProvider() {
+        SecurityProviderUtility.installBCProvider();
+    }
+
     @Test
     public void checkPermissionGranted_whenExceptionThrown_shouldDeny() {
         authorizeAction.setClientId("testId");
@@ -172,5 +182,117 @@ public class AuthorizeActionTest {
         when(defaultAuthenticationMode.getName()).thenReturn("some_acr");
         final boolean skip = authorizeAction.shouldSkipScript(Lists.newArrayList());
         assertFalse(skip);
+    }
+
+    @Test
+    public void getRequestedClaims_whenClientIdMissing_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId(null);
+        authorizeAction.setRequestUri("https://evil.example/jwt");
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+        verify(clientService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriNotInClientAllowlist_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("https://evil.example/jwt");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[]{"https://allowed.example/jwt"});
+        when(clientService.getClient("c1")).thenReturn(client);
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriIsBlocklisted_shouldReturnEmptyAndSkipFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("http://169.254.169.254/latest/meta-data/");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[0]);
+        when(clientService.getClient("c1")).thenReturn(client);
+        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("http://169.254.169.254/*"));
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
+    }
+
+    @Test
+    public void getRequestedClaims_whenRequestUriIsAllowed_shouldInvokeFetch() throws Exception {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setRequestUri("https://allowed.example/jwt");
+        authorizeAction.setState("st1");
+
+        Client client = new Client();
+        client.setRequestUris(new String[]{"https://allowed.example/jwt"});
+        when(clientService.getClient("c1")).thenReturn(client);
+        doReturn(null).when(authorizeAction).fetchRequestUriContent(anyString(), any());
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.isEmpty());
+        verify(authorizeAction).fetchRequestUriContent(eq("https://allowed.example/jwt"), eq(null));
+    }
+
+    @Test
+    public void getRequestedClaims_whenCalledMultipleTimes_shouldCacheAndNotRepeatClientLookup() {
+        authorizeAction.setClientId("c1");
+
+        authorizeAction.getRequestedClaims();
+        authorizeAction.getRequestedClaims();
+        authorizeAction.getRequestedClaims();
+
+        verify(clientService, times(1)).getClient("c1");
+    }
+
+    @Test
+    public void getRequestedClaims_whenStandaloneClaimsSetAndNoRequestJwt_shouldReturnClaimNames() {
+        authorizeAction.setClientId("c1");
+        authorizeAction.setClaims("{\"userinfo\":{\"email\":null,\"given_name\":null},\"id_token\":{\"auth_time\":{\"essential\":true}}}");
+
+        Client client = new Client();
+        when(clientService.getClient("c1")).thenReturn(client);
+
+        List<String> result = authorizeAction.getRequestedClaims();
+
+        assertTrue(result.contains("email"));
+        assertTrue(result.contains("given_name"));
+        assertTrue(result.contains("auth_time"));
+    }
+
+    @Test
+    public void fetchRequestUriContent_whenHashMatchesBody_shouldReturnBody() throws Exception {
+        String body = "fake-request-jwt-body";
+        String matchingHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(body));
+        doReturn(body).when(authorizeAction).httpGet("https://allowed.example/jwt");
+
+        String result = authorizeAction.fetchRequestUriContent("https://allowed.example/jwt", matchingHash);
+
+        assertEquals(result, body);
+        verify(authorizeAction).httpGet("https://allowed.example/jwt");
+    }
+
+    @Test
+    public void fetchRequestUriContent_whenHashDoesNotMatchBody_shouldReturnNull() throws Exception {
+        String body = "fake-request-jwt-body";
+        String wrongHash = "this-is-not-the-real-hash";
+        doReturn(body).when(authorizeAction).httpGet("https://allowed.example/jwt");
+
+        String result = authorizeAction.fetchRequestUriContent("https://allowed.example/jwt", wrongHash);
+
+        assertNull(result, "tampered content with wrong fragment hash must be rejected");
+        verify(authorizeAction).httpGet("https://allowed.example/jwt");
     }
 }

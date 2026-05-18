@@ -4,6 +4,7 @@ version = "0.0.0"
 edition = "2021"
 description = "Python binding to Cedarling"
 license = "Apache-2.0"
+publish = false
 
 [lib]
 name = "cedarling_python"
