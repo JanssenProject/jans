@@ -817,7 +817,10 @@ mod tests {
             &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK", "120")],
             || {
                 let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
-                assert_eq!(config.status_list_refresh_interval_fallback, 120);
+                assert_eq!(
+                    config.status_list_refresh_interval_fallback, 120,
+                    "status list refresh fallback should match the value supplied via env var"
+                );
             },
         );
     }
