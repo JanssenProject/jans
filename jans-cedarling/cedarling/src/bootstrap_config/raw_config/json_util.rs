@@ -6,8 +6,7 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
-use crate::JwtConfig;
-use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
+use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, normalize_status_list_refresh_interval_fallback};
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
 pub(super) fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
@@ -72,13 +71,11 @@ where
     D: serde::Deserializer<'de>,
 {
     let value: Option<u64> = deserialize_or_parse_string_as_json(deserializer)?;
-    // `0` or missing -> use the built-in default so the cache cannot be left to go
-    // stale forever. Non-zero values below the floor are clamped to the floor to
-    // avoid hammering the IDP.
-    Ok(match value {
-        None | Some(0) => JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
-        Some(v) => v.max(MIN_STATUS_LIST_REFRESH_SECS),
-    })
+    // Missing variable is treated the same as an explicit `0`: defer to the
+    // shared normalizer so this code path stays in sync with the loader.
+    Ok(normalize_status_list_refresh_interval_fallback(
+        value.unwrap_or(0),
+    ))
 }
 
 pub(super) fn deserialize_jwks_refresh_min_interval<'de, D>(

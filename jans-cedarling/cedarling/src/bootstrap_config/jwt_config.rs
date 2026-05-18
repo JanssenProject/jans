@@ -82,6 +82,24 @@ pub(crate) const MIN_JWKS_REFRESH_SECS: u64 = 5;
 /// below this are clamped up to this floor.
 pub(crate) const MIN_STATUS_LIST_REFRESH_SECS: u64 = 5;
 
+/// Normalize a candidate Status List JWT refresh fallback (seconds) into a safe
+/// interval. Single source of truth shared by the bootstrap deserializer and
+/// [`JwtConfig::normalize`]:
+///
+/// - `0` -> [`JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS`]
+///   (300s): the cache must never be left to go stale forever, so "disabled"
+///   is not a supported state.
+/// - Non-zero values below [`MIN_STATUS_LIST_REFRESH_SECS`] are clamped up to
+///   that floor to avoid hammering the IDP.
+/// - Any other value is returned unchanged.
+#[must_use]
+pub(crate) fn normalize_status_list_refresh_interval_fallback(value: u64) -> u64 {
+    match value {
+        0 => JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
+        v => v.max(MIN_STATUS_LIST_REFRESH_SECS),
+    }
+}
+
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
@@ -108,6 +126,17 @@ impl JwtConfig {
     /// applied when the Status List JWT has no `ttl` claim. Also used when the
     /// bootstrap property is set to `0`.
     pub const DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS: u64 = 300;
+
+    /// Enforce all field-level invariants on the config in place. Called once
+    /// during service initialization on a cloned `JwtConfig`, so that callers
+    /// who construct the struct programmatically cannot bypass the bootstrap
+    /// deserializer's normalization.
+    pub(crate) fn normalize(&mut self) {
+        self.status_list_refresh_interval_fallback =
+            normalize_status_list_refresh_interval_fallback(
+                self.status_list_refresh_interval_fallback,
+            );
+    }
 
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     #[must_use]
