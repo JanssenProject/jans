@@ -74,7 +74,7 @@ impl From<Value> for TokenClaims {
             Value::Object(map) => Self {
                 claims: map.into_iter().collect(),
             },
-            _ => panic!("expected a JSON object for TokenClaims, got {claims}"),
+            _ => panic!("expected a JSON object for TokenClaims"),
         }
     }
 }
