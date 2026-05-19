@@ -19,7 +19,7 @@
         <link rel="prev" href="../user-claims/">
       
       
-        <link rel="next" href="customize/">
+        <link rel="next" href="../logout/">
       
       
         
@@ -1155,36 +1155,16 @@
   
   
   
-    
-    
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
         
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
           
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_3_13" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
-              
   
   
   <span class="md-ellipsis">
@@ -1198,86 +1178,144 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link md-nav__link--active" for="__nav_1_3_3_13" id="__nav_1_3_3_13_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_3_3_13_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3_3_13">
-            <span class="md-nav__icon md-icon"></span>
-            
+  
+  
+  <span class="md-ellipsis">
+    
   
     Consent
   
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="customize/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Customize
-  
-
     
   </span>
   
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="list-delete/" class="md-nav__link">
+      
         
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-  <span class="md-ellipsis">
+  
     
   
-    List/Delete Consent
   
-
-    
-  </span>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-consent-is-handled-in-janssen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How consent is handled in Janssen
+      
+    </span>
+  </a>
   
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consent-administration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent administration
+      
+    </span>
+  </a>
   
-
-      </a>
-    </li>
+    <nav class="md-nav" aria-label="Consent administration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-user-self-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-user self-service
+      
+    </span>
+  </a>
   
-
-              
-            
-          </ul>
-        </nav>
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-consents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Consents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-revoke-consent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete (Revoke) Consent
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-openid-connect-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related OpenID Connect Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2101,6 +2139,114 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-consent-is-handled-in-janssen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How consent is handled in Janssen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consent-administration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent administration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consent administration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-user-self-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-user self-service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-consents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Consents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-revoke-consent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete (Revoke) Consent
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-openid-connect-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related OpenID Connect Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2181,24 +2327,6 @@
   
 
       
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="./" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Consent
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
     </ol>
   </nav>
 
@@ -2253,11 +2381,63 @@
 
 
 <h1 id="consent">Consent<a class="headerlink" href="#consent" title="Permanent link">#</a></h1>
-<p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
-<div class="admonition contribute">
-<p class="admonition-title">Contribute</p>
-</div>
-<p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
+<p>Consent is the step where a user approves what a client application can access (for example, requested OpenID Connect/OAuth scopes). In OpenID Connect Core, this behavior is tied to the authorization request and can be explicitly requested with <code>prompt=consent</code>.</p>
+<ul>
+<li>OpenID Connect Core specification: <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a></li>
+<li>Authorization endpoint behavior in Janssen: <a href="../../endpoints/authorization/">Authorization Endpoint</a></li>
+</ul>
+<p>In Janssen Server, consent happens during the authorization flow after user authentication. By default, users are shown requested scopes and can allow or deny access.</p>
+<h2 id="how-consent-is-handled-in-janssen">How consent is handled in Janssen<a class="headerlink" href="#how-consent-is-handled-in-janssen" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Default consent UI</strong>: Janssen shows consent screens in the authorization flow.</li>
+<li><strong>Prompt control</strong>: clients can request explicit consent with <code>prompt=consent</code>.</li>
+<li><strong>When consent can be skipped</strong>: server logic may skip the consent page in specific cases, such as trusted clients or when prior consent and scope conditions are already satisfied.</li>
+<li><strong>Persistence</strong>: user approvals are represented through authorization/token grant data, which can be queried and revoked via Config API token endpoints.</li>
+</ul>
+<h2 id="consent-administration">Consent administration<a class="headerlink" href="#consent-administration" title="Permanent link">#</a></h2>
+<h3 id="end-user-self-service">End-user self-service<a class="headerlink" href="#end-user-self-service" title="Permanent link">#</a></h3>
+<p>Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server.</p>
+<p>Casa's <a href="../../../../casa/plugins/consent-management/">consent management plugin</a> gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server.</p>
+<h3 id="using-api">Using API<a class="headerlink" href="#using-api" title="Permanent link">#</a></h3>
+<p>Janssen config API allows applications to administer consent via REST APIs. Janssen stores authorization/consent decisions in token grant data. To view and revoke them, use the Config API token endpoints.</p>
+<p>As noted in Janssen planning docs, viewing and revoking consent is done via Config API (not OpenID Connect or SCIM):</p>
+<ul>
+<li><a href="../../../planning/use-cases/">Consent Gathering (planning context)</a></li>
+<li><a href="../../../config-guide/config-tools/config-api/">Config API overview</a></li>
+</ul>
+<h4 id="list-consents">List Consents<a class="headerlink" href="#list-consents" title="Permanent link">#</a></h4>
+<p>Use Config API token search to list grants/tokens by user and/or client.</p>
+<p>Endpoint pattern:</p>
+<div class="highlight"><pre><span></span><code>GET /api/v1/token/search
+</code></pre></div>
+<p>Example query parameters:</p>
+<ul>
+<li><code>fieldValuePair=usrId=&lt;userId&gt;</code></li>
+<li><code>fieldValuePair=clnId=&lt;clientId&gt;</code></li>
+<li><code>fieldValuePair=usrId=&lt;userId&gt;,clnId=&lt;clientId&gt;</code></li>
+<li>optional paging/sorting: <code>startIndex</code>, <code>limit</code>, <code>sortBy</code>, <code>sortOrder</code></li>
+</ul>
+<p>You can also fetch tokens for a specific client:</p>
+<div class="highlight"><pre><span></span><code>GET /api/v1/token/client/{clientId}
+</code></pre></div>
+<h4 id="delete-revoke-consent">Delete (Revoke) Consent<a class="headerlink" href="#delete-revoke-consent" title="Permanent link">#</a></h4>
+<p>To revoke a consent/grant entry, revoke its token by token code:</p>
+<div class="highlight"><pre><span></span><code>DELETE /api/v1/token/revoke/{tknCde}
+</code></pre></div>
+<p>After revocation, the corresponding token entry is removed. Repeating this for all tokens associated with a user/client effectively removes previously stored consent approvals for that pairing.</p>
+<h2 id="customize">Customize<a class="headerlink" href="#customize" title="Permanent link">#</a></h2>
+<p>Janssen supports customizing consent management beyond the default implementation. This can be achieved either by using interception scripts or by using Agama-based consent flows.</p>
+<p>Refer to <a href="../../../../script-catalog/consent_gathering/consent-gathering/">Consent Gathering</a> for implementation details and examples.</p>
+<h2 id="related-openid-connect-behavior">Related OpenID Connect Behavior<a class="headerlink" href="#related-openid-connect-behavior" title="Permanent link">#</a></h2>
+<ul>
+<li><code>prompt=consent</code> requests explicit consent interaction in the authorization flow.</li>
+<li><code>prompt=none</code> does not allow interactive consent and returns an error if consent is required.</li>
+</ul>
+<p>See also:</p>
+<ul>
+<li><a href="../../endpoints/authorization/">Authorization Endpoint</a></li>
+<li><a href="../prompt-parameter/">Prompt Parameter</a></li>
+</ul>
 
 
 
@@ -2280,7 +2460,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 18, 2026 12:33:40 UTC"><span class="timeago" datetime="2026-05-18T12:33:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 18, 2026 12:33:40 UTC">2026-05-18</span>
   </span>
 
     
@@ -2290,7 +2470,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 2, 2022 12:42:30 UTC"><span class="timeago" datetime="2022-09-02T12:42:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 2, 2022 12:42:30 UTC">2022-09-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 18, 2026 12:33:40 UTC"><span class="timeago" datetime="2026-05-18T12:33:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 18, 2026 12:33:40 UTC">2026-05-18</span>
   </span>
 
     
