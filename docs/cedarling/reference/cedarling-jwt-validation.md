@@ -202,7 +202,7 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 
 By design, the refresh interval for the Status List JWT is driven by the `ttl` claim **inside the Status List JWT itself**, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every `ttl` seconds.
 
-If the issuer omits the `ttl` claim, Cedarling falls back to the bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK` (default `300` seconds) so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds set on `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK` are clamped up to `5` seconds; this clamp applies only to the fallback (when the Status List JWT's `ttl` claim is absent) and is ignored when the Status List JWT carries a `ttl`.
+The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` (default `300` seconds) caps that interval: the effective refresh interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`, so the issuer can always request a *more frequent* refresh, but never a less frequent one. When the issuer omits the `ttl` claim, the max value is used directly so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds are clamped up to `5` seconds.
 
 ## JWT Validation Flow Diagram
 
