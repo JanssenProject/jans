@@ -1040,7 +1040,7 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_mask_condition_sql_applies_only_when_expression_true() {
+    fn test_mask_condition_sql_is_ignored_fail_closed() {
         use pgrx::datum::JsonB;
         use serde_json::json;
 
@@ -1068,8 +1068,8 @@ mod tests {
         let masked_user = crate::mask_sql::cedarling_mask_row(row_user, "test_mask_condition", Some("Read"));
         assert_eq!(
             masked_user.0["pii_value"].as_str(),
-            Some("***REDACTED***"),
-            "rule should apply when condition_sql evaluates true"
+            Some("secret-value"),
+            "conditional rule should be ignored to avoid arbitrary SQL execution"
         );
 
         Spi::run("SELECT set_config('cedarling.role', 'admin', true)")
@@ -1079,7 +1079,7 @@ mod tests {
         assert_eq!(
             masked_admin.0["pii_value"].as_str(),
             Some("secret-value"),
-            "rule should not apply when condition_sql evaluates false"
+            "conditional rule should be ignored for all callers"
         );
 
         Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_condition'")

@@ -289,39 +289,86 @@ fn lower_condition(expr: &str) -> Option<String> {
     lower_atom(expr)
 }
 
-/// Lexically extracts the body of a `when { … }` or `unless { … }` clause
+/// Lexically extracts all bodies of `when { … }` or `unless { … }` clauses
 /// from a Cedar policy source, respecting nested braces and quoted strings.
-fn extract_clause(source: &str, clause: &str) -> Option<String> {
+///
+/// Cedar allows stacked `when`/`unless` clauses with implicit AND semantics.
+/// Returning all matches preserves that behavior in SQL lowering.
+fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
     let marker = format!("{clause} {{");
-    let start = source.find(&marker)?;
-    let mut idx = start + marker.len();
     let bytes = source.as_bytes();
-    let mut depth = 1i32;
+    let mut i = 0usize;
     let mut in_string = false;
-    while idx < bytes.len() {
-        let c = bytes[idx] as char;
-        if c == '"' && (idx == 0 || bytes[idx - 1] != b'\\') {
+    let mut top_level_depth = 0i32;
+    let mut out = Vec::new();
+
+    while i < bytes.len() {
+        let c = bytes[i] as char;
+        if c == '"' && (i == 0 || bytes[i - 1] != b'\\') {
             in_string = !in_string;
-            idx += 1;
+            i += 1;
             continue;
         }
-        if !in_string {
-            if c == '{' {
-                depth += 1;
-            } else if c == '}' {
-                depth -= 1;
-                if depth == 0 {
-                    let expr = source[start + marker.len()..idx].trim().to_string();
-                    if expr.is_empty() {
-                        return None;
-                    }
-                    return Some(expr);
-                }
-            }
+        if in_string {
+            i += 1;
+            continue;
         }
-        idx += 1;
+
+        if c == '{' {
+            top_level_depth += 1;
+            i += 1;
+            continue;
+        }
+        if c == '}' {
+            if top_level_depth > 0 {
+                top_level_depth -= 1;
+            }
+            i += 1;
+            continue;
+        }
+
+        if top_level_depth == 0
+            && i + marker.len() <= bytes.len()
+            && &source[i..i + marker.len()] == marker
+        {
+            let body_start = i + marker.len();
+            let mut idx = body_start;
+            let mut depth = 1i32;
+            let mut body_in_string = false;
+            while idx < bytes.len() {
+                let ch = bytes[idx] as char;
+                if ch == '"' && (idx == 0 || bytes[idx - 1] != b'\\') {
+                    body_in_string = !body_in_string;
+                    idx += 1;
+                    continue;
+                }
+                if !body_in_string {
+                    if ch == '{' {
+                        depth += 1;
+                    } else if ch == '}' {
+                        depth -= 1;
+                        if depth == 0 {
+                            let expr = source[body_start..idx].trim().to_string();
+                            if expr.is_empty() {
+                                return None;
+                            }
+                            out.push(expr);
+                            i = idx + 1;
+                            break;
+                        }
+                    }
+                }
+                idx += 1;
+            }
+            if depth != 0 {
+                return None;
+            }
+            continue;
+        }
+
+        i += 1;
     }
-    None
+    Some(out)
 }
 
 /// Lowers one `PolicyMetadata` (Cedar source text) to a SQL fragment.
@@ -338,18 +385,18 @@ fn lower_policy_to_sql(meta: &PolicyMetadata) -> Option<String> {
         return None;
     }
 
-    let when_clause = extract_clause(&meta.source, "when");
-    let unless_clause = extract_clause(&meta.source, "unless");
+    let when_clauses = extract_clauses(&meta.source, "when")?;
+    let unless_clauses = extract_clauses(&meta.source, "unless")?;
 
-    if when_clause.is_none() && unless_clause.is_none() {
+    if when_clauses.is_empty() && unless_clauses.is_empty() {
         return Some("TRUE".to_string());
     }
 
     let mut parts: Vec<String> = Vec::new();
-    if let Some(when_expr) = when_clause {
+    for when_expr in when_clauses {
         parts.push(format!("({})", lower_condition(&when_expr)?));
     }
-    if let Some(unless_expr) = unless_clause {
+    for unless_expr in unless_clauses {
         parts.push(format!("NOT ({})", lower_condition(&unless_expr)?));
     }
     if parts.is_empty() {
@@ -621,15 +668,40 @@ mod tests {
     }
 
     #[test]
-    fn extract_clause_reads_when_and_unless_bodies() {
+    fn extract_clauses_reads_when_and_unless_bodies() {
         let src = r#"permit(principal, action, resource) when { resource.a == "x" } unless { resource.b == "y" };"#;
         assert_eq!(
-            extract_clause(src, "when"),
-            Some(r#"resource.a == "x""#.to_string())
+            extract_clauses(src, "when"),
+            Some(vec![r#"resource.a == "x""#.to_string()])
         );
         assert_eq!(
-            extract_clause(src, "unless"),
-            Some(r#"resource.b == "y""#.to_string())
+            extract_clauses(src, "unless"),
+            Some(vec![r#"resource.b == "y""#.to_string()])
+        );
+    }
+
+    #[test]
+    fn extract_clauses_collects_stacked_when_and_unless() {
+        let src = r#"
+            permit(principal, action, resource)
+            when { resource.country == "US" }
+            when { resource.tier >= 3 }
+            unless { resource.blocked == true }
+            unless { resource.country == "CN" };
+        "#;
+        assert_eq!(
+            extract_clauses(src, "when"),
+            Some(vec![
+                r#"resource.country == "US""#.to_string(),
+                "resource.tier >= 3".to_string()
+            ])
+        );
+        assert_eq!(
+            extract_clauses(src, "unless"),
+            Some(vec![
+                "resource.blocked == true".to_string(),
+                r#"resource.country == "CN""#.to_string()
+            ])
         );
     }
 
@@ -666,6 +738,21 @@ mod tests {
             "permit(principal, action, resource);",
         );
         assert_eq!(lower_policy_to_sql(&m).as_deref(), Some("TRUE"));
+    }
+
+    #[test]
+    fn lower_policy_to_sql_combines_stacked_when_clauses_with_and() {
+        let m = meta(
+            "p1",
+            PolicyEffect::Permit,
+            r#"permit(principal, action, resource)
+               when { resource.country == "US" }
+               when { resource.tier >= 3 };"#,
+        );
+        let sql = lower_policy_to_sql(&m).expect("stacked when should lower");
+        assert!(sql.contains("\"country\" = 'US'"));
+        assert!(sql.contains("\"tier\" >= 3"));
+        assert!(sql.contains(" AND "));
     }
 
     #[test]

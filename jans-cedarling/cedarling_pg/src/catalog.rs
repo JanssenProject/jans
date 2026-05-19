@@ -75,3 +75,17 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 ",
     name = "cedarling_pg_catalog",
 );
+
+extension_sql!(
+    r"
+REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
+",
+    name = "cedarling_pg_policy_function_privileges",
+    requires = [
+        crate::policy::versions::cedarling_use_policy,
+        crate::policy::versions::cedarling_register_policy_version,
+        crate::policy::versions::cedarling_rollback_policy
+    ],
+);

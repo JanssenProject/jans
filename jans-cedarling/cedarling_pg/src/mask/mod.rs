@@ -236,33 +236,13 @@ fn resolve_explicit_mask(rule: &MaskRule) -> Option<MaskType> {
         if condition_sql.trim().is_empty() {
             return Some(rule.mask_type.clone());
         }
-        if !evaluate_condition_sql(condition_sql) {
-            return None;
-        }
+        warning!(
+            "cedarling_pg: ignoring condition_sql for column '{}' to avoid executing arbitrary SQL",
+            rule.column_name
+        );
+        return None;
     }
     Some(rule.mask_type.clone())
-}
-
-#[cfg(not(test))]
-fn evaluate_condition_sql(condition_sql: &str) -> bool {
-    // condition_sql is extension-owned configuration, intentionally executed as SQL expression.
-    let sql = format!("SELECT COALESCE(({condition_sql}), false)::bool AS applies");
-    match Spi::get_one::<bool>(&sql) {
-        Ok(Some(v)) => v,
-        Ok(None) => false,
-        Err(e) => {
-            warning!(
-                "cedarling_pg: failed to evaluate condition_sql '{}': {}",
-                condition_sql, e
-            );
-            false
-        },
-    }
-}
-
-#[cfg(test)]
-fn evaluate_condition_sql(_condition_sql: &str) -> bool {
-    false
 }
 
 #[cfg(test)]

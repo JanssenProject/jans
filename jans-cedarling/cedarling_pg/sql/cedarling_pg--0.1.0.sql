@@ -340,6 +340,13 @@ AS 'MODULE_PATHNAME', 'cedarling_use_policy_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
+-- cedarling_pg/src/catalog.rs:80
+REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
+/* </end connected objects> */
+
+/* <begin connected objects> */
 -- cedarling_pg/src/policy/schema.rs:61
 -- cedarling_pg::policy::schema::cedarling_validate_schema
 CREATE  FUNCTION "cedarling_validate_schema"(

@@ -124,7 +124,7 @@ jobs:
         # To upgrade: 1) Find the nightly used by the target dylint release
         # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
         # 3) Update the pin below and in the toolchain install step above
-        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --exclude cedarling_pg --path custom-lints
+        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --path custom-lints
 
   rust_benchmarks:
     runs-on: ubuntu-latest

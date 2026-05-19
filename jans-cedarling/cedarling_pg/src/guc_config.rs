@@ -401,7 +401,7 @@ unsafe fn register_string_gucs() {
         c"Filesystem path to Cedarling bootstrap configuration (YAML, JSON, or TOML).",
         c"Must be readable by the PostgreSQL server process. Used to construct the Cedarling engine on first authorization request.",
         &BOOTSTRAP_CONFIG,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 
@@ -410,7 +410,7 @@ unsafe fn register_string_gucs() {
         c"Policy version to pin this session to.",
         c"Empty / unset means the most recently loaded version. Values are matched against versions registered via cedarling_use_policy().",
         &POLICY_VERSION,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 
