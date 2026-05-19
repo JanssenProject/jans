@@ -1,12 +1,13 @@
 package io.jans.shibboleth.model.config.profiles.support;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import io.jans.shibboleth.model.config.profiles.common.*;
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.TrustResult;
 
 public class AuthenticationConfigurationSupport {
-
-    private static final Duration DEFAULT_MAX_AUTHENTICATION_AGE = Duration.ofMinutes(30);
 
     private final InterceptorFlows postAuthenticationFlows;
     private final AuthenticationResultReusePolicy authenticationResultReusePolicy;
@@ -15,21 +16,21 @@ public class AuthenticationConfigurationSupport {
     private AuthenticationConfigurationSupport(InterceptorFlows postAuthenticationFlows, 
         AuthenticationResultReusePolicy authenticationResultReusePolicy, Duration maximumAuthenticationAge) {
         
-        this.postAuthenticationFlows = postAuthenticationFlows != null ? postAuthenticationFlows : InterceptorFlows.empty();
-        this.authenticationResultReusePolicy = authenticationResultReusePolicy != null ? authenticationResultReusePolicy : AuthenticationResultReusePolicy.ALLOW_REUSE;
-        this.maximumAuthenticationAge = maximumAuthenticationAge != null ? maximumAuthenticationAge : DEFAULT_MAX_AUTHENTICATION_AGE;
+        this.postAuthenticationFlows = postAuthenticationFlows;
+        this.authenticationResultReusePolicy = authenticationResultReusePolicy;
+        this.maximumAuthenticationAge = maximumAuthenticationAge;
     }
 
-    public static AuthenticationConfigurationSupport of(InterceptorFlows postAuthenticationFlows, AuthenticationResultReusePolicy authenticationResultReusePolicy, Duration maximumAuthenticationAge) {
+    public static TrustResult<AuthenticationConfigurationSupport> of(InterceptorFlows postAuthenticationFlows,
+        AuthenticationResultReusePolicy authenticationResultReusePolicy, Duration maximumAuthenticationAge ) {
         
-        return new AuthenticationConfigurationSupport(postAuthenticationFlows,authenticationResultReusePolicy,maximumAuthenticationAge);
+        return builder()
+            .postAuthenticationFlows(postAuthenticationFlows)
+            .authenticationResultReusePolicy(authenticationResultReusePolicy)
+            .maximumAuthenticationAge(maximumAuthenticationAge)
+            .build();
     }
-
-    public static AuthenticationConfigurationSupport of() {
-
-        return new AuthenticationConfigurationSupport(null,null,null);
-    }
-
+    
     public InterceptorFlows getPostAuthenticationFlows() {
 
         return postAuthenticationFlows;
@@ -44,4 +45,89 @@ public class AuthenticationConfigurationSupport {
 
         return maximumAuthenticationAge;
     }
+
+    public boolean equals (Object o) {
+
+        if ( this == o ) return true;
+
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        AuthenticationConfigurationSupport other = (AuthenticationConfigurationSupport) o;
+        return Objects.equals(postAuthenticationFlows,other.postAuthenticationFlows)
+            && authenticationResultReusePolicy == other.authenticationResultReusePolicy
+            && Objects.equals(maximumAuthenticationAge,other.maximumAuthenticationAge);
+    }
+
+    public int hashCode() {
+
+        return Objects.hash(postAuthenticationFlows,authenticationResultReusePolicy,maximumAuthenticationAge);
+    }
+    
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(AuthenticationConfigurationSupport base) {
+
+        return new Builder(base);
+    }
+
+    public static class Builder {
+
+        private InterceptorFlows postAuthenticationFlows;
+        private AuthenticationResultReusePolicy authenticationResultReusePolicy;
+        private Duration maximumAuthenticationAge;
+
+        public Builder(AuthenticationConfigurationSupport base) {
+
+            postAuthenticationFlows = base != null ? base.postAuthenticationFlows : null;
+            authenticationResultReusePolicy = base != null ? base.authenticationResultReusePolicy : null;
+            maximumAuthenticationAge = base != null ? base.maximumAuthenticationAge : null;
+        }
+
+        public Builder postAuthenticationFlows(InterceptorFlows postAuthenticationFlows) {
+
+            this.postAuthenticationFlows = postAuthenticationFlows;
+            return this;
+        }
+
+        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy authenticationResultReusePolicy) {
+
+            this.authenticationResultReusePolicy = authenticationResultReusePolicy;
+            return this;
+        }
+
+        public Builder maximumAuthenticationAge(Duration maximumAuthenticationAge) {
+
+            this.maximumAuthenticationAge = maximumAuthenticationAge;
+            return this;
+        }
+
+        public TrustResult<AuthenticationConfigurationSupport> build() {
+
+            if (postAuthenticationFlows == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("postAuthenticationFlows"));
+            }
+
+            if (authenticationResultReusePolicy == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("authenticationResultReusePolicy"));
+            }
+
+            if (maximumAuthenticationAge == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("maximumAuthenticationAge"));
+            }
+
+            AuthenticationConfigurationSupport ret = new AuthenticationConfigurationSupport(postAuthenticationFlows, 
+                authenticationResultReusePolicy, maximumAuthenticationAge);
+            
+            return TrustResult.success(ret);
+        }
+    }
+    
+    
 }

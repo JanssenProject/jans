@@ -27,8 +27,10 @@ import io.jans.shibboleth.model.config.profiles.support.Saml2ConfigurationSuppor
 import io.jans.shibboleth.model.config.profiles.support.Saml2SsoConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlConfigurationSupport;
+import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, 
     SamlAssertionConfigurationCapable,Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
@@ -41,38 +43,17 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
     private final Saml2ConfigurationSupport saml2ConfigurationSupport;
     private final Saml2SsoConfigurationSupport saml2SsoConfigurationSupport;
 
-    private Saml2EcpProfileConfiguration() {
+    private Saml2EcpProfileConfiguration(
+        CommonConfigurationSupport commonConfigurationSupport,SamlConfigurationSupport samlConfigurationSupport,
+        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport, Saml2ConfigurationSupport saml2ConfigurationSupport,
+        Saml2SsoConfigurationSupport saml2SsoConfigurationSupport) {
+        
+        this.commonConfigurationSupport = commonConfigurationSupport;
+        this.samlConfigurationSupport = samlConfigurationSupport;
+        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
+        this.saml2ConfigurationSupport = saml2ConfigurationSupport;
+        this.saml2SsoConfigurationSupport = saml2SsoConfigurationSupport;
 
-        commonConfigurationSupport = CommonConfigurationSupport.of();
-        samlConfigurationSupport = SamlConfigurationSupport.of(MessageSigningPolicy.SIGN_RESPONSES_ONLY);
-
-        saml2ConfigurationSupport = Saml2ConfigurationSupport.of(
-            RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE,
-            EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT,
-            NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS
-        );
-
-        samlAssertionConfigurationSupport = SamlAssertionConfigurationSupport.of(
-            AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS,
-            AssertionTimeCondition.INCLUDE_NOT_BEFORE,
-            Duration.ofMinutes(5));
-
-        saml2SsoConfigurationSupport = Saml2SsoConfigurationSupport.of (
-            AuthenticationResultReusePolicy.ALLOW_REUSE,
-            AssertionEncryptionPolicy.ENCRYPT_ASSERTIONS,
-            AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES,
-            Duration.ofSeconds(0),
-            EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT,
-            AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT,
-            FriendlyNameRandomizationPolicy.RANDOMIZED,
-            NameIdentifiers.empty(),
-            RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS                                                                                                                                                                                  
-        );
-    }
-
-    public static Saml2EcpProfileConfiguration defaultConfiguration() {
-
-        return new Saml2EcpProfileConfiguration();
     }
 
     //Profile configuration 
@@ -204,4 +185,213 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
         return saml2SsoConfigurationSupport.getRequestSigningRequirement();
     }
     //End Saml2Sso configuration
+
+    @Override
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true;
+        
+        if ( o == null || getClass() != o.getClass() ) return false; 
+
+        Saml2EcpProfileConfiguration other = (Saml2EcpProfileConfiguration) o;
+
+        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
+            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
+            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
+            && Objects.equals(saml2SsoConfigurationSupport,other.saml2SsoConfigurationSupport);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(
+            commonConfigurationSupport,samlConfigurationSupport,samlAssertionConfigurationSupport,
+            saml2ConfigurationSupport,saml2SsoConfigurationSupport
+        );
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(Saml2EcpProfileConfiguration config) {
+
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final CommonConfigurationSupport.Builder common;
+        private final SamlConfigurationSupport.Builder saml;
+        private final SamlAssertionConfigurationSupport.Builder samlAssertion;
+        private final Saml2ConfigurationSupport.Builder saml2;
+        private final Saml2SsoConfigurationSupport.Builder saml2Sso;
+
+        public Builder(Saml2EcpProfileConfiguration config) {
+
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
+            saml  = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
+            saml2Sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport) : Saml2SsoConfigurationSupport.builder();
+        }
+
+        public Builder status(ProfileStatus status) {
+
+            common.status(status);
+            return this;
+        }
+
+        public Builder inboundFlows(InterceptorFlows flows) {
+
+            common.inboundFlows(flows);
+            return this;
+        }
+
+        public Builder outboundFlows(InterceptorFlows flows) {
+
+            common.outboundFlows(flows);
+            return this;
+        }
+
+        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+
+            saml.messageSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+
+            samlAssertion.assertionSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
+
+            samlAssertion.assertionTimeCondition(condition);
+            return this;
+        }
+
+        public Builder assertionLifetime(Duration lifetime) {
+
+            samlAssertion.assertionLifetime(lifetime);
+            return this;
+        }
+
+        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
+
+            saml2.requestSignatureValidationPolicy(policy);
+            return this;
+        }
+
+        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
+
+            saml2.encryptionFallbackPolicy(policy);
+            return this;
+        }
+
+        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
+
+            saml2.nameIdEncryptionPolicy(policy);
+            return this;
+        }
+
+        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
+
+            saml2Sso.authenticationResultReusePolicy(policy);
+            return this;
+        }
+
+        public Builder assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
+
+            saml2Sso.assertionEncryptionPolicy(policy);
+            return this;
+        }
+
+
+        public Builder attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
+
+            saml2Sso.attributeEncryptionPolicy(policy);
+            return this;
+        }
+
+        public Builder maximumSPSessionLifetime(Duration lifetime) {
+
+            saml2Sso.maximumSPSessionLifetime(lifetime);
+            return this;
+        }
+
+        public Builder endpointValidationPolicy(EndpointValidationPolicy policy) {
+
+            saml2Sso.endpointValidationPolicy(policy);
+            return this;
+        }
+
+        public Builder attributeStatementPolicy(AttributeStatementPolicy policy) {
+
+            saml2Sso.attributeStatementPolicy(policy);
+            return this;
+        }
+
+        public Builder friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
+
+            saml2Sso.friendlyNameRandomizationPolicy(policy);
+            return this;
+        }
+
+        public Builder nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
+
+            saml2Sso.nameIdFormatPrecedence(nameIdentifiers);
+            return this;
+        }
+
+        public Builder requestSigningRequirement(RequestSigningRequirement requirement) {
+
+            saml2Sso.requestSigningRequirement(requirement);
+            return this;
+        }
+
+        public TrustResult<Saml2EcpProfileConfiguration> build() {
+
+            
+            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            if (commonResult.isFailure()) {
+
+                return TrustResult.failure(commonResult.getError());
+            }
+
+            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            if (samlResult.isFailure()) {
+
+                return TrustResult.failure(samlResult.getError());
+            }
+
+            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            if (samlAssertionResult.isFailure()) {
+
+                return TrustResult.failure(samlAssertionResult.getError());
+            }
+
+            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+
+            if (saml2Result.isFailure()) {
+
+                return TrustResult.failure(saml2Result.getError());
+            }
+
+            TrustResult<Saml2SsoConfigurationSupport> saml2SsoResult = saml2Sso.build();
+
+            if (saml2SsoResult.isFailure()) {
+
+                return TrustResult.failure(saml2SsoResult.getError());
+            }
+
+            return TrustResult.success(new Saml2EcpProfileConfiguration(
+                commonResult.getValue(),samlResult.getValue(),samlAssertionResult.getValue(),
+                saml2Result.getValue(),saml2SsoResult.getValue()
+            ));
+        }
+    }
 }

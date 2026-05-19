@@ -1,10 +1,12 @@
 package io.jans.shibboleth.model.config.profiles.support;
 
+import java.util.Objects;
+
 import io.jans.shibboleth.model.config.profiles.common.*;
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.TrustResult;
 
 public class CommonConfigurationSupport {
-
-    private static final ProfileStatus DEFAULT_PROFILE_STATUS = ProfileStatus.INACTIVE;
 
     private final ProfileStatus status;
     private final InterceptorFlows inboundFlows;
@@ -12,18 +14,9 @@ public class CommonConfigurationSupport {
 
     private CommonConfigurationSupport(ProfileStatus status,InterceptorFlows inboundFlows, InterceptorFlows outboundFlows) {
 
-        this.status = status != null ? status : DEFAULT_PROFILE_STATUS;
-        this.inboundFlows = inboundFlows != null ? inboundFlows : InterceptorFlows.empty();
-        this.outboundFlows = outboundFlows != null ? outboundFlows : InterceptorFlows.empty(); 
-    }
-
-    public static CommonConfigurationSupport of(ProfileStatus status,InterceptorFlows inboundFlows, InterceptorFlows outboundFlows) {
-        return new CommonConfigurationSupport(status,inboundFlows,outboundFlows);
-    }
-    
-    public static CommonConfigurationSupport of() {
-
-        return new CommonConfigurationSupport(null,null,null);
+        this.status = status;
+        this.inboundFlows = inboundFlows;
+        this.outboundFlows = outboundFlows;
     }
     
     public ProfileStatus getStatus() {
@@ -40,5 +33,86 @@ public class CommonConfigurationSupport {
 
         return outboundFlows;
     }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true;
+
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        CommonConfigurationSupport other = (CommonConfigurationSupport) o;
+
+        return status == other.status 
+            && Objects.equals(inboundFlows,other.inboundFlows)
+            &&  Objects.equals(outboundFlows,other.outboundFlows);
+    }
     
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(status,inboundFlows,outboundFlows);
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(CommonConfigurationSupport base) {
+
+        return new Builder(base);
+    }
+    
+    public static class Builder {
+
+        private ProfileStatus status;
+        private InterceptorFlows inboundFlows;
+        private InterceptorFlows outboundFlows;
+
+        public Builder(CommonConfigurationSupport base) {
+            
+            status = base != null ? base.status : null;
+            inboundFlows = base != null ? base.inboundFlows : null;
+            outboundFlows = base != null ? base.outboundFlows : null;
+        }
+
+        public Builder status(ProfileStatus status) {
+
+            this.status = status;
+            return this;
+        }
+
+        public Builder inboundFlows(InterceptorFlows inboundFlows) {
+
+            this.inboundFlows = inboundFlows;
+            return this;
+        }
+
+        public Builder outboundFlows(InterceptorFlows outboundFlows) {
+
+            this.outboundFlows = outboundFlows;
+            return this;
+        }
+
+        public TrustResult<CommonConfigurationSupport> build() {
+
+            if (status == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("status"));
+            }
+
+            if (inboundFlows == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("inboundFlows"));
+            }
+
+            if (outboundFlows == null) {
+
+                return TrustResult.failure(new CannotBeNullOrBlank("outboundFlows"));
+            }
+
+            return TrustResult.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));
+        }
+    }
 }
