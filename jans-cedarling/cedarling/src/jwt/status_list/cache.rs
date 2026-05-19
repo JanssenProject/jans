@@ -40,7 +40,7 @@ struct StatusListUpdateCtx {
     refresh_interval_max: u64,
     status_list_url: Url,
     decoding_key: Option<Arc<DecodingKey>>,
-    validator: Arc<RwLock<JwtValidator>>,
+    validator: Arc<JwtValidator>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
     http_client: HttpClient,
@@ -109,14 +109,10 @@ impl StatusListCache {
                     status_list_url.to_string(),
                 ))?;
 
-        let status_list_jwt: StatusListJwt = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
-        }
-        .try_into()
-        .map_err(DecodeJwtError::DeserializeClaims)?;
+        let status_list_jwt: StatusListJwt = validator
+            .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
+            .try_into()
+            .map_err(DecodeJwtError::DeserializeClaims)?;
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -195,12 +191,7 @@ where
                 },
             };
 
-        let result = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key.clone())
-        };
+        let result = validator.validate_jwt(&status_list_jwt.0, decoding_key.clone());
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
             Err(e) => {

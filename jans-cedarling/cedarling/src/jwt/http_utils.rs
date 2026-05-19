@@ -24,6 +24,8 @@ use url::Url;
 pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
     /// Send a get request to receive the resource from a URL
     async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError> {
+        require_secure_url(url)?;
+
         // add delay to simulate network latency and test async behavior
         // it would be great to implement delay in mock server, but mockito doesn't support it.
         #[cfg(test)]
@@ -40,6 +42,34 @@ pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
             .map_err(HttpError::Request)?;
 
         Ok(result)
+    }
+}
+
+/// Returns `Ok(())` if `url` is safe to fetch from a JWT-validation context.
+///
+/// "Safe" means either `https`, or `http` pointed at a loopback address
+/// (`localhost`, `127.0.0.1`, `::1`)
+pub(super) fn require_secure_url(url: &Url) -> Result<(), HttpError> {
+    if url.scheme().eq_ignore_ascii_case("https") {
+        return Ok(());
+    }
+
+    if url.scheme().eq_ignore_ascii_case("http") && is_loopback_host(url) {
+        return Ok(());
+    }
+
+    Err(HttpError::InsecureScheme {
+        url: url.to_string(),
+        scheme: url.scheme().to_string(),
+    })
+}
+
+fn is_loopback_host(url: &Url) -> bool {
+    match url.host() {
+        Some(url::Host::Ipv4(addr)) => addr.is_loopback(),
+        Some(url::Host::Ipv6(addr)) => addr.is_loopback(),
+        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+        None => false,
     }
 }
 
@@ -86,6 +116,8 @@ impl JwkSet {
         url: &Url,
         client: &HttpClient,
     ) -> Result<(Self, Option<u64>), HttpError> {
+        require_secure_url(url)?;
+
         let response = client
             .get_with_retry(url.as_str())
             .await
@@ -120,6 +152,8 @@ fn parse_max_age(cache_control: &str) -> Option<u64> {
 // function which requires this to be Send.
 impl StatusListJwtStr {
     pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
+        require_secure_url(url)?;
+
         let response = client
             .get_with_retry_with(url.as_str(), |b| {
                 b.header("Accept", "application/statuslist+jwt")
@@ -158,11 +192,17 @@ pub enum HttpError {
     InvalidHeader(String, ToStrError),
     #[error("{0}")]
     Unsupported(String),
+    #[error(
+        "refusing to fetch '{url}' over insecure scheme '{scheme}'; \
+         JWT validation requires https (loopback http is allowed)"
+    )]
+    InsecureScheme { url: String, scheme: String },
 }
 
 #[cfg(test)]
 mod tests {
-    use super::parse_max_age;
+    use super::{HttpError, parse_max_age, require_secure_url};
+    use url::Url;
 
     #[test]
     fn parses_max_age_from_cache_control_header() {
@@ -193,5 +233,47 @@ mod tests {
             max_age, None,
             "expected no max-age when directive is missing"
         );
+    }
+
+    #[test]
+    fn allows_https() {
+        let url = Url::parse("https://idp.example.com/.well-known/openid-configuration").unwrap();
+        assert!(require_secure_url(&url).is_ok());
+    }
+
+    #[test]
+    fn allows_http_loopback_hosts() {
+        for raw in [
+            "http://localhost/.well-known/openid-configuration",
+            "http://localhost:8080/jwks",
+            "http://127.0.0.1:1234/jwks",
+            "http://[::1]:1234/jwks",
+        ] {
+            let url = Url::parse(raw).unwrap();
+            assert!(
+                require_secure_url(&url).is_ok(),
+                "expected loopback url to be allowed: {raw}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_plain_http_to_remote_host() {
+        let url = Url::parse("http://idp.example.com/.well-known/openid-configuration").unwrap();
+        let err = require_secure_url(&url).expect_err("expected http remote to be rejected");
+        match err {
+            HttpError::InsecureScheme { scheme, .. } => assert_eq!(scheme, "http"),
+            other => panic!("expected InsecureScheme, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn rejects_non_http_schemes() {
+        let url = Url::parse("ftp://idp.example.com/jwks").unwrap();
+        let err = require_secure_url(&url).expect_err("expected ftp to be rejected");
+        match err {
+            HttpError::InsecureScheme { scheme, .. } => assert_eq!(scheme, "ftp"),
+            other => panic!("expected InsecureScheme, got {other:?}"),
+        }
     }
 }

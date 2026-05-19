@@ -100,6 +100,7 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
+use smol_str::SmolStr;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -205,6 +206,20 @@ impl JwtService {
         // Create TrustedIssuerValidator for advanced validation scenarios
         let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
 
+        {
+            let cache = token_cache.clone();
+            let cancel = jwks_cancel_token.clone();
+            crate::http::spawn_task(async move {
+                loop {
+                    tokio::select! {
+                        () = crate::async_sleep::sleep(std::time::Duration::from_secs(30)) => {},
+                        () = cancel.cancelled() => { break; },
+                    }
+                    cache.clear_expired();
+                }
+            });
+        }
+
         Ok(Self {
             validators,
             key_service,
@@ -244,20 +259,15 @@ impl JwtService {
             token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<std::sync::RwLock<JwtValidator>> =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<JwtValidator> = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
         // was set on initialization
-        let mut validated_jwt = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(jwt, decoding_key)?
-        };
+        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
 
         // Use TrustedIssuerValidator to find and validate against trusted issuer
         // This implements Requirement 5: "WHEN processing JWT tokens THEN the Cedarling
@@ -358,9 +368,6 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
 
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
-
         let now = Utc::now();
 
         for (index, token) in tokens.iter().enumerate() {
@@ -397,22 +404,12 @@ impl JwtService {
                             .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                         // Check for non-deterministic tokens (graceful validation)
-                        let combination = format!("{}:{}", issuer, token.mapping);
-                        if seen_combinations.insert(combination.clone()) {
+                        let combination =
+                            (SmolStr::from(issuer), SmolStr::from(token.mapping.as_str()));
+                        if seen_combinations.insert(combination) {
                             // Convert ValidatedJwt to Token
-                            let claims =
-                                serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                                    .map_err(|err| {
-                                        if let Some(logger) = &self.logger {
-                                            logger.log_any(JwtLogEntry::new(
-                                                format!(
-                                                    "failed to deserialize token claims: {err}"
-                                                ),
-                                                Some(LogLevel::ERROR),
-                                            ));
-                                        }
-                                        MultiIssuerValidationError::TokenValidationFailed
-                                    })?;
+                            let claims = TokenClaims::try_from(validated_jwt.claims)
+                                .map_err(MultiIssuerValidationError::InvalidClaims)?;
 
                             let cedar_token = Arc::new(Token::new(
                                 &token_name,

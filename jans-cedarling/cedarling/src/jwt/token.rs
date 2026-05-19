@@ -68,10 +68,16 @@ impl From<HashMap<String, Value>> for TokenClaims {
     }
 }
 
-impl From<Value> for TokenClaims {
-    fn from(claims: Value) -> Self {
-        let claims = serde_json::from_value(claims).expect("should deserialize claims to hashmap");
-        Self { claims }
+impl TryFrom<Value> for TokenClaims {
+    type Error = &'static str;
+
+    fn try_from(claims: Value) -> Result<Self, Self::Error> {
+        match claims {
+            Value::Object(map) => Ok(Self {
+                claims: map.into_iter().collect(),
+            }),
+            _ => Err("expected a JSON object for TokenClaims"),
+        }
     }
 }
 
