@@ -10,16 +10,15 @@ use crate::log::Logger;
 use crate::{JwtConfig, LogLevel, LogWriter};
 
 use super::JwtValidator;
+use arc_swap::ArcSwap;
 use jsonwebtoken::Algorithm;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
-type CachedValidator = Arc<RwLock<JwtValidator>>;
-const MUTEX_POISONED_ERR: &str =
-    "JwtValidatorCache RwLock poisoned due to another thread panicking while holding the lock";
+type CachedValidator = Arc<JwtValidator>;
 
 /// Holds a collection of JWT validators keyed by a hash.
 ///
@@ -31,10 +30,17 @@ const MUTEX_POISONED_ERR: &str =
 /// If multiple validators share the same hash (i.e., hash collision),
 /// we perform an additional full comparison via [`OwnedValidatorInfo::is_equal_to`].
 ///
-/// This structure is thread-safe via an internal `RwLock`.
-#[derive(Default)]
+/// This structure is thread-safe.
 pub(crate) struct JwtValidatorCache {
-    validators: RwLock<HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>>,
+    validators: ArcSwap<HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>>,
+}
+
+impl Default for JwtValidatorCache {
+    fn default() -> Self {
+        Self {
+            validators: ArcSwap::from_pointee(HashMap::new()),
+        }
+    }
 }
 
 impl JwtValidatorCache {
@@ -124,14 +130,22 @@ impl JwtValidatorCache {
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
+    ///
+    /// Uses an atomic CAS loop (`rcu`) so concurrent inserts from parallel
+    /// issuer-loading tasks are never lost.
     fn insert(&self, validator_info: &ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
-        self.validators
-            .write()
-            .expect(MUTEX_POISONED_ERR)
-            .entry(key)
-            .or_default()
-            .push((validator_info.owned(), Arc::new(RwLock::new(validator))));
+        let owned_info = validator_info.owned();
+        let cached = Arc::new(validator);
+
+        self.validators.rcu(|old| {
+            let mut new_map = (**old).clone();
+            new_map
+                .entry(key.clone())
+                .or_default()
+                .push((owned_info.clone(), Arc::clone(&cached)));
+            new_map
+        });
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.
@@ -139,11 +153,8 @@ impl JwtValidatorCache {
     /// Performs a fast hash-based lookup. If multiple entries are found under
     /// the same hash (due to collisions), performs full field comparisons to
     /// find an exact match.
-    pub(crate) fn get(
-        &self,
-        validator_info: &ValidatorInfo<'_>,
-    ) -> Option<Arc<RwLock<JwtValidator>>> {
-        let guard = self.validators.read().expect(MUTEX_POISONED_ERR);
+    pub(crate) fn get(&self, validator_info: &ValidatorInfo<'_>) -> Option<Arc<JwtValidator>> {
+        let guard = self.validators.load();
         let validators = guard.get(&validator_info.key_hash())?;
 
         match validators.len() {
@@ -199,14 +210,14 @@ impl Display for TokenKind<'_> {
 }
 
 /// Owned version of [`ValidatorInfo`] used to store entries inside `ValidatorStore`.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OwnedValidatorInfo {
     iss: Option<IssClaim>,
     token_kind: OwnedTokenKind,
     algorithm: Algorithm,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum OwnedTokenKind {
     /// A token that's provided by the user through the [`authorize`] function.
     ///
@@ -257,7 +268,7 @@ impl OwnedTokenKind {
 /// Hash wrapper used as a key in the internal `HashMap`.
 ///
 /// The hash is generated from the contents of a `ValidatorInfo`.
-#[derive(Hash, Eq, PartialEq)]
+#[derive(Clone, Hash, Eq, PartialEq)]
 struct ValidatorKeyHash(u64);
 
 impl ValidatorInfo<'_> {
