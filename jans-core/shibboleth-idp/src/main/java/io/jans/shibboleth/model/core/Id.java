@@ -42,6 +42,11 @@ public class Id {
         return assigned;
     }
 
+    public boolean isNotAssigned() {
+
+        return !assigned;
+    }
+
     public TrustResult<UUID> getValue() {
 
         if (!assigned) {

@@ -1,8 +1,12 @@
 package io.jans.shibboleth.model.core;
 
-import io.jans.shibboleth.model.error.EntityIdError;
+
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.error.InvalidUriSyntax;
 import io.jans.shibboleth.model.util.TrustResult;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class EntityId {
@@ -18,7 +22,13 @@ public class EntityId {
 
         if (value == null  || value.trim().isEmpty() ) {
 
-            return TrustResult.failure(EntityIdError.cannotBeNullOrBlank());
+            return TrustResult.failure(new CannotBeNullOrBlank("value"));
+        }
+
+        try {
+            URI uri = new URI(value);
+        }catch(URISyntaxException e) {
+            return TrustResult.failure(new InvalidUriSyntax("Specified value for EntityId is not a URI"));
         }
 
         return TrustResult.success(new EntityId(value));
@@ -33,7 +43,9 @@ public class EntityId {
     public boolean equals(Object o) {
 
         if ( this == o ) return true;
+
         if ( o == null || getClass() != o.getClass() ) return false;
+        
         EntityId that = (EntityId) o;
         return Objects.equals(value,that.value);
     }

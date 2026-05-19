@@ -34,7 +34,9 @@ public class DisplayName {
     public boolean equals(Object o) {
 
         if ( this == null ) return true;
+
         if ( o == null || getClass() != o.getClass() ) return false;
+        
         DisplayName that = (DisplayName) o;
         return Objects.equals(value, that.value);
     }
