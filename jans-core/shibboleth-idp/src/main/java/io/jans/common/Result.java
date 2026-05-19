@@ -38,7 +38,7 @@ public class Result<T> {
 
         if(!success) {
 
-            throw new IllegalStateException("Cannot get value from failed result");
+            throw new IllegalStateException("Cannot get value from failed result with error '" + error.toString() + "'");
         }
         return value;
     }
