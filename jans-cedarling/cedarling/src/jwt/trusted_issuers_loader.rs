@@ -235,9 +235,9 @@ pub(super) async fn load_trusted_issuer(
                     http_client,
                     // `JwtConfig` has already been normalized in `JwtService::new`,
                     // so this value is guaranteed to be in the safe range.
-                    refresh_interval_fallback: loader
+                    refresh_interval_max: loader
                         .jwt_config
-                        .status_list_refresh_interval_fallback,
+                        .status_list_refresh_interval_max,
                 },
             )
             .await?;

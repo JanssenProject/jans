@@ -34,9 +34,10 @@ type StatusListUri = String;
 
 struct StatusListUpdateCtx {
     ttl: u64,
-    /// Fallback refresh interval (seconds) used when an updated Status List JWT no
-    /// longer carries a `ttl` claim.
-    refresh_interval_fallback: u64,
+    /// Upper bound on the refresh interval (seconds). The Status List JWT's `ttl`
+    /// claim is honored when present, but capped to this value; when the JWT omits
+    /// `ttl`, this value is used directly.
+    refresh_interval_max: u64,
     status_list_url: Url,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<RwLock<JwtValidator>>,
@@ -51,7 +52,7 @@ pub(crate) struct InitForIssArgs<'a> {
     pub token_cache: TokenCache,
     pub logger: Option<Logger>,
     pub http_client: HttpClient,
-    pub refresh_interval_fallback: u64,
+    pub refresh_interval_max: u64,
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -73,7 +74,7 @@ impl StatusListCache {
             token_cache,
             logger,
             http_client,
-            refresh_interval_fallback,
+            refresh_interval_max,
         } = args;
         let openid_config = iss_config
             .openid_config
@@ -117,16 +118,20 @@ impl StatusListCache {
         .try_into()
         .map_err(DecodeJwtError::DeserializeClaims)?;
 
-        // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim is authoritative
-        // for refresh cadence. When the issuer omits `ttl`, fall back to the bootstrap
-        // `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK` so the cache never goes
+        // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
+        // refresh cadence, but the bootstrap
+        // `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps it: the issuer can
+        // always request a *more frequent* refresh, but never a less frequent one.
+        // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let ttl = status_list_jwt.ttl.unwrap_or(refresh_interval_fallback);
+        let ttl = status_list_jwt
+            .ttl
+            .map_or(refresh_interval_max, |t| t.min(refresh_interval_max));
         let status_list: StatusList = status_list_jwt.try_into()?;
 
         let ctx = StatusListUpdateCtx {
             ttl,
-            refresh_interval_fallback,
+            refresh_interval_max,
             status_list_url: status_list_url.clone(),
             decoding_key,
             validator,
@@ -162,7 +167,7 @@ where
 {
     let StatusListUpdateCtx {
         mut ttl,
-        refresh_interval_fallback,
+        refresh_interval_max,
         status_list_url,
         decoding_key,
         validator,
@@ -225,9 +230,11 @@ where
                 continue;
             },
         };
-        // If the refreshed JWT no longer has `ttl`, fall back to the configured
-        // fallback interval so the loop keeps a sane cadence.
-        ttl = status_list_jwt.ttl.unwrap_or(refresh_interval_fallback);
+        // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
+        // refreshed JWT no longer has `ttl`, use the max directly.
+        ttl = status_list_jwt
+            .ttl
+            .map_or(refresh_interval_max, |t| t.min(refresh_interval_max));
 
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
@@ -339,8 +346,8 @@ mod test {
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
-                    refresh_interval_fallback:
-                        JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
+                    refresh_interval_max:
+                        JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
                 },
             )
             .await
@@ -396,10 +403,10 @@ mod test {
     }
 
     /// When the Status List JWT has no `ttl` claim, the bootstrap-config
-    /// `status_list_refresh_interval_fallback` should be used so that the
-    /// background refresh task still runs.
+    /// `status_list_refresh_interval_max` is used directly so the background
+    /// refresh task still runs.
     #[tokio::test]
-    async fn refresh_fallback_used_when_jwt_has_no_ttl() {
+    async fn refresh_max_used_when_jwt_has_no_ttl() {
         let http_client = HttpClient::new(HttpClientConfig {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
@@ -414,7 +421,7 @@ mod test {
             .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
             .await
             .unwrap();
-        // initial JWT has no `ttl` claim - relies on fallback to schedule a refresh
+        // initial JWT has no `ttl` claim - relies on the max to schedule a refresh
         mock_server
             .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b1111_1110]);
         let status_list = StatusListCache::default();
@@ -443,7 +450,7 @@ mod test {
             &status_list,
             None,
         );
-        // 1-second fallback so the test runs fast
+        // 1-second max so the test runs fast
         status_list
             .init_for_iss(
                 &iss_config,
@@ -453,7 +460,7 @@ mod test {
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
-                    refresh_interval_fallback: 1,
+                    refresh_interval_max: 1,
                 },
             )
             .await
@@ -480,7 +487,7 @@ mod test {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
             },
-            "fallback interval did not trigger a refresh",
+            "max interval did not trigger a refresh",
         );
     }
 }

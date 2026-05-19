@@ -25,8 +25,8 @@ pub(super) fn default_jwks_refresh_min_interval() -> u64 {
     JwtConfig::default().jwks_refresh_min_interval
 }
 
-pub(super) fn default_status_list_refresh_interval_fallback() -> u64 {
-    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS
+pub(super) fn default_status_list_refresh_interval_max() -> u64 {
+    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS
 }
 
 #[cfg(not(target_arch = "wasm32"))]

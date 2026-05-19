@@ -127,7 +127,7 @@ impl BootstrapConfig {
                 .to_config(raw.trusted_issuer_loader_workers),
             jwks_refresh_interval: raw.jwks_refresh_interval,
             jwks_refresh_min_interval: raw.jwks_refresh_min_interval,
-            status_list_refresh_interval_fallback: raw.status_list_refresh_interval_fallback,
+            status_list_refresh_interval_max: raw.status_list_refresh_interval_max,
         };
 
         let authorization_config = AuthorizationConfig {

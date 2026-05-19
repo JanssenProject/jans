@@ -9,7 +9,7 @@ use super::super::BootstrapConfigLoadingError;
 use super::default_values::{
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
     default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_fallback, default_token_cache_capacity, default_true,
+    default_status_list_refresh_interval_max, default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -18,7 +18,7 @@ use super::default_values::{
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
-    deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_fallback,
+    deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
     parse_option_string,
 };
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
@@ -387,19 +387,21 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_jwks_refresh_min_interval")]
     pub jwks_refresh_min_interval: u64,
 
-    /// Fallback Status List JWT refresh interval in seconds.
+    /// Upper bound on the Status List JWT refresh interval, in seconds.
     ///
-    /// Only used when the Status List JWT fetched from the issuer has no `ttl` claim;
-    /// when `ttl` is present in the JWT, it is always respected and this value is ignored.
-    /// A value of `0` or an unset variable is treated as "use the default" (300 seconds)
-    /// so the status list cannot silently go stale forever. Non-zero values below `5`
-    /// are clamped to `5`.
+    /// Caps how long Cedarling waits between Status List refreshes. When the Status
+    /// List JWT carries a `ttl` claim, the effective refresh interval is
+    /// `min(jwt_ttl, status_list_refresh_interval_max)`, so the issuer can request a
+    /// *more frequent* refresh but never a less frequent one. When the JWT omits
+    /// `ttl`, this value is used directly. A value of `0` or an unset variable is
+    /// treated as "use the default" (300 seconds) so the status list cannot silently
+    /// go stale forever. Non-zero values below `5` are clamped to `5`.
     #[serde(
-        rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK",
-        default = "default_status_list_refresh_interval_fallback"
+        rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
+        default = "default_status_list_refresh_interval_max"
     )]
-    #[serde(deserialize_with = "deserialize_status_list_refresh_interval_fallback")]
-    pub status_list_refresh_interval_fallback: u64,
+    #[serde(deserialize_with = "deserialize_status_list_refresh_interval_max")]
+    pub status_list_refresh_interval_max: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -800,40 +802,40 @@ mod tests {
     }
 
     #[test]
-    fn test_status_list_refresh_interval_fallback_default() {
+    fn test_status_list_refresh_interval_max_default() {
         with_env_vars(&[], || {
             let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
             assert_eq!(
-                config.status_list_refresh_interval_fallback,
-                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
+                config.status_list_refresh_interval_max,
+                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
                 "missing env var should resolve to the JwtConfig default"
             );
         });
     }
 
     #[test]
-    fn test_status_list_refresh_interval_fallback_from_env() {
+    fn test_status_list_refresh_interval_max_from_env() {
         with_env_vars(
-            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK", "120")],
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "120")],
             || {
                 let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
                 assert_eq!(
-                    config.status_list_refresh_interval_fallback, 120,
-                    "status list refresh fallback should match the value supplied via env var"
+                    config.status_list_refresh_interval_max, 120,
+                    "status list refresh max should match the value supplied via env var"
                 );
             },
         );
     }
 
     #[test]
-    fn test_status_list_refresh_interval_fallback_zero_uses_default() {
+    fn test_status_list_refresh_interval_max_zero_uses_default() {
         with_env_vars(
-            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK", "0")],
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "0")],
             || {
                 let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
                 assert_eq!(
-                    config.status_list_refresh_interval_fallback,
-                    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK_SECS,
+                    config.status_list_refresh_interval_max,
+                    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
                     "0 should be treated as 'use the default'"
                 );
             },
@@ -841,13 +843,13 @@ mod tests {
     }
 
     #[test]
-    fn test_status_list_refresh_interval_fallback_clamps_below_min() {
+    fn test_status_list_refresh_interval_max_clamps_below_min() {
         with_env_vars(
-            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_FALLBACK", "2")],
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "2")],
             || {
                 let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
                 assert_eq!(
-                    config.status_list_refresh_interval_fallback, MIN_STATUS_LIST_REFRESH_SECS,
+                    config.status_list_refresh_interval_max, MIN_STATUS_LIST_REFRESH_SECS,
                     "non-zero values below the minimum should be clamped"
                 );
             },
