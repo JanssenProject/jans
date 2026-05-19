@@ -19,6 +19,10 @@ use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 
+/// A pre-parsed set of decoding keys for a single issuer, ready for
+/// atomic insertion into the key store.
+type ParsedIssuerKeys = Vec<(DecodingKeyInfo, Arc<DecodingKey>)>;
+
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) struct DecodingKeyInfo {
     pub issuer: Option<IssClaim>,
@@ -83,13 +87,14 @@ impl KeyService {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
-        let mut new_keys: HashMap<DecodingKeyInfo, Arc<DecodingKey>> = (**self.keys.load()).clone();
+        // Parse all keys upfront so the rcu closure is infallible.
+        let mut parsed_keys: Vec<(IssClaim, ParsedIssuerKeys)> = Vec::new();
 
         for (issuer, keys) in parsed_stores
             .into_iter()
             .map(|(iss, keys)| (IssClaim::new(&iss), keys))
         {
-            new_keys.retain(|key_info, _| key_info.issuer.as_ref() != Some(&issuer));
+            let mut issuer_keys = Vec::new();
 
             for jwk in keys {
                 let decoding_key =
@@ -107,11 +112,22 @@ impl KeyService {
                     kid: jwk.common.key_id,
                     algorithm,
                 };
-                new_keys.insert(key_info, Arc::new(decoding_key));
+                issuer_keys.push((key_info, Arc::new(decoding_key)));
             }
+            parsed_keys.push((issuer, issuer_keys));
         }
 
-        self.keys.store(Arc::new(new_keys));
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            for (issuer, keys) in &parsed_keys {
+                new_keys.retain(|k, _| k.issuer.as_ref() != Some(issuer));
+                for (key_info, decoding_key) in keys {
+                    new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+                }
+            }
+            new_keys
+        });
+
         Ok(())
     }
 
@@ -146,13 +162,11 @@ impl KeyService {
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
         }
 
-        let mut new_keys: HashMap<DecodingKeyInfo, Arc<DecodingKey>> = (**self.keys.load()).clone();
-
-        new_keys.retain(|key_info, _| key_info.issuer.as_ref() != Some(&openid_config.issuer));
+        let mut parsed_keys: Vec<(DecodingKeyInfo, Arc<DecodingKey>)> = Vec::new();
         for parsed_key in keys {
             let key = parsed_key.jwk;
 
-            // We will no support keys with unspecified algorithms
+            // We will not support keys with unspecified algorithms
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
                     "skipping a JWK with a missing algorithm specifier from '{}'",
@@ -183,10 +197,18 @@ impl KeyService {
                 kid: key.common.key_id,
                 algorithm,
             };
-            new_keys.insert(key_info, Arc::new(decoding_key));
+            parsed_keys.push((key_info, Arc::new(decoding_key)));
         }
 
-        self.keys.store(Arc::new(new_keys));
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            new_keys.retain(|k, _| k.issuer.as_ref() != Some(&openid_config.issuer));
+            for (key_info, decoding_key) in &parsed_keys {
+                new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+            }
+            new_keys
+        });
+
         Ok(())
     }
 

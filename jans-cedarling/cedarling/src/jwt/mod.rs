@@ -401,7 +401,8 @@ impl JwtService {
                             (SmolStr::from(issuer), SmolStr::from(token.mapping.as_str()));
                         if seen_combinations.insert(combination) {
                             // Convert ValidatedJwt to Token
-                            let claims = TokenClaims::from(validated_jwt.claims);
+                            let claims = TokenClaims::try_from(validated_jwt.claims)
+                                .map_err(MultiIssuerValidationError::InvalidClaims)?;
 
                             let cedar_token = Arc::new(Token::new(
                                 &token_name,

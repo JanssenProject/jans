@@ -130,14 +130,22 @@ impl JwtValidatorCache {
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
+    ///
+    /// Uses an atomic CAS loop (`rcu`) so concurrent inserts from parallel
+    /// issuer-loading tasks are never lost.
     fn insert(&self, validator_info: &ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
-        let mut new_map = (**self.validators.load()).clone();
-        new_map
-            .entry(key)
-            .or_default()
-            .push((validator_info.owned(), Arc::new(validator)));
-        self.validators.store(Arc::new(new_map));
+        let owned_info = validator_info.owned();
+        let cached = Arc::new(validator);
+
+        self.validators.rcu(|old| {
+            let mut new_map = (**old).clone();
+            new_map
+                .entry(key.clone())
+                .or_default()
+                .push((owned_info.clone(), Arc::clone(&cached)));
+            new_map
+        });
     }
 
     /// Retrieves a validator matching the given `ValidatorInfo`, if present.

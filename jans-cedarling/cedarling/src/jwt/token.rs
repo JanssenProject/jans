@@ -68,13 +68,15 @@ impl From<HashMap<String, Value>> for TokenClaims {
     }
 }
 
-impl From<Value> for TokenClaims {
-    fn from(claims: Value) -> Self {
+impl TryFrom<Value> for TokenClaims {
+    type Error = &'static str;
+
+    fn try_from(claims: Value) -> Result<Self, Self::Error> {
         match claims {
-            Value::Object(map) => Self {
+            Value::Object(map) => Ok(Self {
                 claims: map.into_iter().collect(),
-            },
-            _ => panic!("expected a JSON object for TokenClaims"),
+            }),
+            _ => Err("expected a JSON object for TokenClaims"),
         }
     }
 }
