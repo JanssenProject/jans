@@ -521,6 +521,38 @@ jobs:
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+
+    - name: Resolve PyPI version
+      id: resolve-version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          TAG_NAME="${{ inputs.target_tag }}"
+        else
+          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        fi
+
+        TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+
+        if [ "${TAG}" == "nightly" ]; then
+          PYPI_JSON=$(curl -sf https://pypi.org/pypi/cedarling_python/json) || PYPI_JSON=""
+          if [ -n "${PYPI_JSON}" ]; then
+            LAST_VERSION=$(echo "${PYPI_JSON}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['info']['version'])")
+          else
+            LAST_VERSION="0.0.0"
+          fi
+          VERSION_TO_PUBLISH=$(echo "${LAST_VERSION}" | awk -F. '{print $1"."$2"."$3+1}')
+        else
+          VERSION_TO_PUBLISH="${TAG}"
+        fi
+
+        echo "version=${VERSION_TO_PUBLISH}" >> $GITHUB_OUTPUT
+        echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+        echo "Resolved version: ${VERSION_TO_PUBLISH}"
+
+        sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" \
+          ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python/Cargo.toml
+        echo "Updated Cargo.toml to version ${VERSION_TO_PUBLISH}"
+
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -541,7 +573,7 @@ jobs:
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="${{ steps.resolve-version.outputs.version }}"
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
@@ -555,6 +587,13 @@ jobs:
         WHL="${WHLS[0]}"
         cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
         gh release upload "${VERSION}" *.whl *.bundle --clobber
+
+    - name: Publish Cedarling Python to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      continue-on-error: true
+      with:
+        packages-dir: ${{ github.workspace }}/jans-cedarling/target/wheels/
+        skip-existing: true
 
   build_cedarling_go:
     if: |
