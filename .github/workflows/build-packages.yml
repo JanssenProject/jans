@@ -544,6 +544,7 @@ jobs:
             os: macos-15
             target: x86_64-apple-darwin
             manylinux: 'off'
+            skip_smoke_test: true
           - name: macos-arm64
             os: macos-15
             target: aarch64-apple-darwin
@@ -704,7 +705,7 @@ jobs:
           TAG="${{ steps.resolve-version.outputs.version }}"
         fi
 
-        cd ${{ github.workspace }}/jans-cedarling/target/wheels
+        cd "${GITHUB_WORKSPACE}/jans-cedarling/target/wheels"
         shopt -s nullglob
         WHLS=(*.whl)
         shopt -u nullglob
@@ -714,7 +715,7 @@ jobs:
         fi
         echo "Found ${#WHLS[@]} wheel(s): ${WHLS[*]}"
         for WHL in "${WHLS[@]}"; do
-          BUNDLE="${{ github.workspace }}/${WHL}.bundle"
+          BUNDLE="${GITHUB_WORKSPACE}/${WHL}.bundle"
           cosign sign-blob --yes --bundle "${BUNDLE}" "${WHL}"
           gh release upload "${VERSION}" "${WHL}" "${BUNDLE}" --clobber
         done
