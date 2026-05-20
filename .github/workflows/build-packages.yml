@@ -553,6 +553,11 @@ jobs:
           ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python/Cargo.toml
         echo "Updated Cargo.toml to version ${VERSION_TO_PUBLISH}"
 
+        # Also update Cargo.lock so --locked does not reject the changed version
+        sed -i '/^name = "cedarling_python"$/{n;s/^version = ".*"$/version = "'"${VERSION_TO_PUBLISH}"'"/}' \
+          ${{ github.workspace }}/jans-cedarling/Cargo.lock
+        echo "Updated Cargo.lock to version ${VERSION_TO_PUBLISH}"
+
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -589,7 +594,7 @@ jobs:
         gh release upload "${VERSION}" *.whl *.bundle --clobber
 
     - name: Publish Cedarling Python to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
       continue-on-error: true
       with:
         packages-dir: ${{ github.workspace }}/jans-cedarling/target/wheels/
