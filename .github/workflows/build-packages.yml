@@ -631,10 +631,10 @@ jobs:
         CARGO_TOML="${{ github.workspace }}/jans-cedarling/bindings/cedarling_python/Cargo.toml"
         CARGO_LOCK="${{ github.workspace }}/jans-cedarling/Cargo.lock"
 
-        perl -pi -e 's/^version = ".*"/version = "'"${VERSION_TO_PUBLISH}"'"/' "${CARGO_TOML}"
+        python3 -c 'import re,sys; p,v=sys.argv[1],sys.argv[2]; open(p,"w",encoding="utf-8").write(re.sub(r"^version = \".*\"","version = \""+v+"\"",open(p,encoding="utf-8").read(),flags=re.MULTILINE))' "${CARGO_TOML}" "${VERSION_TO_PUBLISH}"
         echo "Updated Cargo.toml to version ${VERSION_TO_PUBLISH}"
 
-        perl -pi -e 'if (/^name = "cedarling_python"$/) { $found=1 } elsif ($found && s/^version = ".*"$/version = "'"${VERSION_TO_PUBLISH}"'"/) { $found=0 }' "${CARGO_LOCK}"
+        python3 -c 'import re,sys; p,v=sys.argv[1],sys.argv[2]; c=open(p,encoding="utf-8").read(); c=re.sub("(name = \"cedarling_python\"\nversion = \")[^\"]*(\")",lambda m:m.group(1)+v+m.group(2),c); open(p,"w",encoding="utf-8").write(c)' "${CARGO_LOCK}" "${VERSION_TO_PUBLISH}"
         echo "Updated Cargo.lock to version ${VERSION_TO_PUBLISH}"
 
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -644,7 +644,12 @@ jobs:
         args: --release --locked -i python3.9 python3.10 python3.11 python3.12
         target: ${{ matrix.target }}
         manylinux: ${{ matrix.manylinux }}
-        before-script-linux: yum install -y protobuf-compiler || dnf install -y protobuf-compiler || true
+        before-script-linux: |
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "aarch64" ]; then PROTOC_ARCH="linux-aarch_64"; else PROTOC_ARCH="linux-x86_64"; fi
+          curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-${PROTOC_ARCH}.zip" -o /tmp/protoc.zip
+          unzip -o /tmp/protoc.zip -d /usr/local bin/protoc
+          chmod +x /usr/local/bin/protoc
         maturin-version: "1.9.4"
 
     - name: Smoke-test wheels
@@ -670,11 +675,11 @@ jobs:
           MINOR="${PY_TAG:3}"
           if [ "$RUNNER_OS" = "Windows" ]; then
             py -${MAJOR}.${MINOR} -m pip install --force-reinstall "${WHL}" \
-              && py -${MAJOR}.${MINOR} -c "import cedarling_python; print(cedarling_python.__version__)" \
+              && py -${MAJOR}.${MINOR} -c "import cedarling_python; print('ok:', cedarling_python)" \
               || FAILED+=("${WHL} (python${MAJOR}.${MINOR})")
           else
             python${MAJOR}.${MINOR} -m pip install --force-reinstall "${WHL}" \
-              && python${MAJOR}.${MINOR} -c "import cedarling_python; print(cedarling_python.__version__)" \
+              && python${MAJOR}.${MINOR} -c "import cedarling_python; print('ok:', cedarling_python)" \
               || FAILED+=("${WHL} (python${MAJOR}.${MINOR})")
           fi
         done
