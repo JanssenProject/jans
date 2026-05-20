@@ -94,7 +94,6 @@ mod tests {
         assert!(matches!(err, TokenBundleError::NonStringPayload { .. }));
     }
 
-    /// Phase 8c — no JWT in logs: invalid token-bundle JSON must not echo the
     /// JWT body into the resulting error's Display. The mapping key is the
     /// only field a `NonStringPayload` error can include, and a raw JWT
     /// passed as the whole input is rejected by serde with a "expected value"

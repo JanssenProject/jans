@@ -60,11 +60,11 @@ use pgrx::prelude::*;
 use serde_json::json;
 
 use crate::engine;
-use crate::extension_log;
+use crate::observability::log as extension_log;
 use crate::guc_config::CedarlingLogLevelGuc;
 use crate::resource;
 use crate::resource::schema_map::{self, EntityMapping};
-use crate::token_bundle;
+use crate::tokens::bundle as token_bundle;
 
 #[derive(Debug, Clone)]
 struct TableEntityMapping {
@@ -99,7 +99,7 @@ pub(crate) enum SqlPredicate {
 /// doubles internal `"`. `parse_resource_field` restricts inputs to
 /// `[A-Za-z0-9_]+`, so the conservative "always quote" form is equivalent to
 /// the Postgres builtin for our use.
-fn quote_ident_safe(ident: &str) -> String {
+pub(crate) fn quote_ident_safe(ident: &str) -> String {
     format!("\"{}\"", ident.replace('"', "\"\""))
 }
 
@@ -109,6 +109,25 @@ fn quote_ident_safe(ident: &str) -> String {
 /// backslashes are literal and need no special handling.
 fn quote_literal_safe(value: &str) -> String {
     format!("'{}'", value.replace('\'', "''"))
+}
+
+/// Returns true when `bytes[idx]` is a `"` not escaped by an odd-length
+/// backslash run directly preceding it.
+fn is_unescaped_double_quote(bytes: &[u8], idx: usize) -> bool {
+    if bytes.get(idx) != Some(&b'"') {
+        return false;
+    }
+    let mut slash_count = 0usize;
+    let mut j = idx;
+    while j > 0 {
+        if bytes[j - 1] == b'\\' {
+            slash_count += 1;
+            j -= 1;
+        } else {
+            break;
+        }
+    }
+    slash_count.is_multiple_of(2)
 }
 
 /// Splits `expr` at every top-level occurrence of `op`, ignoring matches
@@ -123,7 +142,7 @@ fn split_top_level(expr: &str, op: &str) -> Vec<String> {
     let mut in_string = false;
     while i < bytes.len() {
         let b = bytes[i];
-        if b == b'"' && (i == 0 || bytes[i - 1] != b'\\') {
+        if is_unescaped_double_quote(bytes, i) {
             in_string = !in_string;
             i += 1;
             continue;
@@ -164,7 +183,7 @@ fn strip_wrapping_parens(expr: &str) -> &str {
         let mut in_string = false;
         let mut wraps = true;
         for (idx, ch) in s.char_indices() {
-            if ch == '"' {
+            if ch == '"' && is_unescaped_double_quote(s.as_bytes(), idx) {
                 in_string = !in_string;
             }
             if in_string {
@@ -304,7 +323,7 @@ fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
 
     while i < bytes.len() {
         let c = bytes[i] as char;
-        if c == '"' && (i == 0 || bytes[i - 1] != b'\\') {
+        if c == '"' && is_unescaped_double_quote(bytes, i) {
             in_string = !in_string;
             i += 1;
             continue;
@@ -329,7 +348,7 @@ fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
 
         if top_level_depth == 0
             && i + marker.len() <= bytes.len()
-            && &source[i..i + marker.len()] == marker
+            && source[i..i + marker.len()] == marker
         {
             let body_start = i + marker.len();
             let mut idx = body_start;
@@ -337,7 +356,7 @@ fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
             let mut body_in_string = false;
             while idx < bytes.len() {
                 let ch = bytes[idx] as char;
-                if ch == '"' && (idx == 0 || bytes[idx - 1] != b'\\') {
+                if ch == '"' && is_unescaped_double_quote(bytes, idx) {
                     body_in_string = !body_in_string;
                     idx += 1;
                     continue;
@@ -543,7 +562,7 @@ fn matching_policies_for_table(
 /// one matched policy cannot be safely lowered to SQL it returns `"TRUE"`
 /// and emits a `WARN`-level diagnostic listing the unhandled policy ids, so
 /// callers know row-by-row authorization remains authoritative.
-#[pg_extern]
+#[pg_extern(stable, parallel_restricted)]
 pub fn cedarling_where(table_name: &str, action: &str, tokens: Option<&str>) -> String {
     if !has_valid_table_and_action_inputs(table_name, action) {
         return "FALSE".to_string();
@@ -659,6 +678,18 @@ mod tests {
     }
 
     #[test]
+    fn split_top_level_handles_escaped_backslash_then_quote() {
+        let expr =
+            r#"resource.note == "path\\\"segment" && resource.country == "US""#;
+        let parts = split_top_level(expr, "&&");
+        assert_eq!(
+            parts.len(),
+            2,
+            "escaped backslash before closing quote must not keep parser in string mode"
+        );
+    }
+
+    #[test]
     fn parse_resource_field_rejects_dotted_or_function_call_lhs() {
         assert_eq!(parse_resource_field("resource.foo"), Some("foo".into()));
         assert_eq!(parse_resource_field("resource.foo_bar1"), Some("foo_bar1".into()));
@@ -702,6 +733,21 @@ mod tests {
                 "resource.blocked == true".to_string(),
                 r#"resource.country == "CN""#.to_string()
             ])
+        );
+    }
+
+    #[test]
+    fn extract_clauses_handles_backslash_quote_sequences_in_strings() {
+        let src = r#"
+            permit(principal, action, resource)
+            when { resource.note == "path\\\"segment}" && resource.country == "US" }
+            when { resource.tier >= 3 };
+        "#;
+        let when = extract_clauses(src, "when").expect("clauses must parse");
+        assert_eq!(when.len(), 2, "both when clauses must be extracted");
+        assert!(
+            when[0].contains(r#"resource.country == "US""#),
+            "first clause must remain intact after escaped quote processing"
         );
     }
 

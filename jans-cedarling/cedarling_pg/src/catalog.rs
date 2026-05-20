@@ -10,6 +10,13 @@
 
 use pgrx::extension_sql;
 
+// Imports are referenced from the `requires = [...]` list of the second `extension_sql!` block;
+// rustc's `unused_imports` check doesn't follow into the macro expansion.
+#[allow(unused_imports)]
+use crate::policy::versions::{
+    cedarling_register_policy_version, cedarling_rollback_policy, cedarling_use_policy,
+};
+
 extension_sql!(
     r"
 -- Namespace for cedarling_pg catalog objects.
@@ -84,8 +91,8 @@ REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
 ",
     name = "cedarling_pg_policy_function_privileges",
     requires = [
-        crate::policy::versions::cedarling_use_policy,
-        crate::policy::versions::cedarling_register_policy_version,
-        crate::policy::versions::cedarling_rollback_policy
+        cedarling_use_policy,
+        cedarling_register_policy_version,
+        cedarling_rollback_policy
     ],
 );

@@ -24,7 +24,7 @@ pub(crate) enum MaskType {
     /// Always replace with a fixed string.
     Fixed { value: String },
     /// Internal fallback for unknown `mask_type` strings that bypass the CHECK constraint.
-    /// Returns the original value unchanged with a warning emitted by the caller.
+    /// Fail-closed by redacting the value.
     Identity,
 }
 
@@ -60,9 +60,8 @@ impl MaskType {
         let input = original.unwrap_or("");
         match self {
             MaskType::Null => None,
-            MaskType::Redact => Some("***REDACTED***".to_string()),
+            MaskType::Redact | MaskType::Identity => Some("***REDACTED***".to_string()),
             MaskType::Fixed { value } => Some(value.clone()),
-            MaskType::Identity => Some(input.to_string()),
             MaskType::Partial { pattern } => Some(apply_partial(input, pattern)),
             MaskType::Hash => {
                 if salt.is_empty() {
@@ -176,9 +175,15 @@ mod tests {
     }
 
     #[test]
-    fn identity_preserves_original() {
-        assert_eq!(MaskType::Identity.apply(Some("keep"), &[]), Some("keep".to_string()));
-        assert_eq!(MaskType::Identity.apply(None, &[]), Some(String::new()));
+    fn identity_is_fail_closed_redaction() {
+        assert_eq!(
+            MaskType::Identity.apply(Some("keep"), &[]),
+            Some("***REDACTED***".to_string())
+        );
+        assert_eq!(
+            MaskType::Identity.apply(None, &[]),
+            Some("***REDACTED***".to_string())
+        );
     }
 
     #[test]

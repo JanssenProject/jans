@@ -13,9 +13,9 @@ use cedarling::bindings::cedar_policy;
 use pgrx::prelude::*;
 use serde_json::json;
 
-use crate::authz_cache;
+use crate::authz::cache as authz_cache;
 use crate::engine;
-use crate::extension_log;
+use crate::observability::log as extension_log;
 use crate::guc_config;
 use crate::policy::PolicyError;
 
@@ -23,7 +23,7 @@ use crate::policy::PolicyError;
 ///
 /// `cedarling_use_policy` will resolve `name` to `bootstrap_path` before treating the
 /// argument as a filesystem path. Returns `true` on success.
-#[pg_extern]
+#[pg_extern(volatile, parallel_unsafe)]
 pub fn cedarling_register_policy_version(name: &str, bootstrap_path: &str) -> bool {
     let name = name.trim();
     let path = bootstrap_path.trim();
@@ -62,7 +62,7 @@ pub fn cedarling_register_policy_version(name: &str, bootstrap_path: &str) -> bo
 /// If `version` matches a name in `cedarling.policy_versions`, the registered
 /// `bootstrap_path` is used; otherwise the argument is treated as a filesystem path.
 /// Clears the authz cache and records the swap in `cedarling.policy_history`.
-#[pg_extern]
+#[pg_extern(volatile, parallel_unsafe)]
 pub fn cedarling_use_policy(version: &str) -> bool {
     let name_or_path = version.trim();
     if name_or_path.is_empty() {
@@ -101,7 +101,8 @@ pub fn cedarling_use_policy(version: &str) -> bool {
     let detail = json!({ "result": "ok", "cache_cleared": true });
     let _ = insert_policy_history("use", &resolved.version_guc_value, previous.as_deref(), &detail);
     let _ = trim_policy_history();
-    crate::status::record_policy_update();
+    crate::observability::status::record_policy_update();
+    crate::observability::trace::push_policy_swap_trace("use", &resolved.version_guc_value);
     true
 }
 
@@ -133,7 +134,7 @@ struct ResolvedPolicy {
 ///
 /// Returns `true` when a rollback happened; returns `false` if there is no previous policy slot
 /// or if rollback fails.
-#[pg_extern]
+#[pg_extern(volatile, parallel_unsafe)]
 pub fn cedarling_rollback_policy() -> bool {
     let rolled = match engine::rollback_policy() {
         Ok(v) => v,
@@ -161,7 +162,8 @@ pub fn cedarling_rollback_policy() -> bool {
     });
     let _ = insert_policy_history("rollback", &rolled_to, Some(&rolled_from), &detail);
     let _ = trim_policy_history();
-    crate::status::record_policy_update();
+    crate::observability::status::record_policy_update();
+    crate::observability::trace::push_policy_swap_trace("rollback", &rolled_to);
     true
 }
 
@@ -170,7 +172,7 @@ pub fn cedarling_rollback_policy() -> bool {
 /// Uses `cedarling.diff_mode`: `structural` (default) parses both files as
 /// `cedar_policy::PolicySet` and diffs per-policy-id; `lines` is the legacy
 /// line-oriented text diff.
-#[pg_extern]
+#[pg_extern(stable, parallel_safe)]
 pub fn cedarling_diff_policies(old: &str, new: &str) -> pgrx::datum::JsonB {
     let result = match guc_config::diff_mode() {
         guc_config::CedarlingDiffMode::Structural => diff_policy_files_structural(old, new),

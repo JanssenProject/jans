@@ -13,7 +13,7 @@ use serde_json::json;
 use thiserror::Error;
 
 use crate::resource;
-use crate::token_bundle;
+use crate::tokens::bundle as token_bundle;
 
 /// A richer authorization result that includes decision plus diagnostics.
 pub struct AuthorizeOutcome {
@@ -79,20 +79,6 @@ pub fn authorize_multi_issuer_outcome(
         policy_hits,
         diag_errors,
     })
-}
-
-/// Parses `token_bundle_json` and `resource_json`, validates the request, and returns Cedar’s decision bit (`true` = allow).
-///
-/// The name uses **`decision`** (not “allow”) because it mirrors [`MultiIssuerAuthorizeResult::decision`](cedarling::MultiIssuerAuthorizeResult):
-/// `false` means deny. “Allow” alone would read like a grant API rather than a boolean outcome.
-pub fn authorize_multi_issuer_decision(
-    engine: &Cedarling,
-    token_bundle_json: &str,
-    resource_json: &str,
-    action: &str,
-    context_json: Option<&str>,
-) -> Result<bool, AuthorizeBridgeError> {
-    Ok(authorize_multi_issuer_outcome(engine, token_bundle_json, resource_json, action, context_json)?.decision)
 }
 
 fn parse_optional_context_json_object(
@@ -182,27 +168,6 @@ pub fn authorize_unsigned_outcome_for_request(
     })
 }
 
-/// Runs [`Cedarling::authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) on a built request.
-pub fn authorize_unsigned_decision_for_request(
-    engine: &Cedarling,
-    request: RequestUnsigned,
-) -> Result<bool, UnsignedBridgeError> {
-    Ok(authorize_unsigned_outcome_for_request(engine, request)?.decision)
-}
-
-/// Parses JSON parts then returns Cedar’s decision bit (`true` = allow).
-pub fn authorize_unsigned_decision(
-    engine: &Cedarling,
-    principal_json: Option<&str>,
-    resource_json: &str,
-    action: &str,
-    context_json: &str,
-) -> Result<bool, UnsignedBridgeError> {
-    let request =
-        unsigned_request_from_json_parts(principal_json, resource_json, action, context_json)?;
-    authorize_unsigned_decision_for_request(engine, request)
-}
-
 #[cfg(test)]
 mod smoke {
     use std::fs;
@@ -212,7 +177,7 @@ mod smoke {
     use tempfile::tempdir;
     use test_utils::token_claims::generate_token_using_claims;
 
-    use super::{authorize_multi_issuer_decision, authorize_unsigned_decision};
+    use super::{authorize_multi_issuer_outcome, authorize_unsigned_outcome_for_request};
     use crate::engine::try_init_cedarling_from_bootstrap_path;
 
     use super::parse_optional_context_json_object;
@@ -222,10 +187,7 @@ mod smoke {
         "/../test_files/policy-store-multi-issuer-basic.yaml"
     ));
 
-    const POLICY_UNSIGNED: &str = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../test_files/policy-store_no_trusted_issuers.yaml"
-    ));
+    use crate::test_fixtures::POLICY_STORE_UNSIGNED_YAML as POLICY_UNSIGNED;
 
     fn write_bootstrap(dir: &std::path::Path, policy_path: &std::path::Path) -> std::path::PathBuf {
         let bootstrap_path = dir.join("bootstrap.yaml");
@@ -303,14 +265,15 @@ mod smoke {
         })
         .to_string();
 
-        let allowed = authorize_multi_issuer_decision(
+        let allowed = authorize_multi_issuer_outcome(
             engine.as_ref(),
             &token_bundle,
             &resource,
             "Acme::Action::\"GetFood\"",
             None,
         )
-        .expect("authorize_multi_issuer should run");
+        .expect("authorize_multi_issuer should run")
+        .decision;
 
         assert!(
             allowed,
@@ -351,14 +314,16 @@ mod smoke {
         })
         .to_string();
 
-        let allowed = authorize_unsigned_decision(
-            engine.as_ref(),
+        let request = super::unsigned_request_from_json_parts(
             Some(&principal),
             &resource,
             "Jans::Action::\"UpdateForTestPrincipals\"",
             "{}",
         )
-        .expect("authorize_unsigned should run");
+        .expect("unsigned request should parse");
+        let allowed = authorize_unsigned_outcome_for_request(engine.as_ref(), request)
+            .expect("authorize_unsigned should run")
+            .decision;
 
         assert!(allowed, "expected ALLOW for unsigned principal+resource");
     }

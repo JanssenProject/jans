@@ -11,6 +11,8 @@ use std::sync::{Mutex, OnceLock};
 use pgrx::prelude::*;
 use serde_json::json;
 
+use crate::sync_mutex;
+
 static TOTAL_REQUESTS: AtomicU64 = AtomicU64::new(0);
 static ALLOWED: AtomicU64 = AtomicU64::new(0);
 static DENIED: AtomicU64 = AtomicU64::new(0);
@@ -18,16 +20,29 @@ static ERRORS: AtomicU64 = AtomicU64::new(0);
 static CACHE_HITS: AtomicU64 = AtomicU64::new(0);
 
 /// RFC 3339 timestamp of the first `record_request()` call in this backend process.
-static START_TIME: OnceLock<String> = OnceLock::new();
+static FIRST_REQUEST_TIME: OnceLock<String> = OnceLock::new();
 
 /// Most recent error message and timestamp `(message, rfc3339_timestamp)`.
 static LAST_ERROR: Mutex<Option<(String, String)>> = Mutex::new(None);
+
+/// Cap for `last_error` and other status strings sourced from user-controlled input.
+const STATUS_TEXT_MAX_CHARS: usize = 256;
+
+/// Cap for `policy_version` echoed from the `cedarling.policy_version` GUC.
+const POLICY_VERSION_MAX_CHARS: usize = 128;
+
+fn truncate_status_text(s: &str, max_chars: usize) -> String {
+    if s.chars().count() <= max_chars {
+        return s.to_string();
+    }
+    s.chars().take(max_chars).collect()
+}
 
 /// Timestamp of the most recent policy update triggered by `cedarling_use_policy` / `cedarling_rollback_policy`.
 static LAST_POLICY_UPDATE: Mutex<Option<String>> = Mutex::new(None);
 
 pub(crate) fn record_request() {
-    START_TIME.get_or_init(|| chrono::Utc::now().to_rfc3339());
+    FIRST_REQUEST_TIME.get_or_init(|| chrono::Utc::now().to_rfc3339());
     TOTAL_REQUESTS.fetch_add(1, Ordering::Relaxed);
 }
 
@@ -43,9 +58,15 @@ pub(crate) fn record_decision(allowed: bool) {
 pub(crate) fn record_error_msg(msg: &str) {
     ERRORS.fetch_add(1, Ordering::Relaxed);
     let ts = chrono::Utc::now().to_rfc3339();
-    if let Ok(mut guard) = LAST_ERROR.lock() {
-        *guard = Some((msg.to_string(), ts));
+    if let Ok(mut guard) = sync_mutex::lock(&LAST_ERROR) {
+        *guard = Some((truncate_status_text(msg, STATUS_TEXT_MAX_CHARS), ts));
     }
+}
+
+/// Inject errors for unit tests (explicit failure path for degraded-status checks).
+#[cfg(test)]
+pub(crate) fn force_error_for_test(message: &str) {
+    record_error_msg(message);
 }
 
 pub(crate) fn record_cache_hit() {
@@ -55,14 +76,15 @@ pub(crate) fn record_cache_hit() {
 /// Records a timestamp for the most recent policy update.
 pub(crate) fn record_policy_update() {
     let ts = chrono::Utc::now().to_rfc3339();
-    if let Ok(mut guard) = LAST_POLICY_UPDATE.lock() {
+    if let Ok(mut guard) = sync_mutex::lock(&LAST_POLICY_UPDATE) {
         *guard = Some(ts);
     }
 }
 
 #[cfg(not(test))]
 fn policy_version_for_status() -> String {
-    crate::guc_config::policy_version_utf8().unwrap_or_else(|| "latest".to_string())
+    let raw = crate::guc_config::policy_version_utf8().unwrap_or_else(|| "latest".to_string());
+    truncate_status_text(&raw, POLICY_VERSION_MAX_CHARS)
 }
 
 #[cfg(test)]
@@ -108,8 +130,7 @@ fn classify_status(
     if !engine_loaded {
         "unhealthy"
     } else if trusted_issuers_failed > 0
-        || (total_requests > 0
-            && failed_requests.saturating_mul(4) >= total_requests)
+        || (total_requests > 0 && failed_requests.saturating_mul(4) >= total_requests)
     {
         "degraded"
     } else {
@@ -123,7 +144,7 @@ fn classify_status(
 ///
 /// Fields:
 /// - `status`: `"healthy"` | `"degraded"` | `"unhealthy"`.
-/// - `start_time`: RFC 3339 timestamp of the first request (or `null` if no requests yet).
+/// - `first_request_time`: RFC 3339 timestamp of the first authorize call in this backend (or `null` if none yet).
 /// - `policy_version`: active policy version from `cedarling.policy_version` GUC.
 /// - `engine_loaded`: whether the Cedarling engine is currently initialized.
 /// - `trusted_issuers_loaded`: number of successfully loaded trusted issuers.
@@ -138,7 +159,7 @@ fn classify_status(
 /// - `cache_hit_rate`: `cache_hits / total_requests` (0.0 when no requests).
 /// - `last_error`: most recent error message (`null` if none).
 /// - `last_error_time`: RFC 3339 timestamp of the most recent error (`null` if none).
-#[pg_extern]
+#[pg_extern(stable)]
 pub fn cedarling_status() -> pgrx::datum::JsonB {
     let total = TOTAL_REQUESTS.load(Ordering::Relaxed);
     let allowed = ALLOWED.load(Ordering::Relaxed);
@@ -157,37 +178,36 @@ pub fn cedarling_status() -> pgrx::datum::JsonB {
     let (engine_loaded, trusted_issuers_loaded, trusted_issuers_failed) = engine_info_for_status();
     let policy_version = policy_version_for_status();
 
-    let status = classify_status(engine_loaded, trusted_issuers_failed, total, failed_requests);
+    let status = classify_status(
+        engine_loaded,
+        trusted_issuers_failed,
+        total,
+        failed_requests,
+    );
 
-    let start_time: serde_json::Value = START_TIME
-        .get()
-        .map_or(serde_json::Value::Null, |s| {
+    let first_request_time: serde_json::Value =
+        FIRST_REQUEST_TIME.get().map_or(serde_json::Value::Null, |s| {
             serde_json::Value::String(s.clone())
         });
 
-    let (last_error, last_error_time) = LAST_ERROR
-        .lock()
-        .ok()
-        .and_then(|g| g.clone())
-        .map_or(
-            (serde_json::Value::Null, serde_json::Value::Null),
-            |(msg, ts)| {
-                (
-                    serde_json::Value::String(msg),
-                    serde_json::Value::String(ts),
-                )
-            },
-        );
+    let (last_error, last_error_time) = sync_mutex::lock(&LAST_ERROR).ok().and_then(|g| g.clone()).map_or(
+        (serde_json::Value::Null, serde_json::Value::Null),
+        |(msg, ts)| {
+            (
+                serde_json::Value::String(msg),
+                serde_json::Value::String(ts),
+            )
+        },
+    );
 
-    let last_policy_update: serde_json::Value = LAST_POLICY_UPDATE
-        .lock()
+    let last_policy_update: serde_json::Value = sync_mutex::lock(&LAST_POLICY_UPDATE)
         .ok()
         .and_then(|g| g.clone())
         .map_or(serde_json::Value::Null, serde_json::Value::String);
 
     let obj = json!({
         "status":                  status,
-        "start_time":              start_time,
+        "first_request_time":      first_request_time,
         "policy_version":          policy_version,
         "last_policy_update":      last_policy_update,
         "engine_loaded":           engine_loaded,
@@ -261,10 +281,63 @@ mod tests {
     }
 
     #[test]
+    fn record_error_msg_truncates_long_messages() {
+        let long = "x".repeat(STATUS_TEXT_MAX_CHARS + 50);
+        record_error_msg(&long);
+        let guard = LAST_ERROR.lock().expect("lock");
+        let (msg, _) = guard.as_ref().expect("last error should be set");
+        assert_eq!(msg.chars().count(), STATUS_TEXT_MAX_CHARS);
+        assert_eq!(msg.as_str(), "x".repeat(STATUS_TEXT_MAX_CHARS));
+    }
+
+    #[test]
+    fn truncate_status_text_respects_char_boundary_not_byte_boundary() {
+        let s = "é".repeat(STATUS_TEXT_MAX_CHARS + 1);
+        let out = truncate_status_text(&s, STATUS_TEXT_MAX_CHARS);
+        assert_eq!(out.chars().count(), STATUS_TEXT_MAX_CHARS);
+    }
+
+    #[test]
+    fn truncate_status_text_caps_policy_version_length() {
+        let long = "v".repeat(POLICY_VERSION_MAX_CHARS + 20);
+        let out = truncate_status_text(&long, POLICY_VERSION_MAX_CHARS);
+        assert_eq!(out.chars().count(), POLICY_VERSION_MAX_CHARS);
+    }
+
+    #[test]
     fn record_policy_update_sets_timestamp() {
         record_policy_update();
         let guard = LAST_POLICY_UPDATE.lock().expect("lock");
-        assert!(guard.is_some(), "last_policy_update should be set after record_policy_update()");
+        assert!(
+            guard.is_some(),
+            "last_policy_update should be set after record_policy_update()"
+        );
+    }
+
+    #[test]
+    fn force_error_for_test_increments_error_counter() {
+        let e0 = ERRORS.load(Ordering::Relaxed);
+        force_error_for_test("injected test error");
+        assert_eq!(ERRORS.load(Ordering::Relaxed), e0 + 1);
+    }
+
+    #[test]
+    fn forced_errors_trigger_degraded_when_engine_loaded() {
+        let e0 = ERRORS.load(Ordering::Relaxed);
+        let t0 = TOTAL_REQUESTS.load(Ordering::Relaxed);
+        for _ in 0..4 {
+            force_error_for_test("injected");
+        }
+        for _ in 0..4 {
+            record_request();
+        }
+        let total = TOTAL_REQUESTS.load(Ordering::Relaxed) - t0;
+        let errors = ERRORS.load(Ordering::Relaxed) - e0;
+        assert_eq!(
+            classify_status(true, 0, total, errors),
+            "degraded",
+            "four injected errors across four requests must degrade status"
+        );
     }
 
     #[test]

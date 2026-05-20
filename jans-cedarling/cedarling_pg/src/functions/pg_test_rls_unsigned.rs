@@ -6,41 +6,11 @@
 //! `#[pg_test]` body for RLS + `cedarling_authorize_unsigned` (kept out of `lib.rs` for line limits).
 
 use std::fs;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use pgrx::prelude::*;
 
-const POLICY_UNSIGNED: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../test_files/policy-store_no_trusted_issuers.yaml"
-));
-
-fn write_bootstrap(dir: &Path, policy_path: &Path) -> PathBuf {
-    let bootstrap_path = dir.join("bootstrap.yaml");
-    let policy_lit = policy_path.to_string_lossy();
-    let contents = format!(
-        "CEDARLING_APPLICATION_NAME: cedarling_pg_rls_pg_test\n\
-         CEDARLING_POLICY_STORE_URI: ''\n\
-         CEDARLING_LOG_TYPE: memory\n\
-         CEDARLING_LOG_LEVEL: DEBUG\n\
-         CEDARLING_LOG_TTL: 60\n\
-         CEDARLING_LOCAL_JWKS: null\n\
-         CEDARLING_POLICY_STORE_LOCAL: null\n\
-         CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
-         CEDARLING_JWT_SIG_VALIDATION: disabled\n\
-         CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
-         CEDARLING_LOCK: disabled\n\
-         CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
-         CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
-         CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
-         CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
-         CEDARLING_LOCK_LISTEN_SSE: disabled\n"
-    );
-    let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
-    f.write_all(contents.as_bytes()).expect("write bootstrap");
-    bootstrap_path
-}
+const POLICY_UNSIGNED: &str = crate::test_support::POLICY_STORE_UNSIGNED_YAML;
 
 fn temp_policy_workdir() -> PathBuf {
     let work =
@@ -89,23 +59,41 @@ fn ddl_create_table_policy() {
 }
 
 fn ddl_cleanup() {
-    Spi::run("RESET ROLE").expect("RESET ROLE");
+    Spi::run("RESET ROLE").ok();
     Spi::run("SET row_security = off").ok();
     Spi::run(
         "DO $$ BEGIN EXECUTE format('REVOKE cedarling_pg_rls_demo FROM %I', session_user); END $$;",
     )
-    .expect("REVOKE membership");
-    Spi::run("DROP TABLE IF EXISTS cedarling_pg_rls_demo CASCADE").expect("DROP TABLE");
-    Spi::run("DROP ROLE IF EXISTS cedarling_pg_rls_demo").expect("DROP ROLE");
-    Spi::run("RESET cedarling.bootstrap_config").expect("RESET bootstrap_config");
+    .ok();
+    Spi::run("DROP TABLE IF EXISTS cedarling_pg_rls_demo CASCADE").ok();
+    Spi::run("DROP ROLE IF EXISTS cedarling_pg_rls_demo").ok();
+    Spi::run("RESET cedarling.bootstrap_config").ok();
+    crate::authz::cache::global_cache().clear_all();
+    crate::engine::reset_for_pg_tests();
+}
+
+struct RlsPgTestGuard {
+    work: PathBuf,
+}
+
+impl Drop for RlsPgTestGuard {
+    fn drop(&mut self) {
+        ddl_cleanup();
+        let _ = fs::remove_dir_all(&self.work);
+    }
 }
 
 /// RLS + `cedarling_authorize_unsigned` against `test_files/policy-store_no_trusted_issuers.yaml`.
 pub fn run_rls_unsigned_policy_filters_select_under_row_security() {
     let work = temp_policy_workdir();
+    let _guard = RlsPgTestGuard { work: work.clone() };
     let policy_path = work.join("policy-store.yaml");
     fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy store");
-    let bootstrap_path = write_bootstrap(&work, &policy_path);
+    let bootstrap_path = crate::test_support::write_bootstrap_yaml(
+        &work,
+        &policy_path,
+        "cedarling_pg_rls_pg_test",
+    );
     let bootstrap_str = bootstrap_path.to_str().expect("bootstrap path utf-8");
     let escaped = bootstrap_str.replace('\'', "''");
 
@@ -143,7 +131,4 @@ pub fn run_rls_unsigned_policy_filters_select_under_row_security() {
         Some(1),
         "non-superuser subject to RLS should see only Cedar-allowed rows"
     );
-
-    ddl_cleanup();
-    let _ = fs::remove_dir_all(&work);
 }

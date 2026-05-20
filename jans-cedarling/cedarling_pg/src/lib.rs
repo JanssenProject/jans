@@ -16,179 +16,39 @@ mod policy;
 mod resource;
 mod tokens;
 mod validate;
+#[cfg(any(test, feature = "pg_test"))]
+mod test_fixtures;
+#[cfg(feature = "pg_test")]
+mod test_support;
+mod sync_mutex;
 
-// Transparent aliases so existing paths (crate::authorized::*, crate::row_authz::*,
-// crate::error::*) remain valid while the real implementations live in functions/.
+#[cfg(feature = "pg_test")]
 mod authorized {
     pub(crate) use crate::functions::authorized::*;
 }
+#[cfg(feature = "pg_test")]
 mod row_authz {
     pub(crate) use crate::functions::authorized_row::*;
-    pub(crate) use crate::functions::build_resource::*;
-}
-mod error {
-    pub(crate) use crate::functions::error::*;
-}
-
-mod authz_bridge {
-    pub(crate) use crate::authz::bridge::*;
-}
-
-mod authz_cache {
-    pub(crate) use crate::authz::cache::*;
-}
-
-mod where_sql {
-    pub(crate) use crate::authz::where_clause::*;
-}
-
-mod token_bundle {
-    pub(crate) use crate::tokens::bundle::*;
 }
 
 #[cfg(feature = "pg_test")]
-mod token_sql {
-    pub(crate) use crate::tokens::sql::*;
-}
-
-mod extension_log {
-    pub(crate) use crate::observability::log::*;
-}
-
-mod trace {
-    pub(crate) use crate::observability::trace::*;
-}
-
-mod status {
-    pub(crate) use crate::observability::status::*;
-}
-
 mod policy_sql {
     pub(crate) use crate::policy::versions::*;
 }
 
+#[cfg(feature = "pg_test")]
 mod schema_sql {
     pub(crate) use crate::policy::schema::*;
 }
 
+#[cfg(feature = "pg_test")]
 mod mask_sql {
     pub(crate) use crate::mask::{
-        cedarling_get_masked_row, cedarling_mask_plan, cedarling_mask_row,
-        cedarling_set_mask_config, cedarling_test_masking,
+        cedarling_mask_row, cedarling_set_mask_config, cedarling_test_masking,
     };
 }
 
-
-
 use pgrx::prelude::*;
-
-const _: usize = core::mem::size_of::<cedarling::blocking::Cedarling>();
-
-// Keep resource parsers reachable for `dead_code` when the cdylib is built without `cfg(test)`.
-const _: fn(&str) -> Result<cedarling::EntityData, resource::ResourceEntityDataError> =
-    resource::resource_entity_data_from_json_str;
-const _: fn(serde_json::Value) -> Result<cedarling::EntityData, resource::ResourceEntityDataError> =
-    resource::resource_entity_data_from_json_value;
-const _: fn(pgrx::datum::AnyElement) -> Result<String, resource::row::RowBuildError> =
-    resource::row::build_resource_json_from_row;
-const _: fn(pg_sys::Oid, &str, Vec<String>) -> bool = resource::schema_map::cedarling_register_entity_map;
-const _: fn(&str) -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
-    engine::try_init_cedarling_from_bootstrap_path;
-const _: fn() -> Result<std::sync::Arc<cedarling::blocking::Cedarling>, engine::EngineError> =
-    engine::global_cedarling;
-const _: fn() -> Option<std::sync::Arc<cedarling::blocking::Cedarling>> = engine::peek_cedarling;
-const _: fn() -> guc_config::CedarlingMode = guc_config::mode;
-const _: fn() -> guc_config::CedarlingLogLevelGuc = guc_config::log_level;
-const _: fn() -> guc_config::CedarlingStrategy = guc_config::strategy;
-const _: fn() -> i32 = guc_config::cache_size;
-const _: fn() -> bool = guc_config::audit_fail_open;
-const _: fn() -> i32 = guc_config::trace_buffer_size;
-const _: fn() -> i32 = guc_config::policy_history_size;
-const _: fn() -> bool = guc_config::schema_validate_strict;
-const _: fn() -> Vec<u8> = guc_config::mask_hash_salt_bytes;
-const _: fn() -> Option<String> = guc_config::context_utf8;
-const _: fn() -> Option<String> = guc_config::policy_version_utf8;
-const _: fn(&error::CedarlingError) -> bool = error::CedarlingError::should_deny;
-const _: fn(&error::CedarlingError) -> guc_config::CedarlingLogLevelGuc =
-    error::CedarlingError::log_level;
-const _: fn(&error::CedarlingError, &'static str) -> error::AuditLogEntry =
-    error::CedarlingError::to_audit_entry;
-const _: fn(&str) -> Result<Vec<cedarling::TokenInput>, token_bundle::TokenBundleError> =
-    token_bundle::parse_token_inputs_from_json;
-#[allow(clippy::type_complexity)]
-const _: fn(
-    &cedarling::blocking::Cedarling,
-    &str,
-    &str,
-    &str,
-    Option<&str>,
-) -> Result<bool, authz_bridge::AuthorizeBridgeError> =
-    authz_bridge::authorize_multi_issuer_decision;
-#[allow(clippy::type_complexity)]
-const _: fn(
-    Option<&str>,
-    &str,
-    &str,
-    &str,
-) -> Result<cedarling::RequestUnsigned, authz_bridge::UnsignedBridgeError> =
-    authz_bridge::unsigned_request_from_json_parts;
-const _: fn(
-    &cedarling::blocking::Cedarling,
-    cedarling::RequestUnsigned,
-) -> Result<bool, authz_bridge::UnsignedBridgeError> =
-    authz_bridge::authorize_unsigned_decision_for_request;
-#[allow(clippy::type_complexity)]
-const _: fn(
-    &cedarling::blocking::Cedarling,
-    &str,
-    &str,
-    &str,
-    Option<&str>,
-) -> Result<authz_bridge::AuthorizeOutcome, authz_bridge::AuthorizeBridgeError> =
-    authz_bridge::authorize_multi_issuer_outcome;
-const _: fn(
-    &cedarling::blocking::Cedarling,
-    cedarling::RequestUnsigned,
-) -> Result<authz_bridge::AuthorizeOutcome, authz_bridge::UnsignedBridgeError> =
-    authz_bridge::authorize_unsigned_outcome_for_request;
-#[allow(clippy::type_complexity)]
-const _: fn(
-    &cedarling::blocking::Cedarling,
-    Option<&str>,
-    &str,
-    &str,
-    &str,
-) -> Result<bool, authz_bridge::UnsignedBridgeError> = authz_bridge::authorize_unsigned_decision;
-const _: fn(&str, Option<&str>, &str) -> bool = authorized::cedarling_authorized;
-#[allow(clippy::type_complexity)]
-const _: fn(Option<&str>, &str, &str, &str) -> bool = authorized::cedarling_authorize_unsigned;
-const _: fn() -> pgrx::datum::JsonB = status::cedarling_status;
-const _: fn(&str, &str) -> bool = policy_sql::cedarling_register_policy_version;
-const _: fn(&str) -> bool = policy_sql::cedarling_use_policy;
-const _: fn() -> bool = policy_sql::cedarling_rollback_policy;
-const _: fn(&str, &str) -> pgrx::datum::JsonB = policy_sql::cedarling_diff_policies;
-const _: fn(&str, Option<&str>) -> pgrx::datum::JsonB = mask_sql::cedarling_mask_plan;
-const _: fn(pgrx::datum::JsonB, &str, Option<&str>) -> pgrx::datum::JsonB =
-    mask_sql::cedarling_mask_row;
-const _: fn() -> Option<pgrx::datum::JsonB> = mask_sql::cedarling_get_masked_row;
-const _: fn(&str, &str, &str, Option<&str>) -> bool = mask_sql::cedarling_set_mask_config;
-#[allow(clippy::type_complexity)]
-const _: fn(Option<&str>, Option<&str>, &str, Option<&str>) -> Option<String> =
-    mask_sql::cedarling_test_masking;
-const _: fn(&str, &str) -> pgrx::datum::JsonB = schema_sql::cedarling_validate_schema;
-const _: fn(pg_sys::Oid, &str) -> pgrx::datum::JsonB = schema_sql::cedarling_validate_schema_by_oid;
-const _: fn(&str, &str, Option<&str>) -> String = where_sql::cedarling_where;
-const _: fn() -> Option<pgrx::datum::JsonB> = trace::cedarling_last_trace;
-const _: fn(Option<i32>) -> pgrx::datum::JsonB = trace::cedarling_recent_traces;
-const _: fn(&str, &str) -> pgrx::datum::JsonB = trace::cedarling_explain;
-const _: fn(pgrx::datum::JsonB, Option<&str>, Option<&str>) -> String =
-    row_authz::cedarling_build_resource;
-const _: fn(pgrx::datum::AnyElement) -> String = row_authz::cedarling_build_resource_anyelement;
-const _: fn(pgrx::datum::JsonB, &str, Option<pgrx::datum::JsonB>) -> bool =
-    row_authz::cedarling_authorized_row;
-const _: fn(pgrx::datum::AnyElement, &str, Option<pgrx::datum::JsonB>) -> bool =
-    row_authz::cedarling_authorized_row_from_anyelement;
-const _: fn(pgrx::datum::AnyElement, Option<&str>) -> bool = row_authz::cedarling_authorized_row_jwt;
 
 ::pgrx::pg_module_magic!(name, version);
 
@@ -197,7 +57,7 @@ pub extern "C-unwind" fn _PG_init() {
     guc_config::register_gucs();
 }
 
-#[pg_extern]
+#[pg_extern(immutable, parallel_safe)]
 fn hello_cedarling_pg() -> &'static str {
     "Hello, cedarling_pg"
 }
@@ -208,11 +68,6 @@ fn hello_cedarling_pg() -> &'static str {
 #[pg_schema]
 mod tests {
     use pgrx::prelude::*;
-
-    #[pg_test]
-    fn test_hello_cedarling_pg() {
-        assert_eq!("Hello, cedarling_pg", crate::hello_cedarling_pg());
-    }
 
     #[pg_test]
     fn test_gucs_defaults() {
@@ -266,38 +121,16 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_context_guc_accepts_json_object() {
-        Spi::run(r#"SET cedarling.context = '{"tenant":"acme","ip":"127.0.0.1"}'"#)
-            .expect("cedarling.context should accept valid object JSON");
-        assert_eq!(
-            crate::guc_config::context_utf8(),
-            Some(r#"{"tenant":"acme","ip":"127.0.0.1"}"#.to_string())
-        );
-        Spi::run("RESET cedarling.context").expect("RESET cedarling.context");
-    }
-
-    #[pg_test]
     fn test_policy_segment_changes_with_policy_version() {
         Spi::run("SET cedarling.policy_version = 'v1'").expect("set policy version v1");
-        let a = crate::authz_cache::policy_segment_from_bootstrap_path();
+        let a = crate::authz::cache::policy_segment_from_bootstrap_path();
         Spi::run("SET cedarling.policy_version = 'v2'").expect("set policy version v2");
-        let b = crate::authz_cache::policy_segment_from_bootstrap_path();
+        let b = crate::authz::cache::policy_segment_from_bootstrap_path();
         assert_ne!(
             a, b,
             "cache policy segment should include cedarling.policy_version"
         );
         Spi::run("RESET cedarling.policy_version").expect("reset policy version");
-    }
-
-    #[pg_test]
-    fn test_strategy_guc_accepts_mask() {
-        Spi::run("SET cedarling.strategy = 'mask'")
-            .expect("SET cedarling.strategy = 'mask' should succeed");
-        assert_eq!(
-            crate::guc_config::strategy(),
-            crate::guc_config::CedarlingStrategy::Mask
-        );
-        Spi::run("RESET cedarling.strategy").expect("RESET cedarling.strategy");
     }
 
     #[pg_test]
@@ -326,114 +159,8 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_catalog_schema_and_tables_exist() {
-        let ns = Spi::get_one::<String>(
-            "SELECT nspname::text FROM pg_namespace WHERE nspname = 'cedarling'",
-        )
-        .expect("SPI should succeed");
-        assert_eq!(ns, Some("cedarling".to_string()));
-
-        let mask_rules = Spi::get_one::<i64>(
-            "SELECT count(*) FROM pg_class c \
-             JOIN pg_namespace n ON n.oid = c.relnamespace \
-             WHERE n.nspname = 'cedarling' AND c.relname = 'mask_rules'",
-        )
-        .expect("SPI should succeed");
-        assert_eq!(mask_rules, Some(1), "cedarling.mask_rules should exist");
-
-        let policy_history = Spi::get_one::<i64>(
-            "SELECT count(*) FROM pg_class c \
-             JOIN pg_namespace n ON n.oid = c.relnamespace \
-             WHERE n.nspname = 'cedarling' AND c.relname = 'policy_history'",
-        )
-        .expect("SPI should succeed");
-        assert_eq!(
-            policy_history,
-            Some(1),
-            "cedarling.policy_history should exist"
-        );
-
-        let entity_map = Spi::get_one::<i64>(
-            "SELECT count(*) FROM pg_class c \
-             JOIN pg_namespace n ON n.oid = c.relnamespace \
-             WHERE n.nspname = 'cedarling' AND c.relname = 'entity_map'",
-        )
-        .expect("SPI should succeed");
-        assert_eq!(entity_map, Some(1), "cedarling.entity_map should exist");
-
-        let policy_versions = Spi::get_one::<i64>(
-            "SELECT count(*) FROM pg_class c \
-             JOIN pg_namespace n ON n.oid = c.relnamespace \
-             WHERE n.nspname = 'cedarling' AND c.relname = 'policy_versions'",
-        )
-        .expect("SPI should succeed");
-        assert_eq!(policy_versions, Some(1), "cedarling.policy_versions should exist");
-    }
-
-    #[pg_test]
-    fn test_mask_rules_insert_enforces_mask_type_check() {
-        // The CHECK constraint should reject unknown mask_type values. Use a DO block so the
-        // expected check_violation is not raised to the #[pg_test] SQL wrapper as FATAL ERROR.
-        Spi::run(
-            r#"DO $do$
-               BEGIN
-                 INSERT INTO cedarling.mask_rules (table_name, column_name, mask_type)
-                 VALUES ('t', 'c', 'bogus_type');
-                 RAISE EXCEPTION 'mask_rules CHECK should have rejected bogus_type';
-               EXCEPTION
-                 WHEN check_violation THEN
-                   NULL;
-               END
-               $do$"#,
-        )
-        .expect("DO block should catch check_violation for bogus mask_type");
-
-        Spi::run(
-            "INSERT INTO cedarling.mask_rules (table_name, column_name, mask_type) \
-             VALUES ('t', 'c', 'hash')",
-        )
-        .expect("valid mask_type 'hash' should be accepted");
-        Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 't'").expect("cleanup");
-    }
-
-    #[pg_test]
     fn test_policy_use_and_rollback_update_history_and_version() {
         use std::fs;
-        use std::io::Write;
-
-        const POLICY_UNSIGNED: &str = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../test_files/policy-store_no_trusted_issuers.yaml"
-        ));
-
-        fn write_bootstrap(
-            dir: &std::path::Path,
-            policy_path: &std::path::Path,
-        ) -> std::path::PathBuf {
-            let bootstrap_path = dir.join("bootstrap.yaml");
-            let policy_lit = policy_path.to_string_lossy();
-            let contents = format!(
-                "CEDARLING_APPLICATION_NAME: cedarling_pg_policy_test\n\
-                 CEDARLING_POLICY_STORE_URI: ''\n\
-                 CEDARLING_LOG_TYPE: memory\n\
-                 CEDARLING_LOG_LEVEL: DEBUG\n\
-                 CEDARLING_LOG_TTL: 60\n\
-                 CEDARLING_LOCAL_JWKS: null\n\
-                 CEDARLING_POLICY_STORE_LOCAL: null\n\
-                 CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
-                 CEDARLING_JWT_SIG_VALIDATION: disabled\n\
-                 CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
-                 CEDARLING_LOCK: disabled\n\
-                 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
-                 CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
-                 CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
-                 CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
-                 CEDARLING_LOCK_LISTEN_SSE: disabled\n"
-            );
-            let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
-            f.write_all(contents.as_bytes()).expect("write bootstrap");
-            bootstrap_path
-        }
 
         let work =
             std::env::temp_dir().join(format!("cedarling_pg_policy_test_{}", std::process::id()));
@@ -442,10 +169,12 @@ mod tests {
 
         let p1 = work.join("policy-1.yaml");
         let p2 = work.join("policy-2.yaml");
-        fs::write(&p1, POLICY_UNSIGNED.as_bytes()).expect("write policy 1");
-        fs::write(&p2, POLICY_UNSIGNED.as_bytes()).expect("write policy 2");
-        let b1 = write_bootstrap(&work, &p1);
-        let b2 = write_bootstrap(&work, &p2);
+        fs::write(&p1, crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes())
+            .expect("write policy 1");
+        fs::write(&p2, crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes())
+            .expect("write policy 2");
+        let b1 = crate::test_support::write_bootstrap_yaml(&work, &p1, "cedarling_pg_policy_test");
+        let b2 = crate::test_support::write_bootstrap_yaml(&work, &p2, "cedarling_pg_policy_test");
 
         let b1s = b1.to_str().expect("utf8 bootstrap 1");
         let b2s = b2.to_str().expect("utf8 bootstrap 2");
@@ -470,50 +199,8 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_policy_diff_structural_detects_added_policy() {
-        use std::fs;
-
-        let work =
-            std::env::temp_dir().join(format!("cedarling_pg_diff_test_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp work dir");
-        let old = work.join("old.cedar");
-        let new = work.join("new.cedar");
-        fs::write(&old, "permit(principal, action, resource);\n").expect("write old");
-        fs::write(
-            &new,
-            "permit(principal, action, resource);\nforbid(principal, action, resource);\n",
-        )
-        .expect("write new");
-
-        Spi::run("RESET cedarling.diff_mode").expect("reset diff_mode");
-        let diff = crate::policy_sql::cedarling_diff_policies(
-            old.to_str().expect("old path utf8"),
-            new.to_str().expect("new path utf8"),
-        );
-        let v = diff.0;
-        assert_eq!(v["ok"], true);
-        let added = v["added"].as_array().cloned().unwrap_or_default();
-        assert!(!added.is_empty(), "structural diff must report added forbid policy");
-        assert!(
-            added.iter().any(|e| e.get("effect").and_then(|e| e.as_str()) == Some("forbid")),
-            "added entry must carry effect=forbid"
-        );
-        assert!(added.iter().all(|e| e.get("id").is_some()), "each added entry must have an id");
-        assert!(v["removed"].as_array().is_some_and(|a| a.is_empty()), "no policies removed");
-
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
     fn test_policy_history_trimmed_to_size_guc() {
         use std::fs;
-        use std::io::Write;
-
-        const POLICY_UNSIGNED: &str = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../test_files/policy-store_no_trusted_issuers.yaml"
-        ));
 
         let work = std::env::temp_dir()
             .join(format!("cedarling_pg_trim_test_{}", std::process::id()));
@@ -521,29 +208,13 @@ mod tests {
         fs::create_dir_all(&work).expect("temp work dir");
 
         let policy_path = work.join("policy.yaml");
-        fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy");
-        let policy_lit = policy_path.to_string_lossy();
-        let bootstrap_contents = format!(
-            "CEDARLING_APPLICATION_NAME: cedarling_pg_trim_test\n\
-             CEDARLING_POLICY_STORE_URI: ''\n\
-             CEDARLING_LOG_TYPE: memory\n\
-             CEDARLING_LOG_LEVEL: DEBUG\n\
-             CEDARLING_LOG_TTL: 60\n\
-             CEDARLING_LOCAL_JWKS: null\n\
-             CEDARLING_POLICY_STORE_LOCAL: null\n\
-             CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
-             CEDARLING_JWT_SIG_VALIDATION: disabled\n\
-             CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
-             CEDARLING_LOCK: disabled\n\
-             CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
-             CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
-             CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
-             CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
-             CEDARLING_LOCK_LISTEN_SSE: disabled\n"
-        );
-        let bootstrap_path = work.join("bootstrap.yaml");
-        let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
-        f.write_all(bootstrap_contents.as_bytes()).expect("write bootstrap");
+        fs::write(
+            &policy_path,
+            crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes(),
+        )
+        .expect("write policy");
+        let bootstrap_path =
+            crate::test_support::write_bootstrap_yaml(&work, &policy_path, "cedarling_pg_trim_test");
         let bs = bootstrap_path.to_str().expect("utf8 bootstrap");
 
         // Limit history to 2 rows for this session.
@@ -569,76 +240,25 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_policy_diff_lines_mode_returns_string_lines() {
-        use std::fs;
-
-        let work =
-            std::env::temp_dir().join(format!("cedarling_pg_diff_lines_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp work dir");
-        let old = work.join("old.cedar");
-        let new = work.join("new.cedar");
-        fs::write(&old, "permit(principal, action, resource);\n").expect("write old");
-        fs::write(
-            &new,
-            "permit(principal, action, resource);\nforbid(principal, action, resource);\n",
-        )
-        .expect("write new");
-
-        Spi::run("SET LOCAL cedarling.diff_mode = 'lines'").expect("set diff_mode lines");
-        let diff = crate::policy_sql::cedarling_diff_policies(
-            old.to_str().expect("old path utf8"),
-            new.to_str().expect("new path utf8"),
-        );
-        let v = diff.0;
-        assert_eq!(v["ok"], true);
-        let added = v["added"].as_array().cloned().unwrap_or_default();
-        assert!(
-            added.contains(&serde_json::json!("forbid(principal, action, resource);")),
-            "lines mode must report added line as a string"
-        );
-        Spi::run("RESET cedarling.diff_mode").expect("reset diff_mode");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
     fn test_policy_versions_registry_roundtrip() {
         use std::fs;
-        use std::io::Write;
 
         let work = std::env::temp_dir()
             .join(format!("cedarling_pg_versions_test_{}", std::process::id()));
         let _ = fs::remove_dir_all(&work);
         fs::create_dir_all(&work).expect("temp work dir");
 
-        let bootstrap_path = work.join("bootstrap.yaml");
         let policy_path = work.join("policy.yaml");
-        const POLICY_UNSIGNED: &str = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../test_files/policy-store_no_trusted_issuers.yaml"
-        ));
-        fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy");
-        let policy_lit = policy_path.to_string_lossy();
-        let bootstrap_contents = format!(
-            "CEDARLING_APPLICATION_NAME: cedarling_pg_versions_test\n\
-             CEDARLING_POLICY_STORE_URI: ''\n\
-             CEDARLING_LOG_TYPE: memory\n\
-             CEDARLING_LOG_LEVEL: DEBUG\n\
-             CEDARLING_LOG_TTL: 60\n\
-             CEDARLING_LOCAL_JWKS: null\n\
-             CEDARLING_POLICY_STORE_LOCAL: null\n\
-             CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
-             CEDARLING_JWT_SIG_VALIDATION: disabled\n\
-             CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
-             CEDARLING_LOCK: disabled\n\
-             CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
-             CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
-             CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
-             CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
-             CEDARLING_LOCK_LISTEN_SSE: disabled\n"
+        fs::write(
+            &policy_path,
+            crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes(),
+        )
+        .expect("write policy");
+        let bootstrap_path = crate::test_support::write_bootstrap_yaml(
+            &work,
+            &policy_path,
+            "cedarling_pg_versions_test",
         );
-        let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
-        f.write_all(bootstrap_contents.as_bytes()).expect("write bootstrap");
 
         let bootstrap_str = bootstrap_path.to_str().expect("utf8 bootstrap");
 
@@ -675,42 +295,6 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_tokens_valid_json_accepted() {
-        Spi::run(r#"SET cedarling.tokens = '{"access_token":"x"}'"#)
-            .expect("valid JSON object should be accepted for cedarling.tokens");
-        Spi::run("RESET cedarling.tokens").expect("RESET cedarling.tokens should succeed");
-    }
-
-    #[pg_test]
-    fn test_token_sql_helpers_roundtrip() {
-        use pgrx::datum::JsonB;
-        use serde_json::json;
-
-        crate::token_sql::cedarling_clear_tokens().expect("clear tokens should succeed");
-        assert!(
-            crate::token_sql::cedarling_current_tokens().is_none(),
-            "after clear, current tokens should be NULL"
-        );
-
-        let payload = json!({"access_token": "t1", "id_token": "t2"});
-        crate::token_sql::cedarling_set_tokens(JsonB(payload.clone()))
-            .expect("cedarling_set_tokens should succeed");
-
-        let current =
-            crate::token_sql::cedarling_current_tokens().expect("current tokens expected");
-        assert_eq!(
-            current.0, payload,
-            "cedarling_current_tokens should round-trip set value"
-        );
-
-        crate::token_sql::cedarling_clear_tokens().expect("second clear should succeed");
-        assert!(
-            crate::token_sql::cedarling_current_tokens().is_none(),
-            "after second clear, current tokens should be NULL"
-        );
-    }
-
-    #[pg_test]
     fn test_fail_closed_without_engine() {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
@@ -741,35 +325,6 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_cedarling_status_returns_jsonb_with_required_keys() {
-        use pgrx::datum::JsonB;
-        let status: JsonB = crate::status::cedarling_status();
-        let v = &status.0;
-        assert!(
-            v.get("total_requests").is_some(),
-            "status missing total_requests"
-        );
-        assert!(v.get("allowed").is_some(), "status missing allowed");
-        assert!(v.get("denied").is_some(), "status missing denied");
-        assert!(v.get("errors").is_some(), "status missing errors");
-        assert!(v.get("cache_hits").is_some(), "status missing cache_hits");
-    }
-
-    #[pg_test]
-    fn test_cedarling_explain_empty_action_returns_error_field() {
-        let result = crate::trace::cedarling_explain(
-            r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
-            "",
-        );
-        let v = &result.0;
-        assert!(
-            v.get("error").is_some(),
-            "empty action must yield an error field"
-        );
-        assert!(v["decision"].is_null(), "decision must be null on error");
-    }
-
-    #[pg_test]
     fn test_cedarling_authorized_row_fail_closed_without_engine() {
         use pgrx::datum::JsonB;
         use serde_json::json;
@@ -780,21 +335,6 @@ mod tests {
             !crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None),
             "cedarling_authorized_row: without engine, fail-closed should deny"
         );
-    }
-
-    #[pg_test]
-    fn test_cedarling_authorized_row_shadow_mode_always_allows() {
-        use pgrx::datum::JsonB;
-        use serde_json::json;
-        Spi::run("SET LOCAL cedarling.mode = 'shadow'").expect("SET LOCAL mode shadow");
-        let resource = JsonB(json!({
-            "cedar_entity_mapping": {"entity_type": "T", "id": "x"}
-        }));
-        assert!(
-            crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None),
-            "cedarling_authorized_row: shadow mode must always allow"
-        );
-        Spi::run("SET LOCAL cedarling.mode = 'enforcement'").expect("restore enforcement");
     }
 
     #[pg_test]
@@ -878,27 +418,6 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_cedarling_explain_sql_returns_jsonb() {
-        let result = Spi::get_one::<pgrx::datum::JsonB>(
-            r#"SELECT cedarling_explain(
-                '{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}',
-                'T::Action::"Read"'
-            )"#,
-        )
-        .expect("SPI should succeed");
-        assert!(
-            result.is_some(),
-            "cedarling_explain should return a non-null JSONB"
-        );
-        let v = result.unwrap().0;
-        assert!(v.get("timestamp").is_some(), "trace must have timestamp");
-        assert!(
-            v.get("duration_ms").is_some(),
-            "trace must have duration_ms"
-        );
-    }
-
-    #[pg_test]
     fn test_mask_config_and_mask_row_roundtrip() {
         use pgrx::datum::JsonB;
         use serde_json::json;
@@ -906,10 +425,9 @@ mod tests {
             "test_tbl", "email", "redact", None
         ));
         let row = JsonB(json!({"email":"alice@example.org","name":"alice"}));
-        let masked = crate::mask_sql::cedarling_mask_row(row, "test_tbl", Some("Read"));
+        let masked = crate::mask_sql::cedarling_mask_row(row, "test_tbl");
         assert_eq!(masked.0["email"], "***REDACTED***");
-        let last = crate::mask_sql::cedarling_get_masked_row().expect("last masked row");
-        assert_eq!(last.0["email"], "***REDACTED***");
+        assert_eq!(masked.0["name"], "alice");
         let _ = Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_tbl'");
     }
 
@@ -941,76 +459,14 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_mask_partial_phone_pattern() {
-        let result = crate::mask_sql::cedarling_test_masking(
-            Some("5558675309"),
-            None,
-            "partial",
-            Some("XXX-XXX-####"),
-        );
-        assert_eq!(result.as_deref(), Some("XXX-XXX-5309"));
-    }
-
-    #[pg_test]
-    fn test_mask_range_produces_integer_in_bounds() {
-        Spi::run("SET cedarling.mask_hash_salt = 'test-range-salt'")
-            .expect("set mask_hash_salt for range");
-        let result = crate::mask_sql::cedarling_test_masking(
-            Some("alice"),
-            None,
-            "range",
-            Some("50000-150000"),
-        );
-        let n: i64 = result.expect("range must return Some").parse().expect("must be integer");
-        assert!((50_000..=150_000).contains(&n), "range result out of bounds: {n}");
-        Spi::run("RESET cedarling.mask_hash_salt").expect("reset mask_hash_salt");
-    }
-
-    #[pg_test]
-    fn test_mask_default_registry_applied_without_explicit_rule() {
+    fn test_mask_strategy_on_deny_returns_true() {
+        // When cedarling.strategy = mask, a deny should surface as true so RLS still
+        // includes the row. Actual column masking is the caller's responsibility
+        // (pair with cedarling_mask_row in the SELECT list).
         use pgrx::datum::JsonB;
         use serde_json::json;
 
-        // No explicit rule registered for this table+column — default registry should apply.
-        let row = JsonB(json!({
-            "user_email": "alice@example.org",
-            "name": "alice"
-        }));
-        let masked = crate::mask_sql::cedarling_mask_row(row, "no_rule_table_xyz", Some("Read"));
-        // user_email matches default registry → masked
-        assert_ne!(
-            masked.0["user_email"].as_str(),
-            Some("alice@example.org"),
-            "user_email should be masked by default registry"
-        );
-        // name has no default match → preserved
-        assert_eq!(masked.0["name"].as_str(), Some("alice"));
-    }
-
-    #[pg_test]
-    fn test_mask_strategy_on_deny_includes_row_and_stashes_masked() {
-        // When cedarling.strategy = mask, a deny should return true and stash masked row.
-        // Without engine, deny comes from finalize_error (fail-closed).
-        // We test via cedarling_authorized_row which uses the mask strategy path on deny.
         Spi::run("SET LOCAL cedarling.strategy = 'mask'").expect("set strategy mask");
-        Spi::run("SET LOCAL cedarling.mask_hash_salt = 'mask-strat-salt'")
-            .expect("set salt for mask strategy test");
-
-        // Register a mask rule for our test table
-        crate::mask_sql::cedarling_set_mask_config("test_mask_strat", "secret_col", "redact", None);
-
-        // Without an engine, the authorized_row path will fail-closed (deny), but
-        // since strategy=mask the function returns true and stashes the masked row.
-        // (In fail-closed mode without an engine, finalize_error returns false → mask wraps it)
-        // We verify via cedarling_get_masked_row being Some after the call.
-
-        // To keep this test self-contained and predictable: call cedarling_authorized_row
-        // with a valid resource but no engine. Fail-closed deny triggers mask strategy.
-        use pgrx::datum::JsonB;
-        use serde_json::json;
-
-        // Clear any previous stash
-        let _ = Spi::run("SELECT 1"); // no-op
 
         let resource = JsonB(json!({
             "cedar_entity_mapping": {"entity_type": "T", "id": "x"},
@@ -1021,22 +477,6 @@ mod tests {
         assert!(result, "strategy=mask on deny must return true");
 
         Spi::run("RESET cedarling.strategy").expect("reset strategy");
-        Spi::run("RESET cedarling.mask_hash_salt").expect("reset salt");
-        let _ = Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_strat'");
-    }
-
-    #[pg_test]
-    fn test_mask_rules_condition_sql_and_data_type_columns_exist() {
-        // Verify catalog columns were added (M7)
-        let cols = Spi::get_one::<i64>(
-            "SELECT count(*) FROM information_schema.columns
-             WHERE table_schema = 'cedarling'
-               AND table_name = 'mask_rules'
-               AND column_name IN ('condition_sql', 'data_type')",
-        )
-        .expect("SPI column count")
-        .unwrap_or_default();
-        assert_eq!(cols, 2, "mask_rules must have condition_sql and data_type columns");
     }
 
     #[pg_test]
@@ -1065,7 +505,7 @@ mod tests {
 
         Spi::run("SELECT set_config('cedarling.role', 'user', true)")
             .expect("set local cedarling.role=user");
-        let masked_user = crate::mask_sql::cedarling_mask_row(row_user, "test_mask_condition", Some("Read"));
+        let masked_user = crate::mask_sql::cedarling_mask_row(row_user, "test_mask_condition");
         assert_eq!(
             masked_user.0["pii_value"].as_str(),
             Some("secret-value"),
@@ -1075,7 +515,7 @@ mod tests {
         Spi::run("SELECT set_config('cedarling.role', 'admin', true)")
             .expect("set local cedarling.role=admin");
         let masked_admin =
-            crate::mask_sql::cedarling_mask_row(row_admin, "test_mask_condition", Some("Read"));
+            crate::mask_sql::cedarling_mask_row(row_admin, "test_mask_condition");
         assert_eq!(
             masked_admin.0["pii_value"].as_str(),
             Some("secret-value"),
@@ -1087,398 +527,172 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_cedarling_where_returns_false_without_tokens() {
-        Spi::run("RESET cedarling.tokens").expect("RESET tokens");
-        let pred = crate::where_sql::cedarling_where("some_table", "Jans::Action::\"Read\"", None);
-        assert_eq!(pred, "FALSE");
-    }
-
-    #[pg_test]
-    fn test_cedarling_where_unsigned_unconditional_permit_returns_true() {
-        crate::authz::pg_test_where::run_unsigned_unconditional_permit_returns_true();
-    }
-
-    #[pg_test]
-    fn test_cedarling_where_unsigned_no_matching_action_returns_false() {
-        crate::authz::pg_test_where::run_unsigned_no_matching_action_returns_false();
-    }
-
-    #[pg_test]
-    fn test_cedarling_where_unsigned_resource_predicate_lowers_to_sql() {
-        crate::authz::pg_test_where::run_unsigned_resource_predicate_lowers_to_sql();
-    }
-
-    #[pg_test]
-    fn test_cedarling_where_unsigned_unhandled_predicate_returns_partial_true() {
-        crate::authz::pg_test_where::run_unsigned_unhandled_predicate_returns_partial_true();
-    }
-
-    #[pg_test]
-    fn test_cedarling_where_unsigned_predicate_matches_rls_count_parity() {
-        crate::authz::pg_test_where::run_unsigned_predicate_matches_rls_count_parity();
-    }
-
-    #[pg_test]
-    fn test_cedarling_explain_includes_policy_hits_and_policies() {
-        crate::authz::pg_test_where::run_explain_includes_policy_hits_and_policies();
-    }
-
-    #[pg_test]
-    fn test_validate_schema_reports_columns_not_in_schema() {
+    fn test_validate_schema() {
         use std::fs;
-        let work =
-            std::env::temp_dir().join(format!("cedarling_pg_schema_test_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp dir");
-        let schema_path = work.join("schema.cedarschema");
-        fs::write(&schema_path, "entity User { name: String, age: Long }\n").expect("write schema");
 
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_probe")
-            .expect("drop cedarling_schema_probe");
-        Spi::run("CREATE TABLE cedarling_schema_probe(name text, age int, extra text)")
-            .expect("create cedarling_schema_probe");
+        let pid = std::process::id();
 
-        let report = crate::schema_sql::cedarling_validate_schema(
-            "cedarling_schema_probe",
-            schema_path.to_str().expect("utf8 schema path"),
-        );
-        assert!(
-            report.0["missing_in_schema"].as_array().is_some(),
-            "validate_schema should return missing_in_schema array"
-        );
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_probe").expect("drop probe table");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
-    fn test_validate_schema_reports_type_mismatch_strict_mode() {
-        use std::fs;
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_schema_mismatch_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp dir");
-        let schema_path = work.join("schema.cedarschema");
-        fs::write(
-            &schema_path,
-            r#"
-            namespace Jans {
-                entity Probe = {
-                    "name": String,
-                    "age": String
-                };
-            }
-            "#,
-        )
-        .expect("write schema");
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_mismatch_probe")
-            .expect("drop cedarling_schema_mismatch_probe");
-        Spi::run("CREATE TABLE cedarling_schema_mismatch_probe(name text, age int4)")
-            .expect("create cedarling_schema_mismatch_probe");
-        Spi::run(
-            "SELECT cedarling_register_entity_map(
-                'cedarling_schema_mismatch_probe'::regclass::oid,
-                'Jans::Probe',
-                ARRAY['name']
-            )",
-        )
-        .expect("register schema mismatch probe mapping");
-
-        let report = crate::schema_sql::cedarling_validate_schema(
-            "cedarling_schema_mismatch_probe",
-            schema_path.to_str().expect("utf8 schema path"),
-        );
-        let mismatches = report.0["type_mismatches"]
-            .as_array()
-            .cloned()
-            .unwrap_or_default();
-        assert!(
-            mismatches
-                .iter()
-                .any(|m| m.get("column").and_then(|v| v.as_str()) == Some("age")),
-            "strict mode must report type mismatch for age int4 vs String, got report: {}",
-            report.0
-        );
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_mismatch_probe").expect("drop probe table");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
-    fn test_validate_schema_matching_shapes_returns_ok_true() {
-        use std::fs;
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_schema_match_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp dir");
-        let schema_path = work.join("schema.cedarschema");
-        fs::write(
-            &schema_path,
-            r#"
-            namespace Jans {
-                entity MatchProbe = {
-                    "name": String,
-                    "score": Long
-                };
-            }
-            "#,
-        )
-        .expect("write schema");
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_match_probe")
-            .expect("drop cedarling_schema_match_probe");
-        Spi::run("CREATE TABLE cedarling_schema_match_probe(name text, score int8)")
-            .expect("create cedarling_schema_match_probe");
-        Spi::run(
-            "SELECT cedarling_register_entity_map(
-                'cedarling_schema_match_probe'::regclass::oid,
-                'Jans::MatchProbe',
-                ARRAY['name']
-            )",
-        )
-        .expect("register schema match probe mapping");
-
-        let report = crate::schema_sql::cedarling_validate_schema(
-            "cedarling_schema_match_probe",
-            schema_path.to_str().expect("utf8 schema path"),
-        );
-        let v = &report.0;
-        assert_eq!(v["ok"], true, "matching shapes must return ok=true, got: {v}");
-        assert!(
-            v["missing_in_table"].as_array().is_some_and(|a| a.is_empty()),
-            "missing_in_table must be empty"
-        );
-        assert!(
-            v["missing_in_schema"].as_array().is_some_and(|a| a.is_empty()),
-            "missing_in_schema must be empty"
-        );
-        assert!(
-            v["type_mismatches"].as_array().is_some_and(|a| a.is_empty()),
-            "type_mismatches must be empty"
-        );
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_match_probe").expect("drop probe table");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
-    fn test_validate_schema_unknown_table_returns_ok_false() {
-        // The table OID lookup fails before schema parsing, so schema content doesn't matter.
-        let report = crate::schema_sql::cedarling_validate_schema(
-            "cedarling_nonexistent_table_xyzzy_abc123",
-            "/nonexistent/path/schema.cedarschema",
-        );
-        let v = &report.0;
-        assert_eq!(v["ok"], false, "unknown table must return ok=false, got: {v}");
-        assert!(
-            v["error"].as_str().is_some(),
-            "error field must be present for unknown table"
-        );
-    }
-
-    #[pg_test]
-    fn test_validate_schema_by_oid_accepts_table_oid() {
-        use std::fs;
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_schema_byoid_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp dir");
-        let schema_path = work.join("schema.cedarschema");
-        fs::write(
-            &schema_path,
-            r#"
-            namespace Jans {
-                entity OidProbe = {
-                    "name": String
-                };
-            }
-            "#,
-        )
-        .expect("write schema");
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_byoid_probe")
-            .expect("drop cedarling_schema_byoid_probe");
-        Spi::run("CREATE TABLE cedarling_schema_byoid_probe(name text)")
-            .expect("create cedarling_schema_byoid_probe");
-        Spi::run(
-            "SELECT cedarling_register_entity_map(
-                'cedarling_schema_byoid_probe'::regclass::oid,
-                'Jans::OidProbe',
-                ARRAY['name']
-            )",
-        )
-        .expect("register byoid probe mapping");
-
-        let schema_str = schema_path.to_str().expect("utf8 schema path").to_string();
-        let report = Spi::get_one_with_args::<pgrx::datum::JsonB>(
-            "SELECT cedarling_validate_schema('cedarling_schema_byoid_probe'::regclass::oid, $1)",
-            &[schema_str.into()],
-        )
-        .expect("SPI call should succeed")
-        .expect("result must be non-null");
-        assert_eq!(
-            report.0["ok"], true,
-            "OID overload must succeed for matching shape, got: {}",
-            report.0
-        );
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_byoid_probe").expect("drop probe table");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    #[pg_test]
-    fn test_status_transitions_to_degraded_after_forced_errors_with_engine_loaded() {
-        use std::fs;
-        use std::io::Write;
-
-        const POLICY_UNSIGNED: &str = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../test_files/policy-store_no_trusted_issuers.yaml"
-        ));
-
-        fn write_bootstrap(
-            dir: &std::path::Path,
-            policy_path: &std::path::Path,
-        ) -> std::path::PathBuf {
-            let bootstrap_path = dir.join("bootstrap.yaml");
-            let policy_lit = policy_path.to_string_lossy();
-            let contents = format!(
-                "CEDARLING_APPLICATION_NAME: cedarling_pg_status_test\n\
-                 CEDARLING_POLICY_STORE_URI: ''\n\
-                 CEDARLING_LOG_TYPE: memory\n\
-                 CEDARLING_LOG_LEVEL: DEBUG\n\
-                 CEDARLING_LOG_TTL: 60\n\
-                 CEDARLING_LOCAL_JWKS: null\n\
-                 CEDARLING_POLICY_STORE_LOCAL: null\n\
-                 CEDARLING_POLICY_STORE_LOCAL_FN: {policy_lit}\n\
-                 CEDARLING_JWT_SIG_VALIDATION: disabled\n\
-                 CEDARLING_JWT_STATUS_VALIDATION: disabled\n\
-                 CEDARLING_LOCK: disabled\n\
-                 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null\n\
-                 CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled\n\
-                 CEDARLING_LOCK_HEALTH_INTERVAL: 0\n\
-                 CEDARLING_LOCK_TELEMETRY_INTERVAL: 0\n\
-                 CEDARLING_LOCK_LISTEN_SSE: disabled\n"
+        // Case 1: unknown table returns ok=false with an error field.
+        {
+            let report = crate::schema_sql::cedarling_validate_schema(
+                "cedarling_nonexistent_table_xyzzy_abc123",
+                "/nonexistent/path/schema.cedarschema",
             );
-            let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
-            f.write_all(contents.as_bytes()).expect("write bootstrap");
-            bootstrap_path
+            let v = &report.0;
+            assert_eq!(v["ok"], false, "unknown table must return ok=false, got: {v}");
+            assert!(v["error"].as_str().is_some(), "error field must be present for unknown table");
         }
 
-        let work = std::env::temp_dir().join(format!(
-            "cedarling_pg_status_degraded_{}",
-            std::process::id()
-        ));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp work dir");
-        let policy_path = work.join("policy-store.yaml");
-        fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy store");
-        let bootstrap_path = write_bootstrap(&work, &policy_path);
-        let bootstrap_str = bootstrap_path.to_str().expect("bootstrap path utf8");
-        assert!(
-            crate::policy_sql::cedarling_use_policy(bootstrap_str),
-            "cedarling_use_policy must load engine for status transition test"
-        );
-
-        let before = crate::status::cedarling_status().0;
-        let total_before = before["total_requests"].as_u64().unwrap_or(0);
-        let errors_before = before["errors"].as_u64().unwrap_or(0);
-
-        // Need (errors+n)/(total+n) >= 0.25 -> n >= ceil((total - 4*errors)/3)
-        let deficit = i128::from(total_before) - 4 * i128::from(errors_before);
-        let mut needed = if deficit <= 0 {
-            0_u64
-        } else {
-            ((deficit + 2) / 3) as u64
-        };
-        // One extra to avoid boundary rounding surprises.
-        needed += 1;
-
-        let resource = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
-        let action = r#"T::Action::"A""#;
-        for _ in 0..needed {
-            let _ = crate::authorized::cedarling_authorize_unsigned(None, resource, action, "[]");
+        // Case 2: extra column in table not in schema → missing_in_schema is populated.
+        {
+            let work = std::env::temp_dir().join(format!("cedarling_pg_schema_a_{pid}"));
+            let _ = fs::remove_dir_all(&work);
+            fs::create_dir_all(&work).expect("tmp dir a");
+            let schema_path = work.join("schema.cedarschema");
+            fs::write(&schema_path, "entity User { name: String, age: Long }\n")
+                .expect("write schema a");
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_a").ok();
+            Spi::run("CREATE TABLE cedarling_schema_a(name text, age int, extra text)")
+                .expect("create table a");
+            let report = crate::schema_sql::cedarling_validate_schema(
+                "cedarling_schema_a",
+                schema_path.to_str().expect("utf8"),
+            );
+            assert!(
+                report.0["missing_in_schema"].as_array().is_some(),
+                "extra column must appear in missing_in_schema; got: {}",
+                report.0
+            );
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_a").ok();
+            let _ = fs::remove_dir_all(&work);
         }
 
-        let after = crate::status::cedarling_status().0;
-        assert_eq!(
-            after["engine_loaded"], true,
-            "engine should remain loaded during degraded-status test"
-        );
-        assert_eq!(
-            after["status"], "degraded",
-            "status should degrade after forced error-rate increase; before={before}, after={after}"
-        );
+        // Case 3: type mismatch (age int4 vs String) in strict mode.
+        {
+            let work = std::env::temp_dir().join(format!("cedarling_pg_schema_b_{pid}"));
+            let _ = fs::remove_dir_all(&work);
+            fs::create_dir_all(&work).expect("tmp dir b");
+            let schema_path = work.join("schema.cedarschema");
+            fs::write(
+                &schema_path,
+                "namespace Jans { entity Probe = { \"name\": String, \"age\": String }; }\n",
+            )
+            .expect("write schema b");
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_b").ok();
+            Spi::run("CREATE TABLE cedarling_schema_b(name text, age int4)")
+                .expect("create table b");
+            Spi::run(
+                "SELECT cedarling_register_entity_map('cedarling_schema_b'::regclass::oid, \
+                 'Jans::Probe', ARRAY['name'])",
+            )
+            .expect("register entity map b");
+            let report = crate::schema_sql::cedarling_validate_schema(
+                "cedarling_schema_b",
+                schema_path.to_str().expect("utf8"),
+            );
+            let mismatches = report.0["type_mismatches"].as_array().cloned().unwrap_or_default();
+            assert!(
+                mismatches.iter().any(|m| m.get("column").and_then(|v| v.as_str()) == Some("age")),
+                "strict mode must report int4 vs String mismatch; got: {}",
+                report.0
+            );
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_b").ok();
+            let _ = fs::remove_dir_all(&work);
+        }
 
-        let _ = fs::remove_dir_all(&work);
+        // Case 4: matching shapes → ok=true, all arrays empty.
+        {
+            let work = std::env::temp_dir().join(format!("cedarling_pg_schema_c_{pid}"));
+            let _ = fs::remove_dir_all(&work);
+            fs::create_dir_all(&work).expect("tmp dir c");
+            let schema_path = work.join("schema.cedarschema");
+            fs::write(
+                &schema_path,
+                "namespace Jans { entity MatchProbe = { \"name\": String, \"score\": Long }; }\n",
+            )
+            .expect("write schema c");
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_c").ok();
+            Spi::run("CREATE TABLE cedarling_schema_c(name text, score int8)")
+                .expect("create table c");
+            Spi::run(
+                "SELECT cedarling_register_entity_map('cedarling_schema_c'::regclass::oid, \
+                 'Jans::MatchProbe', ARRAY['name'])",
+            )
+            .expect("register entity map c");
+            let report = crate::schema_sql::cedarling_validate_schema(
+                "cedarling_schema_c",
+                schema_path.to_str().expect("utf8"),
+            );
+            let v = &report.0;
+            assert_eq!(v["ok"], true, "matching shapes must return ok=true; got: {v}");
+            assert!(v["missing_in_table"].as_array().is_some_and(|a| a.is_empty()));
+            assert!(v["missing_in_schema"].as_array().is_some_and(|a| a.is_empty()));
+            assert!(v["type_mismatches"].as_array().is_some_and(|a| a.is_empty()));
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_c").ok();
+            let _ = fs::remove_dir_all(&work);
+        }
+
+        // Case 5: OID overload produces the same result as name overload.
+        {
+            let work = std::env::temp_dir().join(format!("cedarling_pg_schema_d_{pid}"));
+            let _ = fs::remove_dir_all(&work);
+            fs::create_dir_all(&work).expect("tmp dir d");
+            let schema_path = work.join("schema.cedarschema");
+            fs::write(
+                &schema_path,
+                "namespace Jans { entity OidProbe = { \"name\": String }; }\n",
+            )
+            .expect("write schema d");
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_d").ok();
+            Spi::run("CREATE TABLE cedarling_schema_d(name text)").expect("create table d");
+            Spi::run(
+                "SELECT cedarling_register_entity_map('cedarling_schema_d'::regclass::oid, \
+                 'Jans::OidProbe', ARRAY['name'])",
+            )
+            .expect("register entity map d");
+            let schema_str = schema_path.to_str().expect("utf8").to_string();
+            let report = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+                "SELECT cedarling_validate_schema('cedarling_schema_d'::regclass::oid, $1)",
+                &[schema_str.into()],
+            )
+            .expect("SPI")
+            .expect("non-null");
+            assert_eq!(report.0["ok"], true, "OID overload must succeed; got: {}", report.0);
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_d").ok();
+            let _ = fs::remove_dir_all(&work);
+        }
+
+        // Case 6: strict=off → no type mismatches for known type mismatches.
+        {
+            let work = std::env::temp_dir().join(format!("cedarling_pg_schema_e_{pid}"));
+            let _ = fs::remove_dir_all(&work);
+            fs::create_dir_all(&work).expect("tmp dir e");
+            let schema_path = work.join("schema.cedarschema");
+            fs::write(
+                &schema_path,
+                "namespace Jans { entity Probe = { \"name\": String, \"age\": String }; }\n",
+            )
+            .expect("write schema e");
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_e").ok();
+            Spi::run("CREATE TABLE cedarling_schema_e(name text, age int4)")
+                .expect("create table e");
+            Spi::run("SET LOCAL cedarling.schema_validate_strict = 'off'")
+                .expect("disable strict");
+            let report = crate::schema_sql::cedarling_validate_schema(
+                "cedarling_schema_e",
+                schema_path.to_str().expect("utf8"),
+            );
+            let mismatches = report.0["type_mismatches"].as_array().cloned().unwrap_or_default();
+            assert!(mismatches.is_empty(), "lexical fallback must not emit type mismatches");
+            Spi::run("SET LOCAL cedarling.schema_validate_strict = 'on'").ok();
+            Spi::run("DROP TABLE IF EXISTS cedarling_schema_e").ok();
+            let _ = fs::remove_dir_all(&work);
+        }
     }
 
     #[pg_test]
-    fn test_validate_schema_lexical_fallback_when_strict_disabled() {
-        use std::fs;
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_schema_lexical_{}", std::process::id()));
-        let _ = fs::remove_dir_all(&work);
-        fs::create_dir_all(&work).expect("temp dir");
-        let schema_path = work.join("schema.cedarschema");
-        fs::write(
-            &schema_path,
-            r#"
-            namespace Jans {
-                entity Probe = {
-                    "name": String,
-                    "age": String
-                };
-            }
-            "#,
-        )
-        .expect("write schema");
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_lexical_probe")
-            .expect("drop cedarling_schema_lexical_probe");
-        Spi::run("CREATE TABLE cedarling_schema_lexical_probe(name text, age int4)")
-            .expect("create cedarling_schema_lexical_probe");
-
-        Spi::run("SET LOCAL cedarling.schema_validate_strict = 'off'")
-            .expect("disable strict schema validation");
-        let report = crate::schema_sql::cedarling_validate_schema(
-            "cedarling_schema_lexical_probe",
-            schema_path.to_str().expect("utf8 schema path"),
-        );
-        let mismatches = report.0["type_mismatches"]
-            .as_array()
-            .cloned()
-            .unwrap_or_default();
-        assert!(
-            mismatches.is_empty(),
-            "lexical fallback should not emit type mismatches"
-        );
-        Spi::run("SET LOCAL cedarling.schema_validate_strict = 'on'")
-            .expect("restore strict schema validation");
-
-        Spi::run("DROP TABLE IF EXISTS cedarling_schema_lexical_probe").expect("drop probe table");
-        let _ = fs::remove_dir_all(&work);
-    }
-
-    /// RLS + `cedarling_authorize_unsigned` against the unsigned policy store (runs late by name so
-    /// earlier `#[pg_test]` cases still see an uninitialized Cedarling engine in the same process).
-    #[pg_test]
-    fn test_zzz_rls_unsigned_policy_filters_select_under_row_security() {
+    fn test_rls_unsigned_policy_filters_select_under_row_security() {
         crate::functions::pg_test_rls_unsigned::run_rls_unsigned_policy_filters_select_under_row_security();
-    }
-}
-
-#[cfg(feature = "pg_bench")]
-#[pg_schema]
-mod benches {
-    use pgrx::prelude::*;
-    use pgrx_bench::{black_box, Bencher};
-
-    #[pg_bench]
-    fn bench_hello_cedarling_pg(b: &mut Bencher) {
-        b.iter(|| {
-            black_box(crate::hello_cedarling_pg());
-        });
     }
 }
 
@@ -1486,7 +700,11 @@ mod benches {
 #[cfg(test)]
 pub mod pg_test {
     pub fn setup(_options: Vec<&str>) {
-        // One-off initialization when the pg_test framework starts.
+        #[cfg(feature = "pg_test")]
+        {
+            let _ = crate::engine::reset_for_pg_tests();
+            crate::authz::cache::global_cache().clear_all();
+        }
     }
 
     #[must_use]

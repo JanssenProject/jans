@@ -5,7 +5,7 @@
 
 //! Lazy, process-wide [`cedarling::blocking::Cedarling`] built from `cedarling.bootstrap_config`.
 
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::sync::{Arc, Mutex, MutexGuard};
 
 use cedarling::blocking::Cedarling;
 use thiserror::Error;
@@ -21,7 +21,6 @@ struct EngineInner {
 enum EngineSlot {
     Empty,
     Ready(EngineInner),
-    Failed(String),
 }
 
 static ENGINE: Mutex<EngineSlot> = Mutex::new(EngineSlot::Empty);
@@ -34,8 +33,6 @@ pub enum EngineError {
     BootstrapLoad(#[from] cedarling::BootstrapConfigLoadingError),
     #[error(transparent)]
     CedarlingInit(#[from] cedarling::InitCedarlingError),
-    #[error("Cedarling initialization failed earlier in this process: {0}")]
-    InitPreviouslyFailed(String),
     #[error("internal Cedarling engine mutex was poisoned")]
     MutexPoisoned,
 }
@@ -48,13 +45,12 @@ pub fn try_init_cedarling_from_bootstrap_path(path: &str) -> Result<Arc<Cedarlin
 }
 
 /// Returns the process-wide Cedarling engine, initializing it on first call from
-/// [`guc_config::bootstrap_config_path_utf8`].
+/// [`guc_config::bootstrap_config_path_utf8`]. On failure the slot stays `Empty` so the
+/// next call re-attempts initialization (no failure is cached).
 pub fn global_cedarling() -> Result<Arc<Cedarling>, EngineError> {
     let mut slot = lock_engine_slot()?;
-    match &*slot {
-        EngineSlot::Ready(inner) => return Ok(inner.current.clone()),
-        EngineSlot::Failed(msg) => return Err(EngineError::InitPreviouslyFailed(msg.clone())),
-        EngineSlot::Empty => {},
+    if let EngineSlot::Ready(inner) = &*slot {
+        return Ok(inner.current.clone());
     }
 
     let path = guc_config::bootstrap_config_path_utf8().ok_or(EngineError::BootstrapPathNotSet)?;
@@ -63,21 +59,13 @@ pub fn global_cedarling() -> Result<Arc<Cedarling>, EngineError> {
         return Err(EngineError::BootstrapPathNotSet);
     }
 
-    match try_init_cedarling_from_bootstrap_path(trimmed) {
-        Ok(arc) => {
-            *slot = EngineSlot::Ready(EngineInner {
-                current: arc.clone(),
-                path: trimmed.to_string(),
-                previous: None,
-            });
-            Ok(arc)
-        },
-        Err(e) => {
-            let msg = e.to_string();
-            *slot = EngineSlot::Failed(msg.clone());
-            Err(e)
-        },
-    }
+    let arc = try_init_cedarling_from_bootstrap_path(trimmed)?;
+    *slot = EngineSlot::Ready(EngineInner {
+        current: arc.clone(),
+        path: trimmed.to_string(),
+        previous: None,
+    });
+    Ok(arc)
 }
 
 /// Atomically swap in a new engine loaded from `new_path`.
@@ -89,11 +77,11 @@ pub fn use_policy(new_path: &str) -> Result<Option<String>, EngineError> {
     let mut slot = lock_engine_slot()?;
     let old_path = match &*slot {
         EngineSlot::Ready(inner) => Some(inner.path.clone()),
-        _ => None,
+        EngineSlot::Empty => None,
     };
     let old_inner = match std::mem::replace(&mut *slot, EngineSlot::Empty) {
         EngineSlot::Ready(inner) => Some((inner.current, inner.path)),
-        _ => None,
+        EngineSlot::Empty => None,
     };
     *slot = EngineSlot::Ready(EngineInner {
         current: new_arc,
@@ -129,15 +117,22 @@ pub fn rollback_policy() -> Result<Option<(String, String)>, EngineError> {
 }
 
 /// Returns the loaded engine without triggering initialization. Returns `None` if uninitialized, failed, or mutex poisoned.
+#[cfg(not(test))]
 pub fn peek_cedarling() -> Option<std::sync::Arc<cedarling::blocking::Cedarling>> {
     ENGINE.lock().ok().and_then(|slot| match &*slot {
         EngineSlot::Ready(inner) => Some(inner.current.clone()),
-        _ => None,
+        EngineSlot::Empty => None,
     })
 }
 
 fn lock_engine_slot() -> Result<MutexGuard<'static, EngineSlot>, EngineError> {
-    ENGINE
-        .lock()
-        .map_err(|_: PoisonError<_>| EngineError::MutexPoisoned)
+    crate::sync_mutex::lock(&ENGINE).map_err(|_| EngineError::MutexPoisoned)
+}
+
+/// Clears the process-wide engine slot so later `#[pg_test]` cases start without a loaded engine.
+#[cfg(feature = "pg_test")]
+pub(crate) fn reset_for_pg_tests() {
+    if let Ok(mut slot) = crate::sync_mutex::lock(&ENGINE) {
+        *slot = EngineSlot::Empty;
+    }
 }

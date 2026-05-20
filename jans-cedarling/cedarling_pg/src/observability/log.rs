@@ -9,7 +9,7 @@
 
 use pgrx::prelude::*;
 
-use crate::authz_bridge::{AuthorizeBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{AuthorizeBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::functions::error::CedarlingError;
 use crate::guc_config::{log_level, CedarlingLogLevelGuc};
@@ -53,11 +53,6 @@ pub(crate) fn log_engine_failure(err: &EngineError) {
                 CedarlingLogLevelGuc::Info,
                 "Cedarling engine unavailable: cedarling.bootstrap_config is unset",
             );
-        },
-        EngineError::InitPreviouslyFailed(msg) => {
-            if should_emit(CedarlingLogLevelGuc::Warn) {
-                warning!("cedarling_pg: Cedarling engine unavailable (cached init failure): {msg}");
-            }
         },
         EngineError::BootstrapLoad(e) => {
             if should_emit(CedarlingLogLevelGuc::Warn) {

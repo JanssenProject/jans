@@ -14,12 +14,11 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::authz_bridge::{AuthorizeBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{AuthorizeBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
-use crate::guc_config::CedarlingLogLevelGuc;
 use crate::policy::{PolicyError, SchemaError};
 use crate::resource::row::RowBuildError;
-use crate::token_bundle::TokenBundleError;
+use crate::tokens::bundle::TokenBundleError;
 
 #[derive(Debug, Error)]
 pub enum CedarlingError {
@@ -94,23 +93,6 @@ impl AuditLogEntry {
 
 impl CedarlingError {
     #[must_use]
-    pub const fn should_deny(&self) -> bool {
-        match self {
-            Self::TokenValidation(_)
-            | Self::TokenBundle(_)
-            | Self::ResourceConstruction(_)
-            | Self::RequestInvalid(_)
-            | Self::PolicyEvaluation(_)
-            | Self::PolicyLoading(_)
-            | Self::SchemaValidation(_)
-            | Self::Engine(_)
-            | Self::Configuration(_)
-            | Self::JsonParsing(_)
-            | Self::Database(_) => true,
-        }
-    }
-
-    #[must_use]
     pub const fn category(&self) -> ErrorCategory {
         match self {
             Self::TokenValidation(_) => "token_validation",
@@ -124,23 +106,6 @@ impl CedarlingError {
             Self::Configuration(_) => "configuration",
             Self::JsonParsing(_) => "json_parsing",
             Self::Database(_) => "database",
-        }
-    }
-
-    #[must_use]
-    pub const fn log_level(&self) -> CedarlingLogLevelGuc {
-        match self {
-            Self::Engine(_)
-            | Self::PolicyEvaluation(_)
-            | Self::PolicyLoading(_)
-            | Self::SchemaValidation(_)
-            | Self::Database(_) => CedarlingLogLevelGuc::Warn,
-            Self::TokenValidation(_)
-            | Self::TokenBundle(_)
-            | Self::ResourceConstruction(_)
-            | Self::RequestInvalid(_)
-            | Self::JsonParsing(_)
-            | Self::Configuration(_) => CedarlingLogLevelGuc::Info,
         }
     }
 
@@ -172,9 +137,6 @@ impl From<EngineError> for CedarlingError {
             },
             EngineError::BootstrapLoad(e) => Self::Engine(format!("bootstrap load: {e}")),
             EngineError::CedarlingInit(e) => Self::Engine(format!("init: {e}")),
-            EngineError::InitPreviouslyFailed(msg) => {
-                Self::Engine(format!("previous init failure cached: {msg}"))
-            },
             EngineError::MutexPoisoned => Self::Engine("engine mutex poisoned".into()),
         }
     }
@@ -258,16 +220,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn every_variant_denies_in_fail_closed() {
-        for err in sample_errors() {
-            assert!(
-                err.should_deny(),
-                "variant {err:?} must deny in fail-closed mode"
-            );
-        }
-    }
-
-    #[test]
     fn categories_are_stable_kebab_or_snake() {
         for err in sample_errors() {
             let cat = err.category();
@@ -278,22 +230,6 @@ mod tests {
                 "category {cat:?} for {err:?} must be snake_case ASCII"
             );
         }
-    }
-
-    #[test]
-    fn log_levels_follow_expectation() {
-        assert_eq!(
-            CedarlingError::TokenValidation("x".into()).log_level(),
-            CedarlingLogLevelGuc::Info
-        );
-        assert_eq!(
-            CedarlingError::Engine("x".into()).log_level(),
-            CedarlingLogLevelGuc::Warn
-        );
-        assert_eq!(
-            CedarlingError::PolicyEvaluation("x".into()).log_level(),
-            CedarlingLogLevelGuc::Warn
-        );
     }
 
     #[test]
@@ -336,8 +272,6 @@ mod tests {
         ]
     }
 
-    // --- Phase 8c: no JWT in logs --------------------------------------------
-    //
     // The authorize boundary in [`classify_cedar_authorize_error`] is the *only*
     // place where a cedarling `AuthorizeError` (which may carry JWT material in
     // its inner Display) is translated into a `CedarlingError` that the
@@ -355,35 +289,112 @@ mod tests {
         s.contains("eyJ")
     }
 
+    const CLASSIFIER_REDACTED_MESSAGES: [&str; 3] = [
+        "JWT/token processing failed (details redacted)",
+        "invalid Cedar action or identifier",
+        "request or entity build failed during policy evaluation",
+    ];
+
+    fn jwt_poison() -> &'static str {
+        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.x"
+    }
+
+    fn assert_classified_output_never_leaks_poison(
+        auth_err: &cedarling::AuthorizeError,
+        poison: &str,
+    ) {
+        let classified = classify_cedar_authorize_error(auth_err);
+        let display = classified.to_string();
+        let audit = classified.to_audit_entry("fail_closed").to_json().to_string();
+        assert!(
+            !display.contains(poison),
+            "classified Display leaked poison: {display}"
+        );
+        assert!(
+            !audit.contains(poison),
+            "classified audit JSON leaked poison: {audit}"
+        );
+        assert!(!looks_like_jwt(&display), "Display contains eyJ: {display}");
+        assert!(!looks_like_jwt(&audit), "audit JSON contains eyJ: {audit}");
+    }
+
+    fn poisonous_authorize_errors() -> Vec<cedarling::AuthorizeError> {
+        use std::str::FromStr;
+
+        use cedarling::AuthorizeError;
+        use cedar_policy::EntityUid;
+
+        let poison = jwt_poison();
+        let parse_err = || EntityUid::from_str(poison).expect_err("poison must not parse as UID");
+
+        vec![
+            AuthorizeError::EntitiesToJson(
+                serde_json::from_str::<serde_json::Value>(poison).expect_err("invalid json"),
+            ),
+            AuthorizeError::Action(Box::new(parse_err())),
+            AuthorizeError::IdentifierParsing(Box::new(parse_err())),
+        ]
+    }
+
     #[test]
     fn classifier_outputs_are_static_redacted_strings() {
-        let allowed = [
-            "JWT/token processing failed (details redacted)",
-            "invalid Cedar action or identifier",
-            "request or entity build failed during policy evaluation",
-        ];
-        for s in allowed {
-            assert!(!looks_like_jwt(s), "redacted string itself contains 'eyJ'");
+        for s in CLASSIFIER_REDACTED_MESSAGES {
+            assert!(!looks_like_jwt(s), "redacted string itself contains 'eyJ': {s}");
         }
     }
 
     #[test]
+    fn classify_maps_each_output_kind_to_a_static_redacted_message() {
+        for auth_err in poisonous_authorize_errors() {
+            let classified = classify_cedar_authorize_error(&auth_err);
+            let detail = match &classified {
+                CedarlingError::TokenValidation(s)
+                | CedarlingError::RequestInvalid(s)
+                | CedarlingError::PolicyEvaluation(s) => s.as_str(),
+                other => panic!("unexpected CedarlingError from classify: {other:?}"),
+            };
+            assert!(
+                CLASSIFIER_REDACTED_MESSAGES.contains(&detail),
+                "classifier must return a fixed redacted message, got: {detail:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn classify_never_echoes_inner_authorize_error_display() {
+        let poison = jwt_poison();
+        for auth_err in poisonous_authorize_errors() {
+            assert_classified_output_never_leaks_poison(&auth_err, poison);
+        }
+    }
+
+    #[test]
+    fn classify_never_echoes_random_jwt_like_bytes() {
+        const RANDOM_BYTES: [u8; 48] = [
+            0xA5, 0xC2, 0x7E, 0x11, 0x9B, 0x44, 0xD0, 0x6F, 0x23, 0x88, 0x5A, 0x01, 0xBE, 0x72,
+            0x39, 0xE4, 0x0C, 0x97, 0x51, 0xFA, 0x2D, 0x83, 0x16, 0xCB, 0x60, 0xAD, 0x04, 0x79,
+            0x32, 0xED, 0x58, 0x0F, 0xA0, 0x67, 0x1C, 0xD5, 0x8E, 0x41, 0xF6, 0x2B, 0x94, 0x07,
+            0xBC, 0x65, 0x18, 0xCF, 0x76, 0x29,
+        ];
+        let poison = String::from_utf8_lossy(&RANDOM_BYTES);
+        let inner =
+            serde_json::from_str::<serde_json::Value>(&poison).expect_err("random bytes not json");
+        assert_classified_output_never_leaks_poison(
+            &cedarling::AuthorizeError::EntitiesToJson(inner),
+            &poison,
+        );
+    }
+
+    #[test]
     fn redacted_classifier_strings_do_not_carry_inner_token_data() {
-        // Build CedarlingError shapes that classify_cedar_authorize_error()
-        // can produce, and verify their Display never carries a JWT.
         let cases = [
-            CedarlingError::TokenValidation(
-                "JWT/token processing failed (details redacted)".into(),
-            ),
-            CedarlingError::RequestInvalid("invalid Cedar action or identifier".into()),
-            CedarlingError::PolicyEvaluation(
-                "request or entity build failed during policy evaluation".into(),
-            ),
+            CedarlingError::TokenValidation(CLASSIFIER_REDACTED_MESSAGES[0].into()),
+            CedarlingError::RequestInvalid(CLASSIFIER_REDACTED_MESSAGES[1].into()),
+            CedarlingError::PolicyEvaluation(CLASSIFIER_REDACTED_MESSAGES[2].into()),
         ];
         for err in cases {
             let entry = err.to_audit_entry("fail_closed");
-            let value = entry.to_json();
-            let serialized = value.to_string();
+            let serialized = entry.to_json().to_string();
             assert!(
                 !looks_like_jwt(&serialized),
                 "audit JSON contains JWT-looking substring: {serialized}"

@@ -94,38 +94,6 @@ pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<MaskRule> {
     rules
 }
 
-/// Resolve the `PostgreSQL` table name for a Cedar entity type.
-///
-/// Checks `cedarling.entity_map` first; falls back to the lower-cased basename (after `::`)
-/// when no explicit mapping is registered.
-#[cfg(test)]
-pub(crate) fn table_name_for_entity_type(entity_type: &str) -> String {
-    entity_type
-        .rsplit("::")
-        .next()
-        .unwrap_or(entity_type)
-        .to_ascii_lowercase()
-}
-
-/// Resolve the `PostgreSQL` table name for a Cedar entity type.
-///
-/// Checks `cedarling.entity_map` first; falls back to the lower-cased basename (after `::`)
-/// when no explicit mapping is registered.
-#[cfg(not(test))]
-pub(crate) fn table_name_for_entity_type(entity_type: &str) -> String {
-    let basename = entity_type.rsplit("::").next().unwrap_or(entity_type);
-    let result = pgrx::prelude::Spi::get_one_with_args::<String>(
-        "SELECT c.relname::text
-         FROM cedarling.entity_map em
-         JOIN pg_class c ON c.oid = em.table_oid
-         WHERE em.entity_type = $1
-         LIMIT 1",
-        &[entity_type.into()],
-    )
-    .ok()
-    .flatten();
-    result.unwrap_or_else(|| basename.to_ascii_lowercase())
-}
 
 #[cfg(test)]
 mod tests {

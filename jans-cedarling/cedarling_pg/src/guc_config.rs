@@ -115,6 +115,7 @@ pub fn log_level() -> CedarlingLogLevelGuc {
 
 /// Current `cedarling.strategy`.
 #[must_use]
+#[cfg(any(not(test), feature = "pg_test"))]
 pub fn strategy() -> CedarlingStrategy {
     STRATEGY.get()
 }
@@ -127,6 +128,7 @@ pub fn cache_ttl_seconds() -> i32 {
 
 /// Current `cedarling.cache_size` — maximum in-memory decision entries per backend process.
 #[must_use]
+#[cfg(any(not(test), feature = "pg_test"))]
 pub fn cache_size() -> i32 {
     CACHE_SIZE.get()
 }
@@ -181,6 +183,7 @@ pub fn policy_version_utf8() -> Option<String> {
 
 /// Current `cedarling.trace_buffer_size` (per-backend trace ring capacity).
 #[must_use]
+#[cfg(any(not(test), feature = "pg_test"))]
 pub fn trace_buffer_size() -> i32 {
     TRACE_BUFFER_SIZE.get()
 }
@@ -219,9 +222,7 @@ pub fn mask_hash_salt_bytes() -> Vec<u8> {
 
 /// Register all GUCs with `PostgreSQL`. Call once from `_PG_init`.
 pub fn register_gucs() {
-    unsafe {
-        register_gucs_inner();
-    }
+    register_gucs_inner();
 }
 
 #[pg_guard]
@@ -254,13 +255,16 @@ unsafe extern "C-unwind" fn cedarling_context_check_hook(
     validate::context_json_is_valid_object(s)
 }
 
-unsafe fn register_gucs_inner() {
+fn register_gucs_inner() {
     register_enum_gucs();
     register_numeric_gucs();
-    register_string_gucs();
+    // `define_string_guc_with_hooks` is unsafe in pgrx (C check hooks).
+    unsafe {
+        register_string_gucs();
+    }
 }
 
-unsafe fn register_enum_gucs() {
+fn register_enum_gucs() {
     GucRegistry::define_enum_guc(
         c"cedarling.mode",
         c"Cedarling operation mode.",
@@ -307,7 +311,7 @@ unsafe fn register_enum_gucs() {
     );
 }
 
-unsafe fn register_numeric_gucs() {
+fn register_numeric_gucs() {
     GucRegistry::define_int_guc(
         c"cedarling.cache_ttl",
         c"Authorization result cache TTL in seconds.",

@@ -18,7 +18,10 @@ use crate::resource;
 /// the caller must embed `cedar_entity_mapping` in the JSONB itself.
 ///
 /// Raises a `PostgreSQL` `ERROR` if the resulting document is not a valid `EntityData`.
-#[pg_extern]
+///
+/// **Warning:** this helper aborts the current SQL statement on invalid input. Do not call it
+/// from RLS `USING` / `WITH CHECK` bodies — a single malformed row will fail the whole query.
+#[pg_extern(stable, parallel_safe)]
 pub fn cedarling_build_resource(
     resource: pgrx::datum::JsonB,
     entity_type: Option<&str>,
@@ -48,7 +51,9 @@ pub fn cedarling_build_resource(
 /// SQL name is `cedarling_build_resource_row` so it does not overload `cedarling_build_resource`
 /// (`jsonb`, …): `PostgreSQL` cannot reliably resolve two `cedarling_build_resource` targets when
 /// one uses polymorphic `anyelement`.
-#[pg_extern(name = "cedarling_build_resource_row")]
+///
+/// Same abort-on-error semantics as [`cedarling_build_resource`] — not safe inside RLS policies.
+#[pg_extern(name = "cedarling_build_resource_row", stable, parallel_safe)]
 pub fn cedarling_build_resource_anyelement(record: AnyElement) -> String {
     match crate::resource::row::build_resource_json_from_row(record) {
         Ok(json_str) => {

@@ -55,14 +55,17 @@ pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, Ro
 /// [`IntoDatum`] for [`AnyElement`] uses `PostgreSQL`'s `anyelement` type OID, so SPI would bind
 /// `$1` as the `anyelement` pseudotype and `PostgreSQL` errors when evaluating `to_jsonb($1)`. Pass
 /// the datum with the concrete type OID from [`AnyElement::oid`] instead.
-fn datum_with_oid_for_spi(row: &AnyElement) -> DatumWithOid<'_> {
+/// # Safety
+///
+/// The returned [`DatumWithOid`] must not outlive `row`'s underlying heap tuple slot.
+/// Callers must consume it inside the same `Spi::connect` (or equivalent) scope that owns
+/// `row`.
+unsafe fn datum_with_oid_for_spi(row: &AnyElement) -> DatumWithOid<'_> {
     const _: () = assert!(std::mem::size_of::<Datum>() == std::mem::size_of::<pg_sys::Datum>());
-    unsafe {
-        DatumWithOid::new_from_datum(
-            Some(std::mem::transmute_copy::<pg_sys::Datum, Datum<'_>>(&row.datum())),
-            row.oid(),
-        )
-    }
+    DatumWithOid::new_from_datum(
+        Some(std::mem::transmute_copy::<pg_sys::Datum, Datum<'_>>(&row.datum())),
+        row.oid(),
+    )
 }
 
 fn row_to_json_and_table_oid(
@@ -76,7 +79,7 @@ fn row_to_json_and_table_oid(
                FROM pg_type t
               WHERE t.oid = pg_typeof($1)::oid",
             None,
-            &[datum_with_oid_for_spi(&row)],
+            &[unsafe { datum_with_oid_for_spi(&row) }],
         )?;
         if let Some(r) = rows.next() {
             let row_json = r

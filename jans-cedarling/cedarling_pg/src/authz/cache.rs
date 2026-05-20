@@ -16,18 +16,16 @@
 //! cached engine handle).
 
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::sync::{Mutex, OnceLock, PoisonError};
+use std::sync::{Mutex, OnceLock};
 
 use chrono::Duration as ChronoDuration;
 use sparkv::{Config as SparKvConfig, SparKV};
 
 use crate::guc_config;
+use crate::sync_mutex::{self, MutexPoisoned};
 
 /// Maximum `cedarling.cache_ttl` (seconds) — must align with [`crate::guc_config`] upper bound.
 const MAX_CACHE_TTL_SECS: i64 = 604_800;
-
-const VARIANT_MULTI: u8 = 1;
-const VARIANT_UNSIGNED: u8 = 2;
 
 /// Stable hash of [`guc_config::bootstrap_config_path_utf8`] used as a policy-store identity segment.
 #[must_use]
@@ -42,12 +40,9 @@ pub(crate) fn policy_segment_from_bootstrap_path() -> u64 {
     h.finish()
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub(crate) struct CacheKey {
-    variant: u8,
-    policy_seg: u64,
-    body_fp: u64,
-}
+/// Pre-computed cache key string. Constructed once; zero allocation on lookup/store.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct CacheKey(String);
 
 #[must_use]
 pub(crate) fn multi_issuer_key(
@@ -57,11 +52,7 @@ pub(crate) fn multi_issuer_key(
     action: &str,
     context_trimmed: &str,
 ) -> CacheKey {
-    CacheKey {
-        variant: VARIANT_MULTI,
-        policy_seg,
-        body_fp: fingerprint_parts(&[tokens, resource, action, context_trimmed]),
-    }
+    CacheKey(build_key(1, policy_seg, &[tokens, resource, action, context_trimmed]))
 }
 
 #[must_use]
@@ -72,24 +63,25 @@ pub(crate) fn unsigned_key(
     action: &str,
     context_trimmed: &str,
 ) -> CacheKey {
-    CacheKey {
-        variant: VARIANT_UNSIGNED,
-        policy_seg,
-        body_fp: fingerprint_parts(&[principal_normalized, resource, action, context_trimmed]),
-    }
+    CacheKey(build_key(2, policy_seg, &[principal_normalized, resource, action, context_trimmed]))
 }
 
-fn fingerprint_parts(parts: &[&str]) -> u64 {
-    let mut h = DefaultHasher::new();
+fn build_key(variant: u8, policy_seg: u64, parts: &[&str]) -> String {
+    // Pre-size: "v:seg:" prefix + length-prefixed segments.
+    let body_len: usize = parts.iter().map(|p| p.len().to_string().len() + 1 + p.len() + 1).sum();
+    let mut out = String::with_capacity(3 + 20 + 1 + body_len);
+    out.push_str(&variant.to_string());
+    out.push(':');
+    out.push_str(&policy_seg.to_string());
+    out.push(':');
     for p in parts {
-        p.hash(&mut h);
+        // Length-prefix each segment to avoid delimiter ambiguity.
+        out.push_str(&p.len().to_string());
+        out.push(':');
+        out.push_str(p);
+        out.push('|');
     }
-    h.finish()
-}
-
-#[must_use]
-fn cache_key_string(key: &CacheKey) -> String {
-    format!("{}:{}:{}", key.variant, key.policy_seg, key.body_fp)
+    out
 }
 
 fn sparkv_config_for_authz_cache(max_entries: usize) -> SparKvConfig {
@@ -119,39 +111,47 @@ impl AuthzDecisionCache {
     }
 
     /// Returns a cached decision when `ttl_secs > 0` and the key exists with a live TTL in `SparKV`.
-    pub(crate) fn lookup(&self, ttl_secs: i32, key: &CacheKey) -> Option<bool> {
+    ///
+    /// `Ok(None)` is a miss. `Err` means the mutex was poisoned — callers must fail closed.
+    pub(crate) fn lookup(
+        &self,
+        ttl_secs: i32,
+        key: &CacheKey,
+    ) -> Result<Option<bool>, MutexPoisoned> {
         if ttl_secs <= 0 || !self.enabled {
-            return None;
+            return Ok(None);
         }
-        let key_s = cache_key_string(key);
-        let store = self.inner.lock().unwrap_or_else(PoisonError::into_inner);
-        store.get(&key_s).copied()
+        let store = sync_mutex::lock(&self.inner)?;
+        Ok(store.get(&key.0).copied())
     }
 
     /// Stores a successful authorization outcome with per-entry TTL (same as `cedarling.cache_ttl`
-    /// at call time).
-    pub(crate) fn store(&self, ttl_secs: i32, key: CacheKey, decision: bool) {
+    /// at call time). Ignores poisoned mutex (decision already computed).
+    pub(crate) fn store(&self, ttl_secs: i32, key: &CacheKey, decision: bool) {
         if ttl_secs <= 0 || !self.enabled {
             return;
         }
+        let Ok(mut store) = sync_mutex::lock(&self.inner) else {
+            return;
+        };
         let ttl = ChronoDuration::seconds(i64::from(ttl_secs));
-        let key_s = cache_key_string(&key);
-        let mut store = self.inner.lock().unwrap_or_else(PoisonError::into_inner);
-        let _ = store.set_with_ttl(&key_s, decision, ttl, &[]);
+        let _ = store.set_with_ttl(&key.0, decision, ttl, &[]);
     }
 
     /// Clear all cached authorization decisions for the current backend process.
     pub(crate) fn clear_all(&self) {
-        let mut store = self.inner.lock().unwrap_or_else(PoisonError::into_inner);
-        store.clear();
+        if let Ok(mut store) = sync_mutex::lock(&self.inner) {
+            store.clear();
+        }
     }
 
     /// Sub-second TTL for unit tests (production path uses whole seconds only).
     #[cfg(test)]
-    fn store_ttl_chrono(&self, ttl: ChronoDuration, key: CacheKey, decision: bool) {
-        let key_s = cache_key_string(&key);
-        let mut store = self.inner.lock().unwrap_or_else(PoisonError::into_inner);
-        let _ = store.set_with_ttl(&key_s, decision, ttl, &[]);
+    fn store_ttl_chrono(&self, ttl: ChronoDuration, key: &CacheKey, decision: bool) {
+        let Ok(mut store) = sync_mutex::lock(&self.inner) else {
+            return;
+        };
+        let _ = store.set_with_ttl(&key.0, decision, ttl, &[]);
     }
 }
 
@@ -181,18 +181,18 @@ mod tests {
     fn ttl_zero_skips_store_and_lookup() {
         let c = AuthzDecisionCache::new();
         let key = multi_issuer_key(1, "{}", r#"{"x":1}"#, "A::\"a\"", "{}");
-        c.store(0, key, true);
-        assert_eq!(c.lookup(300, &key), None);
+        c.store(0, &key, true);
+        assert_eq!(c.lookup(300, &key).expect("lock"), None);
     }
 
     #[test]
     fn hit_then_miss_after_expiry() {
         let c = AuthzDecisionCache::new();
         let key = multi_issuer_key(7, "tok", "res", "act", "{}");
-        c.store_ttl_chrono(ChronoDuration::milliseconds(50), key, false);
-        assert_eq!(c.lookup(1, &key), Some(false));
+        c.store_ttl_chrono(ChronoDuration::milliseconds(50), &key, false);
+        assert_eq!(c.lookup(1, &key).expect("lock"), Some(false));
         thread::sleep(Duration::from_millis(200));
-        assert_eq!(c.lookup(1, &key), None);
+        assert_eq!(c.lookup(1, &key).expect("lock"), None);
     }
 
     #[test]

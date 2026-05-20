@@ -20,22 +20,25 @@ use crate::guc_config;
 /// bodies (`SPI_ERROR_TRANSACTION`). Verifying `ROLLBACK` / `ROLLBACK TO SAVEPOINT` against these
 /// assignments is better done from a client session (e.g. `psql` or a small integration test), not
 /// from inside extension SQL helpers.
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention
 pub fn cedarling_set_tokens(tokens: JsonB) -> SpiResult<()> {
-    let json_str = serde_json::to_string(&tokens.0)
-        .expect("serde_json::to_string on serde_json::Value should not fail");
+    let json_str = match serde_json::to_string(&tokens.0) {
+        Ok(s) => s,
+        // `serde_json::Value` cannot hold non-finite floats; serialization is infallible in practice.
+        Err(e) => pgrx::error!("cedarling_set_tokens: json encode: {e}"),
+    };
     set_tokens_guc(&json_str, true)
 }
 
 /// Clears `cedarling.tokens` for the current transaction (`set_config` with empty value, `is_local=true`).
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 pub fn cedarling_clear_tokens() -> SpiResult<()> {
     set_tokens_guc("", true)
 }
 
 /// Returns the current `cedarling.tokens` as `jsonb`, or SQL `NULL` if unset/empty.
-#[pg_extern]
+#[pg_extern(stable, parallel_restricted)]
 pub fn cedarling_current_tokens() -> Option<JsonB> {
     let s = guc_config::tokens_utf8()?;
     let trimmed = s.trim();

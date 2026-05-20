@@ -8,14 +8,15 @@
 
 use pgrx::prelude::*;
 
-use crate::authz_bridge::{self, AuthorizeOutcome};
-use crate::authz_cache;
+use crate::authz::bridge as authz_bridge;
+use crate::authz::bridge::AuthorizeOutcome;
+use crate::authz::cache as authz_cache;
 use crate::engine;
-use crate::error::CedarlingError;
-use crate::extension_log;
+use crate::functions::error::CedarlingError;
 use crate::guc_config::{self, CedarlingFailMode, CedarlingMode};
-use crate::status;
-use crate::trace::{push_trace, AuthorizationTrace};
+use crate::observability::log as extension_log;
+use crate::observability::status as status;
+use crate::observability::trace::{push_trace, AuthorizationTrace};
 
 /// Fields shared across every trace this module records.
 struct TraceCommon<'a> {
@@ -45,6 +46,7 @@ fn record_cache_hit_trace(c: &TraceCommon<'_>, decision: bool) {
         policy_hits: vec![],
         diag_errors: vec![],
         masked: false,
+        policy_version: None,
     });
 }
 
@@ -65,6 +67,7 @@ fn record_success_trace(c: &TraceCommon<'_>, duration_ms: u64, outcome: Authoriz
         policy_hits: outcome.policy_hits,
         diag_errors: outcome.diag_errors,
         masked: false,
+        policy_version: None,
     });
 }
 
@@ -85,6 +88,7 @@ fn record_error_trace(c: &TraceCommon<'_>, duration_ms: u64, ce: &CedarlingError
         policy_hits: vec![],
         diag_errors: vec![],
         masked: false,
+        policy_version: None,
     });
 }
 
@@ -105,7 +109,7 @@ fn record_error_trace(c: &TraceCommon<'_>, duration_ms: u64, ce: &CedarlingError
 ///
 /// **Logging:** structured messages go to the server log at or above [`guc_config::CedarlingLogLevelGuc`]
 /// (`cedarling.log_level`). JWT material is never logged.
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps parameters from PostgreSQL calling convention
 pub fn cedarling_authorized(resource_json: &str, token_bundle: Option<&str>, action: &str) -> bool {
     cedarling_authorized_inner(resource_json, token_bundle, action)
@@ -134,7 +138,7 @@ fn cedarling_authorized_inner(
         ));
     };
 
-    let (resource_type, resource_id) = crate::trace::extract_entity_info(resource_trimmed);
+    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(resource_trimmed);
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
 
     status::record_request();
@@ -159,9 +163,17 @@ fn cedarling_authorized_inner(
         shadow,
     };
 
-    if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        record_cache_hit_trace(&common, decision);
-        return finalize_decision(decision);
+    match authz_cache::global_cache().lookup(ttl, &cache_key) {
+        Ok(Some(decision)) => {
+            record_cache_hit_trace(&common, decision);
+            return finalize_decision(decision);
+        },
+        Ok(None) => {},
+        Err(_) => {
+            return finalize_error(&CedarlingError::Engine(
+                "authorization cache mutex poisoned".into(),
+            ));
+        },
     }
 
     let engine = match engine::global_cedarling() {
@@ -184,14 +196,14 @@ fn cedarling_authorized_inner(
         context_from_guc.as_deref(),
     ) {
         Ok(outcome) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
-            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
+            authz_cache::global_cache().store(ttl, &cache_key, outcome.decision);
             let decision = outcome.decision;
             record_success_trace(&common, duration_ms, outcome);
             finalize_decision(decision)
         },
         Err(e) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
             extension_log::log_multi_issuer_bridge_failure(&e);
             let ce = CedarlingError::from(e);
             record_error_trace(&common, duration_ms, &ce);
@@ -207,7 +219,7 @@ fn cedarling_authorized_inner(
 /// - **`context_json`**: Cedar request context; must be a JSON **object** (use `"{}"` if unused).
 ///
 /// **Logging:** same rules as [`cedarling_authorized`] (`cedarling.log_level`, no secrets).
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps parameters from PostgreSQL calling convention
 pub fn cedarling_authorize_unsigned(
     principal_json: Option<&str>,
@@ -236,13 +248,13 @@ fn cedarling_authorize_unsigned_inner(
         ));
     }
 
-    let (resource_type, resource_id) = crate::trace::extract_entity_info(resource_trimmed);
+    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(resource_trimmed);
     // Derive principal_id from the principal JSON if one was provided.
     let principal_id: Option<String> = principal_json
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .and_then(|s| {
-            let (_, id) = crate::trace::extract_entity_info(s);
+            let (_, id) = crate::observability::trace::extract_entity_info(s);
             if id.is_empty() { None } else { Some(id) }
         });
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
@@ -273,9 +285,17 @@ fn cedarling_authorize_unsigned_inner(
         shadow,
     };
 
-    if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        record_cache_hit_trace(&common, decision);
-        return finalize_decision(decision);
+    match authz_cache::global_cache().lookup(ttl, &cache_key) {
+        Ok(Some(decision)) => {
+            record_cache_hit_trace(&common, decision);
+            return finalize_decision(decision);
+        },
+        Ok(None) => {},
+        Err(_) => {
+            return finalize_error(&CedarlingError::Engine(
+                "authorization cache mutex poisoned".into(),
+            ));
+        },
     }
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
@@ -306,14 +326,14 @@ fn cedarling_authorize_unsigned_inner(
 
     match authz_bridge::authorize_unsigned_outcome_for_request(engine.as_ref(), request) {
         Ok(outcome) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
-            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
+            authz_cache::global_cache().store(ttl, &cache_key, outcome.decision);
             let decision = outcome.decision;
             record_success_trace(&common, duration_ms, outcome);
             finalize_decision(decision)
         },
         Err(e) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
             extension_log::log_unsigned_bridge_failure(&e);
             let ce = CedarlingError::from(e);
             record_error_trace(&common, duration_ms, &ce);

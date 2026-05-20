@@ -12,31 +12,25 @@
 //! cache / counter path — useful for interactive policy debugging in `psql`.
 
 use std::collections::VecDeque;
-use std::sync::{Mutex, OnceLock};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 use chrono::Utc;
 use pgrx::prelude::*;
 use serde_json::{json, Value};
 
-use crate::authz_bridge;
+use crate::authz::bridge as authz_bridge;
 use crate::engine;
+use crate::sync_mutex;
 #[cfg(not(test))]
 use crate::guc_config;
-
-static TRACE_BUFFER_SIZE: OnceLock<usize> = OnceLock::new();
-
-fn trace_buffer_size() -> usize {
-    *TRACE_BUFFER_SIZE.get_or_init(load_trace_buffer_size)
-}
-
 #[cfg(test)]
-fn load_trace_buffer_size() -> usize {
+fn trace_buffer_size() -> usize {
     64
 }
 
 #[cfg(not(test))]
-fn load_trace_buffer_size() -> usize {
+fn trace_buffer_size() -> usize {
     usize::try_from(guc_config::trace_buffer_size())
         .unwrap_or(0)
         .min(65_536)
@@ -75,6 +69,8 @@ pub(crate) struct AuthorizationTrace {
     pub diag_errors: Vec<String>,
     /// `true` when `cedarling.strategy = mask` converted a deny into a masked-row allow.
     pub masked: bool,
+    /// `cedarling.policy_version` at evaluation time (if set).
+    pub policy_version: Option<String>,
 }
 
 static RING: Mutex<VecDeque<AuthorizationTrace>> = Mutex::new(VecDeque::new());
@@ -90,17 +86,41 @@ pub(crate) fn duration_millis(d: Duration) -> u64 {
 }
 
 /// Push a trace into the ring buffer. Oldest entry is silently dropped when the buffer is full.
-pub(crate) fn push_trace(trace: AuthorizationTrace) {
+pub(crate) fn push_trace(mut trace: AuthorizationTrace) {
+    if trace.policy_version.is_none() {
+        trace.policy_version = policy_version_for_trace();
+    }
     let max_traces = trace_buffer_size();
     if max_traces == 0 {
         return;
     }
-    if let Ok(mut buf) = RING.lock() {
-        if buf.len() >= max_traces {
+    if let Ok(mut buf) = sync_mutex::lock(&RING) {
+        while buf.len() >= max_traces {
             buf.pop_front();
         }
         buf.push_back(trace);
     }
+}
+
+/// Record a non-authorization marker when policy is swapped or rolled back.
+pub(crate) fn push_policy_swap_trace(operation: &str, detail: &str) {
+    push_trace(AuthorizationTrace {
+        timestamp: Utc::now().to_rfc3339(),
+        action: format!("cedarling.policy.{operation}"),
+        duration_ms: 0,
+        decision: None,
+        error_category: Some("configuration"),
+        request_id: String::new(),
+        resource_type: String::new(),
+        resource_id: detail.to_string(),
+        principal_id: None,
+        shadow: false,
+        cache_hit: false,
+        policy_hits: vec![],
+        diag_errors: vec![format!("policy {operation}: {detail}")],
+        masked: false,
+        policy_version: policy_version_for_trace(),
+    });
 }
 
 /// Extract `(entity_type, id)` from the `cedar_entity_mapping` block inside resource JSON.
@@ -154,16 +174,29 @@ fn trace_to_value(t: &AuthorizationTrace) -> Value {
     if t.masked {
         obj["masked"] = json!(true);
     }
+    if let Some(pv) = &t.policy_version {
+        obj["policy_version"] = json!(pv);
+    }
     obj
+}
+
+#[cfg(not(test))]
+fn policy_version_for_trace() -> Option<String> {
+    crate::guc_config::policy_version_utf8()
+}
+
+#[cfg(test)]
+fn policy_version_for_trace() -> Option<String> {
+    None
 }
 
 /// Returns the most recent authorization trace recorded in this backend process, or `NULL` if none.
 ///
 /// Traces are per-backend-process and reset on backend reconnect. Resource JSON and token data
 /// are never included — only action, decision, duration, and optional error category.
-#[pg_extern]
+#[pg_extern(stable)]
 pub fn cedarling_last_trace() -> Option<pgrx::datum::JsonB> {
-    RING.lock()
+    sync_mutex::lock(&RING)
         .ok()
         .and_then(|buf| buf.back().map(|t| pgrx::datum::JsonB(trace_to_value(t))))
 }
@@ -172,7 +205,7 @@ pub fn cedarling_last_trace() -> Option<pgrx::datum::JsonB> {
 ///
 /// `limit` defaults to 10 when `NULL`; clamped to `0..=cedarling.trace_buffer_size`.
 /// Traces are per-backend-process.
-#[pg_extern]
+#[pg_extern(stable)]
 pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
     let max_traces = trace_buffer_size();
     if max_traces == 0 {
@@ -181,8 +214,7 @@ pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
     let count = usize::try_from(limit.unwrap_or(10).max(0))
         .unwrap_or(0)
         .min(max_traces);
-    let arr: Vec<Value> = RING
-        .lock()
+    let arr: Vec<Value> = sync_mutex::lock(&RING)
         .map(|buf| buf.iter().rev().take(count).map(trace_to_value).collect())
         .unwrap_or_default();
     pgrx::datum::JsonB(json!(arr))
@@ -199,14 +231,15 @@ pub fn cedarling_recent_traces(limit: Option<i32>) -> pgrx::datum::JsonB {
 /// The returned object always contains `timestamp`, `action`, `duration_ms`, and `decision`
 /// (`"allow"` | `"deny"` | `null`). An `error` field is added on failure. On success,
 /// `request_id`, `policy_hits`, `diag_errors`, and `policies` are also included.
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 pub fn cedarling_explain(resource_json: &str, action: &str) -> pgrx::datum::JsonB {
+    // Not STRICT: SQL callers may pass empty strings and receive the documented error envelope.
     let start = Instant::now();
     let timestamp = Utc::now().to_rfc3339();
     let action_trimmed = action.trim();
     let resource_trimmed = resource_json.trim();
 
-    let elapsed_ms = || crate::trace::duration_millis(start.elapsed());
+    let elapsed_ms = || duration_millis(start.elapsed());
 
     if action_trimmed.is_empty() {
         return pgrx::datum::JsonB(json!({
@@ -327,6 +360,7 @@ mod tests {
             policy_hits: vec![],
             diag_errors: vec![],
             masked: false,
+            policy_version: None,
         }
     }
 
@@ -400,9 +434,10 @@ mod tests {
                 policy_hits: vec![],
                 diag_errors: vec![],
                 masked: false,
+                policy_version: None,
             });
         }
-        let buf = RING.lock().expect("lock");
+        let buf = sync_mutex::lock(&RING).expect("lock");
         assert!(
             buf.len() <= max_traces,
             "ring buffer must never exceed configured trace_buffer_size"
@@ -444,5 +479,26 @@ mod tests {
         let (et, id) = extract_entity_info("not json");
         assert_eq!(et, "");
         assert_eq!(id, "");
+    }
+
+    #[test]
+    fn explain_empty_action_returns_error_without_decision() {
+        let result = cedarling_explain(
+            r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#,
+            "",
+        );
+        let v = &result.0;
+        assert_eq!(v["error"], "empty action");
+        assert!(v["decision"].is_null());
+        assert!(v.get("timestamp").is_some());
+        assert!(v.get("duration_ms").is_some());
+    }
+
+    #[test]
+    fn explain_empty_resource_returns_error_without_decision() {
+        let result = cedarling_explain("", "T::Action::\"Read\"");
+        let v = &result.0;
+        assert_eq!(v["error"], "empty resource JSON");
+        assert!(v["decision"].is_null());
     }
 }

@@ -11,7 +11,7 @@ use std::hash::{Hash, Hasher};
 use pgrx::prelude::*;
 use serde_json::{Map, Value};
 
-use crate::error::CedarlingError;
+use crate::functions::error::CedarlingError;
 
 #[derive(Debug, Clone)]
 pub(crate) struct EntityMapping {
@@ -171,7 +171,7 @@ pub(crate) fn heuristic_entity_type(relname: &str) -> String {
 }
 
 /// Register or update an explicit table -> entity mapping.
-#[pg_extern]
+#[pg_extern(volatile, parallel_unsafe)]
 pub fn cedarling_register_entity_map(
     table: pg_sys::Oid,
     entity_type: &str,

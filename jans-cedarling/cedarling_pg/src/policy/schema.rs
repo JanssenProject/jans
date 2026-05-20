@@ -58,7 +58,7 @@ enum Compatibility {
 /// By default (`cedarling.schema_validate_strict = true`) this uses Cedar's parser and performs
 /// typed compatibility checks. When strict mode is disabled, it falls back to the historical
 /// lexical identifier extraction behavior for compatibility.
-#[pg_extern]
+#[pg_extern(stable, parallel_safe)]
 pub fn cedarling_validate_schema(table_name: &str, cedar_schema_path: &str) -> pgrx::datum::JsonB {
     let table = table_name.trim();
     let schema_path = cedar_schema_path.trim();
@@ -86,7 +86,7 @@ pub fn cedarling_validate_schema(table_name: &str, cedar_schema_path: &str) -> p
 /// Accepts the table as an OID so callers can write
 /// `cedarling_validate_schema('mytable'::regclass::oid, '/path/schema')`.
 /// Strict/lexical mode is controlled by `cedarling.schema_validate_strict` as in the text variant.
-#[pg_extern(name = "cedarling_validate_schema")]
+#[pg_extern(name = "cedarling_validate_schema", stable, parallel_safe)]
 pub fn cedarling_validate_schema_by_oid(
     table_oid: pg_sys::Oid,
     cedar_schema_path: &str,

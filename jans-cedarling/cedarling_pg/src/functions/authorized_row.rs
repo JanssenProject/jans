@@ -9,15 +9,17 @@ use pgrx::datum::{AnyElement, JsonB};
 use pgrx::prelude::*;
 use serde_json::json;
 
-use crate::authz_bridge;
-use crate::authz_cache;
+use crate::authz::bridge as authz_bridge;
+use crate::authz::cache as authz_cache;
 use crate::engine;
-use crate::error::CedarlingError;
-use crate::extension_log;
+use crate::functions::error::CedarlingError;
+use crate::observability::log as extension_log;
 use crate::functions::authorized::{finalize_decision, finalize_error};
-use crate::guc_config::{self, CedarlingMode, CedarlingStrategy};
-use crate::status;
-use crate::trace::{push_trace, AuthorizationTrace};
+use crate::guc_config::{self, CedarlingMode};
+#[cfg(not(test))]
+use crate::guc_config::CedarlingStrategy;
+use crate::observability::status as status;
+use crate::observability::trace::{push_trace, AuthorizationTrace};
 
 /// Authorize a JSONB resource under unsigned Cedar policy (no JWT tokens required).
 ///
@@ -28,12 +30,11 @@ use crate::trace::{push_trace, AuthorizationTrace};
 /// Inherits the same mode / fail-mode / shadow semantics and caching as
 /// `cedarling_authorize_unsigned`. Suitable as an RLS `USING` predicate.
 ///
-/// When `cedarling.strategy = mask` and the Cedar engine denies the request, this function:
-/// 1. Computes a masked version of the row (using `cedarling.mask_rules` + default registry).
-/// 2. Stashes it via `cedarling_get_masked_row()`.
-/// 3. Returns `true` so RLS includes the row (with masked sensitive columns).
-/// 4. Writes a trace with `decision=false, masked=true`.
-#[pg_extern]
+/// When `cedarling.strategy = mask` and the Cedar engine denies the request, this function
+/// returns `true` (so RLS includes the row) and writes a trace with `decision=false, masked=true`.
+/// Callers must apply column masking themselves by pairing this predicate with
+/// `cedarling_mask_row(t, '<table>')` in the SELECT list.
+#[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
 pub fn cedarling_authorized_row(
     resource: pgrx::datum::JsonB,
@@ -67,7 +68,7 @@ pub fn cedarling_authorized_row(
         Err(e) => return finalize_error(&CedarlingError::JsonParsing(e.to_string())),
     };
 
-    let (resource_type, resource_id) = crate::trace::extract_entity_info(&resource_str);
+    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(&resource_str);
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
 
     status::record_request();
@@ -80,15 +81,21 @@ pub fn cedarling_authorized_row(
         action_trimmed,
         &context_str,
     );
-    if let Some(decision) = authz_cache::global_cache().lookup(ttl, &cache_key) {
-        return handle_row_cache_hit(
-            decision,
-            &resource,
-            action_trimmed,
-            &resource_type,
-            &resource_id,
-            shadow,
-        );
+    match authz_cache::global_cache().lookup(ttl, &cache_key) {
+        Ok(Some(decision)) => {
+            return handle_row_cache_hit(
+                decision,
+                action_trimmed,
+                &resource_type,
+                &resource_id,
+                shadow,
+            );
+        },
+        Ok(None) => {},
+        Err(_) => {
+            let ce = CedarlingError::Engine("authorization cache mutex poisoned".into());
+            return finalize_with_mask_strategy_on_error(&ce);
+        },
     }
 
     let request = match authz_bridge::unsigned_request_from_json_parts(
@@ -102,7 +109,7 @@ pub fn cedarling_authorized_row(
             extension_log::log_unsigned_bridge_failure(&e);
             status::record_error_msg(&e.to_string());
             let ce = CedarlingError::from(e);
-            return finalize_with_mask_strategy_on_error(&ce, &resource);
+            return finalize_with_mask_strategy_on_error(&ce);
         },
     };
 
@@ -112,7 +119,7 @@ pub fn cedarling_authorized_row(
             extension_log::log_engine_failure(&e);
             status::record_error_msg(&e.to_string());
             let ce = CedarlingError::from(e);
-            return finalize_with_mask_strategy_on_error(&ce, &resource);
+            return finalize_with_mask_strategy_on_error(&ce);
         },
     };
 
@@ -128,22 +135,21 @@ pub fn cedarling_authorized_row(
     };
     match authz_bridge::authorize_unsigned_outcome_for_request(engine.as_ref(), request) {
         Ok(outcome) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
-            authz_cache::global_cache().store(ttl, cache_key, outcome.decision);
-            handle_row_success(&row_common, duration_ms, outcome, &resource)
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
+            authz_cache::global_cache().store(ttl, &cache_key, outcome.decision);
+            handle_row_success(&row_common, duration_ms, outcome)
         },
         Err(e) => {
-            let duration_ms = crate::trace::duration_millis(start.elapsed());
+            let duration_ms = crate::observability::trace::duration_millis(start.elapsed());
             extension_log::log_unsigned_bridge_failure(&e);
             let ce = CedarlingError::from(e);
-            handle_row_error(&row_common, duration_ms, &ce, &resource)
+            handle_row_error(&row_common, duration_ms, &ce)
         },
     }
 }
 
 fn handle_row_cache_hit(
     decision: bool,
-    resource: &JsonB,
     action: &str,
     resource_type: &str,
     resource_id: &str,
@@ -152,7 +158,7 @@ fn handle_row_cache_hit(
     status::record_cache_hit();
     status::record_decision(decision);
     let timestamp = chrono::Utc::now().to_rfc3339();
-    let (final_decision, masked) = apply_mask_strategy(decision, resource, &timestamp);
+    let (final_decision, masked) = apply_mask_strategy(decision);
     push_trace(AuthorizationTrace {
         timestamp,
         action: action.to_string(),
@@ -168,6 +174,7 @@ fn handle_row_cache_hit(
         policy_hits: vec![],
         diag_errors: vec![],
         masked,
+        policy_version: None,
     });
     if masked { true } else { finalize_decision(final_decision) }
 }
@@ -184,11 +191,10 @@ struct RowTraceCommon<'a> {
 fn handle_row_success(
     c: &RowTraceCommon<'_>,
     duration_ms: u64,
-    outcome: crate::authz_bridge::AuthorizeOutcome,
-    resource: &JsonB,
+    outcome: crate::authz::bridge::AuthorizeOutcome,
 ) -> bool {
     status::record_decision(outcome.decision);
-    let (final_decision, masked) = apply_mask_strategy(outcome.decision, resource, c.timestamp);
+    let (final_decision, masked) = apply_mask_strategy(outcome.decision);
     push_trace(AuthorizationTrace {
         timestamp: c.timestamp.to_string(),
         action: c.action.to_string(),
@@ -204,6 +210,7 @@ fn handle_row_success(
         policy_hits: outcome.policy_hits,
         diag_errors: outcome.diag_errors,
         masked,
+        policy_version: None,
     });
     if masked { true } else { finalize_decision(final_decision) }
 }
@@ -212,7 +219,6 @@ fn handle_row_error(
     c: &RowTraceCommon<'_>,
     duration_ms: u64,
     ce: &CedarlingError,
-    resource: &JsonB,
 ) -> bool {
     status::record_error_msg(&ce.to_string());
     push_trace(AuthorizationTrace {
@@ -230,39 +236,37 @@ fn handle_row_error(
         policy_hits: vec![],
         diag_errors: vec![],
         masked: false,
+        policy_version: None,
     });
-    finalize_with_mask_strategy_on_error(ce, resource)
+    finalize_with_mask_strategy_on_error(ce)
 }
 
 /// Finalize an error through fail-open/fail-closed mode and then apply masking strategy.
 ///
 /// This keeps `strategy=mask` behavior consistent for explicit deny decisions and
 /// deny-on-error outcomes (e.g. missing engine in fail-closed mode).
-fn finalize_with_mask_strategy_on_error(err: &CedarlingError, resource: &JsonB) -> bool {
+fn finalize_with_mask_strategy_on_error(err: &CedarlingError) -> bool {
     let decision = finalize_error(err);
-    let (final_decision, masked) = apply_mask_strategy(decision, resource, "");
+    let (final_decision, masked) = apply_mask_strategy(decision);
     if masked { true } else { finalize_decision(final_decision) }
 }
 
-/// When `strategy=mask` and `decision=false`, compute + stash the masked row and return
-/// `(false, true)`. Otherwise return `(decision, false)`.
-fn apply_mask_strategy(
-    decision: bool,
-    resource: &JsonB,
-    _timestamp: &str,
-) -> (bool, bool) {
-    if decision || !matches!(guc_config::strategy(), CedarlingStrategy::Mask) {
+#[cfg(test)]
+fn strategy_is_mask() -> bool {
+    false
+}
+
+#[cfg(not(test))]
+fn strategy_is_mask() -> bool {
+    matches!(guc_config::strategy(), CedarlingStrategy::Mask)
+}
+
+/// When `strategy=mask` and `decision=false`, return `(false, true)` so the caller surfaces
+/// the row as allowed and records `masked=true` in the trace. Otherwise `(decision, false)`.
+fn apply_mask_strategy(decision: bool) -> (bool, bool) {
+    if decision || !strategy_is_mask() {
         return (decision, false);
     }
-    let entity_type = resource
-        .0
-        .get("cedar_entity_mapping")
-        .and_then(|m| m.get("entity_type"))
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
-    let table_name = crate::mask::config::table_name_for_entity_type(entity_type);
-    let salt = guc_config::mask_hash_salt_bytes();
-    crate::mask::compute_and_stash_masked_row(&resource.0, &table_name, &salt);
     (false, true)
 }
 
@@ -270,7 +274,7 @@ fn apply_mask_strategy(
 ///
 /// Materializes the row to canonical Cedar `EntityData` JSON and then reuses the JSONB
 /// unsigned path (`cedarling_authorized_row`).
-#[pg_extern(name = "cedarling_authorized_row")]
+#[pg_extern(name = "cedarling_authorized_row", volatile, parallel_restricted)]
 pub fn cedarling_authorized_row_from_anyelement(
     record: AnyElement,
     action: &str,
@@ -290,7 +294,7 @@ pub fn cedarling_authorized_row_from_anyelement(
 /// `AnyElement` wrapper for JWT/multi-issuer authorization.
 ///
 /// Reads tokens from the fallback chain: explicit bundle (none here) → `cedarling.tokens` GUC.
-#[pg_extern]
+#[pg_extern(volatile, parallel_restricted)]
 pub fn cedarling_authorized_row_jwt(record: AnyElement, action: Option<&str>) -> bool {
     let action = action.unwrap_or("Read");
     let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
@@ -315,21 +319,8 @@ mod tests {
     }
 
     #[test]
-    fn error_variants_deny_in_fail_closed_mode() {
-        let cases = vec![
-            CedarlingError::RequestInvalid("empty action".into()),
-            CedarlingError::JsonParsing("bad json".into()),
-            CedarlingError::Engine("no engine".into()),
-        ];
-        for err in &cases {
-            assert!(err.should_deny(), "{err:?} must deny in fail-closed mode");
-        }
-    }
-
-    #[test]
     fn apply_mask_strategy_noop_when_decision_true() {
-        let resource = JsonB(json!({"cedar_entity_mapping": {"entity_type": "T", "id": "x"}}));
-        let (d, masked) = apply_mask_strategy(true, &resource, "ts");
+        let (d, masked) = apply_mask_strategy(true);
         assert!(d);
         assert!(!masked);
     }
@@ -337,8 +328,7 @@ mod tests {
     #[test]
     fn apply_mask_strategy_noop_when_strategy_filter() {
         // strategy() returns Filter by default in tests (no pg GUC).
-        let resource = JsonB(json!({"cedar_entity_mapping": {"entity_type": "T", "id": "x"}}));
-        let (d, masked) = apply_mask_strategy(false, &resource, "ts");
+        let (d, masked) = apply_mask_strategy(false);
         assert!(!d);
         assert!(!masked, "filter strategy should not mask");
     }
