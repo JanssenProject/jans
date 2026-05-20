@@ -136,7 +136,11 @@ docker exec -it cedarling-pg psql -U postgres -c "SELECT cedarling_status();"
 ```
 
 To pin a specific cedarling_pg version, use the
-`ghcr.io/janssenproject/jans/cedarling_pg:<version>-pg<major>` tag.
+`ghcr.io/janssenproject/jans/cedarling_pg:<version>-pg<major>` tag (for example
+`0.1.0-pg16`). The `latest-pg<major>` tags are published alongside each
+release; CI today exercises the tarball install path in
+`test-cedarling.yml`, not the container tags — verify the image tag you deploy
+matches your release version.
 
 ### Manual tarball install
 
@@ -159,16 +163,26 @@ cd cedarling_pg-${VER}-pg${PG}-${TRIPLE}
 
 ### Enable the extension
 
-Once the binaries are in place, the SQL part is the same on every install path:
+Once the binaries are in place, the SQL part is the same on every install path.
+
+`CREATE EXTENSION cedarling_pg` must be run as a **superuser** (the extension
+control file sets `superuser = true` because catalog DDL and bootstrap
+filesystem reads require elevated privileges).
 
 ```sql
 CREATE EXTENSION cedarling_pg;
 
--- Point the extension at a Cedarling bootstrap (cluster-wide; needs reload).
+-- Point the extension at a Cedarling bootstrap (superuser-only GUC).
 ALTER SYSTEM SET cedarling.bootstrap_config =
     '/etc/cedarling/bootstrap.yaml';
 SELECT pg_reload_conf();
 ```
+
+`pg_reload_conf()` reloads the GUC value, but it does **not** rebuild an engine
+that is already loaded in a backend. After changing bootstrap YAML on disk,
+either restart affected backends or call `cedarling_use_policy()` with the new
+bootstrap path (or a registered version name) so Cedarling reloads policy in
+place.
 
 ## SQL function reference
 
@@ -181,12 +195,12 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 
 | Function | Purpose |
 | --- | --- |
-| `cedarling_authorized(resource_json text, token_bundle text, action text) → bool` | JWT / multi-issuer authorization. `token_bundle` may be `NULL`; the extension then falls back to `cedarling.tokens`. |
+| `cedarling_authorized(resource_json text, token_bundle text, action text) → bool` | JWT / multi-issuer authorization. Token resolution order: non-empty `token_bundle` argument → else `cedarling.tokens` GUC → else fail-closed configuration error. Pass `NULL` or `''` to use the GUC. |
 | `cedarling_authorize_unsigned(principal_json text, resource_json text, action text, context_json text) → bool` | Unsigned authorization (no tokens). |
-| `cedarling_authorized_row(record anyelement, action text, context jsonb DEFAULT NULL) → bool` | RLS-friendly form: materializes the composite row, looks up its Cedar entity mapping, asks the engine. |
-| `cedarling_authorized_row(resource jsonb, action text, context jsonb DEFAULT NULL) → bool` | JSONB overload for callers that already have a Cedar `EntityData` document. |
-| `cedarling_authorized_row_jwt(record anyelement, action text DEFAULT 'Read') → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. |
-| `cedarling_build_resource(record anyelement) → jsonb` | Returns the canonical Cedar `EntityData` JSON that `cedarling_authorized_row` would have produced — useful for debugging. |
+| `cedarling_authorized_row(record anyelement, action text, context jsonb) → bool` | RLS-friendly form: materializes the composite row, looks up its Cedar entity mapping, asks the engine. SQL has no `DEFAULT` on `context`; pass `NULL` for an empty object. |
+| `cedarling_authorized_row(resource jsonb, action text, context jsonb) → bool` | JSONB overload for callers that already have a Cedar `EntityData` document. Pass `NULL` for `{}`. |
+| `cedarling_authorized_row_jwt(record anyelement, action text) → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. Omitting `action` in SQL is invalid; the Rust default `'Read'` applies only when callers use a wrapper that supplies it. |
+| `cedarling_build_resource(record anyelement) → jsonb` | Returns the canonical Cedar `EntityData` JSON that `cedarling_authorized_row` would have produced — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
 | `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. Falls back to `'TRUE'` (with a `WARN` listing unhandled policy ids) when a policy can't be lowered, and to `'FALSE'` on parse/engine errors. |
 
 ### Tokens (session / transaction scoped)
@@ -219,17 +233,16 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | Function | Purpose |
 | --- | --- |
 | `cedarling_set_mask_config(table_name text, column_name text, mask_type text, mask_value text) → bool` | Upsert into `cedarling.mask_rules`. `mask_type` is one of `null`, `redact`, `partial`, `range`, `hash`, `fixed`. |
-| `cedarling_test_masking(mask_type text, mask_value text, input text, salt text DEFAULT NULL) → text` | Apply a single mask and return the result. Useful from a `psql` REPL. |
-| `cedarling_mask_plan(table_name text, action text DEFAULT NULL) → jsonb` | Show the masks that would be applied for a given (table, action) pair. |
-| `cedarling_mask_row(row jsonb, table_name text, action text DEFAULT NULL) → jsonb` | Apply masks to a JSONB row representation. |
-| `cedarling_get_masked_row() → jsonb` | Retrieve the most recently masked row produced by `cedarling.strategy = mask`. |
+| `cedarling_test_masking(original_value text, data_type text, mask_type text, mask_config text) → text` | Apply a single mask and return the result. The hash salt comes from `cedarling.mask_hash_salt` (GUC), not a function argument. |
+| `cedarling_mask_plan(table_name text, action text DEFAULT NULL) → jsonb` | List masking rules for `table_name`. The optional `action` is echoed in the JSON metadata only (reserved for future action-scoped rules). |
+| `cedarling_mask_row(row jsonb, table_name text) → jsonb` | Apply masks to a JSONB row using table/column rules and the default registry. |
 
 ### Observability
 
 | Function | Purpose |
 | --- | --- |
-| `cedarling_status() → jsonb` | Health classification (`healthy` / `degraded` / `unhealthy`), trusted-issuer counts, request totals, allowed/denied/error counts, cache hit-rate, last error, last policy update. |
-| `cedarling_last_trace() → jsonb` | The most recent `AuthorizationTrace` (request id, decision, matched policy ids, diagnostic errors, cache-hit flag, shadow flag, duration). |
+| `cedarling_status() → jsonb` | Health classification (`healthy` / `degraded` / `unhealthy`), trusted-issuer counts, request totals, allowed/denied/error counts, cache hit-rate, last error, last policy update. `first_request_time` is when the first authorize call ran in this backend (not extension load time). |
+| `cedarling_last_trace() → jsonb` | The most recent `AuthorizationTrace` (request id, decision, matched policy ids, diagnostic errors, cache-hit flag, shadow flag, duration, `policy_version` at evaluation time). |
 | `cedarling_recent_traces(limit int) → jsonb` | The trailing window of traces from the ring buffer. |
 | `cedarling_explain(resource_json text, action text) → jsonb` | One-off authorization that bypasses the cache and the request counters, returning the full enriched trace plus matched policies. |
 
@@ -248,22 +261,22 @@ or cluster-wide (`ALTER SYSTEM SET ...; SELECT pg_reload_conf();`).
 
 | GUC | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `cedarling.bootstrap_config` | text | — | Path to the Cedarling bootstrap YAML. Required for any `#[pg_extern]` that talks to the engine. |
+| `cedarling.bootstrap_config` | text (superuser) | — | Path to the Cedarling bootstrap YAML. Required for any `#[pg_extern]` that talks to the engine. Only superusers can set it. |
 | `cedarling.mode` | enum | `enforcement` | `enforcement` / `instrumentation` / `shadow`. Shadow always returns `true` and writes a trace. |
 | `cedarling.strategy` | enum | `filter` | `filter` (exclude unauthorized rows) or `mask` (return the row with masked columns). |
-| `cedarling.fail_mode` | enum | `closed` | `closed` (deny on engine errors) or `open` (allow reads on engine errors). |
+| `cedarling.fail_mode` | enum | `closed` | `closed` (deny on engine errors) or `open` (allow on engine errors). A single `SET cedarling.fail_mode = 'open'` turns Cedarling outages into wholesale `ALLOW` for the session. |
 | `cedarling.log_level` | enum | `info` | `debug` / `info` / `warn` / `error`. |
 | `cedarling.cache_ttl` | int | `300` | Decision cache TTL in seconds. |
 | `cedarling.cache_size` | int | `8192` | Maximum cached decisions per backend. Set to `0` to disable. |
-| `cedarling.audit_fail_open` | bool | `on` | Whether audit-log failures (extension log writes) are fatal. |
+| `cedarling.audit_fail_open` | bool | `on` | Whether to emit an audit log entry when `cedarling.fail_mode = 'open'` allows a request after an authorization error. |
 | `cedarling.tokens` | text | — | Transaction- or session-scoped JWT bundle. |
 | `cedarling.context` | text | — | Optional ambient Cedar `context` JSON object. |
-| `cedarling.policy_version` | text | — | Pinned policy version; participates in the decision-cache key. |
-| `cedarling.trace_buffer_size` | int | `1024` | Ring-buffer capacity for `cedarling_recent_traces` (range `0..=65536`). |
+| `cedarling.policy_version` | text (superuser) | — | Pinned policy version; participates in the decision-cache key. Only superusers can set it; values are truncated in `cedarling_status()`. |
+| `cedarling.trace_buffer_size` | int | `1024` | Ring-buffer capacity for `cedarling_recent_traces` (range `0..=65536`); runtime `SET` changes apply immediately in the current backend. |
 | `cedarling.policy_history_size` | int | `16` | Maximum rows retained in `cedarling.policy_history`. |
 | `cedarling.diff_mode` | enum | `structural` | `structural` (per-policy-id diff, default) or `lines` (legacy line diff). |
 | `cedarling.schema_validate_strict` | bool | `on` | When `on`, `cedarling_validate_schema` uses the real Cedar parser; `off` falls back to lexical identifier extraction. |
-| `cedarling.mask_hash_salt` | text | — | Salt used by `MaskType::Hash`. When unset, `hash` masks return a sentinel and emit one warning. |
+| `cedarling.mask_hash_salt` | text (superuser) | — | Salt used by `MaskType::Hash`. When unset, `hash` masks return a sentinel and emit one warning. Superuser-only like `bootstrap_config` and `policy_version`. |
 
 ## Quick start
 
@@ -330,28 +343,55 @@ SELECT cedarling_status();
 
 ### Predicate pushdown
 
+`cedarling_where` is an **optimization hint only** — never the sole
+authorization gate. Pair it with a row-level check (`cedarling_authorized_row*`
+or an RLS policy) so every row is still evaluated by Cedarling.
+
 ```sql
 SELECT count(*)
   FROM students
- WHERE (cedarling_where('students', 'Acme::Action::"Read"', NULL))::bool;
+ WHERE cedarling_authorized_row_jwt(students, 'Read')
+   AND (cedarling_where('students', 'Acme::Action::"Read"', NULL))::bool;
 ```
 
 `cedarling_where` lowers matching Cedar policies into SQL where it can
 (equalities, comparisons, boolean combinations over `resource.<col>`) and
-falls back to `'TRUE'` with a warning when a policy isn't representable —
-RLS continues to evaluate those policies row-by-row.
+falls back to `'TRUE'` with a warning when a policy isn't representable.
+Policies that cannot be lowered safely still rely on per-row RLS evaluation.
 
 ### Mask instead of filter
 
+`cedarling.strategy = 'mask'` flips RLS behaviour: instead of dropping rows
+that Cedar denies, `cedarling_authorized_row` returns `true` so the row
+survives RLS, and the trace records `masked=true`. The function does **not**
+rewrite columns — it only changes the authorization verdict. To actually
+redact sensitive values, pair it with `cedarling_mask_row()` in the SELECT
+list (or wrap the table in a view):
+
 ```sql
-ALTER DATABASE app SET cedarling.strategy = 'mask';
+-- 1. Configure the masking rule (or rely on the default registry —
+--    columns named "email", "phone", "ssn", "credit_card", "password",
+--    or "salary" get a sensible mask automatically).
 SELECT cedarling_set_mask_config(
     'students', 'email',
     'partial', '***@***.com'
 );
--- Or rely on the default registry: a column named "email", "phone", "ssn",
--- "credit_card", "password", or "salary" gets a sensible mask automatically.
+
+-- 2. Switch the deny-time strategy.
+ALTER DATABASE app SET cedarling.strategy = 'mask';
+
+-- 3. In queries / views, materialise the row through cedarling_mask_row()
+--    so denied rows still appear but with sensitive columns redacted.
+CREATE VIEW students_safe AS
+SELECT (cedarling_mask_row(to_jsonb(s), 'students')).*  -- redacted columns
+  FROM students s;                                       -- RLS still applies
 ```
+
+Why the two-step shape: the actual transformation is a pure function of
+`(row, mask_rules)`, so Postgres can mark it `STABLE PARALLEL SAFE` and the
+planner is free to parallelise the SELECT. Folding the mask into the
+RLS predicate would have required process-global mutable state, which can't
+be shared correctly across parallel workers.
 
 ## Security notes
 
@@ -362,9 +402,36 @@ SELECT cedarling_set_mask_config(
   that invariant regresses.
 - **Fail-safe by default.** Every error path in `enforcement` mode returns
   `false`. `shadow` mode always returns `true` and records a trace.
+- **`fail_mode = open` is a deliberate escape hatch.** When the engine is
+  down or a request fails validation, `open` returns `true` instead of
+  denying. That is one GUC change away from bypassing authorization for
+  every row. Keep the default `closed` in production; treat `open` as a
+  break-glass setting with change control.
+- **Fail-open audit visibility depends on `cedarling.log_level`.** When
+  `fail_mode = open` converts an error into an allow, the extension emits
+  a structured `WARNING` audit line only if `cedarling.log_level` is `warn`
+  or more verbose (`info`, `debug`). With `cedarling.log_level = 'error'`,
+  that audit entry is suppressed even when `cedarling.audit_fail_open` is
+  `on`. Operators who rely on logs for fail-open visibility should not set
+  `log_level` to `error`.
 - **JWT validation lives in Cedarling.** Toggle it on with
   `CEDARLING_JWT_SIG_VALIDATION: enabled` in the bootstrap YAML; this
   extension does not implement its own JWT parser.
+- **Authorization functions stay `VOLATILE` / `PARALLEL UNSAFE`.** Read-only
+  observers (`cedarling_status`, `cedarling_last_trace`, `cedarling_recent_traces`)
+  are marked `STABLE`, but `cedarling_authorized*` and `cedarling_where` mutate
+  per-backend counters and traces. Do not mark them
+  `PARALLEL SAFE` until shared-memory aggregation exists (see review §13.8).
+- **Sensitive GUCs and policy lifecycle are superuser-gated.**
+  `cedarling.bootstrap_config`, `cedarling.policy_version`, and
+  `cedarling.mask_hash_salt` are `Suset` (superuser-only). `EXECUTE` on
+  `cedarling_use_policy`, `cedarling_register_policy_version`, and
+  `cedarling_rollback_policy` is revoked from `PUBLIC` — grant only to
+  roles that may swap policy versions.
+- **`cedarling.mask_rules.condition_sql` is not executed.** Non-empty
+  `condition_sql` values are ignored (fail-closed for that column) so
+  arbitrary SQL cannot be injected through mask configuration. Use RLS or
+  Cedar policies for conditional masking.
 
 ## Building from source (contributors only)
 
