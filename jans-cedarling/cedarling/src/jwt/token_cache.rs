@@ -46,7 +46,11 @@ impl Default for TokenCache {
 impl TokenCache {
     /// Creates a new `TokenCache` with the specified maximum TTL in seconds.
     ///
-    /// If `max_ttl` is set to 0, tokens will use their natural expiration or default TTL.
+    /// `max_ttl` semantics:
+    /// - `> 0`: caps each entry's TTL at `max_ttl`. Also used as the TTL when
+    ///   the token has no `exp` claim.
+    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
+    ///   claim; tokens without `exp` are not cached.
     pub(crate) fn new(
         max_ttl: usize,
         capacity: usize,
@@ -101,15 +105,23 @@ impl TokenCache {
 
     /// Saves a token to the cache with appropriate TTL.
     ///
-    /// The TTL is calculated based on:
-    /// 1. The token's expiration claim (if present and valid)
-    /// 2. The configured maximum TTL (if set)
-    /// 3. Default TTL (5 minutes) if neither applies
+    /// The TTL is determined as follows:
+    /// 1. If the token has a valid `exp` claim, the entry TTL is the time until
+    ///    expiration (clamped by `max_ttl` when it is > 0).
+    /// 2. If the token has no `exp` claim and `max_ttl` is > 0, `max_ttl` is used.
+    /// 3. If the token has no `exp` claim and `max_ttl` is 0, the token is **not
+    ///    cached at all** (matches the documented behaviour of
+    ///    `CEDARLING_TOKEN_CACHE_MAX_TTL = 0`).
     pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
         if TokenCache::check_token_expired(&token, now) {
             // token is expired, no need to save it
             return;
         }
+
+        let Some(duration) = self.cache_duration(&token, now) else {
+            // No `exp` claim and no configured max TTL — do not cache.
+            return;
+        };
 
         let key = hash_jwt_token(kind, jwt);
 
@@ -119,18 +131,11 @@ impl TokenCache {
             .map(|iss| vec![IndexKey::Iss(iss).index_value()])
             .unwrap_or_default();
 
-        let result = if let Some(duration) = self.cache_duration(&token, now) {
-            self.cache
-                .write()
-                .expect("token cache mutex shouldn't be poisoned")
-                .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys)
-        } else {
-            // set with SparkKV default TTL (5 minutes)
-            self.cache
-                .write()
-                .expect("token cache mutex shouldn't be poisoned")
-                .set(&key, token, &index_keys)
-        };
+        let result = self
+            .cache
+            .write()
+            .expect("token cache mutex shouldn't be poisoned")
+            .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys);
         if let Err(err) = result {
             self.log_warn(format!("could not set token to token cache: {err}"));
         }

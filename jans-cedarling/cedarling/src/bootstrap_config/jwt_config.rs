@@ -42,8 +42,10 @@ pub struct JwtConfig {
     /// Maximum TTL (in seconds) for cached tokens.
     /// Zero means no TTL limit is applied.
     ///
-    /// It is recommended to keep this value within a few minutes to prevent the
-    /// cache from growing excessively.
+    /// Defaults to [`Self::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS`] (5 seconds): small
+    /// enough that revocation / status-list changes are picked up promptly while
+    /// still serving repeated requests for the same token from cache. Keep this
+    /// value short (seconds, not minutes) to bound cache growth and staleness.
     pub token_cache_max_ttl_secs: usize,
     /// Maximum number of tokens the cache can store.
     pub token_cache_capacity: usize,
@@ -68,20 +70,42 @@ pub(crate) const DEFAULT_JWKS_REFRESH_INTERVAL_SECS: u64 = 3600;
 /// Minimum allowed refresh interval, in seconds. Values below this are clamped.
 pub(crate) const MIN_JWKS_REFRESH_SECS: u64 = 5;
 
+impl JwtConfig {
+    /// Default maximum number of tokens the token cache can store.
+    pub const DEFAULT_TOKEN_CACHE_CAPACITY: usize = 100;
+
+    /// Default maximum TTL (seconds) for cached tokens.
+    ///
+    /// Chosen as a small value so that repeated requests for the same token are
+    /// served from cache, while revocation / status-list changes are still
+    /// picked up within a few seconds. Prevents unbounded cache growth for
+    /// tokens without an `exp` claim.
+    pub const DEFAULT_TOKEN_CACHE_MAX_TTL_SECS: usize = 5;
+
+    /// Default minimum interval (seconds) between on-demand JWKS re-fetches per issuer.
+    pub const DEFAULT_JWKS_REFRESH_MIN_INTERVAL: u64 = 30;
+}
+
 impl Default for JwtConfig {
-    /// Cedarling will use the strictest validation options by default.
+    /// Cedarling uses strict-by-default validation.
+    ///
+    /// The returned value is identical to what is produced when parsing an
+    /// empty bootstrap configuration (`BootstrapConfigRaw::default()` →
+    /// `JwtConfig`). Signature and status validation are **on**. To opt out
+    /// for testing or trusted environments, set the flags explicitly or use
+    /// [`JwtConfig::new_without_validation`].
     fn default() -> Self {
         let config = Self {
             jwks: None,
             jwt_sig_validation: true,
             jwt_status_validation: true,
             signature_algorithms_supported: HashSet::new(),
-            token_cache_capacity: 100,
+            token_cache_capacity: Self::DEFAULT_TOKEN_CACHE_CAPACITY,
             token_cache_earliest_expiration_eviction: true,
-            token_cache_max_ttl_secs: 60 * 5, // 5min
+            token_cache_max_ttl_secs: Self::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS,
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             jwks_refresh_interval: None,
-            jwks_refresh_min_interval: 30,
+            jwks_refresh_min_interval: Self::DEFAULT_JWKS_REFRESH_MIN_INTERVAL,
         };
         config.allow_all_algorithms()
     }
@@ -89,6 +113,9 @@ impl Default for JwtConfig {
 
 impl JwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
+    ///
+    /// Intended for tests and trusted-environment embedders. Production
+    /// deployments should use [`JwtConfig::default`] (strict).
     #[must_use]
     pub fn new_without_validation() -> Self {
         Self {
