@@ -590,8 +590,9 @@ jobs:
           exit 1
         fi
         WHL="${WHLS[0]}"
-        cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
-        gh release upload "${VERSION}" *.whl *.bundle --clobber
+        BUNDLE="${{ github.workspace }}/${WHL}.bundle"
+        cosign sign-blob --yes --bundle "${BUNDLE}" "${WHL}"
+        gh release upload "${VERSION}" "${WHL}" "${BUNDLE}" --clobber
 
     - name: Publish Cedarling Python to PyPI
       uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
