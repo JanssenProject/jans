@@ -190,9 +190,7 @@ public class ShibbolethResource extends BaseResource {
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
-        if(trustRelationship==null){
-            throwBadRequestException(DATA_NULL_CHK, SHIBBOLETH_TRUST_RELATIONSHIP + "is null.");
-        }
+     
         return Response.ok(trustRelationship.getReleasedAttributes()).build();
     }
 
@@ -230,7 +228,7 @@ public class ShibbolethResource extends BaseResource {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
@@ -240,15 +238,14 @@ public class ShibbolethResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
-    public Response addTrustRelationship(@MultipartForm TrustRelationshipForm trustRelationshipForm) {
+    public Response addTrustRelationship(TrustRelationship trustRelationship) {
         logger.info("POST TrustRelationship");
         if (logger.isInfoEnabled()) {
-            logger.info("Add TrustRelationship  trustRelationshipForm:{}", escapeLog(trustRelationshipForm));
+            logger.info("Add TrustRelationship  trustRelationship:{}", escapeLog(trustRelationship));
         }
         // validation
-        validateTrustRelationship(trustRelationshipForm, null, false);
-        TrustRelationship trustRelationship = shibbolethService
-                .addTrustRelationship(trustRelationshipForm.getTrustRelationship());
+        validateTrustRelationship(trustRelationship, null, false);
+        shibbolethService.addTrustRelationship(trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
@@ -277,7 +274,7 @@ public class ShibbolethResource extends BaseResource {
                     escapeLog(trustRelationshipForm));
         }
 
-        validateTrustRelationship(trustRelationshipForm, metadatafile, true);
+        validateTrustRelationshipForm(trustRelationshipForm, metadatafile, true);
         TrustRelationship trustRelationship = shibbolethService
                 .updateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metadatafile);
         return Response.status(Response.Status.OK).entity(trustRelationship).build();
@@ -519,11 +516,18 @@ public class ShibbolethResource extends BaseResource {
         return pageDataList;
     }
 
-    private void validateTrustRelationship(TrustRelationshipForm trustRelationshipForm, InputStream metaDataFile,
+    private void validateTrustRelationshipForm(TrustRelationshipForm trustRelationshipForm, InputStream metaDataFile,
             boolean isUpdate) {
         checkResourceNotNull(trustRelationshipForm, SHIBBOLETH_TRUST_RELATIONSHIP_FORM);
-        TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
-        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP_FORM);
+        validateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metaDataFile, isUpdate);
+    }
+
+    private void validateTrustRelationship(TrustRelationship trustRelationship, InputStream metaDataFile,
+            boolean isUpdate) {
+        if (logger.isInfoEnabled()) {
+            logger.info("trustRelationship:{}, metaDataFile:{}, isUpdate:{}", escapeLog(trustRelationship), escapeLog(metaDataFile), isUpdate);
+        }
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
         // mandatory attributes
         List<String> missingAttributesList = new ArrayList<>();
@@ -574,7 +578,7 @@ public class ShibbolethResource extends BaseResource {
             }
         }
 
-        if (!isUpdate) {
+        if (isUpdate) {
             validateMetaData(trustRelationship, metaDataFile);
         }
     }

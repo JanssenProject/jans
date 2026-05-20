@@ -6015,7 +6015,7 @@
         "entityType",
         "metadataSource",
         "jansReleasedAttr",
-        "entityIds",
+        "jansEntityId",
 		"jansContainerFed",
         "jansProfileConfiguration",
         "jansStatus",

@@ -48,7 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 @ApplicationScoped
 public class ShibbolethService {
 
-    private static final String SHIBBOLETH_TR_CONFIG_DN = "inum=%s,ou=trustRelationships,%s";
+    private static final String SHIBBOLETH_TR_CONFIG_DN = "inum=%s,ou=trustRelationship,%s";
 
     @Inject
     private Logger logger;
@@ -93,7 +93,7 @@ public class ShibbolethService {
     public String getDnForTrustRelationship(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=trustRelationships,%s", orgDn);
+            return String.format("ou=trustRelationship,%s", orgDn);
         }
         return String.format(SHIBBOLETH_TR_CONFIG_DN, inum, orgDn);
     }
@@ -135,10 +135,9 @@ public class ShibbolethService {
     }
 
     public List<TrustRelationship> getAllTrustRelationshipByDisplayName(String name) {
-        logger.info("Search TrustRelationship with name:{}", name);
+        logger.info(" \n\n New Search TrustRelationship with name:{}", name);
 
-        String[] targetArray = new String[] { name };
-        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
+        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
         logger.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
@@ -162,13 +161,14 @@ public class ShibbolethService {
     }
 
     public PagedResult<TrustRelationship> getTrustRelationship(SearchRequest searchRequest) {
-        logger.debug("Search TrustRelationship with searchRequest:{}", searchRequest);
+        logger.error("\n\n\n Search TrustRelationship with searchRequest:{}, searchRequest.getFilterAssertionValue:{}", searchRequest, searchRequest.getFilterAssertionValue());
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
-
+            logger.error("\n\n\n Block 1");
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                logger.error("\n\n\n Block 2 - assertionValue:{} ", assertionValue);
                 String[] targetArray = new String[] { assertionValue };
                 Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                         targetArray, null);
@@ -180,9 +180,10 @@ public class ShibbolethService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.trace("TrustRelationship pattern searchFilter:{}", searchFilter);
+        logger.error("TrustRelationship pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            logger.error("\n\n\n Block 3");
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
                 logger.trace("TrustRelationship dataFilter:{}", dataFilter);
@@ -192,7 +193,7 @@ public class ShibbolethService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.debug("TrustRelationship searchFilter:{}", searchFilter);
+        logger.error("TrustRelationship searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -244,6 +245,9 @@ public class ShibbolethService {
     }
 
     public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
+        trustRelationship.setInum(this.generateInumForNewRelationship());
+        trustRelationship.setBaseDn(SHIBBOLETH_TR_CONFIG_DN);
+        trustRelationship.setDn(this.getDnForTrustRelationship(trustRelationship.getInum()));
         return addTrustRelationship(trustRelationship, null);
     }
 

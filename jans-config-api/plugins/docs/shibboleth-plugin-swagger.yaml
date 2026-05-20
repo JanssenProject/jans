@@ -157,6 +157,7 @@ paths:
         schema:
           type: integer
           format: int32
+          default: 1
       - name: fieldValuePair
         in: query
         description: Field and value pair for searching
@@ -198,7 +199,7 @@ paths:
       requestBody:
         description: Trust Relationship object
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/TrustRelationship"
             examples:
@@ -816,16 +817,6 @@ components:
           type: string
         description:
           type: string
-    TrustRelationshipForm:
-      required:
-      - trustRelationship
-      type: object
-      properties:
-        trustRelationship:
-          $ref: "#/components/schemas/TrustRelationship"
-        metaDataFile:
-          type: string
-          format: binary
     StringPagedResult:
       type: object
       properties:
@@ -858,6 +849,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TrustRelationship"
+    TrustRelationshipForm:
+      required:
+      - trustRelationship
+      type: object
+      properties:
+        trustRelationship:
+          $ref: "#/components/schemas/TrustRelationship"
+        metaDataFile:
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2
