@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Javier Rojas Blum
@@ -121,15 +122,15 @@ public class RedirectionUriService {
     }
 
     String fetchSectorIdentifierContent(String sectorIdentiferUri) {
-        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-        try {
-            Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke();
+        try (jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+             Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke()) {
             if (clientResponse.getStatus() != 200) {
                 return null;
             }
             return clientResponse.readEntity(String.class);
-        } finally {
-            clientRequest.close();
         }
     }
 
