@@ -541,7 +541,7 @@ jobs:
             target: aarch64
             manylinux: auto
           - name: macos-x86_64
-            os: macos-13
+            os: macos-15
             target: x86_64-apple-darwin
             manylinux: 'off'
           - name: macos-arm64
@@ -570,17 +570,12 @@ jobs:
       shell: bash
       run: |
         curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-win64.zip" -o /tmp/protoc.zip
-        unzip -o /tmp/protoc.zip -d "/c/protoc"
-        echo "PROTOC=/c/protoc/bin/protoc.exe" >> $GITHUB_ENV
-        echo "/c/protoc/bin" >> $GITHUB_PATH
+        unzip -o /tmp/protoc.zip -d "C:/protoc"
+        echo "PROTOC=C:\\protoc\\bin\\protoc.exe" >> $GITHUB_ENV
+        echo "C:\\protoc\\bin" >> $GITHUB_PATH
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
-
-    - name: Setup Python 3.9
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: '3.9'
 
     - name: Setup Python 3.10
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -638,7 +633,7 @@ jobs:
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
-        args: --release --locked -i python3.9 python3.10 python3.11 python3.12
+        args: --release --locked -i python3.10 python3.11 python3.12
         target: ${{ matrix.target }}
         manylinux: ${{ matrix.manylinux }}
         before-script-linux: |
