@@ -7,7 +7,7 @@ The ordering of items is not stable, it is driven by a dependency graph.
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:13
+-- cedarling_pg/src/catalog.rs:20
 
 -- Namespace for cedarling_pg catalog objects.
 CREATE SCHEMA IF NOT EXISTS cedarling;
@@ -72,7 +72,7 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:210
+-- cedarling_pg/src/functions/authorized.rs:222
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned
 CREATE  FUNCTION "cedarling_authorize_unsigned"(
 	"principal_json" TEXT, /* Option < & str > */
@@ -80,170 +80,168 @@ CREATE  FUNCTION "cedarling_authorize_unsigned"(
 	"action" TEXT, /* & str */
 	"context_json" TEXT /* & str */
 ) RETURNS bool /* bool */
+VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:108
+-- cedarling_pg/src/functions/authorized.rs:112
 -- cedarling_pg::functions::authorized::cedarling_authorized
 CREATE  FUNCTION "cedarling_authorized"(
 	"resource_json" TEXT, /* & str */
 	"token_bundle" TEXT, /* Option < & str > */
 	"action" TEXT /* & str */
 ) RETURNS bool /* bool */
+VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorized_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:36
+-- cedarling_pg/src/functions/authorized_row.rs:35
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"resource" jsonb, /* pgrx :: datum :: JsonB */
 	"action" TEXT, /* & str */
 	"context" jsonb /* Option < pgrx :: datum :: JsonB > */
 ) RETURNS bool /* bool */
+VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:273
+-- cedarling_pg/src/functions/authorized_row.rs:265
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
 	"action" TEXT, /* & str */
 	"context" jsonb /* Option < JsonB > */
 ) RETURNS bool /* bool */
-
+VOLATILE PARALLEL RESTRICTED 
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:293
+-- cedarling_pg/src/functions/authorized_row.rs:285
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
 	"action" TEXT /* Option < & str > */
 ) RETURNS bool /* bool */
+VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorized_row_jwt_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/build_resource.rs:21
+-- cedarling_pg/src/functions/build_resource.rs:24
 -- cedarling_pg::functions::build_resource::cedarling_build_resource
 CREATE  FUNCTION "cedarling_build_resource"(
 	"resource" jsonb, /* pgrx :: datum :: JsonB */
 	"entity_type" TEXT, /* Option < & str > */
 	"entity_id" TEXT /* Option < & str > */
 ) RETURNS TEXT /* String */
+STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_build_resource_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/build_resource.rs:51
+-- cedarling_pg/src/functions/build_resource.rs:56
 -- cedarling_pg::functions::build_resource::cedarling_build_resource_row
 CREATE  FUNCTION "cedarling_build_resource_row"(
 	"record" anyelement /* AnyElement */
 ) RETURNS TEXT /* String */
-STRICT 
+STRICT STABLE PARALLEL SAFE 
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_build_resource_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/tokens/sql.rs:32
+-- cedarling_pg/src/tokens/sql.rs:35
 -- cedarling_pg::tokens::sql::cedarling_clear_tokens
 CREATE  FUNCTION "cedarling_clear_tokens"() RETURNS VOID /* SpiResult < () > */
-STRICT
+STRICT VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_clear_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/tokens/sql.rs:38
+-- cedarling_pg/src/tokens/sql.rs:41
 -- cedarling_pg::tokens::sql::cedarling_current_tokens
 CREATE  FUNCTION "cedarling_current_tokens"() RETURNS jsonb /* Option < JsonB > */
-STRICT
+STRICT STABLE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_current_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:173
+-- cedarling_pg/src/policy/versions.rs:175
 -- cedarling_pg::policy::versions::cedarling_diff_policies
 CREATE  FUNCTION "cedarling_diff_policies"(
 	"old" TEXT, /* & str */
 	"new" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT
+STRICT STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_diff_policies_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:202
+-- cedarling_pg/src/observability/trace.rs:234
 -- cedarling_pg::observability::trace::cedarling_explain
 CREATE  FUNCTION "cedarling_explain"(
 	"resource_json" TEXT, /* & str */
 	"action" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT
+STRICT VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_explain_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:151
--- cedarling_pg::mask::cedarling_get_masked_row
-CREATE  FUNCTION "cedarling_get_masked_row"() RETURNS jsonb /* Option < pgrx :: datum :: JsonB > */
-STRICT
-LANGUAGE c /* Rust */
-AS 'MODULE_PATHNAME', 'cedarling_get_masked_row_wrapper';
-/* </end connected objects> */
-
-/* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:164
+-- cedarling_pg/src/observability/trace.rs:197
 -- cedarling_pg::observability::trace::cedarling_last_trace
 CREATE  FUNCTION "cedarling_last_trace"() RETURNS jsonb /* Option < pgrx :: datum :: JsonB > */
-STRICT
+STRICT STABLE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_last_trace_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:89
+-- cedarling_pg/src/mask/mod.rs:81
 -- cedarling_pg::mask::cedarling_mask_plan
 CREATE  FUNCTION "cedarling_mask_plan"(
 	"table_name" TEXT, /* & str */
 	"action" TEXT /* Option < & str > */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
+STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_mask_plan_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:135
+-- cedarling_pg/src/mask/mod.rs:126
 -- cedarling_pg::mask::cedarling_mask_row
 CREATE  FUNCTION "cedarling_mask_row"(
 	"row_json" jsonb, /* pgrx :: datum :: JsonB */
-	"table_name" TEXT, /* & str */
-	"_action" TEXT /* Option < & str > */
+	"table_name" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
+STRICT STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_mask_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:175
+-- cedarling_pg/src/observability/trace.rs:208
 -- cedarling_pg::observability::trace::cedarling_recent_traces
 CREATE  FUNCTION "cedarling_recent_traces"(
 	"limit" INT /* Option < i32 > */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
+STABLE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_recent_traces_wrapper';
 /* </end connected objects> */
@@ -256,7 +254,7 @@ CREATE  FUNCTION "cedarling_register_entity_map"(
 	"entity_type" TEXT, /* & str */
 	"id_columns" TEXT[] /* Vec < String > */
 ) RETURNS bool /* bool */
-STRICT
+STRICT VOLATILE PARALLEL UNSAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_register_entity_map_wrapper';
 /* </end connected objects> */
@@ -268,22 +266,22 @@ CREATE  FUNCTION "cedarling_register_policy_version"(
 	"name" TEXT, /* & str */
 	"bootstrap_path" TEXT /* & str */
 ) RETURNS bool /* bool */
-STRICT
+STRICT VOLATILE PARALLEL UNSAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_register_policy_version_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:136
+-- cedarling_pg/src/policy/versions.rs:137
 -- cedarling_pg::policy::versions::cedarling_rollback_policy
 CREATE  FUNCTION "cedarling_rollback_policy"() RETURNS bool /* bool */
-STRICT
+STRICT VOLATILE PARALLEL UNSAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_rollback_policy_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:44
+-- cedarling_pg/src/mask/mod.rs:34
 -- cedarling_pg::mask::cedarling_set_mask_config
 CREATE  FUNCTION "cedarling_set_mask_config"(
 	"table_name" TEXT, /* & str */
@@ -291,6 +289,7 @@ CREATE  FUNCTION "cedarling_set_mask_config"(
 	"mask_type" TEXT, /* & str */
 	"mask_value" TEXT /* Option < & str > */
 ) RETURNS bool /* bool */
+VOLATILE PARALLEL UNSAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_set_mask_config_wrapper';
 /* </end connected objects> */
@@ -301,22 +300,22 @@ AS 'MODULE_PATHNAME', 'cedarling_set_mask_config_wrapper';
 CREATE  FUNCTION "cedarling_set_tokens"(
 	"tokens" jsonb /* JsonB */
 ) RETURNS VOID /* SpiResult < () > */
-STRICT
+STRICT VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_set_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/status.rs:141
+-- cedarling_pg/src/observability/status.rs:162
 -- cedarling_pg::observability::status::cedarling_status
 CREATE  FUNCTION "cedarling_status"() RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT
+STRICT STABLE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_status_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:70
+-- cedarling_pg/src/mask/mod.rs:60
 -- cedarling_pg::mask::cedarling_test_masking
 CREATE  FUNCTION "cedarling_test_masking"(
 	"original_value" TEXT, /* Option < & str > */
@@ -324,6 +323,7 @@ CREATE  FUNCTION "cedarling_test_masking"(
 	"mask_type" TEXT, /* & str */
 	"mask_config" TEXT /* Option < & str > */
 ) RETURNS TEXT /* Option < String > */
+STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_test_masking_wrapper';
 /* </end connected objects> */
@@ -334,13 +334,19 @@ AS 'MODULE_PATHNAME', 'cedarling_test_masking_wrapper';
 CREATE  FUNCTION "cedarling_use_policy"(
 	"version" TEXT /* & str */
 ) RETURNS bool /* bool */
-STRICT
+STRICT VOLATILE PARALLEL UNSAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_use_policy_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:80
+-- cedarling_pg/src/catalog.rs:86
+-- requires:
+--   cedarling_use_policy
+--   cedarling_register_policy_version
+--   cedarling_rollback_policy
+
+
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
@@ -353,7 +359,7 @@ CREATE  FUNCTION "cedarling_validate_schema"(
 	"table_name" TEXT, /* & str */
 	"cedar_schema_path" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT
+STRICT STABLE PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_validate_schema_wrapper';
 /* </end connected objects> */
@@ -365,28 +371,29 @@ CREATE  FUNCTION "cedarling_validate_schema"(
 	"table_oid" oid, /* pg_sys :: Oid */
 	"cedar_schema_path" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT 
+STRICT STABLE PARALLEL SAFE 
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_validate_schema_by_oid_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/authz/where_clause.rs:499
+-- cedarling_pg/src/authz/where_clause.rs:565
 -- cedarling_pg::authz::where_clause::cedarling_where
 CREATE  FUNCTION "cedarling_where"(
 	"table_name" TEXT, /* & str */
 	"action" TEXT, /* & str */
 	"tokens" TEXT /* Option < & str > */
 ) RETURNS TEXT /* String */
+STABLE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_where_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/lib.rs:200
+-- cedarling_pg/src/lib.rs:60
 -- cedarling_pg::hello_cedarling_pg
 CREATE  FUNCTION "hello_cedarling_pg"() RETURNS TEXT /* & '_ str */
-STRICT
+IMMUTABLE STRICT PARALLEL SAFE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'hello_cedarling_pg_wrapper';
 /* </end connected objects> */
