@@ -569,13 +569,10 @@ jobs:
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        winget install --id=Google.Protobuf -e --accept-package-agreements --accept-source-agreements
-        PROTOC_PATH=$(find /c/Users/runneradmin/AppData/Local/Microsoft/WinGet/Packages -name protoc.exe | head -n 1)
-        if [ -z "$PROTOC_PATH" ]; then
-          PROTOC_PATH="/c/Program Files/Protobuf/bin/protoc.exe"
-        fi
-        echo "PROTOC=$PROTOC_PATH" >> $GITHUB_ENV
-        echo "$(dirname "$PROTOC_PATH")" >> $GITHUB_PATH
+        curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-win64.zip" -o /tmp/protoc.zip
+        unzip -o /tmp/protoc.zip -d "/c/protoc"
+        echo "PROTOC=/c/protoc/bin/protoc.exe" >> $GITHUB_ENV
+        echo "/c/protoc/bin" >> $GITHUB_PATH
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
@@ -648,7 +645,7 @@ jobs:
           ARCH=$(uname -m)
           if [ "$ARCH" = "aarch64" ]; then PROTOC_ARCH="linux-aarch_64"; else PROTOC_ARCH="linux-x86_64"; fi
           curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-${PROTOC_ARCH}.zip" -o /tmp/protoc.zip
-          unzip -o /tmp/protoc.zip -d /usr/local bin/protoc
+          unzip -o /tmp/protoc.zip -d /usr/local
           chmod +x /usr/local/bin/protoc
         maturin-version: "1.9.4"
 
