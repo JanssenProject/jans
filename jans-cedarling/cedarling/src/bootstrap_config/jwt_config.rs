@@ -61,6 +61,18 @@ pub struct JwtConfig {
     pub jwks_refresh_interval: Option<u64>,
     /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
     pub jwks_refresh_min_interval: u64,
+    /// Upper bound on the Status List JWT refresh interval in seconds.
+    ///
+    /// Caps how long Cedarling waits between Status List refreshes. When the Status
+    /// List JWT carries a `ttl` claim (per the IETF `oauth-status-list` spec), the
+    /// effective refresh interval is `min(jwt_ttl, status_list_refresh_interval_max)`
+    /// so the issuer can always request a *more frequent* refresh, but never a less
+    /// frequent one. When the JWT omits `ttl`, this value is used directly.
+    ///
+    /// A value of `0` is treated as "use the default" so the cache cannot be left to
+    /// go stale forever. Non-zero values below `MIN_STATUS_LIST_REFRESH_SECS` (5) are
+    /// clamped to that minimum.
+    pub status_list_refresh_interval_max: u64,
 }
 
 /// Default periodic JWKS refresh interval when neither `Cache-Control: max-age`
@@ -70,20 +82,26 @@ pub(crate) const DEFAULT_JWKS_REFRESH_INTERVAL_SECS: u64 = 3600;
 /// Minimum allowed refresh interval, in seconds. Values below this are clamped.
 pub(crate) const MIN_JWKS_REFRESH_SECS: u64 = 5;
 
-impl JwtConfig {
-    /// Default maximum number of tokens the token cache can store.
-    pub const DEFAULT_TOKEN_CACHE_CAPACITY: usize = 100;
+/// Minimum allowed Status List JWT refresh interval (in seconds). Non-zero values
+/// below this are clamped up to this floor.
+pub(crate) const MIN_STATUS_LIST_REFRESH_SECS: u64 = 5;
 
-    /// Default maximum TTL (seconds) for cached tokens.
-    ///
-    /// Chosen as a small value so that repeated requests for the same token are
-    /// served from cache, while revocation / status-list changes are still
-    /// picked up within a few seconds. Prevents unbounded cache growth for
-    /// tokens without an `exp` claim.
-    pub const DEFAULT_TOKEN_CACHE_MAX_TTL_SECS: usize = 5;
-
-    /// Default minimum interval (seconds) between on-demand JWKS re-fetches per issuer.
-    pub const DEFAULT_JWKS_REFRESH_MIN_INTERVAL: u64 = 30;
+/// Normalize a candidate Status List JWT refresh maximum (seconds) into a safe
+/// interval. Single source of truth shared by the bootstrap deserializer and
+/// [`JwtConfig::normalize`]:
+///
+/// - `0` -> [`JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS`]
+///   (300s): the cache must never be left to go stale forever, so "disabled"
+///   is not a supported state.
+/// - Non-zero values below [`MIN_STATUS_LIST_REFRESH_SECS`] are clamped up to
+///   that floor to avoid hammering the IDP.
+/// - Any other value is returned unchanged.
+#[must_use]
+pub(crate) fn normalize_status_list_refresh_interval_max(value: u64) -> u64 {
+    match value {
+        0 => JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+        v => v.max(MIN_STATUS_LIST_REFRESH_SECS),
+    }
 }
 
 impl Default for JwtConfig {
@@ -106,12 +124,43 @@ impl Default for JwtConfig {
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             jwks_refresh_interval: None,
             jwks_refresh_min_interval: Self::DEFAULT_JWKS_REFRESH_MIN_INTERVAL,
+            status_list_refresh_interval_max:
+                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
         };
         config.allow_all_algorithms()
     }
 }
 
 impl JwtConfig {
+    /// Default maximum number of tokens the token cache can store.
+    pub const DEFAULT_TOKEN_CACHE_CAPACITY: usize = 100;
+
+    /// Default maximum TTL (seconds) for cached tokens.
+    ///
+    /// Chosen as a small value so that repeated requests for the same token are
+    /// served from cache, while revocation / status-list changes are still
+    /// picked up within a few seconds. Prevents unbounded cache growth for
+    /// tokens without an `exp` claim.
+    pub const DEFAULT_TOKEN_CACHE_MAX_TTL_SECS: usize = 5;
+
+    /// Default minimum interval (seconds) between on-demand JWKS re-fetches per issuer.
+    pub const DEFAULT_JWKS_REFRESH_MIN_INTERVAL: u64 = 30;
+
+    /// Default upper bound for the Status List JWT refresh interval (in seconds),
+    /// applied when the Status List JWT has no `ttl` claim and as a cap on JWT-
+    /// provided values. Also used when the bootstrap property is set to `0`.
+    pub const DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS: u64 = 300;
+
+    /// Enforce all field-level invariants on the config in place. Called once
+    /// during service initialization on a cloned `JwtConfig`, so that callers
+    /// who construct the struct programmatically cannot bypass the bootstrap
+    /// deserializer's normalization.
+    pub(crate) fn normalize(&mut self) {
+        self.status_list_refresh_interval_max = normalize_status_list_refresh_interval_max(
+            self.status_list_refresh_interval_max,
+        );
+    }
+
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     ///
     /// Intended for tests and trusted-environment embedders. Production
