@@ -59,7 +59,7 @@ DROP EXTENSION IF EXISTS cedarling_pg CASCADE;
 CREATE EXTENSION cedarling_pg;
 
 -- Catalog schema present?
-SELECT 1/count(*) AS ok
+SELECT count(*) = 1 AS cedarling_schema_present
   FROM pg_namespace
  WHERE nspname = 'cedarling';
 
