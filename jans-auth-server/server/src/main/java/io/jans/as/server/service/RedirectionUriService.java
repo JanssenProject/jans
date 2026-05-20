@@ -15,6 +15,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.QueryStringDecoder;
+import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.session.ws.rs.EndSessionService;
 import jakarta.ejb.Stateless;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Javier Rojas Blum
@@ -73,24 +75,18 @@ public class RedirectionUriService {
             return result;
         }
 
+        if (!isAllowedSectorIdentifierUri(sectorIdentiferUri)) {
+            return result;
+        }
+
         final List<String> sectorRedirectUris = localResponseCache.getSectorRedirectUris(sectorIdentiferUri);
         if (sectorRedirectUris != null) {
             return sectorRedirectUris;
         }
 
-        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-
-        String entity = null;
-        try {
-            Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke();
-            int status = clientResponse.getStatus();
-            if (status != 200) {
-                return result;
-            }
-
-            entity = clientResponse.readEntity(String.class);
-        } finally {
-            clientRequest.close();
+        String entity = fetchSectorIdentifierContent(sectorIdentiferUri);
+        if (StringUtils.isBlank(entity)) {
+            return result;
         }
 
         JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
@@ -100,6 +96,42 @@ public class RedirectionUriService {
         }
         localResponseCache.putSectorRedirectUris(sectorIdentiferUri, result);
         return result;
+    }
+
+    boolean isAllowedSectorIdentifierUri(String sectorIdentiferUri) {
+        try {
+            java.net.URI uri = new java.net.URI(sectorIdentiferUri);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                log.warn("sector_identifier_uri must use https scheme, got: {}", sectorIdentiferUri);
+                return false;
+            }
+        } catch (java.net.URISyntaxException e) {
+            log.warn("sector_identifier_uri is not a valid URI: {}", sectorIdentiferUri);
+            return false;
+        }
+
+        final List<String> blockList = appConfiguration.getRequestUriBlockList();
+        if (blockList != null && !blockList.isEmpty()) {
+            URLPatternList urlPatternList = new URLPatternList(blockList);
+            if (urlPatternList.isUrlListed(sectorIdentiferUri)) {
+                log.warn("sector_identifier_uri is forbidden by block list: {}", sectorIdentiferUri);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    String fetchSectorIdentifierContent(String sectorIdentiferUri) {
+        try (jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+             Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke()) {
+            if (clientResponse.getStatus() != 200) {
+                return null;
+            }
+            return clientResponse.readEntity(String.class);
+        }
     }
 
     public String validateRedirectionUri(@NotNull Client client, String redirectionUri) {

@@ -1303,9 +1303,10 @@ async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
-        vec![
-            TokenInput::new("Dolphin::Userinfo_token".to_string(), dolphin_user_token),
-        ],
+        vec![TokenInput::new(
+            "Dolphin::Userinfo_token".to_string(),
+            dolphin_user_token,
+        )],
         EntityData::from_json(
             &json!({
                 "cedar_entity_mapping": {
