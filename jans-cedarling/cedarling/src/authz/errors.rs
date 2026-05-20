@@ -29,6 +29,9 @@ pub enum MultiIssuerValidationError {
 
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
+
+    #[error("JWT claims are not a JSON object: {0}")]
+    InvalidClaims(&'static str),
 }
 
 /// Error type for token input validation
