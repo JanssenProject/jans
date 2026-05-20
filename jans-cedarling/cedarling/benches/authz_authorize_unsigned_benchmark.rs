@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
     InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
@@ -155,6 +155,7 @@ async fn prepare_cedarling() -> Result<Cedarling, InitCedarlingError> {
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

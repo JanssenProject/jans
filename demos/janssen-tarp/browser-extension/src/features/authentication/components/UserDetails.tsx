@@ -15,6 +15,7 @@ import {
   LoginDetails,
   IJWT,
 } from "../../../shared/types";
+import { awaitRedirectInIncognitoPopup } from "../../../shared/components/IncognitoPopupFlow";
 
 type UserDetailsProps = {
   data?: any;
@@ -199,25 +200,42 @@ const UserDetails = ({
       );
     });
   }
-
   async function performRemoteLogout(
     idToken: string,
     config: OpenIDConfiguration,
-    forceSilent = false
+    forceSilent = false,
   ) {
     if (forceSilent) {
       return performSilentLogout(idToken, config);
     }
 
-    return new Promise<void>((resolve) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: buildLogoutUrl(idToken, config),
-          interactive: true,
-        },
-        () => resolve()
+    const currentWindow = await new Promise<chrome.windows.Window>((resolve, reject) =>
+      chrome.windows.getCurrent((win) => {
+        if (!win) return reject(new Error('Could not get current window'));
+        resolve(win);
+      }),
+    );
+
+    if (currentWindow.incognito) {
+      const postLogoutRedirect = chrome.identity.getRedirectURL('logout');
+
+      await awaitRedirectInIncognitoPopup(
+        buildLogoutUrl(idToken, config),
+        (u) => u.startsWith(postLogoutRedirect),
       );
-    });
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow(
+          { url: buildLogoutUrl(idToken, config), interactive: true },
+          (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl)
+              reject(new Error(chrome.runtime.lastError?.message ?? 'Logout flow did not complete'));
+            else
+              resolve();
+          },
+        );
+      });
+    }
   }
 
   async function performSilentLogout(
@@ -254,6 +272,30 @@ const UserDetails = ({
     return `${config.end_session_endpoint}?${params.toString()}`;
   }
 
+  const isJWT = (token?: string): boolean => {
+    if (!token || typeof token !== "string") return false;
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    const base64UrlPattern = /^[A-Za-z0-9_-]+$/;
+    if (!parts.every((part) => base64UrlPattern.test(part))) return false;
+    try {
+      const decode = (str: string) => {
+        const base64 = str
+          .replace(/-/g, "+")
+          .replace(/_/g, "/")
+          .padEnd(str.length + (4 - (str.length % 4)) % 4, "=");
+        const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      };
+      const header = decode(parts[0]);
+      const payload = decode(parts[1]);
+      return typeof header === "object" && header !== null && "alg" in header &&
+        typeof payload === "object" && payload !== null;
+    } catch {
+      return false;
+    }
+  };
+
   const TokenCard = ({
     title,
     expandedState,
@@ -261,13 +303,15 @@ const UserDetails = ({
     setShowPayload,
     rawToken,
     decoded,
+    isValidJWT,
   }: {
     title: string;
     expandedState: keyof typeof expanded;
     showPayload: boolean;
     setShowPayload: (v: boolean) => void;
-    rawToken: string;
+    rawToken: string | undefined;
     decoded: IJWT;
+    isValidJWT: boolean;
   }) => (
     <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
       {/* Header */}
@@ -275,22 +319,14 @@ const UserDetails = ({
         onClick={() =>
           setExpanded((prev) => ({
             ...prev,
-            [expandedState]:
-              !prev[expandedState],
+            [expandedState]: !prev[expandedState],
           }))
         }
         className="flex w-full items-center justify-between px-6 py-5 text-left hover:bg-gray-50"
       >
-        <span className="text-xl font-semibold text-gray-900">
-          {title}
-        </span>
-
+        <span className="text-xl font-semibold text-gray-900">{title}</span>
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-900 text-white">
-          {expanded[expandedState] ? (
-            <Minus size={16} />
-          ) : (
-            <Plus size={16} />
-          )}
+          {expanded[expandedState] ? <Minus size={16} /> : <Plus size={16} />}
         </span>
       </button>
 
@@ -298,37 +334,37 @@ const UserDetails = ({
       {expanded[expandedState] && (
         <div className="border-t border-gray-200 bg-gray-50 px-6 py-5">
           <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <div className="break-all text-sm leading-7 text-gray-600">
-              {showPayload ? (
-                <>
-                  <JsonEditor
-                    collapse
-                    viewOnly
-                    data={decoded.header}
-                    rootName="header"
-                  />
-                  <JsonEditor
-                    collapse
-                    viewOnly
-                    data={decoded.payload}
-                    rootName="payload"
-                  />
-                </>
-              ) : (
-                rawToken
-              )}
-            </div>
 
-            <button
-              onClick={() =>
-                setShowPayload(!showPayload)
-              }
-              className="mt-4 text-sm font-medium text-emerald-600 hover:underline"
-            >
-              {showPayload
-                ? "Show JWT"
-                : "Show Payload"}
-            </button>
+            {/* 👇 Branch on JWT validity */}
+            {!rawToken ? (
+              <p className="text-sm text-gray-400 italic">
+                No token available.
+              </p>
+            ) : !isValidJWT ? (
+              <p className="text-sm text-gray-400 italic">
+                ⚠️ This token is not in a valid JWT format.
+              </p>
+            ) : (
+              <>
+                <div className="break-all text-sm leading-7 text-gray-600">
+                  {showPayload ? (
+                    <>
+                      <JsonEditor collapse viewOnly data={decoded.header} rootName="header" />
+                      <JsonEditor collapse viewOnly data={decoded.payload} rootName="payload" />
+                    </>
+                  ) : (
+                    rawToken
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowPayload(!showPayload)}
+                  className="mt-4 text-sm font-medium text-emerald-600 hover:underline"
+                >
+                  {showPayload ? "Show JWT" : "Show Payload"}
+                </button>
+              </>
+            )}
+
           </div>
         </div>
       )}
@@ -342,7 +378,7 @@ const UserDetails = ({
         <div
           role="status"
           aria-live="polite"
-          aria-atomic="true" 
+          aria-atomic="true"
           className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#002B49] text-white text-sm font-medium rounded-full shadow-2xl flex items-center gap-3 z-[60] animate-bounce">
           {snackbar}
         </div>
@@ -396,6 +432,7 @@ const UserDetails = ({
               setShowPayload={setShowPayloadAT}
               rawToken={data?.access_token}
               decoded={decodedTokens.access_token}
+              isValidJWT={isJWT(data?.access_token)}
             />
 
             <TokenCard
@@ -405,6 +442,7 @@ const UserDetails = ({
               setShowPayload={setShowPayloadIdToken}
               rawToken={data?.id_token}
               decoded={decodedTokens.id_token}
+              isValidJWT={isJWT(data?.id_token)}
             />
           </>
         )}
@@ -416,6 +454,7 @@ const UserDetails = ({
           setShowPayload={setShowPayloadUI}
           rawToken={data?.userDetails}
           decoded={decodedTokens.userinfo_token}
+          isValidJWT={isJWT(data?.userDetails)}
         />
 
         {/* Logout */}

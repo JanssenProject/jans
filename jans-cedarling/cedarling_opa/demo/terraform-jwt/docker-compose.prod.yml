@@ -1,0 +1,34 @@
+# Production-mode overlay — enables real GitHub Actions JWT validation.
+#
+# Usage (explicitly opt in; does NOT auto-load on plain "docker compose up"):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+#
+# What changes vs. the default docker-compose.yml:
+#   - opa-config.json is added as a volume and passed as --config-file instead
+#     of opa-config-demo.json.
+#   - JWT signature validation is ON (CEDARLING_JWT_SIG_VALIDATION: "enabled").
+#   - The OPA server fetches GitHub's JWKS endpoint at startup; outbound HTTPS
+#     to https://token.actions.githubusercontent.com must be reachable.
+#
+# Prerequisites:
+#   - Run this from inside a real GitHub Actions job that has
+#       permissions:
+#         id-token: write
+#     and export the OIDC token with:
+#       export TF_JWT=$(./tf_authz_jwt.sh --fetch-token)
+#   - Locally crafted JWTs will be rejected because their signatures cannot be
+#     verified against GitHub's public keys.  Use plain "docker compose up"
+#     (demo mode) for local development without real tokens.
+
+services:
+  opa-cedarling:
+    volumes:
+      - ./opa-config.json:/app/demo/terraform-jwt/opa-config.json:ro
+    command:
+      - run
+      - --server
+      - --addr
+      - "0.0.0.0:8181"
+      - --config-file
+      - /app/demo/terraform-jwt/opa-config.json
+      - /app/demo/terraform-jwt/rego

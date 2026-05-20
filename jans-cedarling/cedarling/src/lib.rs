@@ -44,7 +44,6 @@ pub use crate::context_data_api::{
     DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
     ValidationError, ValidationResult, ValueMappingError,
 };
-pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
@@ -54,10 +53,12 @@ pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
+pub use http::HttpClientConfig;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
+use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
@@ -127,7 +128,7 @@ impl Cedarling {
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
-            .then(|| ApplicationName(config.application_name.clone()));
+            .then(|| ApplicationName::from(config.application_name.clone()));
 
         let metrics = Arc::new(
             if config
@@ -147,6 +148,7 @@ impl Cedarling {
             app_name,
             config.lock_config.as_ref(),
             metrics.clone(),
+            config.http_client_config,
         )
         .await?;
 
@@ -196,6 +198,17 @@ impl Cedarling {
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
+        }
+
+        if let Some(registry) = log.health_registry() {
+            registry.register("core", || HealthStatus::Success);
+            registry.register("policy_load", move || {
+                if policy_count > 0 {
+                    HealthStatus::Success
+                } else {
+                    HealthStatus::Failure
+                }
+            });
         }
 
         Ok(Cedarling {

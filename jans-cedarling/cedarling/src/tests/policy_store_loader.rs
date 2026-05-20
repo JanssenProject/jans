@@ -247,6 +247,7 @@ fn create_jwt_cedarling_config_with_loader(
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: crate::HttpClientConfig::default(),
     }
 }
 
@@ -259,16 +260,13 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
@@ -285,16 +283,13 @@ fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) 
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
@@ -809,9 +804,14 @@ permit(
     let archive_path = temp_dir.path().join("multi_template.cjar");
     fs::write(&archive_path, &archive).expect("Failed to write archive file");
 
-    let loaded = crate::load_policy_store(&crate::PolicyStoreConfig {
-        source: crate::PolicyStoreSource::CjarFile(archive_path),
-    })
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+    let loaded = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: crate::PolicyStoreSource::CjarFile(archive_path),
+        },
+        &http_client,
+    )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
 

@@ -972,6 +972,20 @@
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false
+    },
+    {
+      "permission": "https://jans.io/oauth/config/fido2-metrics.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "fido2"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/fido2.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "fido2"
     }
   ],
   "rolePermissionMapping": [
@@ -1115,7 +1129,9 @@
         "https://jans.io/oauth/config/ssa.write",
         "https://jans.io/oauth/config/uma.readonly",
         "https://jans.io/oauth/config/uma.write",
-        "https://jans.io/oauth/config/uma.admin"
+        "https://jans.io/oauth/config/uma.admin",
+        "https://jans.io/oauth/config/fido2-metrics.readonly",
+        "https://jans.io/oauth/config/fido2.admin"
       ]
     }
   ]

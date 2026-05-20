@@ -7,37 +7,44 @@ use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     LogLevel,
-    common::policy_store::TrustedIssuer,
+    common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
 
-/// Fast lookup index for trusted issuers by URL or origin.
+/// Fast lookup index for trusted issuers by `iss` claim.
 ///
-/// This structure maintains indexes for O(1) lookups of trusted issuers by either:
-/// - Full OIDC endpoint URL
-/// - Origin only
+/// `iss` claim semantics vary across `IdPs`:
+/// - origin only (Google: `https://accounts.google.com`),
+/// - origin + path (Microsoft tenant: `https://login.microsoftonline.com/{tenant}/v2.0`),
+/// - origin with trailing slash (Auth0).
+///
+/// To cover all cases we maintain two indexes — origin and full configured
+/// URL — and try both on lookup. Both are keyed by the canonical
+/// [`IssClaim`] form so trailing-slash / case differences cannot cause
+/// false negatives.
 ///
 /// # Origin Collision Handling
 ///
-/// When multiple issuers share the same origin, the last issuer encountered during construction
-/// will be used for origin-based lookups. A warning is logged when this occurs. Full URL lookups
-/// remain unaffected and will correctly resolve to each specific issuer.
+/// When multiple issuers share the same origin, the last issuer encountered
+/// during construction wins for origin-based lookups; a warning is logged.
+/// Full-URL lookups remain unaffected.
 #[derive(Debug, Clone)]
 pub(crate) struct TrustedIssuerIndex {
-    /// Index mapping full URL to trusted issuer
-    url_index: HashMap<String, Arc<TrustedIssuer>>,
-    /// Index mapping origin to trusted issuer
-    origin_index: HashMap<String, Arc<TrustedIssuer>>,
+    url_index: HashMap<IssClaim, Arc<TrustedIssuer>>,
+    origin_index: HashMap<IssClaim, Arc<TrustedIssuer>>,
 }
 
 impl TrustedIssuerIndex {
     pub(crate) fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<&Logger>) -> Self {
-        let mut origin_index: HashMap<String, Arc<TrustedIssuer>> = HashMap::new();
-        let mut url_index = HashMap::new();
+        let mut origin_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
+        let mut url_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
 
-        for iss in issuers.values() {
-            let origin = iss.get_oidc_endpoint().origin().ascii_serialization();
-            let full_url = iss.get_oidc_endpoint().as_str();
+        let mut sorted: Vec<(&String, &TrustedIssuer)> = issuers.iter().collect();
+        sorted.sort_by(|a, b| a.0.cmp(b.0));
+
+        for (_, iss) in sorted {
+            let origin = iss.iss_claim();
+            let full_url = IssClaim::new(iss.get_oidc_endpoint().as_str());
             let issuer = Arc::new(iss.clone());
 
             if let Some(existing) = origin_index.get(&origin) {
@@ -45,14 +52,12 @@ impl TrustedIssuerIndex {
                     LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
                         .set_message(format!(
                             "Duplicate origin '{}': issuer '{}' will override existing issuer '{}' for origin-based lookups",
-                            origin,
-                            iss.name,
-                            existing.name,
+                            origin, iss.name, existing.name,
                         )),
                 );
             }
             origin_index.insert(origin, issuer.clone());
-            url_index.insert(full_url.to_string(), issuer);
+            url_index.insert(full_url, issuer);
         }
 
         Self {
@@ -61,11 +66,11 @@ impl TrustedIssuerIndex {
         }
     }
 
-    /// Finds a trusted issuer by URL, checking full URL first, then origin.
-    pub(super) fn find(&self, url: &str) -> Option<&Arc<TrustedIssuer>> {
-        self.url_index
-            .get(url)
-            .or_else(|| self.origin_index.get(url))
+    /// Finds a trusted issuer by canonical [`IssClaim`].
+    pub(super) fn find(&self, iss: &IssClaim) -> Option<&Arc<TrustedIssuer>> {
+        self.origin_index
+            .get(iss)
+            .or_else(|| self.url_index.get(iss))
     }
 
     /// Returns an iterator over references to all trusted issuers.
@@ -124,22 +129,28 @@ mod tests {
         let issuer_index = TrustedIssuerIndex::new(&HashMap::new(), None);
         assert!(
             issuer_index
-                .find("https://login.microsoftonline.com/tenant")
-                .is_none()
+                .find(&IssClaim::new("https://login.microsoftonline.com/tenant"))
+                .is_none(),
+            "expected no issuer to be found in empty index for IssClaim::new(\"https://login.microsoftonline.com/tenant\")"
         );
     }
 
     #[test]
     fn test_find_non_existing_issuer() {
         let issuer_index = create_issuer_index();
-        assert!(issuer_index.find("https://account.google.com").is_none());
+        assert!(
+            issuer_index
+                .find(&IssClaim::new("https://account.google.com"))
+                .is_none(),
+            "expected no issuer to be found for IssClaim::new(\"https://account.google.com\")"
+        );
     }
 
     #[test]
     fn test_find_by_full_url() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find("https://login.microsoftonline.com/tenant")
+            .find(&IssClaim::new("https://login.microsoftonline.com/tenant"))
             .expect("Should find issuer by full URL");
 
         assert_eq!(issuer.name, "Microsoft");
@@ -153,7 +164,7 @@ mod tests {
     fn test_find_by_origin() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find("https://account.gluu.org")
+            .find(&IssClaim::new("https://account.gluu.org"))
             .expect("Should find issuer by origin");
 
         assert_eq!(issuer.name, "Jans");
@@ -164,10 +175,26 @@ mod tests {
     }
 
     #[test]
+    fn test_find_by_origin_with_trailing_slash() {
+        // Auth0-style: `iss` claim emitted as `https://issuer/` (with slash).
+        // Index keys come from `Url::origin().ascii_serialization()` (no slash).
+        // `find` must canonicalize the input so lookup still succeeds.
+        let issuer_index = create_issuer_index();
+        let issuer = issuer_index
+            .find(&IssClaim::new("https://account.gluu.org/"))
+            .expect("Should find issuer by origin with trailing slash");
+
+        assert_eq!(
+            issuer.name, "Jans",
+            "lookup-by-origin-with-trailing-slash should normalize the trailing slash and resolve to the 'Jans' issuer"
+        );
+    }
+
+    #[test]
     fn test_find_by_origin_with_port() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find("https://auth.company.internal:8443")
+            .find(&IssClaim::new("https://auth.company.internal:8443"))
             .expect("Should find issuer by origin with port");
 
         assert_eq!(issuer.name, "Company");

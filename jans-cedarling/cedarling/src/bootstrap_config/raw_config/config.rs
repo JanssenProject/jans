@@ -7,11 +7,14 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_jwks_refresh_min_interval, default_log_channel_capacity,
-    default_log_max_retries, default_token_cache_capacity, default_true,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
-use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::default_values::{
+    default_http_client_request_timeout, default_stdout_buffer_limit, default_stdout_timeout_millis,
+};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
@@ -338,6 +341,32 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_workers: WorkersCount,
+    // =========================================================================
+    // HTTP CLIENT CONFIGURATION
+    // =========================================================================
+    /// Per-request timeout in seconds.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_TIMEOUT",
+        default = "default_http_client_request_timeout",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_timeout: u64,
+    /// Maximum number of retry attempts per request.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
+        default = "default_http_client_max_retries",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_max_retries: u32,
+
+    /// Base delay between retries in seconds.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_RETRY_DELAY",
+        default = "default_http_client_retry_delay_secs",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_retry_delay: u64,
 
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.

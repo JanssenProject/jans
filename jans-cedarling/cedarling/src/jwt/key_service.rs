@@ -4,10 +4,13 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+
+use arc_swap::ArcSwap;
 
 use crate::LogWriter;
 use crate::common::issuer_utils::IssClaim;
+use crate::http::HttpClient;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
@@ -16,15 +19,16 @@ use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+/// A pre-parsed set of decoding keys for a single issuer, ready for
+/// atomic insertion into the key store.
+type ParsedIssuerKeys = Vec<(DecodingKeyInfo, Arc<DecodingKey>)>;
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) struct DecodingKeyInfo {
     pub issuer: Option<IssClaim>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
 }
-
-const MUTEX_POISONED_ERR: &str =
-    "KeyService RwLock poisoned due to another thread panicking while holding the lock";
 
 /// Manages JSON Web Keys (JWKs) used for decoding JWTs.
 ///
@@ -43,9 +47,16 @@ const MUTEX_POISONED_ERR: &str =
 /// Additionally, an on-demand refresh is triggered when a token arrives with
 /// an unknown `kid`. This signal is rate-limited per issuer
 /// (`CEDARLING_JWKS_REFRESH_MIN_INTERVAL`, default 30 s) to prevent abuse.
-#[derive(Default)]
 pub(super) struct KeyService {
-    keys: RwLock<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
+    keys: ArcSwap<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
+}
+
+impl Default for KeyService {
+    fn default() -> Self {
+        Self {
+            keys: ArcSwap::from_pointee(HashMap::new()),
+        }
+    }
 }
 
 impl KeyService {
@@ -76,13 +87,14 @@ impl KeyService {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
-        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
+        // Parse all keys upfront so the rcu closure is infallible.
+        let mut parsed_keys: Vec<(IssClaim, ParsedIssuerKeys)> = Vec::new();
 
         for (issuer, keys) in parsed_stores
             .into_iter()
             .map(|(iss, keys)| (IssClaim::new(&iss), keys))
         {
-            keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&issuer));
+            let mut issuer_keys = Vec::new();
 
             for jwk in keys {
                 let decoding_key =
@@ -100,9 +112,21 @@ impl KeyService {
                     kid: jwk.common.key_id,
                     algorithm,
                 };
-                keys_guard.insert(key_info, Arc::new(decoding_key));
+                issuer_keys.push((key_info, Arc::new(decoding_key)));
             }
+            parsed_keys.push((issuer, issuer_keys));
         }
+
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            for (issuer, keys) in &parsed_keys {
+                new_keys.retain(|k, _| k.issuer.as_ref() != Some(issuer));
+                for (key_info, decoding_key) in keys {
+                    new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+                }
+            }
+            new_keys
+        });
 
         Ok(())
     }
@@ -111,8 +135,9 @@ impl KeyService {
         &self,
         openid_config: &OpenIdConfig,
         logger: Option<&Logger>,
+        http_client: HttpClient,
     ) -> Result<(), KeyServiceError> {
-        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
+        let jwks = JwkSet::get_from_url(&openid_config.jwks_uri, &http_client)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
@@ -137,13 +162,11 @@ impl KeyService {
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
         }
 
-        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
-
-        keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&openid_config.issuer));
+        let mut parsed_keys: Vec<(DecodingKeyInfo, Arc<DecodingKey>)> = Vec::new();
         for parsed_key in keys {
             let key = parsed_key.jwk;
 
-            // We will no support keys with unspecified algorithms
+            // We will not support keys with unspecified algorithms
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
                     "skipping a JWK with a missing algorithm specifier from '{}'",
@@ -174,8 +197,17 @@ impl KeyService {
                 kid: key.common.key_id,
                 algorithm,
             };
-            keys_guard.insert(key_info, Arc::new(decoding_key));
+            parsed_keys.push((key_info, Arc::new(decoding_key)));
         }
+
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            new_keys.retain(|k, _| k.issuer.as_ref() != Some(&openid_config.issuer));
+            for (key_info, decoding_key) in &parsed_keys {
+                new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+            }
+            new_keys
+        });
 
         Ok(())
     }
@@ -187,10 +219,12 @@ impl KeyService {
         &self,
         openid_config: &OpenIdConfig,
         logger: Option<&Logger>,
+        http_client: &HttpClient,
     ) -> Result<Option<u64>, KeyServiceError> {
-        let (jwks, max_age) = JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri)
-            .await
-            .map_err(KeyServiceError::GetJwks)?;
+        let (jwks, max_age) =
+            JwkSet::get_from_url_with_max_age(&openid_config.jwks_uri, http_client)
+                .await
+                .map_err(KeyServiceError::GetJwks)?;
 
         self.insert_jwk_set(openid_config, logger, jwks)?;
 
@@ -198,15 +232,11 @@ impl KeyService {
     }
 
     pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<Arc<DecodingKey>> {
-        self.keys
-            .read()
-            .expect(MUTEX_POISONED_ERR)
-            .get(key_info)
-            .cloned()
+        self.keys.load().get(key_info).cloned()
     }
 
     pub(super) fn has_keys(&self) -> bool {
-        !self.keys.read().expect(MUTEX_POISONED_ERR).is_empty()
+        !self.keys.load().is_empty()
     }
 }
 
@@ -313,10 +343,25 @@ pub enum FetchKeysError {
 
 #[cfg(test)]
 mod test {
+    use std::sync::LazyLock;
+    use std::time::Duration;
+
     use super::*;
-    use crate::jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256};
+    use crate::{
+        http::{HttpClient, HttpClientConfig},
+        jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256},
+    };
     use jsonwebtoken::Algorithm;
     use serde_json::json;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     fn can_insert_and_get_keys_from_str() {
@@ -403,12 +448,19 @@ mod test {
 
         let key_service = KeyService::default();
 
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
         key_service
-            .get_keys_using_oidc(&server1.openid_config(), None)
+            .get_keys_using_oidc(&server1.openid_config(), None, http_client.clone())
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .get_keys_using_oidc(&server2.openid_config(), None)
+            .get_keys_using_oidc(&server2.openid_config(), None, http_client)
             .await
             .expect("fetch keys for issuer 2");
 
@@ -482,7 +534,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh with cache-control header should succeed");
 
@@ -528,7 +580,7 @@ mod test {
 
         let key_service = KeyService::default();
         let max_age = key_service
-            .refresh_keys_using_oidc(&openid_config, None)
+            .refresh_keys_using_oidc(&openid_config, None, &HTTP_CLIENT)
             .await
             .expect("refresh without cache-control header should succeed");
 
@@ -558,7 +610,7 @@ mod test {
         let key_service = KeyService::default();
 
         key_service
-            .get_keys_using_oidc(&openid_config, None)
+            .get_keys_using_oidc(&openid_config, None, HTTP_CLIENT.clone())
             .await
             .expect("initial key fetch should succeed");
 
@@ -579,7 +631,7 @@ mod test {
             .expect("should rotate signing key");
 
         key_service
-            .refresh_keys_using_oidc(&server.openid_config(), None)
+            .refresh_keys_using_oidc(&server.openid_config(), None, &HTTP_CLIENT)
             .await
             .expect("refresh should succeed");
 

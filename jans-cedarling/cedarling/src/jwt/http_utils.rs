@@ -3,21 +3,17 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::LazyLock;
-
-use crate::common::issuer_utils::IssClaim;
+use crate::{
+    common::issuer_utils::IssClaim,
+    http::{HttpClient, HttpClientError},
+};
 
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
-use reqwest::{
-    Client,
-    header::{CACHE_CONTROL, ToStrError},
-};
+use reqwest::header::{CACHE_CONTROL, ToStrError};
 use serde::{Deserialize, Deserializer, de};
 use url::Url;
-
-static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 // async_traits are Send by default but wasm-bindgen doesn't support those
 // so we opt out of it for the wasm bindings to compile.
@@ -25,9 +21,56 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-pub(super) trait GetFromUrl<T> {
+pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
     /// Send a get request to receive the resource from a URL
-    async fn get_from_url(url: &Url) -> Result<T, HttpError>;
+    async fn get_from_url(url: &Url, client: &HttpClient) -> Result<T, HttpError> {
+        require_secure_url(url)?;
+
+        // add delay to simulate network latency and test async behavior
+        // it would be great to implement delay in mock server, but mockito doesn't support it.
+        #[cfg(test)]
+        {
+            use std::time::Duration;
+            use tokio::time::sleep;
+
+            sleep(Duration::from_millis(1)).await;
+        }
+
+        let result = client
+            .get_json::<T>(url.as_str())
+            .await
+            .map_err(HttpError::Request)?;
+
+        Ok(result)
+    }
+}
+
+/// Returns `Ok(())` if `url` is safe to fetch from a JWT-validation context.
+///
+/// "Safe" means either `https`, or `http` pointed at a loopback address
+/// (`localhost`, `127.0.0.1`, `::1`)
+pub(super) fn require_secure_url(url: &Url) -> Result<(), HttpError> {
+    if url.scheme().eq_ignore_ascii_case("https") {
+        return Ok(());
+    }
+
+    if url.scheme().eq_ignore_ascii_case("http") && is_loopback_host(url) {
+        return Ok(());
+    }
+
+    Err(HttpError::InsecureScheme {
+        url: url.to_string(),
+        scheme: url.scheme().to_string(),
+    })
+}
+
+fn is_loopback_host(url: &Url) -> bool {
+    match url.host() {
+        Some(url::Host::Ipv4(addr)) => addr.is_loopback(),
+        Some(url::Host::Ipv6(addr)) => addr.is_loopback(),
+        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+        None => false,
+    }
 }
 
 #[derive(Deserialize, Clone)]
@@ -64,65 +107,21 @@ where
     Ok(url)
 }
 
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        // add delay to simulate network latency and test async behavior of trusted issuers loading
-        // it would be great to implement delay in mock server, but mockito doesn't support it.
-        #[cfg(test)]
-        {
-            use std::time::Duration;
-            use tokio::time::sleep;
+impl GetFromUrl<OpenIdConfig> for OpenIdConfig {}
 
-            sleep(Duration::from_millis(1)).await;
-        }
-
-        let openid_config = HTTP_CLIENT
-            .get(url.as_str())
-            .send()
-            .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<OpenIdConfig>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
-
-        Ok(openid_config)
-    }
-}
-
-#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
-#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
-impl GetFromUrl<JwkSet> for JwkSet {
-    async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let jwk_set = HTTP_CLIENT
-            .get(url.as_str())
-            .send()
-            .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?
-            .json::<JwkSet>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
-
-        Ok(jwk_set)
-    }
-}
+impl GetFromUrl<JwkSet> for JwkSet {}
 
 impl JwkSet {
     pub(super) async fn get_from_url_with_max_age(
         url: &Url,
+        client: &HttpClient,
     ) -> Result<(Self, Option<u64>), HttpError> {
-        let response = HTTP_CLIENT
-            .get(url.as_str())
-            .send()
+        require_secure_url(url)?;
+
+        let response = client
+            .get_with_retry(url.as_str())
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?;
+            .map_err(HttpError::Request)?;
 
         let max_age = response
             .headers()
@@ -152,15 +151,15 @@ fn parse_max_age(cache_control: &str) -> Option<u64> {
 // NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
 impl StatusListJwtStr {
-    pub(super) async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
-        let response = HTTP_CLIENT
-            .get(url.as_str())
-            .header("Content-Type", "application/statuslist+jwt")
-            .send()
+    pub(super) async fn get_from_url(url: &Url, client: &HttpClient) -> Result<Self, HttpError> {
+        require_secure_url(url)?;
+
+        let response = client
+            .get_with_retry_with(url.as_str(), |b| {
+                b.header("Accept", "application/statuslist+jwt")
+            })
             .await
-            .map_err(HttpError::GetRequest)?
-            .error_for_status()
-            .map_err(HttpError::ErrorCode)?;
+            .map_err(HttpError::Request)?;
 
         if let Some(content_type) = response.headers().get("Content-Type") {
             let content_type = content_type
@@ -183,23 +182,27 @@ impl StatusListJwtStr {
 
 #[derive(Debug, thiserror::Error)]
 pub enum HttpError {
-    #[error("failed to complete GET request: {0}")]
-    GetRequest(#[source] reqwest::Error),
-    #[error("received an error response: {0}")]
-    ErrorCode(#[source] reqwest::Error),
-    #[error("failed to deserialize respose from JSON: {0}")]
+    #[error("HTTP request failed: {0}")]
+    Request(#[from] HttpClientError),
+    #[error("failed to deserialize response from JSON: {0}")]
     JsonDeserializeResponse(#[source] reqwest::Error),
-    #[error("failed to read the respose text: {0}")]
+    #[error("failed to read the response text: {0}")]
     ReadTextResponse(#[source] reqwest::Error),
     #[error("the value of the '{0}' header is invalid: {1}")]
     InvalidHeader(String, ToStrError),
     #[error("{0}")]
     Unsupported(String),
+    #[error(
+        "refusing to fetch '{url}' over insecure scheme '{scheme}'; \
+         JWT validation requires https (loopback http is allowed)"
+    )]
+    InsecureScheme { url: String, scheme: String },
 }
 
 #[cfg(test)]
 mod tests {
-    use super::parse_max_age;
+    use super::{HttpError, parse_max_age, require_secure_url};
+    use url::Url;
 
     #[test]
     fn parses_max_age_from_cache_control_header() {
@@ -230,5 +233,47 @@ mod tests {
             max_age, None,
             "expected no max-age when directive is missing"
         );
+    }
+
+    #[test]
+    fn allows_https() {
+        let url = Url::parse("https://idp.example.com/.well-known/openid-configuration").unwrap();
+        assert!(require_secure_url(&url).is_ok());
+    }
+
+    #[test]
+    fn allows_http_loopback_hosts() {
+        for raw in [
+            "http://localhost/.well-known/openid-configuration",
+            "http://localhost:8080/jwks",
+            "http://127.0.0.1:1234/jwks",
+            "http://[::1]:1234/jwks",
+        ] {
+            let url = Url::parse(raw).unwrap();
+            assert!(
+                require_secure_url(&url).is_ok(),
+                "expected loopback url to be allowed: {raw}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_plain_http_to_remote_host() {
+        let url = Url::parse("http://idp.example.com/.well-known/openid-configuration").unwrap();
+        let err = require_secure_url(&url).expect_err("expected http remote to be rejected");
+        match err {
+            HttpError::InsecureScheme { scheme, .. } => assert_eq!(scheme, "http"),
+            other => panic!("expected InsecureScheme, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn rejects_non_http_schemes() {
+        let url = Url::parse("ftp://idp.example.com/jwks").unwrap();
+        let err = require_secure_url(&url).expect_err("expected ftp to be rejected");
+        match err {
+            HttpError::InsecureScheme { scheme, .. } => assert_eq!(scheme, "ftp"),
+            other => panic!("expected InsecureScheme, got {other:?}"),
+        }
     }
 }

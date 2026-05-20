@@ -92,6 +92,7 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
@@ -99,6 +100,7 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
+use smol_str::SmolStr;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -153,6 +155,7 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
         metrics: Arc<MetricsCollector>,
+        http_client: HttpClient,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
@@ -186,6 +189,7 @@ impl JwtService {
             token_cache: token_cache.clone(),
             logger: logger.clone(),
             loading_state: loading_state.clone(),
+            http_client,
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
             jwks_cancel_token: jwks_cancel_token.clone(),
         };
@@ -194,6 +198,20 @@ impl JwtService {
 
         // Create TrustedIssuerValidator for advanced validation scenarios
         let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
+
+        {
+            let cache = token_cache.clone();
+            let cancel = jwks_cancel_token.clone();
+            crate::http::spawn_task(async move {
+                loop {
+                    tokio::select! {
+                        () = crate::async_sleep::sleep(std::time::Duration::from_secs(30)) => {},
+                        () = cancel.cancelled() => { break; },
+                    }
+                    cache.clear_expired();
+                }
+            });
+        }
 
         Ok(Self {
             validators,
@@ -234,20 +252,15 @@ impl JwtService {
             token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<std::sync::RwLock<JwtValidator>> =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<JwtValidator> = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
         // was set on initialization
-        let mut validated_jwt = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(jwt, decoding_key)?
-        };
+        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
 
         // Use TrustedIssuerValidator to find and validate against trusted issuer
         // This implements Requirement 5: "WHEN processing JWT tokens THEN the Cedarling
@@ -348,9 +361,6 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
 
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
-
         let now = Utc::now();
 
         for (index, token) in tokens.iter().enumerate() {
@@ -387,22 +397,12 @@ impl JwtService {
                             .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                         // Check for non-deterministic tokens (graceful validation)
-                        let combination = format!("{}:{}", issuer, token.mapping);
-                        if seen_combinations.insert(combination.clone()) {
+                        let combination =
+                            (SmolStr::from(issuer), SmolStr::from(token.mapping.as_str()));
+                        if seen_combinations.insert(combination) {
                             // Convert ValidatedJwt to Token
-                            let claims =
-                                serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                                    .map_err(|err| {
-                                        if let Some(logger) = &self.logger {
-                                            logger.log_any(JwtLogEntry::new(
-                                                format!(
-                                                    "failed to deserialize token claims: {err}"
-                                                ),
-                                                Some(LogLevel::ERROR),
-                                            ));
-                                        }
-                                        MultiIssuerValidationError::TokenValidationFailed
-                                    })?;
+                            let claims = TokenClaims::try_from(validated_jwt.claims)
+                                .map_err(MultiIssuerValidationError::InvalidClaims)?;
 
                             let cedar_token = Arc::new(Token::new(
                                 &token_name,
@@ -546,11 +546,24 @@ mod test {
     use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::http::HttpClient;
+    use crate::http::HttpClientConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
     use std::sync::Arc;
+    use std::sync::LazyLock;
+    use std::time::Duration;
     use tokio::test;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
@@ -585,7 +598,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -595,7 +607,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -612,6 +623,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -649,6 +661,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -676,6 +689,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -715,7 +729,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -726,7 +739,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -744,6 +756,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -793,7 +806,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -811,6 +823,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -854,6 +867,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -880,7 +894,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -898,6 +911,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -960,7 +974,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -978,6 +991,7 @@ mod test {
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -1028,6 +1042,7 @@ mod test {
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
             Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");

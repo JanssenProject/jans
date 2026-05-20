@@ -26,52 +26,7 @@
                         "token_id": "jti"
                     },
                     "id_tokens": {},
-                    "userinfo_tokens": {
-                        "user_id": "sub",
-                        "role_mapping": "role",
-                        "claim_mapping": {
-                            "email": {
-                                "parser": "regex",
-                                "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
-                                "UID": {
-                                    "attr": "uid",
-                                    "type": "String"
-                                },
-                                "DOMAIN": {
-                                    "attr": "domain",
-                                    "type": "String"
-                                }
-                            },
-                            "profile": {
-                                "parser": "regex",
-                                "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P<HOST>[^\\/:\\#?]+)(?::(?<PORT>\\d+))?(?P<PATH>\\/[^?\\#]*)?(?:\\?(?P<QUERY>[^\\#]*))?(?:(?P<FRAGMENT>.*))?/gm",
-                                "SCHEME": {
-                                    "attr": "scheme",
-                                    "type": "String"
-                                },
-                                "HOST": {
-                                    "attr": "host",
-                                    "type": "String"
-                                },
-                                "PORT": {
-                                    "attr": "port",
-                                    "type": "String"
-                                },
-                                "PATH": {
-                                    "attr": "path",
-                                    "type": "String"
-                                },
-                                "QUERY": {
-                                    "attr": "query",
-                                    "type": "String"
-                                },
-                                "FRAGMENT": {
-                                    "attr": "fragment",
-                                    "type": "String"
-                                }
-                            }
-                        }
-                    },
+                    "userinfo_tokens": {},
                     "tx_tokens": {}
                 }
             },
