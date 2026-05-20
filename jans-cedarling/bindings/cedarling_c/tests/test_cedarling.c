@@ -15,7 +15,6 @@
 // Test configuration - uses policy-store_ok_2.yaml for unsigned authorization
 const char* TEST_CONFIG = "{\n"
     "    \"CEDARLING_APPLICATION_NAME\": \"TestApp\",\n"
-    "    \"CEDARLING_POLICY_STORE_ID\": \"a1bf93115de86de760ee0bea1d529b521489e5a11747\",\n"
     "    \"CEDARLING_JWT_SIG_VALIDATION\": \"disabled\",\n"
     "    \"CEDARLING_JWT_STATUS_VALIDATION\": \"disabled\",\n"
     "    \"CEDARLING_LOG_TYPE\": \"std_out\",\n"

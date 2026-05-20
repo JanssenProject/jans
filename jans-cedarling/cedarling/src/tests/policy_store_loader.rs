@@ -260,16 +260,13 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
@@ -286,16 +283,13 @@ fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) 
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#

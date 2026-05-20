@@ -76,7 +76,7 @@ the Cedarling will use the default value as specified in the property definition
 
 **HTTP client:**
 
-- **`CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
+- **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
 
@@ -110,7 +110,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **JWT and cryptographic behavior:**
 
-- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Default is `enabled`. **Disabling this is strongly discouraged outside of testing**: a JWT without signature validation is just plain JSON and is trivially spoofable.
+- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Loopback hosts (`localhost`, `127.0.0.1`, `::1`) are allowed over plain HTTP so local development is not blocked. Default is `enabled`. **Disabling this is strongly discouraged outside of testing**: a JWT without signature validation is just plain JSON and is trivially spoofable.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `enabled`. If the issuer does not publish a `status_list_endpoint`, status checks are skipped gracefully for that issuer.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
 - **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
