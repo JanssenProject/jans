@@ -33,11 +33,11 @@ use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 type StatusListUri = String;
 
 struct StatusListUpdateCtx {
-    ttl: u64,
-    /// Upper bound on the refresh interval (seconds). The Status List JWT's `ttl`
+    ttl: Duration,
+    /// Upper bound on the refresh interval. The Status List JWT's `ttl`
     /// claim is honored when present, but capped to this value; when the JWT omits
     /// `ttl`, this value is used directly.
-    refresh_interval_max: u64,
+    refresh_interval_max: Duration,
     status_list_url: Url,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<JwtValidator>,
@@ -52,7 +52,16 @@ pub(crate) struct InitForIssArgs<'a> {
     pub token_cache: TokenCache,
     pub logger: Option<Logger>,
     pub http_client: HttpClient,
-    pub refresh_interval_max: u64,
+    pub refresh_interval_max: Duration,
+}
+
+/// Resolve effective refresh interval as `min(jwt_ttl, refresh_interval_max)`,
+/// or `refresh_interval_max` when the JWT omits `ttl`.
+fn effective_refresh_interval(jwt_ttl_secs: Option<u64>, max: Duration) -> Duration {
+    match jwt_ttl_secs {
+        Some(t) => Duration::from_secs(t).min(max),
+        None => max,
+    }
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -120,9 +129,7 @@ impl StatusListCache {
         // always request a *more frequent* refresh, but never a less frequent one.
         // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let ttl = status_list_jwt
-            .ttl
-            .map_or(refresh_interval_max, |t| t.min(refresh_interval_max));
+        let ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
         let status_list: StatusList = status_list_jwt.try_into()?;
 
         let ctx = StatusListUpdateCtx {
@@ -173,7 +180,7 @@ where
     } = ctx;
 
     loop {
-        sleep(Duration::from_secs(ttl)).await;
+        sleep(ttl).await;
 
         let status_list_jwt =
             match StatusListJwtStr::get_from_url(&status_list_url, &http_client).await {
@@ -223,9 +230,7 @@ where
         };
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
-        ttl = status_list_jwt
-            .ttl
-            .map_or(refresh_interval_max, |t| t.min(refresh_interval_max));
+        ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
 
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
@@ -337,8 +342,9 @@ mod test {
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
-                    refresh_interval_max:
-                        JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+                    // Small cap so the JWT ttl (1s) is capped to a sub-second
+                    // value, keeping the test fast.
+                    refresh_interval_max: Duration::from_millis(200),
                 },
             )
             .await
@@ -370,7 +376,7 @@ mod test {
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b0000_0001], None);
 
         // Wait for the token to expire and get updated
-        tokio::time::sleep(Duration::from_secs(3)).await;
+        tokio::time::sleep(Duration::from_millis(600)).await;
 
         // Check if the status list got updated
         {
@@ -451,7 +457,7 @@ mod test {
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
-                    refresh_interval_max: 1,
+                    refresh_interval_max: Duration::from_millis(200),
                 },
             )
             .await
@@ -463,7 +469,7 @@ mod test {
         mock_server
             .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b0000_0001]);
 
-        tokio::time::sleep(Duration::from_secs(3)).await;
+        tokio::time::sleep(Duration::from_millis(600)).await;
 
         let lists = status_list
             .status_lists
@@ -479,6 +485,102 @@ mod test {
                 list: vec![0b0000_0001],
             },
             "max interval did not trigger a refresh",
+        );
+    }
+
+    /// When the Status List JWT's `ttl` exceeds the bootstrap-config
+    /// `status_list_refresh_interval_max`, the refresh loop must cap the sleep
+    /// at the max so the cache still refreshes before the JWT's own ttl.
+    #[tokio::test]
+    async fn refresh_capped_when_jwt_ttl_exceeds_max() {
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        })
+        .expect("http client should be constructed");
+
+        let validators = JwtValidatorCache::default();
+        let key_service = KeyService::default();
+        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
+        key_service
+            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .await
+            .unwrap();
+        // JWT ttl = 10s, much larger than refresh_interval_max = 1s
+        mock_server.generate_status_list_endpoint(
+            1u8.try_into().unwrap(),
+            &[0b1111_1110],
+            Some(10),
+        );
+        let status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            HashMap::default(),
+        );
+
+        let iss_config = IssuerConfig {
+            issuer_id: "some_iss_id".into(),
+            policy: Arc::new(ti),
+            openid_config: Some(mock_server.openid_config()),
+        };
+        validators.init_for_iss(
+            &iss_config,
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: false,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+                ..Default::default()
+            },
+            &status_list,
+            None,
+        );
+        status_list
+            .init_for_iss(
+                &iss_config,
+                InitForIssArgs {
+                    validators: &validators,
+                    key_service: &key_service,
+                    token_cache: TokenCache::default(),
+                    logger: None,
+                    http_client,
+                    refresh_interval_max: Duration::from_millis(200),
+                },
+            )
+            .await
+            .unwrap();
+
+        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+
+        // Update the server-side list before the cap-driven refresh fires.
+        mock_server.generate_status_list_endpoint(
+            1u8.try_into().unwrap(),
+            &[0b0000_0001],
+            Some(10),
+        );
+
+        // Sleep > refresh_interval_max but < JWT ttl: refresh only fires if
+        // the loop honored min(ttl, refresh_interval_max).
+        tokio::time::sleep(Duration::from_millis(600)).await;
+
+        let lists = status_list
+            .status_lists
+            .read()
+            .expect("obtain status_lists read lock");
+        let got = lists
+            .get(&status_list_uri)
+            .expect("should have a status list");
+        assert_eq!(
+            *got,
+            StatusList {
+                bit_size: 1u8.try_into().unwrap(),
+                list: vec![0b0000_0001],
+            },
+            "refresh did not respect the configured cap over the JWT ttl",
         );
     }
 }
