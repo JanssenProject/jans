@@ -7,7 +7,8 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use crate::{lock_config::LockServiceConfig, HttpClientConfig, JwtConfig};
+use super::feature_types::FeatureToggle;
+use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
 
 pub(super) fn default_jti() -> String {
     "jti".to_string()
@@ -17,12 +18,20 @@ pub(super) fn default_true() -> bool {
     true
 }
 
+pub(super) fn default_enabled_feature_toggle() -> FeatureToggle {
+    FeatureToggle::Enabled
+}
+
 pub(super) fn default_token_cache_capacity() -> usize {
-    JwtConfig::default().token_cache_capacity
+    JwtConfig::DEFAULT_TOKEN_CACHE_CAPACITY
+}
+
+pub(super) fn default_token_cache_max_ttl() -> usize {
+    JwtConfig::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS
 }
 
 pub(super) fn default_jwks_refresh_min_interval() -> u64 {
-    JwtConfig::default().jwks_refresh_min_interval
+    JwtConfig::DEFAULT_JWKS_REFRESH_MIN_INTERVAL
 }
 
 pub(super) fn default_status_list_refresh_interval_max() -> u64 {
