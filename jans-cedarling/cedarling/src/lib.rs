@@ -128,7 +128,7 @@ impl Cedarling {
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
-            .then(|| ApplicationName(config.application_name.clone()));
+            .then(|| ApplicationName::from(config.application_name.clone()));
 
         let metrics = Arc::new(
             if config

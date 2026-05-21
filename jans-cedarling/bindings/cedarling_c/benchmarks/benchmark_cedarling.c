@@ -58,7 +58,6 @@ static void init_benchmark_configs(const char *argv0) {
         sizeof(UNSIGNED_CONFIG),
         "{"
         "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
-        "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
         "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
         "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
         "\"CEDARLING_LOG_TYPE\":\"off\","
@@ -76,7 +75,6 @@ static void init_benchmark_configs(const char *argv0) {
         sizeof(MULTI_ISSUER_CONFIG),
         "{"
         "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
-        "\"CEDARLING_POLICY_STORE_ID\":\"a1bf93115de86de760ee0bea1d529b521489e5a11747\","
         "\"CEDARLING_JWT_SIG_VALIDATION\":\"disabled\","
         "\"CEDARLING_JWT_STATUS_VALIDATION\":\"disabled\","
         "\"CEDARLING_LOG_TYPE\":\"off\","

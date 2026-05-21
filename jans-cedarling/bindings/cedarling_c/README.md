@@ -85,7 +85,6 @@ cedarling_init();
 // Create a new instance with configuration
 const char* config = "{"
     "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
-    "\"CEDARLING_POLICY_STORE_ID\": \"your-policy-store-id\","
     "\"CEDARLING_LOG_LEVEL\": \"INFO\","
     "\"CEDARLING_LOG_TYPE\": \"std_out\","
     "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"/path/to/policy-store.yaml\""
@@ -420,7 +419,6 @@ For complete configuration documentation, see [cedarling-properties.md](../../..
 ```json
 {
     "CEDARLING_APPLICATION_NAME": "MyApp",
-    "CEDARLING_POLICY_STORE_ID": "your-policy-store-id",
     "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_LOG_TYPE": "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.yaml",

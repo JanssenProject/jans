@@ -28,7 +28,6 @@ use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
 use serde_json::json;
 use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
-use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid7::Uuid;
@@ -716,13 +715,7 @@ fn calculate_elapsed_time(start_time: chrono::DateTime<Utc>) -> i64 {
 }
 
 fn serialize_entities(entities: &Entities) -> serde_json::Value {
-    let mut buf = Vec::new();
-    let cursor = Cursor::new(&mut buf);
-    entities
-        .write_to_json(cursor)
-        .ok()
-        .and_then(|()| serde_json::from_slice(buf.as_slice()).ok())
-        .unwrap_or(serde_json::Value::Null)
+    entities.to_json_value().unwrap_or(serde_json::Value::Null)
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_decision`] method.

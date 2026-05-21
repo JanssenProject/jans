@@ -25,6 +25,7 @@ impl ErrorMetricKey for MultiIssuerValidationError {
             Self::TokenValidationFailed => "multi_issuer.all_tokens_failed",
             Self::InvalidContextJson => "multi_issuer.invalid_context",
             Self::MissingIssuer => "multi_issuer.missing_issuer",
+            MultiIssuerValidationError::InvalidClaims(_) => "multi_issuer.invalid_claim",
         }
     }
 }

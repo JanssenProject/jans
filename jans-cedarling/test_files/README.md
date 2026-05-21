@@ -4,7 +4,7 @@ This folder contains policy store files used for unit testing purposes.
 
 ## Bootstrap config fixtures
 
-- `bootstrap_props.json` / `bootstrap_props.yaml`: sample bootstrap config. `CEDARLING_POLICY_STORE_LOCAL_FN` points to `policy-store_ok.yaml` (Agama format with `policy_stores`). All keys match `BootstrapConfigRaw`; deprecated options (e.g. `CEDARLING_USER_AUTHZ`) are not present.
+- `bootstrap_props.json` / `bootstrap_props.yaml`: sample bootstrap config. `CEDARLING_POLICY_STORE_LOCAL_FN` points to `policy-store_ok.yaml` (Agama format with `policy_stores`). All keys match `BootstrapConfigRaw`.
 
 ## Descriptions of json policy store test fixtures
 
