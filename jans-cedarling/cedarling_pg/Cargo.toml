@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 description = "PostgreSQL extension integrating Cedarling authorization (pgrx)."
 license = "Apache-2.0"
+# Required for cargo-deny: the path-only dep on cedarling is only exempt from the
+# workspace-wide `wildcards = "deny"` rule when this crate is marked
+# `publish = false` (see deny.toml `allow-wildcard-paths`).
+publish = false
 
 [lib]
 crate-type = ["cdylib"]
