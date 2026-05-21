@@ -21,7 +21,8 @@ use crate::{
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
         OpenIdConfig, TokenCache, key_service::KeyServiceError,
-        loading_state::TrustedIssuerLoadingState, status_list::StatusListCache,
+        loading_state::TrustedIssuerLoadingState,
+        status_list::{InitForIssArgs, StatusListCache},
         validation::JwtValidatorCache,
     },
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
@@ -226,11 +227,18 @@ pub(super) async fn load_trusted_issuer(
             .status_lists
             .init_for_iss(
                 &iss_config,
-                &loader.validators,
-                &loader.key_service,
-                loader.token_cache.clone(),
-                loader.logger.clone(),
-                http_client,
+                InitForIssArgs {
+                    validators: &loader.validators,
+                    key_service: &loader.key_service,
+                    token_cache: loader.token_cache.clone(),
+                    logger: loader.logger.clone(),
+                    http_client,
+                    // `JwtConfig` has already been normalized in `JwtService::new`,
+                    // so this value is guaranteed to be in the safe range.
+                    refresh_interval_max: std::time::Duration::from_secs(
+                        loader.jwt_config.status_list_refresh_interval_max,
+                    ),
+                },
             )
             .await?;
     }

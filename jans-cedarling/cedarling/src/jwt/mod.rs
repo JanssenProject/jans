@@ -161,6 +161,13 @@ impl JwtService {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
         }
 
+        // Apply field-level invariants once here so the bootstrap deserializer is
+        // not the only line of defense - programmatic callers that build a
+        // `JwtConfig` directly cannot otherwise reach the normalization.
+        let mut jwt_config = jwt_config.clone();
+        jwt_config.normalize();
+        let jwt_config = &jwt_config;
+
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());

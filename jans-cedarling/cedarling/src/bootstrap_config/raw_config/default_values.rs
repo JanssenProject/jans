@@ -34,6 +34,10 @@ pub(super) fn default_jwks_refresh_min_interval() -> u64 {
     JwtConfig::DEFAULT_JWKS_REFRESH_MIN_INTERVAL
 }
 
+pub(super) fn default_status_list_refresh_interval_max() -> u64 {
+    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) fn default_stdout_timeout_millis() -> u64 {
     StdOutLoggerMode::DEFAULT_FLUSH_TIMEOUT_MILLIS
