@@ -1178,6 +1178,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="JWT Status Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-list-refresh-cadence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status List Refresh Cadence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1608,6 +1625,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="JWT Status Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-list-refresh-cadence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status List Refresh Cadence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1945,6 +1979,9 @@ namespace Acme {
 <p>ℹ️ <strong>Use Case</strong></p>
 <p>Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.</p>
 </blockquote>
+<h3 id="status-list-refresh-cadence">Status List Refresh Cadence<a class="headerlink" href="#status-list-refresh-cadence" title="Permanent link">#</a></h3>
+<p>By design, the refresh interval for the Status List JWT is driven by the <code>ttl</code> claim <strong>inside the Status List JWT itself</strong>, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every <code>ttl</code> seconds.</p>
+<p>The bootstrap property <code>CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX</code> (default <code>300</code> seconds) caps that interval: the effective refresh interval is <code>min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)</code>, so the issuer can always request a <em>more frequent</em> refresh, but never a less frequent one. When the issuer omits the <code>ttl</code> claim, the max value is used directly so the cache cannot silently go stale forever. A value of <code>0</code> or an unset variable resolves to the built-in default. Non-zero values below <code>5</code> seconds are clamped up to <code>5</code> seconds.</p>
 <h2 id="jwt-validation-flow-diagram">JWT Validation Flow Diagram<a class="headerlink" href="#jwt-validation-flow-diagram" title="Permanent link">#</a></h2>
 <p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the <code>authorize_multi_issuer</code> flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
 <p><img alt="Cedarling JWT validation flow diagram showing token verification process" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
@@ -1982,7 +2019,7 @@ namespace Acme {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 20, 2026 18:28:56 UTC"><span class="timeago" datetime="2026-05-20T18:28:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 20, 2026 18:28:56 UTC">2026-05-20</span>
   </span>
 
     
