@@ -163,21 +163,14 @@ it is your Docker container ID.
 
 ### Python instructions (if Docker is unavailable)
 
+Python 3.11 is required for this approach.
+
 - Clone the Janssen repository and navigate to `jans/jans-cedarling/flask-sidecar`.
-- Run `poetry install` to install dependencies.
-- Download and install the latest Cedarling nightly wheel:
-
-```bash
-wget https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-```
-
-- Install the nightly wheel:
-
-```bash
-poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-```
+- Run `uv sync --locked --python 3.11` to install dependencies.
 
 - Modify `secrets/bootstrap.json` to your specifications.
+
+- Activate the virtual environment: `source .venv/bin/activate`
 
 - Navigate to `jans/jans-cedarling/flask-sidecar/main`
 
@@ -189,7 +182,7 @@ CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
 ```
 
-- Run the sidecar: `poetry run flask run`
+- Run the sidecar: `flask run`
 
 - The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
