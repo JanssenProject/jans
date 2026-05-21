@@ -80,8 +80,7 @@ end
 Before you begin, make sure you have the following:
 
 - `Docker` installed on your machine
-- `Python 3.10` or higher
-- `pipx` and `Poetry` installed if you're not using Docker
+- `Python 3.11` and `uv` if you are not using Docker
 
 ## Policy Store Setup (Agama Lab)
 
