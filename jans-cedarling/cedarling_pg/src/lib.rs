@@ -694,6 +694,36 @@ mod tests {
     fn test_rls_unsigned_policy_filters_select_under_row_security() {
         crate::functions::pg_test_rls_unsigned::run_rls_unsigned_policy_filters_select_under_row_security();
     }
+
+    #[pg_test]
+    fn test_unsigned_unconditional_permit_returns_true() {
+        crate::authz::pg_test_where::run_unsigned_unconditional_permit_returns_true();
+    }
+
+    #[pg_test]
+    fn test_unsigned_no_matching_action_returns_false() {
+        crate::authz::pg_test_where::run_unsigned_no_matching_action_returns_false();
+    }
+
+    #[pg_test]
+    fn test_unsigned_resource_predicate_lowers_to_sql() {
+        crate::authz::pg_test_where::run_unsigned_resource_predicate_lowers_to_sql();
+    }
+
+    #[pg_test]
+    fn test_unsigned_unhandled_predicate_returns_partial_true() {
+        crate::authz::pg_test_where::run_unsigned_unhandled_predicate_returns_partial_true();
+    }
+
+    #[pg_test]
+    fn test_unsigned_predicate_matches_rls_count_parity() {
+        crate::authz::pg_test_where::run_unsigned_predicate_matches_rls_count_parity();
+    }
+
+    #[pg_test]
+    fn test_explain_includes_policy_hits_and_policies() {
+        crate::authz::pg_test_where::run_explain_includes_policy_hits_and_policies();
+    }
 }
 
 /// Required by `cargo pgrx test`.

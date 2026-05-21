@@ -40,8 +40,7 @@ impl Drop for WhereParityGuard {
             self.qrole
         ))
         .ok();
-        Spi::run(&format!("DROP TABLE IF EXISTS {} CASCADE", self.qtable))
-            .ok();
+        Spi::run(&format!("DROP TABLE IF EXISTS {} CASCADE", self.qtable)).ok();
         Spi::run(&format!("DROP ROLE IF EXISTS {}", self.qrole)).ok();
         Spi::run("RESET cedarling.bootstrap_config").ok();
         crate::authz::cache::global_cache().clear_all();
@@ -150,7 +149,7 @@ fn create_probe_table_and_register_mapping(table_name: &str) {
     ))
     .expect("CREATE probe table");
     Spi::run(&format!(
-        "SELECT cedarling_register_entity_map({qname}::regclass::oid, 'Jans::Issue', ARRAY['id'])"
+        "SELECT cedarling_register_entity_map('{table_name}'::regclass::oid, 'Jans::Issue', ARRAY['id'])"
     ))
     .expect("register entity map for probe table");
 }
@@ -161,13 +160,13 @@ fn drop_probe_table(table_name: &str) {
 }
 
 /// Unconditional permit (`WhereOpen`) must lower to `"TRUE"` via `AlwaysTrue`.
-#[pg_test]
-fn run_unsigned_unconditional_permit_returns_true() {
+pub fn run_unsigned_unconditional_permit_returns_true() {
     let work = setup_engine_with_where_policies("unconditional");
     let table = "cedarling_pg_where_unconditional";
     create_probe_table_and_register_mapping(table);
 
-    let pred = crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereOpen\"", None);
+    let pred =
+        crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereOpen\"", None);
     assert_eq!(
         pred, "TRUE",
         "unsigned + unconditional permit must lower to AlwaysTrue (\"TRUE\")"
@@ -178,13 +177,13 @@ fn run_unsigned_unconditional_permit_returns_true() {
 }
 
 /// No matching action → zero policies → `AlwaysFalse` → `"FALSE"`.
-#[pg_test]
-fn run_unsigned_no_matching_action_returns_false() {
+pub fn run_unsigned_no_matching_action_returns_false() {
     let work = setup_engine_with_where_policies("nomatch");
     let table = "cedarling_pg_where_nomatch";
     create_probe_table_and_register_mapping(table);
 
-    let pred = crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"DoesNotExist\"", None);
+    let pred =
+        crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"DoesNotExist\"", None);
     assert_eq!(
         pred, "FALSE",
         "no matching policy must lower to AlwaysFalse (\"FALSE\")"
@@ -195,13 +194,13 @@ fn run_unsigned_no_matching_action_returns_false() {
 }
 
 /// `resource.country == "US"` lowers to a SQL equality predicate with quoted column + literal.
-#[pg_test]
-fn run_unsigned_resource_predicate_lowers_to_sql() {
+pub fn run_unsigned_resource_predicate_lowers_to_sql() {
     let work = setup_engine_with_where_policies("eq");
     let table = "cedarling_pg_where_eq";
     create_probe_table_and_register_mapping(table);
 
-    let pred = crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereEq\"", None);
+    let pred =
+        crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereEq\"", None);
     assert!(
         pred.contains("\"country\""),
         "predicate must reference the quoted column name; got: {pred}"
@@ -214,8 +213,14 @@ fn run_unsigned_resource_predicate_lowers_to_sql() {
         pred.contains('='),
         "predicate must contain a SQL equality comparator; got: {pred}"
     );
-    assert_ne!(pred, "TRUE", "structural lowering must not collapse to AlwaysTrue");
-    assert_ne!(pred, "FALSE", "matching policy must not collapse to AlwaysFalse");
+    assert_ne!(
+        pred, "TRUE",
+        "structural lowering must not collapse to AlwaysTrue"
+    );
+    assert_ne!(
+        pred, "FALSE",
+        "matching policy must not collapse to AlwaysFalse"
+    );
 
     drop_probe_table(table);
     let _ = fs::remove_dir_all(&work);
@@ -223,13 +228,16 @@ fn run_unsigned_resource_predicate_lowers_to_sql() {
 
 /// Method-call body (`resource.tags.contains(...)`) can't be lowered → `Partial` → `"TRUE"`.
 /// Row-by-row authorization remains authoritative; a WARN diagnostic names the unhandled policy.
-#[pg_test]
-fn run_unsigned_unhandled_predicate_returns_partial_true() {
+pub fn run_unsigned_unhandled_predicate_returns_partial_true() {
     let work = setup_engine_with_where_policies("unhandled");
     let table = "cedarling_pg_where_unhandled";
     create_probe_table_and_register_mapping(table);
 
-    let pred = crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereUnhandled\"", None);
+    let pred = crate::authz::where_clause::cedarling_where(
+        table,
+        "Jans::Action::\"WhereUnhandled\"",
+        None,
+    );
     assert_eq!(
         pred, "TRUE",
         "unhandled (method-call) policy must surface a permissive Partial \"TRUE\" fragment"
@@ -242,8 +250,7 @@ fn run_unsigned_unhandled_predicate_returns_partial_true() {
 /// Parity: `SELECT count(*) FROM t WHERE <cedarling_where(...)>` must equal
 /// `SELECT count(*) FROM t` under RLS with per-row `cedarling_authorize_unsigned`.
 /// Dataset: 3 rows (2 US, 1 CA); `WhereEq` permits `country == "US"` → both counts = 2.
-#[pg_test]
-fn run_unsigned_predicate_matches_rls_count_parity() {
+pub fn run_unsigned_predicate_matches_rls_count_parity() {
     let work = setup_engine_with_where_policies("parity");
     let table = "cedarling_pg_where_parity";
     let role = "cedarling_pg_where_parity_role";
@@ -273,11 +280,12 @@ fn run_unsigned_predicate_matches_rls_count_parity() {
     .expect("INSERT parity rows");
 
     Spi::run(&format!(
-        "SELECT cedarling_register_entity_map({qtable}::regclass::oid, 'Jans::Issue', ARRAY['id'])"
+        "SELECT cedarling_register_entity_map('{table}'::regclass::oid, 'Jans::Issue', ARRAY['id'])"
     ))
     .expect("register entity map (parity)");
 
-    let pred = crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereEq\"", None);
+    let pred =
+        crate::authz::where_clause::cedarling_where(table, "Jans::Action::\"WhereEq\"", None);
     assert_ne!(
         pred, "FALSE",
         "policy `WhereEq` must produce a permissive predicate (got FALSE — engine bootstrap failed?)"
@@ -343,8 +351,7 @@ fn run_unsigned_predicate_matches_rls_count_parity() {
 /// `cedarling_explain` should include request/diagnostic/policy metadata on a successful call.
 ///
 /// Uses `WhereOpen` which is an unconditional permit for `Jans::Issue` resources.
-#[pg_test]
-fn run_explain_includes_policy_hits_and_policies() {
+pub fn run_explain_includes_policy_hits_and_policies() {
     let work = setup_engine_with_where_policies("explain");
     let result = crate::observability::trace::cedarling_explain(
         r#"{
@@ -365,11 +372,15 @@ fn run_explain_includes_policy_hits_and_policies() {
         "successful explain must include request_id; got: {v}"
     );
     assert!(
-        v.get("policy_hits").and_then(|x| x.as_array()).is_some_and(|a| !a.is_empty()),
+        v.get("policy_hits")
+            .and_then(|x| x.as_array())
+            .is_some_and(|a| !a.is_empty()),
         "successful explain should include non-empty policy_hits; got: {v}"
     );
     assert!(
-        v.get("policies").and_then(|x| x.as_array()).is_some_and(|a| !a.is_empty()),
+        v.get("policies")
+            .and_then(|x| x.as_array())
+            .is_some_and(|a| !a.is_empty()),
         "successful explain should include non-empty policies; got: {v}"
     );
 

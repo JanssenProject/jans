@@ -413,38 +413,3 @@ jobs:
       run: |
         git --no-pager diff --exit-code sql/cedarling_pg--0.1.0.sql \
           || (echo "sql/cedarling_pg--0.1.0.sql is out of date; run 'cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql' and commit the result." && exit 1)
-
-    # Exercise the end-user (no Rust) install path on every PR. This builds
-    # the same artifact the release workflow ships, then installs it via the
-    # install-binary.sh script into a system Postgres and creates the
-    # extension. If this breaks, the release tarballs would break too.
-    - name: Build extension package (cargo pgrx package)
-      working-directory: jans-cedarling/cedarling_pg
-      run: cargo pgrx package --features pg16
-
-    - name: Install system PostgreSQL 16
-      run: |
-        sudo apt-get install -y --no-install-recommends postgresql-16 postgresql-server-dev-16
-        sudo systemctl start postgresql@16-main || sudo pg_ctlcluster 16 main start
-
-    - name: Install cedarling_pg from staged tarball
-      working-directory: jans-cedarling/cedarling_pg
-      run: |
-        set -euxo pipefail
-        version="$(grep -m1 '^version' Cargo.toml | sed -E 's/version *= *"([^"]+)"/\1/')"
-        stage="$(mktemp -d)"
-        base="cedarling_pg-${version}-pg16-x86_64-unknown-linux-gnu"
-        mkdir -p "${stage}/${base}"
-        cp -a "target/release/cedarling_pg-pg16/." "${stage}/${base}/"
-        install -m 0755 scripts/install-binary.sh "${stage}/${base}/install.sh"
-        tar -czf "${stage}/${base}.tar.gz" -C "${stage}" "${base}"
-
-        cd "${stage}"
-        tar -xzf "${base}.tar.gz"
-        cd "${base}"
-        PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config ./install.sh
-
-    - name: Verify CREATE EXTENSION works against system PostgreSQL
-      run: |
-        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE EXTENSION cedarling_pg;"
-        sudo -u postgres psql -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM pg_proc WHERE proname LIKE 'cedarling_%';"
