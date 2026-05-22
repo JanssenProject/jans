@@ -214,10 +214,7 @@ nav:
       - JARM: janssen-server/auth-server/openid-features/jarm.md
       - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
       - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
-      - Consent:
-        - janssen-server/auth-server/openid-features/consent/README.md
-        - Customize: janssen-server/auth-server/openid-features/consent/customize.md
-        - List/Delete Consent: janssen-server/auth-server/openid-features/consent/list-delete.md
+      - Consent: janssen-server/auth-server/openid-features/consent.md
       - Logout:
         - janssen-server/auth-server/openid-features/logout/README.md
         - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
@@ -612,6 +609,7 @@ nav:
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md
     - OPA: cedarling/integrations/cedarling-opa.md
+    - OpenSearch: cedarling/integrations/opensearch.md
     - Terraform Authorization:
       - Overview: cedarling/integrations/terraform-authz-overview.md
       - Unsigned Flow: cedarling/integrations/terraform-authz.md
