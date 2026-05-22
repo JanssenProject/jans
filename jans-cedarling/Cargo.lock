@@ -796,6 +796,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cedarling_pg_codegen"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "postgres",
+]
+
+[[package]]
 name = "cedarling_python"
 version = "0.0.0"
 dependencies = [
