@@ -38,9 +38,10 @@ use crate::observability::trace::{push_trace, AuthorizationTrace};
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
 pub fn cedarling_authorized_row(
     resource: pgrx::datum::JsonB,
-    action: &str,
+    action: Option<&str>,
     context: Option<pgrx::datum::JsonB>,
 ) -> bool {
+    let action = action.unwrap_or("Read");
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
         return finalize_error(&CedarlingError::RequestInvalid("empty action".into()));
@@ -277,7 +278,7 @@ fn apply_mask_strategy(decision: bool) -> (bool, bool) {
 #[pg_extern(name = "cedarling_authorized_row", volatile, parallel_restricted)]
 pub fn cedarling_authorized_row_from_anyelement(
     record: AnyElement,
-    action: &str,
+    action: Option<&str>,
     context: Option<JsonB>,
 ) -> bool {
     let resource_json = match crate::resource::row::build_resource_json_from_row(record) {

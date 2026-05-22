@@ -332,7 +332,7 @@ mod tests {
             "cedar_entity_mapping": {"entity_type": "T", "id": "x"}
         }));
         assert!(
-            !crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None),
+            !crate::row_authz::cedarling_authorized_row(resource, Some("T::Action::\"A\""), None),
             "cedarling_authorized_row: without engine, fail-closed should deny"
         );
     }
@@ -472,7 +472,7 @@ mod tests {
             "cedar_entity_mapping": {"entity_type": "T", "id": "x"},
             "secret_col": "top-secret"
         }));
-        let result = crate::row_authz::cedarling_authorized_row(resource, "T::Action::\"A\"", None);
+        let result = crate::row_authz::cedarling_authorized_row(resource, Some("T::Action::\"A\""), None);
         // With no engine and fail-closed, decision=false. With strategy=mask, function returns true.
         assert!(result, "strategy=mask on deny must return true");
 

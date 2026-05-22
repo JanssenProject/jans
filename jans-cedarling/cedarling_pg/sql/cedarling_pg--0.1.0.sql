@@ -103,7 +103,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_wrapper';
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"resource" jsonb, /* pgrx :: datum :: JsonB */
-	"action" TEXT, /* & str */
+	"action" TEXT, /* Option < & str > */
 	"context" jsonb /* Option < pgrx :: datum :: JsonB > */
 ) RETURNS bool /* bool */
 VOLATILE PARALLEL RESTRICTED
@@ -112,11 +112,11 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:277
+-- cedarling_pg/src/functions/authorized_row.rs:278
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
-	"action" TEXT, /* & str */
+	"action" TEXT, /* Option < & str > */
 	"context" jsonb /* Option < JsonB > */
 ) RETURNS bool /* bool */
 VOLATILE PARALLEL RESTRICTED 
@@ -125,7 +125,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:297
+-- cedarling_pg/src/functions/authorized_row.rs:298
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
