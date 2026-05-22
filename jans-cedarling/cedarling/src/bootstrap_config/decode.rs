@@ -22,10 +22,10 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::HttpClientConfig;
 use crate::context_data_api::DataStoreConfig;
 use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
+use crate::HttpClientConfig;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -127,6 +127,7 @@ impl BootstrapConfig {
                 .to_config(raw.trusted_issuer_loader_workers),
             jwks_refresh_interval: raw.jwks_refresh_interval,
             jwks_refresh_min_interval: raw.jwks_refresh_min_interval,
+            status_list_refresh_interval_max: raw.status_list_refresh_interval_max,
         };
 
         let authorization_config = AuthorizationConfig {

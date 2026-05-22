@@ -76,7 +76,7 @@ the Cedarling will use the default value as specified in the property definition
 
 **HTTP client:**
 
-- **`CEDARLING_HTTP_REQUEST_TIMEOUT_MILLIS`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
+- **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
 
@@ -110,8 +110,9 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **JWT and cryptographic behavior:**
 
-- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Default is `disabled`.
-- **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `disabled`.
+- **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Loopback hosts (`localhost`, `127.0.0.1`, `::1`) are allowed over plain HTTP so local development is not blocked. Default is `enabled`. **Disabling this is strongly discouraged outside of testing**: a JWT without signature validation is just plain JSON and is trivially spoofable.
+- **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `enabled`. If the issuer does not publish a `status_list_endpoint`, status checks are skipped gracefully for that issuer.
+- **`CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`** : Upper bound on the Status List JWT refresh interval, in seconds. When the Status List JWT fetched from the issuer carries a `ttl` claim (per the IETF `oauth-status-list` spec), the effective refresh interval is `min(jwt_ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)` — the issuer can always request a *more frequent* refresh, but never a less frequent one. When the JWT omits `ttl`, this value is used directly. A value of `0` or an unset variable resolves to the built-in default (`300` seconds) so the status list cannot silently go stale forever. Non-zero values below `5` are clamped to `5`.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
 - **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
 - **`CEDARLING_JWKS_REFRESH_INTERVAL`** : Optional override for JWKS periodic refresh interval in seconds. When set, overrides the `Cache-Control: max-age` from the JWKS endpoint. If omitted, the server-driven interval or a 1-hour fallback is used.
@@ -119,7 +120,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **Token cache:**
 
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `0`, which disables the maximum TTL — in that case, the token's `exp` claim is used to compute the cache entry TTL. If the token has no `exp` claim and this is `0`, the token is not cached at all. If the token has no `exp` claim and this is > 0, this value is used as the cache TTL fallback.
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the cap — the token's `exp` claim is used as the entry TTL; tokens without `exp` are then not cached at all.
 - **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
 - **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
 

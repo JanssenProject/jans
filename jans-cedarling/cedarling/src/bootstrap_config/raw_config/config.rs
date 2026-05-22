@@ -3,13 +3,15 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
-use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
-    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
+    default_enabled_feature_toggle, default_http_client_max_retries,
+    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_log_channel_capacity, default_log_max_retries,
+    default_status_list_refresh_interval_max, default_token_cache_capacity,
+    default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -18,12 +20,13 @@ use super::default_values::{
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
-    deserialize_or_parse_string_as_json, parse_option_string,
+    deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
+    parse_option_string,
 };
-use crate::JwtConfig;
-use crate::LockTransport;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
+use crate::JwtConfig;
+use crate::LockTransport;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -151,7 +154,10 @@ pub struct BootstrapConfigRaw {
     ///
     /// When enabled, this requires the `iss` (Issuer) claim to be present in
     /// all tokens and the issuer URL must use the `https` scheme.
-    #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIG_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
 
@@ -162,7 +168,10 @@ pub struct BootstrapConfigRaw {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
 
@@ -253,10 +262,22 @@ pub struct BootstrapConfigRaw {
     pub lock_log_max_retries: u32,
 
     /// Maximum token cache TTL in seconds.
-    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
-    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
-    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
-    #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
+    ///
+    /// Caps how long a validated token may stay in the cache. The effective
+    /// TTL for an entry is `min(time-until-exp, max_ttl)` when both apply.
+    ///
+    /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
+    ///   tokens that do not carry an `exp` claim.
+    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
+    ///   claim; tokens without `exp` are not cached at all.
+    ///
+    /// Default: `5` seconds — small enough to pick up revocation / status-list
+    /// changes quickly, large enough to amortise repeated requests for the
+    /// same token.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_MAX_TTL",
+        default = "default_token_cache_max_ttl"
+    )]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
     /// Default value is 100.
@@ -385,6 +406,22 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_jwks_refresh_min_interval")]
     pub jwks_refresh_min_interval: u64,
+
+    /// Upper bound on the Status List JWT refresh interval, in seconds.
+    ///
+    /// Caps how long Cedarling waits between Status List refreshes. When the Status
+    /// List JWT carries a `ttl` claim, the effective refresh interval is
+    /// `min(jwt_ttl, status_list_refresh_interval_max)`, so the issuer can request a
+    /// *more frequent* refresh but never a less frequent one. When the JWT omits
+    /// `ttl`, this value is used directly. A value of `0` or an unset variable is
+    /// treated as "use the default" (300 seconds) so the status list cannot silently
+    /// go stale forever. Non-zero values below `5` are clamped to `5`.
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
+        default = "default_status_list_refresh_interval_max"
+    )]
+    #[serde(deserialize_with = "deserialize_status_list_refresh_interval_max")]
+    pub status_list_refresh_interval_max: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -432,7 +469,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::jwt_config::MIN_JWKS_REFRESH_SECS;
+    use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
     use std::{
         env,
         sync::{LazyLock, Mutex},
@@ -779,6 +816,61 @@ mod tests {
                 assert_eq!(
                     config.jwks_refresh_min_interval, MIN_JWKS_REFRESH_SECS,
                     "JWKS refresh min interval should be clamped to minimum"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.status_list_refresh_interval_max,
+                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+                "missing env var should resolve to the JwtConfig default"
+            );
+        });
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_from_env() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "120")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max, 120,
+                    "status list refresh max should match the value supplied via env var"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_zero_uses_default() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "0")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max,
+                    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+                    "0 should be treated as 'use the default'"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_clamps_below_min() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "2")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max, MIN_STATUS_LIST_REFRESH_SECS,
+                    "non-zero values below the minimum should be clamped"
                 );
             },
         );
