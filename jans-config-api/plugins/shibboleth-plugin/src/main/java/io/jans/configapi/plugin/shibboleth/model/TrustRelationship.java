@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.configapi.plugin.shibboleth.model.profile.*;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
@@ -47,6 +48,7 @@ public class TrustRelationship extends Entry implements Serializable {
     @NotNull
     @AttributeName
     @Schema(description = "Metadata source for Trust Relationship.")
+    @JsonObject
     private MetadataSource metadataSource;
     
     @AttributeName(name = "jansReleasedAttr")

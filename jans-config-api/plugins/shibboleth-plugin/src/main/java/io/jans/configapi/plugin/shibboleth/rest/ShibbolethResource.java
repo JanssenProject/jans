@@ -100,7 +100,7 @@ public class ShibbolethResource extends BaseResource {
     public Response getTrustedServiceProviders(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Page number to be retrieved, the number of pages is the total number of records divided by the page size (rounded up)") @DefaultValue(ApiConstants.PAGE_INDEX) @QueryParam(value = "PAGE") int page,
@@ -487,14 +487,14 @@ public class ShibbolethResource extends BaseResource {
             return pageDataList;
         }
         int dataSize = dataList.size();
-        double totalPages = (dataSize / limit);
-        logger.debug("totalPages:{}", totalPages);
+        int totalPages =  (int)Math.ceil((double)dataSize / limit);
+        logger.info("dataSize:{}, limit:{}, totalPages:{}", dataSize, limit, totalPages);
         if (totalPages < pageNo) {
             throwBadRequestException("Total pages in paginated result are:{" + totalPages
                     + "}, but page provided in request is:{" + pageNo + "} ");
         }
-        int startIndex = pageNo * limit;
-        logger.debug("startIndex:{}", startIndex);
+        int startIndex = pageNo==1? 0: (pageNo * limit +1);
+        logger.error("startIndex:{}", startIndex);
         try {
             dataList.get(startIndex);
         } catch (IndexOutOfBoundsException ioe) {
@@ -504,13 +504,15 @@ public class ShibbolethResource extends BaseResource {
         }
 
         int toIndex = (startIndex + limit <= dataList.size()) ? startIndex + limit : dataList.size();
-        try {
+
+        logger.error("toIndex:{}", toIndex);
+       /* try {
             dataList.get(toIndex);
         } catch (IndexOutOfBoundsException ioe) {
             logger.error("Error while getting data as toIndex:{}", toIndex, ioe);
             throwBadRequestException(
                     "Page toIndex:{ " + toIndex + " } calulated as per pageNo:{ " + pageNo + " } is incorrect");
-        }
+        }*/
         pageDataList = dataList.subList(startIndex, toIndex);
         logger.debug("toIndex:{}, pageDataList:{}", toIndex, pageDataList);
         return pageDataList;
