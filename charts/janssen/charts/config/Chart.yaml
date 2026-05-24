@@ -10,7 +10,6 @@ keywords:
   - secrets
 home: /docker-jans-configurator
 sources:
-  - /docker-jans-configurator
   - https://github.com/JanssenProject/jans/tree/main/docker-jans-configurator
 maintainers:
   - name: Mohammad Abudayyeh

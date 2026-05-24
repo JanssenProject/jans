@@ -14,7 +14,6 @@ Configuration parameters for setup and initial configuration secret and config l
 
 ## Source Code
 
-* </docker-jans-configurator>
 * <https://github.com/JanssenProject/jans/tree/main/docker-jans-configurator>
 
 ## Requirements
