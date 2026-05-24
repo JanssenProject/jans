@@ -14,8 +14,8 @@ Jans Config Api endpoints can be used to configure jans-auth-server, which is an
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans/jans-config-api>
-* <https://github.com/JanssenProject/jans/docker-jans-config-api>
+* <https://github.com/JanssenProject/jans/tree/main/jans-config-api>
+* <https://github.com/JanssenProject/jans/tree/main/docker-jans-config-api>
 
 ## Requirements
 
