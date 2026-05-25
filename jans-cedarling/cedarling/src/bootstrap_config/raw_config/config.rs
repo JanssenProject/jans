@@ -214,8 +214,9 @@ pub struct BootstrapConfigRaw {
     ///
     /// When this property is set, Cedarling will skip Dynamic Client Registration
     /// and use this access token directly to authenticate with Lock Server endpoints
-    /// (log, health, telemetry). This is useful in environments where the DCR flow
-    /// is not available or access tokens are provisioned externally.
+    /// (log, health, telemetry). Primarily intended for testing and local development
+    /// to simplify the bootstrap flow; may also be used in environments where the
+    /// DCR flow is not available or access tokens are provisioned externally.
     ///
     /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
     /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is

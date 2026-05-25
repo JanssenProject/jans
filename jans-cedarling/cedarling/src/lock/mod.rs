@@ -47,7 +47,9 @@
 //!
 //! If a pre-issued access token is supplied in `LockServiceConfig::access_token_jwt`,
 //! Cedarling uses it directly. The SSA validation and DCR steps are skipped entirely.
-//! This is useful in deployments where token issuance is managed externally.
+//! Primarily intended for testing and local development to simplify the bootstrap
+//! flow; may also be used in deployments where token issuance is managed externally.
+//! Not available on WASM builds.
 //!
 //! 1. **Initialization**: [`LockService`] is created with configuration
 //! 2. **Lock Config**: Fetch `.well-known/lock-server-configuration`
