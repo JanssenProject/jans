@@ -209,6 +209,24 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_ssa_jwt: Option<String>,
 
+    /// Pre-issued access token to use for Lock Server authentication, bypassing
+    /// the SSA → DCR → access_token flow entirely.
+    ///
+    /// When this property is set, Cedarling will skip Dynamic Client Registration
+    /// and use this access token directly to authenticate with Lock Server endpoints
+    /// (log, health, telemetry). This is useful in environments where the DCR flow
+    /// is not available or access tokens are provisioned externally.
+    ///
+    /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
+    /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is
+    /// skipped.
+    #[serde(
+        rename = "CEDARLING_LOCK_ACCESS_TOKEN_JWT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub lock_access_token_jwt: Option<String>,
+
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]

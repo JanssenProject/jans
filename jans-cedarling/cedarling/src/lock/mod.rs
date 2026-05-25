@@ -40,12 +40,32 @@
 //!
 //! ### Flow
 //!
+//! On initialization, [`LockService`] fetches the Lock Server's well-known configuration
+//! and then acquires an access token using **one of two mechanisms**:
+//!
+//! #### Path A – Direct access token (`CEDARLING_LOCK_ACCESS_TOKEN_JWT`)
+//!
+//! If a pre-issued access token is supplied in `LockServiceConfig::access_token_jwt`,
+//! Cedarling uses it directly. The SSA validation and DCR steps are skipped entirely.
+//! This is useful in deployments where token issuance is managed externally.
+//!
 //! 1. **Initialization**: [`LockService`] is created with configuration
-//! 2. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
-//! 3. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
-//! 4. **Access Token**: Client credentials are obtained for Lock Server communication
-//! 5. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
-//! 6. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//! 2. **Lock Config**: Fetch `.well-known/lock-server-configuration`
+//! 3. **Access Token**: Use the provided `access_token_jwt` directly
+//! 4. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
+//! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//!
+//! #### Path B – SSA → DCR flow (`CEDARLING_LOCK_SSA_JWT`, default)
+//!
+//! 1. **Initialization**: [`LockService`] is created with configuration
+//! 2. **Lock Config**: Fetch `.well-known/lock-server-configuration`
+//! 3. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
+//! 4. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
+//! 5. **Access Token**: Client credentials are obtained for Lock Server communication
+//! 6. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
+//! 7. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//!
+//! When both `access_token_jwt` and `ssa_jwt` are set, Path A takes precedence and a warning is logged.
 //!
 //! ## SSA JWT Validation
 //!
@@ -215,32 +235,62 @@ impl LockService {
         // Get lock config from the config uri endpoint first
         let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
 
-        // Validate SSA JWT if provided
-        if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
-            // Get the JWKS URI from the IDP URL (not the lock server URL)
-            let jwks_uri = format!(
-                "{}/jans-auth/restv1/jwks",
-                IssClaim::new(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
-                    .as_str()
-            );
+        // Obtain the access token to authenticate with Lock Server endpoints.
+        //
+        // Two paths are supported:
+        //
+        // 1. **Direct token** (`access_token_jwt` is set): use it as-is, skipping the
+        //    SSA validation and Dynamic Client Registration (DCR) flow entirely.
+        //    This is useful when the access token is provisioned externally.
+        //
+        // 2. **SSA → DCR flow** (default): optionally validate the SSA JWT, then perform
+        //    DCR to obtain a `client_id`/`client_secret`, and finally exchange those for
+        //    an access token using the client credentials grant.
+        //
+        // If both are provided, `access_token_jwt` takes precedence and the SSA flow is
+        // skipped entirely (a warning is emitted to help catch misconfiguration).
+        let access_token: String = if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
+            if bootstrap_conf.ssa_jwt.is_some() {
+                logger.log_any(LockLogEntry::warn(
+                    "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
+                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
+                     be skipped."
+                        .to_string(),
+                ));
+            }
+            direct_token.clone()
+        } else {
+            // Validate SSA JWT if provided
+            if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
+                // Get the JWKS URI from the IDP URL (not the lock server URL)
+                let jwks_uri = format!(
+                    "{}/jans-auth/restv1/jwks",
+                    IssClaim::new(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
+                        .as_str()
+                );
 
-            // Validate the SSA JWT
-            validate_ssa_jwt(ssa_jwt, &jwks_uri, &http_client)
-                .await
-                .map_err(|e| {
-                    InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {e}"))
-                })?;
-        }
+                // Validate the SSA JWT
+                validate_ssa_jwt(ssa_jwt, &jwks_uri, &http_client)
+                    .await
+                    .map_err(|e| {
+                        InitLockServiceError::InvalidSsaJwt(format!(
+                            "SSA JWT validation failed: {e}"
+                        ))
+                    })?;
+            }
 
-        // Register client
-        let client_creds = register_client(
-            pdp_id,
-            &lock_config.issuer_oidc_url,
-            bootstrap_conf.ssa_jwt.as_ref(),
-            bootstrap_conf.accept_invalid_certs,
-            http_conf,
-        )
-        .await?;
+            // Register client via DCR, obtaining an access token
+            let client_creds = register_client(
+                pdp_id,
+                &lock_config.issuer_oidc_url,
+                bootstrap_conf.ssa_jwt.as_ref(),
+                bootstrap_conf.accept_invalid_certs,
+                http_conf,
+            )
+            .await?;
+
+            client_creds.access_token
+        };
 
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
@@ -248,7 +298,7 @@ impl LockService {
                 let worker = create_worker(
                     bootstrap_conf,
                     AuditKind::Log(log_endpoint.0),
-                    &client_creds.access_token,
+                    &access_token,
                     log_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
@@ -268,7 +318,7 @@ impl LockService {
                 let worker = create_worker(
                     bootstrap_conf,
                     AuditKind::Telemetry(telemetry_endpoint.0),
-                    &client_creds.access_token,
+                    &access_token,
                     telemetry_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
@@ -301,7 +351,7 @@ impl LockService {
                         registry: registry.clone(),
                     },
                     bootstrap_conf,
-                    &client_creds.access_token,
+                    &access_token,
                     http_conf,
                 )?;
 
@@ -732,6 +782,147 @@ mod test {
             result.unwrap_err(),
             InitLockServiceError::InvalidSsaJwt(_)
         ));
+    }
+
+    /// Tests that when `access_token_jwt` is set the SSA → DCR flow is entirely bypassed:
+    /// the IDP's JWKS, OIDC, DCR, and token endpoints must NOT be called.
+    #[tokio::test]
+    async fn test_lock_service_with_direct_access_token() {
+        let pdp_id = PdpID::new();
+        let direct_access_token = "some.pre.issued.access.token";
+
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, lock_config_endpoint) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
+
+        // These endpoints must NOT be called when access_token_jwt is provided
+        let oidc_endpoint = mock_idp_server
+            .mock("GET", "/.well-known/openid-configuration")
+            .expect(0)
+            .create();
+        let dcr_endpoint = mock_idp_server
+            .mock("POST", "/jans-auth/restv1/register")
+            .expect(0)
+            .create();
+        let token_endpoint = mock_idp_server
+            .mock("POST", "/jans-auth/restv1/token")
+            .expect(0)
+            .create();
+
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: None,
+            access_token_jwt: Some(direct_access_token.to_string()),
+            log_interval: Some(Duration::from_millis(100)),
+            health_interval: None,
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        };
+
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let lock_svc = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock service with direct access token");
+
+        lock_config_endpoint.assert();
+        // DCR/token flow must not have been triggered
+        oidc_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
+
+        // Send a log entry and confirm it reaches the Lock Server
+        let log_entry = MockLogEntry {
+            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
+            level: LogLevel::TRACE,
+            log_kind: LogType::Decision,
+            decision: "ALLOW".to_string(),
+            action: "Test".to_string(),
+            principal: vec!["Jans::User".to_string()],
+            resource: "Jans::Issue".to_string(),
+            application_id: "test_app".to_string(),
+            pdp_id: "test-pdp".to_string(),
+        };
+        lock_svc.log_any(log_entry);
+
+        sleep(Duration::from_secs(1)).await;
+        log_endpoint.assert();
+    }
+
+    /// Tests that when both `access_token_jwt` and `ssa_jwt` are set,
+    /// `access_token_jwt` wins and the SSA/DCR flow is skipped.
+    #[tokio::test]
+    async fn test_lock_service_access_token_takes_precedence_over_ssa() {
+        let pdp_id = PdpID::new();
+        let direct_access_token = "some.pre.issued.access.token";
+        // An SSA JWT is provided but should be ignored
+        let ssa_jwt = "some.ssa.jwt.that.should.be.ignored";
+
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, lock_config_endpoint) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+
+        // DCR / token endpoints must NOT be called
+        let oidc_endpoint = mock_idp_server
+            .mock("GET", "/.well-known/openid-configuration")
+            .expect(0)
+            .create();
+        let dcr_endpoint = mock_idp_server
+            .mock("POST", "/jans-auth/restv1/register")
+            .expect(0)
+            .create();
+        let token_endpoint = mock_idp_server
+            .mock("POST", "/jans-auth/restv1/token")
+            .expect(0)
+            .create();
+
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: Some(ssa_jwt.to_string()),
+            access_token_jwt: Some(direct_access_token.to_string()),
+            log_interval: None,
+            health_interval: None,
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        };
+
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let _lock_svc = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock service: access_token_jwt should win over ssa_jwt");
+
+        lock_config_endpoint.assert();
+        oidc_endpoint.assert();
+        dcr_endpoint.assert();
+        token_endpoint.assert();
     }
 
     /// Mocks the `.well-known/lock-server-configuration` endpoint
