@@ -239,7 +239,7 @@ impl LockService {
             pdp_id,
             bootstrap_conf,
             &lock_config,
-            &logger,
+            logger.as_ref(),
             http_conf,
             &http_client,
         )
@@ -340,13 +340,13 @@ impl LockService {
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
         lock_config: &LockConfig,
-        logger: &Option<LoggerWeak>,
+        logger: Option<&LoggerWeak>,
         http_conf: HttpClientConfig,
         http_client: &HttpClient,
     ) -> Result<String, InitLockServiceError> {
         if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
             if bootstrap_conf.ssa_jwt.is_some() {
-                logger.log_any(LockLogEntry::warn(
+                logger.cloned().log_any(LockLogEntry::warn(
                     "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
                      CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
                      be skipped."

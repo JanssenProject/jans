@@ -64,7 +64,7 @@ pub struct LockServiceConfig {
     pub ssa_jwt: Option<String>,
     /// Pre-issued access token for Lock Server authentication.
     ///
-    /// When set, Cedarling skips the SSA → DCR → access_token flow and uses this
+    /// When set, Cedarling skips the SSA → DCR → `access_token` flow and uses this
     /// token directly. If both `ssa_jwt` and `access_token_jwt` are present,
     /// `access_token_jwt` takes precedence.
     pub access_token_jwt: Option<String>,

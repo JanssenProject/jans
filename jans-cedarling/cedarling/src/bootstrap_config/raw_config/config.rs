@@ -210,7 +210,7 @@ pub struct BootstrapConfigRaw {
     pub lock_ssa_jwt: Option<String>,
 
     /// Pre-issued access token to use for Lock Server authentication, bypassing
-    /// the SSA → DCR → access_token flow entirely.
+    /// the SSA → DCR → `access_token` flow entirely.
     ///
     /// When this property is set, Cedarling will skip Dynamic Client Registration
     /// and use this access token directly to authenticate with Lock Server endpoints
