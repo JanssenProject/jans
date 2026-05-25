@@ -226,6 +226,103 @@ class UpdateToken(UpdateTokenType):
 
 ***
 
+## Unit testing custom scripts
+
+You don't need to start the Authorization Server to verify your script logic.
+The interception interfaces (e.g. `DiscoveryType`, `UpdateTokenType`,
+`IntrospectionType`) are plain Java interfaces, so a script class can be
+instantiated and its methods called directly from a unit test.
+
+### Recommended approach
+
+The `ExecutionContext` (and other context objects passed to interception
+methods) holds references to most server-side objects at runtime. **You only
+need to populate the parts of the context your script actually reads.** This
+keeps tests focused and fast.
+
+Cover both **positive** and **negative** scenarios for each branch of script
+logic:
+
+- **Positive** — provide the inputs the script expects and assert the
+  observable outcome (response was modified, return value is `true`, etc.).
+- **Negative** — provide missing/empty inputs and assert the failure mode
+  (`NullPointerException`, `false` return, response left untouched, etc.).
+  These tests document the script's preconditions.
+
+Two mocking styles work well:
+
+1. **Plain construction** — build a real `ExecutionContext`, set what you need
+   (`context.setClient(client)`), and pass it. Easiest to read.
+2. **Mockito** — already used heavily in jans-auth-server tests. Useful when
+   the real object is heavy or pulls in too many collaborators. Stub only the
+   methods the script calls.
+
+### Example: Discovery script
+
+Given a `Discovery` script that does not touch context:
+
+```java
+public boolean modifyResponse(Object responseAsJsonObject, Object context) {
+    JSONObject response = (JSONObject) responseAsJsonObject;
+    response.accumulate("key_from_java", "value_from_script_on_java");
+    return true;
+}
+```
+
+A bare `new ExecutionContext()` is enough — there is nothing to set up:
+
+```java
+DiscoveryType script = new Discovery();
+JSONObject response = new JSONObject();
+
+assertTrue(script.modifyResponse(response, new ExecutionContext()));
+assertEquals(response.getString("key_from_java"), "value_from_script_on_java");
+```
+
+If the same script is changed to read the client from the context:
+
+```java
+public boolean modifyResponse(Object responseAsJsonObject, Object context) {
+    ExecutionContext executionContext = (ExecutionContext) context;
+    JSONObject response = (JSONObject) responseAsJsonObject;
+    response.accumulate("client_id_from_script", executionContext.getClient().getClientId());
+    return true;
+}
+```
+
+…the negative test is to pass an empty context and assert NPE; the positive
+test sets the client (either with a real `Client` or a Mockito mock):
+
+```java
+// negative — empty context, client is null
+assertThrows(NullPointerException.class,
+        () -> script.modifyResponse(new JSONObject(), new ExecutionContext()));
+
+// positive — explicit setter
+Client client = new Client();
+client.setClientId("test_id");
+ExecutionContext context = new ExecutionContext();
+context.setClient(client);
+
+JSONObject response = new JSONObject();
+assertTrue(script.modifyResponse(response, context));
+assertEquals(response.getString("client_id_from_script"), "test_id");
+```
+
+### Full sample test
+
+A complete, runnable example covering context-free, client-aware, and
+opt-out (returns `false`) scenarios — both with explicit construction and
+with Mockito — lives in the jans-auth-server test suite:
+
+[`jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java)
+
+The same pattern applies to every other script type — substitute the type's
+interface and its context object (`ExternalUpdateTokenContext`,
+`ExternalIntrospectionContext`, etc.).
+
+***
+
 ### Mandatory methods to be overridden
 This is the [base class of all custom script types](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/BaseExternalType.java) and all custom
 scripts should implement the following methods.
