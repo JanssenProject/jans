@@ -1277,17 +1277,6 @@ jobs:
         path: /tmp/cedarling-uniffi-digest.sha256
         retention-days: 1
 
-  # ---------------------------------------------------------------------------
-  # SLSA Provenance jobs — additive; no existing build/sign/upload steps removed
-  # Each provenance job:
-  #   1. Collects SHA-256 digests produced by the matrix build job(s) above.
-  #   2. Calls the slsa-framework/slsa-github-generator generic reusable workflow
-  #      (pinned to a full commit SHA) to produce a signed .intoto.jsonl file.
-  #   3. Uploads the .intoto.jsonl to the same GitHub Release.
-  # Permissions are scoped to these jobs only (id-token:write, contents:write,
-  # actions:read) — never added to the build jobs themselves.
-  # ---------------------------------------------------------------------------
-
   collect-binary-digests:
     name: Collect binary package digests
     needs: [publish_binary_packages]
