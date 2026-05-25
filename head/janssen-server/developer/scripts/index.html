@@ -3165,6 +3165,56 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-testing-custom-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit testing custom scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unit testing custom scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-discovery-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Discovery script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-sample-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full sample test
+      
+    </span>
+  </a>
+  
+</li>
+        
           <li class="md-nav__item">
   <a href="#mandatory-methods-to-be-overridden" class="md-nav__link">
     <span class="md-ellipsis">
@@ -3753,6 +3803,81 @@ Suppose, we are implementing an Openbanking Identity platform and we have to add
 </li>
 </ol>
 <hr />
+<h2 id="unit-testing-custom-scripts">Unit testing custom scripts<a class="headerlink" href="#unit-testing-custom-scripts" title="Permanent link">#</a></h2>
+<p>You don't need to start the Authorization Server to verify your script logic.
+The interception interfaces (e.g. <code>DiscoveryType</code>, <code>UpdateTokenType</code>,
+<code>IntrospectionType</code>) are plain Java interfaces, so a script class can be
+instantiated and its methods called directly from a unit test.</p>
+<h3 id="recommended-approach">Recommended approach<a class="headerlink" href="#recommended-approach" title="Permanent link">#</a></h3>
+<p>The <code>ExecutionContext</code> (and other context objects passed to interception
+methods) holds references to most server-side objects at runtime. <strong>You only
+need to populate the parts of the context your script actually reads.</strong> This
+keeps tests focused and fast.</p>
+<p>Cover both <strong>positive</strong> and <strong>negative</strong> scenarios for each branch of script
+logic:</p>
+<ul>
+<li><strong>Positive</strong> — provide the inputs the script expects and assert the
+  observable outcome (response was modified, return value is <code>true</code>, etc.).</li>
+<li><strong>Negative</strong> — provide missing/empty inputs and assert the failure mode
+  (<code>NullPointerException</code>, <code>false</code> return, response left untouched, etc.).
+  These tests document the script's preconditions.</li>
+</ul>
+<p>Two mocking styles work well:</p>
+<ol>
+<li><strong>Plain construction</strong> — build a real <code>ExecutionContext</code>, set what you need
+   (<code>context.setClient(client)</code>), and pass it. Easiest to read.</li>
+<li><strong>Mockito</strong> — already used heavily in jans-auth-server tests. Useful when
+   the real object is heavy or pulls in too many collaborators. Stub only the
+   methods the script calls.</li>
+</ol>
+<h3 id="example-discovery-script">Example: Discovery script<a class="headerlink" href="#example-discovery-script" title="Permanent link">#</a></h3>
+<p>Given a <code>Discovery</code> script that does not touch context:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span>
+<span class="w">    </span><span class="n">response</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;key_from_java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value_from_script_on_java&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A bare <code>new ExecutionContext()</code> is enough — there is nothing to set up:</p>
+<div class="highlight"><pre><span></span><code><span class="n">DiscoveryType</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Discovery</span><span class="p">();</span>
+<span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">();</span>
+
+<span class="n">assertTrue</span><span class="p">(</span><span class="n">script</span><span class="p">.</span><span class="na">modifyResponse</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExecutionContext</span><span class="p">()));</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;key_from_java&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;value_from_script_on_java&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>If the same script is changed to read the client from the context:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ExecutionContext</span><span class="w"> </span><span class="n">executionContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExecutionContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+<span class="w">    </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span>
+<span class="w">    </span><span class="n">response</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;client_id_from_script&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">executionContext</span><span class="p">.</span><span class="na">getClient</span><span class="p">().</span><span class="na">getClientId</span><span class="p">());</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>…the negative test is to pass an empty context and assert NPE; the positive
+test sets the client (either with a real <code>Client</code> or a Mockito mock):</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// negative — empty context, client is null</span>
+<span class="n">assertThrows</span><span class="p">(</span><span class="n">NullPointerException</span><span class="p">.</span><span class="na">class</span><span class="p">,</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">script</span><span class="p">.</span><span class="na">modifyResponse</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExecutionContext</span><span class="p">()));</span>
+
+<span class="c1">// positive — explicit setter</span>
+<span class="n">Client</span><span class="w"> </span><span class="n">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Client</span><span class="p">();</span>
+<span class="n">client</span><span class="p">.</span><span class="na">setClientId</span><span class="p">(</span><span class="s">&quot;test_id&quot;</span><span class="p">);</span>
+<span class="n">ExecutionContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExecutionContext</span><span class="p">();</span>
+<span class="n">context</span><span class="p">.</span><span class="na">setClient</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+
+<span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">();</span>
+<span class="n">assertTrue</span><span class="p">(</span><span class="n">script</span><span class="p">.</span><span class="na">modifyResponse</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">));</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;client_id_from_script&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;test_id&quot;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="full-sample-test">Full sample test<a class="headerlink" href="#full-sample-test" title="Permanent link">#</a></h3>
+<p>A complete, runnable example covering context-free, client-aware, and
+opt-out (returns <code>false</code>) scenarios — both with explicit construction and
+with Mockito — lives in the jans-auth-server test suite:</p>
+<p><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java"><code>jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java</code></a></p>
+<p>The same pattern applies to every other script type — substitute the type's
+interface and its context object (<code>ExternalUpdateTokenContext</code>,
+<code>ExternalIntrospectionContext</code>, etc.).</p>
+<hr />
 <h3 id="mandatory-methods-to-be-overridden">Mandatory methods to be overridden<a class="headerlink" href="#mandatory-methods-to-be-overridden" title="Permanent link">#</a></h3>
 <p>This is the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/BaseExternalType.java">base class of all custom script types</a> and all custom
 scripts should implement the following methods.
@@ -3950,7 +4075,7 @@ E.g:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 15, 2026 08:14:56 UTC"><span class="timeago" datetime="2026-04-15T08:14:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 15, 2026 08:14:56 UTC">2026-04-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 25, 2026 11:22:38 UTC"><span class="timeago" datetime="2026-05-25T11:22:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 25, 2026 11:22:38 UTC">2026-05-25</span>
   </span>
 
     
