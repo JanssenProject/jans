@@ -103,7 +103,7 @@ pub struct EntityRender {
     pub unmapped_columns: Vec<String>,
 }
 
-/// Escape a PostgreSQL attribute name for Cedar schema double-quoted keys.
+/// Escape a `PostgreSQL` attribute name for Cedar schema double-quoted keys.
 fn escape_cedar_attribute_name(name: &str) -> String {
     name.replace('\\', "\\\\").replace('"', "\\\"")
 }
