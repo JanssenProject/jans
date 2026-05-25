@@ -235,62 +235,15 @@ impl LockService {
         // Get lock config from the config uri endpoint first
         let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
 
-        // Obtain the access token to authenticate with Lock Server endpoints.
-        //
-        // Two paths are supported:
-        //
-        // 1. **Direct token** (`access_token_jwt` is set): use it as-is, skipping the
-        //    SSA validation and Dynamic Client Registration (DCR) flow entirely.
-        //    This is useful when the access token is provisioned externally.
-        //
-        // 2. **SSA → DCR flow** (default): optionally validate the SSA JWT, then perform
-        //    DCR to obtain a `client_id`/`client_secret`, and finally exchange those for
-        //    an access token using the client credentials grant.
-        //
-        // If both are provided, `access_token_jwt` takes precedence and the SSA flow is
-        // skipped entirely (a warning is emitted to help catch misconfiguration).
-        let access_token: String = if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
-            if bootstrap_conf.ssa_jwt.is_some() {
-                logger.log_any(LockLogEntry::warn(
-                    "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
-                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
-                     be skipped."
-                        .to_string(),
-                ));
-            }
-            direct_token.clone()
-        } else {
-            // Validate SSA JWT if provided
-            if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
-                // Get the JWKS URI from the IDP URL (not the lock server URL)
-                let jwks_uri = format!(
-                    "{}/jans-auth/restv1/jwks",
-                    IssClaim::new(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
-                        .as_str()
-                );
-
-                // Validate the SSA JWT
-                validate_ssa_jwt(ssa_jwt, &jwks_uri, &http_client)
-                    .await
-                    .map_err(|e| {
-                        InitLockServiceError::InvalidSsaJwt(format!(
-                            "SSA JWT validation failed: {e}"
-                        ))
-                    })?;
-            }
-
-            // Register client via DCR, obtaining an access token
-            let client_creds = register_client(
-                pdp_id,
-                &lock_config.issuer_oidc_url,
-                bootstrap_conf.ssa_jwt.as_ref(),
-                bootstrap_conf.accept_invalid_certs,
-                http_conf,
-            )
-            .await?;
-
-            client_creds.access_token
-        };
+        let access_token = Self::acquire_access_token(
+            pdp_id,
+            bootstrap_conf,
+            &lock_config,
+            &logger,
+            http_conf,
+            &http_client,
+        )
+        .await?;
 
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
@@ -306,7 +259,6 @@ impl LockService {
                 )?;
                 Some(worker)
             },
-            // Other cases that will always resolve to Cedarling not having to send logs
             _ => None,
         };
 
@@ -369,6 +321,66 @@ impl LockService {
             logger,
             cancel_tkn,
         })
+    }
+
+    /// Acquire the access token used to authenticate with Lock Server endpoints.
+    ///
+    /// Two paths are supported:
+    ///
+    /// 1. **Direct token** (`access_token_jwt` is set): use it as-is, skipping SSA
+    ///    validation and Dynamic Client Registration (DCR) entirely. Useful when the
+    ///    token is provisioned externally.
+    ///
+    /// 2. **SSA → DCR flow** (default): optionally validate the SSA JWT, then perform
+    ///    DCR to obtain credentials, and exchange them for an access token via the
+    ///    client credentials grant.
+    ///
+    /// If both are set, `access_token_jwt` takes precedence and a warning is emitted.
+    async fn acquire_access_token(
+        pdp_id: PdpID,
+        bootstrap_conf: &LockServiceConfig,
+        lock_config: &LockConfig,
+        logger: &Option<LoggerWeak>,
+        http_conf: HttpClientConfig,
+        http_client: &HttpClient,
+    ) -> Result<String, InitLockServiceError> {
+        if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
+            if bootstrap_conf.ssa_jwt.is_some() {
+                logger.log_any(LockLogEntry::warn(
+                    "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
+                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
+                     be skipped."
+                        .to_string(),
+                ));
+            }
+            return Ok(direct_token.clone());
+        }
+
+        // Validate SSA JWT if provided
+        if let Some(ssa_jwt) = &bootstrap_conf.ssa_jwt {
+            let jwks_uri = format!(
+                "{}/jans-auth/restv1/jwks",
+                IssClaim::new(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
+                    .as_str()
+            );
+            validate_ssa_jwt(ssa_jwt, &jwks_uri, http_client)
+                .await
+                .map_err(|e| {
+                    InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {e}"))
+                })?;
+        }
+
+        // Register client via DCR, obtaining an access token
+        let client_creds = register_client(
+            pdp_id,
+            &lock_config.issuer_oidc_url,
+            bootstrap_conf.ssa_jwt.as_ref(),
+            bootstrap_conf.accept_invalid_certs,
+            http_conf,
+        )
+        .await?;
+
+        Ok(client_creds.access_token)
     }
 
     pub(crate) async fn shut_down(&mut self) {
