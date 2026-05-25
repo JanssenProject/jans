@@ -91,7 +91,7 @@ public class ShibbolethResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationshipPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationshipPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-all-shibboleth-trust.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
@@ -166,8 +166,8 @@ public class ShibbolethResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Get attribute list Trust Relationship", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
-            "Shibboleth - Trust Relationship" }, security = {
+    @Operation(summary = "Get  list Trust Relationship", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
+            "Shibboleth - Trust Relaattributetionship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
@@ -264,14 +264,13 @@ public class ShibbolethResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     @PUT
-    @Path(Constants.INUM_PATH_PARAM)
+    @Path(Constants.INUM_PATH_PARAM + Constants.FILE)
     public Response updateTrustRelationship(
             @Parameter(description = "TrustRelationship inum") @PathParam(Constants.INUM) @NotNull String inum,
-            @MultipartForm TrustRelationshipForm trustRelationshipForm, InputStream metadatafile) throws IOException {
+           InputStream metadatafile) throws IOException {
         logger.info("Update TrustRelationship");
         if (logger.isInfoEnabled()) {
-            logger.info("Update TrustRelationship identified by inum:{}, trustRelationshipForm:{}", escapeLog(inum),
-                    escapeLog(trustRelationshipForm));
+            logger.info("Update TrustRelationship identified by inum:{}", escapeLog(inum), escapeLog(trustRelationshipForm));
         }
 
         validateTrustRelationshipForm(trustRelationshipForm, metadatafile, true);
@@ -504,15 +503,8 @@ public class ShibbolethResource extends BaseResource {
         }
 
         int toIndex = (startIndex + limit <= dataList.size()) ? startIndex + limit : dataList.size();
-
         logger.error("toIndex:{}", toIndex);
-       /* try {
-            dataList.get(toIndex);
-        } catch (IndexOutOfBoundsException ioe) {
-            logger.error("Error while getting data as toIndex:{}", toIndex, ioe);
-            throwBadRequestException(
-                    "Page toIndex:{ " + toIndex + " } calulated as per pageNo:{ " + pageNo + " } is incorrect");
-        }*/
+
         pageDataList = dataList.subList(startIndex, toIndex);
         logger.debug("toIndex:{}, pageDataList:{}", toIndex, pageDataList);
         return pageDataList;
