@@ -140,9 +140,19 @@ pub fn audit_fail_open() -> bool {
 }
 
 /// Current `cedarling.tokens` as a UTF-8 string, if set and valid UTF-8.
+///
+/// Empty / whitespace-only values are treated as unset.
 #[must_use]
 pub fn tokens_utf8() -> Option<String> {
-    TOKENS.get().and_then(|c| c.into_string().ok())
+    TOKENS.get().and_then(|c| {
+        let s = c.into_string().ok()?;
+        let t = s.trim();
+        if t.is_empty() {
+            None
+        } else {
+            Some(t.to_string())
+        }
+    })
 }
 
 /// Current `cedarling.context` as a UTF-8 string, if set and valid UTF-8.

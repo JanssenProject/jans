@@ -11,12 +11,18 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+/// Emit a single-quoted YAML scalar, escaping embedded `'` as `''`.
+fn yaml_single_quoted_scalar(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "''"))
+}
+
 /// Write a minimal bootstrap config wired to a local policy-store file.
 pub(crate) fn write_bootstrap_yaml(dir: &Path, policy_path: &Path, app_name: &str) -> PathBuf {
     let bootstrap_path = dir.join("bootstrap.yaml");
-    let policy_lit = policy_path.to_string_lossy();
+    let app_name_lit = yaml_single_quoted_scalar(app_name);
+    let policy_lit = yaml_single_quoted_scalar(&policy_path.to_string_lossy());
     let contents = format!(
-        "CEDARLING_APPLICATION_NAME: {app_name}\n\
+        "CEDARLING_APPLICATION_NAME: {app_name_lit}\n\
          CEDARLING_POLICY_STORE_URI: ''\n\
          CEDARLING_LOG_TYPE: memory\n\
          CEDARLING_LOG_LEVEL: DEBUG\n\
@@ -36,4 +42,23 @@ pub(crate) fn write_bootstrap_yaml(dir: &Path, policy_path: &Path, app_name: &st
     let mut f = fs::File::create(&bootstrap_path).expect("bootstrap file");
     f.write_all(contents.as_bytes()).expect("write bootstrap");
     bootstrap_path
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn yaml_scalar_quotes_values_with_special_characters() {
+        assert_eq!(
+            yaml_single_quoted_scalar("app:name#1"),
+            "'app:name#1'",
+            "colons and hash must be wrapped in quotes"
+        );
+        assert_eq!(
+            yaml_single_quoted_scalar("it's"),
+            "'it''s'",
+            "embedded single quotes must be doubled"
+        );
+    }
 }

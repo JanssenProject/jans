@@ -45,27 +45,22 @@ pub(crate) fn default_mask_for_column(col_name: &str) -> Option<MaskType> {
     None
 }
 
-/// Fetch explicit mask rules for `table_name` from `cedarling.mask_rules`.
-///
-/// Only rows where `condition_sql IS NULL` are returned; conditional rules are skipped with a
-/// warning (evaluating arbitrary SQL in this helper would require another SPI execution level).
-/// Returns `(column_name, MaskType)` pairs.
+/// reject them when applying rules.
 #[cfg(test)]
-pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Vec<MaskRule> {
+pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Result<Vec<MaskRule>, String> {
     // Unit tests run outside a Postgres backend; return no catalog rules so tests
     // validate pure masking behavior (default registry + type preservation) only.
-    Vec::new()
+    Ok(Vec::new())
 }
 
 /// Fetch explicit mask rules for `table_name` from `cedarling.mask_rules`.
 ///
-/// Only rows where `condition_sql IS NULL` are returned; conditional rules are skipped with a
-/// warning (evaluating arbitrary SQL in this helper would require another SPI execution level).
-/// Returns `(column_name, MaskType)` pairs.
+/// Conditional rules (`condition_sql` non-empty) are returned in the result set; callers must
+/// reject them when applying rules.
 #[cfg(not(test))]
-pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<MaskRule> {
+pub(crate) fn lookup_explicit_rules(table_name: &str) -> Result<Vec<MaskRule>, String> {
     let mut rules = Vec::new();
-    let _ = pgrx::prelude::Spi::connect(|client| {
+    pgrx::prelude::Spi::connect(|client| {
         let rows = client.select(
             "SELECT column_name, mask_type, mask_value, condition_sql
              FROM cedarling.mask_rules
@@ -90,8 +85,9 @@ pub(crate) fn lookup_explicit_rules(table_name: &str) -> Vec<MaskRule> {
             });
         }
         Ok::<(), pgrx::spi::Error>(())
-    });
-    rules
+    })
+    .map_err(|source| format!("mask rule catalog lookup failed for table '{table_name}': {source}"))?;
+    Ok(rules)
 }
 
 

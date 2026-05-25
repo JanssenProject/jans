@@ -51,7 +51,7 @@ fi
 
 echo "==> Running post-install health check against database '${PG_DB}'"
 if ! "${PSQL_BIN}" -lqt | awk '{print $1}' | grep -qx "${PG_DB}"; then
-    createdb "${PG_DB}"
+    "${PSQL_BIN}" -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE \"${PG_DB//\"/\"\"}\""
 fi
 
 "${PSQL_BIN}" -v ON_ERROR_STOP=1 -d "${PG_DB}" <<'SQL'

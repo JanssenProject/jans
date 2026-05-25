@@ -42,9 +42,12 @@ mod tests {
 
     #[test]
     fn tokens_valid_json_ok() {
-        assert!(tokens_json_is_valid(r#"{"access_token":"x"}"#));
-        assert!(tokens_json_is_valid("[]"));
-        assert!(tokens_json_is_valid("42"));
+        assert!(
+            tokens_json_is_valid(r#"{"access_token":"x"}"#),
+            "JSON object tokens should be valid"
+        );
+        assert!(tokens_json_is_valid("[]"), "JSON array tokens should be valid");
+        assert!(tokens_json_is_valid("42"), "numeric tokens JSON should be valid");
     }
 
     #[test]
@@ -61,20 +64,38 @@ mod tests {
 
     #[test]
     fn context_empty_and_whitespace_ok() {
-        assert!(context_json_is_valid_object(""));
-        assert!(context_json_is_valid_object("   \n\t  "));
+        assert!(
+            context_json_is_valid_object(""),
+            "empty context string should be valid"
+        );
+        assert!(
+            context_json_is_valid_object("   \n\t  "),
+            "whitespace-only context should be valid"
+        );
     }
 
     #[test]
     fn context_valid_object_ok() {
-        assert!(context_json_is_valid_object(r#"{"ip":"127.0.0.1","tenant":"acme"}"#));
-        assert!(context_json_is_valid_object("{}"));
+        assert!(
+            context_json_is_valid_object(r#"{"ip":"127.0.0.1","tenant":"acme"}"#),
+            "JSON object context should be valid"
+        );
+        assert!(context_json_is_valid_object("{}"), "empty JSON object should be valid");
     }
 
     #[test]
     fn context_non_object_or_invalid_rejected() {
-        assert!(!context_json_is_valid_object(r#"["a"]"#));
-        assert!(!context_json_is_valid_object("42"));
-        assert!(!context_json_is_valid_object("not json"));
+        assert!(
+            !context_json_is_valid_object(r#"["a"]"#),
+            "JSON array context should be rejected"
+        );
+        assert!(
+            !context_json_is_valid_object("42"),
+            "numeric JSON context should be rejected"
+        );
+        assert!(
+            !context_json_is_valid_object("not json"),
+            "non-JSON context should be rejected"
+        );
     }
 }

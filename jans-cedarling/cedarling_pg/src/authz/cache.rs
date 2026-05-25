@@ -182,7 +182,11 @@ mod tests {
         let c = AuthzDecisionCache::new();
         let key = multi_issuer_key(1, "{}", r#"{"x":1}"#, "A::\"a\"", "{}");
         c.store(0, &key, true);
-        assert_eq!(c.lookup(300, &key).expect("lock"), None);
+        assert_eq!(
+            c.lookup(300, &key).expect("lock"),
+            None,
+            "TTL of 0 should skip storing and return None on lookup"
+        );
     }
 
     #[test]
@@ -190,9 +194,17 @@ mod tests {
         let c = AuthzDecisionCache::new();
         let key = multi_issuer_key(7, "tok", "res", "act", "{}");
         c.store_ttl_chrono(ChronoDuration::milliseconds(50), &key, false);
-        assert_eq!(c.lookup(1, &key).expect("lock"), Some(false));
+        assert_eq!(
+            c.lookup(1, &key).expect("lock"),
+            Some(false),
+            "entry should be present before expiry"
+        );
         thread::sleep(Duration::from_millis(200));
-        assert_eq!(c.lookup(1, &key).expect("lock"), None);
+        assert_eq!(
+            c.lookup(1, &key).expect("lock"),
+            None,
+            "entry should be expired after sleep"
+        );
     }
 
     #[test]
@@ -200,6 +212,6 @@ mod tests {
         let seg = 42;
         let m = multi_issuer_key(seg, "{}", "r", "a", "{}");
         let u = unsigned_key(seg, "", "r", "a", "{}");
-        assert_ne!(m, u);
+        assert_ne!(m, u, "multi-issuer and unsigned keys must differ");
     }
 }

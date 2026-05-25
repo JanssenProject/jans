@@ -648,21 +648,38 @@ mod tests {
 
     #[test]
     fn input_validation_rejects_empty_table_or_action() {
-        assert!(!has_valid_table_and_action_inputs("", "A::Action::\"Read\""));
-        assert!(!has_valid_table_and_action_inputs("t", " "));
-        assert!(has_valid_table_and_action_inputs("t", "A::Action::\"Read\""));
+        assert!(
+            !has_valid_table_and_action_inputs("", "A::Action::\"Read\""),
+            "empty table name should be rejected"
+        );
+        assert!(
+            !has_valid_table_and_action_inputs("t", " "),
+            "blank action should be rejected"
+        );
+        assert!(
+            has_valid_table_and_action_inputs("t", "A::Action::\"Read\""),
+            "valid table and action should be accepted"
+        );
     }
 
     #[test]
     fn quote_ident_safe_doubles_internal_double_quotes() {
-        assert_eq!(quote_ident_safe("col"), "\"col\"");
-        assert_eq!(quote_ident_safe("a\"b"), "\"a\"\"b\"");
+        assert_eq!(quote_ident_safe("col"), "\"col\"", "simple ident should be quoted");
+        assert_eq!(
+            quote_ident_safe("a\"b"),
+            "\"a\"\"b\"",
+            "internal double quotes should be doubled"
+        );
     }
 
     #[test]
     fn quote_literal_safe_doubles_internal_single_quotes() {
-        assert_eq!(quote_literal_safe("ab"), "'ab'");
-        assert_eq!(quote_literal_safe("a'b"), "'a''b'");
+        assert_eq!(quote_literal_safe("ab"), "'ab'", "simple literal should be quoted");
+        assert_eq!(
+            quote_literal_safe("a'b"),
+            "'a''b'",
+            "internal single quotes should be doubled"
+        );
     }
 
     #[test]
@@ -671,10 +688,10 @@ mod tests {
             r#"resource.a == "x" && (resource.b == "y" || resource.c == "z")"#,
             "&&",
         );
-        assert_eq!(parts.len(), 2);
+        assert_eq!(parts.len(), 2, "top-level && should split into two parts");
         // String containing the operator-substring must not be split.
         let parts = split_top_level(r#"resource.a == "&& trick""#, "&&");
-        assert_eq!(parts.len(), 1);
+        assert_eq!(parts.len(), 1, "&& inside a string must not split");
     }
 
     #[test]
@@ -691,11 +708,23 @@ mod tests {
 
     #[test]
     fn parse_resource_field_rejects_dotted_or_function_call_lhs() {
-        assert_eq!(parse_resource_field("resource.foo"), Some("foo".into()));
-        assert_eq!(parse_resource_field("resource.foo_bar1"), Some("foo_bar1".into()));
-        assert_eq!(parse_resource_field("resource."), None);
-        assert_eq!(parse_resource_field("resource.foo.bar"), None);
-        assert_eq!(parse_resource_field("principal.role"), None);
+        assert_eq!(parse_resource_field("resource.foo"), Some("foo".into()), "simple field");
+        assert_eq!(
+            parse_resource_field("resource.foo_bar1"),
+            Some("foo_bar1".into()),
+            "underscore field name"
+        );
+        assert_eq!(parse_resource_field("resource."), None, "empty field suffix");
+        assert_eq!(
+            parse_resource_field("resource.foo.bar"),
+            None,
+            "dotted field path should be rejected"
+        );
+        assert_eq!(
+            parse_resource_field("principal.role"),
+            None,
+            "non-resource lhs should be rejected"
+        );
     }
 
     #[test]
@@ -703,11 +732,13 @@ mod tests {
         let src = r#"permit(principal, action, resource) when { resource.a == "x" } unless { resource.b == "y" };"#;
         assert_eq!(
             extract_clauses(src, "when"),
-            Some(vec![r#"resource.a == "x""#.to_string()])
+            Some(vec![r#"resource.a == "x""#.to_string()]),
+            "when clause body should be extracted"
         );
         assert_eq!(
             extract_clauses(src, "unless"),
-            Some(vec![r#"resource.b == "y""#.to_string()])
+            Some(vec![r#"resource.b == "y""#.to_string()]),
+            "unless clause body should be extracted"
         );
     }
 
@@ -725,14 +756,16 @@ mod tests {
             Some(vec![
                 r#"resource.country == "US""#.to_string(),
                 "resource.tier >= 3".to_string()
-            ])
+            ]),
+            "stacked when clauses should all be extracted"
         );
         assert_eq!(
             extract_clauses(src, "unless"),
             Some(vec![
                 "resource.blocked == true".to_string(),
                 r#"resource.country == "CN""#.to_string()
-            ])
+            ]),
+            "stacked unless clauses should all be extracted"
         );
     }
 
@@ -755,11 +788,14 @@ mod tests {
     fn lower_condition_handles_eq_lt_gt_in_and_boolean_chains() {
         let expr = r#"(resource.country == "US" && resource.age >= 18) || resource.tier in ["gold","platinum"]"#;
         let lowered = lower_condition(expr).expect("lowering should succeed");
-        assert!(lowered.contains("\"country\" = 'US'"));
-        assert!(lowered.contains("\"age\" >= 18"));
-        assert!(lowered.contains("\"tier\" IN ('gold', 'platinum')"));
-        assert!(lowered.contains(" OR "));
-        assert!(lowered.contains(" AND "));
+        assert!(lowered.contains("\"country\" = 'US'"), "country equality should lower");
+        assert!(lowered.contains("\"age\" >= 18"), "age comparison should lower");
+        assert!(
+            lowered.contains("\"tier\" IN ('gold', 'platinum')"),
+            "IN list should lower"
+        );
+        assert!(lowered.contains(" OR "), "OR chain should be preserved");
+        assert!(lowered.contains(" AND "), "AND chain should be preserved");
     }
 
     #[test]
@@ -768,11 +804,12 @@ mod tests {
         assert_eq!(
             lower_condition(r#"principal.role.contains("admin")"#),
             None,
+            "function-call lhs should not lower"
         );
-        // Multi-segment field access: not lowerable.
         assert_eq!(
             lower_condition(r#"resource.owner.id == "alice""#),
             None,
+            "multi-segment field access should not lower"
         );
     }
 
@@ -783,7 +820,11 @@ mod tests {
             PolicyEffect::Permit,
             "permit(principal, action, resource);",
         );
-        assert_eq!(lower_policy_to_sql(&m).as_deref(), Some("TRUE"));
+        assert_eq!(
+            lower_policy_to_sql(&m).as_deref(),
+            Some("TRUE"),
+            "unconditional permit should lower to TRUE"
+        );
     }
 
     #[test]
@@ -796,9 +837,9 @@ mod tests {
                when { resource.tier >= 3 };"#,
         );
         let sql = lower_policy_to_sql(&m).expect("stacked when should lower");
-        assert!(sql.contains("\"country\" = 'US'"));
-        assert!(sql.contains("\"tier\" >= 3"));
-        assert!(sql.contains(" AND "));
+        assert!(sql.contains("\"country\" = 'US'"), "first when clause should appear");
+        assert!(sql.contains("\"tier\" >= 3"), "second when clause should appear");
+        assert!(sql.contains(" AND "), "stacked when clauses should AND together");
     }
 
     #[test]
@@ -811,7 +852,7 @@ mod tests {
             PolicyEffect::Permit,
             "this is not a Cedar policy at all",
         );
-        assert_eq!(lower_policy_to_sql(&m), None);
+        assert_eq!(lower_policy_to_sql(&m), None, "unparseable policy source should not lower");
     }
 
     #[test]
@@ -833,10 +874,14 @@ mod tests {
                 fragment,
                 unhandled_policy_ids,
             } => {
-                assert_eq!(fragment, "TRUE");
-                assert_eq!(unhandled_policy_ids, vec!["p2".to_string()]);
+                assert_eq!(fragment, "TRUE", "handled permit should contribute TRUE");
+                assert_eq!(
+                    unhandled_policy_ids,
+                    vec!["p2".to_string()],
+                    "unhandled policy id should be reported"
+                );
             },
-            other => panic!("expected partial predicate, got {other:?}"),
+            other => panic!("expected Partial with fragment TRUE and unhandled p2, got {other:?}"),
         }
     }
 
@@ -846,6 +891,7 @@ mod tests {
         assert_eq!(
             policies_to_sql_predicate(&policies, &table_mapping()),
             SqlPredicate::AlwaysFalse,
+            "empty policy set should yield AlwaysFalse"
         );
     }
 
@@ -865,11 +911,11 @@ mod tests {
         ];
         match policies_to_sql_predicate(&policies, &table_mapping()) {
             SqlPredicate::Where(sql) => {
-                assert!(sql.contains("\"age\" >= 18"));
-                assert!(sql.contains("\"country\" = 'CN'"));
-                assert!(sql.contains("NOT"));
+                assert!(sql.contains("\"age\" >= 18"), "permit clause should appear");
+                assert!(sql.contains("\"country\" = 'CN'"), "forbid clause should appear");
+                assert!(sql.contains("NOT"), "forbid should wrap clause in NOT");
             },
-            other => panic!("expected WHERE predicate, got {other:?}"),
+            other => panic!("expected WHERE predicate combining permit and forbid, got {other:?}"),
         }
     }
 }

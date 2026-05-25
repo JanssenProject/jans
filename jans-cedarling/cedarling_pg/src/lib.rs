@@ -18,7 +18,7 @@ mod tokens;
 mod validate;
 #[cfg(any(test, feature = "pg_test"))]
 mod test_fixtures;
-#[cfg(feature = "pg_test")]
+#[cfg(any(test, feature = "pg_test"))]
 mod test_support;
 mod sync_mutex;
 
@@ -386,7 +386,7 @@ mod tests {
                LIMIT 1"#,
         )
         .expect("default mapping query");
-        assert_eq!(default_id, Some("10-20".to_string()));
+        assert_eq!(default_id, Some(r#"["10","20"]"#.to_string()));
 
         let registered = Spi::get_one::<bool>(
             r#"SELECT cedarling_register_entity_map(
@@ -412,7 +412,7 @@ mod tests {
                LIMIT 1"#,
         )
         .expect("mapped id query");
-        assert_eq!(mapped_id, Some("20-10".to_string()));
+        assert_eq!(mapped_id, Some(r#"["20","10"]"#.to_string()));
 
         Spi::run("DROP TABLE IF EXISTS cedarling_phase2_pk").expect("drop test table");
     }
@@ -480,10 +480,7 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_mask_condition_sql_is_ignored_fail_closed() {
-        use pgrx::datum::JsonB;
-        use serde_json::json;
-
+    fn test_mask_condition_sql_errors_fail_closed() {
         Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_condition'")
             .expect("cleanup before test");
         Spi::run(
@@ -500,30 +497,36 @@ mod tests {
         )
         .expect("insert conditional mask rule");
 
-        let row_user = JsonB(json!({"pii_value":"secret-value"}));
-        let row_admin = JsonB(json!({"pii_value":"secret-value"}));
-
-        Spi::run("SELECT set_config('cedarling.role', 'user', true)")
-            .expect("set local cedarling.role=user");
-        let masked_user = crate::mask_sql::cedarling_mask_row(row_user, "test_mask_condition");
-        assert_eq!(
-            masked_user.0["pii_value"].as_str(),
-            Some("secret-value"),
-            "conditional rule should be ignored to avoid arbitrary SQL execution"
-        );
-
-        Spi::run("SELECT set_config('cedarling.role', 'admin', true)")
-            .expect("set local cedarling.role=admin");
-        let masked_admin =
-            crate::mask_sql::cedarling_mask_row(row_admin, "test_mask_condition");
-        assert_eq!(
-            masked_admin.0["pii_value"].as_str(),
-            Some("secret-value"),
-            "conditional rule should be ignored for all callers"
-        );
+        Spi::run(
+            r#"
+            DO $cedarling_test$
+            DECLARE
+              caught boolean := false;
+            BEGIN
+              BEGIN
+                PERFORM cedarling_mask_row(
+                  '{"pii_value":"secret-value"}'::jsonb,
+                  'test_mask_condition'
+                );
+              EXCEPTION
+                WHEN OTHERS THEN
+                  IF SQLERRM LIKE 'cedarling_mask_row:%conditional mask rules%' THEN
+                    caught := true;
+                  ELSE
+                    RAISE;
+                  END IF;
+              END;
+              IF NOT caught THEN
+                RAISE EXCEPTION 'expected cedarling_mask_row to reject conditional mask rule';
+              END IF;
+            END;
+            $cedarling_test$;
+            "#,
+        )
+        .expect("cedarling_mask_row should abort on non-empty condition_sql");
 
         Spi::run("DELETE FROM cedarling.mask_rules WHERE table_name = 'test_mask_condition'")
-            .expect("cleanup conditional mask rule");
+            .expect("cleanup after test");
     }
 
     #[pg_test]
