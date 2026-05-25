@@ -13,31 +13,31 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/local/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/contribute/ci-cd/slsa-verification/">
       
       
-        <link rel="prev" href="../microsoft-aks/">
+        <link rel="prev" href="../release-process/">
       
       
-        <link rel="next" href="../rancher/">
+        <link rel="next" href="../../../agama/introduction/">
       
       
         
       
       
-      <link rel="icon" href="../../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
-        <title>Local (Minikube/MicroK8s) - Janssen Documentation</title>
+        <title>SLSA Verification - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -56,17 +56,17 @@
       
     
     
-      <link rel="stylesheet" href="../../../../../css/timeago.css">
+      <link rel="stylesheet" href="../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../../../../css/tabs.css">
+      <link rel="stylesheet" href="../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../../../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../../../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
     
-      <link rel="stylesheet" href="../../../../../stylesheets/navigation.css">
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#local-kubernetes-setup-minikubemicrok8s" class="md-skip">
+        <a href="#slsa-artifact-verification" class="md-skip">
           Skip to content
         </a>
       
@@ -106,12 +106,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../../../../..">
+  <a href="../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -123,9 +123,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Local (Minikube/MicroK8s)
+              SLSA Verification
             
           </span>
         </div>
@@ -277,7 +277,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../../../getting-started/" class="md-tabs__link">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -324,7 +324,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../../cedarling/" class="md-tabs__link">
+        <a href="../../../cedarling/" class="md-tabs__link">
           
   
   
@@ -366,9 +366,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -502,7 +502,7 @@
   
   
   
-    <a href="../../../../../getting-started/" class="md-nav__link">
+    <a href="../../../getting-started/" class="md-nav__link">
       
   
   
@@ -570,7 +570,7 @@
   
   
   
-    <a href="../../../../architecture/" class="md-nav__link">
+    <a href="../../../janssen-server/architecture/" class="md-nav__link">
       
   
   
@@ -640,7 +640,7 @@
   
   
   
-    <a href="../../../../auth-server/" class="md-nav__link">
+    <a href="../../../janssen-server/auth-server/" class="md-nav__link">
       
   
   
@@ -718,7 +718,7 @@
   
   
   
-    <a href="../../../../config-guide/" class="md-nav__link">
+    <a href="../../../janssen-server/config-guide/" class="md-nav__link">
       
   
   
@@ -788,7 +788,7 @@
   
   
   
-    <a href="../../../../test-debug/" class="md-nav__link">
+    <a href="../../../janssen-server/test-debug/" class="md-nav__link">
       
   
   
@@ -819,270 +819,6 @@
                 
   
   
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Deploy & Operate
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Deploy & Operate
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../planning/overview/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Planning
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6_3" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6_3" id="__nav_1_6_3_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_6_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Installation
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
   
   
     
@@ -1124,14 +860,14 @@
   
   
   
-    <a href="../../../vm-install/" class="md-nav__link">
+    <a href="../../../janssen-server/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    VM Installation
+    Deploy & Operate
   
 
     
@@ -1163,8 +899,6 @@
     
       
         
-          
-        
       
         
       
@@ -1189,18 +923,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6_3_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="../../" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    Helm Deployments
+    Product & Releases
   
 
     
@@ -1208,26 +941,252 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6_3_3" id="__nav_1_6_3_3_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_6_3_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_7">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Helm Deployments
+    Product & Releases
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CHANGELOG/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EOL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Support Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../CONTRIBUTING/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../governance/charter/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../development/development/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
               
             
               
@@ -1240,12 +1199,6 @@
   
     
     
-      
-        
-      
-        
-      
-        
       
         
       
@@ -1264,17 +1217,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6_3_3_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_6_3_3_2" id="__nav_1_6_3_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_7_6" id="__nav_1_7_6_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Platform Setup
+    CI/CD
   
 
     
@@ -1285,12 +1238,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_1_6_3_3_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6_3_3_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_7_6">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Platform Setup
+    CI/CD
   
 
           </label>
@@ -1303,70 +1256,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../amazon-eks/" class="md-nav__link">
+      <a href="../release-process/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Amazon EKS
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../google-gke/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Google GKE
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../microsoft-aks/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Microsoft AKS
+    Release Process
   
 
     
@@ -1403,7 +1300,7 @@
   <span class="md-ellipsis">
     
   
-    Local (Minikube/MicroK8s)
+    SLSA Verification
   
 
     
@@ -1421,7 +1318,7 @@
   <span class="md-ellipsis">
     
   
-    Local (Minikube/MicroK8s)
+    SLSA Verification
   
 
     
@@ -1447,10 +1344,160 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-slsa-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install slsa-verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-cosign-for-signature-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install cosign (for signature verification)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-binary-wheel-wasm-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Binary / Wheel / WASM Artifacts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying Binary / Wheel / WASM Artifacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#also-verify-the-cosign-bundle-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Also verify the cosign bundle signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Docker Images
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying Docker Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-slsa-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With slsa-verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-the-github-cli-gh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With the GitHub CLI (gh)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-image-digest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the image digest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#also-verify-the-cosign-signature-on-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Also verify the cosign signature on Docker images
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#artifact-families-and-provenance-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artifact Families and Provenance Files
       
     </span>
   </a>
@@ -1458,43 +1505,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start-script" class="md-nav__link">
+  <a href="#further-reading" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start Script
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Endpoints
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#manual-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Manual Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
+        Further Reading
       
     </span>
   </a>
@@ -1510,34 +1524,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../rancher/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Rancher Marketplace
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -1546,590 +1532,8 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../ingress-setup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Ingress Setup
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../database-setup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Database Setup
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../install-janssen/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Install Janssen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../post-install/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Post-Installation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../docker-install/quick-start/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Docker
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../kubernetes-ops/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Kubernetes Operations
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../vm-ops/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    VM Operations
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../reference/database/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Database
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../terraform/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Terraform & IaC
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../lock/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Lock
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../../CHANGELOG/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Product & Releases
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
       
     </li>
   
@@ -2196,7 +1600,7 @@
   
   
   
-    <a href="../../../../../agama/introduction/" class="md-nav__link">
+    <a href="../../../agama/introduction/" class="md-nav__link">
       
   
   
@@ -2265,7 +1669,7 @@
   
   
   
-    <a href="../../../../../cedarling/" class="md-nav__link">
+    <a href="../../../cedarling/" class="md-nav__link">
       
   
   
@@ -2318,10 +1722,160 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-slsa-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install slsa-verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-cosign-for-signature-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install cosign (for signature verification)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-binary-wheel-wasm-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Binary / Wheel / WASM Artifacts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying Binary / Wheel / WASM Artifacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#also-verify-the-cosign-bundle-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Also verify the cosign bundle signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Docker Images
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying Docker Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-slsa-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With slsa-verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-the-github-cli-gh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With the GitHub CLI (gh)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-image-digest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the image digest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#also-verify-the-cosign-signature-on-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Also verify the cosign signature on Docker images
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#artifact-families-and-provenance-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artifact Families and Provenance Files
       
     </span>
   </a>
@@ -2329,43 +1883,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start-script" class="md-nav__link">
+  <a href="#further-reading" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start Script
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Endpoints
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#manual-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Manual Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
+        Further Reading
       
     </span>
   </a>
@@ -2403,7 +1924,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../../../../getting-started/" class="md-path__link">
+        <a href="../../../getting-started/" class="md-path__link">
           
   <span class="md-ellipsis">
     Janssen Server
@@ -2424,10 +1945,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../../../" class="md-path__link">
+        <a href="../../../CHANGELOG/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Deploy & Operate
+    Product & Releases
   </span>
 
         </a>
@@ -2442,46 +1963,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../../" class="md-path__link">
+        <a href="../release-process/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Installation
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../../" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Helm Deployments
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../amazon-eks/" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Platform Setup
+    CI/CD
   </span>
 
         </a>
@@ -2499,107 +1984,215 @@
   
                   
 
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">helm</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">installation</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">local</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">microk8s</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">minikube</span>
-      
-    
-  </nav>
-
 
   
   
 
 
-<h1 id="local-kubernetes-setup-minikubemicrok8s">Local Kubernetes Setup (Minikube/MicroK8s)<a class="headerlink" href="#local-kubernetes-setup-minikubemicrok8s" title="Permanent link">#</a></h1>
-<p>This guide covers setting up Janssen on a local Kubernetes cluster for development and testing.</p>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>For local deployments, minimum resources are:</p>
-<ul>
-<li>8 GB RAM</li>
-<li>4 CPU cores</li>
-<li>50 GB hard-disk</li>
-</ul>
-<h2 id="quick-start-script">Quick Start Script<a class="headerlink" href="#quick-start-script" title="Permanent link">#</a></h2>
-<p>Start a fresh Ubuntu VM with ports 443 and 80 open, then run:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-
-wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
+<h1 id="slsa-artifact-verification">SLSA Artifact Verification<a class="headerlink" href="#slsa-artifact-verification" title="Permanent link">#</a></h1>
+<p>Every release of the Janssen Project ships with <a href="https://slsa.dev/spec/v1.0/levels">SLSA Build Level 3</a>
+provenance attestations alongside the existing cosign signatures. This document
+explains how to verify both binary/wheel/WASM artifacts and Docker images.</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<h3 id="install-slsa-verifier">Install <code>slsa-verifier</code><a class="headerlink" href="#install-slsa-verifier" title="Permanent link">#</a></h3>
+<p><strong>macOS (Homebrew)</strong>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>slsa-verifier
+</code></pre></div></p>
+<p><strong>Go install</strong>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span>install<span class="w"> </span>github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
+</code></pre></div></p>
+<p><strong>GitHub Release download</strong><br />
+Download the latest binary from
+<a href="https://github.com/slsa-framework/slsa-verifier/releases/latest">https://github.com/slsa-framework/slsa-verifier/releases/latest</a> and place it
+on your <code>PATH</code>.</p>
+<p><strong>Verify the installation</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>version
+</code></pre></div></p>
+<h3 id="install-cosign-for-signature-verification">Install <code>cosign</code> (for signature verification)<a class="headerlink" href="#install-cosign-for-signature-verification" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>cosign<span class="w">         </span><span class="c1"># macOS</span>
+<span class="c1"># or</span>
+go<span class="w"> </span>install<span class="w"> </span>github.com/sigstore/cosign/v2/cmd/cosign@latest
 </code></pre></div>
-<p>This installs Docker, MicroK8s, Helm, and Janssen with default settings.</p>
-<h2 id="accessing-endpoints">Accessing Endpoints<a class="headerlink" href="#accessing-endpoints" title="Permanent link">#</a></h2>
-<p>The installer adds a hosts record in the VM. To access from outside the VM, map the VM IP to your FQDN.</p>
+<hr />
+<h2 id="verifying-binary-wheel-wasm-artifacts">Verifying Binary / Wheel / WASM Artifacts<a class="headerlink" href="#verifying-binary-wheel-wasm-artifacts" title="Permanent link">#</a></h2>
+<p>Every GitHub Release contains a <code>.intoto.jsonl</code> provenance file alongside the
+artifact files. The provenance file is named
+<code>&lt;artifact-name&gt;.intoto.jsonl</code> and is generated by the
+<code>slsa-framework/slsa-github-generator</code> reusable workflow.</p>
+<h3 id="general-command">General command<a class="headerlink" href="#general-command" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span>&lt;ARTIFACT_FILE&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>&lt;ARTIFACT_FILE&gt;.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>&lt;RELEASE_TAG&gt;
+</code></pre></div>
+<p>Replace <code>&lt;RELEASE_TAG&gt;</code> with the release tag (e.g., <code>v1.2.0</code> or <code>nightly</code>).</p>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">#</a></h3>
+<p><strong>DEB package (Ubuntu 24.04)</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans_1.2.0-stable~ubuntu24.04_amd64.deb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>jans_1.2.0-stable~ubuntu24.04_amd64.deb.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>RPM package (EL9)</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans-1.2.0-stable.el9.x86_64.rpm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>jans-1.2.0-stable.el9.x86_64.rpm.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Python zipapp</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans-linux-ubuntu-X86-64-setup.pyz<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>jans-linux-ubuntu-X86-64-setup.pyz.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Cedarling WASM tarball</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cedarling_wasm_1.2.0_pkg.tar.gz<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>cedarling_wasm_1.2.0_pkg.tar.gz.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Cedarling Python wheel</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cedarling_python-1.2.0-cp311-cp311-manylinux_2_17_x86_64.whl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>cedarling_python-1.2.0-cp311-cp311-manylinux_2_17_x86_64.whl.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Cedarling Go shared library</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libcedarling_go-1.2.0_x86-64.so<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>libcedarling_go-1.2.0_x86-64.so.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Cedarling KrakenD plugin</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cedarling-krakend-amd64-builder-2.9.0-1.2.0.so<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>cedarling-krakend-amd64-builder-2.9.0-1.2.0.so.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<p><strong>Cedarling UniFFI library / Kotlin binding</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-artifact<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libcedarling_uniffi-1.2.0.so<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--provenance-path<span class="w"> </span>libcedarling_uniffi-1.2.0.so.intoto.jsonl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-tag<span class="w"> </span>v1.2.0
+</code></pre></div></p>
+<h3 id="also-verify-the-cosign-bundle-signature">Also verify the cosign bundle signature<a class="headerlink" href="#also-verify-the-cosign-bundle-signature" title="Permanent link">#</a></h3>
+<p>Each artifact also ships with a <code>.bundle</code> sidecar (cosign keyless signature).
+Verify it alongside the provenance attestation:</p>
+<div class="highlight"><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>&lt;ARTIFACT_FILE&gt;.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span><span class="s2">&quot;https://token.actions.githubusercontent.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&lt;ARTIFACT_FILE&gt;
+</code></pre></div>
+<hr />
+<h2 id="verifying-docker-images">Verifying Docker Images<a class="headerlink" href="#verifying-docker-images" title="Permanent link">#</a></h2>
+<p>Docker images published to GHCR (<code>ghcr.io/janssenproject/jans/&lt;image&gt;</code>) carry
+SLSA provenance attestations generated by <code>actions/attest-build-provenance</code>.
+The attestation is stored in the registry and can be verified with
+<code>slsa-verifier</code> or via <code>gh attestation verify</code>.</p>
+<h3 id="with-slsa-verifier">With <code>slsa-verifier</code><a class="headerlink" href="#with-slsa-verifier" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-image<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/janssenproject/jans/&lt;image&gt;@&lt;digest&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans
+</code></pre></div>
+<p><strong>Example — auth-server</strong>
+<div class="highlight"><pre><span></span><code>slsa-verifier<span class="w"> </span>verify-image<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/janssenproject/jans/auth-server@sha256:abc123...<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-uri<span class="w"> </span>github.com/JanssenProject/jans
+</code></pre></div></p>
+<h3 id="with-the-github-cli-gh">With the GitHub CLI (<code>gh</code>)<a class="headerlink" href="#with-the-github-cli-gh" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>oci://ghcr.io/janssenproject/jans/&lt;image&gt;@&lt;digest&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--owner<span class="w"> </span>JanssenProject
+</code></pre></div>
+<h3 id="find-the-image-digest">Find the image digest<a class="headerlink" href="#find-the-image-digest" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/janssenproject/jans/&lt;image&gt;:&lt;tag&gt;
+docker<span class="w"> </span>inspect<span class="w"> </span>--format<span class="o">=</span><span class="s1">&#39;{{index .RepoDigests 0}}&#39;</span><span class="w"> </span>ghcr.io/janssenproject/jans/&lt;image&gt;:&lt;tag&gt;
+<span class="c1"># or</span>
+cosign<span class="w"> </span>triangulate<span class="w"> </span>ghcr.io/janssenproject/jans/&lt;image&gt;:&lt;tag&gt;
+</code></pre></div>
+<h3 id="also-verify-the-cosign-signature-on-docker-images">Also verify the cosign signature on Docker images<a class="headerlink" href="#also-verify-the-cosign-signature-on-docker-images" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>cosign<span class="w"> </span>verify<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span><span class="s2">&quot;https://token.actions.githubusercontent.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/janssenproject/jans/&lt;image&gt;@&lt;digest&gt;
+</code></pre></div>
+<hr />
+<h2 id="artifact-families-and-provenance-files">Artifact Families and Provenance Files<a class="headerlink" href="#artifact-families-and-provenance-files" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
-<th>Service</th>
-<th>Endpoint</th>
+<th>Artifact family</th>
+<th>Provenance file suffix</th>
+<th>Workflow job</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Auth server</td>
-<td><code>https://FQDN/.well-known/openid-configuration</code></td>
+<td>DEB / RPM binary packages</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-binary</code></td>
 </tr>
 <tr>
-<td>FIDO2</td>
-<td><code>https://FQDN/.well-known/fido2-configuration</code></td>
+<td>Python zipapps (<code>.pyz</code>)</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-python</code></td>
 </tr>
 <tr>
-<td>SCIM</td>
-<td><code>https://FQDN/.well-known/scim-configuration</code></td>
+<td>Cedarling WASM tarball</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-wasm</code></td>
+</tr>
+<tr>
+<td>Cedarling Python wheels</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-cedarling-python</code></td>
+</tr>
+<tr>
+<td>Cedarling Go libraries</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-cedarling-go</code></td>
+</tr>
+<tr>
+<td>Cedarling KrakenD plugins</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-cedarling-krakend</code></td>
+</tr>
+<tr>
+<td>Cedarling UniFFI / Kotlin</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-cedarling-uniffi</code></td>
+</tr>
+<tr>
+<td>Demo source zips / Chrome extension</td>
+<td><code>.intoto.jsonl</code></td>
+<td><code>provenance-demo</code></td>
+</tr>
+<tr>
+<td>Docker images (GHCR)</td>
+<td>Registry attestation</td>
+<td><code>docker</code> (via <code>actions/attest-build-provenance</code>)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="manual-setup">Manual Setup<a class="headerlink" href="#manual-setup" title="Permanent link">#</a></h2>
-<p>If you prefer manual setup:</p>
-<ol>
-<li>Install <a href="https://minikube.sigs.k8s.io/docs/start/">Minikube</a> or <a href="https://github.com/canonical/microk8s/tree/master#quickstart">MicroK8s</a></li>
-<li>Install <a href="https://helm.sh/docs/intro/install/">Helm</a></li>
-<li>Create the namespace:
-   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>jans
-</code></pre></div></li>
-</ol>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">#</a></h2>
-<p>Proceed to <a href="../../ingress-setup/">Ingress Setup</a> to configure traffic routing.</p>
+<hr />
+<h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://slsa.dev">SLSA framework</a></li>
+<li><a href="https://github.com/slsa-framework/slsa-verifier">slsa-verifier documentation</a></li>
+<li><a href="https://github.com/slsa-framework/slsa-github-generator">slsa-github-generator</a></li>
+<li><a href="https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds">GitHub artifact attestations</a></li>
+<li><a href="https://docs.sigstore.dev/cosign/overview/">cosign documentation</a></li>
+</ul>
 
 
 
@@ -2622,7 +2215,7 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 20, 2026 13:13:06 UTC"><span class="timeago" datetime="2026-05-20T13:13:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 20, 2026 13:13:06 UTC">2026-05-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 25, 2026 13:05:07 UTC"><span class="timeago" datetime="2026-05-25T13:05:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 25, 2026 13:05:07 UTC">2026-05-25</span>
   </span>
 
     
@@ -2632,7 +2225,7 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 25, 2026 13:05:07 UTC"><span class="timeago" datetime="2026-05-25T13:05:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 25, 2026 13:05:07 UTC">2026-05-25</span>
   </span>
 
     
@@ -2712,19 +2305,19 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../../js/timeago.min.js"></script>
+        <script src="../../../js/timeago.min.js"></script>
       
-        <script src="../../../../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../../../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../../../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 
@@ -2733,7 +2326,7 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
      width="0" height="0"/>
 
 
-  <script src="../../../../../assets/js/reo.js" defer></script>
+  <script src="../../../assets/js/reo.js" defer></script>
 
 
   </body>
