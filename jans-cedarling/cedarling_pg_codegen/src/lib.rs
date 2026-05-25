@@ -26,20 +26,13 @@ pub struct Column {
 pub fn cedar_type_for_pg_type(pg_type: &str) -> Option<String> {
     let pg = pg_type.trim();
 
-    // Array form: "text[]" / "integer[]" / "uuid[][]" etc.  Cedar only models
-    // one-dimensional sets, so we treat any array as `Set<inner>` and pass the
-    // element type through this same mapping.
     if let Some(stripped) = pg.strip_suffix("[]") {
         let inner = cedar_type_for_pg_type(stripped)?;
         return Some(format!("Set<{inner}>"));
     }
 
-    // Strip precision/length modifiers: `character varying(255)` → `character varying`.
     let base = pg.split_once('(').map_or(pg, |(b, _)| b).trim();
 
-    // Cedar text schema has three primitives we can map onto: `Long`, `String`, `Bool`.
-    // Numeric/float and bytea have no safe text-schema mapping; return None so the caller
-    // can skip the column or warn. Temporal + jsonb fold into String as ISO-8601 / serialised text.
     let mapped = match base {
         "smallint" | "integer" | "bigint" | "oid" => "Long",
         "text"
@@ -61,10 +54,6 @@ pub fn cedar_type_for_pg_type(pg_type: &str) -> Option<String> {
 }
 
 /// Convert a `snake_case` table name to a singular `PascalCase` Cedar entity name.
-///
-/// Mirrors the heuristic used by `cedarling_pg`'s entity-map inference so that
-/// generated schemas line up with the default lookup. Example: `student_records`
-/// → `StudentRecord`.
 #[must_use]
 pub fn entity_name_for_table(table: &str) -> String {
     let parts: Vec<&str> = table.split('_').filter(|s| !s.is_empty()).collect();
@@ -90,10 +79,8 @@ pub fn entity_name_for_table(table: &str) -> String {
 
 fn depluralise(word: &str) -> String {
     if let Some(stem) = word.strip_suffix("ies") {
-        // companies → company
         return format!("{stem}y");
     }
-    // Sibilant plurals (drop `es`, keep the stem): addresses → address, boxes → box.
     if word.ends_with("ses")
         || word.ends_with("xes")
         || word.ends_with("zes")
@@ -102,7 +89,6 @@ fn depluralise(word: &str) -> String {
     {
         return word[..word.len() - 2].to_string();
     }
-    // Generic `s` plural (avoid double-s like `class`).
     if word.ends_with('s') && !word.ends_with("ss") && word.len() > 1 {
         return word[..word.len() - 1].to_string();
     }
@@ -115,6 +101,11 @@ pub struct EntityRender {
     pub entity_name: String,
     pub cedar_text: String,
     pub unmapped_columns: Vec<String>,
+}
+
+/// Escape a PostgreSQL attribute name for Cedar schema double-quoted keys.
+fn escape_cedar_attribute_name(name: &str) -> String {
+    name.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 /// Render a single entity declaration from a table's columns.
@@ -130,13 +121,14 @@ pub fn render_entity(table: &str, columns: &[Column]) -> EntityRender {
         }
     }
 
-let mut body = String::new();
+    let mut body = String::new();
     if attrs.is_empty() {
         writeln!(body, "  entity {entity_name};").ok();
     } else {
         writeln!(body, "  entity {entity_name} = {{").ok();
         for (name, ty) in &attrs {
-            writeln!(body, "    \"{name}\": {ty},").ok();
+            let escaped = escape_cedar_attribute_name(name);
+            writeln!(body, "    \"{escaped}\": {ty},").ok();
         }
         body.push_str("  };\n");
     }
@@ -151,7 +143,7 @@ let mut body = String::new();
 /// Wrap one or more entity bodies in a Cedar namespace.
 #[must_use]
 pub fn wrap_namespace(namespace: &str, entity_bodies: &[String]) -> String {
-let mut out = String::new();
+    let mut out = String::new();
     writeln!(out, "namespace {namespace} {{").ok();
     for body in entity_bodies {
         out.push_str(body);
@@ -166,26 +158,49 @@ mod tests {
 
     #[test]
     fn maps_basic_scalar_types() {
-        assert_eq!(cedar_type_for_pg_type("integer").as_deref(), Some("Long"));
-        assert_eq!(cedar_type_for_pg_type("bigint").as_deref(), Some("Long"));
-        assert_eq!(cedar_type_for_pg_type("text").as_deref(), Some("String"));
+        assert_eq!(
+            cedar_type_for_pg_type("integer").as_deref(),
+            Some("Long"),
+            "integer should map to Long"
+        );
+        assert_eq!(
+            cedar_type_for_pg_type("bigint").as_deref(),
+            Some("Long"),
+            "bigint should map to Long"
+        );
+        assert_eq!(
+            cedar_type_for_pg_type("text").as_deref(),
+            Some("String"),
+            "text should map to String"
+        );
         assert_eq!(
             cedar_type_for_pg_type("character varying").as_deref(),
-            Some("String")
+            Some("String"),
+            "character varying should map to String"
         );
-        assert_eq!(cedar_type_for_pg_type("boolean").as_deref(), Some("Bool"));
-        assert_eq!(cedar_type_for_pg_type("uuid").as_deref(), Some("String"));
+        assert_eq!(
+            cedar_type_for_pg_type("boolean").as_deref(),
+            Some("Bool"),
+            "boolean should map to Bool"
+        );
+        assert_eq!(
+            cedar_type_for_pg_type("uuid").as_deref(),
+            Some("String"),
+            "uuid should map to String"
+        );
     }
 
     #[test]
     fn strips_length_modifiers() {
         assert_eq!(
             cedar_type_for_pg_type("character varying(255)").as_deref(),
-            Some("String")
+            Some("String"),
+            "varchar length modifier should be stripped"
         );
         assert_eq!(
             cedar_type_for_pg_type("character(10)").as_deref(),
-            Some("String")
+            Some("String"),
+            "char length modifier should be stripped"
         );
     }
 
@@ -193,39 +208,63 @@ mod tests {
     fn temporal_types_become_string() {
         assert_eq!(
             cedar_type_for_pg_type("timestamp with time zone").as_deref(),
-            Some("String")
+            Some("String"),
+            "timestamptz should map to String"
         );
-        assert_eq!(cedar_type_for_pg_type("date").as_deref(), Some("String"));
+        assert_eq!(
+            cedar_type_for_pg_type("date").as_deref(),
+            Some("String"),
+            "date should map to String"
+        );
     }
 
     #[test]
     fn arrays_become_sets() {
         assert_eq!(
             cedar_type_for_pg_type("text[]").as_deref(),
-            Some("Set<String>")
+            Some("Set<String>"),
+            "text[] should map to Set<String>"
         );
         assert_eq!(
             cedar_type_for_pg_type("integer[]").as_deref(),
-            Some("Set<Long>")
+            Some("Set<Long>"),
+            "integer[] should map to Set<Long>"
         );
     }
 
     #[test]
     fn numeric_and_bytea_are_unmapped() {
-        assert!(cedar_type_for_pg_type("numeric").is_none());
-        assert!(cedar_type_for_pg_type("real").is_none());
-        assert!(cedar_type_for_pg_type("bytea").is_none());
+        assert!(
+            cedar_type_for_pg_type("numeric").is_none(),
+            "numeric has no Cedar mapping"
+        );
+        assert!(
+            cedar_type_for_pg_type("real").is_none(),
+            "real has no Cedar mapping"
+        );
+        assert!(
+            cedar_type_for_pg_type("bytea").is_none(),
+            "bytea has no Cedar mapping"
+        );
     }
 
     #[test]
     fn entity_name_pascal_cases_and_depluralises_last_word() {
-        assert_eq!(entity_name_for_table("students"), "Student");
-        assert_eq!(entity_name_for_table("user_accounts"), "UserAccount");
-        assert_eq!(entity_name_for_table("companies"), "Company");
-        assert_eq!(entity_name_for_table("addresses"), "Address");
-        assert_eq!(entity_name_for_table("boxes"), "Box");
-        assert_eq!(entity_name_for_table("classes"), "Class");
-        assert_eq!(entity_name_for_table("status"), "Statu"); // false plural; user can override
+        assert_eq!(entity_name_for_table("students"), "Student", "students → Student");
+        assert_eq!(
+            entity_name_for_table("user_accounts"),
+            "UserAccount",
+            "user_accounts → UserAccount"
+        );
+        assert_eq!(entity_name_for_table("companies"), "Company", "companies → Company");
+        assert_eq!(entity_name_for_table("addresses"), "Address", "addresses → Address");
+        assert_eq!(entity_name_for_table("boxes"), "Box", "boxes → Box");
+        assert_eq!(entity_name_for_table("classes"), "Class", "classes → Class");
+        assert_eq!(
+            entity_name_for_table("status"),
+            "Statu",
+            "status is a false plural"
+        );
     }
 
     #[test]
@@ -245,12 +284,31 @@ mod tests {
             },
         ];
         let r = render_entity("students", &cols);
-        assert_eq!(r.entity_name, "Student");
-        assert!(r.cedar_text.contains("entity Student = {"));
-        assert!(r.cedar_text.contains("\"id\": Long,"));
-        assert!(r.cedar_text.contains("\"name\": String,"));
-        assert!(r.cedar_text.contains("\"tags\": Set<String>,"));
-        assert!(r.unmapped_columns.is_empty());
+        assert_eq!(r.entity_name, "Student", "entity name should depluralize table");
+        assert!(
+            r.cedar_text.contains("entity Student = {"),
+            "output should declare Student entity"
+        );
+        assert!(r.cedar_text.contains("\"id\": Long,"), "id should map to Long");
+        assert!(r.cedar_text.contains("\"name\": String,"), "name should map to String");
+        assert!(
+            r.cedar_text.contains("\"tags\": Set<String>,"),
+            "tags should map to Set<String>"
+        );
+        assert!(r.unmapped_columns.is_empty(), "all columns should map");
+    }
+
+    #[test]
+    fn render_entity_escapes_quotes_in_attribute_names() {
+        let cols = vec![Column {
+            name: r#"col"quote"#.into(),
+            pg_type: "text".into(),
+        }];
+        let r = render_entity("items", &cols);
+        assert!(
+            r.cedar_text.contains(r#""col\"quote": String,"#),
+            "embedded double quotes must be escaped"
+        );
     }
 
     #[test]
@@ -270,16 +328,24 @@ mod tests {
             },
         ];
         let r = render_entity("students", &cols);
-        assert!(r.cedar_text.contains("\"id\": Long,"));
-        assert!(!r.cedar_text.contains("score"));
-        assert!(!r.cedar_text.contains("image"));
-        assert_eq!(r.unmapped_columns, vec!["score", "image"]);
+        assert!(r.cedar_text.contains("\"id\": Long,"), "mapped id should appear");
+        assert!(!r.cedar_text.contains("score"), "unmapped score should be omitted");
+        assert!(!r.cedar_text.contains("image"), "unmapped image should be omitted");
+        assert_eq!(
+            r.unmapped_columns,
+            vec!["score", "image"],
+            "unmapped columns should be reported"
+        );
     }
 
     #[test]
     fn empty_table_renders_bare_entity() {
         let r = render_entity("empty", &[]);
-        assert_eq!(r.cedar_text, "  entity Empty;\n");
+        assert_eq!(
+            r.cedar_text,
+            "  entity Empty;\n",
+            "empty table should render bare entity"
+        );
     }
 
     #[test]
@@ -287,9 +353,9 @@ mod tests {
         let body_a = "  entity A;\n".to_string();
         let body_b = "  entity B = {\n    \"x\": Long,\n  };\n".to_string();
         let out = wrap_namespace("Jans", &[body_a, body_b]);
-        assert!(out.starts_with("namespace Jans {\n"));
-        assert!(out.ends_with("}\n"));
-        assert!(out.contains("entity A;"));
-        assert!(out.contains("entity B = {"));
+        assert!(out.starts_with("namespace Jans {\n"), "should open namespace");
+        assert!(out.ends_with("}\n"), "should close namespace");
+        assert!(out.contains("entity A;"), "should include first entity");
+        assert!(out.contains("entity B = {"), "should include second entity");
     }
 }

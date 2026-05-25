@@ -101,7 +101,7 @@ pub fn cedarling_validate_schema_by_oid(
             Ok(n) => n,
             Err(e) => return error_envelope(&e.to_string()),
         };
-        return validate_schema_lexical(&relname, schema_path);
+        return validate_schema_lexical_by_oid(table_oid, &relname, schema_path);
     }
 
     match validate_schema_strict_inner(table_oid, schema_path) {
@@ -194,7 +194,19 @@ fn validate_schema_strict_inner(table_oid: pg_sys::Oid, cedar_schema_path: &str)
 }
 
 fn validate_schema_lexical(table_name: &str, cedar_schema_path: &str) -> pgrx::datum::JsonB {
-    let table_cols = match fetch_table_columns_by_name_legacy(table_name) {
+    match resolve_table_oid(table_name) {
+        Ok(Some(oid)) => validate_schema_lexical_by_oid(oid, table_name, cedar_schema_path),
+        Ok(None) => error_envelope(&format!("unknown table: {table_name}")),
+        Err(e) => error_envelope(&e.to_string()),
+    }
+}
+
+fn validate_schema_lexical_by_oid(
+    table_oid: pg_sys::Oid,
+    table_label: &str,
+    cedar_schema_path: &str,
+) -> pgrx::datum::JsonB {
+    let table_cols = match fetch_table_column_names_by_oid(table_oid) {
         Ok(v) => v,
         Err(e) => return error_envelope(&format!("table introspection failed: {e}")),
     };
@@ -207,11 +219,18 @@ fn validate_schema_lexical(table_name: &str, cedar_schema_path: &str) -> pgrx::d
     let missing_in_schema: Vec<String> = table_cols.difference(&schema_attrs).cloned().collect();
     pgrx::datum::JsonB(json!({
         "ok": missing_in_table.is_empty() && missing_in_schema.is_empty(),
-        "table_entity": table_name,
+        "table_entity": table_label,
         "missing_in_table": missing_in_table,
         "missing_in_schema": missing_in_schema,
         "type_mismatches": []
     }))
+}
+
+fn fetch_table_column_names_by_oid(table_oid: pg_sys::Oid) -> Result<BTreeSet<String>, SchemaError> {
+    Ok(fetch_table_columns_by_oid(table_oid)?
+        .into_iter()
+        .map(|c| c.name)
+        .collect())
 }
 
 fn resolve_table_oid(table_name: &str) -> Result<Option<pg_sys::Oid>, SchemaError> {
@@ -272,30 +291,6 @@ fn fetch_table_columns_by_oid(table_oid: pg_sys::Oid) -> Result<Vec<TableColumn>
     Ok(out)
 }
 
-fn fetch_table_columns_by_name_legacy(table_name: &str) -> Result<BTreeSet<String>, SchemaError> {
-    let mut out = BTreeSet::new();
-    Spi::connect(|client| {
-        let rows = client.select(
-            "SELECT a.attname::text AS attname
-             FROM pg_attribute a
-             JOIN pg_class c ON c.oid = a.attrelid
-             JOIN pg_namespace n ON n.oid = c.relnamespace
-             WHERE c.relname = $1
-               AND a.attnum > 0
-               AND NOT a.attisdropped",
-            None,
-            &[table_name.into()],
-        )?;
-        for row in rows {
-            if let Some(name) = row.get_by_name::<String, _>("attname")? {
-                out.insert(name);
-            }
-        }
-        Ok::<(), pgrx::spi::Error>(())
-    })?;
-    Ok(out)
-}
-
 fn resolve_entity_type_name(
     schema: &cedar_policy::Schema,
     preferred_entity_type: &str,
@@ -329,8 +324,8 @@ fn extract_entity_attributes(
     schema_json: &Value,
     entity_type: &str,
 ) -> Option<BTreeMap<String, Value>> {
-    let mut out = BTreeMap::new();
     let preferred_basename = entity_type.rsplit("::").next().unwrap_or(entity_type);
+    let allow_basename_fallback = !entity_type.contains("::");
     let namespaces = if let Some(ns) = schema_json.get("namespaces").and_then(Value::as_object) {
         ns.clone()
     } else {
@@ -346,15 +341,19 @@ fn extract_entity_attributes(
             } else {
                 format!("{namespace_name}::{short_name}")
             };
-            let full_basename = full_name.rsplit("::").next().unwrap_or(&full_name);
-            if full_name != entity_type
-                && short_name != entity_type
-                && short_name != preferred_basename
-                && full_basename != preferred_basename
-            {
+            let matches = if full_name == entity_type || short_name == entity_type {
+                true
+            } else if allow_basename_fallback {
+                let full_basename = full_name.rsplit("::").next().unwrap_or(&full_name);
+                short_name == preferred_basename || full_basename == preferred_basename
+            } else {
+                false
+            };
+            if !matches {
                 continue;
             }
 
+            let mut out = BTreeMap::new();
             let attrs = entity_def
                 .get("shape")
                 .and_then(|s| s.get("attributes"))
@@ -511,5 +510,46 @@ mod tests {
         assert!(attrs.contains("age"));
         assert!(attrs.contains("is_ok"));
         assert!(!attrs.contains("String"));
+    }
+
+    #[test]
+    fn extract_entity_attributes_requires_exact_namespace_when_qualified() {
+        let schema_json = json!({
+            "namespaces": {
+                "Ns1": {
+                    "entityTypes": {
+                        "User": {
+                            "shape": {
+                                "attributes": {
+                                    "ns1_field": { "type": "String" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "Ns2": {
+                    "entityTypes": {
+                        "User": {
+                            "shape": {
+                                "attributes": {
+                                    "ns2_field": { "type": "String" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        let ns1_attrs = extract_entity_attributes(&schema_json, "Ns1::User")
+            .expect("Ns1::User should resolve");
+        assert!(
+            ns1_attrs.contains_key("ns1_field"),
+            "expected Ns1 attributes for fully-qualified Ns1::User"
+        );
+        assert!(
+            !ns1_attrs.contains_key("ns2_field"),
+            "must not merge Ns2 attributes when entity_type is Ns1::User"
+        );
     }
 }

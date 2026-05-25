@@ -159,7 +159,7 @@ fn classify_status(
 /// - `cache_hit_rate`: `cache_hits / total_requests` (0.0 when no requests).
 /// - `last_error`: most recent error message (`null` if none).
 /// - `last_error_time`: RFC 3339 timestamp of the most recent error (`null` if none).
-#[pg_extern(stable)]
+#[pg_extern(volatile)]
 pub fn cedarling_status() -> pgrx::datum::JsonB {
     let total = TOTAL_REQUESTS.load(Ordering::Relaxed);
     let allowed = ALLOWED.load(Ordering::Relaxed);

@@ -137,15 +137,31 @@ fn deterministic_range(salt: &[u8], value: &str, min: i64, max: i64) -> i64 {
     min.saturating_add(offset)
 }
 
-/// Parse `"min-max"` range bounds, handling negative numbers via `rfind('-')`.
+/// Parse `"min-max"` range bounds, including signed integers on both sides.
 fn parse_range_bounds(bounds: &str) -> (i64, i64) {
-    if let Some(sep) = bounds.rfind('-').filter(|&i| i > 0) {
-        let min = bounds[..sep].trim().parse().unwrap_or(0);
-        let max = bounds[sep + 1..].trim().parse().unwrap_or(0);
-        (min, max)
-    } else {
-        (0, 0)
+    let trimmed = bounds.trim();
+    if trimmed.is_empty() {
+        return (0, 0);
     }
+
+    let bytes = trimmed.as_bytes();
+    let mut scan_from = 0;
+    if bytes.first().is_some_and(|b| *b == b'-' || *b == b'+') {
+        scan_from = 1;
+    }
+
+    for (i, &b) in bytes.iter().enumerate().skip(scan_from) {
+        if b != b'-' {
+            continue;
+        }
+        let min_str = trimmed[..i].trim();
+        let max_str = trimmed[i + 1..].trim();
+        if let (Ok(min), Ok(max)) = (min_str.parse::<i64>(), max_str.parse::<i64>()) {
+            return (min, max);
+        }
+    }
+
+    (0, 0)
 }
 
 #[cfg(test)]
@@ -199,8 +215,9 @@ mod tests {
     fn partial_cc_keeps_last_four() {
         let m = MaskType::Partial { pattern: "****-****-****-####".to_string() };
         assert_eq!(
-            m.apply(Some("4111111111111234"), SALT),
-            Some("****-****-****-1234".to_string())
+            m.apply(Some("SYNTHCCARDNUM1234"), SALT),
+            Some("****-****-****-1234".to_string()),
+            "partial mask should keep the last four characters of a synthetic card number"
         );
     }
 
@@ -300,7 +317,14 @@ mod tests {
     #[test]
     fn parse_range_bounds_negative_min() {
         let (min, max) = parse_range_bounds("-100-100");
-        assert_eq!(min, -100);
-        assert_eq!(max, 100);
+        assert_eq!(min, -100, "negative min should parse");
+        assert_eq!(max, 100, "positive max should parse");
+    }
+
+    #[test]
+    fn parse_range_bounds_negative_max() {
+        let (min, max) = parse_range_bounds("-10--5");
+        assert_eq!(min, -10, "negative min should parse when max is also negative");
+        assert_eq!(max, -5, "negative max should parse");
     }
 }

@@ -128,7 +128,10 @@ pub(crate) fn build_entity_id(attrs: &Map<String, Value>, mapping: &EntityMappin
             };
             parts.push(s);
         }
-        return parts.join("-");
+        if parts.len() == 1 {
+            return parts.into_iter().next().expect("checked len above");
+        }
+        return serde_json::to_string(&parts).unwrap_or_else(|_| fallback_hashed_entity_id(attrs));
     }
     fallback_hashed_entity_id(attrs)
 }
@@ -207,8 +210,44 @@ mod tests {
 
     #[test]
     fn heuristic_singular_pascal_case() {
-        assert_eq!(heuristic_entity_type("students"), "Student");
-        assert_eq!(heuristic_entity_type("student_profiles"), "StudentProfile");
-        assert_eq!(heuristic_entity_type("user"), "User");
+        assert_eq!(heuristic_entity_type("students"), "Student", "trailing s should depluralize");
+        assert_eq!(
+            heuristic_entity_type("student_profiles"),
+            "StudentProfile",
+            "snake_case segments should become PascalCase"
+        );
+        assert_eq!(heuristic_entity_type("user"), "User", "single segment should capitalize");
+    }
+
+    #[test]
+    fn build_entity_id_uses_json_array_for_composite_keys() {
+        use serde_json::json;
+
+        let attrs = json!({"id1": "a-b", "id2": "c"}).as_object().unwrap().clone();
+        let mapping = EntityMapping {
+            entity_type: "T".into(),
+            id_columns: vec!["id1".into(), "id2".into()],
+        };
+        assert_eq!(
+            build_entity_id(&attrs, &mapping),
+            r#"["a-b","c"]"#,
+            "composite keys must encode as JSON array to avoid join collisions"
+        );
+    }
+
+    #[test]
+    fn build_entity_id_single_column_stays_plain() {
+        use serde_json::json;
+
+        let attrs = json!({"id": 42}).as_object().unwrap().clone();
+        let mapping = EntityMapping {
+            entity_type: "T".into(),
+            id_columns: vec!["id".into()],
+        };
+        assert_eq!(
+            build_entity_id(&attrs, &mapping),
+            "42",
+            "single-column ids should remain a plain string"
+        );
     }
 }

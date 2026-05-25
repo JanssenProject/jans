@@ -67,31 +67,45 @@ mod tests {
     fn parses_array_form() {
         let json = r#"[{"mapping":"Acme::Access_Token","payload":"eyJ"}]"#;
         let v = parse_token_inputs_from_json(json).expect("parse");
-        assert_eq!(v.len(), 1);
-        assert_eq!(v[0].mapping, "Acme::Access_Token");
-        assert_eq!(v[0].payload, "eyJ");
+        assert_eq!(v.len(), 1, "array form should yield one token");
+        assert_eq!(
+            v[0].mapping,
+            "Acme::Access_Token",
+            "mapping key should be preserved"
+        );
+        assert_eq!(v[0].payload, "eyJ", "payload should be preserved");
     }
 
     #[test]
     fn parses_object_form() {
         let json = r#"{"Dolphin::Access_Token":"aa.bb.cc","Dolphin::Dolphin_Token":"xx.yy.zz"}"#;
         let v = parse_token_inputs_from_json(json).expect("parse");
-        assert_eq!(v.len(), 2);
+        assert_eq!(v.len(), 2, "object form should yield two tokens");
         let mut keys: Vec<_> = v.iter().map(|t| t.mapping.as_str()).collect();
         keys.sort_unstable();
-        assert_eq!(keys, ["Dolphin::Access_Token", "Dolphin::Dolphin_Token"]);
+        assert_eq!(
+            keys,
+            ["Dolphin::Access_Token", "Dolphin::Dolphin_Token"],
+            "object keys should become mapping names"
+        );
     }
 
     #[test]
     fn rejects_primitives() {
         let err = parse_token_inputs_from_json("42").unwrap_err();
-        assert!(matches!(err, TokenBundleError::UnsupportedShape));
+        assert!(
+            matches!(err, TokenBundleError::UnsupportedShape),
+            "numeric JSON should be rejected as unsupported shape"
+        );
     }
 
     #[test]
     fn rejects_object_with_non_string_payload() {
         let err = parse_token_inputs_from_json(r#"{"Acme::Access_Token":123}"#).unwrap_err();
-        assert!(matches!(err, TokenBundleError::NonStringPayload { .. }));
+        assert!(
+            matches!(err, TokenBundleError::NonStringPayload { .. }),
+            "non-string object payload should be rejected"
+        );
     }
 
     /// JWT body into the resulting error's Display. The mapping key is the

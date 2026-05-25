@@ -78,7 +78,7 @@ pub fn cedarling_test_masking(
 /// The optional `action` argument is reserved for future action-scoped rules; it is echoed in the
 /// response metadata only. Each rule entry includes `column`, `mask_type`, `mask_value`,
 /// `condition_sql`, and `data_type`.
-#[pg_extern(stable, parallel_safe)]
+#[pg_extern(stable)]
 pub fn cedarling_mask_plan(table_name: &str, action: Option<&str>) -> pgrx::datum::JsonB {
     let action_value = action.unwrap_or("Read");
     let mut rules: Vec<Value> = Vec::new();
@@ -123,20 +123,23 @@ pub fn cedarling_mask_plan(table_name: &str, action: Option<&str>) -> pgrx::datu
 /// Explicit rules in `cedarling.mask_rules` take precedence; the built-in default registry is
 /// applied to columns that have no explicit rule but whose name matches a known sensitive pattern.
 /// Type-preserving: `Range`-masked columns are written as JSON numbers.
-#[pg_extern(stable, parallel_safe)]
+#[pg_extern(stable)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
 pub fn cedarling_mask_row(
     row_json: pgrx::datum::JsonB,
     table_name: &str,
 ) -> pgrx::datum::JsonB {
     let salt = guc_config::mask_hash_salt_bytes();
-    pgrx::datum::JsonB(compute_masked_row_inner(&row_json.0, table_name, &salt))
+    match compute_masked_row_inner(&row_json.0, table_name, &salt) {
+        Ok(out) => pgrx::datum::JsonB(out),
+        Err(e) => pgrx::error!("cedarling_mask_row: {e}"),
+    }
 }
 
 /// Core masking logic: explicit catalog rules + default registry fallback, type-preserving output.
-fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value {
+fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Result<Value, String> {
     let mut out = row.clone();
-    let explicit: BTreeMap<String, MaskRule> = lookup_explicit_rules(table_name)
+    let explicit: BTreeMap<String, MaskRule> = lookup_explicit_rules(table_name)?
         .into_iter()
         .map(|r| (r.column_name.clone(), r))
         .collect();
@@ -146,10 +149,11 @@ fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value
         for col in &column_names {
             // Explicit rule wins when applicable; otherwise fall back to default registry.
             let default_mask = default_mask_for_column(col);
-            let mask_ref: Option<&MaskType> = explicit
-                .get(col)
-                .and_then(resolve_explicit_mask)
-                .or(default_mask.as_ref());
+            let mask_ref: Option<&MaskType> = match explicit.get(col) {
+                Some(rule) => resolve_explicit_mask(rule)?,
+                None => None,
+            }
+            .or(default_mask.as_ref());
             let Some(mask) = mask_ref else { continue };
 
             let original = match obj.get(col) {
@@ -176,7 +180,7 @@ fn compute_masked_row_inner(row: &Value, table_name: &str, salt: &[u8]) -> Value
             obj.insert(col.clone(), masked_val);
         }
     }
-    out
+    Ok(out)
 }
 
 /// Apply `mask` and convert the result to the appropriate JSON value type.
@@ -198,27 +202,17 @@ fn apply_with_type_preservation(mask: &MaskType, original: Option<&str>, salt: &
     }
 }
 
-#[cfg(not(test))]
-fn warn_condition_sql_ignored(column_name: &str) {
-    warning!(
-        "cedarling_pg: ignoring condition_sql for column '{column_name}' to avoid executing arbitrary SQL"
-    );
-}
-
-#[cfg(test)]
-fn warn_condition_sql_ignored(_column_name: &str) {
-    // Unit tests run outside Postgres; keep this path side-effect free.
-}
-
-fn resolve_explicit_mask(rule: &MaskRule) -> Option<&MaskType> {
+pub(crate) fn resolve_explicit_mask(rule: &MaskRule) -> Result<Option<&MaskType>, String> {
     if let Some(condition_sql) = rule.condition_sql.as_deref() {
         if condition_sql.trim().is_empty() {
-            return Some(&rule.mask_type);
+            return Ok(Some(&rule.mask_type));
         }
-        warn_condition_sql_ignored(&rule.column_name);
-        return None;
+        return Err(format!(
+            "conditional mask rules are not supported for column '{}' (condition_sql must be NULL or empty)",
+            rule.column_name
+        ));
     }
-    Some(&rule.mask_type)
+    Ok(Some(&rule.mask_type))
 }
 
 #[cfg(test)]
@@ -230,7 +224,7 @@ mod tests {
     const SALT: &[u8] = b"cedarling-pg-test-salt";
 
     fn masked_row(row: &Value, table: &str) -> Value {
-        compute_masked_row_inner(row, table, SALT)
+        compute_masked_row_inner(row, table, SALT).expect("unit test mask row should succeed")
     }
 
     #[test]
@@ -290,5 +284,31 @@ mod tests {
             "password should be masked to [PROTECTED]"
         );
         assert_eq!(result.get("role").and_then(|v| v.as_str()), Some("user"));
+    }
+
+    #[test]
+    fn resolve_explicit_mask_rejects_non_empty_condition_sql() {
+        let rule = MaskRule {
+            column_name: "pii_value".into(),
+            mask_type: MaskType::Redact,
+            condition_sql: Some("true".into()),
+        };
+        assert!(
+            resolve_explicit_mask(&rule).is_err(),
+            "non-empty condition_sql must fail closed"
+        );
+    }
+
+    #[test]
+    fn resolve_explicit_mask_accepts_null_condition_sql() {
+        let rule = MaskRule {
+            column_name: "email".into(),
+            mask_type: MaskType::Redact,
+            condition_sql: None,
+        };
+        assert!(
+            matches!(resolve_explicit_mask(&rule), Ok(Some(MaskType::Redact))),
+            "rule without condition_sql should apply"
+        );
     }
 }

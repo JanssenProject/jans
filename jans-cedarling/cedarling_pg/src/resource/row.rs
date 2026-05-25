@@ -21,14 +21,15 @@ pub(crate) enum RowBuildError {
     Json(#[from] serde_json::Error),
     #[error("row materialization failed: {0}")]
     Materialization(String),
+    #[error("row must be a JSON object to build Cedar EntityData (embed cedar_entity_mapping or pass a composite row)")]
+    NotObject,
 }
 
 pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, RowBuildError> {
     let (mut value, table_oid) = row_to_json_and_table_oid(row)?;
 
     let Some(obj) = value.as_object_mut() else {
-        value = json!({ "value": value });
-        return Ok(serde_json::to_string(&value).unwrap_or_else(|_| "{}".to_string()));
+        return Err(RowBuildError::NotObject);
     };
 
     if obj.contains_key("cedar_entity_mapping") {
