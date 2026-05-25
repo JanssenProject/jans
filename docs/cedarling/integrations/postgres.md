@@ -200,7 +200,8 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | `cedarling_authorized_row(record anyelement, action text, context jsonb) → bool` | RLS-friendly form: materializes the composite row, looks up its Cedar entity mapping, asks the engine. SQL has no `DEFAULT` on `context`; pass `NULL` for an empty object. |
 | `cedarling_authorized_row(resource jsonb, action text, context jsonb) → bool` | JSONB overload for callers that already have a Cedar `EntityData` document. Pass `NULL` for `{}`. |
 | `cedarling_authorized_row_jwt(record anyelement, action text) → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. Omitting `action` in SQL is invalid; the Rust default `'Read'` applies only when callers use a wrapper that supplies it. |
-| `cedarling_build_resource(record anyelement) → jsonb` | Returns the canonical Cedar `EntityData` JSON that `cedarling_authorized_row` would have produced — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
+| `cedarling_build_resource_row(record anyelement) → text` | Materializes a composite row into the canonical Cedar `EntityData` JSON string that `cedarling_authorized_row` would use — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
+| `cedarling_build_resource(resource jsonb, entity_type text, entity_id text) → text` | Builds `EntityData` JSON from an existing JSONB document; optional `entity_type` / `entity_id` override or inject `cedar_entity_mapping`. Same abort-on-error semantics as the row variant. |
 | `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. Falls back to `'TRUE'` (with a `WARN` listing unhandled policy ids) when a policy can't be lowered, and to `'FALSE'` on parse/engine errors. |
 
 ### Tokens (session / transaction scoped)
@@ -468,10 +469,10 @@ every supported PG major.
 - CI exercises the extension through the `postgres_extension_tests` job in
   [`.github/workflows/test-cedarling.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/test-cedarling.yml),
   which builds with `cargo pgrx`, runs the `#[pg_test]` suite against a real
-  Postgres backend, gates the committed `sql/cedarling_pg--0.1.0.sql` so
-  the packaged extension SQL stays in lock-step with the `#[pg_extern]` set,
-  and runs the end-user `install-binary.sh` path against a freshly packaged
-  artifact so the binary install never silently breaks.
+  Postgres backend, and gates the committed `sql/cedarling_pg--0.1.0.sql` so
+  the packaged extension SQL stays in lock-step with the `#[pg_extern]` set.
+  End-user `install-binary.sh` packaging is exercised separately by the
+  release workflow (see below), not in `postgres_extension_tests`.
 - Release packaging lives in
   [`.github/workflows/release-cedarling-pg.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/release-cedarling-pg.yml).
   Push a tag of the form `cedarling_pg-v<version>` (e.g. `cedarling_pg-v0.1.0`)
