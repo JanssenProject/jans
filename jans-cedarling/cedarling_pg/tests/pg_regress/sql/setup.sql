@@ -2,7 +2,9 @@
 CREATE EXTENSION cedarling_pg;
 
 -- Catalog schema should exist after CREATE EXTENSION.
-SELECT nspname FROM pg_namespace WHERE nspname = 'cedarling';
+SELECT nspname
+  FROM pg_namespace
+ WHERE nspname = 'cedarling';
 SELECT count(*) AS mask_rules_exists
   FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
  WHERE n.nspname = 'cedarling' AND c.relname = 'mask_rules';
