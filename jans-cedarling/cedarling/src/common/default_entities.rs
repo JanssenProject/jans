@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::str::FromStr;
 use std::string::FromUtf8Error;
+use std::sync::Arc;
 
 use crate::common::default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError};
 use crate::entity_builder::BuildEntityError;
@@ -33,7 +34,7 @@ const DANGEROUS_PATTERNS: [&str; 6] = [
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DefaultEntities {
-    pub inner: HashMap<EntityUid, Entity>,
+    pub inner: Arc<HashMap<EntityUid, Entity>>,
 }
 
 impl DefaultEntities {
@@ -72,7 +73,7 @@ impl DefaultEntities {
         }
 
         Self {
-            inner: default_entities,
+            inner: Arc::new(default_entities),
         }
     }
 }
@@ -122,7 +123,9 @@ pub struct DefaultEntitiesWithWarns {
 impl DefaultEntitiesWithWarns {
     fn new(entities: HashMap<EntityUid, Entity>, warns: Vec<DefaultEntityWarning>) -> Self {
         Self {
-            inner: DefaultEntities { inner: entities },
+            inner: DefaultEntities {
+                inner: Arc::new(entities),
+            },
             warns,
         }
     }
