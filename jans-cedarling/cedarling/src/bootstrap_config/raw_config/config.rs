@@ -220,6 +220,9 @@ pub struct BootstrapConfigRaw {
     /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
     /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is
     /// skipped.
+    ///
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
     #[serde(
         rename = "CEDARLING_LOCK_ACCESS_TOKEN_JWT",
         default,

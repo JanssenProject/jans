@@ -239,6 +239,7 @@ impl LockService {
             pdp_id,
             bootstrap_conf,
             &lock_config,
+            #[cfg(not(target_arch = "wasm32"))]
             logger.as_ref(),
             http_conf,
             &http_client,
@@ -340,10 +341,12 @@ impl LockService {
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
         lock_config: &LockConfig,
-        logger: Option<&LoggerWeak>,
+        #[cfg(not(target_arch = "wasm32"))] logger: Option<&LoggerWeak>,
         http_conf: HttpClientConfig,
         http_client: &HttpClient,
     ) -> Result<String, InitLockServiceError> {
+        // Direct pre-issued access token path is not supported on WASM builds.
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
             if bootstrap_conf.ssa_jwt.is_some() {
                 logger.cloned().log_any(LockLogEntry::warn(
@@ -798,6 +801,7 @@ mod test {
 
     /// Tests that when `access_token_jwt` is set the SSA → DCR flow is entirely bypassed:
     /// the IDP's JWKS, OIDC, DCR, and token endpoints must NOT be called.
+    #[cfg(not(target_arch = "wasm32"))]
     #[tokio::test]
     async fn test_lock_service_with_direct_access_token() {
         let pdp_id = PdpID::new();
@@ -877,6 +881,7 @@ mod test {
 
     /// Tests that when both `access_token_jwt` and `ssa_jwt` are set,
     /// `access_token_jwt` wins and the SSA/DCR flow is skipped.
+    #[cfg(not(target_arch = "wasm32"))]
     #[tokio::test]
     async fn test_lock_service_access_token_takes_precedence_over_ssa() {
         let pdp_id = PdpID::new();
