@@ -15,7 +15,8 @@ Janssen Access and Identity Management All-in-One Chart. This chart deploys the 
 ## Source Code
 
 * <https://jans.io>
-* <https://github.com/JanssenProject/jans/charts/janssen>
+* <https://github.com/JanssenProject/jans/tree/main/charts/janssen>
+* <https://github.com/JanssenProject/jans/tree/main/charts/janssen-all-in-one>
 
 ## Requirements
 

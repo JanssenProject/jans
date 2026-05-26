@@ -15,7 +15,7 @@ Shibboleth Identity Provider 5.1.6 for SAML SSO, integrated with Janssen Auth Se
 ## Source Code
 
 * <https://github.com/JanssenProject/jans>
-* <https://shibboleth.net/products/identity-provider.html>
+* <https://shibboleth.atlassian.net/wiki/spaces/IDP5/overview>
 
 ## Requirements
 
