@@ -549,8 +549,6 @@ impl TrustedIssuerLoadingInfo for JwtService {
 /// or status validation has been explicitly disabled. The defaults are strict,
 /// so reaching this code means an operator opted out.
 fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logger>) {
-    let Some(logger) = logger else { return };
-
     if !jwt_config.jwt_sig_validation {
         logger.log_any(JwtLogEntry::new(
             "JWT signature validation is disabled (CEDARLING_JWT_SIG_VALIDATION=disabled); \
