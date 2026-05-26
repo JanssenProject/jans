@@ -36,7 +36,8 @@ dependencies = [
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    "kubernetes>=11.0",
+    # don't use v36 until patches available
+    "kubernetes>=11.0,<36.0",
 
     # the ldap3 library is not removed for the following reasons:
     #
