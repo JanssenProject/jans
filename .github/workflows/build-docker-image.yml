@@ -395,8 +395,10 @@ jobs:
       - name: Derive lowercase image name for SLSA attestation
         id: image_ref
         if: steps.build_docker_image.outputs.build && github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.prep.outputs.tags }}
         run: |
-          FIRST_TAG=$(echo "${{ steps.prep.outputs.tags }}" | cut -d',' -f1)
+          FIRST_TAG=$(printf '%s' "$TAGS" | cut -d',' -f1)
           IMAGE_NAME="${FIRST_TAG%%:*}"
           echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
 

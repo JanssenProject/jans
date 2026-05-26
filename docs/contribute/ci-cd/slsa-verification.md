@@ -140,7 +140,7 @@ Verify it alongside the provenance attestation:
 ```bash
 cosign verify-blob \
   --bundle <ARTIFACT_FILE>.bundle \
-  --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+  --certificate-identity-regexp "https://github.com/JanssenProject/jans/.github/workflows/build-packages\\.yml@refs/tags/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   <ARTIFACT_FILE>
 ```
@@ -190,7 +190,7 @@ cosign triangulate ghcr.io/janssenproject/jans/<image>:<tag>
 
 ```bash
 cosign verify \
-  --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+  --certificate-identity-regexp "https://github.com/JanssenProject/jans/.github/workflows/build-docker-image\\.yml@refs/tags/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   ghcr.io/janssenproject/jans/<image>@<digest>
 ```
@@ -217,6 +217,6 @@ cosign verify \
 
 - [SLSA framework](https://slsa.dev)
 - [slsa-verifier documentation](https://github.com/slsa-framework/slsa-verifier)
-- [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator)
+- [slsa-github-generator v2.1.0](https://github.com/slsa-framework/slsa-github-generator/releases/tag/v2.1.0)
 - [GitHub artifact attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
-- [cosign documentation](https://docs.sigstore.dev/cosign/overview/)
+- [cosign documentation](https://docs.sigstore.dev/cosign/)

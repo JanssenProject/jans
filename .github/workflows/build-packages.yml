@@ -350,11 +350,13 @@ jobs:
         DIGEST_FILE="/tmp/python-digest-${PLAT}.sha256"
         rm -f "${DIGEST_FILE}"
         for F in "${SETUP_FILE}" "${TUI_FILE}"; do
-          if [ -f "${F}" ]; then
-            SHA256=$(sha256_of "${F}")
-            FNAME=$(basename "${F}")
-            printf '%s  %s\n' "${SHA256}" "${FNAME}" >> "${DIGEST_FILE}"
+          if [ ! -f "${F}" ]; then
+            echo "ERROR: expected artifact not found: ${F}" >&2
+            exit 1
           fi
+          SHA256=$(sha256_of "${F}")
+          FNAME=$(basename "${F}")
+          printf '%s  %s\n' "${SHA256}" "${FNAME}" >> "${DIGEST_FILE}"
         done
         touch "${DIGEST_FILE}"
 
@@ -1324,6 +1326,7 @@ jobs:
       base64-subjects: "${{ needs.collect-binary-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-binary-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-python-digests:
     name: Collect Python zipapp digests
@@ -1372,6 +1375,7 @@ jobs:
       base64-subjects: "${{ needs.collect-python-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-python-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-wasm-digests:
     name: Collect Cedarling WASM digests
@@ -1419,6 +1423,7 @@ jobs:
       base64-subjects: "${{ needs.collect-wasm-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-wasm-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-cedarling-python-digests:
     name: Collect Cedarling Python wheel digests
@@ -1467,6 +1472,7 @@ jobs:
       base64-subjects: "${{ needs.collect-cedarling-python-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-python-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-cedarling-go-digests:
     name: Collect Cedarling Go library digests
@@ -1515,6 +1521,7 @@ jobs:
       base64-subjects: "${{ needs.collect-cedarling-go-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-go-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-cedarling-krakend-digests:
     name: Collect Cedarling KrakenD plugin digests
@@ -1563,6 +1570,7 @@ jobs:
       base64-subjects: "${{ needs.collect-cedarling-krakend-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-krakend-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-cedarling-uniffi-digests:
     name: Collect Cedarling UniFFI digests
@@ -1610,6 +1618,7 @@ jobs:
       base64-subjects: "${{ needs.collect-cedarling-uniffi-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-uniffi-digests.outputs.tag }}"
+      compile-generator: true
 
   collect-demo-digests:
     name: Collect demo package digests
@@ -1657,3 +1666,4 @@ jobs:
       base64-subjects: "${{ needs.collect-demo-digests.outputs.hashes }}"
       upload-assets: true
       upload-tag-name: "${{ needs.collect-demo-digests.outputs.tag }}"
+      compile-generator: true
