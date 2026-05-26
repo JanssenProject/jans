@@ -386,7 +386,11 @@ mod tests {
                LIMIT 1"#,
         )
         .expect("default mapping query");
-        assert_eq!(default_id, Some(r#"["10","20"]"#.to_string()));
+        assert_eq!(
+            default_id,
+            Some(r#"["10","20"]"#.to_string()),
+            "default composite PK id should encode id columns in PK order as JSON array"
+        );
 
         let registered = Spi::get_one::<bool>(
             r#"SELECT cedarling_register_entity_map(
@@ -412,7 +416,11 @@ mod tests {
                LIMIT 1"#,
         )
         .expect("mapped id query");
-        assert_eq!(mapped_id, Some(r#"["20","10"]"#.to_string()));
+        assert_eq!(
+            mapped_id,
+            Some(r#"["20","10"]"#.to_string()),
+            "registered id_columns [id2,id1] should reverse composite id component order"
+        );
 
         Spi::run("DROP TABLE IF EXISTS cedarling_phase2_pk").expect("drop test table");
     }

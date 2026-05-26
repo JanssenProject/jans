@@ -218,7 +218,7 @@ CREATE  FUNCTION "cedarling_mask_plan"(
 	"table_name" TEXT, /* & str */
 	"action" TEXT /* Option < & str > */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STABLE PARALLEL SAFE
+STABLE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_mask_plan_wrapper';
 /* </end connected objects> */
@@ -230,7 +230,7 @@ CREATE  FUNCTION "cedarling_mask_row"(
 	"row_json" jsonb, /* pgrx :: datum :: JsonB */
 	"table_name" TEXT /* & str */
 ) RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT STABLE PARALLEL SAFE
+STRICT STABLE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_mask_row_wrapper';
 /* </end connected objects> */
@@ -247,7 +247,7 @@ AS 'MODULE_PATHNAME', 'cedarling_recent_traces_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/resource/schema_map.rs:174
+-- cedarling_pg/src/resource/schema_map.rs:195
 -- cedarling_pg::resource::schema_map::cedarling_register_entity_map
 CREATE  FUNCTION "cedarling_register_entity_map"(
 	"table" oid, /* pg_sys :: Oid */
@@ -309,7 +309,7 @@ AS 'MODULE_PATHNAME', 'cedarling_set_tokens_wrapper';
 -- cedarling_pg/src/observability/status.rs:162
 -- cedarling_pg::observability::status::cedarling_status
 CREATE  FUNCTION "cedarling_status"() RETURNS jsonb /* pgrx :: datum :: JsonB */
-STRICT STABLE
+STRICT VOLATILE
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_status_wrapper';
 /* </end connected objects> */

@@ -469,3 +469,12 @@ every supported PG major.
 - CI exercises the extension through the `postgres_extension_tests` job in
   [`.github/workflows/test-cedarling.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/test-cedarling.yml),
   which builds with `cargo pgrx`, runs the `#[pg_test]` suite against a real
+  Postgres backend, and gates the committed `sql/cedarling_pg--0.1.0.sql` so
+  the packaged extension SQL stays in lock-step with the `#[pg_extern]` set.
+  End-user `install-binary.sh` packaging is exercised separately by the
+  release workflow (see below), not in `postgres_extension_tests`.
+- Release packaging lives in
+  [`.github/workflows/release-cedarling-pg.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/release-cedarling-pg.yml).
+  Push a tag of the form `cedarling_pg-v<version>` (e.g. `cedarling_pg-v0.1.0`)
+  to trigger a full matrix build of tarballs, `.deb`s, and Docker images
+  attached to a GitHub release.

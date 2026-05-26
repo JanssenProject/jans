@@ -152,25 +152,43 @@ fn fallback_hashed_entity_id(attrs: &Map<String, Value>) -> String {
     format!("row-{:016x}", h.finish())
 }
 
+fn depluralise_word(word: &str) -> String {
+    if let Some(stem) = word.strip_suffix("ies") {
+        return format!("{stem}y");
+    }
+    if word.ends_with("ses")
+        || word.ends_with("xes")
+        || word.ends_with("zes")
+        || word.ends_with("shes")
+        || word.ends_with("ches")
+    {
+        return word[..word.len() - 2].to_string();
+    }
+    if word.ends_with('s') && !word.ends_with("ss") && word.len() > 1 {
+        let stem = &word[..word.len() - 1];
+        if !stem.ends_with('u') {
+            return stem.to_string();
+        }
+    }
+    word.to_string()
+}
+
 pub(crate) fn heuristic_entity_type(relname: &str) -> String {
-    let singular = if relname.ends_with('s') && relname.len() > 1 {
-        &relname[..relname.len() - 1]
-    } else {
-        relname
-    };
-    singular
-        .split('_')
-        .filter(|s| !s.is_empty())
-        .map(|part| {
-            let mut chars = part.chars();
-            let mut out = String::new();
-            if let Some(first) = chars.next() {
-                out.push(first.to_ascii_uppercase());
-            }
+    let parts: Vec<&str> = relname.split('_').filter(|s| !s.is_empty()).collect();
+    let mut out = String::new();
+    for (i, part) in parts.iter().enumerate() {
+        let word = if i + 1 == parts.len() {
+            depluralise_word(part)
+        } else {
+            (*part).to_string()
+        };
+        let mut chars = word.chars();
+        if let Some(first) = chars.next() {
+            out.push(first.to_ascii_uppercase());
             out.extend(chars);
-            out
-        })
-        .collect()
+        }
+    }
+    out
 }
 
 /// Register or update an explicit table -> entity mapping.
@@ -217,6 +235,11 @@ mod tests {
             "snake_case segments should become PascalCase"
         );
         assert_eq!(heuristic_entity_type("user"), "User", "single segment should capitalize");
+        assert_eq!(
+            heuristic_entity_type("status"),
+            "Status",
+            "singular words ending in s should not be truncated"
+        );
     }
 
     #[test]

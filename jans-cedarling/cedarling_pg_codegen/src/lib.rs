@@ -90,7 +90,11 @@ fn depluralise(word: &str) -> String {
         return word[..word.len() - 2].to_string();
     }
     if word.ends_with('s') && !word.ends_with("ss") && word.len() > 1 {
-        return word[..word.len() - 1].to_string();
+        let stem = &word[..word.len() - 1];
+        // Avoid truncating singular words like "status" -> "statu" (stem ends in 'u').
+        if !stem.ends_with('u') {
+            return stem.to_string();
+        }
     }
     word.to_string()
 }
@@ -179,7 +183,7 @@ pub fn sanitize_table_filename(table: &str) -> String {
         sanitized = sanitized.replace("..", "_");
     }
 
-    sanitized = sanitized.trim_matches(['.', '_', ' ']).to_string();
+    sanitized = sanitized.trim_matches(['.', ' ']).to_string();
     if sanitized.is_empty() {
         "_table".to_string()
     } else {
@@ -297,8 +301,8 @@ mod tests {
         assert_eq!(entity_name_for_table("classes"), "Class", "classes → Class");
         assert_eq!(
             entity_name_for_table("status"),
-            "Statu",
-            "status is a false plural"
+            "Status",
+            "status is already singular and should not lose its trailing s"
         );
     }
 
@@ -398,20 +402,46 @@ mod tests {
     fn sanitize_table_filename_blocks_path_traversal() {
         assert_eq!(
             sanitize_table_filename("../../../table"),
-            "table",
-            "parent-dir segments must not survive in output filenames"
+            "______table",
+            "slashes and parent-dir segments must be neutralized into a single filename component"
         );
         assert_eq!(
             sanitize_table_filename("../../etc/passwd"),
-            "etc_passwd",
-            "slashes and parent-dir segments must be neutralized"
+            "____etc_passwd",
+            "slashes and parent-dir segments must be neutralized into a single filename component"
         );
     }
 
     #[test]
     fn sanitize_table_filename_preserves_ordinary_names() {
-        assert_eq!(sanitize_table_filename("students"), "students");
-        assert_eq!(sanitize_table_filename("user_accounts"), "user_accounts");
-        assert_eq!(sanitize_table_filename(r#""my_table""#), "my_table");
+        assert_eq!(
+            sanitize_table_filename("students"),
+            "students",
+            "simple table name should pass through unchanged"
+        );
+        assert_eq!(
+            sanitize_table_filename("user_accounts"),
+            "user_accounts",
+            "snake_case table name should pass through unchanged"
+        );
+        assert_eq!(
+            sanitize_table_filename(r#""my_table""#),
+            "my_table",
+            "quoted identifier spelling should strip surrounding quotes"
+        );
+    }
+
+    #[test]
+    fn sanitize_table_filename_preserves_leading_underscores() {
+        assert_eq!(
+            sanitize_table_filename("_users"),
+            "_users",
+            "leading underscores must not be trimmed"
+        );
+        assert_eq!(
+            sanitize_table_filename("users"),
+            "users",
+            "unprefixed name must stay distinct from _users"
+        );
     }
 }
