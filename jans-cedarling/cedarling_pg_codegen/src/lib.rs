@@ -152,6 +152,41 @@ pub fn wrap_namespace(namespace: &str, entity_bodies: &[String]) -> String {
     out
 }
 
+/// Sanitize a table identifier for use as a single filesystem path component.
+///
+/// `pg_class.relname` stores quoted-identifier spellings without the surrounding `"`,
+/// so names like `../../../evil` are possible. This strips path separators, control
+/// characters, and `..` segments before building output filenames.
+#[must_use]
+pub fn sanitize_table_filename(table: &str) -> String {
+    let mut name = table.trim().to_string();
+    if name.len() >= 2 && name.starts_with('"') && name.ends_with('"') {
+        name = name[1..name.len() - 1].replace("\"\"", "\"");
+    }
+
+    let mut sanitized: String = name
+        .chars()
+        .map(|c| {
+            if c == '/' || c == '\\' || c == '\0' || c.is_control() {
+                '_'
+            } else {
+                c
+            }
+        })
+        .collect();
+
+    while sanitized.contains("..") {
+        sanitized = sanitized.replace("..", "_");
+    }
+
+    sanitized = sanitized.trim_matches(['.', '_', ' ']).to_string();
+    if sanitized.is_empty() {
+        "_table".to_string()
+    } else {
+        sanitized
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -357,5 +392,26 @@ mod tests {
         assert!(out.ends_with("}\n"), "should close namespace");
         assert!(out.contains("entity A;"), "should include first entity");
         assert!(out.contains("entity B = {"), "should include second entity");
+    }
+
+    #[test]
+    fn sanitize_table_filename_blocks_path_traversal() {
+        assert_eq!(
+            sanitize_table_filename("../../../table"),
+            "table",
+            "parent-dir segments must not survive in output filenames"
+        );
+        assert_eq!(
+            sanitize_table_filename("../../etc/passwd"),
+            "etc_passwd",
+            "slashes and parent-dir segments must be neutralized"
+        );
+    }
+
+    #[test]
+    fn sanitize_table_filename_preserves_ordinary_names() {
+        assert_eq!(sanitize_table_filename("students"), "students");
+        assert_eq!(sanitize_table_filename("user_accounts"), "user_accounts");
+        assert_eq!(sanitize_table_filename(r#""my_table""#), "my_table");
     }
 }
