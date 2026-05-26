@@ -53,115 +53,170 @@ A typical authorization flow:
 
 ## Requirements
 
-- PostgreSQL 13 – 18 (binaries are published for every major).
-- Linux x86_64 or aarch64 (other platforms must build from source —
-  see [Building from source](#building-from-source-contributors-only)).
+- PostgreSQL **13 – 18** (the extension ships a pgrx feature per major).
+- **Prebuilt tarballs** are published for every supported major on linux x86_64
+  (see [Installing prebuilt binaries](#installing-prebuilt-binaries)).
+- Other platforms, or hosts that need a different CPU arch, must
+  [build from source](#building-from-source).
 - JWT signature validation is the responsibility of Cedarling, not this
   extension. Set `CEDARLING_JWT_SIG_VALIDATION: enabled` in the bootstrap
   YAML you point `cedarling.bootstrap_config` at, and keep
   `CEDARLING_LOCAL_JWKS` or the trusted-issuer list populated.
 
-You do **not** need a Rust toolchain, `cargo`, or `pgrx` to install or run
-cedarling_pg. Pick whichever installation path matches your environment.
+You do **not** need a Rust toolchain to install a prebuilt tarball. Building
+from source requires Rust stable, `cargo-pgrx`, and the Postgres development
+headers for the target major.
+
+### Why one tarball per PostgreSQL major?
+
+PostgreSQL extensions are native libraries (`.so` files). A `cedarling_pg.so`
+built for PG 16 cannot be loaded by PG 17 — the ABI and catalog layout differ.
+Each release therefore ships a **matched set** per major:
+
+| File | Role |
+| --- | --- |
+| `cedarling_pg.so` | Native library compiled against that PG major |
+| `cedarling_pg.control` | Extension metadata (`default_version`, `module_pathname`, …) |
+| `cedarling_pg--*.sql` | SQL that creates functions and catalog tables |
+
+Always install all three from the **same** `pgNN` artifact. Mixing a PG 16
+`.so` with PG 17 SQL files will not work.
+
+## Installation overview
+
+| Goal | Command |
+| --- | --- |
+| Install a release tarball | [`scripts/install.sh binary …`](#installing-prebuilt-binaries) |
+| Compile and install locally | [`scripts/install.sh source …`](#building-from-source) |
+| Enable in SQL after files are copied | [`CREATE EXTENSION`](#enable-the-extension) |
+
+Both install paths use the same helper script:
+[`jans-cedarling/cedarling_pg/scripts/install.sh`](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling_pg/scripts/install.sh).
 
 ## Installing prebuilt binaries
 
-Every tagged `cedarling_pg-v*` release publishes:
+The `build_cedarling_pg` job in
+[`.github/workflows/build-packages.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/build-packages.yml)
+publishes cosign-signed tarballs to each Jans release (`v*` / `nightly` tags).
+Each artifact is built with `cargo pgrx package --features pgNN`.
 
-- Tarballs (`.tar.gz`) for each (PG major × linux arch) combination
-- Debian/Ubuntu packages (`.deb`) for each (PG major × linux arch) combination
-- A multi-arch Docker image per PG major on GitHub Container Registry
+Asset names:
+
+```text
+cedarling_pg-{version}-pg{13|14|15|16|17|18}-linux-x86_64.tar.gz
+cedarling_pg-{version}-pg{13|14|15|16|17|18}-linux-x86_64.tar.gz.bundle
+```
 
 Browse them on the
-[Janssen releases page](https://github.com/JanssenProject/jans/releases?q=cedarling_pg)
-or use one of the install paths below.
+[Janssen releases page](https://github.com/JanssenProject/jans/releases).
 
-### One-line installer (Linux)
-
-The installer detects your PostgreSQL major (via `pg_config`) and CPU
-architecture, downloads the matching tarball from the latest release, verifies
-its SHA256, and copies the files into the directories reported by `pg_config`:
+### Step 1 — download (and optionally verify)
 
 ```bash
-curl -fsSL \
-  https://github.com/JanssenProject/jans/releases/latest/download/install-binary.sh \
-  | bash
+TAG=v1.0.0                         # Jans release tag
+VER="${TAG#v}"                     # embedded in the asset file name
+PG=16                              # must match your server major
+ARCHIVE="cedarling_pg-${VER}-pg${PG}-linux-x86_64.tar.gz"
+
+curl -fSLO "https://github.com/JanssenProject/jans/releases/download/${TAG}/${ARCHIVE}"
+curl -fSLO "https://github.com/JanssenProject/jans/releases/download/${TAG}/${ARCHIVE}.bundle"
+
+# Optional but recommended.
+cosign verify-blob \
+  --bundle "${ARCHIVE}.bundle" \
+  --certificate-oidc-issuer-regexp='https://token.actions.githubusercontent.com' \
+  "${ARCHIVE}"
 ```
 
-Common overrides:
+### Step 2 — install with `install.sh binary`
+
+Point `PG_CONFIG` at the Postgres instance you are extending, then run the
+helper. It unpacks the tarball, finds the matched `.so` / `.control` / `.sql`
+set for your PG major, and copies them into the directories reported by
+`pg_config`:
 
 ```bash
-# Pin a specific release.
-CEDARLING_PG_VERSION=0.1.0 bash install-binary.sh
+export PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config   # example
 
-# Use a non-default pg_config (e.g. when several PG majors are installed).
-PG_CONFIG=/usr/lib/postgresql/17/bin/pg_config bash install-binary.sh
+# From the repo (or copy install.sh to the server):
+./scripts/install.sh binary "${ARCHIVE}"
 ```
 
-The installer needs write access to `pg_config --sharedir` and
-`pg_config --pkglibdir`; it will use `sudo` automatically if those directories
-are root-owned (the usual case for packaged Postgres installs).
-
-### Debian / Ubuntu (.deb)
+You can also pass an already-extracted directory instead of the `.tar.gz`:
 
 ```bash
-# Replace 16 with your installed PG major, and amd64 with arm64 on ARM hosts.
-VER=0.1.0
-PG=16
-ARCH=amd64
-curl -fSLO https://github.com/JanssenProject/jans/releases/download/cedarling_pg-v${VER}/cedarling_pg-${VER}-pg${PG}-x86_64-unknown-linux-gnu.deb
-sudo apt-get install -y ./cedarling_pg-${VER}-pg${PG}-x86_64-unknown-linux-gnu.deb
+tar -xzf "${ARCHIVE}"
+./scripts/install.sh binary "cedarling_pg-${VER}-pg${PG}-linux-x86_64"
 ```
 
-The package is named `postgresql-<MAJOR>-cedarling-pg` and depends on
-`postgresql-<MAJOR>`, so `apt-get install` will pull the matching server if
-it isn't already present.
+The script uses `sudo install` automatically when `pg_config` directories are
+not writable by the current user.
 
-### Docker
+### Manual install (without the script)
 
-The release pipeline publishes a multi-arch image to
-[GitHub Container Registry](https://github.com/orgs/JanssenProject/packages/container/package/cedarling_pg)
-per PG major. The image is the official `postgres:<NN>` image with
-cedarling_pg preinstalled and auto-created on first start.
+If you prefer not to use the helper, the tarball unpacks to:
+
+```text
+cedarling_pg-{version}-pg{NN}-linux-x86_64/
+  usr/lib/postgresql/{NN}/lib/cedarling_pg.so
+  usr/share/postgresql/{NN}/extension/cedarling_pg.control
+  usr/share/postgresql/{NN}/extension/cedarling_pg--*.sql
+```
+
+Copy those files into `pg_config --pkglibdir` and
+`pg_config --sharedir`/extension yourself. Do not mix files from different
+`pgNN` directories.
+
+## Building from source
+
+Use this path on unsupported platforms, during development, or when you need
+a PG major before a tarball is published.
+
+Prerequisites:
+
+- Rust stable
+- [`cargo-pgrx`](https://crates.io/crates/cargo-pgrx) at the version pinned in
+  `jans-cedarling/cedarling_pg/Cargo.toml` (currently `0.18.0`)
+- Postgres build dependencies: `build-essential libreadline-dev zlib1g-dev
+  flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc
+  pkg-config protobuf-compiler`
+
+One-time pgrx setup for each PG major you plan to build against:
 
 ```bash
-docker run --rm -d \
-  --name cedarling-pg \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -v /etc/cedarling:/etc/cedarling:ro \
-  ghcr.io/janssenproject/jans/cedarling_pg:latest-pg16
-
-docker exec -it cedarling-pg psql -U postgres -c "SELECT cedarling_status();"
+cargo install --locked cargo-pgrx --version 0.18.0
+cargo pgrx init --pg16 download          # repeat --pg13, --pg14, … as needed
 ```
 
-To pin a specific cedarling_pg version, use the
-`ghcr.io/janssenproject/jans/cedarling_pg:<version>-pg<major>` tag (for example
-`0.1.0-pg16`). The `latest-pg<major>` tags are published alongside each
-release; CI today exercises the tarball install path in
-`test-cedarling.yml`, not the container tags — verify the image tag you deploy
-matches your release version.
-
-### Manual tarball install
-
-If you'd rather avoid the one-line installer:
+Then build and install with the helper script:
 
 ```bash
-VER=0.1.0
-PG=16
-TRIPLE=x86_64-unknown-linux-gnu     # aarch64-unknown-linux-gnu on ARM
-ASSET=cedarling_pg-${VER}-pg${PG}-${TRIPLE}.tar.gz
+cd jans-cedarling/cedarling_pg
 
-curl -fSLO https://github.com/JanssenProject/jans/releases/download/cedarling_pg-v${VER}/${ASSET}
-curl -fSLO https://github.com/JanssenProject/jans/releases/download/cedarling_pg-v${VER}/${ASSET}.sha256
-sha256sum -c <(printf '%s  %s\n' "$(cat ${ASSET}.sha256)" "${ASSET}")
-
-tar -xzf ${ASSET}
-cd cedarling_pg-${VER}-pg${PG}-${TRIPLE}
-./install.sh    # uses pg_config to pick the right install paths
+# Default PG major is pg16; override with PG_VERSION.
+PG_VERSION=pg17 ./scripts/install.sh source --release
 ```
 
-### Enable the extension
+`install.sh source` wraps `cargo pgrx install`, then runs a short psql health
+check (`CREATE EXTENSION`, catalog tables present, core functions registered).
+Pass `--skip-health` to skip the database check.
+
+Point `PG_CONFIG` / `PATH` at the Postgres instance you want to extend when
+several majors are installed locally. Re-run once per major you support — the
+extension must be compiled against the exact server version it will load into.
+
+To produce the same tarball layout CI publishes:
+
+```bash
+cargo pgrx package --features pg16
+# archive target/release/cedarling_pg-pg16/
+```
+
+Trigger the `build_cedarling_pg` job via `workflow_dispatch` on an existing
+release tag to attach those artifacts to a Jans release without cutting a new
+tag.
+
+## Enable the extension
 
 Once the binaries are in place, the SQL part is the same on every install path.
 
@@ -434,34 +489,6 @@ be shared correctly across parallel workers.
   arbitrary SQL cannot be injected through mask configuration. Use RLS or
   Cedar policies for conditional masking.
 
-## Building from source (contributors only)
-
-End users should not need this section — prefer one of the prebuilt install
-paths above. If you are hacking on cedarling_pg itself, you'll need:
-
-- Rust stable
-- [`cargo-pgrx`](https://crates.io/crates/cargo-pgrx) at the version pinned in
-  `jans-cedarling/cedarling_pg/Cargo.toml` (currently `0.18.0`)
-- The Postgres build dependencies (`build-essential libreadline-dev zlib1g-dev
-  flex bison libxml2-dev libxslt-dev libssl-dev pkg-config`)
-
-```bash
-# One-time pgrx setup (downloads the Postgres builds it manages).
-cargo install --locked cargo-pgrx --version 0.18.0
-cargo pgrx init
-
-# Build + install into the pgrx-managed Postgres + run a health check.
-cd jans-cedarling/cedarling_pg
-scripts/install.sh                       # build + install + health check
-scripts/install.sh --release             # release build
-PG_VERSION=pg17 scripts/install.sh       # target a different major
-```
-
-To produce the same artifacts the release workflow does without a tag push,
-trigger the `Release cedarling_pg` workflow manually
-(`workflow_dispatch`) — it builds tarballs, `.deb`s, and a Docker image for
-every supported PG major.
-
 ## Source and CI
 
 - Crate root:
@@ -471,10 +498,8 @@ every supported PG major.
   which builds with `cargo pgrx`, runs the `#[pg_test]` suite against a real
   Postgres backend, and gates the committed `sql/cedarling_pg--0.1.0.sql` so
   the packaged extension SQL stays in lock-step with the `#[pg_extern]` set.
-  End-user `install-binary.sh` packaging is exercised separately by the
-  release workflow (see below), not in `postgres_extension_tests`.
-- Release packaging lives in
-  [`.github/workflows/release-cedarling-pg.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/release-cedarling-pg.yml).
-  Push a tag of the form `cedarling_pg-v<version>` (e.g. `cedarling_pg-v0.1.0`)
-  to trigger a full matrix build of tarballs, `.deb`s, and Docker images
-  attached to a GitHub release.
+- Prebuilt linux x86_64 tarballs (pg13–pg18) are published by the
+  `build_cedarling_pg` job in
+  [`.github/workflows/build-packages.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/build-packages.yml)
+  alongside the other Cedarling release assets on each Jans `v*` / `nightly`
+  tag.
