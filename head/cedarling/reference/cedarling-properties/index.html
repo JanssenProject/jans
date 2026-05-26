@@ -1644,6 +1644,7 @@ the Cedarling will use the default value as specified in the property definition
 <li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-master-configuration</code>.</li>
 <li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
+<li><strong><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></strong> : Pre-issued access token for Lock Server authentication. When set, Cedarling skips the SSA → DCR → access token flow entirely and uses this token directly to authenticate with Lock Server endpoints (log, health, telemetry). <strong>Primarily intended for testing and local development</strong> to simplify the bootstrap flow when a full Auth Server / DCR setup is not desired. This token may also be used when token issuance is managed externally or DCR is not available. If both <code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code> and <code>CEDARLING_LOCK_SSA_JWT</code> are set, <code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code> takes precedence and a warning is emitted. <strong>Not available on WASM builds.</strong></li>
 <li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Server (0 to turn off transmission).</li>
@@ -1703,7 +1704,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 20, 2026 18:28:56 UTC"><span class="timeago" datetime="2026-05-20T18:28:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 20, 2026 18:28:56 UTC">2026-05-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 26, 2026 16:37:32 UTC"><span class="timeago" datetime="2026-05-26T16:37:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 26, 2026 16:37:32 UTC">2026-05-26</span>
   </span>
 
     
