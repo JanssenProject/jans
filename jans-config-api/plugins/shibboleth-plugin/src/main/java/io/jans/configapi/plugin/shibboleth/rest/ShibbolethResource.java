@@ -190,7 +190,6 @@ public class ShibbolethResource extends BaseResource {
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
-     
         return Response.ok(trustRelationship.getReleasedAttributes()).build();
     }
 
@@ -265,17 +264,17 @@ public class ShibbolethResource extends BaseResource {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     @PUT
     @Path(Constants.INUM_PATH_PARAM + Constants.FILE)
-    public Response updateTrustRelationship(
-            @Parameter(description = "TrustRelationship inum") @PathParam(Constants.INUM) @NotNull String inum,
-           InputStream metadatafile) throws IOException {
+    public Response updateTrustRelationship(TrustRelationship trustRelationship, InputStream metadatafile) throws IOException {
+
         logger.info("Update TrustRelationship");
         if (logger.isInfoEnabled()) {
-            logger.info("Update TrustRelationship identified by inum:{}", escapeLog(inum), escapeLog(trustRelationshipForm));
+            logger.info("Update TrustRelationship identified by trustRelationship:{}, metadatafile:{}", escapeLog(trustRelationship),
+                    escapeLog(metadatafile));
         }
 
-        validateTrustRelationshipForm(trustRelationshipForm, metadatafile, true);
-        TrustRelationship trustRelationship = shibbolethService
-                .updateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metadatafile);
+        validateTrustRelationship(trustRelationship, metadatafile, true);
+        trustRelationship = shibbolethService
+                .updateTrustRelationship(trustRelationship, metadatafile);
         return Response.status(Response.Status.OK).entity(trustRelationship).build();
     }
 
@@ -450,7 +449,6 @@ public class ShibbolethResource extends BaseResource {
             logger.error("Error while getting log data is - ", ioe);
             throwBadRequestException("Index may be incorrect, total entries:{" + entityIdSet.size()
                     + "}, startIndex provided:{" + startIndex + "} , endtIndex provided:{" + limit + "} ");
-
         }
 
         logger.info("Federation Entities stringPagedResult:{}", stringPagedResult);
@@ -486,13 +484,13 @@ public class ShibbolethResource extends BaseResource {
             return pageDataList;
         }
         int dataSize = dataList.size();
-        int totalPages =  (int)Math.ceil((double)dataSize / limit);
+        int totalPages = (int) Math.ceil((double) dataSize / limit);
         logger.info("dataSize:{}, limit:{}, totalPages:{}", dataSize, limit, totalPages);
         if (totalPages < pageNo) {
             throwBadRequestException("Total pages in paginated result are:{" + totalPages
                     + "}, but page provided in request is:{" + pageNo + "} ");
         }
-        int startIndex = pageNo==1? 0: (pageNo * limit +1);
+        int startIndex = pageNo == 1 ? 0 : (pageNo * limit + 1);
         logger.error("startIndex:{}", startIndex);
         try {
             dataList.get(startIndex);
@@ -516,11 +514,11 @@ public class ShibbolethResource extends BaseResource {
         validateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metaDataFile, isUpdate);
     }
 
-    private void validateTrustRelationship(TrustRelationship trustRelationship, InputStream metaDataFile,
-            boolean isUpdate) {
+    private void validateTrustRelationship(TrustRelationship trustRelationship, InputStream metaDataFile, boolean isUpdate) {
         if (logger.isInfoEnabled()) {
             logger.info("trustRelationship:{}, metaDataFile:{}, isUpdate:{}", escapeLog(trustRelationship), escapeLog(metaDataFile), isUpdate);
         }
+       
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
         // mandatory attributes
@@ -536,7 +534,7 @@ public class ShibbolethResource extends BaseResource {
             checkNotNull(missingAttributesList);
         }
 
-        // check if Enity type is valid
+        // check if Entity type is valid
         if ((EntityType.getByValue(trustRelationship.getEntityType().getValue()) == null)
                 || (StringUtils.isBlank(trustRelationship.getEntityType().getValue()))) {
             throwBadRequestException(INVALID_TRUST_NATURE,
@@ -548,6 +546,21 @@ public class ShibbolethResource extends BaseResource {
         if (isUpdate) {
             checkNotNull(inum, SHIBBOLETH_TRUST_RELATIONSHIP_INUM);
         }
+
+        validateRequest(inum, isUpdate);
+
+        if (isUpdate) {
+            validateMetaData(trustRelationship, metaDataFile);
+        }
+    }
+
+    private void validateRequest(String inum, boolean isUpdate ) {
+        logger.info("validateUpdateRequest inum:{}, isUpdate:{}", inum, isUpdate);
+
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
+        logger.info("validateUpdateRequest trustRelationship:{}", trustRelationship);
+
+        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
         // check if TrustRelationship with same name already exists
         List<TrustRelationship> existingTrustRelationshipList = shibbolethService
@@ -570,10 +583,6 @@ public class ShibbolethResource extends BaseResource {
                 throwBadRequestException(NAME_CONFLICT,
                         String.format(NAME_CONFLICT_MSG, trustRelationship.getDisplayName()));
             }
-        }
-
-        if (isUpdate) {
-            validateMetaData(trustRelationship, metaDataFile);
         }
     }
 
@@ -605,7 +614,6 @@ public class ShibbolethResource extends BaseResource {
         default:
             return;
         }
-
     }
 
     private void validateFileMetaDataSourceType(InputStream metaDataFile) {
