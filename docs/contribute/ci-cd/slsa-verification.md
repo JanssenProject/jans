@@ -217,6 +217,6 @@ cosign verify \
 
 - [SLSA framework](https://slsa.dev)
 - [slsa-verifier documentation](https://github.com/slsa-framework/slsa-verifier)
-- [slsa-github-generator v2.1.0](https://github.com/slsa-framework/slsa-github-generator/releases/tag/v2.1.0)
+- [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator/releases/latest)
 - [GitHub artifact attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
 - [cosign documentation](https://docs.sigstore.dev/cosign/)

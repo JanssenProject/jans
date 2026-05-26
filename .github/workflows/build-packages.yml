@@ -344,7 +344,7 @@ jobs:
       shell: bash
       run: |
         PLAT="${{ matrix.name }}"
-        SETUP_FILE="${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz"
+        SETUP_FILE="${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz"
         TUI_FILE="${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz"
         sha256_of() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'; else shasum -a 256 "$1" | awk '{print $1}'; fi; }
         DIGEST_FILE="/tmp/python-digest-${PLAT}.sha256"
@@ -1279,6 +1279,17 @@ jobs:
         path: /tmp/cedarling-uniffi-digest.sha256
         retention-days: 1
 
+  # ---------------------------------------------------------------------------
+  # SLSA Provenance jobs — additive; no existing build/sign/upload steps removed
+  # Each provenance job:
+  #   1. Collects SHA-256 digests produced by the matrix build job(s) above.
+  #   2. Calls the slsa-framework/slsa-github-generator generic reusable workflow
+  #      (pinned to a full commit SHA) to produce a signed .intoto.jsonl file.
+  #   3. Uploads the .intoto.jsonl to the same GitHub Release.
+  # Permissions are scoped to these jobs only (id-token:write, contents:write,
+  # actions:read) — never added to the build jobs themselves.
+  # ---------------------------------------------------------------------------
+
   collect-binary-digests:
     name: Collect binary package digests
     needs: [publish_binary_packages]
@@ -1327,6 +1338,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-binary-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: binary.intoto.jsonl
 
   collect-python-digests:
     name: Collect Python zipapp digests
@@ -1376,6 +1388,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-python-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: python.intoto.jsonl
 
   collect-wasm-digests:
     name: Collect Cedarling WASM digests
@@ -1424,6 +1437,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-wasm-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: wasm.intoto.jsonl
 
   collect-cedarling-python-digests:
     name: Collect Cedarling Python wheel digests
@@ -1473,6 +1487,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-python-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: cedarling-python.intoto.jsonl
 
   collect-cedarling-go-digests:
     name: Collect Cedarling Go library digests
@@ -1522,6 +1537,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-go-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: cedarling-go.intoto.jsonl
 
   collect-cedarling-krakend-digests:
     name: Collect Cedarling KrakenD plugin digests
@@ -1571,6 +1587,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-krakend-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: cedarling-krakend.intoto.jsonl
 
   collect-cedarling-uniffi-digests:
     name: Collect Cedarling UniFFI digests
@@ -1619,6 +1636,7 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-cedarling-uniffi-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: cedarling-uniffi.intoto.jsonl
 
   collect-demo-digests:
     name: Collect demo package digests
@@ -1667,3 +1685,4 @@ jobs:
       upload-assets: true
       upload-tag-name: "${{ needs.collect-demo-digests.outputs.tag }}"
       compile-generator: true
+      provenance-name: demo.intoto.jsonl
