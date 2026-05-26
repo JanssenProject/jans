@@ -134,14 +134,14 @@ install_binary_from_stage() {
 
     shopt -s nullglob
     local f
-    for f in "${share_dir}/${EXT_NAME}.control" "${share_dir}/${EXT_NAME}"--*.sql; do
+    for f in "${share_dir}/${EXT_NAME}.control" "${share_dir}/${EXT_NAME}--"*.sql; do
         log "Installing $(basename "${f}")"
         install_file "${f}" "${ext_share}/$(basename "${f}")"
     done
     shopt -u nullglob
 
     local sql_count
-    sql_count="$(find "${share_dir}" -maxdepth 1 -name "${EXT_NAME}"--*.sql | wc -l)"
+    sql_count="$(find "${share_dir}" -maxdepth 1 -name "${EXT_NAME}--*.sql" | wc -l)"
     [[ "${sql_count}" -gt 0 ]] || die "no ${EXT_NAME}--*.sql files found in ${share_dir}"
 }
 
@@ -173,8 +173,8 @@ cmd_binary() {
     local input="${1:-}"
     [[ -n "${input}" ]] || die "binary mode requires a tarball or directory argument (see --help)"
 
-    require_cmd pg_config
     local pg_config="${PG_CONFIG:-pg_config}"
+    require_cmd "${pg_config}"
     local pg_major
     pg_major="$(detect_pg_major "${pg_config}")"
     [[ "${pg_major}" =~ ^[0-9]+$ ]] || die "could not parse PG major from ${pg_config}"
