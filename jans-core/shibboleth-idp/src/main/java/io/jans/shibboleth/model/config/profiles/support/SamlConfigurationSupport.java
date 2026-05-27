@@ -72,7 +72,7 @@ public class SamlConfigurationSupport {
 
             if (messageSigningPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("messageSigningPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("messageSigningPolicy"));
             }
 
             return TrustResult.success(new SamlConfigurationSupport(messageSigningPolicy));

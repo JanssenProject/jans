@@ -243,47 +243,47 @@ public class Saml2SsoConfigurationSupport {
             
             if (authenticationResultReusePolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("authenticationResultReusePolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionEncryptionPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("attributeEncryptionPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
             }
 
             if (maximumSPSessionLifetime == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("maximumSPSessionLifetime"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("maximumSPSessionLifetime"));
             }
 
             if (endpointValidationPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("endpointValidationPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("endpointValidationPolicy"));
             }
 
             if (attributeStatementPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("attributeStatementPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("friendlyNameRandomizationPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("friendlyNameRandomizationPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("nameIdFormatPrecedence"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
             }
 
             if (requestSigningRequirement == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("requestSigningRequirement"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("requestSigningRequirement"));
             }
 
             return TrustResult.success(new Saml2SsoConfigurationSupport(

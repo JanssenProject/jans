@@ -113,17 +113,17 @@ public class SamlAssertionConfigurationSupport {
 
             if (assertionSigningPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionSigningPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
             }
 
             if (assertionTimeCondition == null) {
                 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionTimeCondition"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionTimeCondition"));
             }
 
             if (assertionLifetime == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionLifetime"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionLifetime"));
             }
 
             return TrustResult.success(new SamlAssertionConfigurationSupport(assertionSigningPolicy, assertionTimeCondition, assertionLifetime));

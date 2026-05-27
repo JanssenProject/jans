@@ -113,17 +113,17 @@ public class Saml2ConfigurationSupport {
 
             if (requestSignatureValidationPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("requestSignatureValidationPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("requestSignatureValidationPolicy"));
             }
 
             if (encryptionFallbackPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("encryptionFallbackPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("encryptionFallbackPolicy"));
             }
 
             if (nameIdEncryptionPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("nameIdEncryptionPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdEncryptionPolicy"));
             }
 
             return TrustResult.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));

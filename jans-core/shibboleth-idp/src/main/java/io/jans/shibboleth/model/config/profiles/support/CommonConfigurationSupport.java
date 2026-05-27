@@ -99,17 +99,17 @@ public class CommonConfigurationSupport {
 
             if (status == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("status"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("status"));
             }
 
             if (inboundFlows == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("inboundFlows"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("inboundFlows"));
             }
 
             if (outboundFlows == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("outboundFlows"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("outboundFlows"));
             }
 
             return TrustResult.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));
