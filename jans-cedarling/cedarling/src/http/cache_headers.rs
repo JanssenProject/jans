@@ -21,7 +21,7 @@ use std::time::Duration;
 /// Cache state extracted from a single HTTP response.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct CacheValidators {
-    /// Strong or weak ETag, including the quote marks and any `W/` prefix.
+    /// Strong or weak `ETag`, including the quote marks and any `W/` prefix.
     pub etag: Option<String>,
     /// `Last-Modified` value as the server sent it. Stored verbatim for echoing
     /// in a subsequent `If-Modified-Since` request.
@@ -43,16 +43,14 @@ impl CacheValidators {
     /// `now` is injected so callers can test deterministically. In production
     /// pass [`Utc::now()`].
     pub(crate) fn from_headers(headers: &HeaderMap, now: DateTime<Utc>) -> Self {
-        let mut out = Self::default();
-
-        out.etag = headers
+        let etag = headers
             .get(reqwest::header::ETAG)
             .and_then(|v| v.to_str().ok())
             .map(str::trim)
             .filter(|s| !s.is_empty())
             .map(str::to_owned);
 
-        out.last_modified = headers
+        let last_modified = headers
             .get(reqwest::header::LAST_MODIFIED)
             .and_then(|v| v.to_str().ok())
             .map(str::trim)
@@ -62,14 +60,11 @@ impl CacheValidators {
         let (cc_max_age, no_cache, no_store) = headers
             .get(reqwest::header::CACHE_CONTROL)
             .and_then(|v| v.to_str().ok())
-            .map(parse_cache_control)
-            .unwrap_or((None, false, false));
-        out.no_cache = no_cache;
-        out.no_store = no_store;
+            .map_or((None, false, false), parse_cache_control);
 
         // Cache-Control: max-age wins over Expires when both are present.
-        if let Some(secs) = cc_max_age {
-            out.fresh_for = Some(Duration::from_secs(secs));
+        let mut fresh_for = if let Some(secs) = cc_max_age {
+            Some(Duration::from_secs(secs))
         } else if let Some(expires_at) = headers
             .get(reqwest::header::EXPIRES)
             .and_then(|v| v.to_str().ok())
@@ -78,22 +73,30 @@ impl CacheValidators {
             let delta = expires_at.signed_duration_since(now);
             // Negative or zero ⇒ already stale, treat as fresh_for=0 so the
             // worker will revalidate immediately on its next tick.
-            out.fresh_for = Some(if delta.num_seconds() > 0 {
-                Duration::from_secs(delta.num_seconds() as u64)
+            Some(if delta.num_seconds() > 0 {
+                Duration::from_secs(delta.num_seconds().cast_unsigned())
             } else {
                 Duration::ZERO
-            });
-        }
+            })
+        } else {
+            None
+        };
 
         // no-cache forces revalidation regardless of any max-age value.
-        if out.no_cache {
-            out.fresh_for = Some(Duration::ZERO);
+        if no_cache {
+            fresh_for = Some(Duration::ZERO);
         }
 
-        out
+        Self {
+            etag,
+            last_modified,
+            fresh_for,
+            no_cache,
+            no_store,
+        }
     }
 
-    /// True if any conditional-request validator (ETag or Last-Modified) is
+    /// True if any conditional-request validator (`ETag` or `Last-Modified`) is
     /// present. Only used by tests today; production code calls
     /// [`HttpClient::get_bytes_conditional`] which inspects the fields directly.
     #[cfg(test)]
@@ -102,7 +105,7 @@ impl CacheValidators {
     }
 }
 
-/// Parse a `Cache-Control` header value into (max_age, no_cache, no_store).
+/// Parse a `Cache-Control` header value into (`max_age`, `no_cache`, `no_store`).
 /// Tolerant: malformed directives are skipped.
 fn parse_cache_control(value: &str) -> (Option<u64>, bool, bool) {
     let mut max_age: Option<u64> = None;

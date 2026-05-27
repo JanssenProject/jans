@@ -31,6 +31,7 @@ impl PolicyStoreConfig {
     pub const MIN_REFRESH_INTERVAL_SECS: u64 = 5;
 
     /// True if the source is a remote URL and refresh is enabled.
+    #[must_use]
     pub fn refresh_enabled(&self) -> bool {
         self.refresh_interval_secs > 0
             && matches!(

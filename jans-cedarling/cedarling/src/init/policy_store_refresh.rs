@@ -131,20 +131,11 @@ pub(crate) enum RebuildError {
 }
 
 /// Mutable per-source state — what we learned from the previous response.
+#[derive(Default)]
 struct RefreshState {
     validators: CacheValidators,
     last_body_hash: Option<u64>,
     consecutive_failures: u32,
-}
-
-impl Default for RefreshState {
-    fn default() -> Self {
-        Self {
-            validators: CacheValidators::default(),
-            last_body_hash: None,
-            consecutive_failures: 0,
-        }
-    }
 }
 
 impl RefreshState {
@@ -178,9 +169,12 @@ impl RefreshState {
 
         let secs = secs.max(min_secs);
         let jitter_pct = jitter_pct();
-        let adjusted = (secs as i128) + ((secs as i128) * jitter_pct / 100);
-        let adjusted = adjusted.max(min_secs as i128) as u64;
-        Duration::from_secs(adjusted)
+        let secs_i128 = i128::from(secs);
+        let adjusted = secs_i128 + (secs_i128 * jitter_pct / 100);
+        let adjusted = adjusted.max(i128::from(min_secs));
+        // Adjusted is bounded by `[min_secs, secs * 110/100]`, both of which fit
+        // in u64 since `secs` is itself a u64.
+        Duration::from_secs(u64::try_from(adjusted).unwrap_or(min_secs))
     }
 }
 
@@ -189,7 +183,7 @@ impl RefreshState {
 fn jitter_pct() -> i128 {
     static COUNTER: AtomicU64 = AtomicU64::new(0);
     let n = COUNTER.fetch_add(1, Ordering::Relaxed);
-    ((n % 21) as i128) - 10
+    i128::from(n % 21) - 10
 }
 
 fn body_hash(bytes: &[u8]) -> u64 {
@@ -309,7 +303,7 @@ async fn run_worker(
         futures::pin_mut!(sleep_fut);
 
         match select(sleep_fut, &mut shutdown_rx).await {
-            Either::Left((_, _)) => {
+            Either::Left(((), _)) => {
                 let outcome = tick(
                     &source,
                     &http_client,
@@ -453,26 +447,36 @@ mod tests {
         let s = RefreshState::default();
         let d = s.next_delay(300).as_secs();
         // Allow for ±10% jitter.
-        assert!(d >= 270 && d <= 330, "got {d}");
+        assert!((270..=330).contains(&d), "got {d}");
     }
 
     #[test]
     fn next_delay_honors_shorter_server_hint() {
-        let mut s = RefreshState::default();
-        s.validators.fresh_for = Some(Duration::from_secs(60));
+        let s = RefreshState {
+            validators: CacheValidators {
+                fresh_for: Some(Duration::from_secs(60)),
+                ..CacheValidators::default()
+            },
+            ..RefreshState::default()
+        };
         let d = s.next_delay(300).as_secs();
         // Server says 60s — we pick the shorter of 60 and 300, plus jitter.
-        assert!(d >= 54 && d <= 66, "got {d}");
+        assert!((54..=66).contains(&d), "got {d}");
     }
 
     #[test]
     fn next_delay_caps_server_hint_at_base() {
-        let mut s = RefreshState::default();
-        // Server says "fresh for an hour" but operator chose 30s.
-        s.validators.fresh_for = Some(Duration::from_secs(3600));
+        let s = RefreshState {
+            // Server says "fresh for an hour" but operator chose 30s.
+            validators: CacheValidators {
+                fresh_for: Some(Duration::from_secs(3600)),
+                ..CacheValidators::default()
+            },
+            ..RefreshState::default()
+        };
         let d = s.next_delay(30).as_secs();
         // Should track the operator's 30s base, ±10% jitter — never the server's 3600s.
-        assert!(d >= 27 && d <= 33, "got {d}");
+        assert!((27..=33).contains(&d), "got {d}");
     }
 
     #[test]
@@ -485,12 +489,14 @@ mod tests {
 
     #[test]
     fn next_delay_backs_off_on_failures() {
-        let mut s = RefreshState::default();
-        s.consecutive_failures = 3;
+        let s = RefreshState {
+            consecutive_failures: 3,
+            ..RefreshState::default()
+        };
         let d = s.next_delay(60).as_secs();
         // 60 * 2^3 = 480, plus jitter, capped at REFRESH_FAILURE_BACKOFF_MAX_SECS=600.
         // After ±10% jitter, expect between ~432 and ~528.
-        assert!(d >= 400 && d <= 600, "got {d}");
+        assert!((400..=600).contains(&d), "got {d}");
     }
 
     #[test]

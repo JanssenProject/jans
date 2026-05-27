@@ -280,6 +280,7 @@ pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
+    use crate::http::cache_headers::CacheValidators;
     use crate::http::{HttpClient, HttpClientConfig};
 
     use mockito::Server;
@@ -507,7 +508,7 @@ mod test {
         let url = format!("{}/store", server.url());
 
         let result = client
-            .get_bytes_conditional(&url, &Default::default())
+            .get_bytes_conditional(&url, &CacheValidators::default())
             .await
             .expect("request");
 
@@ -520,7 +521,7 @@ mod test {
                     Some(std::time::Duration::from_secs(120))
                 );
             }
-            other => panic!("expected Modified, got {other:?}"),
+            super::ConditionalFetch::NotModified => panic!("expected Modified, got NotModified"),
         }
         mock.assert_async().await;
     }

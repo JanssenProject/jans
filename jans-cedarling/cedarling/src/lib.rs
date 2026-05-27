@@ -227,36 +227,14 @@ impl Cedarling {
         let authz = service_factory.authz_service().await?;
         let authz_swap = Arc::new(arc_swap::ArcSwap::from(authz));
 
-        // Spawn the policy-store refresh worker if the source is remote and a
-        // non-zero refresh interval was configured.
-        let refresh_handle = if config.policy_store_config.refresh_enabled() {
-            if let Some(source) =
-                RefreshSource::from_policy_store_source(&config.policy_store_config.source)
-            {
-                let rebuilder = AuthzRebuilder {
-                    jwt_config: config.jwt_config.clone(),
-                    authorization_config: config.authorization_config.clone(),
-                    http_client: service_factory.http_client_for_refresh(),
-                    log: log.clone(),
-                    data_store: data.clone(),
-                    metrics: metrics.clone(),
-                };
-                let handle = spawn_refresh_worker(
-                    source,
-                    config.policy_store_config.refresh_interval_secs,
-                    service_factory.http_client_for_refresh(),
-                    rebuilder,
-                    authz_swap.clone(),
-                    metrics.clone(),
-                    log.clone(),
-                );
-                Some(Arc::new(handle))
-            } else {
-                None
-            }
-        } else {
-            None
-        };
+        let refresh_handle = maybe_spawn_refresh_worker(
+            config,
+            &service_factory,
+            authz_swap.clone(),
+            log.clone(),
+            data.clone(),
+            metrics.clone(),
+        );
 
         Ok(Cedarling {
             log,
@@ -352,6 +330,41 @@ impl TrustedIssuerLoadingInfo for Cedarling {
     fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
         self.authz.load().failed_trusted_issuer_ids()
     }
+}
+
+/// Spawn the background policy-store refresh worker if the source is a remote
+/// URL and a non-zero refresh interval was configured. Returns `None` for
+/// local sources or when refresh is disabled.
+fn maybe_spawn_refresh_worker(
+    config: &BootstrapConfig,
+    service_factory: &ServiceFactory<'_>,
+    authz_swap: Arc<arc_swap::ArcSwap<authz::Authz>>,
+    log: log::Logger,
+    data: Arc<context_data_api::DataStore>,
+    metrics: Arc<authz::metrics::MetricsCollector>,
+) -> Option<Arc<PolicyStoreRefreshHandle>> {
+    if !config.policy_store_config.refresh_enabled() {
+        return None;
+    }
+    let source = RefreshSource::from_policy_store_source(&config.policy_store_config.source)?;
+    let rebuilder = AuthzRebuilder {
+        jwt_config: config.jwt_config.clone(),
+        authorization_config: config.authorization_config.clone(),
+        http_client: service_factory.http_client_for_refresh(),
+        log: log.clone(),
+        data_store: data,
+        metrics: metrics.clone(),
+    };
+    let handle = spawn_refresh_worker(
+        source,
+        config.policy_store_config.refresh_interval_secs,
+        service_factory.http_client_for_refresh(),
+        rebuilder,
+        authz_swap,
+        metrics,
+        log,
+    );
+    Some(Arc::new(handle))
 }
 
 /// Log detailed information about the loaded policy store metadata, including
