@@ -139,6 +139,68 @@ async fn load_policy_store_from_lock_master(
     extract_first_policy_store(&agama_policy_store)
 }
 
+/// Parses already-fetched Lock-Master JSON bytes into a [`PolicyStoreWithID`].
+/// Used by the policy-store refresh worker, which performs the HTTP fetch itself
+/// to be able to send conditional-request headers.
+pub(crate) fn parse_lock_master_bytes(
+    bytes: &[u8],
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    let agama_policy_store: LegacyAgamaPolicyStore = serde_json::from_slice(bytes)?;
+    extract_first_policy_store(&agama_policy_store)
+}
+
+/// Parses already-fetched `.cjar` archive bytes into a [`PolicyStoreWithID`].
+/// On native targets the schema-parsing step is offloaded to a blocking thread;
+/// on WASM it runs inline since `spawn_blocking` is unavailable.
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) async fn parse_cjar_bytes(
+    bytes: &[u8],
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    use crate::common::policy_store::loader;
+
+    let loaded = loader::load_policy_store_archive_bytes(bytes)
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
+
+    let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
+
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
+            })??;
+
+    Ok(PolicyStoreWithID {
+        id: store_id,
+        store: legacy_store,
+        metadata: Some(store_metadata),
+    })
+}
+
+/// Parses already-fetched `.cjar` archive bytes into a [`PolicyStoreWithID`] —
+/// WASM build, single-threaded.
+#[cfg(target_arch = "wasm32")]
+pub(crate) async fn parse_cjar_bytes(
+    bytes: &[u8],
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    use crate::common::policy_store::loader;
+
+    let loaded = loader::load_policy_store_archive_bytes(bytes)
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
+
+    let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
+
+    let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
+
+    Ok(PolicyStoreWithID {
+        id: store_id,
+        store: legacy_store,
+        metadata: Some(store_metadata),
+    })
+}
+
 /// Loads the policy store from a Cedar Archive (.cjar) file.
 ///
 /// Uses the `load_policy_store_archive` function from the loader module
@@ -378,6 +440,7 @@ mod test {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_generated.json").into(),
                 ),
+                ..Default::default()
             },
             &HTTP_CLIENT,
         )
@@ -392,6 +455,7 @@ mod test {
                 source: crate::PolicyStoreSource::FileYaml(
                     Path::new("../test_files/policy-store_ok.yaml").into(),
                 ),
+                ..Default::default()
             },
             &HTTP_CLIENT,
         )
@@ -419,6 +483,7 @@ mod test {
         load_policy_store(
             &PolicyStoreConfig {
                 source: crate::PolicyStoreSource::LockServer(uri),
+                ..Default::default()
             },
             &HTTP_CLIENT,
         )

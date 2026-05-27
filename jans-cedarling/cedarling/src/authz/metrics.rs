@@ -275,6 +275,17 @@ pub(crate) struct MetricsCollector {
 
     /// Swapped wholesale on each snapshot; read lock for record_*, write lock for snapshot
     interval: RwLock<Box<IntervalState>>,
+
+    // These counters are emitted on every snapshot regardless of telemetry
+    // interval (they reflect long-running worker state, not per-interval
+    // activity). See `crate::init::policy_store_refresh`.
+    policy_store_refresh_last_attempt_secs: AtomicI64,
+    policy_store_refresh_last_success_secs: AtomicI64,
+    policy_store_refresh_consecutive_failures: AtomicI64,
+    /// Integer-enum encoding of the last [`crate::init::policy_store_refresh::RefreshOutcome`]
+    /// `0` means "no attempt yet"; see `RefreshOutcome` for the
+    /// per-outcome values.
+    policy_store_refresh_last_outcome: AtomicI64,
 }
 
 impl MetricsCollector {
@@ -285,6 +296,10 @@ impl MetricsCollector {
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
             interval: RwLock::new(Box::new(IntervalState::new(now))),
+            policy_store_refresh_last_attempt_secs: AtomicI64::new(0),
+            policy_store_refresh_last_success_secs: AtomicI64::new(0),
+            policy_store_refresh_consecutive_failures: AtomicI64::new(0),
+            policy_store_refresh_last_outcome: AtomicI64::new(0),
         }
     }
 
@@ -294,6 +309,40 @@ impl MetricsCollector {
             init_time: Utc::now(),
             policy_count: AtomicI64::new(0),
             interval: RwLock::new(Box::new(IntervalState::new(Utc::now()))),
+            policy_store_refresh_last_attempt_secs: AtomicI64::new(0),
+            policy_store_refresh_last_success_secs: AtomicI64::new(0),
+            policy_store_refresh_consecutive_failures: AtomicI64::new(0),
+            policy_store_refresh_last_outcome: AtomicI64::new(0),
+        }
+    }
+
+    /// Records a refresh-worker tick outcome. Always runs regardless of
+    /// `enabled`, since refresh state should be observable even if telemetry
+    /// emission to Lock is disabled.
+    pub(crate) fn record_policy_store_refresh(
+        &self,
+        outcome: crate::init::policy_store_refresh::RefreshOutcome,
+    ) {
+        let now_secs = Utc::now().timestamp();
+        self.policy_store_refresh_last_attempt_secs
+            .store(now_secs, Ordering::Relaxed);
+        self.policy_store_refresh_last_outcome
+            .store(outcome as i64, Ordering::Relaxed);
+
+        match outcome {
+            crate::init::policy_store_refresh::RefreshOutcome::Success
+            | crate::init::policy_store_refresh::RefreshOutcome::NotModified => {
+                self.policy_store_refresh_last_success_secs
+                    .store(now_secs, Ordering::Relaxed);
+                self.policy_store_refresh_consecutive_failures
+                    .store(0, Ordering::Relaxed);
+            },
+            crate::init::policy_store_refresh::RefreshOutcome::HttpError
+            | crate::init::policy_store_refresh::RefreshOutcome::NetworkError
+            | crate::init::policy_store_refresh::RefreshOutcome::ParseError => {
+                self.policy_store_refresh_consecutive_failures
+                    .fetch_add(1, Ordering::Relaxed);
+            },
         }
     }
 
@@ -555,7 +604,29 @@ impl MetricsCollector {
             .expect(ERROR_COUNTERS_LOCK_POISONED)
             .clone();
 
-        let ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
+        let mut ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
+
+        // Inject policy-store refresh state into the snapshot.
+        ops.insert(
+            "policy_store_refresh.last_attempt_secs".to_string(),
+            self.policy_store_refresh_last_attempt_secs
+                .load(Ordering::Relaxed),
+        );
+        ops.insert(
+            "policy_store_refresh.last_success_secs".to_string(),
+            self.policy_store_refresh_last_success_secs
+                .load(Ordering::Relaxed),
+        );
+        ops.insert(
+            "policy_store_refresh.consecutive_failures".to_string(),
+            self.policy_store_refresh_consecutive_failures
+                .load(Ordering::Relaxed),
+        );
+        ops.insert(
+            "policy_store_refresh.last_outcome".to_string(),
+            self.policy_store_refresh_last_outcome
+                .load(Ordering::Relaxed),
+        );
 
         MetricsSnapshot {
             policy_stats,

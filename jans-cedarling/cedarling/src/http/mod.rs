@@ -3,11 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+pub(crate) mod cache_headers;
 mod spawn_task;
 
 pub use spawn_task::*;
 
-use http_utils::{Backoff, HttpRequestError, Sender};
+use cache_headers::CacheValidators;
+use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
@@ -194,6 +196,69 @@ impl HttpClient {
         let mut sender = self.create_sender();
         sender.send_with_retry(|| f(self.raw_client.get(uri))).await
     }
+
+    /// Fetches `uri` as raw bytes, honoring any previously captured cache
+    /// validators (`If-None-Match`, `If-Modified-Since`). Used by the policy
+    /// store refresh worker.
+    ///
+    /// Returns:
+    /// - [`ConditionalFetch::NotModified`] when the server replied `304`.
+    /// - [`ConditionalFetch::Modified`] with the new body and freshly parsed
+    ///   validators otherwise.
+    pub(crate) async fn get_bytes_conditional(
+        &self,
+        uri: &str,
+        validators: &CacheValidators,
+    ) -> Result<ConditionalFetch, HttpClientError> {
+        // Clone the small validator strings so the closure can be `Fn` (callable
+        // on each retry attempt).
+        let etag = validators.etag.clone();
+        let last_modified = validators.last_modified.clone();
+
+        let response = self
+            .get_with_retry_with(uri, |b| {
+                let mut b = b;
+                if let Some(e) = &etag {
+                    b = b.header(reqwest::header::IF_NONE_MATCH, e.as_str());
+                }
+                if let Some(lm) = &last_modified {
+                    b = b.header(reqwest::header::IF_MODIFIED_SINCE, lm.as_str());
+                }
+                b
+            })
+            .await?;
+
+        let status = response.status();
+        if status == reqwest::StatusCode::NOT_MODIFIED {
+            return Ok(ConditionalFetch::NotModified);
+        }
+
+        let headers = response.headers().clone();
+        let new_validators = CacheValidators::from_headers(&headers, chrono::Utc::now());
+        let bytes = response.bytes().await.map(|b| b.to_vec()).map_err(|e| {
+            HttpRequestError::new(
+                HttpRequestReasonError::DecodeResponseBytes(e),
+                Some(status),
+            )
+        })?;
+
+        Ok(ConditionalFetch::Modified {
+            bytes,
+            validators: new_validators,
+        })
+    }
+}
+
+/// Outcome of [`HttpClient::get_bytes_conditional`].
+#[derive(Debug)]
+pub(crate) enum ConditionalFetch {
+    /// Server responded `304 Not Modified` — body intentionally omitted.
+    NotModified,
+    /// Server returned a fresh body and (possibly) new cache validators.
+    Modified {
+        bytes: Vec<u8>,
+        validators: CacheValidators,
+    },
 }
 
 #[derive(Debug)]
@@ -396,5 +461,96 @@ mod test {
             elapsed < Duration::from_secs(2),
             "Expected to time out near {request_timeout:?}, took {elapsed:?}",
         );
+    }
+
+    #[tokio::test]
+    async fn conditional_get_returns_not_modified_on_304() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_header("if-none-match", "\"v1\"")
+            .with_status(304)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let validators = crate::http::cache_headers::CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            ..Default::default()
+        };
+        let url = format!("{}/store", server.url());
+
+        let result = client
+            .get_bytes_conditional(&url, &validators)
+            .await
+            .expect("request");
+
+        assert!(matches!(result, super::ConditionalFetch::NotModified));
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_captures_validators_on_200() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .with_header("etag", "\"v2\"")
+            .with_header("cache-control", "max-age=120")
+            .with_body(b"new-body-bytes")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let result = client
+            .get_bytes_conditional(&url, &Default::default())
+            .await
+            .expect("request");
+
+        match result {
+            super::ConditionalFetch::Modified { bytes, validators } => {
+                assert_eq!(bytes, b"new-body-bytes");
+                assert_eq!(validators.etag.as_deref(), Some("\"v2\""));
+                assert_eq!(
+                    validators.fresh_for,
+                    Some(std::time::Duration::from_secs(120))
+                );
+            }
+            other => panic!("expected Modified, got {other:?}"),
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_sends_if_modified_since() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_header(
+                "if-modified-since",
+                "Sun, 22 May 2026 12:00:00 GMT",
+            )
+            .with_status(200)
+            .with_body(b"x")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let validators = crate::http::cache_headers::CacheValidators {
+            last_modified: Some("Sun, 22 May 2026 12:00:00 GMT".to_string()),
+            ..Default::default()
+        };
+        let url = format!("{}/store", server.url());
+
+        let _ = client
+            .get_bytes_conditional(&url, &validators)
+            .await
+            .expect("request");
+        mock.assert_async().await;
     }
 }

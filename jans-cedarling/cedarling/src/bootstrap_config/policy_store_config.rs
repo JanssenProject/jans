@@ -15,6 +15,40 @@ use crate::bootstrap_config::BootstrapConfigLoadingError;
 pub struct PolicyStoreConfig {
     /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
+
+    /// Base refresh interval in seconds for URL-based policy store sources
+    /// (`CjarUrl`, `LockServer`). `0` disables background refresh and preserves
+    /// the load-once-at-startup behavior. Ignored for local sources. A server
+    /// `Cache-Control: max-age` / `Expires` hint may *shorten* the next
+    /// interval but never lengthens it.
+    #[serde(default)]
+    pub refresh_interval_secs: u64,
+}
+
+impl PolicyStoreConfig {
+    /// Minimum refresh interval, in seconds — anything smaller is clamped up to
+    /// this value to avoid a busy-poll against the upstream.
+    pub const MIN_REFRESH_INTERVAL_SECS: u64 = 5;
+
+    /// True if the source is a remote URL and refresh is enabled.
+    pub fn refresh_enabled(&self) -> bool {
+        self.refresh_interval_secs > 0
+            && matches!(
+                self.source,
+                PolicyStoreSource::CjarUrl(_) | PolicyStoreSource::LockServer(_)
+            )
+    }
+}
+
+impl Default for PolicyStoreConfig {
+    fn default() -> Self {
+        Self {
+            source: PolicyStoreSource::Yaml(
+                "cedar_version: v4.0.0\npolicy_stores: {}\n".to_string(),
+            ),
+            refresh_interval_secs: 0,
+        }
+    }
 }
 
 /// Raw policy store config
@@ -129,6 +163,9 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             ),
             _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
         };
-        Ok(Self { source })
+        Ok(Self {
+            source,
+            ..Default::default()
+        })
     }
 }
