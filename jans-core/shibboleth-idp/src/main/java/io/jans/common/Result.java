@@ -13,7 +13,7 @@ public class Result<T> {
         this.error = error;
         this.success = success;
     }
-
+    
     public static <T> Result<T> success (T value) {
 
         return new Result<>(value,null,true);
