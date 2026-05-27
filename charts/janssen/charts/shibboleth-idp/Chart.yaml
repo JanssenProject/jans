@@ -12,7 +12,7 @@ keywords:
 home: https://jans.io
 sources:
   - https://github.com/JanssenProject/jans
-  - https://shibboleth.net/products/identity-provider.html
+  - https://shibboleth.atlassian.net/wiki/spaces/IDP5/overview
 maintainers:
   - name: Janssen Project
     email: support@jans.io
