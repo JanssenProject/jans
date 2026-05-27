@@ -547,14 +547,14 @@ public class ShibbolethResource extends BaseResource {
             checkNotNull(inum, SHIBBOLETH_TRUST_RELATIONSHIP_INUM);
         }
 
-        validateRequest(inum, isUpdate);
+        validateInum(inum, isUpdate);
 
         if (isUpdate) {
             validateMetaData(trustRelationship, metaDataFile);
         }
     }
 
-    private void validateRequest(String inum, boolean isUpdate ) {
+    private void validateInum(String inum, boolean isUpdate ) {
         logger.info("validateUpdateRequest inum:{}, isUpdate:{}", inum, isUpdate);
 
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
