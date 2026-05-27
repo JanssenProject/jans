@@ -15,6 +15,16 @@
         <kotlin.version>2.1.20</kotlin.version>
         <jans.bom.version>${project.version}</jans.bom.version>
         <dokka.version>2.2.0</dokka.version>
+
+        <!-- Cedarling native artifact coordinates -->
+        <!-- Override via -Dcedarling.release.tag=v1.2.3 or -Dcedarling.native.version=1.2.3 -->
+        <cedarling.release.tag>nightly</cedarling.release.tag>
+        <cedarling.native.version>0.0.0</cedarling.native.version>
+        <cedarling.base.url>https://github.com/JanssenProject/jans/releases/download/${cedarling.release.tag}</cedarling.base.url>
+
+        <!-- Target paths (mirrors the shell script variables) -->
+        <cedarling.resources.dir>${project.basedir}/src/main/resources</cedarling.resources.dir>
+        <cedarling.kotlin.dir>${project.basedir}/src/main/kotlin/io/jans/cedarling</cedarling.kotlin.dir>
     </properties>
     <scm>
         <url>https://github.com/JanssenProject/jans</url>
@@ -117,15 +127,73 @@
         </dependency>
 
         <!-- For mocking static methods -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!--
+                ============================================================
+                Download pre-built native artefacts from GitHub Releases.
+                Replaces the external shell script that previously ran wget +
+                unzip before invoking Maven.
+
+                Runs in generate-sources so the files are present before the
+                Kotlin compiler starts in the compile phase.
+
+                Override release coordinates at the command line:
+                  mvn package \
+                    -Dcedarling.release.tag=v1.2.3 \
+                    -Dcedarling.native.version=1.2.3
+                ============================================================
+            -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.9.0</version>
+                <executions>
+
+                    <!-- Step 1: download + rename the shared library (.so) -->
+                    <execution>
+                        <id>download-native-lib</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Downloads as libcedarling_uniffi-0.0.0.so, saved under the
+                                 canonical name the JNA loader expects. -->
+                            <url>${cedarling.base.url}/libcedarling_uniffi-${cedarling.native.version}.so</url>
+                            <outputDirectory>${cedarling.resources.dir}</outputDirectory>
+                            <outputFileName>libcedarling_uniffi.so</outputFileName>
+                            <!-- Re-download only when the remote file changes -->
+                            <overwrite>false</overwrite>
+                            <!-- Cache by URL hash so incremental builds skip the download -->
+                            <skipCache>false</skipCache>
+                        </configuration>
+                    </execution>
+
+                    <!-- Step 2: download the Kotlin-bindings zip and unpack it in-place
+                         (equivalent to: wget zip && unzip zip -d $KOTLIN_DIR && rm zip) -->
+                    <execution>
+                        <id>download-kotlin-bindings</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>${cedarling.base.url}/cedarling_uniffi-kotlin-${cedarling.native.version}.zip</url>
+                            <outputDirectory>${cedarling.kotlin.dir}</outputDirectory>
+                            <!-- unpack=true extracts the zip and does NOT keep the archive,
+                                 mirroring: unzip -q … && rm -f … -->
+                            <unpack>true</unpack>
+                            <overwrite>false</overwrite>
+                            <skipCache>false</skipCache>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
             <!-- Kotlin compiler plugin -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>

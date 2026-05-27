@@ -62,6 +62,15 @@ pub struct LockServiceConfig {
     /// Software Statement Assertion Json Web Token that Cedarling will use for Dynamic
     /// Client Registration.
     pub ssa_jwt: Option<String>,
+    /// Pre-issued access token for Lock Server authentication.
+    ///
+    /// When set, Cedarling skips the SSA → DCR → `access_token` flow and uses this
+    /// token directly. If both `ssa_jwt` and `access_token_jwt` are present,
+    /// `access_token_jwt` takes precedence.
+    ///
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub access_token_jwt: Option<String>,
     /// Intervals to send log messages to the lock server.
     /// Set this to [`None`] to disable transmission.
     pub log_interval: Option<Duration>,
@@ -99,6 +108,10 @@ pub struct LockServiceConfigRaw {
     pub dynamic_config: bool,
     /// SSA JWT
     pub ssa_jwt: Option<String>,
+    /// Pre-issued access token (bypasses SSA → DCR flow when set).
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub access_token_jwt: Option<String>,
     /// Log interval
     pub log_interval: Option<Duration>,
     /// Health interval
@@ -126,6 +139,8 @@ impl Default for LockServiceConfig {
                 .expect("Failed to parse default lock server configuration URI"),
             dynamic_config: false,
             ssa_jwt: None,
+            #[cfg(not(target_arch = "wasm32"))]
+            access_token_jwt: None,
             log_interval: None,
             health_interval: None,
             telemetry_interval: None,
@@ -148,6 +163,8 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
                 .expect("Failed to parse lock server configuration URI from raw config"),
             dynamic_config: raw.dynamic_config,
             ssa_jwt: raw.ssa_jwt,
+            #[cfg(not(target_arch = "wasm32"))]
+            access_token_jwt: raw.access_token_jwt,
             log_interval: raw.log_interval,
             health_interval: raw.health_interval,
             telemetry_interval: raw.telemetry_interval,
@@ -171,6 +188,8 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .parse()?;
 
         let ssa_jwt = raw.lock_ssa_jwt.clone();
+        #[cfg(not(target_arch = "wasm32"))]
+        let access_token_jwt = raw.lock_access_token_jwt.clone();
 
         let log_interval =
             (raw.audit_log_interval > 0).then(|| Duration::from_secs(raw.audit_log_interval));
@@ -185,6 +204,8 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             config_uri,
             dynamic_config: raw.dynamic_configuration.into(),
             ssa_jwt,
+            #[cfg(not(target_arch = "wasm32"))]
+            access_token_jwt,
             log_interval,
             health_interval,
             telemetry_interval,
