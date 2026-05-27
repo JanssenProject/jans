@@ -138,17 +138,15 @@ set for your PG major, and copies them into the directories reported by
 ```bash
 export PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config   # example
 
-# From the repo root (or copy install.sh to the server):
-cd jans-cedarling/cedarling_pg
-./scripts/install.sh binary "${ARCHIVE}"
+# From the repo root (where ARCHIVE was downloaded):
+./jans-cedarling/cedarling_pg/scripts/install.sh binary "${ARCHIVE}"
 ```
 
 You can also pass an already-extracted directory instead of the `.tar.gz`:
 
 ```bash
 tar -xzf "${ARCHIVE}"
-cd jans-cedarling/cedarling_pg
-./scripts/install.sh binary "cedarling_pg-${VER}-pg${PG}-linux-x86_64"
+./jans-cedarling/cedarling_pg/scripts/install.sh binary "cedarling_pg-${VER}-pg${PG}-linux-x86_64"
 ```
 
 The script uses `sudo install` automatically when `pg_config` directories are
