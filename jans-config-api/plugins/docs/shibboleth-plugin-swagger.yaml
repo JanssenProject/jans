@@ -534,7 +534,7 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{inum}/file:
+  /shibboleth/trust-relationship/file:
     put:
       tags:
       - Shibboleth - Trust Relationship

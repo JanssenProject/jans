@@ -263,18 +263,18 @@ public class ShibbolethResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     @PUT
-    @Path(Constants.INUM_PATH_PARAM + Constants.FILE)
-    public Response updateTrustRelationship(TrustRelationship trustRelationship, InputStream metadatafile) throws IOException {
+    @Path(Constants.FILE)
+    public Response updateTrustRelationship(TrustRelationship trustRelationship, InputStream metadatafile)
+            throws IOException {
 
         logger.info("Update TrustRelationship");
         if (logger.isInfoEnabled()) {
-            logger.info("Update TrustRelationship identified by trustRelationship:{}, metadatafile:{}", escapeLog(trustRelationship),
-                    escapeLog(metadatafile));
+            logger.info("Update TrustRelationship identified by trustRelationship:{}, metadatafile:{}",
+                    escapeLog(trustRelationship), escapeLog(metadatafile));
         }
 
         validateTrustRelationship(trustRelationship, metadatafile, true);
-        trustRelationship = shibbolethService
-                .updateTrustRelationship(trustRelationship, metadatafile);
+        trustRelationship = shibbolethService.updateTrustRelationship(trustRelationship, metadatafile);
         return Response.status(Response.Status.OK).entity(trustRelationship).build();
     }
 
@@ -514,11 +514,13 @@ public class ShibbolethResource extends BaseResource {
         validateTrustRelationship(trustRelationshipForm.getTrustRelationship(), metaDataFile, isUpdate);
     }
 
-    private void validateTrustRelationship(TrustRelationship trustRelationship, InputStream metaDataFile, boolean isUpdate) {
+    private void validateTrustRelationship(TrustRelationship trustRelationship, InputStream metaDataFile,
+            boolean isUpdate) {
         if (logger.isInfoEnabled()) {
-            logger.info("trustRelationship:{}, metaDataFile:{}, isUpdate:{}", escapeLog(trustRelationship), escapeLog(metaDataFile), isUpdate);
+            logger.info("trustRelationship:{}, metaDataFile:{}, isUpdate:{}", escapeLog(trustRelationship),
+                    escapeLog(metaDataFile), isUpdate);
         }
-       
+
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
 
         // mandatory attributes
@@ -541,26 +543,15 @@ public class ShibbolethResource extends BaseResource {
                     String.format(INVALID_TRUST_NATURE_MSG, trustRelationship.getEntityType()));
         }
 
-        // inum - if update
-        final String inum = trustRelationship.getInum();
-        if (isUpdate) {
-            checkNotNull(inum, SHIBBOLETH_TRUST_RELATIONSHIP_INUM);
-        }
-
-        validateInum(inum, isUpdate);
+        validateName(trustRelationship, isUpdate);
 
         if (isUpdate) {
             validateMetaData(trustRelationship, metaDataFile);
         }
     }
 
-    private void validateInum(String inum, boolean isUpdate ) {
-        logger.info("validateUpdateRequest inum:{}, isUpdate:{}", inum, isUpdate);
-
-        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
-        logger.info("validateUpdateRequest trustRelationship:{}", trustRelationship);
-
-        checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
+    private void validateName(TrustRelationship trustRelationship, boolean isUpdate) {
+        logger.info("validateUpdateRequest trustRelationship:{}, isUpdate:{}", escapeLog(trustRelationship), isUpdate);
 
         // check if TrustRelationship with same name already exists
         List<TrustRelationship> existingTrustRelationshipList = shibbolethService
@@ -569,6 +560,13 @@ public class ShibbolethResource extends BaseResource {
         if (existingTrustRelationshipList != null && !existingTrustRelationshipList.isEmpty()) {
             List<TrustRelationship> list = null;
             if (isUpdate) {
+
+                // inum - if update
+                final String inum = trustRelationship.getInum();
+                if (isUpdate) {
+                    checkNotNull(inum, SHIBBOLETH_TRUST_RELATIONSHIP_INUM);
+                }
+
                 List<String> inumList = existingTrustRelationshipList.stream().map(TrustRelationship::getInum)
                         .collect(Collectors.toList());
                 logger.info("TrustRelationship's with name:{}, inumList:{}", trustRelationship.getDisplayName(),
