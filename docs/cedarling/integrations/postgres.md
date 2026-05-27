@@ -181,11 +181,13 @@ Prerequisites:
   flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc
   pkg-config protobuf-compiler`
 
-One-time pgrx setup for each PG major you plan to build against:
+One-time pgrx setup for **each PG major** you plan to build against (run the
+`init` line once per major — building for pg17 requires `--pg17`, not just
+`--pg16`):
 
 ```bash
 cargo install --locked cargo-pgrx --version 0.18.0
-cargo pgrx init --pg16 download          # repeat --pg13, --pg14, … as needed
+cargo pgrx init --pg16 download          # repeat --pg13, --pg14, --pg17, … as needed
 ```
 
 Then build and install with the helper script:
@@ -201,9 +203,12 @@ PG_VERSION=pg17 ./scripts/install.sh source --release
 check (`CREATE EXTENSION`, catalog tables present, core functions registered).
 Pass `--skip-health` to skip the database check.
 
-Point `PG_CONFIG` / `PATH` at the Postgres instance you want to extend when
-several majors are installed locally. Re-run once per major you support — the
-extension must be compiled against the exact server version it will load into.
+When `pg_config` is not on `$PATH`, the script resolves the pgrx-managed
+Postgres for `PG_VERSION` via `cargo pgrx info pg-config`. To install into a
+system Postgres instead, set `PG_CONFIG` (for example
+`/usr/lib/postgresql/17/bin/pg_config`). Re-run once per major you support —
+the extension must be compiled against the exact server version it will load
+into.
 
 To produce the same tarball layout CI publishes:
 
