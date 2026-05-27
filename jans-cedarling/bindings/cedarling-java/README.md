@@ -14,7 +14,7 @@ This guide explores the process of generating the Kotlin binding for Cedarling u
 
 #### Building from Kotlin binding
 
-
+**Note:** Follow steps 1 through 3 only when building on Windows or macOS. If you are using Linux, you can skip directly to step 4 for the build process.   
 
 1. Build Cedarling by executing below command from `./jans/jans-cedarling` of cloned jans project:
 
