@@ -5,7 +5,9 @@ import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfig
 import io.jans.shibboleth.model.config.profiles.Saml2EcpProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2LogoutProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2SsoProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.SamlProfileConfigurationDefaults;
 import io.jans.shibboleth.model.config.profiles.ShibbolethSsoProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.capabilities.CommonConfigurationCapable;
 import io.jans.shibboleth.model.config.profiles.common.AssertionEncryptionPolicy;
 import io.jans.shibboleth.model.config.profiles.common.AssertionSigningPolicy;
 import io.jans.shibboleth.model.config.profiles.common.AssertionTimeCondition;
@@ -20,6 +22,7 @@ import io.jans.shibboleth.model.config.profiles.common.MessageSigningPolicy;
 import io.jans.shibboleth.model.config.profiles.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.model.config.profiles.common.NameIdentifiers;
 import io.jans.shibboleth.model.config.profiles.common.ProfileStatus;
+import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.config.profiles.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.model.config.profiles.common.RequestSigningRequirement;
 import io.jans.shibboleth.model.core.*;
@@ -35,26 +38,26 @@ public class TrustRelationship {
 
     private static final int INITIAL_VERSION = 1;
 
-    private Id id;
-    private DisplayName displayName;
-    private Description description;
+    private final Id id;
+    private final DisplayName displayName;
+    private final Description description;
     private final TrustNature nature;
 
-    private int version;
-    private TrustStatus status;
-    private MetadataSource metadataSource;
+    private final Version version;
+    private final TrustStatus status;
+    private final MetadataSource metadataSource;
 
-    private EntityIds discoveredEntityIds;
+    private final EntityIds discoveredEntityIds;
 
-    private ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration;
-    private Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration;
-    private Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration;
-    private Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
-    private Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
-    private Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+    private final ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration;
+    private final Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration;
+    private final Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration;
+    private final Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
+    private final Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
+    private final Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
 
     private TrustRelationship(Id id, DisplayName displayName, Description description, 
-        TrustNature nature, int version, TrustStatus status, MetadataSource metadataSource, EntityIds discoveredEntityIds,
+        TrustNature nature, Version version, TrustStatus status, MetadataSource metadataSource, EntityIds discoveredEntityIds,
         ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration,
         Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration,
         Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration,
@@ -81,12 +84,6 @@ public class TrustRelationship {
         this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
     }
 
-    private int incrementVersion() {
-
-        version++;
-        return version;
-    }
-
     public Id getId() {
 
         return id;
@@ -97,15 +94,11 @@ public class TrustRelationship {
         return displayName;
     }
 
-    public TrustResult<Void> updateDisplayName(DisplayName newDisplayName) {
+    public TrustResult<TrustRelationship> updateDisplayName(DisplayName newDisplayName) {
 
-        if (newDisplayName == null) {
-
-            return TrustResult.failure(DisplayNameError.required());
-        }
-        displayName = newDisplayName;
-        incrementVersion();
-        return TrustResult.success(null);
+        return from(this)
+            .withDisplayName(newDisplayName)
+            .build();
     } 
 
     public Description getDescription() {
@@ -113,12 +106,11 @@ public class TrustRelationship {
         return description;
     }
 
-    public TrustResult<Void> updateDescription(Description newDescription) {
+    public TrustResult<TrustRelationship> updateDescription(Description newDescription) {
 
-        description = newDescription != null ? newDescription : Description.of("");
-        incrementVersion();
-        return TrustResult.success(null);
-
+        return from(this)
+            .withDescription(newDescription == null ? Description.of("") : newDescription)
+            .build();
     }
 
     public TrustNature getNature() {
@@ -142,7 +134,7 @@ public class TrustRelationship {
         return status;
     }
 
-    public int getVersion() {
+    public Version getVersion() {
 
         return version;
     }
@@ -152,86 +144,17 @@ public class TrustRelationship {
         return metadataSource;
     }
 
-    private boolean isMetadataSourceAllowedForNature(MetadataSource source) {
 
-        boolean allowed = false;
-
-        switch(nature) {
-            case INDIVIDUAL:
-                allowed = isMetadataSourceAllowedForIndividualNature(source);
-                break;
-            case AGGREGATE:
-                allowed = isMetadataSourceAllowedForAggregateNature(source);
-                break;
-        }
-
-        return allowed;
-    }
-
-    private boolean isMetadataSourceNotAllowedForNature(MetadataSource source) {
-
-        return !isMetadataSourceAllowedForNature(source);
-    }
-
-    private boolean isMetadataSourceAllowedForIndividualNature(MetadataSource source) {
-
-        boolean allowed = false;
-
-        switch(source.getType()) {
-            case FILE:
-            case URI:
-            case UPSTREAM:
-            case MANUAL:
-            case NONE:
-                allowed = true;
-                break;
-            case MDQ:
-                allowed = false;
-                break;
-        }
-
-        return allowed;
-    }
-
-    private boolean isMetadataSourceAllowedForAggregateNature(MetadataSource source) {
-
-        boolean allowed = false;
-        switch(source.getType()) {
-            case FILE:
-            case URI:
-            case MDQ:
-            case NONE:
-                allowed = true;
-                break;
-            case UPSTREAM:
-            case MANUAL:
-                allowed = false;
-                break;
-        }
-        return allowed;
-    }
-
-    public TrustResult<Void> updateMetadataSource(MetadataSource source) {
+    public TrustResult<TrustRelationship> updateMetadataSource(MetadataSource source) {
 
         if ( source == null ) {
 
-            return TrustResult.failure(new CannotBeNullOrBlank("source"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("source"));
         }
-
-        if ( isMetadataSourceNotAllowedForNature(source) ) {
-
-            final String operation = String.format("updateMetadataSource(%s)",source.getType());
-            final TrustNature requiredNature = nature == TrustNature.INDIVIDUAL ? TrustNature.AGGREGATE : TrustNature.INDIVIDUAL;
-            return TrustResult.failure(new OperationRestrictedToNature(operation, requiredNature, nature));
-        }
-
-        if ( source.getType() == MetadataSourceType.NONE && status == TrustStatus.DRAFT ) {
-
-            return TrustResult.success(null);
-        }
-
-        incrementVersion();
-        return TrustResult.success(null);
+        
+        return from(this)
+            .withMetadataSource(source)
+            .build();
     }
 
     public EntityIds getDiscoveredEntityIds() {
@@ -239,25 +162,16 @@ public class TrustRelationship {
         return discoveredEntityIds;
     }
 
-    public TrustResult<Void> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
+    public TrustResult<TrustRelationship> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
 
+        if (discoveredEntityIds == null) {
 
-        if ( discoveredEntityIds == null ) {
-
-            return TrustResult.failure(new CannotBeNullOrBlank("discoveredEntityIds"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("discoveredEntityIds"));
         }
 
-        if ( !isAggregateNature() ) {
-
-            return TrustResult.failure(new OperationRestrictedToNature("incorporateDiscoveredEntityIds", TrustNature.AGGREGATE, nature));
-        }
-
-        if (!status.isActivating()) {
-
-            return TrustResult.failure(new InvalidStatusForOperation(status, "incorporateDiscoveredEntityIds"));
-        }
-        incrementVersion();
-        return null;
+        return from(this)
+            .withDiscoveredEntityIds(discoveredEntityIds)
+            .build();
     }
 
     public boolean hasNoMetadataSource() {
@@ -305,173 +219,302 @@ public class TrustRelationship {
         return saml2LogoutProfileConfiguration;
     }
 
-    public static TrustResult<TrustRelationship> create (
-        final String displayName,
-        final String description,
-        final TrustNature nature
-    )
+    public <T extends CommonConfigurationCapable> TrustResult<TrustRelationship> updateProfileConfiguration(T profileConfiguration) {
 
-    {
+        if (profileConfiguration == null) {
 
-        
-        Id id = Id.unassigned();
+            return TrustResult.failure(CannotBeNullOrBlank.forField("profileConfiguration"));
+        }
+
+        return from(this)
+            .withProfileConfiguration(profileConfiguration)
+            .build();
+    }
+
+    private TrustRelationship withIncrementedVersion() {
+
+        return new TrustRelationship(
+            id, 
+            displayName, 
+            description, 
+            nature, 
+            version.next(), 
+            status, 
+            metadataSource, 
+            discoveredEntityIds, 
+            shibbolethSsoProfileConfiguration, 
+            saml2ArtifactResolutionProfileConfiguration, 
+            saml2AttributeQueryProfileConfiguration, 
+            saml2EcpProfileConfiguration, 
+            saml2SsoProfileConfiguration, 
+            saml2LogoutProfileConfiguration
+        );
+    }
+
+    public static TrustResult<TrustRelationship> create (String displayName,String description,TrustNature nature ) {
+
+
+        if (nature == null) {
+
+            return TrustResult.failure(TrustRelationshipCreationFailed.because(
+                CannotBeNullOrBlank.forField("nature")
+            ));
+        }
 
         TrustResult<DisplayName> displayNameResult = DisplayName.of(displayName);
-        if( displayNameResult.isFailure() ) {
-            return TrustResult.failure(displayNameResult.getError());
-        }
-        final DisplayName displayNameValue = displayNameResult.getValue();
+        if (displayNameResult.isFailure()) {
 
-        Description descriptionValue = Description.of(description);
-        
-        if ( nature == null ) {
-
-            return TrustResult.failure(TrustNatureError.required());
+            return TrustResult.failure(TrustRelationshipCreationFailed.because(
+                CannotBeNullOrBlank.forField("displayName")
+            ));
         }
 
-        int version =  INITIAL_VERSION;
-        TrustStatus status = TrustStatus.DRAFT;
-        MetadataSource metadataSource = new NoMetadataSource();
-        EntityIds discoveredEntityIds = EntityIds.empty();
+        Description desc = Description.of(description);
+
+        return builder()
+            .withId(Id.unassigned())
+            .withDisplayName(displayNameResult.getValue())
+            .withDescription(desc)
+            .withNature(nature)
+            .withVersion(Version.initial())
+            .withStatus(TrustStatus.DRAFT)
+            .withMetadataSource(new NoMetadataSource())
+            .withDiscoveredEntityIds(EntityIds.empty())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
+            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .build();
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(TrustRelationship original) {
+
+        return new Builder(original);
+    }
+
+    public static class Builder {
+
+        private final TrustRelationship original; //nullable, only set when using from()
+
+        private Id id;
+        private DisplayName displayName;
+        private Description description;
+        private TrustNature nature;
+         
+        private Version version;
+        private TrustStatus status;
+        private MetadataSource metadataSource;
+         
+        private EntityIds discoveredEntityIds;
+        private ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration;
+        private Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration;
+        private Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration;
+        private Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
+        private Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
+        private Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+
+        public Builder (TrustRelationship original) {
+
+            this.original = original;
+            if (original != null) {
+
+                id = original.id; 
+                displayName = original.displayName;
+                description = original.description;
+                nature = original.nature;
+                
+                version = original.version;
+                status  = original.status;
+                metadataSource = original.metadataSource;
+
+                discoveredEntityIds = original.discoveredEntityIds;
+                shibbolethSsoProfileConfiguration = original.shibbolethSsoProfileConfiguration;
+                saml2ArtifactResolutionProfileConfiguration = original.saml2ArtifactResolutionProfileConfiguration;
+                saml2AttributeQueryProfileConfiguration = original.saml2AttributeQueryProfileConfiguration;
+                saml2EcpProfileConfiguration = original.saml2EcpProfileConfiguration;
+                saml2SsoProfileConfiguration = original.saml2SsoProfileConfiguration;
+                saml2LogoutProfileConfiguration = original.saml2LogoutProfileConfiguration;
+            }
+        }
+
+        public Builder withId(Id id) {
+
+            this.id = id;
+            return this;
+        }
+
+        public Builder withDisplayName(DisplayName displayName) {
+
+            this.displayName = displayName;
+            return this;
+        }
+
+        public Builder withDescription(Description description) {
+
+            this.description = description;
+            return this;
+        }
+
+        public Builder withNature(TrustNature nature) {
+
+            this.nature = nature;
+            return this;
+        }
+
+        public Builder withVersion(Version version) {
+
+            this.version = version;
+            return this;
+        }
+
+        public Builder withStatus(TrustStatus status) {
+
+            this.status = status;
+            return this;
+        }
+
+        public Builder withMetadataSource(MetadataSource metadataSource) {
+
+            this.metadataSource = metadataSource;
+            return this;
+        }
+
+        public Builder withDiscoveredEntityIds(EntityIds discoveredEntityIds) {
+
+            this.discoveredEntityIds = discoveredEntityIds;
+            return this;
+        }
+
+        public <T extends CommonConfigurationCapable> Builder withProfileConfiguration(T profileConfiguration) {
+
+            switch(profileConfiguration.getType()) {
+
+                case SHIBBOLETH_SSO:
+                    this.shibbolethSsoProfileConfiguration = (ShibbolethSsoProfileConfiguration) profileConfiguration;
+                    break;
+                case SAML2_ARTIFACT_RESOLUTION:
+                    this.saml2ArtifactResolutionProfileConfiguration = (Saml2ArtifactResolutionProfileConfiguration) profileConfiguration;
+                    break;
+                case SAML2_ATTRIBUTE_QUERY:
+                    this.saml2AttributeQueryProfileConfiguration = (Saml2AttributeQueryProfileConfiguration) profileConfiguration;
+                    break;
+                case SAML2_ECP:
+                    this.saml2EcpProfileConfiguration = (Saml2EcpProfileConfiguration) profileConfiguration;
+                    break;
+                case SAML2_SSO:
+                    this.saml2SsoProfileConfiguration = (Saml2SsoProfileConfiguration) profileConfiguration;
+                    break;
+                case SAML2_LOGOUT:
+                    this.saml2LogoutProfileConfiguration = (Saml2LogoutProfileConfiguration) profileConfiguration;
+                    break;
+            }
+
+            return this;
+        }
+
+
+        public TrustResult<TrustRelationship> build() {
+
+            BuildContext build_context = createBuildContext();
+            TrustResult<Void> rules_enforcement_result = TrustRules.enforce(build_context);
+
+            if (rules_enforcement_result.isFailure()) {
+                
+                if (creatingNewInstance()) {
+                    return TrustResult.failure(TrustRelationshipCreationFailed.because(rules_enforcement_result.getError()));
+                }else {
+                    return TrustResult.failure(TrustRelationshipUpdateFailed.because(rules_enforcement_result.getError()));
+                }
+            }
+
+            TrustRelationship candidate = createCandidateTrustRelationship();
+
+            if(creatingNewInstance()) {
+
+                return TrustResult.success(candidate);
+            }
+
+            if (updatingExistingInstance() && isEssentiallyUnchanged(candidate)) {
+
+                return TrustResult.success(original);
+            }
+
+            TrustRelationship final_trust_relationship = applyStateTransitions(candidate);
+
+            return TrustResult.success(final_trust_relationship.withIncrementedVersion());
+        }
         
-        ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration = defaultShibbolethSsoProfileConfiguration();
-        Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration = defaultSaml2ArtifactResolutionProfileConfiguration();
-        Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration = defaultSaml2AttributeQueryProfileConfiguration();
-        Saml2EcpProfileConfiguration saml2EcpProfileConfiguration = defaultSaml2EcpProfileConfiguration();
-        Saml2SsoProfileConfiguration saml2SsoProfileConfiguration = defaultSaml2SsoProfileConfiguration();
-        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration = defaultSaml2LogoutProfileConfiguration();
+        private final BuildContext createBuildContext() {
 
-        return TrustResult.success(new TrustRelationship(
-            id,displayNameValue,descriptionValue,nature,version,
-            status,metadataSource,discoveredEntityIds,
-            shibbolethSsoProfileConfiguration,saml2ArtifactResolutionProfileConfiguration,
-            saml2AttributeQueryProfileConfiguration,saml2EcpProfileConfiguration,
-            saml2SsoProfileConfiguration,saml2LogoutProfileConfiguration
-        ));
-    }
+            return new BuildContext(
+                original, 
+                id, displayName, description, nature, version, status, 
+                metadataSource, discoveredEntityIds, 
+                shibbolethSsoProfileConfiguration, 
+                saml2ArtifactResolutionProfileConfiguration, 
+                saml2AttributeQueryProfileConfiguration, 
+                saml2EcpProfileConfiguration, 
+                saml2SsoProfileConfiguration, 
+                saml2LogoutProfileConfiguration
+            );
+        }
 
-    private static ShibbolethSsoProfileConfiguration defaultShibbolethSsoProfileConfiguration() {
+        private final TrustRelationship createCandidateTrustRelationship () {
 
-        return ShibbolethSsoProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .postAuthenticationFlows(InterceptorFlows.empty())
-            .authenticationResultReusePolicy(AuthenticationResultReusePolicy.ALLOW_REUSE)
-            .maximumAuthenticationAge(Duration.ofMinutes(0))
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .assertionTimeCondition(AssertionTimeCondition.INCLUDE_NOT_BEFORE)
-            .assertionLifetime(Duration.ofMinutes(5))
-            .assertionSigningPolicy(AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS)
-            .attributeStatementPolicy(AttributeStatementPolicy.OMIT_ATTRIBUTE_STATEMENT)
-            .nameIdFormatPrecedence(NameIdentifiers.empty())
-            .build()
-            .getValue();
-    }
+            return new TrustRelationship(
+                id,
+                displayName,
+                description,
+                nature,
+                version,
+                status,
+                metadataSource,
+                discoveredEntityIds,
+                shibbolethSsoProfileConfiguration,
+                saml2ArtifactResolutionProfileConfiguration,
+                saml2AttributeQueryProfileConfiguration,
+                saml2EcpProfileConfiguration,
+                saml2SsoProfileConfiguration,
+                saml2LogoutProfileConfiguration
+            );
 
-    private static Saml2AttributeQueryProfileConfiguration defaultSaml2AttributeQueryProfileConfiguration() {
+        }
 
-        return Saml2AttributeQueryProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .assertionSigningPolicy(AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS)
-            .assertionTimeCondition(AssertionTimeCondition.INCLUDE_NOT_BEFORE)
-            .assertionLifetime(Duration.ofMinutes(5))
-            .requestSignatureValidationPolicy(RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE)
-            .encryptionFallbackPolicy(EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT)
-            .nameIdEncryptionPolicy(NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS)
-            .assertionEncryptionPolicy(AssertionEncryptionPolicy.DO_NOT_ENCRYPT_ASSERTIONS)
-            .attributeEncryptionPolicy(AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES)
-            .friendlyRandomizationPolicy(FriendlyNameRandomizationPolicy.RANDOMIZED)
+        private final boolean creatingNewInstance() {
 
-            .build()
-            .getValue();
-    }
+            return original == null;
+        }
 
-    private static Saml2ArtifactResolutionProfileConfiguration defaultSaml2ArtifactResolutionProfileConfiguration() {
+        private final boolean updatingExistingInstance() {
 
-        return Saml2ArtifactResolutionProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .requestSignatureValidationPolicy(RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE)
-            .encryptionFallbackPolicy(EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT)
-            .nameIdEncryptionPolicy(NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS)
-            .assertionSigningPolicy(AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS)
-            .assertionEncryptionPolicy(AssertionEncryptionPolicy.DO_NOT_ENCRYPT_ASSERTIONS)
-            .attributeEncryptionPolicy(AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES)
-            .build()
-            .getValue();
-    }
+            return ! creatingNewInstance();
+        }
 
-    private static Saml2EcpProfileConfiguration defaultSaml2EcpProfileConfiguration() {
+        private boolean isEssentiallyUnchanged(TrustRelationship candidate) {
 
-        return Saml2EcpProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .requestSignatureValidationPolicy(RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE)
-            .encryptionFallbackPolicy(EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT)
-            .nameIdEncryptionPolicy(NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS)
-            .assertionTimeCondition(AssertionTimeCondition.INCLUDE_NOT_BEFORE)
-            .assertionLifetime(Duration.ofMinutes(5))
-            .assertionSigningPolicy(AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS)
-            .authenticationResultReusePolicy(AuthenticationResultReusePolicy.ALLOW_REUSE)
-            .assertionEncryptionPolicy(AssertionEncryptionPolicy.ENCRYPT_ASSERTIONS)
-            .attributeEncryptionPolicy(AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES)
-            .maximumSPSessionLifetime(Duration.ofMinutes(0))
-            .endpointValidationPolicy(EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT)
-            .attributeStatementPolicy((AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT))
-            .friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.RANDOMIZED)
-            .nameIdFormatPrecedence(NameIdentifiers.empty())
-            .requestSigningRequirement(RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS)
-            .build()
-            .getValue();
-    }
+            return Objects.equals(original.displayName,candidate.displayName)
+                && Objects.equals(original.description,candidate.description)
+                && Objects.equals(original.nature,candidate.nature)
+                && Objects.equals(original.metadataSource,candidate.metadataSource)
+                && Objects.equals(original.discoveredEntityIds,candidate.discoveredEntityIds)
+                && Objects.equals(original.shibbolethSsoProfileConfiguration,candidate.shibbolethSsoProfileConfiguration)
+                && Objects.equals(original.saml2ArtifactResolutionProfileConfiguration,candidate.saml2ArtifactResolutionProfileConfiguration)
+                && Objects.equals(original.saml2AttributeQueryProfileConfiguration,candidate.saml2AttributeQueryProfileConfiguration)
+                && Objects.equals(original.saml2EcpProfileConfiguration,candidate.saml2EcpProfileConfiguration)
+                && Objects.equals(original.saml2SsoProfileConfiguration,candidate.saml2SsoProfileConfiguration)
+                && Objects.equals(original.saml2LogoutProfileConfiguration,candidate.saml2LogoutProfileConfiguration);
+        }
 
-    private static Saml2SsoProfileConfiguration defaultSaml2SsoProfileConfiguration() {
+        private TrustRelationship applyStateTransitions(TrustRelationship candidate) {
 
-        return Saml2SsoProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .postAuthenticationFlows(InterceptorFlows.empty())
-            .authenticationResultReusePolicy(AuthenticationResultReusePolicy.ALLOW_REUSE)
-            .maximumAuthenticationAge(Duration.ofMinutes(0))
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .requestSignatureValidationPolicy(RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE)
-            .encryptionFallbackPolicy(EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT)
-            .nameIdEncryptionPolicy(NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS)
-            .assertionTimeCondition(AssertionTimeCondition.INCLUDE_NOT_BEFORE)
-            .assertionLifetime(Duration.ofMinutes(5))
-            .assertionSigningPolicy(AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS)
-            .assertionEncryptionPolicy(AssertionEncryptionPolicy.ENCRYPT_ASSERTIONS)
-            .attributeEncryptionPolicy(AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES)
-            .maximumSPSessionLifetime(Duration.ofMinutes(0))
-            .endpointValidationPolicy(EndpointValidationPolicy.ALWAYS_VALIDATE_ENDPOINT)
-            .attributeStatementPolicy(AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT)
-            .friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy.RANDOMIZED)
-            .nameIdFormatPrecedence(NameIdentifiers.empty())
-            .requestSigningRequirement(RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS)
-            .build()
-            .getValue();
-    }
-
-    private static Saml2LogoutProfileConfiguration defaultSaml2LogoutProfileConfiguration() {
-
-        return Saml2LogoutProfileConfiguration.builder()
-            .status(ProfileStatus.INACTIVE)
-            .inboundFlows(InterceptorFlows.empty())
-            .outboundFlows(InterceptorFlows.empty())
-            .messageSigningPolicy(MessageSigningPolicy.SIGN_RESPONSES_ONLY)
-            .requestSignatureValidationPolicy(RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE)
-            .encryptionFallbackPolicy(EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT)
-            .nameIdEncryptionPolicy(NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS)
-            .build()
-            .getValue();
+            return candidate;
+        }
     }
 }

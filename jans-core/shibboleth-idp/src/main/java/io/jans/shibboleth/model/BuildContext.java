@@ -1,0 +1,137 @@
+package io.jans.shibboleth.model;
+
+import io.jans.shibboleth.model.core.Id;
+import io.jans.shibboleth.model.core.DisplayName;
+import io.jans.shibboleth.model.core.Description;
+import io.jans.shibboleth.model.core.TrustNature;
+import io.jans.shibboleth.model.core.Version;
+import io.jans.shibboleth.model.core.TrustStatus;
+import io.jans.shibboleth.model.metadata.MetadataSource;
+import io.jans.shibboleth.model.EntityIds;
+import io.jans.shibboleth.model.config.profiles.ShibbolethSsoProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2ArtifactResolutionProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2EcpProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2SsoProfileConfiguration;
+import io.jans.shibboleth.model.config.profiles.Saml2LogoutProfileConfiguration;
+
+public class BuildContext {
+    
+    private final TrustRelationship original;
+
+    private final Id id;
+    private final DisplayName displayName;
+    private final Description description;
+    private final TrustNature nature;
+    private final Version version;
+    private final TrustStatus status;
+    private final MetadataSource metadataSource;
+    private final EntityIds discoveredEntityIds;
+    private final ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration;
+    private final Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration;
+    private final Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration;
+    private final Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
+    private final Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
+    private final Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+
+    public BuildContext(TrustRelationship original,
+        Id id, DisplayName displayName, Description description,
+        TrustNature nature, Version version, TrustStatus status, MetadataSource metadataSource,
+        EntityIds discoveredEntityIds, ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration,
+        Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration, 
+        Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration,
+        Saml2EcpProfileConfiguration saml2EcpProfileConfiguration, Saml2SsoProfileConfiguration saml2SsoProfileConfiguration,
+        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration ) {
+        
+        this.original = original;
+        this.id = id;
+        this.displayName = displayName;
+        this.description = description;
+        this.nature = nature;
+        this.version = version;
+        this.status = status;
+        this.metadataSource = metadataSource;
+        this.discoveredEntityIds = discoveredEntityIds;
+        this.shibbolethSsoProfileConfiguration = shibbolethSsoProfileConfiguration;
+        this.saml2ArtifactResolutionProfileConfiguration = saml2ArtifactResolutionProfileConfiguration;
+        this.saml2AttributeQueryProfileConfiguration = saml2AttributeQueryProfileConfiguration;
+        this.saml2EcpProfileConfiguration = saml2EcpProfileConfiguration;
+        this.saml2SsoProfileConfiguration = saml2SsoProfileConfiguration;
+        this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
+    }
+
+    public TrustRelationship getOriginal() {
+
+        return original;
+    }
+
+    public Id getId() {
+
+        return id;
+    }
+
+    public DisplayName getDisplayName() {
+
+        return displayName;
+    }
+
+    public Description getDescription() {
+
+        return description;
+    }
+
+    public TrustNature getNature() {
+
+        return nature;
+    }
+
+    public Version getVersion() {
+
+        return version;
+    }
+
+    public TrustStatus getStatus() {
+
+        return status;
+    }
+
+    public MetadataSource getMetadataSource() {
+
+        return metadataSource;
+    }
+
+    public EntityIds getDiscoveredEntityIds() {
+
+        return discoveredEntityIds;
+    }
+
+    public ShibbolethSsoProfileConfiguration getShibbolethSsoProfileConfiguration() {
+
+        return shibbolethSsoProfileConfiguration;
+    }
+
+    public Saml2ArtifactResolutionProfileConfiguration getSaml2ArtifactResolutionProfileConfiguration() {
+
+        return saml2ArtifactResolutionProfileConfiguration;
+    }
+
+    public Saml2AttributeQueryProfileConfiguration getSaml2AttributeQueryProfileConfiguration() {
+
+        return saml2AttributeQueryProfileConfiguration;
+    }
+
+    public Saml2EcpProfileConfiguration getSaml2EcpProfileConfiguration() {
+
+        return saml2EcpProfileConfiguration;
+    }
+
+    public Saml2SsoProfileConfiguration getSaml2SsoProfileConfiguration() {
+
+        return saml2SsoProfileConfiguration;
+    }
+
+    public Saml2LogoutProfileConfiguration getSaml2LogoutProfileConfiguration() {
+
+        return saml2LogoutProfileConfiguration;
+    }
+}
