@@ -9,7 +9,7 @@ public class OperationRestrictedToNature extends TrustError  {
     private final TrustNature requiredNature;
     private final TrustNature actualNature;
 
-    public OperationRestrictedToNature(String operationName, TrustNature requiredNature, TrustNature actualNature) {
+    private OperationRestrictedToNature(String operationName, TrustNature requiredNature, TrustNature actualNature) {
 
         super(String.format(MSG_TEMPLATE,operationName,requiredNature,actualNature));
 
@@ -31,5 +31,10 @@ public class OperationRestrictedToNature extends TrustError  {
     public TrustNature getActualNature() {
 
         return actualNature;
+    }
+
+    public static OperationRestrictedToNature of(String operation, TrustNature requiredNature, TrustNature actualNature) {
+
+        return new OperationRestrictedToNature(operation, requiredNature, actualNature);
     }
 }

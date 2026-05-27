@@ -19,7 +19,7 @@ public class DisplayName {
 
         if( rawValue == null || rawValue.trim().isEmpty() ) {
 
-            return TrustResult.failure(DisplayNameError.cannotBeNullOrBlank());
+            return TrustResult.failure(CannotBeNullOrBlank.forField("rawValue"));
         }
 
         return TrustResult.success(new DisplayName(rawValue.trim()));

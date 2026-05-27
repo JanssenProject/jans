@@ -22,13 +22,13 @@ public class EntityId {
 
         if (value == null  || value.trim().isEmpty() ) {
 
-            return TrustResult.failure(new CannotBeNullOrBlank("value"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("value"));
         }
 
         try {
             URI uri = new URI(value);
         }catch(URISyntaxException e) {
-            return TrustResult.failure(new InvalidUriSyntax("Specified value for EntityId is not a URI"));
+            return TrustResult.failure(InvalidUriSyntax.forValue(value));
         }
 
         return TrustResult.success(new EntityId(value));

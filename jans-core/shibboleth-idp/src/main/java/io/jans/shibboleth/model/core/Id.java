@@ -51,7 +51,7 @@ public class Id {
 
         if (!assigned) {
 
-            return TrustResult.failure(IdError.notAssigned());
+            return TrustResult.failure(IdNotAssigned.accessingValueOfUnassignedId());
         }
 
         return TrustResult.success(value);
