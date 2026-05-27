@@ -1,0 +1,25 @@
+{
+  "sub": "55S2wwoQWBmp3hPQ7EfysnJIOCFvOaNt34oKBMXFDgw",
+  "iss": "https://admin-ui-test.gluu.org",
+  "token_type": "Bearer",
+  "client_id": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",
+  "aud": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",
+  "acr": "simple_password_auth",
+  "x5t#S256": "",
+  "nbf": 1774096211,
+  "scope": [
+    "role",
+    "openid",
+    "profile"
+  ],
+  "auth_time": 1774096207,
+  "exp": 1774162607,
+  "iat": 1774096211,
+  "jti": "usI7pvAiSvKZmIJYMDnhow",
+  "status": {
+    "status_list": {
+      "idx": 214,
+      "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+    }
+  }
+}
