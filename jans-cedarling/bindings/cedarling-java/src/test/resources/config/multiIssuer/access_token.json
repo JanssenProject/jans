@@ -1,6 +1,6 @@
 {
   "sub": "55S2wwoQWBmp3hPQ7EfysnJIOCFvOaNt34oKBMXFDgw",
-  "iss": "https://admin-ui-test.gluu.org",
+  "iss": "https://op-provider.gluu.org",
   "token_type": "Bearer",
   "client_id": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",
   "aud": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",

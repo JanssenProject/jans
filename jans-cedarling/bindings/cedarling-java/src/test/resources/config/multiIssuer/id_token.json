@@ -2,7 +2,7 @@
   "at_hash": "lkxmc_FXt8LgPKy4KXvJ0A",
   "sub": "55S2wwoQWBmp3hPQ7EfysnJIOCFvOaNt34oKBMXFDgw",
   "amr": [],
-  "iss": "https://admin-ui-test.gluu.org",
+  "iss": "https://op-provider.gluu.org",
   "nonce": "3e2f4f42-8a43-4afd-895a-6713e3d23dde",
   "sid": "180e3838-e7ff-4c40-be99-84d4532b6782",
   "jansOpenIDConnectVersion": "openidconnect-1.0",

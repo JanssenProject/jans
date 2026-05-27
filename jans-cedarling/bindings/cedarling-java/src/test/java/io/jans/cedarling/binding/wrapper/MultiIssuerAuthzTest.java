@@ -132,7 +132,7 @@ public class MultiIssuerAuthzTest {
         assertFalse(adapter.isTrustedIssuerLoadedByName("Jans"),
                 "Issuer 'Jans' should not be loaded by name");
 
-        assertTrue(adapter.isTrustedIssuerLoadedByIss("https://admin-ui-test.gluu.org"),
+        assertTrue(adapter.isTrustedIssuerLoadedByIss("https://op-provider.gluu.org"),
                 "Issuer should be loaded by ISS");
 
         long total = adapter.totalIssuers();

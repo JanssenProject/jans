@@ -102,11 +102,8 @@ public class UnsignedAuthzTest {
     @Test(expectedExceptions = EntityException.class)
     public void testAuthorizeDeniedInvalidPrincipals() throws AuthorizeException, EntityException {
         String invalidPrincipals = "{}";
-
-        AuthorizeResult result = adapter.authorizeUnsigned(
+        adapter.authorizeUnsigned(
                 invalidPrincipals, action, resource, context);
-        assertNotNull(result);
-        assertTrue(result.getDecision(), "Authorization should ALLOW");
     }
 
     // ---------------------------
@@ -123,10 +120,9 @@ public class UnsignedAuthzTest {
     public void testGetLogById() throws Exception {
         List<String> logEntries = adapter.getLogIds();
 
-        if (!logEntries.isEmpty()) {
-            String log = adapter.getLogById(logEntries.get(0));
-            assertNotNull(log, "Log entry should not be null");
-        }
+        String log = adapter.getLogById(logEntries.get(0));
+        assertNotNull(log, "Log entry should not be null");
+
     }
 
     @Test(dependsOnMethods = "testAuthorizeWithPrincipalsList")

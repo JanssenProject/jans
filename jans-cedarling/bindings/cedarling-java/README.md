@@ -156,7 +156,7 @@ namespace Jans {
 
 4. Map the script with client used to perform authentication.
 
-![](./docs/mapping_update_token_script_with_client.png)
+![Mapping update_token script with client](./docs/mapping_update_token_script_with_client.png)
 
 5. The script runs before access_token generation and includes openid and profile scopes into the token if the oidc client has authorization_code in grant-types.
 

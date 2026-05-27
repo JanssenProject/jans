@@ -1,5 +1,5 @@
 {
-    "configuration_endpoint": "https://admin-ui-test.gluu.org/.well-known/openid-configuration",
+    "configuration_endpoint": "https://op-provider.gluu.org/.well-known/openid-configuration",
     "description": "",
     "token_metadata": {
         "access_token": {

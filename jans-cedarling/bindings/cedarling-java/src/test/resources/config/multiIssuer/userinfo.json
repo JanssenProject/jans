@@ -5,7 +5,7 @@
     "admin",
     "auditor"
   ],
-  "iss": "https://admin-ui-test.gluu.org",
+  "iss": "https://op-provider.gluu.org",
   "given_name": "Admin",
   "middle_name": "Admins",
   "inum": "40213524-b15b-4286-b90a-fd7a9aa712e6",
