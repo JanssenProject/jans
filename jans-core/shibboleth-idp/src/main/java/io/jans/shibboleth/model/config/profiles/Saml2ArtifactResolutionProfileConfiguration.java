@@ -262,17 +262,17 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
 
             if (assertionSigningPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionSigningPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("assertionEncryptionPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("attributeEncryptionPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
             }
 
             return TrustResult.success(new Saml2ArtifactResolutionProfileConfiguration(

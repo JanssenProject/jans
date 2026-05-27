@@ -272,12 +272,12 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
 
             if (attributeStatementPolicy == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("attributeStatementPolicy"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return TrustResult.failure(new CannotBeNullOrBlank("nameIdFormatPrecedence"));
+                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
             }
 
             return TrustResult.success(new ShibbolethSsoProfileConfiguration(
