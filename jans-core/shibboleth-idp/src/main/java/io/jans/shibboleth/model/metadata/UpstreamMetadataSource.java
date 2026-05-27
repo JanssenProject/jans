@@ -27,17 +27,17 @@ public class UpstreamMetadataSource implements MetadataSource {
 
         if ( parentId == null ) {
 
-            return TrustResult.failure(new CannotBeNullOrBlank("parentId"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("parentId"));
         }
 
         if ( entityId == null ) {
 
-            return TrustResult.failure(new CannotBeNullOrBlank("entityId"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("entityId"));
         }
 
         if ( parentId.isNotAssigned() ) {
 
-            return TrustResult.failure(new IdNotAssigned("Upstream metadata source requires a valid parentId"));
+            return TrustResult.failure(IdNotAssigned.forUpstreamMetadataSource());
         }
 
         return TrustResult.success(new UpstreamMetadataSource(parentId,entityId));

@@ -24,7 +24,7 @@ public class FileMetadataSource implements MetadataSource {
 
         if (filePath == null || filePath.isBlank() ) {
 
-            return TrustResult.failure(new CannotBeNullOrBlank("filePath"));
+            return TrustResult.failure(CannotBeNullOrBlank.forField("filePath"));
         }
 
         return TrustResult.success(new FileMetadataSource(filePath));
