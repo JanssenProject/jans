@@ -3,6 +3,7 @@ package io.jans.shibboleth.model;
 import io.jans.shibboleth.model.core.Description;
 import io.jans.shibboleth.model.core.DisplayName;
 import io.jans.shibboleth.model.core.Id;
+import io.jans.shibboleth.model.core.Version;
 
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 
@@ -112,13 +113,13 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
     
-    public TrustRelationshipAssert isVersion(int version) {
+    public TrustRelationshipAssert isVersion(Version version) {
 
         isNotNull();
 
-        if(actual.getVersion() != version ) {
+        if(!Objects.equals(actual.getVersion(), version)) {
 
-            failWithMessage("TrustRelationship version is <%d>. Expected: <%d>",actual.getVersion(),version);
+            failWithMessage("TrustRelationship version is <%s>. Expected: <%s>",actual.getVersion(),version);
         }
 
         return this;
