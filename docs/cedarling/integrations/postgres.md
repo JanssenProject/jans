@@ -504,4 +504,5 @@ be shared correctly across parallel workers.
   `build_cedarling_pg` job in
   [`.github/workflows/build-packages.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/build-packages.yml)
   alongside the other Cedarling release assets on each Jans `v*` / `nightly`
-  tag.
+  tag. Each tarball is cosign-signed; SLSA v3 provenance is attached as
+  `cedarling-pg.intoto.jsonl` on the same release.

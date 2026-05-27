@@ -1813,3 +1813,68 @@ jobs:
           gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber || {
             echo "gh release upload failed (assets may already exist), continuing..."
           }
+
+      - name: Compute SHA256 digest for SLSA provenance
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          SHA256=$(sha256sum "${FILE}" | awk '{print $1}')
+          echo "${SHA256}  ${FILE}" > "/tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256"
+
+      - name: Upload cedarling_pg digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cedarling-pg-digest-${{ matrix.pg }}
+          path: /tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256
+          retention-days: 1
+
+  collect-cedarling-pg-digests:
+    name: Collect Cedarling PostgreSQL extension digests
+    needs: [build_cedarling_pg]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+          fi
+      - name: Download cedarling_pg digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-pg-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-pg-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-pg-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-pg:
+    name: SLSA provenance — Cedarling PostgreSQL extension
+    needs: [collect-cedarling-pg-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg)) &&
+      needs.collect-cedarling-pg-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-pg-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-pg-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-pg.intoto.jsonl
