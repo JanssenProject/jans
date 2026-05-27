@@ -25,9 +25,11 @@
 #
 # Environment variables (source mode):
 #   PG_VERSION  pgrx feature to build against (default: pg16)
+#   PG_CONFIG   pg_config for the target server; when unset, uses PATH or
+#               the pgrx-managed Postgres for PG_VERSION
 #   PG_DB       database used for the post-install health check
 #               (default: cedarling_pg_install_check)
-#   PSQL        psql binary matching PG_VERSION (default: psql)
+#   PSQL        psql binary matching PG_VERSION (default: next to pg_config)
 
 set -euo pipefail
 
@@ -51,7 +53,7 @@ Commands:
            pgNN segment in the artifact name (for example pg16).
 
   source   Build with cargo-pgrx and install into the Postgres instance
-           selected by PG_VERSION / pg_config. Runs a psql health check
+           selected by PG_VERSION / PG_CONFIG. Runs a psql health check
            unless --skip-health is passed.
 
 Options:
@@ -60,8 +62,9 @@ Options:
   -h, --help     Show this help text.
 
 Environment:
-  PG_CONFIG      Target server (binary mode). Example:
-                 /usr/lib/postgresql/16/bin/pg_config
+  PG_CONFIG      pg_config for the target server (binary and source modes).
+                 Source mode default: first on PATH, then pgrx-managed Postgres
+                 for PG_VERSION. Example: /usr/lib/postgresql/16/bin/pg_config
   PG_VERSION     pgrx feature for source builds (default: pg16).
   PG_DB          Health-check database (source mode).
   PSQL           psql binary for the health check (source mode).
@@ -77,6 +80,28 @@ detect_pg_major() {
     local raw
     raw="$("${pg_config}" --version)" || die "could not run ${pg_config} --version"
     echo "${raw}" | awk '{print $2}' | cut -d. -f1
+}
+
+# Resolve pg_config for source builds: PG_CONFIG, then PATH, then pgrx-managed Postgres.
+resolve_pg_config_for_source() {
+    local pg_version="${1}"
+
+    if [[ -n "${PG_CONFIG:-}" ]]; then
+        echo "${PG_CONFIG}"
+        return 0
+    fi
+
+    if command -v pg_config >/dev/null 2>&1; then
+        command -v pg_config
+        return 0
+    fi
+
+    local pgrx_config
+    if ! pgrx_config="$(cargo pgrx info pg-config "${pg_version}" 2>/dev/null)"; then
+        die "pg_config not found on PATH and Postgres ${pg_version} is not managed by pgrx. Run: cargo pgrx init --${pg_version} download   Or set PG_CONFIG to your server's pg_config."
+    fi
+    [[ -x "${pgrx_config}" ]] || die "pgrx pg_config is not executable: ${pgrx_config}"
+    echo "${pgrx_config}"
 }
 
 install_file() {
@@ -129,8 +154,9 @@ install_binary_from_stage() {
     log "  shared extension dir: ${ext_share}"
     log "  library dir:          ${pkg_lib}"
 
-    log "Installing ${EXT_NAME}.so"
-    install_file "${lib_dir}/${EXT_NAME}.so" "${pkg_lib}/${EXT_NAME}.so"
+    local sql_count
+    sql_count="$(find "${share_dir}" -maxdepth 1 -name "${EXT_NAME}--*.sql" | wc -l)"
+    [[ "${sql_count}" -gt 0 ]] || die "no ${EXT_NAME}--*.sql files found in ${share_dir}"
 
     shopt -s nullglob
     local f
@@ -140,9 +166,8 @@ install_binary_from_stage() {
     done
     shopt -u nullglob
 
-    local sql_count
-    sql_count="$(find "${share_dir}" -maxdepth 1 -name "${EXT_NAME}--*.sql" | wc -l)"
-    [[ "${sql_count}" -gt 0 ]] || die "no ${EXT_NAME}--*.sql files found in ${share_dir}"
+    log "Installing ${EXT_NAME}.so"
+    install_file "${lib_dir}/${EXT_NAME}.so" "${pkg_lib}/${EXT_NAME}.so"
 }
 
 prepare_binary_stage() {
@@ -203,7 +228,6 @@ cmd_binary() {
 cmd_source() {
     local pg_version="${PG_VERSION:-pg16}"
     local pg_db="${PG_DB:-cedarling_pg_install_check}"
-    local psql_bin="${PSQL:-psql}"
     local release_flag=""
     local skip_health="false"
 
@@ -216,10 +240,21 @@ cmd_source() {
     done
 
     require_cmd cargo
+    local pg_config
+    pg_config="$(resolve_pg_config_for_source "${pg_version}")"
+    local pg_config_major
+    pg_config_major="$(detect_pg_major "${pg_config}")"
+    local pg_version_major="${pg_version#pg}"
+    if [[ "${pg_config_major}" != "${pg_version_major}" ]]; then
+        warn "PG_VERSION=${pg_version} but ${pg_config} reports PostgreSQL ${pg_config_major}; continuing because PG_CONFIG/PATH was explicit"
+    fi
+
+    local psql_bin="${PSQL:-$(dirname "${pg_config}")/psql}"
     log "Building and installing ${EXT_NAME} from source (${pg_version}${release_flag:+, release})"
+    log "Using pg_config: ${pg_config}"
     cd "${EXT_DIR}"
     # shellcheck disable=SC2086
-    cargo pgrx install --features "${pg_version}" ${release_flag}
+    cargo pgrx install --pg-config "${pg_config}" --features "${pg_version}" ${release_flag}
 
     if [[ "${skip_health}" == "true" ]]; then
         log "Skipping health check (--skip-health)"
