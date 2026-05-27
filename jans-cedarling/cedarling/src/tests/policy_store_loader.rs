@@ -231,6 +231,7 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -809,6 +810,7 @@ permit(
     let loaded = crate::init::policy_store::load_policy_store(
         &crate::PolicyStoreConfig {
             source: crate::PolicyStoreSource::CjarFile(archive_path),
+            ..Default::default()
         },
         &http_client,
     )
