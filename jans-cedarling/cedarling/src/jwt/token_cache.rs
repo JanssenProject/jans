@@ -15,6 +15,17 @@ use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
 
+fn sparkv_max_ttl(max_ttl: usize) -> Duration {
+    if max_ttl == 0 {
+        return Duration::MAX;
+    }
+
+    i64::try_from(max_ttl)
+        .ok()
+        .and_then(Duration::try_seconds)
+        .unwrap_or(Duration::MAX)
+}
+
 /// A dedicated cache for storing validated JWT tokens.
 ///
 /// The cache uses a thread-safe key-value store with automatic expiration
@@ -60,7 +71,7 @@ impl TokenCache {
     ) -> Self {
         Self {
             cache: Arc::new(RwLock::new(SparKV::with_config(Config {
-                max_ttl: Duration::seconds(i64::try_from(max_ttl).unwrap_or_default()),
+                max_ttl: sparkv_max_ttl(max_ttl),
                 max_items: capacity,
                 earliest_expiration_eviction,
                 ..Default::default()
@@ -250,5 +261,59 @@ impl IndexKey {
     // because in future it may change, for example applying hash function
     fn index_value(&self) -> String {
         self.to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::jwt::token::TokenClaims;
+    use serde_json::{Value, json};
+    use std::collections::HashMap;
+
+    fn token_cache(max_ttl: usize) -> TokenCache {
+        TokenCache::new(max_ttl, 100, true, None, Arc::new(MetricsCollector::new(0)))
+    }
+
+    fn token(claims: HashMap<String, Value>) -> Arc<Token> {
+        Arc::new(Token::new("test", TokenClaims::from(claims), None))
+    }
+
+    fn token_with_exp(now: DateTime<Utc>, duration_secs: i64) -> Arc<Token> {
+        token(HashMap::from([(
+            "exp".to_string(),
+            json!(now.timestamp() + duration_secs),
+        )]))
+    }
+
+    #[test]
+    fn max_ttl_zero_uses_token_expiration() {
+        let now = Utc::now();
+        let cache = token_cache(0);
+        let token = token_with_exp(now, 3600);
+
+        cache.save(&TokenKind::StatusList, "jwt", token, now);
+
+        assert!(cache.find(&TokenKind::StatusList, "jwt").is_some());
+    }
+
+    #[test]
+    fn max_ttl_zero_does_not_cache_token_without_exp() {
+        let now = Utc::now();
+        let cache = token_cache(0);
+        let token = token(HashMap::new());
+
+        cache.save(&TokenKind::StatusList, "jwt", token, now);
+
+        assert!(cache.find(&TokenKind::StatusList, "jwt").is_none());
+    }
+
+    #[test]
+    fn positive_max_ttl_caps_token_expiration() {
+        let now = Utc::now();
+        let cache = token_cache(5);
+        let token = token_with_exp(now, 3600);
+
+        assert_eq!(cache.cache_duration(&token, now), Some(5));
     }
 }
