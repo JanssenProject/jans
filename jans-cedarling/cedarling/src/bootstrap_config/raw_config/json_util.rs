@@ -6,6 +6,7 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
+use crate::bootstrap_config::policy_store_config::PolicyStoreConfig;
 use crate::jwt_config::{normalize_status_list_refresh_interval_max, MIN_JWKS_REFRESH_SECS};
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
@@ -86,6 +87,23 @@ where
 {
     let value: u64 = deserialize_or_parse_string_as_json(deserializer)?;
     Ok(value.max(MIN_JWKS_REFRESH_SECS))
+}
+
+/// Normalize the policy-store refresh interval. `0` means "disabled" and is left
+/// alone. Non-zero values below `MIN_REFRESH_INTERVAL_SECS` are clamped up to
+/// avoid a busy-poll against the upstream.
+pub(super) fn deserialize_policy_store_refresh_interval<'de, D>(
+    deserializer: D,
+) -> Result<u64, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: u64 = deserialize_or_parse_string_as_json(deserializer)?;
+    Ok(if value == 0 {
+        0
+    } else {
+        value.max(PolicyStoreConfig::MIN_REFRESH_INTERVAL_SECS)
+    })
 }
 
 #[cfg(test)]

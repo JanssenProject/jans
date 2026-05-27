@@ -55,6 +55,9 @@ use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
+use init::policy_store_refresh::{
+    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
+};
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
@@ -108,8 +111,18 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    authz: Arc<Authz>,
+    /// Wrapped in [`ArcSwap`] so the policy-store refresh worker can publish a
+    /// freshly built [`Authz`] (with new policy store, rebuilt JWT service and
+    /// entity builder) atomically. Every public method snapshots via
+    /// [`ArcSwap::load`] so an in-flight authorization keeps using the
+    /// pre-swap instance.
+    authz: Arc<arc_swap::ArcSwap<Authz>>,
     data: Arc<DataStore>,
+    /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
+    /// the worker's `oneshot` shutdown channel so the background refresh loop
+    /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
+    /// the field is intentionally not read.
+    _refresh_handle: Option<Arc<PolicyStoreRefreshHandle>>,
 }
 
 impl Cedarling {
@@ -211,10 +224,45 @@ impl Cedarling {
             });
         }
 
+        let authz = service_factory.authz_service().await?;
+        let authz_swap = Arc::new(arc_swap::ArcSwap::from(authz));
+
+        // Spawn the policy-store refresh worker if the source is remote and a
+        // non-zero refresh interval was configured.
+        let refresh_handle = if config.policy_store_config.refresh_enabled() {
+            if let Some(source) =
+                RefreshSource::from_policy_store_source(&config.policy_store_config.source)
+            {
+                let rebuilder = AuthzRebuilder {
+                    jwt_config: config.jwt_config.clone(),
+                    authorization_config: config.authorization_config.clone(),
+                    http_client: service_factory.http_client_for_refresh(),
+                    log: log.clone(),
+                    data_store: data.clone(),
+                    metrics: metrics.clone(),
+                };
+                let handle = spawn_refresh_worker(
+                    source,
+                    config.policy_store_config.refresh_interval_secs,
+                    service_factory.http_client_for_refresh(),
+                    rebuilder,
+                    authz_swap.clone(),
+                    metrics.clone(),
+                    log.clone(),
+                );
+                Some(Arc::new(handle))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service().await?,
+            authz: authz_swap,
             data,
+            _refresh_handle: refresh_handle,
         })
     }
 
@@ -230,7 +278,7 @@ impl Cedarling {
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unsigned(&request)
+        self.authz.load().authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
@@ -240,7 +288,7 @@ impl Cedarling {
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.authorize_multi_issuer(&request)
+        self.authz.load().authorize_multi_issuer(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -255,6 +303,7 @@ impl Cedarling {
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.authz
+            .load()
             .get_matching_policies_unsigned(principal, actions, resources)
     }
 
@@ -269,6 +318,7 @@ impl Cedarling {
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.authz
+            .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
@@ -280,27 +330,27 @@ impl Cedarling {
 
 impl TrustedIssuerLoadingInfo for Cedarling {
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+        self.authz.load().is_trusted_issuer_loaded_by_name(issuer_id)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
-        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+        self.authz.load().is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
     fn total_issuers(&self) -> usize {
-        self.authz.total_issuers()
+        self.authz.load().total_issuers()
     }
 
     fn loaded_trusted_issuers_count(&self) -> usize {
-        self.authz.loaded_trusted_issuers_count()
+        self.authz.load().loaded_trusted_issuers_count()
     }
 
     fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
-        self.authz.loaded_trusted_issuer_ids()
+        self.authz.load().loaded_trusted_issuer_ids()
     }
 
     fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
-        self.authz.failed_trusted_issuer_ids()
+        self.authz.load().failed_trusted_issuer_ids()
     }
 }
 

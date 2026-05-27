@@ -10,6 +10,7 @@
 //! - get keys for JWT validation
 
 pub(crate) mod policy_store;
+pub(crate) mod policy_store_refresh;
 pub(crate) mod service_config;
 pub(crate) mod service_factory;
 
