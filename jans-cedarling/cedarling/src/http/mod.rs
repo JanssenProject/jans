@@ -117,6 +117,12 @@ impl HttpClient {
         })
     }
 
+    /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
+    /// (e.g. when they need to inspect headers before consuming the body).
+    pub(crate) fn max_response_size_bytes(&self) -> Option<u64> {
+        self.max_response_size_bytes
+    }
+
     /// Creates a new Sender with the configured backoff strategy.
     pub(crate) fn create_sender(&self) -> Sender {
         let backoff = {
