@@ -3,18 +3,17 @@
  *
  * Copyright (c) 2026, Janssen Project
  */
-
-package io.jans.lock.cedarling;
+package io.jans.lock.cedarling.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -25,23 +24,19 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
-import io.jans.lock.cedarling.config.BootstrapConfig;
+import io.jans.lock.cedarling.BaseCedarlingTest;
 import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
+import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.lock.model.config.cedarling.LogLevel;
 import io.jans.lock.model.config.cedarling.LogType;
-import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 
 /**
- * Integration tests for the Cedarling authorization engine.
+ * Integration tests for {@link CedarlingAuthorizationService}.
  *
  * <p>These tests exercise the Cedarling policy engine end-to-end using real JWT access
- * tokens and a real policy store loaded from {@code src/test/resources/test-policy-store}.
- *
- * <p>The dependency on {@code CedarlingAuthorizationService} is intentionally removed:
- * the test wires the native {@link CedarlingAdapter} directly, so it validates the
- * engine behaviour without any service-layer indirection.
+ * tokens and a real policy store loaded from {@code src/test/resources/lock_policy_store.json}.
  *
  * <h3>Token matrix</h3>
  * <pre>
@@ -55,8 +50,8 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
  * </pre>
  *
  * <p><strong>JWT expiry:</strong> The tokens are real tokens whose {@code exp} claim is in
- * the past. Before each test run the payloads are patched (base64-decode → update exp →
- * base64-encode) to a value 1 hour in the future. Because the adapter is initialised with
+ * the past.  Before each test run the payloads are patched (base64-decode → update exp →
+ * base64-encode) to a value 1 hour in the future.  Because the adapter is initialised with
  * {@code jwtSigValidation(false)} the modified signature is still accepted by Cedarling.
  *
  * <p><strong>Prerequisites:</strong> The native Cedarling UniFFI library must be on the
@@ -65,10 +60,8 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
  * @author Yuriy Movchan Date: 12/05/2026
  */
 @TestInstance(Lifecycle.PER_CLASS)
-@DisplayName("Cedarling Engine – Authorization Integration Tests")
-class CedarlingIntegrationTest extends BaseCedarlingTest {
-
-    private static final Logger log = LoggerFactory.getLogger(CedarlingIntegrationTest.class);
+@DisplayName("CedarlingAuthorizationService – Integration Tests")
+class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
 
     // ─── Raw JWT strings (exp claims are patched at runtime) ────────────────────
 
@@ -100,20 +93,21 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
     // ─── @ProtectedCedarlingApi annotation parameter constants ──────────────────
 
     /** Cedar action that maps to HTTP POST requests. */
-    private static final String ACTION_POST   = "Jans::Action::\"POST\"";
+    private static final String ACTION_POST      = "Jans::Action::\"POST\"";
 
-    /** Cedar entity type for HTTP requests. */
-    private static final String RESOURCE_TYPE = "Jans::HTTP_Request";
+    /** Cedar entity type for HTTP requests (note: trailing quote is intentional,
+     *  it matches the value used in the real @ProtectedCedarlingApi annotations). */
+    private static final String RESOURCE_TYPE    = "Jans::HTTP_Request";
 
     // Permission IDs – must match the {@code id} attribute of each annotation
-    private static final String ID_LOG        = "lock_audit_log_write";
-    private static final String ID_HEALTH     = "lock_audit_health_write";
-    private static final String ID_TELEMETRY  = "lock_audit_telemetry_write";
+    private static final String ID_LOG           = "lock_audit_log_write";
+    private static final String ID_HEALTH        = "lock_audit_health_write";
+    private static final String ID_TELEMETRY     = "lock_audit_telemetry_write";
 
     // Endpoint paths – must match the {@code path} attribute of each annotation
-    private static final String PATH_LOG      = "/audit/log/bulk";
-    private static final String PATH_HEALTH   = "/audit/health/bulk";
-    private static final String PATH_TELEMETRY = "/audit/health/bulk";
+    private static final String PATH_LOG         = "/audit/log/bulk";
+    private static final String PATH_HEALTH      = "/audit/health/bulk";
+    private static final String PATH_TELEMETRY   = "/audit/health/bulk";
 
     /**
      * The token map key expected by Cedarling's native authorize input.
@@ -121,14 +115,9 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
      */
     private static final String ACCESS_TOKEN_KEY = CedarlingAuthorizationService.CEDARLING_JANS_ACCESS_TOKEN;
 
-    // ─── Native adapter + runtime-patched tokens ────────────────────────────────
+    // ─── Service under test + runtime-patched tokens ────────────────────────────
 
-    /**
-     * Native Cedarling adapter initialised directly from the policy store.
-     * Replaces the {@code CedarlingAuthorizationService} wrapper that was
-     * used in the original test.
-     */
-    private CedarlingAdapter cedarlingAdapter;
+    private CedarlingAuthorizationService authService;
 
     /**
      * JWT tokens with their {@code exp} claims patched to one hour in the future.
@@ -144,39 +133,40 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
      * Performs one-time initialisation before any test in this class runs:
      * <ol>
      *   <li>Loads {@code lock_policy_store.json} from the test classpath.</li>
-     *   <li>Builds a {@link BootstrapConfig} and initialises the native
-     *       {@link CedarlingAdapter} directly – no CDI, no service wrapper.</li>
+     *   <li>Creates a fully wired {@link CedarlingAuthorizationService} via field
+     *       injection (bypassing CDI) and calls its {@code @PostConstruct} method.</li>
      *   <li>Patches the {@code exp} claims of all three JWT tokens.</li>
      * </ol>
      */
     @BeforeAll
-    void setUpAdapterAndTokens() throws Exception {
+    void setUpServiceAndTokens() throws Exception {
         // ── 1. Load policy store from test resources ──────────────────────────
     	String currentDir = System.getProperty("user.dir");
     	String policyStoreFn = currentDir + "/target/test-classes/test-policy-store";
 
-        // ── 2. Build BootstrapConfig and initialise the native adapter directly
-        //       (mirrors the logic from CedarlingAuthorizationService.init())
-        BootstrapConfig bootstrapConfig = BootstrapConfig.builder()
-                .applicationName("lock-integration-test")
-                .policyStoreLocalFn(policyStoreFn)
-                .logType(LogType.STD_OUT)
-                .logLevel(LogLevel.TRACE)
-                // Signature validation disabled so exp-patched tokens are accepted
-                .jwtSigValidation(false)
-                .jwtStatusValidation(false)
-                .build();
-        
-        cedarlingAdapter = new CedarlingAdapter();
-        
-        String jsonConfig = bootstrapConfig.toJsonConfig();
-        log.info("Cedarling JSON configuration: {}", jsonConfig);
-		cedarlingAdapter.loadFromJson(jsonConfig);
-        log.info("Cedarling initialized successfully with trusted issuers count: {}", cedarlingAdapter.loadedTrustedIssuersCount());
+        // ── 2. Build mocked CDI dependencies ─────────────────────────────────
+        Logger                    log              = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
+        AppConfiguration          appConfiguration = mock(AppConfiguration.class);
+        CedarlingPolicyConfiguration policyConfig  = mock(CedarlingPolicyConfiguration.class);
+        CedarlingConfiguration    cedarConf        = mock(CedarlingConfiguration.class);
 
-        log.info("CedarlingAdapter initialised successfully");
+        when(cedarConf.isEnabled()).thenReturn(true);
+        // Use null for log-related settings; BootstrapConfig treats them as "disabled" / default
+        when(cedarConf.getLogType()).thenReturn(LogType.STD_OUT);
+        when(cedarConf.getLogLevel()).thenReturn(LogLevel.TRACE);
+        when(appConfiguration.getCedarlingConfiguration()).thenReturn(cedarConf);
 
-        // ── 3. Patch exp claims so the tokens are not expired during the test run
+        // ── 3. Wire the service manually (CDI is not available in unit tests) ─
+        authService = new CedarlingAuthorizationService();
+        injectField(authService, "log",              log);
+        injectField(authService, "appConfiguration", appConfiguration);
+        injectField(authService, "policyConfiguration", policyConfig);
+        injectField(authService, "policyStoreLocalFn", policyStoreFn);
+
+        // Trigger @PostConstruct – initialises CedarlingAdapter with the real policy
+        authService.init();
+
+        // ── 4. Patch exp claims so the tokens are not expired during the test run
         jwt1 = withFutureExp(RAW_JWT_1);
         jwt2 = withFutureExp(RAW_JWT_2);
         jwt3 = withFutureExp(RAW_JWT_3);
@@ -185,8 +175,8 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
     /** Calls the adapter's {@code close()} after the entire test class completes. */
     @AfterAll
     void tearDown() {
-        if (cedarlingAdapter != null) {
-            cedarlingAdapter.close();
+        if (authService != null) {
+            authService.destroy();
         }
     }
 
@@ -294,9 +284,8 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
     // ===========================================================================
 
     /**
-     * Calls the native {@link CedarlingAdapter#authorize} directly, constructing
-     * the token map and resource exactly the same way as the production code in
-     * {@code CedarlingProtectionService}.
+     * Calls {@link CedarlingAuthorizationService#authorize} with a resource map
+     * built the same way as {@code CedarlingProtectionService.getCedarlingResource()}.
      *
      * @param accessToken the JWT access token (after exp patching)
      * @param action      Cedar action string (e.g. {@code Jans::Action::"POST"})
@@ -304,44 +293,23 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
      * @param path        endpoint path from {@code @ProtectedCedarlingApi.path()}
      * @return {@code true} when Cedarling grants the request
      */
-    private boolean authorize(String accessToken, String action, String permId, String path) {
-        Map<String, String> tokens = Map.of(ACCESS_TOKEN_KEY, accessToken);
-        try {
-    		JSONObject resourceObject = new JSONObject(Optional.ofNullable(
-    				buildResource(permId, path)).map(Map.class::cast).orElse(Collections.emptyMap()));
+	private boolean authorize(String accessToken, String action, String permId, String path) {
+		Map<String, String> tokens = Map.of(ACCESS_TOKEN_KEY, accessToken);
 
-    		JSONObject contextObject = new JSONObject(Optional.ofNullable(
-    				buildContext()).map(Map.class::cast).orElse(Collections.emptyMap()));
-
-    		MultiIssuerAuthorizeResult res = cedarlingAdapter.authorizeMultiIssuer(tokens, action, resourceObject, contextObject);
-			
-			if (res == null) {
-				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
-						tokens, action, resourceObject, contextObject);
-				return false;
-			}
-
-			String requestId = res.getRequestId();
-			log.info("Authorization workload decision {} for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
-					res.getDecision(), requestId, tokens, action, resourceObject, contextObject);
-
-			return res.getDecision();
-        } catch (Exception e) {
-            log.error("Authorization call failed for permId={} path={}: {}", permId, path, e.getMessage(), e);
-            return false;
-        }
-    }
+		return authService.authorize(tokens, action, buildResource(permId, path), buildContext());
+	}
 
     /**
-     * Constructs the Cedar resource map exactly as
-     * {@code CedarlingProtectionService.getCedarlingResource()} does at runtime.
+     * Constructs the Cedar resource map that mirrors what
+     * {@code CedarlingProtectionService.getCedarlingResource()} produces at runtime.
      *
-     * <p>The numeric {@code id} inside {@code cedar_entity_mapping} is derived from
-     * {@link CedarlingPermission#hashCode()}, matching production behaviour exactly.
+     * <p>The numeric {@code id} inside {@code cedar_entity_mapping} is derived from the
+     * {@link CedarlingPermission#hashCode()} of a permission built with the supplied
+     * arguments, matching the production code exactly.
      *
      * @param permId the permission ID ({@code @ProtectedCedarlingApi.id()})
      * @param path   the endpoint path ({@code @ProtectedCedarlingApi.path()})
-     * @return resource map ready for the native authorize call
+     * @return resource map ready for {@code CedarlingAuthorizationService.authorize()}
      */
     private static Map<String, Object> buildResource(String permId, String path) {
         Map<String, Object> resource = new HashMap<>();
@@ -355,7 +323,8 @@ class CedarlingIntegrationTest extends BaseCedarlingTest {
     }
 
     /**
-     * Returns an empty context map – mirrors {@code CedarlingProtectionService.getCedarlingContext()}.
+     * Returns an empty context map.  The production code also sends an empty map,
+     * so we match that behaviour here.
      */
     private static Map<String, Object> buildContext() {
         return Collections.emptyMap();

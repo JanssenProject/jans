@@ -45,8 +45,6 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 public class CedarlingProtectionService implements CedarlingProtection {
 
-    private static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_Token";
-
 	@Inject
     private Logger log;
 
@@ -169,7 +167,8 @@ public class CedarlingProtectionService implements CedarlingProtection {
 		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", requestedPermission.getResource(), "id", id)
+						Map.of("entity_type", requestedPermission.getResource(),
+								"id", id)
 					)
 		);
 		map.putAll(

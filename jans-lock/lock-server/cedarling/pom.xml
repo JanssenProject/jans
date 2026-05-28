@@ -13,6 +13,12 @@
 		<version>0.0.0-nightly</version>
 	</parent>
 
+	<properties>
+		<maven.compiler.source>15</maven.compiler.source>
+		<maven.compiler.target>15</maven.compiler.target>
+		<maven.compiler.release>15</maven.compiler.release>
+	</properties>
+	
 	<build>
 		<resources>
 			<resource>
@@ -83,6 +89,53 @@
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-jetty</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-jetty</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-httpclient-apache5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Documentation -->
 		<dependency>
 			<groupId>io.jans</groupId>
