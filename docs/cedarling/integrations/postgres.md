@@ -477,13 +477,13 @@ be shared correctly across parallel workers.
   denying. That is one GUC change away from bypassing authorization for
   every row. Keep the default `closed` in production; treat `open` as a
   break-glass setting with change control.
-- **Fail-open audit visibility depends on `cedarling.log_level`.** When
-  `fail_mode = open` converts an error into an allow, the extension emits
-  a structured `WARNING` audit line only if `cedarling.log_level` is `warn`
-  or more verbose (`info`, `debug`). With `cedarling.log_level = 'error'`,
-  that audit entry is suppressed even when `cedarling.audit_fail_open` is
-  `on`. Operators who rely on logs for fail-open visibility should not set
-  `log_level` to `error`.
+- **Fail-open audit entries bypass `cedarling.log_level`.** When
+  `fail_mode = open` converts an error into an allow and
+  `cedarling.audit_fail_open` is `on`, the extension emits a structured
+  `WARNING` audit line regardless of `cedarling.log_level`. The audit
+  channel is gated solely by `cedarling.audit_fail_open` — `log_level`
+  controls routine diagnostics only and cannot silence the audit record
+  of a security-relevant fail-open decision.
 - **JWT validation lives in Cedarling.** Toggle it on with
   `CEDARLING_JWT_SIG_VALIDATION: enabled` in the bootstrap YAML; this
   extension does not implement its own JWT parser.
