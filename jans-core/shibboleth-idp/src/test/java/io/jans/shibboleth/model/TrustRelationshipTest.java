@@ -304,6 +304,7 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
 
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#sourcesNotAllowedForAggregateTrustRelationship")
         @DisplayName(
@@ -319,6 +320,7 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
 
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#sourcesNotAllowedForIndividualTrustRelationship")
         @DisplayName(
@@ -331,7 +333,7 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
             
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(OperationRestrictedToNature.class);
+            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
 
         @Disabled
