@@ -97,7 +97,14 @@ pub fn cedarling_use_policy(version: &str) -> bool {
     };
 
     authz_cache::global_cache().clear_all();
-    let _ = set_policy_version_guc(&resolved.version_guc_value);
+    if let Err(e) = set_policy_version_guc(&resolved.version_guc_value) {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Error,
+            &format!("cedarling_use_policy: failed to set cedarling.policy_version: {e}"),
+        );
+        let _ = engine::rollback_policy();
+        return false;
+    }
     let detail = json!({ "result": "ok", "cache_cleared": true });
     let _ = insert_policy_history("use", &resolved.version_guc_value, previous.as_deref(), &detail);
     let _ = trim_policy_history();
@@ -154,7 +161,14 @@ pub fn cedarling_rollback_policy() -> bool {
     };
 
     authz_cache::global_cache().clear_all();
-    let _ = set_policy_version_guc(&rolled_to);
+    if let Err(e) = set_policy_version_guc(&rolled_to) {
+        extension_log::log_diagnostic(
+            guc_config::CedarlingLogLevelGuc::Error,
+            &format!("cedarling_rollback_policy: failed to set cedarling.policy_version: {e}"),
+        );
+        let _ = engine::use_policy(&rolled_from);
+        return false;
+    }
     let detail = json!({
         "result": "ok",
         "rolled_back_from": rolled_from,
