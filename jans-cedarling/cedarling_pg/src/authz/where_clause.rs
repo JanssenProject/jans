@@ -60,8 +60,8 @@ use pgrx::prelude::*;
 use serde_json::json;
 
 use crate::engine;
-use crate::observability::log as extension_log;
 use crate::guc_config::CedarlingLogLevelGuc;
+use crate::observability::log as extension_log;
 use crate::resource;
 use crate::resource::schema_map::{self, EntityMapping};
 use crate::tokens::bundle as token_bundle;
@@ -109,6 +109,46 @@ pub(crate) fn quote_ident_safe(ident: &str) -> String {
 /// backslashes are literal and need no special handling.
 fn quote_literal_safe(value: &str) -> String {
     format!("'{}'", value.replace('\'', "''"))
+}
+
+/// Decode Cedar double-quoted string contents (`\\`, `\"`, `\n`, `\u{…}`, …).
+fn unescape_cedar_string_literal(inner: &str) -> Option<String> {
+    let mut out = String::with_capacity(inner.len());
+    let mut chars = inner.chars();
+    while let Some(c) = chars.next() {
+        if c != '\\' {
+            out.push(c);
+            continue;
+        }
+        let esc = chars.next()?;
+        match esc {
+            '"' => out.push('"'),
+            '\\' => out.push('\\'),
+            'n' => out.push('\n'),
+            'r' => out.push('\r'),
+            't' => out.push('\t'),
+            'u' => {
+                if chars.next()? != '{' {
+                    return None;
+                }
+                let mut hex = String::new();
+                loop {
+                    let digit = chars.next()?;
+                    if digit == '}' {
+                        break;
+                    }
+                    if !digit.is_ascii_hexdigit() {
+                        return None;
+                    }
+                    hex.push(digit);
+                }
+                let code = u32::from_str_radix(&hex, 16).ok()?;
+                out.push(char::from_u32(code)?);
+            },
+            _ => return None,
+        }
+    }
+    Some(out)
 }
 
 /// Returns true when `bytes[idx]` is a `"` not escaped by an odd-length
@@ -237,7 +277,8 @@ fn lower_scalar_literal(raw: &str) -> Option<String> {
     }
     if t.starts_with('"') && t.ends_with('"') && t.len() >= 2 {
         let inner = &t[1..t.len() - 1];
-        return Some(quote_literal_safe(inner));
+        let decoded = unescape_cedar_string_literal(inner)?;
+        return Some(quote_literal_safe(&decoded));
     }
     None
 }
@@ -664,7 +705,11 @@ mod tests {
 
     #[test]
     fn quote_ident_safe_doubles_internal_double_quotes() {
-        assert_eq!(quote_ident_safe("col"), "\"col\"", "simple ident should be quoted");
+        assert_eq!(
+            quote_ident_safe("col"),
+            "\"col\"",
+            "simple ident should be quoted"
+        );
         assert_eq!(
             quote_ident_safe("a\"b"),
             "\"a\"\"b\"",
@@ -673,8 +718,35 @@ mod tests {
     }
 
     #[test]
+    fn unescape_cedar_string_literal_decodes_backslash_sequences() {
+        assert_eq!(
+            unescape_cedar_string_literal(r"C:\\path"),
+            Some(r"C:\path".to_string()),
+            "Cedar \\\\ should become one backslash"
+        );
+        assert_eq!(
+            unescape_cedar_string_literal(r#"say \"hi\""#),
+            Some(r#"say "hi""#.to_string()),
+            "Cedar backslash-quote should become a quote"
+        );
+    }
+
+    #[test]
+    fn lower_scalar_literal_unescapes_cedar_strings_before_sql_quoting() {
+        assert_eq!(
+            lower_scalar_literal(r#""C:\\path""#),
+            Some(r"'C:\path'".to_string()),
+            "Cedar windows path should lower to matching SQL literal"
+        );
+    }
+
+    #[test]
     fn quote_literal_safe_doubles_internal_single_quotes() {
-        assert_eq!(quote_literal_safe("ab"), "'ab'", "simple literal should be quoted");
+        assert_eq!(
+            quote_literal_safe("ab"),
+            "'ab'",
+            "simple literal should be quoted"
+        );
         assert_eq!(
             quote_literal_safe("a'b"),
             "'a''b'",
@@ -696,8 +768,7 @@ mod tests {
 
     #[test]
     fn split_top_level_handles_escaped_backslash_then_quote() {
-        let expr =
-            r#"resource.note == "path\\\"segment" && resource.country == "US""#;
+        let expr = r#"resource.note == "path\\\"segment" && resource.country == "US""#;
         let parts = split_top_level(expr, "&&");
         assert_eq!(
             parts.len(),
@@ -708,13 +779,21 @@ mod tests {
 
     #[test]
     fn parse_resource_field_rejects_dotted_or_function_call_lhs() {
-        assert_eq!(parse_resource_field("resource.foo"), Some("foo".into()), "simple field");
+        assert_eq!(
+            parse_resource_field("resource.foo"),
+            Some("foo".into()),
+            "simple field"
+        );
         assert_eq!(
             parse_resource_field("resource.foo_bar1"),
             Some("foo_bar1".into()),
             "underscore field name"
         );
-        assert_eq!(parse_resource_field("resource."), None, "empty field suffix");
+        assert_eq!(
+            parse_resource_field("resource."),
+            None,
+            "empty field suffix"
+        );
         assert_eq!(
             parse_resource_field("resource.foo.bar"),
             None,
@@ -788,8 +867,14 @@ mod tests {
     fn lower_condition_handles_eq_lt_gt_in_and_boolean_chains() {
         let expr = r#"(resource.country == "US" && resource.age >= 18) || resource.tier in ["gold","platinum"]"#;
         let lowered = lower_condition(expr).expect("lowering should succeed");
-        assert!(lowered.contains("\"country\" = 'US'"), "country equality should lower");
-        assert!(lowered.contains("\"age\" >= 18"), "age comparison should lower");
+        assert!(
+            lowered.contains("\"country\" = 'US'"),
+            "country equality should lower"
+        );
+        assert!(
+            lowered.contains("\"age\" >= 18"),
+            "age comparison should lower"
+        );
         assert!(
             lowered.contains("\"tier\" IN ('gold', 'platinum')"),
             "IN list should lower"
@@ -837,9 +922,18 @@ mod tests {
                when { resource.tier >= 3 };"#,
         );
         let sql = lower_policy_to_sql(&m).expect("stacked when should lower");
-        assert!(sql.contains("\"country\" = 'US'"), "first when clause should appear");
-        assert!(sql.contains("\"tier\" >= 3"), "second when clause should appear");
-        assert!(sql.contains(" AND "), "stacked when clauses should AND together");
+        assert!(
+            sql.contains("\"country\" = 'US'"),
+            "first when clause should appear"
+        );
+        assert!(
+            sql.contains("\"tier\" >= 3"),
+            "second when clause should appear"
+        );
+        assert!(
+            sql.contains(" AND "),
+            "stacked when clauses should AND together"
+        );
     }
 
     #[test]
@@ -852,7 +946,11 @@ mod tests {
             PolicyEffect::Permit,
             "this is not a Cedar policy at all",
         );
-        assert_eq!(lower_policy_to_sql(&m), None, "unparseable policy source should not lower");
+        assert_eq!(
+            lower_policy_to_sql(&m),
+            None,
+            "unparseable policy source should not lower"
+        );
     }
 
     #[test]
@@ -912,7 +1010,10 @@ mod tests {
         match policies_to_sql_predicate(&policies, &table_mapping()) {
             SqlPredicate::Where(sql) => {
                 assert!(sql.contains("\"age\" >= 18"), "permit clause should appear");
-                assert!(sql.contains("\"country\" = 'CN'"), "forbid clause should appear");
+                assert!(
+                    sql.contains("\"country\" = 'CN'"),
+                    "forbid clause should appear"
+                );
                 assert!(sql.contains("NOT"), "forbid should wrap clause in NOT");
             },
             other => panic!("expected WHERE predicate combining permit and forbid, got {other:?}"),
