@@ -722,8 +722,13 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_unsigned_unhandled_predicate_returns_partial_true() {
-        crate::authz::pg_test_where::run_unsigned_unhandled_predicate_returns_partial_true();
+    fn test_unsigned_unhandled_predicate_returns_partial_deny() {
+        crate::authz::pg_test_where::run_unsigned_unhandled_predicate_returns_partial_deny();
+    }
+
+    #[pg_test]
+    fn test_unsigned_unhandled_predicate_returns_partial_permit() {
+        crate::authz::pg_test_where::run_unsigned_unhandled_predicate_returns_partial_permit();
     }
 
     #[pg_test]

@@ -226,12 +226,17 @@ pub fn run_unsigned_resource_predicate_lowers_to_sql() {
     let _ = fs::remove_dir_all(&work);
 }
 
-/// Method-call body (`resource.tags.contains(...)`) can't be lowered → `Partial` → `"TRUE"`.
-/// Row-by-row authorization remains authoritative; a WARN diagnostic names the unhandled policy.
-pub fn run_unsigned_unhandled_predicate_returns_partial_true() {
+/// Method-call body (`resource.tags.contains(...)`) can't be lowered → `Partial` → fail-closed.
+/// With the default `cedarling.where_partial_fallback = deny`, the function must surface
+/// `"FALSE"` so standalone callers (no per-row RLS) get safe behavior. A WARN diagnostic
+/// names the unhandled policy.
+pub fn run_unsigned_unhandled_predicate_returns_partial_deny() {
     let work = setup_engine_with_where_policies("unhandled");
     let table = "cedarling_pg_where_unhandled";
     create_probe_table_and_register_mapping(table);
+
+    Spi::run("RESET cedarling.where_partial_fallback")
+        .expect("RESET cedarling.where_partial_fallback");
 
     let pred = crate::authz::where_clause::cedarling_where(
         table,
@@ -239,8 +244,37 @@ pub fn run_unsigned_unhandled_predicate_returns_partial_true() {
         None,
     );
     assert_eq!(
+        pred, "FALSE",
+        "default fallback `deny` must surface a fail-closed Partial \"FALSE\" fragment"
+    );
+
+    drop_probe_table(table);
+    let _ = fs::remove_dir_all(&work);
+}
+
+/// Same scenario, but with `cedarling.where_partial_fallback = permit`: an unhandled
+/// residual must surface `"TRUE"`. This is the safe behavior **only** when paired with
+/// a row-by-row `cedarling_authorized*` RLS predicate.
+pub fn run_unsigned_unhandled_predicate_returns_partial_permit() {
+    let work = setup_engine_with_where_policies("unhandled_permit");
+    let table = "cedarling_pg_where_unhandled_permit";
+    create_probe_table_and_register_mapping(table);
+
+    Spi::run("SET cedarling.where_partial_fallback = 'permit'")
+        .expect("SET cedarling.where_partial_fallback = permit");
+
+    let pred = crate::authz::where_clause::cedarling_where(
+        table,
+        "Jans::Action::\"WhereUnhandled\"",
+        None,
+    );
+
+    Spi::run("RESET cedarling.where_partial_fallback")
+        .expect("RESET cedarling.where_partial_fallback");
+
+    assert_eq!(
         pred, "TRUE",
-        "unhandled (method-call) policy must surface a permissive Partial \"TRUE\" fragment"
+        "fallback `permit` must surface a permissive Partial \"TRUE\" fragment"
     );
 
     drop_probe_table(table);

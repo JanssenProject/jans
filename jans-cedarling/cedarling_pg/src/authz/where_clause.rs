@@ -29,10 +29,12 @@
 //! of structural shapes (`resource.<col> {==,!=,<,<=,>,>=} <literal>`,
 //! `resource.<col> in [<literal>, …]`, with `&&` / `||` / `(…)` composition);
 //! (d) any policy that doesn't fit those shapes is reported as an
-//! **unhandled residual** so RLS row-by-row authorization remains
-//! authoritative. Returning a too-permissive `TRUE` SQL fragment is the only
-//! way the optimizer can keep callers safe — never invent a SQL predicate
-//! the matched Cedar policy didn't actually express.
+//! **unhandled residual**. The SQL fragment returned for that residual is
+//! chosen by `cedarling.where_partial_fallback`: `deny` (default) → `"FALSE"`
+//! is safe for standalone callers; `permit` → `"TRUE"` is only safe when
+//! paired with a row-by-row `cedarling_authorized*` predicate that re-checks
+//! every row. Never invent a SQL predicate the matched Cedar policy didn't
+//! actually express.
 //!
 //! # Linking constraint (read before adding tests)
 //!
@@ -60,7 +62,7 @@ use pgrx::prelude::*;
 use serde_json::json;
 
 use crate::engine;
-use crate::guc_config::CedarlingLogLevelGuc;
+use crate::guc_config::{self, CedarlingLogLevelGuc, CedarlingWherePartialFallback};
 use crate::observability::log as extension_log;
 use crate::resource;
 use crate::resource::schema_map::{self, EntityMapping};
@@ -600,9 +602,12 @@ fn matching_policies_for_table(
 ///
 /// On invalid inputs, table-resolution failures, missing entity-mapping, or
 /// engine errors the function returns `"FALSE"` (fail-closed). When at least
-/// one matched policy cannot be safely lowered to SQL it returns `"TRUE"`
-/// and emits a `WARN`-level diagnostic listing the unhandled policy ids, so
-/// callers know row-by-row authorization remains authoritative.
+/// one matched policy cannot be safely lowered to SQL the function emits a
+/// `WARN`-level diagnostic listing the unhandled policy ids and returns a
+/// fragment chosen by `cedarling.where_partial_fallback`:
+///   - `deny` (default) → `"FALSE"` — safe for standalone use.
+///   - `permit` → `"TRUE"` — safe **only** when paired with a row-by-row
+///     `cedarling_authorized*` predicate that still enforces every row.
 #[pg_extern(stable, parallel_restricted)]
 pub fn cedarling_where(table_name: &str, action: &str, tokens: Option<&str>) -> String {
     if !has_valid_table_and_action_inputs(table_name, action) {
@@ -638,17 +643,22 @@ pub fn cedarling_where(table_name: &str, action: &str, tokens: Option<&str>) -> 
         SqlPredicate::AlwaysFalse => "FALSE".to_string(),
         SqlPredicate::Where(sql) => sql,
         SqlPredicate::Partial {
-            fragment,
+            fragment: _,
             unhandled_policy_ids,
         } => {
+            let chosen = match guc_config::where_partial_fallback() {
+                CedarlingWherePartialFallback::Permit => "TRUE",
+                CedarlingWherePartialFallback::Deny => "FALSE",
+            };
             extension_log::log_diagnostic(
                 CedarlingLogLevelGuc::Warn,
                 &format!(
-                    "cedarling_where: partial predicate lowering; unhandled policy ids: {}",
+                    "cedarling_where: partial predicate lowering returning '{chosen}'; \
+                     unhandled policy ids: {}",
                     unhandled_policy_ids.join(", ")
                 ),
             );
-            fragment
+            chosen.to_string()
         },
     }
 }

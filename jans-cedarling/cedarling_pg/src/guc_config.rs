@@ -73,6 +73,20 @@ pub enum CedarlingDiffMode {
     Lines,
 }
 
+/// Fallback `cedarling_where` returns when at least one matched policy could not be
+/// lowered to a SQL predicate.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, PostgresGucEnum)]
+pub enum CedarlingWherePartialFallback {
+    /// Return `'TRUE'`. Safe **only** when paired with row-by-row
+    /// `cedarling_authorized*` predicates (the documented RLS pattern).
+    #[name = c"permit"]
+    Permit,
+    /// Return `'FALSE'` (fail-closed). Safe default for callers that use
+    /// `cedarling_where` standalone (no per-row RLS).
+    #[name = c"deny"]
+    Deny,
+}
+
 static MODE: GucSetting<CedarlingMode> =
     GucSetting::<CedarlingMode>::new(CedarlingMode::Enforcement);
 static FAIL_MODE: GucSetting<CedarlingFailMode> =
@@ -92,6 +106,8 @@ static TRACE_BUFFER_SIZE: GucSetting<i32> = GucSetting::<i32>::new(1024);
 static POLICY_HISTORY_SIZE: GucSetting<i32> = GucSetting::<i32>::new(16);
 static DIFF_MODE: GucSetting<CedarlingDiffMode> =
     GucSetting::<CedarlingDiffMode>::new(CedarlingDiffMode::Structural);
+static WHERE_PARTIAL_FALLBACK: GucSetting<CedarlingWherePartialFallback> =
+    GucSetting::<CedarlingWherePartialFallback>::new(CedarlingWherePartialFallback::Deny);
 static SCHEMA_VALIDATE_STRICT: GucSetting<bool> = GucSetting::<bool>::new(true);
 static MASK_HASH_SALT: GucSetting<Option<CString>> = GucSetting::<Option<CString>>::new(None);
 
@@ -210,6 +226,12 @@ pub fn diff_mode() -> CedarlingDiffMode {
     DIFF_MODE.get()
 }
 
+/// Current `cedarling.where_partial_fallback` (`permit` or `deny`).
+#[must_use]
+pub fn where_partial_fallback() -> CedarlingWherePartialFallback {
+    WHERE_PARTIAL_FALLBACK.get()
+}
+
 /// Current `cedarling.schema_validate_strict`.
 #[must_use]
 pub fn schema_validate_strict() -> bool {
@@ -316,6 +338,15 @@ fn register_enum_gucs() {
         c"Algorithm used by cedarling_diff_policies.",
         c"structural: per-policy-id diff via cedar_policy::PolicySet (default). lines: legacy line-oriented text diff.",
         &DIFF_MODE,
+        GucContext::Userset,
+        GucFlags::empty(),
+    );
+
+    GucRegistry::define_enum_guc(
+        c"cedarling.where_partial_fallback",
+        c"Fragment cedarling_where returns when at least one matched policy cannot be lowered to SQL.",
+        c"deny (default): return 'FALSE' (fail-closed). permit: return 'TRUE' (safe only when paired with row-by-row cedarling_authorized* RLS).",
+        &WHERE_PARTIAL_FALLBACK,
         GucContext::Userset,
         GucFlags::empty(),
     );

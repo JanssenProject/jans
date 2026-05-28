@@ -262,7 +262,7 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | `cedarling_authorized_row_jwt(record anyelement, action text) → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. `action` must not be SQL `NULL`. |
 | `cedarling_build_resource_row(record anyelement) → text` | Materializes a composite row into the canonical Cedar `EntityData` JSON string that `cedarling_authorized_row` would use — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
 | `cedarling_build_resource(resource jsonb, entity_type text, entity_id text) → text` | Builds `EntityData` JSON from an existing JSONB document; optional `entity_type` / `entity_id` override or inject `cedar_entity_mapping`. Same abort-on-error semantics as the row variant. |
-| `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. Falls back to `'TRUE'` (with a `WARN` listing unhandled policy ids) when a policy can't be lowered, and to `'FALSE'` on parse/engine errors. |
+| `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. On parse/engine errors returns `'FALSE'`. When at least one matched policy can't be lowered, returns the fragment chosen by `cedarling.where_partial_fallback` (default `'deny'` → `'FALSE'`; set to `'permit'` for the legacy `'TRUE'` behavior, safe only when paired with row-by-row RLS). Always emits a `WARN` listing the unhandled policy ids. |
 
 ### Tokens (session / transaction scoped)
 
@@ -336,6 +336,7 @@ or cluster-wide (`ALTER SYSTEM SET ...; SELECT pg_reload_conf();`).
 | `cedarling.trace_buffer_size` | int | `1024` | Ring-buffer capacity for `cedarling_recent_traces` (range `0..=65536`); runtime `SET` changes apply immediately in the current backend. |
 | `cedarling.policy_history_size` | int | `16` | Maximum rows retained in `cedarling.policy_history`. |
 | `cedarling.diff_mode` | enum | `structural` | `structural` (per-policy-id diff, default) or `lines` (legacy line diff). |
+| `cedarling.where_partial_fallback` | enum | `deny` | Fragment `cedarling_where` returns when at least one matched policy can't be lowered. `deny` (default) → `'FALSE'`, safe for standalone use. `permit` → `'TRUE'`, safe only when paired with row-by-row RLS. |
 | `cedarling.schema_validate_strict` | bool | `on` | When `on`, `cedarling_validate_schema` uses the real Cedar parser; `off` falls back to lexical identifier extraction. |
 | `cedarling.mask_hash_salt` | text (superuser) | — | Salt used by `MaskType::Hash`. When unset, `hash` masks return a sentinel and emit one warning. Superuser-only like `bootstrap_config` and `policy_version`. |
 
@@ -416,9 +417,17 @@ SELECT count(*)
 ```
 
 `cedarling_where` lowers matching Cedar policies into SQL where it can
-(equalities, comparisons, boolean combinations over `resource.<col>`) and
-falls back to `'TRUE'` with a warning when a policy isn't representable.
-Policies that cannot be lowered safely still rely on per-row RLS evaluation.
+(equalities, comparisons, boolean combinations over `resource.<col>`). When
+at least one matched policy isn't representable, the function emits a
+`WARN` listing the unhandled policy ids and returns the fragment chosen by
+`cedarling.where_partial_fallback`:
+
+- **`deny` (default)** → `'FALSE'`. Safe for standalone callers that do not
+  pair `cedarling_where` with a per-row authorization predicate.
+- **`permit`** → `'TRUE'`. Use only when the query also has a row-by-row
+  `cedarling_authorized*` predicate (or RLS using one) so every row is
+  still evaluated by Cedarling — otherwise unhandled policies become a
+  silent fail-open.
 
 ### Mask instead of filter
 
