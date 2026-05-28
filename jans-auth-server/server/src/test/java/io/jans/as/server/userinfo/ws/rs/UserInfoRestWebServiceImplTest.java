@@ -134,7 +134,7 @@ public class UserInfoRestWebServiceImplTest {
     }
 
     @Test
-    public void createJwtClaims_whenStatusListEnabled_shouldReturnClaimsWithIssuer() throws Exception {
+    public void createJwtClaims_whenStatusListDisabled_shouldReturnClaimsWithIssuer() throws Exception {
         when(errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)).thenReturn(false);
 
         JwtClaims claims = invokeCreateJwtClaims();
