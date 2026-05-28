@@ -104,6 +104,23 @@ resolve_pg_config_for_source() {
     echo "${pgrx_config}"
 }
 
+# Match psql to pg_config: same bin dir when pg_config is a path; else PATH psql.
+resolve_psql_for_source() {
+    local pg_config="${1}"
+
+    if [[ -n "${PSQL:-}" ]]; then
+        echo "${PSQL}"
+        return 0
+    fi
+
+    if [[ "${pg_config}" == */* ]]; then
+        echo "$(dirname "${pg_config}")/psql"
+        return 0
+    fi
+
+    command -v psql 2>/dev/null || echo "psql"
+}
+
 install_file() {
     local src="${1}" dst="${2}"
     if [[ -w "$(dirname "${dst}")" ]]; then
@@ -249,7 +266,8 @@ cmd_source() {
         warn "PG_VERSION=${pg_version} but ${pg_config} reports PostgreSQL ${pg_config_major}; continuing because PG_CONFIG/PATH was explicit"
     fi
 
-    local psql_bin="${PSQL:-$(dirname "${pg_config}")/psql}"
+    local psql_bin
+    psql_bin="$(resolve_psql_for_source "${pg_config}")"
     log "Building and installing ${EXT_NAME} from source (${pg_version}${release_flag:+, release})"
     log "Using pg_config: ${pg_config}"
     cd "${EXT_DIR}"
