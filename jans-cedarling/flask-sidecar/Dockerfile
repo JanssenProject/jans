@@ -23,7 +23,7 @@ RUN find /opt/venv -name "__pycache__" -type d -exec rm -rf {} + && \
     find /opt/venv -name "*.pyo" -delete
 
 ### Stage 2: Final runtime
-FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
+FROM python:3.14.5-slim-trixie@sha256:c845af9399020c7e562969a13689e929074a10fd057acd1b1fad06a2fb068e97
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
