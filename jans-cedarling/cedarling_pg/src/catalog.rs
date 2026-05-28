@@ -14,7 +14,8 @@ use pgrx::extension_sql;
 // rustc's `unused_imports` check doesn't follow into the macro expansion.
 #[allow(unused_imports)]
 use crate::policy::versions::{
-    cedarling_register_policy_version, cedarling_rollback_policy, cedarling_use_policy,
+    cedarling_diff_policies, cedarling_register_policy_version, cedarling_rollback_policy,
+    cedarling_use_policy,
 };
 
 extension_sql!(
@@ -88,11 +89,13 @@ extension_sql!(
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_diff_policies(text, text) FROM PUBLIC;
 ",
     name = "cedarling_pg_policy_function_privileges",
     requires = [
         cedarling_use_policy,
         cedarling_register_policy_version,
-        cedarling_rollback_policy
+        cedarling_rollback_policy,
+        cedarling_diff_policies,
     ],
 );
