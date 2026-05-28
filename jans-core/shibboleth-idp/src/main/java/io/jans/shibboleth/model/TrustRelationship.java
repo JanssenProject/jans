@@ -109,7 +109,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> updateDescription(Description newDescription) {
 
         return from(this)
-            .withDescription(newDescription == null ? Description.of("") : newDescription)
+            .withDescription(newDescription)
             .build();
     }
 
@@ -147,11 +147,6 @@ public class TrustRelationship {
 
     public TrustResult<TrustRelationship> updateMetadataSource(MetadataSource source) {
 
-        if ( source == null ) {
-
-            return TrustResult.failure(CannotBeNullOrBlank.forField("source"));
-        }
-        
         return from(this)
             .withMetadataSource(source)
             .build();
@@ -358,7 +353,7 @@ public class TrustRelationship {
 
         public Builder withDescription(Description description) {
 
-            this.description = description;
+            this.description = description != null ? description : Description.of("");
             return this;
         }
 

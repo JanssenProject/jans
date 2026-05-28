@@ -290,12 +290,13 @@ public class TrustRelationshipTest {
     @DisplayName("Metadata Source Update Tests")
     public class MetadataSourceUpdateTests {
 
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(
             "GIVEN an existing TrustRelationship  " +
             "WHEN updateMetadataSource(null) is called " +
-            "THEN the operation fails with missing metadata source error")
+            "THEN the operation fails with trustrelationshipupdatefailed message")
         public void shouldRejectNullMetadataSource(TrustRelationship tr) {
 
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(null);
