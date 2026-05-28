@@ -1,3 +1,21 @@
+/*
+Lock Ordering (CRITICAL):
+
+1. globalInstanceMu (R/W) -> CedarPlugin.mtx (R/W)
+   - Always acquire globalInstanceMu BEFORE CedarPlugin.mtx
+   - Never hold CedarPlugin.mtx while trying to acquire globalInstanceMu
+
+2. CedarPlugin.mtx protects:
+   - p.cedar (*cedarling_go.Cedarling)
+   - p.config (Config)
+
+3. globalInstanceMu protects:
+   - globalInstance (*CedarPlugin)
+
+WithCedarlingInstance follows this order:
+   globalInstanceMu.RLock() -> get p -> globalInstanceMu.RUnlock() → p.mtx.RLock()
+*/
+
 package cedarlingopa
 
 import (
@@ -47,19 +65,19 @@ func clearGlobalInstance(p *CedarPlugin) {
 	}
 }
 
-func GetCedarlingInstance() (*cedarling_go.Cedarling, func()) {
+func WithCedarlingInstance(fn func(*cedarling_go.Cedarling) error) error {
 	globalInstanceMu.RLock()
 	p := globalInstance
 	globalInstanceMu.RUnlock()
 	if p == nil {
-		return nil, func() {}
+		return errors.New("Cedarling plugin not initialized")
 	}
 	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 	if p.cedar == nil {
-		p.mtx.RUnlock()
-		return nil, func() {}
+		return errors.New("Cedarling instance not ready")
 	}
-	return p.cedar, p.mtx.RUnlock
+	return fn(p.cedar)
 }
 
 func logMessage(stderr bool, msg string) {

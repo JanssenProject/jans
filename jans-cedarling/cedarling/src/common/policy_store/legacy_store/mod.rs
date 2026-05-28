@@ -57,8 +57,6 @@ pub(crate) struct LegacyTokenEntityMetadata {
     #[serde(default = "default_trusted")]
     pub(crate) trusted: bool,
     pub(crate) entity_type_name: String,
-    #[serde(default)]
-    pub(crate) principal_mapping: HashSet<String>,
     #[serde(default = "default_token_id")]
     pub(crate) token_id: String,
     #[serde(default)]
@@ -78,7 +76,6 @@ impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
         super::TokenEntityMetadata::builder()
             .trusted(v.trusted)
             .entity_type_name(v.entity_type_name)
-            .principal_mapping(v.principal_mapping)
             .token_id(v.token_id)
             .required_claims(v.required_claims)
             .build()

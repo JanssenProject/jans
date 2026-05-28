@@ -12,25 +12,13 @@
           "openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
           "token_metadata": {
             "access_token": {
-              "entity_type_name": "Jans::Access_token",
-              "workload_id": "client_id",
-              "principal_mapping": [
-                "Jans::Workload"
-              ]
+              "entity_type_name": "Jans::Access_token"
             },
             "id_token": {
-              "entity_type_name": "Jans::Id_token",
-              "user_id": "sub",
-              "principal_mapping": [
-                "Jans::User"
-              ]
+              "entity_type_name": "Jans::Id_token"
             },
             "userinfo_token": {
-              "entity_type_name": "Jans::Userinfo_token",
-              "user_id": "sub",
-              "principal_mapping": [
-                "Jans::User"
-              ]
+              "entity_type_name": "Jans::Userinfo_token"
             }
           }
         }
@@ -46,7 +34,6 @@
           }
         },
         "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-          "cedar_version": "v4.0.0",
           "description": "simple policy example for principal user",
           "creation_date": "2024-09-20T17:22:39.996050",
           "policy_content": {
@@ -56,7 +43,6 @@
           }
         },
         "TestPrincipal1": {
-          "cedar_version": "v4.0.0",
           "description": "simple policy example for TestPrincipal1",
           "creation_date": "2024-09-20T17:22:39.996050",
           "policy_content": {
@@ -66,7 +52,6 @@
           }
         },
         "TestPrincipal2": {
-          "cedar_version": "v4.0.0",
           "description": "simple policy example for TestPrincipal2",
           "creation_date": "2024-09-20T17:22:39.996050",
           "policy_content": {

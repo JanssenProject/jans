@@ -130,7 +130,7 @@ default allow := false
 result := cedarling.opa.authorize_multi_issuer(input)
 
 allow if {
-	result.decision == true
+        result.decision == true
 }
 
 deny_reasons := result.reasons
@@ -224,7 +224,7 @@ default allow := false
 result := cedarling.opa.authorize_multi_issuer(input)
 
 allow if {
-	result.decision == true
+        result.decision == true
 }
 
 deny_reasons := result.reasons
@@ -301,6 +301,13 @@ And we get a response:
   }
 }
 ```
+
+## Use Cases
+
+The following examples show end-to-end uses of the Cedarling-OPA plugin with realistic authorization models:
+
+- [Gating Terraform with Cedarling-OPA](./terraform-authz.md) — role-based control over `terraform plan / apply / destroy` across dev, staging, and production workspaces, enforced by a shell wrapper before any cloud change is made.
+- [Terraform Authorization with GitHub Actions OIDC JWTs](./terraform-authz-jwt.md) — CI/CD-first variant using `authorize_multi_issuer`; Cedarling validates GitHub OIDC tokens and evaluates Cedar policies that check JWT claims (`repository`, `ref`, `environment`) to gate Terraform operations with no service-account secrets.
 
 ## Docker
 A Dockerfile is provided to allow building a docker image embedded with the bootstrap configuration and rego files. To build and run this image:

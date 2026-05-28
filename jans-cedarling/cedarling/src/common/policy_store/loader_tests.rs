@@ -729,14 +729,11 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
             "token_metadata": {
                 "access_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::access_token",
-                    "user_id": "sub",
-                    "role_mapping": "role"
+                    "entity_type_name": "Jans::access_token"
                 },
                 "id_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::id_token",
-                    "user_id": "sub"
+                    "entity_type_name": "Jans::id_token"
                 }
             }
         }"#,
@@ -753,8 +750,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
             "token_metadata": {
                 "id_token": {
                     "trusted": false,
-                    "entity_type_name": "Google::id_token",
-                    "user_id": "email"
+                    "entity_type_name": "Google::id_token"
                 }
             }
         }"#,
@@ -824,20 +820,16 @@ fn test_parse_issuer_with_token_metadata() {
                 "access_token": {
                     "trusted": true,
                     "entity_type_name": "App::access_token",
-                    "user_id": "sub",
-                    "role_mapping": "role",
                     "token_id": "jti"
                 },
                 "id_token": {
                     "trusted": true,
                     "entity_type_name": "App::id_token",
-                    "user_id": "sub",
                     "token_id": "jti"
                 },
                 "userinfo_token": {
                     "trusted": true,
-                    "entity_type_name": "App::userinfo_token",
-                    "user_id": "sub"
+                    "entity_type_name": "App::userinfo_token"
                 }
             }
         }"#,
@@ -1073,8 +1065,7 @@ fn test_complete_policy_store_with_issuers() {
             "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
             "token_metadata": {
                 "access_token": {
-                    "entity_type_name": "Jans::access_token",
-                    "user_id": "sub"
+                    "entity_type_name": "Jans::access_token"
                 }
             }
         }"#,

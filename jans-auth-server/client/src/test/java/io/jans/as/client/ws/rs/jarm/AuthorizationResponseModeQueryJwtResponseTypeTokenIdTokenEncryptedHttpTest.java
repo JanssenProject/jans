@@ -10,7 +10,7 @@ import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
-import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -224,8 +224,8 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
-                null, KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM);
+        RegisterResponse registerResponse = registerClientWithJwks(redirectUris, responseTypes, sectorIdentifierUri, SignatureAlgorithm.RS256,
+                KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM);
 
         String clientId = registerResponse.getClientId();
         sharedKey = registerResponse.getClientSecret();
@@ -272,8 +272,8 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
-                null, KeyEncryptionAlgorithm.A256KW, BlockEncryptionAlgorithm.A256GCM);
+        RegisterResponse registerResponse = registerClientWithJwks(redirectUris, responseTypes, sectorIdentifierUri, SignatureAlgorithm.RS256,
+                KeyEncryptionAlgorithm.A256KW, BlockEncryptionAlgorithm.A256GCM);
 
         String clientId = registerResponse.getClientId();
         sharedKey = registerResponse.getClientSecret();
@@ -330,6 +330,7 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -359,17 +360,17 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         authorizationRequest.setResponseMode(ResponseMode.QUERY_JWT);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
+                serverKeyId,
+                jwks,
+                TestCryptoContext.getInstance().getCryptoProvider(),
+                Lists.newArrayList(),
+                Lists.newArrayList());
         authorizationRequest.setRequest(authJwt);
 
         authorizationRequest(authorizationRequest, ResponseMode.QUERY_JWT, userId, userSecret);
@@ -396,6 +397,7 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -425,17 +427,17 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         authorizationRequest.setResponseMode(ResponseMode.QUERY_JWT);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA1_5,
+                BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
+                serverKeyId,
+                jwks,
+                TestCryptoContext.getInstance().getCryptoProvider(),
+                Lists.newArrayList(),
+                Lists.newArrayList());
         authorizationRequest.setRequest(authJwt);
 
         authorizationRequest(authorizationRequest, ResponseMode.QUERY_JWT, userId, userSecret);
@@ -462,6 +464,7 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -491,17 +494,17 @@ public class AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedH
         authorizationRequest.setResponseMode(ResponseMode.QUERY_JWT);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(serverKeyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
+        String authJwt = TestCryptoContext.createJweWithNestedJwsAndRsaEncryption(
+                authorizationRequest,
+                SignatureAlgorithm.RS256,
+                cryptoContext.getKeyId(Algorithm.RS256),
+                KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM,
+                serverKeyId,
+                jwks,
+                TestCryptoContext.getInstance().getCryptoProvider(),
+                Lists.newArrayList(),
+                Lists.newArrayList());
         authorizationRequest.setRequest(authJwt);
 
         authorizationRequest(authorizationRequest, ResponseMode.QUERY_JWT, userId, userSecret);

@@ -6,26 +6,6 @@
 
 package io.jans.as.server.comp.db;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Properties;
-
-import org.jboss.weld.junit5.ExplicitParamInjection;
-import org.jboss.weld.junit5.auto.AddBeanClasses;
-import org.jboss.weld.junit5.auto.EnableAutoWeld;
-import org.jboss.weld.junit5.auto.WeldJunit5AutoExtension;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.model.user.authenticator.UserAuthenticator;
@@ -44,6 +24,23 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+import org.jboss.weld.junit5.ExplicitParamInjection;
+import org.jboss.weld.junit5.auto.AddBeanClasses;
+import org.jboss.weld.junit5.auto.EnableAutoWeld;
+import org.jboss.weld.junit5.auto.WeldJunit5AutoExtension;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Yuriy Movchan Date: 18/11/2024
@@ -55,8 +52,7 @@ import jakarta.inject.Inject;
 @AddBeanClasses(io.jans.service.util.Resources.class)
 
 @AddBeanClasses(value = { io.jans.orm.service.PersistanceFactoryService.class,
-		io.jans.orm.ldap.impl.LdapEntryManagerFactory.class, io.jans.orm.sql.impl.SqlEntryManagerFactory.class,
-		io.jans.orm.couchbase.impl.CouchbaseEntryManagerFactory.class, io.jans.orm.cloud.spanner.impl.SpannerEntryManagerFactory.class})
+		io.jans.orm.ldap.impl.LdapEntryManagerFactory.class, io.jans.orm.sql.impl.SqlEntryManagerFactory.class})
 
 @ExplicitParamInjection
 public class UserServiceTest {

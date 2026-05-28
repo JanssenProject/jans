@@ -1,0 +1,12 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache bash curl jq
+
+WORKDIR /demo
+COPY tf_authz.sh .
+COPY demo-runner.sh .
+RUN chmod +x tf_authz.sh demo-runner.sh
+
+ENV TERRAFORM_BIN=echo
+
+CMD ["/demo/demo-runner.sh"]

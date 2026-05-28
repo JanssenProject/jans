@@ -290,14 +290,11 @@ mod tests {
             "token_metadata": {
                 "access_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::access_token",
-                    "user_id": "sub",
-                    "role_mapping": "role"
+                    "entity_type_name": "Jans::access_token"
                 },
                 "id_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::id_token",
-                    "user_id": "sub"
+                    "entity_type_name": "Jans::id_token"
                 }
             }
         }"#;

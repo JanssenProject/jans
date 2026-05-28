@@ -79,7 +79,6 @@ Before performing authorization, you need to configure a Cedarling instance. Con
 ```c
 const char* config = "{"
     "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
-    "\"CEDARLING_POLICY_STORE_ID\": \"your-policy-store-id\","
     "\"CEDARLING_LOG_LEVEL\": \"INFO\","
     "\"CEDARLING_LOG_TYPE\": \"std_out\","
     "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"/path/to/policy-store.yaml\""
@@ -91,7 +90,6 @@ const char* config = "{"
 | Property | Description |
 |----------|-------------|
 | `CEDARLING_APPLICATION_NAME` | Name of your application |
-| `CEDARLING_POLICY_STORE_ID` | ID of the policy store |
 | `CEDARLING_LOG_LEVEL` | Logging level (DEBUG, INFO, WARN, ERROR) |
 | `CEDARLING_LOG_TYPE` | Log output type (std_out, memory, off) |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` | Path to local policy store file |
@@ -120,7 +118,6 @@ int main() {
     // Configuration JSON
     const char* config = "{"
         "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
-        "\"CEDARLING_POLICY_STORE_ID\": \"example-policy-store\","
         "\"CEDARLING_LOG_LEVEL\": \"INFO\","
         "\"CEDARLING_LOG_TYPE\": \"std_out\","
         "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"./policy-store.yaml\""
@@ -462,7 +459,6 @@ int main() {
     // Configuration
     const char* config = "{"
         "\"CEDARLING_APPLICATION_NAME\": \"ExampleApp\","
-        "\"CEDARLING_POLICY_STORE_ID\": \"example-store\","
         "\"CEDARLING_LOG_LEVEL\": \"DEBUG\","
         "\"CEDARLING_LOG_TYPE\": \"memory\","
         "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"./policy-store.yaml\""

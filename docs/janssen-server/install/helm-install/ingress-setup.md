@@ -7,9 +7,9 @@ tags:
   - gateway-api
 ---
 
-# Ingress & Traffic Management
+# External Access & Traffic Management
 
-This guide covers configuring ingress for your Janssen deployment. Choose between the modern Gateway API (recommended) or the legacy Kubernetes Ingress.
+This guide explains how to expose and route external traffic to your Janssen deployment, using either the modern Gateway API (recommended) or the legacy Ingress API.
 
 ## Networking Architecture Selection: Gateway API vs. Ingress
 

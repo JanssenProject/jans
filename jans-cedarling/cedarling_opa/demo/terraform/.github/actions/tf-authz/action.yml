@@ -1,0 +1,160 @@
+# action.yml — Reusable composite action for Cedarling-OPA Terraform authorization
+#
+# Drop this action into any existing workflow with a `uses:` step to add a
+# Cedar authorization check before Terraform runs.  The action queries the
+# Cedarling-OPA server and exits non-zero (blocking the job) when the Cedar
+# policies deny the requested operation.
+#
+# Inputs mirror the environment variables consumed by tf_authz.sh so that the
+# two integration paths (direct script, composite action) stay in sync.
+
+name: 'Terraform Cedar Authorization'
+description: >
+  Authorize a Terraform subcommand against a Cedarling-OPA server.
+  Fails the step — and therefore the job — when Cedar policies deny access.
+
+inputs:
+  tf_user_id:
+    description: >
+      Identity of the operator or CI service account evaluated by Cedar
+      (e.g. "alice" or "ci-bot").
+    required: true
+
+  tf_user_roles:
+    description: >
+      Comma-separated Cedar role names that describe the caller's permissions
+      (e.g. "Developer", "Ops", or "Admin").  Must match roles defined in the
+      policy store.
+    required: true
+
+  tf_workspace:
+    description: >
+      Target Terraform workspace name evaluated as the Cedar resource
+      (e.g. "dev", "staging", or "production").
+    required: true
+
+  opa_url:
+    description: >
+      Base URL of the running opa-cedarling server.
+    required: false
+    default: 'http://localhost:8181'
+
+  tf_subcommand:
+    description: >
+      Terraform subcommand to authorize.  Only "plan", "apply", and "destroy"
+      trigger an authorization check; any other value is passed through without
+      a check (mirroring tf_authz.sh behaviour).
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check Terraform authorization via Cedarling-OPA
+      shell: bash
+      env:
+        TF_USER_ID:    ${{ inputs.tf_user_id }}
+        TF_USER_ROLES: ${{ inputs.tf_user_roles }}
+        TF_WORKSPACE:  ${{ inputs.tf_workspace }}
+        OPA_URL:       ${{ inputs.opa_url }}
+        TF_SUBCOMMAND: ${{ inputs.tf_subcommand }}
+      run: |
+        set -euo pipefail
+
+        # ── Map terraform sub-command → Cedar action ────────────────────────
+        case "${TF_SUBCOMMAND}" in
+            plan)    CEDAR_ACTION="Plan"    ;;
+            apply)   CEDAR_ACTION="Apply"   ;;
+            destroy) CEDAR_ACTION="Destroy" ;;
+            *)
+                echo "tf-authz: subcommand '${TF_SUBCOMMAND}' does not require authorization — skipping."
+                exit 0
+                ;;
+        esac
+
+        # ── Verify dependencies ─────────────────────────────────────────────
+        for cmd in curl jq; do
+            if ! command -v "${cmd}" &>/dev/null; then
+                echo "tf-authz: ERROR — '${cmd}' is required but not installed." >&2
+                exit 1
+            fi
+        done
+
+        # ── Build the OPA query payload ─────────────────────────────────────
+        CURRENT_TIME=$(date +%s)
+
+        ROLES_JSON=$(echo "${TF_USER_ROLES}" | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+            | jq -R . | jq -s .)
+
+        PAYLOAD=$(jq -n \
+            --arg user_id   "${TF_USER_ID}" \
+            --arg workspace "${TF_WORKSPACE}" \
+            --arg action    "Infra::Action::\"${CEDAR_ACTION}\"" \
+            --argjson roles    "${ROLES_JSON}" \
+            --argjson cur_time "${CURRENT_TIME}" \
+            '{
+                input: {
+                    principal: {
+                        cedar_entity_mapping: {
+                            entity_type: "Infra::User",
+                            id: $user_id
+                        },
+                        sub:  $user_id,
+                        role: $roles
+                    },
+                    action: $action,
+                    resource: {
+                        cedar_entity_mapping: {
+                            entity_type: "Infra::TerraformWorkspace",
+                            id: $workspace
+                        }
+                    },
+                    context: {
+                        current_time: $cur_time
+                    }
+                }
+            }')
+
+        # ── Display authorization context ───────────────────────────────────
+        echo "tf-authz: checking authorization..."
+        echo "  User:      ${TF_USER_ID} (roles: ${TF_USER_ROLES})"
+        echo "  Action:    terraform ${TF_SUBCOMMAND}  →  Infra::Action::\"${CEDAR_ACTION}\""
+        echo "  Workspace: ${TF_WORKSPACE}  →  Infra::TerraformWorkspace::\"${TF_WORKSPACE}\""
+        echo ""
+
+        # ── Query the Cedarling-OPA server ──────────────────────────────────
+        RESPONSE=$(curl -sf -X POST "${OPA_URL}/v1/data/infra/terraform" \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}") || {
+            echo "tf-authz: ERROR — could not reach OPA server at ${OPA_URL}" >&2
+            echo "          Make sure opa-cedarling is running (see README.md)." >&2
+            exit 1
+        }
+
+        DECISION=$(echo "${RESPONSE}" | jq -r '.result.allow // false')
+
+        # ── Enforce the decision ────────────────────────────────────────────
+        if [ "${DECISION}" = "true" ]; then
+            MATCHING_POLICIES=$(echo "${RESPONSE}" | \
+                jq -r '.result.result.reasons // [] | join(", ")')
+            echo "tf-authz: ALLOWED"
+            if [ -n "${MATCHING_POLICIES}" ]; then
+                echo "  Granted by Cedar policy: ${MATCHING_POLICIES}"
+            fi
+        else
+            echo "tf-authz: DENIED" >&2
+            echo "" >&2
+            echo "  ${TF_USER_ID} is not permitted to run 'terraform ${TF_SUBCOMMAND}'" >&2
+            echo "  on workspace '${TF_WORKSPACE}'." >&2
+            echo "" >&2
+            echo "  No Cedar policy allows this operation." >&2
+
+            CEDAR_ERRORS=$(echo "${RESPONSE}" | \
+                jq -r '.result.result.errors // [] | join(", ")')
+            if [ -n "${CEDAR_ERRORS}" ]; then
+                echo "" >&2
+                echo "  Cedarling evaluation errors: ${CEDAR_ERRORS}" >&2
+            fi
+
+            exit 1
+        fi

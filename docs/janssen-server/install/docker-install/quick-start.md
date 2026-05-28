@@ -35,7 +35,12 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-vers
 chmod u+x start_janssen_aio_demo.sh
 ```
 
-Next, execute the script. You will need to provide your fully qualified domain name (FQDN), the persistence type (`MYSQL` or `PGSQL`), the Janssen version (leave empty `""` for the default), and your Virtual Machine's IP address in place of `<VM_IP>`.
+Next, execute the script. You will need to provide the following details:
+
+- Fully qualified domain name (FQDN)
+- Persistence type (`MYSQL` or `PGSQL`)
+- Janssen version (leave empty `""` for the default)
+- Virtual Machine's Public IP address in place of `<VM_IP>`
 
 
 === "MySQL"
@@ -58,12 +63,12 @@ Console messages like below will confirm the successful startup and readiness of
 [I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ...
 [I] Waiting 120 seconds for services to initialize before starting health checks. Hang on...
 [W] Janssen is not ready yet; retrying in 10 seconds ...
-[I] Janssen is ready to accept request
+[I] Janssen is ready to accept requests
 ```
 
 ## Verify Installation By Accessing Standard Endpoints
 
-To access Janssen Server standard endpoints from outside of the Docker container, your system's `/etc/hosts` file needs to be updated. Open the file and add the IP domain record, which should be the IP of the instance where Docker is installed (your `<VM_IP>`), followed by the hostname used during installation (`demoexample.jans.io`).
+To access Janssen Server standard endpoints from outside the Docker container, your system's `/etc/hosts` file needs to be updated. Open the file and add the IP domain record, which should be the IP of the instance where Docker is installed (your `<VM_IP>`), followed by the hostname used during installation (`demoexample.jans.io`).
 
 ```bash
 # For example
@@ -80,7 +85,7 @@ https://demoexample.jans.io/.well-known/openid-configuration
 
 Janssen Server can be configured using the Text-based User Interface (TUI). 
 
-1. Download the `jans-cli-tui`:
+1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
     ```bash
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
@@ -116,7 +121,7 @@ This Docker-based installation uses `docker compose` under the hood to create th
 Run the command below in the same directory where you executed the installation script to stop the containers, remove them, and clean up the generated files and volumes:
 
 ```bash
-sudo docker compose -f compose.yaml down -v
+sudo docker compose -f compose.yaml down -v && sudo rm -rf jans-aio-demo compose.yaml
 ```
 
 Console messages like below confirm the successful removal:

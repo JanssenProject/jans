@@ -498,7 +498,7 @@ check_jans_readiness() {
     while [[ "$retries" -le 20 ]]; do
         cid=$(docker ps --filter network=jans-aio-demo --filter name=jans --filter health=healthy -q ||:)
         if [[ -n "$cid" ]]; then
-            echo "[I] Janssen is ready to accept request"
+            echo "[I] Janssen is ready to accept requests"
             break
         else
             echo "[W] Janssen is not ready yet; retrying in 10 seconds ..."

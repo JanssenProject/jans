@@ -16,7 +16,7 @@ use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
 use reqwest::Client;
 use serde::Serialize;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use url::Url;
 
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
@@ -299,6 +299,58 @@ impl MockServer {
         self.endpoints.status_list = endpoint;
     }
 
+    /// Same as [`Self::generate_status_list_endpoint`] but produces a Status List JWT
+    /// that intentionally omits the `ttl` claim. Used to exercise the bootstrap-config
+    /// fallback refresh interval.
+    #[track_caller]
+    pub(crate) fn generate_status_list_endpoint_without_ttl(
+        &mut self,
+        status_list_bits: StatusBitSize,
+        status_list: &[u8],
+    ) {
+        let bits: u8 = status_list_bits.into();
+        let lst = status_list::compress_and_encode(status_list);
+        let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
+        let iss = self.server.url();
+        let header = jwt::Header {
+            alg: self.keys.alg,
+            kid: self.keys.kid.clone(),
+            typ: TokenTypeHeader::StatusListJwt.into(),
+            ..Default::default()
+        };
+        let encoding_key = self.keys.encoding_key.clone();
+        let build_jwt_claims = move || {
+            let now = chrono::Utc::now().timestamp();
+            let exp = now + 3600;
+            let claims = json!({
+                "sub": sub,
+                "status_list": {
+                  "bits": bits,
+                  "lst": lst,
+                },
+                "iss": iss,
+                "exp": exp,
+                "iat": now,
+            });
+
+            jwt::encode(&header, &claims, &encoding_key)
+                .expect("encode status list JWT")
+                .as_bytes()
+                .to_vec()
+        };
+
+        let endpoint = Some(
+            self.server
+                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+                .with_status(200)
+                .with_header("content-type", "application/statuslist+jwt")
+                .with_body_from_request(move |_| build_jwt_claims())
+                .expect(1)
+                .create(),
+        );
+        self.endpoints.status_list = endpoint;
+    }
+
     /// Updates the `OpenID` configuration mock to include the status list endpoint.
     /// This should be called after `generate_status_list_endpoint` to ensure the
     /// OIDC configuration returned via HTTP includes the `status_list_endpoint` field.
@@ -324,6 +376,53 @@ impl MockServer {
             .expect(1)
             .create();
         self.endpoints.oidc = Some(oidc);
+    }
+
+    /// Rotates the active HS256 signing key and updates mocked OIDC/JWKS responses.
+    pub(crate) fn rotate_signing_key_hs256(
+        &mut self,
+        kid: impl ToString,
+    ) -> Result<(), KeyGenerationError> {
+        self.keys = generate_keypair_hs256(Some(kid))?;
+
+        // Replace JWKS endpoint with the new key set.
+        let old_jwks = self.endpoints.jwks.take();
+        drop(old_jwks);
+        let jwks = self
+            .server
+            .mock("GET", MOCK_JWKS_URI)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({"keys": generate_jwks(std::slice::from_ref(&self.keys)).keys}).to_string(),
+            )
+            .expect_at_least(1)
+            .create();
+        self.endpoints.jwks = Some(jwks);
+
+        let old_oidc = self.endpoints.oidc.take();
+        drop(old_oidc);
+
+        let mut body = json!({
+            "issuer": self.server.url(),
+            "jwks_uri": self.server.url() + MOCK_JWKS_URI,
+        });
+
+        if let Some(status_list_endpoint) = self.status_list_endpoint() {
+            body["status_list_endpoint"] = json!(status_list_endpoint.to_string());
+        }
+
+        let oidc = self
+            .server
+            .mock("GET", MOCK_OIDC_ENDPOINT)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(body.to_string())
+            .expect_at_least(0)
+            .create();
+        self.endpoints.oidc = Some(oidc);
+
+        Ok(())
     }
 
     /// Helper function for generating a status list JWT for this mock server
