@@ -41,7 +41,9 @@ pub fn cedarling_authorized_row(
     action: Option<&str>,
     context: Option<pgrx::datum::JsonB>,
 ) -> bool {
-    let action = action.unwrap_or("Read");
+    let Some(action) = action else {
+        return finalize_error(&CedarlingError::RequestInvalid("NULL action".into()));
+    };
     let action_trimmed = action.trim();
     if action_trimmed.is_empty() {
         return finalize_error(&CedarlingError::RequestInvalid("empty action".into()));
@@ -297,7 +299,9 @@ pub fn cedarling_authorized_row_from_anyelement(
 /// Reads tokens from the fallback chain: explicit bundle (none here) → `cedarling.tokens` GUC.
 #[pg_extern(volatile, parallel_restricted)]
 pub fn cedarling_authorized_row_jwt(record: AnyElement, action: Option<&str>) -> bool {
-    let action = action.unwrap_or("Read");
+    let Some(action) = action else {
+        return finalize_error(&CedarlingError::RequestInvalid("NULL action".into()));
+    };
     let resource_json = match crate::resource::row::build_resource_json_from_row(record) {
         Ok(v) => v,
         Err(e) => return finalize_error(&CedarlingError::from(e)),
