@@ -25,7 +25,7 @@ pub struct AuthorizeOutcome {
 
 /// Errors building or running a multi-issuer authorization call.
 #[derive(Debug, Error)]
-pub enum AuthorizeBridgeError {
+pub enum MultiIssuerBridgeError {
     #[error(transparent)]
     TokenBundle(#[from] token_bundle::TokenBundleError),
     #[error(transparent)]
@@ -58,17 +58,17 @@ pub fn authorize_multi_issuer_outcome(
     resource_json: &str,
     action: &str,
     context_json: Option<&str>,
-) -> Result<AuthorizeOutcome, AuthorizeBridgeError> {
+) -> Result<AuthorizeOutcome, MultiIssuerBridgeError> {
     let tokens = token_bundle::parse_token_inputs_from_json(token_bundle_json)?;
 
     let resource = resource::resource_entity_data_from_json_str(resource_json)?;
     let context =
-        parse_optional_context_json_object(context_json).map_err(AuthorizeBridgeError::RequestInvalid)?;
+        parse_optional_context_json_object(context_json).map_err(MultiIssuerBridgeError::RequestInvalid)?;
     let request =
         AuthorizeMultiIssuerRequest::new_with_fields(tokens, resource, action.to_string(), context);
     request
         .validate()
-        .map_err(|e| AuthorizeBridgeError::RequestInvalid(e.to_string()))?;
+        .map_err(|e| MultiIssuerBridgeError::RequestInvalid(e.to_string()))?;
     let result = engine.authorize_multi_issuer(request)?;
     let diagnostics = result.response.diagnostics();
     let policy_hits: Vec<String> = diagnostics.reason().map(ToString::to_string).collect();

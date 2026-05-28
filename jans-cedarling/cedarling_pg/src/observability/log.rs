@@ -9,7 +9,7 @@
 
 use pgrx::prelude::*;
 
-use crate::authz::bridge::{AuthorizeBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{MultiIssuerBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::functions::error::CedarlingError;
 use crate::guc_config::{log_level, CedarlingLogLevelGuc};
@@ -73,21 +73,21 @@ pub(crate) fn log_engine_failure(err: &EngineError) {
     }
 }
 
-pub(crate) fn log_multi_issuer_bridge_failure(err: &AuthorizeBridgeError) {
+pub(crate) fn log_multi_issuer_bridge_failure(err: &MultiIssuerBridgeError) {
     let (at, msg) = match err {
-        AuthorizeBridgeError::TokenBundle(_) => (
+        MultiIssuerBridgeError::TokenBundle(_) => (
             CedarlingLogLevelGuc::Info,
             "cedarling_authorized: token bundle JSON invalid or unsupported shape",
         ),
-        AuthorizeBridgeError::Resource(_) => (
+        MultiIssuerBridgeError::Resource(_) => (
             CedarlingLogLevelGuc::Info,
             "cedarling_authorized: resource JSON invalid for EntityData",
         ),
-        AuthorizeBridgeError::RequestInvalid(_) => (
+        MultiIssuerBridgeError::RequestInvalid(_) => (
             CedarlingLogLevelGuc::Info,
             "cedarling_authorized: request validation failed before Cedar evaluation",
         ),
-        AuthorizeBridgeError::Authorize(e) => classify_authorize_error(e),
+        MultiIssuerBridgeError::Authorize(e) => classify_authorize_error(e),
     };
     log_diagnostic(at, msg);
 }
