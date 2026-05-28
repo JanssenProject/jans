@@ -60,10 +60,11 @@ pub fn cedarling_set_mask_config(
 #[pg_extern(stable, parallel_safe)]
 pub fn cedarling_test_masking(
     original_value: Option<&str>,
-    _data_type: Option<&str>,
+    data_type: Option<&str>,
     mask_type: &str,
     mask_config: Option<&str>,
 ) -> Option<String> {
+    let _ = data_type; // reserved for future type-aware masking
     let salt = guc_config::mask_hash_salt_bytes();
     let mt = MaskType::from_parts(mask_type, mask_config);
     let result = mt.apply(original_value, &salt);
