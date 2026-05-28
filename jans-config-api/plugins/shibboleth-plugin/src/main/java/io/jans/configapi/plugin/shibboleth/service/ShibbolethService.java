@@ -138,7 +138,7 @@ public class ShibbolethService {
         logger.info(" \n\n New Search TrustRelationship with name:{}", name);
 
         Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
-        logger.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
+        logger.error("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }

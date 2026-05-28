@@ -154,7 +154,7 @@ public class ShibbolethResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
-    @Path(Constants.NAME_PATH_PARAM)
+    @Path( Constants.NAME + Constants.NAME_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
             Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     public Response getTrustedServiceProvidersByName(
@@ -166,7 +166,7 @@ public class ShibbolethResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Get  list Trust Relationship", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
+    @Operation(summary = "Get final attribute list", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
             "Shibboleth - Trust Relaattributetionship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
@@ -246,31 +246,6 @@ public class ShibbolethResource extends BaseResource {
         validateTrustRelationship(trustRelationship, null, false);
         shibbolethService.addTrustRelationship(trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
-    }
-
-    @Operation(summary = "Update Trust Relationship", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
-            "Shibboleth - Trust Relationship" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/trust-relationship-post.json")))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-    @PUT
-    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
-    public Response updateTrustRelationship(TrustRelationship trustRelationship) throws IOException {
-        logger.info("Update TrustRelationship");
-        if (logger.isInfoEnabled()) {
-            logger.info("Update TrustRelationship  trustRelationship:{}", escapeLog(trustRelationship));
-        }
-// validation
-        validateTrustRelationship(trustRelationship, null, true);
-        shibbolethService.updateTrustRelationship(trustRelationship);
-        return Response.status(Response.Status.OK).entity(trustRelationship).build();
     }
 
     @Operation(summary = "Update Trust Relationship details", description = "Update Trust Relationship details", operationId = "put-shibboleth-trust", tags = {
