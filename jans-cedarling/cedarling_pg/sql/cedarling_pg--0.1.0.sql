@@ -7,7 +7,7 @@ The ordering of items is not stable, it is driven by a dependency graph.
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:20
+-- cedarling_pg/src/catalog.rs:21
 
 -- Namespace for cedarling_pg catalog objects.
 CREATE SCHEMA IF NOT EXISTS cedarling;
@@ -112,7 +112,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:278
+-- cedarling_pg/src/functions/authorized_row.rs:280
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
@@ -125,7 +125,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:298
+-- cedarling_pg/src/functions/authorized_row.rs:300
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
@@ -179,7 +179,7 @@ AS 'MODULE_PATHNAME', 'cedarling_current_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:175
+-- cedarling_pg/src/policy/versions.rs:189
 -- cedarling_pg::policy::versions::cedarling_diff_policies
 CREATE  FUNCTION "cedarling_diff_policies"(
 	"old" TEXT, /* & str */
@@ -212,7 +212,7 @@ AS 'MODULE_PATHNAME', 'cedarling_last_trace_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:81
+-- cedarling_pg/src/mask/mod.rs:82
 -- cedarling_pg::mask::cedarling_mask_plan
 CREATE  FUNCTION "cedarling_mask_plan"(
 	"table_name" TEXT, /* & str */
@@ -224,7 +224,7 @@ AS 'MODULE_PATHNAME', 'cedarling_mask_plan_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:126
+-- cedarling_pg/src/mask/mod.rs:127
 -- cedarling_pg::mask::cedarling_mask_row
 CREATE  FUNCTION "cedarling_mask_row"(
 	"row_json" jsonb, /* pgrx :: datum :: JsonB */
@@ -272,7 +272,7 @@ AS 'MODULE_PATHNAME', 'cedarling_register_policy_version_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:137
+-- cedarling_pg/src/policy/versions.rs:144
 -- cedarling_pg::policy::versions::cedarling_rollback_policy
 CREATE  FUNCTION "cedarling_rollback_policy"() RETURNS bool /* bool */
 STRICT VOLATILE PARALLEL UNSAFE
@@ -319,7 +319,7 @@ AS 'MODULE_PATHNAME', 'cedarling_status_wrapper';
 -- cedarling_pg::mask::cedarling_test_masking
 CREATE  FUNCTION "cedarling_test_masking"(
 	"original_value" TEXT, /* Option < & str > */
-	"_data_type" TEXT, /* Option < & str > */
+	"data_type" TEXT, /* Option < & str > */
 	"mask_type" TEXT, /* & str */
 	"mask_config" TEXT /* Option < & str > */
 ) RETURNS TEXT /* Option < String > */
@@ -340,16 +340,18 @@ AS 'MODULE_PATHNAME', 'cedarling_use_policy_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:86
+-- cedarling_pg/src/catalog.rs:87
 -- requires:
 --   cedarling_use_policy
 --   cedarling_register_policy_version
 --   cedarling_rollback_policy
+--   cedarling_diff_policies
 
 
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_diff_policies(text, text) FROM PUBLIC;
 /* </end connected objects> */
 
 /* <begin connected objects> */
@@ -377,7 +379,7 @@ AS 'MODULE_PATHNAME', 'cedarling_validate_schema_by_oid_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/authz/where_clause.rs:565
+-- cedarling_pg/src/authz/where_clause.rs:611
 -- cedarling_pg::authz::where_clause::cedarling_where
 CREATE  FUNCTION "cedarling_where"(
 	"table_name" TEXT, /* & str */
