@@ -336,7 +336,6 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
 
-        @Disabled
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsByNature")
         @DisplayName(
@@ -354,6 +353,7 @@ public class TrustRelationshipTest {
     @DisplayName("Profile Configuration Update Tests")
     public class ProfileConfigurationUpdateTests {
         
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(

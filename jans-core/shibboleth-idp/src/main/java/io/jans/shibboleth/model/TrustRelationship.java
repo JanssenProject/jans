@@ -218,7 +218,11 @@ public class TrustRelationship {
 
         if (profileConfiguration == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("profileConfiguration"));
+            return TrustResult.failure(
+                TrustRelationshipUpdateFailed.because(
+                    CannotBeNullOrBlank.forField("profileConfiguration")
+                )
+            );
         }
 
         return from(this)
@@ -388,6 +392,7 @@ public class TrustRelationship {
         }
 
         public <T extends CommonConfigurationCapable> Builder withProfileConfiguration(T profileConfiguration) {
+
 
             switch(profileConfiguration.getType()) {
 
