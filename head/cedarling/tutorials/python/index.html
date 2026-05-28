@@ -1691,9 +1691,9 @@
 <li><a href="#usage">Usage</a></li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled <code>cedarling_python</code> wheel from the <a href="https://github.com/JanssenProject/jans/releases/latest">releases page</a> or <a href="#building-from-source">build it from the source</a>.</p>
+<p>The Cedarling Python bindings are available via package managers using PyPI. To use them, you can either install the <a href="https://pypi.org/project/cedarling-python/">cedarling-python</a> package or <a href="#building-from-source">build it from the source</a>.</p>
 <h3 id="building-from-source">Building from source<a class="headerlink" href="#building-from-source" title="Permanent link">#</a></h3>
-<p>The recommended approach is to compile a Python wheel using <a href="https://github.com/PyO3/maturin">Maturin</a>, a tool for building and publishing Rust-based Python packages.</p>
+<p>You can compile a Python wheel using <a href="https://github.com/PyO3/maturin">Maturin</a>, a tool for building and publishing Rust-based Python packages.</p>
 <p><strong>1. Set up a virtual environment</strong></p>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
 <span class="nb">source</span><span class="w"> </span>venv/bin/activate
@@ -1720,10 +1720,10 @@ pip<span class="w"> </span>install<span class="w"> </span>maturin<span class="o"
 </code></pre></div>
 <h2 id="including-in-projects">Including in projects<a class="headerlink" href="#including-in-projects" title="Permanent link">#</a></h2>
 <p>If you're using a dependency manager like <a href="https://python-poetry.org/">Poetry</a>, you can:</p>
-<p><strong>Option 1: Add the wheel via CLI</strong></p>
-<div class="highlight"><pre><span></span><code>poetry add path/to/wheel.whl
+<p><strong>Option 1: Add the package from PyPI</strong></p>
+<div class="highlight"><pre><span></span><code>poetry add cedarling-python
 </code></pre></div>
-<p><strong>Option 2: Install it manually into Poetry's virtual environment</strong></p>
+<p><strong>Option 2: Install the wheel manually into Poetry's virtual environment</strong></p>
 <div class="highlight"><pre><span></span><code>poetry run pip install path/to/wheel.whl
 </code></pre></div>
 <p><strong>Option 3: Add it to <code>pyproject.toml</code> statically</strong></p>
@@ -1996,7 +1996,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 28, 2026 07:22:49 UTC"><span class="timeago" datetime="2026-05-28T07:22:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 28, 2026 07:22:49 UTC">2026-05-28</span>
   </span>
 
     
