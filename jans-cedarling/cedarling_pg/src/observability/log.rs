@@ -115,12 +115,15 @@ pub(crate) fn log_unsigned_bridge_failure(err: &UnsignedBridgeError) {
     log_diagnostic(at, msg);
 }
 
-/// Emit a structured audit entry at `WARN` when fail-open converts an error-induced deny into
-/// an allow. Respects [`should_emit`] so it can be suppressed by `cedarling.log_level = error`.
+/// Emit a structured audit entry at `WARNING` when fail-open converts an error-induced deny into
+/// an allow.
+///
+/// Intentionally **bypasses** `cedarling.log_level` — the audit channel is gated solely by
+/// `cedarling.audit_fail_open` at the call site. An operator who has chosen to enable
+/// fail-open auditing must not have those entries silenced by an unrelated log-verbosity knob
+/// (e.g. `cedarling.log_level = 'error'`), since fail-open audit entries describe a security-
+/// relevant decision flip, not routine diagnostics.
 pub(crate) fn log_audit_fail_open(err: &CedarlingError) {
-    if !should_emit(CedarlingLogLevelGuc::Warn) {
-        return;
-    }
     let entry = err.to_audit_entry("fail_open");
     // Serialize to compact JSON so log collectors can parse it directly.
     warning!("cedarling_pg: audit {}", entry.to_json());
