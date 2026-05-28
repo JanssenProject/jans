@@ -190,6 +190,54 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
+    put:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Update Trust Relationship details
+      description: Update Trust Relationship details
+      operationId: put-shibboleth-trust
+      requestBody:
+        description: Trust Relationship object
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TrustRelationshipForm"
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Updated Trust Relationship
+          content:
+            multipart/form-data:
+              schema:
+                $ref: "#/components/schemas/TrustRelationship"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
     post:
       tags:
       - Shibboleth - Trust Relationship
@@ -530,55 +578,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/file:
-    put:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Update Trust Relationship details
-      description: Update Trust Relationship details
-      operationId: put-shibboleth-trust
-      requestBody:
-        description: Trust Relationship object
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/TrustRelationshipForm"
-            examples:
-              Request example:
-                description: Request example
-                value: ""
-      responses:
-        "200":
-          description: Updated Trust Relationship
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TrustRelationship"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-      security:
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
