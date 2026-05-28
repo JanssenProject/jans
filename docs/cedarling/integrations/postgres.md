@@ -257,9 +257,9 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | --- | --- |
 | `cedarling_authorized(resource_json text, token_bundle text, action text) → bool` | JWT / multi-issuer authorization. Token resolution order: non-empty `token_bundle` argument → else `cedarling.tokens` GUC → else fail-closed configuration error. Pass `NULL` or `''` to use the GUC. |
 | `cedarling_authorize_unsigned(principal_json text, resource_json text, action text, context_json text) → bool` | Unsigned authorization (no tokens). |
-| `cedarling_authorized_row(record anyelement, action text, context jsonb) → bool` | RLS-friendly form: materializes the composite row, looks up its Cedar entity mapping, asks the engine. SQL has no `DEFAULT` on `context`; pass `NULL` for an empty object. |
-| `cedarling_authorized_row(resource jsonb, action text, context jsonb) → bool` | JSONB overload for callers that already have a Cedar `EntityData` document. Pass `NULL` for `{}`. |
-| `cedarling_authorized_row_jwt(record anyelement, action text) → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. Omitting `action` in SQL is invalid; the Rust default `'Read'` applies only when callers use a wrapper that supplies it. |
+| `cedarling_authorized_row(record anyelement, action text, context jsonb) → bool` | RLS-friendly form: materializes the composite row, looks up its Cedar entity mapping, asks the engine. `action` must not be SQL `NULL`. SQL has no `DEFAULT` on `context`; pass `NULL` for an empty object. |
+| `cedarling_authorized_row(resource jsonb, action text, context jsonb) → bool` | JSONB overload for callers that already have a Cedar `EntityData` document. `action` must not be SQL `NULL`. Pass `NULL` for `{}` on `context`. |
+| `cedarling_authorized_row_jwt(record anyelement, action text) → bool` | Same as `cedarling_authorized_row` but uses `cedarling.tokens` to drive `authorize_multi_issuer`. `action` must not be SQL `NULL`. |
 | `cedarling_build_resource_row(record anyelement) → text` | Materializes a composite row into the canonical Cedar `EntityData` JSON string that `cedarling_authorized_row` would use — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
 | `cedarling_build_resource(resource jsonb, entity_type text, entity_id text) → text` | Builds `EntityData` JSON from an existing JSONB document; optional `entity_type` / `entity_id` override or inject `cedar_entity_mapping`. Same abort-on-error semantics as the row variant. |
 | `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. Falls back to `'TRUE'` (with a `WARN` listing unhandled policy ids) when a policy can't be lowered, and to `'FALSE'` on parse/engine errors. |
@@ -486,9 +486,12 @@ be shared correctly across parallel workers.
 - **Sensitive GUCs and policy lifecycle are superuser-gated.**
   `cedarling.bootstrap_config`, `cedarling.policy_version`, and
   `cedarling.mask_hash_salt` are `Suset` (superuser-only). `EXECUTE` on
-  `cedarling_use_policy`, `cedarling_register_policy_version`, and
-  `cedarling_rollback_policy` is revoked from `PUBLIC` — grant only to
-  roles that may swap policy versions.
+  `cedarling_use_policy`, `cedarling_register_policy_version`,
+  `cedarling_rollback_policy`, and `cedarling_diff_policies` is revoked from
+  `PUBLIC` — grant only to superusers (or roles that can set
+  `cedarling.policy_version`). Non-superuser callers of the policy-swap
+  functions get `false` and the engine change is rolled back if the GUC update
+  fails.
 - **`cedarling.mask_rules.condition_sql` is not executed.** Non-empty
   `condition_sql` values are ignored (fail-closed for that column) so
   arbitrary SQL cannot be injected through mask configuration. Use RLS or
