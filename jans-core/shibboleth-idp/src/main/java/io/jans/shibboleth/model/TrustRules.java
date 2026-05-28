@@ -2,6 +2,7 @@ package io.jans.shibboleth.model;
 
 import java.util.List;
 
+import io.jans.shibboleth.model.rules.MetadataSourceCompatibilityRule;
 import io.jans.shibboleth.model.rules.RequiredFieldsRule;
 import io.jans.shibboleth.model.util.TrustResult;
 
@@ -37,7 +38,8 @@ public class TrustRules {
     private static final List<TrustRule> defaultRules() {
 
         return List.of(
-            RequiredFieldsRule::check
+            RequiredFieldsRule::check,
+            MetadataSourceCompatibilityRule::check
         );
     }
 }
