@@ -50,6 +50,8 @@ import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.date.DateFormatterService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
+import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.as.server.service.token.StatusListService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
@@ -121,6 +123,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private UserInfoService userInfoService;
+
+    @Inject
+    private StatusListService statusListService;
+
+    @Inject
+    private StatusListIndexService statusListIndexService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -268,6 +276,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         claims.setIssuer(appConfiguration.getIssuer());
         Audience.setAudience(claims, authorizationGrant.getClient());
+
+        // add status claim with index
+        if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+            ExecutionContext executionContext = new ExecutionContext();
+            executionContext.setStatusListIndex(statusListIndexService.next());
+
+            statusListService.addStatusClaimWithIndex(claims, executionContext);
+        }
         return claims;
     }
 
