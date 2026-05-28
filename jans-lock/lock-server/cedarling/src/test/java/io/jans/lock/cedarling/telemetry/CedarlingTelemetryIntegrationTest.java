@@ -880,7 +880,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
         		@Override
         	    protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
         	        // Delegate to the standard builder; JWT validation is disabled for tests
-        	        return BootstrapConfig.builder()
+        			BootstrapConfig bootstrapConfig = BootstrapConfig.builder()
         	            .applicationName("Lock Server - Test Edition")
         	            .policyStoreLocalFn(System.getProperty("user.dir") + "/target/test-classes/test-policy-store")
         	            .jwtStatusValidation(false) 
@@ -897,6 +897,9 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 						.lockListenSse(false)
 						.lockAccessTokenJwt(lockAccessTokenJwt)
 						.build();
+        			
+        	        log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
+        			return bootstrapConfig;
         	    }
         };
 
