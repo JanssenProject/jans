@@ -138,7 +138,7 @@ public class ShibbolethResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Shibboleth trust search by - inum:{}", escapeLog(inum));
         }
-
+        logger.error("Shibboleth trust search by - inum:{}", inum);
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
 
         return Response.ok(trustRelationship).build();
@@ -154,7 +154,7 @@ public class ShibbolethResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
-    @Path( Constants.NAME + Constants.NAME_PATH_PARAM)
+    @Path(Constants.NAME + Constants.NAME_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
             Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     public Response getTrustedServiceProvidersByName(
@@ -162,11 +162,13 @@ public class ShibbolethResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Shibboleth trust by name:{}", escapeLog(name));
         }
+
+        logger.error("Shibboleth trust by name:{}", name);
         List<TrustRelationship> trustRelationshipList = shibbolethService.getAllTrustRelationshipByDisplayName(name);
         return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Get final attribute list", description = "Get attribute list Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
+    @Operation(summary = "Get final attribute list", description = "Get attribute list for Trust Relationship", operationId = "get-shibboleth-trust-attribute-list", tags = {
             "Shibboleth - Trust Relaattributetionship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
@@ -177,7 +179,7 @@ public class ShibbolethResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
-    @Path(Constants.INUM_PATH_PARAM + Constants.RELEASE_POLICY + Constants.EFFECTIVE)
+    @Path(Constants.RELEASE_POLICY + Constants.EFFECTIVE + Constants.INUM_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
             Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     public Response getTrustRelationshipAttribute(
@@ -189,7 +191,7 @@ public class ShibbolethResource extends BaseResource {
 
         TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
         checkResourceNotNull(trustRelationship, SHIBBOLETH_TRUST_RELATIONSHIP);
-
+        logger.error("Verify TrustRelationship for attribute by - inum:{}", inum);
         return Response.ok(trustRelationship.getReleasedAttributes()).build();
     }
 
@@ -203,7 +205,7 @@ public class ShibbolethResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
-    @Path(Constants.FED_ID_PATH_PARAM + Constants.DISCOVERY + Constants.ENTITIES)
+    @Path(Constants.FED_ID_PATH + Constants.DISCOVERY + Constants.ENTITIES + Constants.FED_ID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
             Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
     public Response getFederationEntityId(
@@ -213,6 +215,8 @@ public class ShibbolethResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Get feration entity ID by fedId:{}", escapeLog(fedId));
         }
+
+        logger.error("Verify TrustRelationship for attribute by - fedId:{}", fedId);
         Set<String> entityIds = shibbolethService.getFederationEntityId(fedId);
         if (logger.isDebugEnabled()) {
             logger.debug("EntityIds under federation:{} are:{}", escapeLog(fedId), entityIds);

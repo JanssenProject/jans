@@ -178,7 +178,48 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: |
+                    {
+                      "start": 0,
+                      "totalEntriesCount": 2,
+                      "entriesCount": 2,
+                      "entries": [
+                        {
+                          "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                          "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                          "displayName": "TR-2",
+                          "description": "Trust-relationship 2",
+                          "entityType": "individual",
+                          "metadataSource": {
+                            "metadataSourceType": "file"
+                          },
+                          "releasedAttributes": [
+                            "inum=C4F7,ou=scopes,o=jans",
+                            "inum=10B2,ou=scopes,o=jans"
+                          ],
+                          "status": "draft",
+                          "version": 0,
+                          "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                        },
+                        {
+                          "dn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans",
+                          "inum": "3d197836-38d1-4020-873b-1e3c920a69cc",
+                          "displayName": "TR-1",
+                          "description": "Trust-relationship 1",
+                          "entityType": "individual",
+                          "metadataSource": {
+                            "metadataSourceType": "file"
+                          },
+                          "releasedAttributes": [
+                            "inum=C4F7,ou=scopes,o=jans",
+                            "inum=10B2,ou=scopes,o=jans"
+                          ],
+                          "status": "draft",
+                          "version": 0,
+                          "baseDn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans"
+                        }
+                      ]
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -310,7 +351,24 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: |
+                    {
+                      "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                      "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                      "displayName": "TR-2",
+                      "description": "Trust-relationship 2",
+                      "entityType": "individual",
+                      "metadataSource": {
+                        "metadataSourceType": "file"
+                      },
+                      "releasedAttributes": [
+                        "inum=C4F7,ou=scopes,o=jans",
+                        "inum=10B2,ou=scopes,o=jans"
+                      ],
+                      "status": "draft",
+                      "version": 0,
+                      "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -351,7 +409,7 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.delete
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{fed-id}/discovery/entities:
+  /shibboleth/trust-relationship/fedId/discovery/entities/{fed-id}:
     get:
       tags:
       - Shibboleth - Trust Relationship
@@ -401,12 +459,12 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{inum}release-policyeffective:
+  /shibboleth/trust-relationship/release-policy/effective/{inum}:
     get:
       tags:
       - Shibboleth - Trust Relaattributetionship
-      summary: Get  list Trust Relationship
-      description: Get attribute list Trust Relationship
+      summary: Get final attribute list
+      description: Get attribute list for Trust Relationship
       operationId: get-shibboleth-trust-attribute-list
       parameters:
       - name: inum
@@ -427,7 +485,11 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: |
+                    [
+                      "inum=C4F7,ou=scopes,o=jans",
+                      "inum=10B2,ou=scopes,o=jans"
+                    ]
         "401":
           description: Unauthorized
         "404":
@@ -544,7 +606,7 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{name}:
+  /shibboleth/trust-relationship/name/{name}:
     get:
       tags:
       - Shibboleth - Trust Relationship
