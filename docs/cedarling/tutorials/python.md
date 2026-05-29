@@ -12,11 +12,11 @@ tags:
 
 ## Installation
 
-At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases/latest) or [build it from the source](#building-from-source).
+The Cedarling Python bindings are available via package managers using PyPI. To use them, you can either install the [cedarling-python](https://pypi.org/project/cedarling-python/) package or [build it from the source](#building-from-source).
 
 ### Building from source
 
-The recommended approach is to compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
+You can compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
 
 **1. Set up a virtual environment**
 
@@ -64,13 +64,13 @@ maturin develop
 
 If you're using a dependency manager like [Poetry](https://python-poetry.org/), you can:
 
-**Option 1: Add the wheel via CLI**
+**Option 1: Add the package from PyPI**
 
 ```
-poetry add path/to/wheel.whl
+poetry add cedarling-python
 ```
 
-**Option 2: Install it manually into Poetry's virtual environment**
+**Option 2: Install the wheel manually into Poetry's virtual environment**
 
 ```
 poetry run pip install path/to/wheel.whl
