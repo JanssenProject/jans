@@ -104,6 +104,50 @@ public class TrustRelationshipTest {
     public class CreationTests {
 
         @Tag("refactoring")
+        @ParameterizedTest
+        @EnumSource(TrustNature.class)
+        @DisplayName(
+            "Given all valid creation parameters " + 
+            "WHEN creating trustrelationship " +
+            "THEN it should create a trust relationship in DRAFT STATUS " +
+            "  with initial version " +
+            "  with no metadata source configured yet " +
+            "  and using all default profile configurations ")
+        public void shouldCreateTrustRelationshipInInitialDraftState(TrustNature nature) {
+            
+            TrustResult<TrustRelationship> result = TrustRelationship.create("TestTR","Test TR",nature);
+
+            assertThat(result.isSuccess()).isTrue();
+
+            TrustRelationship trustrelationship = result.getValue();
+            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("TestTR").getValue();
+
+            assertThat(trustrelationship).isNew()
+                .hasDisplayName(newDisplayName)
+                .hasDescription(Description.of("Test TR"))
+                .isOfNature(nature)
+                .hasStatus(TrustStatus.DRAFT)
+                .isVersion(Version.initial())
+                .hasNoMetadataSource()
+                .hasNoDiscoveredEntityIds();
+        
+            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
+                .usesDefaultConfiguration();
+        
+            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ATTRIBUTE_QUERY)
+                .usesDefaultConfiguration();
+
+            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ARTIFACT_RESOLUTION)
+                .usesDefaultConfiguration();
+        
+            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ECP)
+                .usesDefaultConfiguration();
+
+            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_LOGOUT)
+                .usesDefaultConfiguration();
+        }
+
+        @Tag("refactoring")
         @Test
         @DisplayName(
             "Given blank or null displayName " +
@@ -148,49 +192,7 @@ public class TrustRelationshipTest {
             assertThat(result.getValue().getDescription()).isEqualTo(Description.of(""));
         }
 
-        @Tag("refactoring")
-        @ParameterizedTest
-        @EnumSource(TrustNature.class)
-        @DisplayName(
-            "Given all valid creation parameters " + 
-            "WHEN creating trustrelationship " +
-            "THEN it should create a trust relationship in DRAFT STATUS " +
-            "  with version 1 " +
-            "  with no metadata source configured yet " +
-            "  and using all default profile configurations ")
-        public void shouldCreateTrustRelationshipInInitialDraftState(TrustNature nature) {
-            
-            TrustResult<TrustRelationship> result = TrustRelationship.create("TestTR","Test TR",nature);
-
-            assertThat(result.isSuccess()).isTrue();
-
-            TrustRelationship trustrelationship = result.getValue();
-            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("TestTR").getValue();
-
-            assertThat(trustrelationship).isNew()
-                .hasDisplayName(newDisplayName)
-                .hasDescription(Description.of("Test TR"))
-                .isOfNature(nature)
-                .hasStatus(TrustStatus.DRAFT)
-                .isVersion(Version.initial())
-                .hasNoMetadataSource()
-                .hasNoDiscoveredEntityIds();
-        
-            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
-                .usesDefaultConfiguration();
-        
-            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ATTRIBUTE_QUERY)
-                .usesDefaultConfiguration();
-
-            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ARTIFACT_RESOLUTION)
-                .usesDefaultConfiguration();
-        
-            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_ECP)
-                .usesDefaultConfiguration();
-
-            assertThat(trustrelationship).withProfileConfiguration(ProfileType.SAML2_LOGOUT)
-                .usesDefaultConfiguration();
-        }
+       
     }
 
     @Nested
@@ -359,7 +361,7 @@ public class TrustRelationshipTest {
         @DisplayName(
             "GIVEN an existing TrustRelationship " +
             "WHEN updateProfileConfiguration(null) is called " +
-            "THEN the operation fails with missing profile configuration error"
+            "THEN the operation fails with trustrelationship update failed"
         )
         public void shouldFailIfProfileConfigurationIsNull(TrustRelationship tr) {
 
@@ -368,6 +370,7 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
 
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#allProfileConfigurations")
         @DisplayName(
