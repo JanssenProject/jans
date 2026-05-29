@@ -48,41 +48,34 @@ EXAMPLE_FILES = Path(__file__).resolve().parent.parent / "example_files"
 def main():
     # -- 1. Initialize Cedarling with the unsigned policy store ---------------
     config = BootstrapConfig({
-        "CEDARLING_APPLICATION_NAME": "ExampleApp",
-        "CEDARLING_POLICY_STORE_LOCAL_FN": str(
-            EXAMPLE_FILES / "policy-store-unsigned"
-        ),
-        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_LOG_TYPE": "std_out",
-        "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
-    })
+            "CEDARLING_APPLICATION_NAME": "AGT_policies",
+            "CEDARLING_LOG_LEVEL": "DEBUG",
+            "CEDARLING_LOG_TYPE": "std_out",
+            "CEDARLING_POLICY_STORE_URI": "https://github.com/duttarnab/CedarligngUpgradeTest/releases/download/v1.0.8/AGT_policies.cjar"
+        })
     instance = Cedarling(config)
 
     # -- 2. Define the resource being accessed --------------------------------
     resource = EntityData.from_dict({
         "cedar_entity_mapping": {
-            "entity_type": "Jans::Issue",
-            "id": "issue-123",
-        },
-        "org_id": "some_long_id",
-        "country": "US",
+            "entity_type": "AGT::Resource",
+            "id": "some_resource_id",
+        }
     })
 
     # -- 3. Define the principal (who is requesting access) -------------------
     # is_ok=True means the policy will ALLOW this principal.
     principal = EntityData.from_dict({
         "cedar_entity_mapping": {
-            "entity_type": "Jans::TestPrincipal1",
+            "entity_type": "AGT::Agent",
             "id": "p1",
         },
-        "is_ok": True,
+        "role": "auditor"
     })
 
     # -- 4. Build and execute the unsigned authorization request ---------------
     request = RequestUnsigned(
-        action='Jans::Action::"UpdateForTestPrincipals"',
+        action='AGT::Action::"WriteResource"',
         resource=resource,
         context={},
         principal=principal,

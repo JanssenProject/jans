@@ -68,7 +68,7 @@ public class UpdateTokenCedarling implements UpdateTokenType {
     }
 
     public int getApiVersion() {
-        return 1;
+        return 11;
     }
 
     @Override
@@ -165,7 +165,6 @@ public class UpdateTokenCedarling implements UpdateTokenType {
         json.put("cedar_entity_mapping", new JSONObject()
                 .put("entity_type", "Jans::Application")
                 .put("id", "app_id"));
-        json.put("grantTypes", grantTypes);
 
         log.debug("Resource JSON: {}", json);
         return json;

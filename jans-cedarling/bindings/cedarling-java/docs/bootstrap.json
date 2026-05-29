@@ -2,8 +2,5 @@
   "CEDARLING_APPLICATION_NAME": "Cedarling-Test-In-Custom-Script",
   "CEDARLING_POLICY_STORE_LOCAL_FN": "./custom/static/update_token_script.cjar",
   "CEDARLING_LOG_LEVEL": "DEBUG",
-  "CEDARLING_LOG_TYPE": "std_out",
-  "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-    "===": [{"var": "Jans::Workload"}, "ALLOW"]
-  }
+  "CEDARLING_LOG_TYPE": "std_out"
 }

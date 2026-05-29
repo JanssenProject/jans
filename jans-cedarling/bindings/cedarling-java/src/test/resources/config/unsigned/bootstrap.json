@@ -3,8 +3,5 @@
   "CEDARLING_POLICY_STORE_LOCAL_FN": "<will_be_dynamically_updated_at_runtime>",
   "CEDARLING_LOG_LEVEL": "DEBUG",
   "CEDARLING_LOG_TYPE": "memory",
-  "CEDARLING_LOG_TTL": 120,
-  "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-    "===": [{"var": "Jans::User"}, "ALLOW"]
-  }
+  "CEDARLING_LOG_TTL": 120
 }
