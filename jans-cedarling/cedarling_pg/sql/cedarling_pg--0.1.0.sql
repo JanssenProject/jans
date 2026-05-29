@@ -179,7 +179,7 @@ AS 'MODULE_PATHNAME', 'cedarling_current_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:189
+-- cedarling_pg/src/policy/versions.rs:203
 -- cedarling_pg::policy::versions::cedarling_diff_policies
 CREATE  FUNCTION "cedarling_diff_policies"(
 	"old" TEXT, /* & str */
@@ -272,7 +272,7 @@ AS 'MODULE_PATHNAME', 'cedarling_register_policy_version_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:144
+-- cedarling_pg/src/policy/versions.rs:151
 -- cedarling_pg::policy::versions::cedarling_rollback_policy
 CREATE  FUNCTION "cedarling_rollback_policy"() RETURNS bool /* bool */
 STRICT VOLATILE PARALLEL UNSAFE
