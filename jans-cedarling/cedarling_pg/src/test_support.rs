@@ -7,8 +7,11 @@
 
 pub(crate) use crate::test_fixtures::POLICY_STORE_UNSIGNED_YAML;
 
+#[cfg(feature = "pg_test")]
 use std::fs;
+#[cfg(feature = "pg_test")]
 use std::io::Write;
+#[cfg(feature = "pg_test")]
 use std::path::{Path, PathBuf};
 
 /// Emit a single-quoted YAML scalar, escaping embedded `'` as `''`.
@@ -17,6 +20,9 @@ fn yaml_single_quoted_scalar(value: &str) -> String {
 }
 
 /// Write a minimal bootstrap config wired to a local policy-store file.
+///
+/// Only the `#[pg_test]` modules need this
+#[cfg(feature = "pg_test")]
 pub(crate) fn write_bootstrap_yaml(dir: &Path, policy_path: &Path, app_name: &str) -> PathBuf {
     let bootstrap_path = dir.join("bootstrap.yaml");
     let app_name_lit = yaml_single_quoted_scalar(app_name);
