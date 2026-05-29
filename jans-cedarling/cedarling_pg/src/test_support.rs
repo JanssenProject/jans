@@ -5,6 +5,7 @@
 
 //! Shared helpers for `#[pg_test]` modules.
 
+#[cfg(feature = "pg_test")]
 pub(crate) use crate::test_fixtures::POLICY_STORE_UNSIGNED_YAML;
 
 #[cfg(feature = "pg_test")]
