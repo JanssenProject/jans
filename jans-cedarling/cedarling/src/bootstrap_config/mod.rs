@@ -304,7 +304,7 @@ mod tests {
 
         // Verify JWT configuration
         assert!(config.jwt_config.jwt_sig_validation);
-        assert!(!config.jwt_config.jwt_status_validation);
+        assert!(config.jwt_config.jwt_status_validation);
         assert!(
             config
                 .jwt_config

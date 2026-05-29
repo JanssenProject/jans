@@ -94,6 +94,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 ```
 
+## Default Config Sample
+
+- `cedarling/config/default_config.yaml` is a user-facing sample. Keep it consistent with the real defaults in code (e.g. `JwtConfig::default`, `BootstrapConfigRaw` defaults) and with `docs/cedarling/reference/cedarling-properties.md`.
+- When changing any default value, default behavior, or adding/removing a `CEDARLING_*` bootstrap property: update this YAML in the same change so the sample never contradicts the documented or compiled-in defaults.
+
 ## Python Bindings Validation
 
 **When working with Python bindings:**

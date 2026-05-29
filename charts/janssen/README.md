@@ -15,7 +15,7 @@ Janssen Access and Identity Management Microservices Chart. This chart deploys e
 ## Source Code
 
 * <https://jans.io>
-* <https://github.com/JanssenProject/jans/charts/janssen>
+* <https://github.com/JanssenProject/jans/tree/main/charts/janssen>
 
 ## Requirements
 

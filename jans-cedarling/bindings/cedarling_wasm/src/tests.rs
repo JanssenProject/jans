@@ -40,6 +40,7 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
 });
@@ -51,6 +52,7 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
 });
@@ -74,6 +76,7 @@ static NO_ISSUERS_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
 });
@@ -216,6 +219,8 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_TYPE": "memory",
         "CEDARLING_LOG_TTL": 120,
         "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
