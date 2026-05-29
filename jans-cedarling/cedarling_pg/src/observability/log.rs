@@ -164,8 +164,17 @@ mod tests {
 
     #[test]
     fn level_rank_orders_debug_most_verbose() {
-        assert!(level_rank(CedarlingLogLevelGuc::Debug) < level_rank(CedarlingLogLevelGuc::Info));
-        assert!(level_rank(CedarlingLogLevelGuc::Info) < level_rank(CedarlingLogLevelGuc::Warn));
-        assert!(level_rank(CedarlingLogLevelGuc::Warn) < level_rank(CedarlingLogLevelGuc::Error));
+        assert!(
+            level_rank(CedarlingLogLevelGuc::Debug) < level_rank(CedarlingLogLevelGuc::Info),
+            "Debug should be more verbose (lower rank) than Info"
+        );
+        assert!(
+            level_rank(CedarlingLogLevelGuc::Info) < level_rank(CedarlingLogLevelGuc::Warn),
+            "Info should be more verbose (lower rank) than Warn"
+        );
+        assert!(
+            level_rank(CedarlingLogLevelGuc::Warn) < level_rank(CedarlingLogLevelGuc::Error),
+            "Warn should be more verbose (lower rank) than Error"
+        );
     }
 }

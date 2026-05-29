@@ -102,7 +102,14 @@ pub fn cedarling_use_policy(version: &str) -> bool {
             guc_config::CedarlingLogLevelGuc::Error,
             &format!("cedarling_use_policy: failed to set cedarling.policy_version: {e}"),
         );
-        let _ = engine::rollback_policy();
+        if let Err(e2) = engine::rollback_policy() {
+            extension_log::log_diagnostic(
+                guc_config::CedarlingLogLevelGuc::Error,
+                &format!(
+                    "cedarling_use_policy: GUC set failed AND engine rollback also failed; engine and cedarling.policy_version are now inconsistent: {e2}"
+                ),
+            );
+        }
         return false;
     }
     let detail = json!({ "result": "ok", "cache_cleared": true });
@@ -166,7 +173,14 @@ pub fn cedarling_rollback_policy() -> bool {
             guc_config::CedarlingLogLevelGuc::Error,
             &format!("cedarling_rollback_policy: failed to set cedarling.policy_version: {e}"),
         );
-        let _ = engine::use_policy(&rolled_from);
+        if let Err(e2) = engine::use_policy(&rolled_from) {
+            extension_log::log_diagnostic(
+                guc_config::CedarlingLogLevelGuc::Error,
+                &format!(
+                    "cedarling_rollback_policy: failed to restore engine policy after GUC set failure; engine and cedarling.policy_version are now inconsistent: {e2}"
+                ),
+            );
+        }
         return false;
     }
     let detail = json!({
