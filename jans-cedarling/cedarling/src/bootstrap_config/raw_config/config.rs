@@ -290,8 +290,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
     ///   tokens that do not carry an `exp` claim.
-    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
-    ///   claim; tokens without `exp` are not cached at all.
+    /// - `0`: disables the token cache entirely.
     ///
     /// Default: `5` seconds — small enough to pick up revocation / status-list
     /// changes quickly, large enough to amortise repeated requests for the

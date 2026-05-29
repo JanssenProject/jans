@@ -8,23 +8,12 @@ use sparkv::{Config, SparKV};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
-use crate::LogLevel;
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
-
-fn sparkv_max_ttl(max_ttl: usize) -> Duration {
-    if max_ttl == 0 {
-        return Duration::MAX;
-    }
-
-    i64::try_from(max_ttl)
-        .ok()
-        .and_then(Duration::try_seconds)
-        .unwrap_or(Duration::MAX)
-}
+use crate::LogLevel;
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
@@ -60,8 +49,7 @@ impl TokenCache {
     /// `max_ttl` semantics:
     /// - `> 0`: caps each entry's TTL at `max_ttl`. Also used as the TTL when
     ///   the token has no `exp` claim.
-    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
-    ///   claim; tokens without `exp` are not cached.
+    /// - `0`: disables the token cache entirely.
     pub(crate) fn new(
         max_ttl: usize,
         capacity: usize,
@@ -71,7 +59,7 @@ impl TokenCache {
     ) -> Self {
         Self {
             cache: Arc::new(RwLock::new(SparKV::with_config(Config {
-                max_ttl: sparkv_max_ttl(max_ttl),
+                max_ttl: Duration::seconds(i64::try_from(max_ttl).unwrap_or_default()),
                 max_items: capacity,
                 earliest_expiration_eviction,
                 ..Default::default()
@@ -99,6 +87,11 @@ impl TokenCache {
     /// Returns `Some(Arc<Token>)` if the token is found in cache and not expired,
     /// otherwise returns `None`.
     pub(crate) fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
+        if self.max_ttl == 0 {
+            self.metrics.record_cache_miss();
+            return None;
+        }
+
         let key = hash_jwt_token(kind, jwt);
         let result = self
             .cache
@@ -120,10 +113,12 @@ impl TokenCache {
     /// 1. If the token has a valid `exp` claim, the entry TTL is the time until
     ///    expiration (clamped by `max_ttl` when it is > 0).
     /// 2. If the token has no `exp` claim and `max_ttl` is > 0, `max_ttl` is used.
-    /// 3. If the token has no `exp` claim and `max_ttl` is 0, the token is **not
-    ///    cached at all** (matches the documented behaviour of
-    ///    `CEDARLING_TOKEN_CACHE_MAX_TTL = 0`).
+    /// 3. If `max_ttl` is 0, the token cache is disabled and no token is cached.
     pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
+        if self.max_ttl == 0 {
+            return;
+        }
+
         if TokenCache::check_token_expired(&token, now) {
             // token is expired, no need to save it
             return;
@@ -268,7 +263,7 @@ impl IndexKey {
 mod tests {
     use super::*;
     use crate::jwt::token::TokenClaims;
-    use serde_json::{Value, json};
+    use serde_json::{json, Value};
     use std::collections::HashMap;
 
     fn token_cache(max_ttl: usize) -> TokenCache {
@@ -287,14 +282,17 @@ mod tests {
     }
 
     #[test]
-    fn max_ttl_zero_uses_token_expiration() {
+    fn max_ttl_zero_disables_cache_for_token_with_exp() {
         let now = Utc::now();
         let cache = token_cache(0);
         let token = token_with_exp(now, 3600);
 
         cache.save(&TokenKind::StatusList, "jwt", token, now);
 
-        assert!(cache.find(&TokenKind::StatusList, "jwt").is_some());
+        assert!(
+            cache.find(&TokenKind::StatusList, "jwt").is_none(),
+            "max_ttl=0 should disable token cache even when the token has exp"
+        );
     }
 
     #[test]
@@ -305,7 +303,10 @@ mod tests {
 
         cache.save(&TokenKind::StatusList, "jwt", token, now);
 
-        assert!(cache.find(&TokenKind::StatusList, "jwt").is_none());
+        assert!(
+            cache.find(&TokenKind::StatusList, "jwt").is_none(),
+            "max_ttl=0 should not cache tokens without exp"
+        );
     }
 
     #[test]
@@ -314,6 +315,10 @@ mod tests {
         let cache = token_cache(5);
         let token = token_with_exp(now, 3600);
 
-        assert_eq!(cache.cache_duration(&token, now), Some(5));
+        assert_eq!(
+            cache.cache_duration(&token, now),
+            Some(5),
+            "positive max_ttl should cap the cache duration for tokens with exp"
+        );
     }
 }
