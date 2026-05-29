@@ -1814,8 +1814,7 @@ end
 <p>Before you begin, make sure you have the following:</p>
 <ul>
 <li><code>Docker</code> installed on your machine</li>
-<li><code>Python 3.10</code> or higher</li>
-<li><code>pipx</code> and <code>Poetry</code> installed if you're not using Docker</li>
+<li><code>Python 3.11</code> and <code>uv</code> if you are not using Docker</li>
 </ul>
 <h2 id="policy-store-setup-agama-lab">Policy Store Setup (Agama Lab)<a class="headerlink" href="#policy-store-setup-agama-lab" title="Permanent link">#</a></h2>
 <p>To begin using Cedarling, you need to set up a policy store. We'll use this <a href="https://cloud.gluu.org/agama-lab/login">Agama Lab</a> for this purpose.</p>
@@ -1895,21 +1894,17 @@ when {
 <p>The sidecar is now running on <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a>. Keep track of the output of the previous command,
 it is your Docker container ID.</p>
 <h3 id="python-instructions-if-docker-is-unavailable">Python instructions (if Docker is unavailable)<a class="headerlink" href="#python-instructions-if-docker-is-unavailable" title="Permanent link">#</a></h3>
+<p>Python 3.11 is required for this approach.</p>
 <ul>
 <li>Clone the Janssen repository and navigate to <code>jans/jans-cedarling/flask-sidecar</code>.</li>
-<li>Run <code>poetry install</code> to install dependencies.</li>
-<li>Download and install the latest Cedarling nightly wheel:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-</code></pre></div>
-<ul>
-<li>Install the nightly wheel:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-</code></pre></div>
-<ul>
+<li>
+<p>Run <code>uv sync --locked --python 3.11</code> to install dependencies.</p>
+</li>
 <li>
 <p>Modify <code>secrets/bootstrap.json</code> to your specifications.</p>
+</li>
+<li>
+<p>Activate the virtual environment: <code>source .venv/bin/activate</code></p>
 </li>
 <li>
 <p>Navigate to <code>jans/jans-cedarling/flask-sidecar/main</code></p>
@@ -1924,7 +1919,7 @@ SIDECAR_DEBUG_RESPONSE=False
 </code></pre></div>
 <ul>
 <li>
-<p>Run the sidecar: <code>poetry run flask run</code></p>
+<p>Run the sidecar: <code>flask run</code></p>
 </li>
 <li>
 <p>The sidecar is now running on <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a></p>
@@ -2159,7 +2154,7 @@ when {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 28, 2026 07:22:49 UTC"><span class="timeago" datetime="2026-05-28T07:22:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 28, 2026 07:22:49 UTC">2026-05-28</span>
   </span>
 
     
