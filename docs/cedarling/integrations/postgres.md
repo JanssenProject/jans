@@ -195,7 +195,7 @@ Then build and install with the helper script:
 ```bash
 cd jans-cedarling/cedarling_pg
 
-# Default PG major is pg16; override with PG_VERSION=17.
+# Default PG major is pg16; override with PG_VERSION=pg17.
 PG_VERSION=pg16 ./scripts/install.sh source --release
 ```
 
