@@ -195,8 +195,8 @@ Then build and install with the helper script:
 ```bash
 cd jans-cedarling/cedarling_pg
 
-# Default PG major is pg16; override with PG_VERSION.
-PG_VERSION=pg17 ./scripts/install.sh source --release
+# Default PG major is pg16; override with PG_VERSION=17.
+PG_VERSION=pg16 ./scripts/install.sh source --release
 ```
 
 `install.sh source` wraps `cargo pgrx install`, then runs a short psql health
