@@ -213,7 +213,7 @@ public class TrustRelationshipTest {
             "  - the TrustRelationship's version should be incremented " +
             "  - the TrustRelationship's display name is the provided display name "
         )
-        public void shouldUpdateDisplayNameAndIncrementVersion_whenNewDifferentNameIsProvided(TrustRelationship tr) {
+        public void shouldUpdateDisplayNameAndIncrementVersionWhenNewDifferentNameIsProvided(TrustRelationship tr) {
 
             //Given 
             var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("Jans new TR").getValue();
@@ -242,7 +242,7 @@ public class TrustRelationshipTest {
             " - the trustrelationship's version should be incremented " +
             " - the trustrelationship's description is the same as the newly provided description "
         )
-        public void shouldUpdateDescriptionAndIncrementVersion_whenNewDifferentDescriptionIsProvided(TrustRelationship tr) {
+        public void shouldUpdateDescriptionAndIncrementVersionWhenNewDifferentDescriptionIsProvided(TrustRelationship tr) {
 
             //Given 
             Description new_description = Description.of("Jans New Description");
@@ -262,27 +262,10 @@ public class TrustRelationshipTest {
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(
-            "Given a valid trust relationship " + 
-            "WHEN updating the display name of an existing TrustRelationship with a null value " +
-            "THEN the update should fail with a TrustRelationshipUpdateFailed error"
-        )
-        public void shouldFailWithTrustRelationshipUpdateFailedWhenDisplayNameIsNull(TrustRelationship tr) {
-
-            //When
-            TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
-
-            //Then
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "Given a valid trust relationship with a  non-empty description " + 
+            "GIVEN a valid trust relationship with a  non-empty description " + 
             "WHEN updateDescription(null) is called  " +
-            "THEN description is cleared and version is incremented")
+            "THEN description is cleared and version is incremented"
+        )
         public void shouldAllowNullToClearDescription(TrustRelationship tr) {
 
             //Given 
@@ -302,45 +285,76 @@ public class TrustRelationshipTest {
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(
-            "Given a valid new display name " +
-            "WHEN updating the display name of an existing TrustRelationship " + 
-            "THEN display name is changed successfully "+
-            "status stays the same, " +
-            "and version is incremented")
-        public void shouldUpdateDisplayNameWhileKeepingStatusAndIncrementingVersion(TrustRelationship tr) {
+            "GIVEN  " +
+            "   - a valid trustrelationship in any status " +
+            "   - a display name identical to the existing trustrelationship's display name " +
+            "WHEN updating the display name of the trustrelationship with the said display name " +
+            "THEN " +
+            "   - the update should succeed " +
+            "   - the display name should be unchanged " +
+            "   - the version should be unchanged "
+        )
+        public void shouldBeIdempotentWhenUpdatingDisplayName(TrustRelationship tr) {
 
-            //When
-            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("NewTR").getValue();
-            TrustResult<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
+            //Given
+            var displayName = io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue()).getValue();
+            assertThat(displayName).isEqualTo(tr.getDisplayName());
+
+            //When 
+            TrustResult<TrustRelationship> result = tr.updateDisplayName(displayName);
 
             //Then
             assertThat(result.isSuccess()).isTrue();
-            final TrustRelationship newtr = result.getValue();
-            assertThat(newtr).hasDisplayName(newDisplayName);
-            assertThat(newtr.getStatus()).isEqualTo(tr.getStatus());
-            assertThat(newtr).isVersion(tr.getVersion().next());
+            TrustRelationship newtr = result.getValue();
+            assertThat(newtr.getDisplayName()).isEqualTo(tr.getDisplayName());
+            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
         }
 
         @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(
-            "Given a valid new description " + 
-            "WHEN updating the description of an existing TrustRelationship " + 
-            "THEN description is changed successfully " +
-            "status stays the same, and version is incremented")
-        public void shouldUpdateDescriptionWhileKeepingStatusAndIncrementingVersion(TrustRelationship tr) {
+            "GIVEN  " +
+            "   - a valid trustrelationship in any status " +
+            "   - a description identical to the existing trustrelationship's description " +
+            "WHEN updating the description of the trustrelationship with the said description " +
+            "THEN   " +
+            "   - the update should succeed " +
+            "   - the description should be unchanged   " +
+            "   - the version should be unchanged " 
+        )
+        public void shouldBeIdempotentWhenUpdatingDescription(TrustRelationship tr) {
 
-            //When
-            Description newDescription = Description.of("New Description");
-            TrustResult<TrustRelationship> result = tr.updateDescription(newDescription);
+            //Given 
+            Description description = Description.of(tr.getDescription().getValue());
+            assertThat(description).isEqualTo(tr.getDescription());
+
+            //When 
+            TrustResult<TrustRelationship> result = tr.updateDescription(description);
 
             //Then
             assertThat(result.isSuccess()).isTrue();
-            final TrustRelationship newtr = result.getValue();
-            assertThat(newtr).hasDescription(newDescription);
-            assertThat(newtr).hasStatus(tr.getStatus());
-            assertThat(newtr).isVersion(tr.getVersion().next());
+            TrustRelationship newtr = result.getValue();
+            assertThat(newtr.getDescription()).isEqualTo(tr.getDescription());
+            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
+        }
+
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
+        @DisplayName(
+            "Given a valid trust relationship " + 
+            "WHEN updating the display name of an existing TrustRelationship with a null value " +
+            "THEN the update should fail with a TrustRelationshipUpdateFailed error"
+        )
+        public void shouldFailWithTrustRelationshipUpdateFailedWhenDisplayNameIsNull(TrustRelationship tr) {
+
+            //When
+            TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
+
+            //Then
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
         }
     }
 
