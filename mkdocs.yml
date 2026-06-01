@@ -546,6 +546,7 @@ nav:
       - Useful Tools: contribute/development/useful-tools.md
     - CI/CD:
       - Release Process: contribute/ci-cd/release-process.md
+      - SLSA Verification: contribute/ci-cd/slsa-verification.md
 
 
 # ====================
