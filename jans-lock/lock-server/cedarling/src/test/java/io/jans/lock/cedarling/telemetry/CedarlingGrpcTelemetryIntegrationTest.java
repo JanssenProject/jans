@@ -6,9 +6,7 @@
 package io.jans.lock.cedarling.telemetry;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,17 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.wiremock.grpc.dsl.WireMockGrpc.json;
+import static org.wiremock.grpc.dsl.WireMockGrpc.method;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,9 +39,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wiremock.grpc.dsl.WireMockGrpcService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
 import io.jans.lock.cedarling.config.BootstrapConfig;
@@ -53,24 +52,38 @@ import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
+import io.jans.lock.model.config.cedarling.LockTransport;
 import io.jans.lock.model.config.cedarling.LogLevel;
 import io.jans.lock.model.config.cedarling.LogType;
 
 /**
- * Integration test that verifies Cedarling pushes health, log, and telemetry audit data to a Lock server. A WireMock HTTPS server (inherited from
- * {@link BaseWireMockHttpTest}) acts as the Lock server, so no real network or external process is required.
+ * Integration test that verifies Cedarling pushes health, log, and telemetry audit data to a Lock server over gRPC. A WireMock HTTPS server with the gRPC
+ * extension enabled (inherited from {@link BaseWireMockGrpcTest}) acts as the Lock server so no real network or external process is required.
  *
  * <h3>Test structure</h3>
  * <ol>
- * <li><strong>Setup</strong> – WireMock stubs the {@code /.well-known} discovery document and all audit endpoints. Cedarling is initialised with
- * {@code CEDARLING_LOCK=enabled} and a short telemetry interval ({@value #TELEMETRY_INTERVAL_SEC} s) so data arrives quickly.</li>
- * <li><strong>Round 1</strong> – 5 authorization calls (4 ALLOW + 1 DENY). The test waits up to {@value #WAIT_TIMEOUT_SEC} seconds for telemetry, captures the
- * payloads, and verifies all required fields.</li>
- * <li><strong>Reset</strong> – WireMock's request journal is cleared to give Round 2 a clean baseline.</li>
- * <li><strong>Round 2</strong> – 7 authorization calls (4 ALLOW + 3 DENY). Same capture / verification cycle.</li>
- * <li><strong>Cross-round comparison</strong> – health status must remain {@code "ok"}; {@code evaluationRequestsCount} must be ≥ the Round 1 value (Cedarling
- * accumulates it globally).</li>
+ * <li><strong>Setup</strong> – WireMock stubs the {@code /.well-known} discovery document (HTTPS) and all six gRPC audit methods ({@code Process*} /
+ * {@code ProcessBulk*}). Cedarling is initialised with {@code CEDARLING_LOCK=enabled}, gRPC transport, and a short telemetry interval
+ * ({@value #TELEMETRY_INTERVAL_SEC} s).</li>
+ * <li><strong>Round 1</strong> – 5 authorisation calls (4 ALLOW + 1 DENY). The test waits up to {@value #WAIT_TIMEOUT_SEC} s for any gRPC audit call to arrive,
+ * captures the payloads for every method, and verifies all required proto fields.</li>
+ * <li><strong>Reset</strong> – WireMock's request journal is cleared.</li>
+ * <li><strong>Round 2</strong> – 7 authorisation calls (4 ALLOW + 3 DENY). Same verification cycle.</li>
+ * <li><strong>Cross-round comparison</strong> – health status must remain {@code "running"}; {@code evaluation_requests_count} must be &ge; the Round 1
+ * value.</li>
  * </ol>
+ *
+ * <h3>gRPC URL mapping</h3>
+ * <p>
+ * WireMock gRPC maps incoming calls to HTTP POST requests whose path is {@code /<fully-qualified-service-name>/<MethodName>}. For {@code audit.proto} the
+ * fully-qualified service name is {@value #AUDIT_SERVICE_FQSN}, so {@code ProcessHealth} is matched at {@code /io.jans.lock.audit.AuditService/ProcessHealth}.
+ *
+ * <h3>Proto JSON field layout</h3>
+ * 
+ * <pre>
+ * // Single-entry methods:  { "entry":   { "service": "...", ... } }
+ * // Bulk methods:          { "entries": [ { ... }, { ... } ] }
+ * </pre>
  *
  * <h3>Token matrix</h3>
  * 
@@ -84,49 +97,62 @@ import io.jans.lock.model.config.cedarling.LogType;
  * └────────┴────────────────────────────────────────────────────┴──────────────────┘
  * </pre>
  *
- * <p>
- * <strong>Prerequisites:</strong> The native Cedarling UniFFI library must be available on the dynamic-library path ({@code LD_LIBRARY_PATH} /
- * {@code java.library.path}).
- *
- * @see BaseWireMockHttpTest
+ * @see BaseWireMockGrpcTest
  * @see CedarlingAuthorizationService
  *
  * @author Yuriy Movchan Date: 12/05/2026
  */
 @TestInstance(Lifecycle.PER_CLASS)
-@DisplayName("Cedarling Telemetry – Integration Tests")
-public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
+@DisplayName("Cedarling gRPC Telemetry – Integration Tests")
+public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest {
 
 	static {
 		Configurator.setRootLevel(Level.INFO);
 	}
 
-	private static final Logger log = LoggerFactory.getLogger(CedarlingTelemetryIntegrationTest.class);
+	private static final Logger log = LoggerFactory.getLogger(CedarlingGrpcTelemetryIntegrationTest.class);
 
 	private static final boolean DUMP_CAPTURED_REQUEST = true;
 
-	// ─── WireMock endpoint paths ─────────────────────────────────────────────
+	// ─── WireMock endpoint paths ──────────────────────────────────────────────
 
 	private static final String WELL_KNOWN_PATH = "/.well-known/lock-server-configuration";
-	private static final String HEALTH_PATH = "/jans-lock/api/v1/audit/health";
-	private static final String LOG_PATH = "/jans-lock/api/v1/audit/log";
-	private static final String TELEMETRY_PATH = "/jans-lock/api/v1/audit/telemetry";
-	private static final String BULK_HEALTH_PATH = HEALTH_PATH + "/bulk";
-	private static final String BULK_LOG_PATH = LOG_PATH + "/bulk";
-	private static final String BULK_TELEMETRY_PATH = TELEMETRY_PATH + "/bulk";
+
+	// ─── gRPC service / method names ─────────────────────────────────────────
+
+	/**
+	 * Fully-qualified gRPC service name derived from audit.proto:
+	 * 
+	 * <pre>
+	 *   package io.jans.lock.audit;
+	 *   service AuditService { ... }
+	 * </pre>
+	 * 
+	 * WireMock gRPC maps every call to an HTTP POST path of the form {@code /<FQSN>/<MethodName>}.
+	 */
+	private static final String AUDIT_SERVICE_FQSN = "io.jans.lock.audit.AuditService";
+
+	/** Simple method names – must match the rpc declarations in audit.proto exactly. */
+	private static final String METHOD_HEALTH = "ProcessHealth";
+	private static final String METHOD_BULK_HEALTH = "ProcessBulkHealth";
+	private static final String METHOD_LOG = "ProcessLog";
+	private static final String METHOD_BULK_LOG = "ProcessBulkLog";
+	private static final String METHOD_TELEMETRY = "ProcessTelemetry";
+	private static final String METHOD_BULK_TELEMETRY = "ProcessBulkTelemetry";
+
+	/** All six gRPC audit methods – used for bulk stub registration and capture. */
+	private static final List<String> ALL_GRPC_METHODS = List.of(METHOD_HEALTH, METHOD_BULK_HEALTH, METHOD_LOG, METHOD_BULK_LOG, METHOD_TELEMETRY, METHOD_BULK_TELEMETRY);
 
 	// ─── Raw JWT strings – exp claims are patched at runtime ─────────────────
 
-	/**
-	 * JWT 1 – scopes: {@code health.write}, {@code telemetry.write}, {@code log.write}.
-	 */
+	/** JWT 1 – scopes: {@code health.write}, {@code telemetry.write}, {@code log.write}. */
 	private static final String RAW_JWT_1 = "eyJraWQiOiJjb25uZWN0XzNjMzJjMTkzLTY5ZjYtNDBkYS1iNmQyLTE3ODY0YmJkYzU1MV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9"
 			+ ".eyJhdWQiOiIwZTk5NDAzMC1lZTg4LTRmMTQtYWUwOC04YjBkYTEwNDQwMjkiLCJzdWIiOiIwZTk5NDAzMC1lZTg4LTRmMTQtYWUwOC04YjBkYTEwNDQwMjkiLC"
 			+ "J4NXQjUzI1NiI6IiIsIm5iZiI6MTc3ODYxNDA2Niwic2NvcGUiOlsiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svaGVhbHRoLndyaXRlIiwiaHR0cHM6Ly9qYW"
 			+ "5zLmlvL29hdXRoL2xvY2svdGVsZW1ldHJ5LndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svbG9nLndyaXRlIl0sImlzcyI6Imh0dHBzOi8vamFucy"
 			+ "1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzc4NjE0MzY2LCJpYXQiOjE3Nzg2MTQwNjYsImNsaWVudF"
 			+ "9pZCI6IjBlOTk0MDMwLWVlODgtNGYxNC1hZTA4LThiMGRhMTA0NDAyOSIsImp0aSI6IkhNdjluYnBiUkRLRTAzNVRUTkgwT3ciLCJzdGF0dXMiOnsic3RhdHVzX2"
-			+ "xpc3QiOnsiaWR4Ijo0MDAsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0"
+			+ "xpc3QiOnsiaWR4Ijo0MDAsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdC" + "J9fX0"
 			+ ".bNXIL4f1lqvLoS49iMSZJORD2mJ9MWYCM5a8nyAiLqKy_fEqvqb-g1X6SgVeS2dJ9aFV-KRrfcjl0zSSQq6mBn-1pAostlMgV-lkOBi7rCbJUMwmdN7Bv7Op8E"
 			+ "yuD44_4hHRYhAXOXYv1CcjkyXtv-A9gDxNjHvhHVvpjaizcIMXVRrPxTTQgZF7r7n0t13La2E0vOxzzsgcWQjJukAY8HYybtoRL4JFswBIWPcgET9Btg9mZghDMl"
 			+ "vs0yiLVQfiGUZYcmxCCEQinjtutKgONP0Gv6xVMdsXMUpgXGZi6PCiEaEWButMwBauc9RJWEHbd7C4muKoAQ6_tFNuS_eoRw";
@@ -137,7 +163,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			+ "J4NXQjUzI1NiI6IiIsIm5iZiI6MTc3ODYxNDE2MSwic2NvcGUiOlsiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svaGVhbHRoLndyaXRlIl0sImlzcyI6Imh0dH"
 			+ "BzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzc4NjE0NDYxLCJpYXQiOjE3Nzg2MTQxNj"
 			+ "EsImNsaWVudF9pZCI6IjBlOTk0MDMwLWVlODgtNGYxNC1hZTA4LThiMGRhMTA0NDAyOSIsImp0aSI6InRVMGVQb0haU0RPSjJ5Z0EyZFRnc3ciLCJzdGF0dXMiOn"
-			+ "sic3RhdHVzX2xpc3QiOnsiaWR4Ijo0MDEsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0"
+			+ "sic3RhdHVzX2xpc3QiOnsiaWR4Ijo0MDEsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdG" + "F0dXNfbGlzdCJ9fX0"
 			+ ".iIN4rKz4wnGgijhNWJqY_RqYNx_7zT0hdevnU6wqRwiLp3rQG3c4ouv8P6X4CbiaxERzABbrjsS-4JcW2H2oLpAsuJGhJtr-HExe3iLs_OQ2_4NDwo0k2KJ5e_"
 			+ "zGP6Wykr6mQ8WhvGIfURk1aLirLCsegKhH1b26tSp6i8z7z-etNLwGjVPDfw6vV01kYJ0_O_tSf0HuLkGTPf34ld86CUNbPf2cE9Q4uqX_3xVTtMW0ffmOhDo8Qs"
 			+ "2dL96xs8O6ah-Rvp6UVjcD4A1qbVImN6USE70nEndmtDR_rvfsCBiL-htkgChTDZymceTcOn00NOvWB2I00rvSy7FdWwNAFQ";
@@ -148,7 +174,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			+ "J4NXQjUzI1NiI6IiIsIm5iZiI6MTc3ODYxNzc2MSwic2NvcGUiOlsiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svbG9nLndyaXRlIl0sImlzcyI6Imh0dHBzOi"
 			+ "8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzc4NjE4MDYxLCJpYXQiOjE3Nzg2MTc3NjEsIm"
 			+ "NsaWVudF9pZCI6IjBlOTk0MDMwLWVlODgtNGYxNC1hZTA4LThiMGRhMTA0NDAyOSIsImp0aSI6IjVxUWRHYWl4VEgybkQ5Z0Y2WDFPaXciLCJzdGF0dXMiOnsic3"
-			+ "RhdHVzX2xpc3QiOnsiaWR4Ijo1MDAsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0"
+			+ "RhdHVzX2xpc3QiOnsiaWR4Ijo1MDAsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dX" + "NfbGlzdCJ9fX0"
 			+ ".Q7xieptgb5r9eXqjI5BCSDv_ITtzZXbsXoyqcjsYw0PonF6z3c5XjiSPPrXVUU9dY_HQUrd4ib3U7oIQrKtfXcjJ2pMNuTZ0vPRCcZM_XqqbV3IewUbztabDKD"
 			+ "NpK0pSaNZy9V1SslHjW_vQoVDnclJL-w2usyXlMVnFub92GV3ldBZ9cB4UYVRovrzG_UxCa8FI-WkikYoET-vIiHbS5yP3EXlRKwP2pWwhHKwhAC7sjbnYW8ApgY"
 			+ "VAmvAnWqwPcaY_Bl-UobDHGBr0b0FhLtMIZvGevo1KdQE5dJwiflZOgiUZiYJU9uJ-tklD2gd5Pq-7g1-DW9Fvsmo2WVDcHw";
@@ -160,7 +186,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			+ "5zLmlvL29hdXRoL2xvY2svdGVsZW1ldHJ5LndyaXRlIiwiaHR0cHM6Ly9qYW5zLmlvL29hdXRoL2xvY2svbG9nLndyaXRlIl0sImlzcyI6Imh0dHBzOi8vamFucy"
 			+ "1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwIjoxNzc5OTU4OTI0LCJpYXQiOjE3Nzk5NTg2MjQsImNsaWVudF"
 			+ "9pZCI6ImY0NTAxNDVmLWFiODItNGJjZS05N2NmLTYyNDZiMWM2YjFhNiIsImp0aSI6IjNOU2ZLM1hQU25XZDlNWDFDNlFhT1EiLCJzdGF0dXMiOnsic3RhdHVzX2"
-			+ "xpc3QiOnsiaWR4Ijo0MDEsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0"
+			+ "xpc3QiOnsiaWR4Ijo0MDEsInVyaSI6Imh0dHBzOi8vamFucy1teXNxbC1sb2NrLXNlcnZlci5qYW5zLmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdC" + "J9fX0"
 			+ ".YSMkLZIm0JzIIiuShrXbZwLT5Bm58nBpz2fcaGEP4zyyDE0Te1T3WKmJZRsyRNPN3QgIwa9b02C-lGTqUJ9YkylTolLitJHgy7aVhfestGYTZ_r0gvfcGYVF8h"
 			+ "zsk5k11U-hb9SGbZOXOvuis998fCXolG-UUaYj7VGjU8xreGLgmEx7Otmfpi2bjenQ0DGFjo82XAVzgqO7gwGT-5zohBQ8uNQcKKASGj4g2NtVcjXqmxBS9huI7e"
 			+ "dAJxFPlZ5J7gghfJAIARDLm8UrYgNEHqVdQPDOrAdnIOE5n0I4oJad5fl5luyKSNmd6sL4hi82OR7Ldig3XIjxyHQ7VJYZhA";
@@ -185,7 +211,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	/** Cedarling telemetry/health push interval in seconds. */
 	private static final int TELEMETRY_INTERVAL_SEC = 5;
 
-	/** Maximum time to wait for at least one HTTP audit payload per round. */
+	/** Maximum time to wait for at least one gRPC audit payload per round. */
 	private static final int WAIT_TIMEOUT_SEC = 30;
 	private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(WAIT_TIMEOUT_SEC);
 
@@ -193,66 +219,67 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private CedarlingAuthorizationService authService;
+
+	/**
+	 * WireMockGrpcService wraps the WireMock admin API and provides the {@code stubFor(method(...).willReturn(json(...)))} DSL used to register gRPC stubs.
+	 *
+	 * It is lazily created on the first call to {@link #configureGrpcAuditStubs()} because at field-initialisation time the WireMock server may not yet have an
+	 * assigned port.
+	 */
+	private WireMockGrpcService grpcAuditService;
+
 	private String jwt1, jwt2, jwt3;
 
 	/**
-	 * Guards one-time Cedarling initialisation inside {@link #registerStubs()}. WireMock stubs must exist before {@code initCedarlingService()} is called
-	 * (Cedarling fetches the well-known document during startup), so the service cannot be initialised in {@code @BeforeAll} – at that point the
-	 * {@link com.github.tomakehurst.wiremock.junit5.WireMockExtension} has not yet registered any stubs. The flag ensures initialisation happens exactly once, on
-	 * the first {@code @BeforeEach} invocation.
+	 * Guards one-time Cedarling initialisation inside {@link #registerStubs()}. WireMock clears stubs in its own {@code beforeEach} which runs before any
+	 * {@code @BeforeEach} in the test class, so Cedarling must be started here (after stubs are up) rather than in {@code @BeforeAll}.
 	 */
 	private boolean serviceInitialized = false;
 
-	// ─── Lifecycle ───────────────────────────────────────────────────────────
+	// ─── Lifecycle ────────────────────────────────────────────────────────────
 
 	/**
-	 * Registers WireMock stubs and, on the very first call, initialises the Cedarling service.
+	 * Registers WireMock stubs and, on the very first call, initialises Cedarling.
 	 *
-	 * <h3>Why everything lives here and not in {@code @BeforeAll}</h3>
-	 * <p>
-	 * {@link com.github.tomakehurst.wiremock.junit5.WireMockExtension} resets <em>all</em> stub mappings in its own {@code beforeEach} callback, which executes
-	 * <strong>after</strong> {@code @BeforeAll} but <strong>before</strong> any {@code @BeforeEach} defined in the test class. The execution order for each test
-	 * method is therefore:
-	 * 
 	 * <pre>
-	 *   &#64;BeforeAll  setUpAll()          – runs once, but stubs aren't registered yet
-	 *   WireMockExtension.beforeEach()  – wipes all stub mappings
-	 *   @BeforeEach registerStubs()     – stubs registered here, safe to call Cedarling init
+	 * Execution order per test method:
+	 *   &#64;BeforeAll  setUpGrpc()           – gRPC channel created once (base class)
+	 *   WireMockExtension.beforeEach()    – wipes all stub mappings
+	 *   @BeforeEach registerStubs()       – stubs re-registered; Cedarling init on first call
 	 * </pre>
-	 * <p>
-	 * Cedarling fetches the well-known discovery document during {@code initCedarlingService()}, so the WireMock stubs <em>must</em> be present before that call.
-	 * The {@code serviceInitialized} flag ensures the expensive init runs exactly once while the stub registration runs before every test.
 	 */
 	@BeforeEach
 	void registerStubs() throws Exception {
 		configureWellKnownEndpoint();
-		configureAuditEndpoints();
-		log.info("WireMock stubs registered (well-known + 6 audit endpoints)");
+		configureGrpcAuditStubs();
+		log.info("WireMock stubs registered (well-known + {} gRPC audit methods)", ALL_GRPC_METHODS.size());
 
 		if (!serviceInitialized) {
 			initAuthService();
 			serviceInitialized = true;
-			log.info("WireMock HTTPS port: {}  |  telemetry interval: {}s  |  wait timeout: {}s", wireMockServer.getHttpsPort(), TELEMETRY_INTERVAL_SEC, WAIT_TIMEOUT_SEC);
+			log.info("WireMock HTTP port: {}  |  HTTPS port: {}  |  telemetry interval: {}s  |  wait timeout: {}s",
+					wireMockServer.getPort(), wireMockServer.getHttpsPort(), TELEMETRY_INTERVAL_SEC, WAIT_TIMEOUT_SEC);
 		}
 	}
 
-	/** Shuts down the Cedarling adapter after the class is done. */
+	/** Shuts down Cedarling and the gRPC channel after all tests in the class. */
 	@AfterAll
 	void tearDown() {
 		if (serviceInitialized) {
 			authService.destroy();
 			log.info("Cedarling service destroyed");
 		}
+		// gRPC channel shutdown is handled by BaseWireMockGrpcTest.tearDownGrpc()
 	}
 
-	// ─── Tests ───────────────────────────────────────────────────────────────
+	// ─── Tests ────────────────────────────────────────────────────────────────
 
 	@Nested
-	@DisplayName("Two-round telemetry lifecycle")
-	class TwoRoundTelemetryLifecycle {
+	@DisplayName("Two-round gRPC telemetry lifecycle")
+	class TwoRoundGrpcTelemetryLifecycle {
 
 		/**
-		 * Main telemetry lifecycle test.
+		 * Main gRPC telemetry lifecycle test.
 		 *
 		 * <p>
 		 * Executes two batches of authorisation calls separated by a WireMock request-journal reset, then verifies:
@@ -264,8 +291,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		 * </ul>
 		 */
 		@Test
-		@DisplayName("Telemetry accumulates correctly across two authorization rounds")
-		void telemetryAccumulatesAcrossRounds() throws Exception {
+		@DisplayName("gRPC telemetry accumulates correctly across two authorisation rounds")
+		void grpcTelemetryAccumulatesAcrossRounds() throws Exception {
 
 			// ════════════════════════════ ROUND 1 ════════════════════════════
 			log.info("=== ROUND 1 – 5 authorisation calls (4 ALLOW + 1 DENY) ===");
@@ -275,18 +302,18 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 2));
 
 			// Wait for the telemetry push triggered by round-1 evaluations
-			Map<String, List<JsonNode>> round1CapturedRequests = awaitAndCapture("R1", WAIT_TIMEOUT);
+			Map<String, List<JsonNode>> r1Captured = awaitAndCapture("R1", WAIT_TIMEOUT);
 
-			List<JsonNode> r1Telemetry = findCaptured(round1CapturedRequests, "R1 telemetry", TELEMETRY_PATH);
-			List<JsonNode> r1BulkTelemetry = findCaptured(round1CapturedRequests, "R1 bulk-telemetry", BULK_TELEMETRY_PATH);
-			List<JsonNode> r1Health = findCaptured(round1CapturedRequests, "R1 health", HEALTH_PATH);
-			List<JsonNode> r1BulkHealth = findCaptured(round1CapturedRequests, "R1 bulk-health", BULK_HEALTH_PATH);
-			List<JsonNode> r1Log = findCaptured(round1CapturedRequests, "R1 log", LOG_PATH);
-			List<JsonNode> r1BulkLog = findCaptured(round1CapturedRequests, "R1 bulk-log", BULK_LOG_PATH);
+			List<JsonNode> r1Health = getMethod(r1Captured, "R1 health", METHOD_HEALTH);
+			List<JsonNode> r1BulkHealth = getMethod(r1Captured, "R1 bulk-health", METHOD_BULK_HEALTH);
+			List<JsonNode> r1Log = getMethod(r1Captured, "R1 log", METHOD_LOG);
+			List<JsonNode> r1BulkLog = getMethod(r1Captured, "R1 bulk-log", METHOD_BULK_LOG);
+			List<JsonNode> r1Telemetry = getMethod(r1Captured, "R1 telemetry", METHOD_TELEMETRY);
+			List<JsonNode> r1BulkTelemetry = getMethod(r1Captured, "R1 bulk-telemetry", METHOD_BULK_TELEMETRY);
 
-			log.info("Round 1 received – telemetry={}, health={}, log={}, bulkTel={}, bulkHealth={}, bulkLog={}",
-					r1Telemetry.size(), r1Health.size(), r1Log.size(),
-					r1BulkTelemetry.size(), r1BulkHealth.size(), r1BulkLog.size());
+			log.info("Round 1 received – health={}, bulkHealth={}, log={}, bulkLog={}, telemetry={}, bulkTelemetry={}",
+					r1Health.size(), r1BulkHealth.size(), r1Log.size(), r1BulkLog.size(),
+					r1Telemetry.size(), r1BulkTelemetry.size());
 
 			// Structural and value verification
 			verifyHealthPayloads(r1Health, "Round 1");
@@ -297,8 +324,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", -1);
 
 			// Capture round 1's latest evaluationRequestsCount for comparison
-			long r1EvalCount = latestLong(r1Telemetry, "evaluationRequestsCount");
-			log.info("Round 1 – evaluationRequestsCount = {}", r1EvalCount);
+			long r1EvalCount = latestEntryLong(r1Telemetry, "evaluation_requests_count");
+			log.info("Round 1 – evaluation_requests_count = {}", r1EvalCount);
 
 			// Reset request journal – Round 2 starts clean
 			wireMockServer.resetRequests();
@@ -312,18 +339,18 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 2));
 
 			// Wait for the telemetry push triggered by round-2 evaluations
-			Map<String, List<JsonNode>> round2CapturedRequests = awaitAndCapture("R2", WAIT_TIMEOUT);
+			Map<String, List<JsonNode>> r2Captured = awaitAndCapture("R2", WAIT_TIMEOUT);
 
-			List<JsonNode> r2Telemetry = findCaptured(round2CapturedRequests, "R2 telemetry", TELEMETRY_PATH);
-			List<JsonNode> r2BulkTelemetry = findCaptured(round2CapturedRequests, "R2 bulk-telemetry", BULK_TELEMETRY_PATH);
-			List<JsonNode> r2Health = findCaptured(round2CapturedRequests, "R2 health", HEALTH_PATH);
-			List<JsonNode> r2BulkHealth = findCaptured(round2CapturedRequests, "R2 bulk-health", BULK_HEALTH_PATH);
-			List<JsonNode> r2Log = findCaptured(round2CapturedRequests, "R2 log", LOG_PATH);
-			List<JsonNode> r2BulkLog = findCaptured(round2CapturedRequests, "R2 bulk-log", BULK_LOG_PATH);
+			List<JsonNode> r2Health = getMethod(r2Captured, "R2 health", METHOD_HEALTH);
+			List<JsonNode> r2BulkHealth = getMethod(r2Captured, "R2 bulk-health", METHOD_BULK_HEALTH);
+			List<JsonNode> r2Log = getMethod(r2Captured, "R2 log", METHOD_LOG);
+			List<JsonNode> r2BulkLog = getMethod(r2Captured, "R2 bulk-log", METHOD_BULK_LOG);
+			List<JsonNode> r2Telemetry = getMethod(r2Captured, "R2 telemetry", METHOD_TELEMETRY);
+			List<JsonNode> r2BulkTelemetry = getMethod(r2Captured, "R2 bulk-telemetry", METHOD_BULK_TELEMETRY);
 
-			log.info("Round 2 received – telemetry={}, health={}, log={}, bulkTel={}, bulkHealth={}, bulkLog={}",
-					r2Telemetry.size(), r2Health.size(), r2Log.size(),
-					r2BulkTelemetry.size(), r2BulkHealth.size(), r2BulkLog.size());
+			log.info("Round 2 received – health={}, bulkHealth={}, log={}, bulkLog={}, telemetry={}, bulkTelemetry={}",
+					r2Health.size(), r2BulkHealth.size(), r2Log.size(), r2BulkLog.size(),
+					r2Telemetry.size(), r2BulkTelemetry.size());
 
 			verifyHealthPayloads(r2Health, "Round 2");
 			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", -1);
@@ -336,7 +363,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			compareTelemetryAcrossRounds(r1EvalCount, r1Telemetry, r2Telemetry);
 			compareHealthAcrossRounds(r1Health, r2Health);
 
-			log.info("✅ All HTTP telemetry assertions passed across both rounds.");
+			log.info("✅ All gRPC telemetry assertions passed across both rounds.");
 		}
 	}
 
@@ -356,7 +383,6 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		// JWT 2 – health allowed, log denied
 		assertTrue(authorize(jwt2, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R1: JWT2 must be allowed for /health");
 		assertFalse(authorize(jwt2, ACTION_POST, ID_LOG, PATH_LOG), "R1: JWT2 must be denied for /log (missing log.write)");
-
 		return 5; // 4 ALLOW + 1 DENY
 	}
 
@@ -378,7 +404,6 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		// JWT 1 – all allowed
 		assertTrue(authorize(jwt1, ACTION_POST, ID_LOG, PATH_LOG), "R2: JWT1 must be allowed for /log");
 		assertTrue(authorize(jwt1, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R2: JWT1 must be allowed for /health");
-
 		return 7; // 4 ALLOW + 3 DENY
 	}
 
@@ -397,10 +422,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			return;
 		}
 		for (int i = 0; i < payloads.size(); i++) {
-			JsonNode node = payloads.get(i);
-			String ctx = label + " health[" + i + "]";
-
-			verifyHealthPayload(ctx, node);
+			verifyHealthEntry(label + " health[" + i + "]", payloads.get(i).path("entry"));
 		}
 		log.info("[{}] {} health payload(s) verified", label, payloads.size());
 	}
@@ -410,39 +432,33 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			log.warn("⚠️ [{}] No bulk-health payloads received – skipping field checks", label);
 			return;
 		}
-
 		int count = 0;
 		for (int i = 0; i < payloads.size(); i++) {
-			JsonNode nodeArray = payloads.get(i);
-
-			assertTrue(nodeArray.isArray(), "Bulk Health response should be an array of health payloads, but got: " + nodeArray.getNodeType());
-
-			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " health[" + i + "][" + j + "]";
-				JsonNode node = nodeArray.get(j);
-
-				verifyHealthPayload(ctx, node);
+			JsonNode entries = payloads.get(i).path("entries");
+			assertTrue(entries.isArray(), label + " health[" + i + "]: 'entries' must be an array, got: " + entries.getNodeType());
+			for (int j = 0; j < entries.size(); j++) {
+				verifyHealthEntry(label + " health[" + i + "][" + j + "]", entries.get(j));
 				count++;
 			}
 		}
 		if (minExpectedEntries >= 0) {
 			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " health entries but got " + count);
 		}
-		log.info("[{}] ✅ {} health payloads verified", label, count);
+		log.info("[{}] ✅ {} health entry/entries verified", label, count);
 	}
 
-	private void verifyHealthPayload(String ctx, JsonNode node) {
+	private void verifyHealthEntry(String ctx, JsonNode entry) {
 		// ── Required fields ──
-		assertTrue(node.hasNonNull("service"), ctx + ": missing 'service'");
-		assertTrue(node.hasNonNull("status"), ctx + ": missing 'status'");
-		assertTrue(node.hasNonNull("node_name"), ctx + ": missing 'node_name'");
+		assertTrue(entry.hasNonNull("service"), ctx + ": missing 'service'");
+		assertTrue(entry.hasNonNull("status"), ctx + ": missing 'status'");
+		assertTrue(entry.hasNonNull("nodeName"), ctx + ": missing 'node_name'");
 
 		// ── Value assertions ──
-		assertEquals("Lock Server - Test Edition", node.get("service").asText(), ctx + ": service must be 'Lock Server - Test Edition'");
-		assertEquals("running", node.get("status").asText(), ctx + ": status must be 'running'");
+		assertEquals("Lock Server - Test Edition", entry.get("service").asText(), ctx + ": service must be 'Lock Server - Test Edition'");
+		assertEquals("running", entry.get("status").asText(), ctx + ": status must be 'running'");
 
 		// node_name must be present and non-blank
-		assertFalse(node.get("node_name").asText("").isBlank(), ctx + ": node_name must not be blank");
+		assertFalse(entry.get("nodeName").asText("").isBlank(), ctx + ": node_name must not be blank");
 	}
 
 	/**
@@ -461,8 +477,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			return;
 		}
 		for (int i = 0; i < payloads.size(); i++) {
-			// HTTP bodies are the log entry object directly (no "entry" wrapper)
-			verifyLogPayload(label + " log[" + i + "]", payloads.get(i));
+			verifyLogEntry(label + " log[" + i + "]", payloads.get(i).path("entry"));
 		}
 		log.info("[{}] {} log payload(s) verified", label, payloads.size());
 	}
@@ -472,52 +487,46 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			log.warn("⚠️ [{}] No bulk-log payloads received – skipping field checks", label);
 			return;
 		}
-
 		int count = 0;
 		for (int i = 0; i < payloads.size(); i++) {
-			JsonNode nodeArray = payloads.get(i);
-
-			assertTrue(nodeArray.isArray(), "Bulk Log response should be an array of log payloads, but got: " + nodeArray.getNodeType());
-
-			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " log[" + i + "][" + j + "]";
-				JsonNode node = nodeArray.get(j);
-
-				verifyLogPayload(ctx, node);
+			JsonNode entries = payloads.get(i).path("entries");
+			assertTrue(entries.isArray(), label + " log[" + i + "]: 'entries' must be an array, got: " + entries.getNodeType());
+			for (int j = 0; j < entries.size(); j++) {
+				verifyLogEntry(label + " log[" + i + "][" + j + "]", entries.get(j));
 				count++;
 			}
 		}
 		if (minExpectedEntries >= 0) {
 			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " log entries but got " + count);
 		}
-		log.info("[{}] ✅ {} log payload(s) verified", label, count);
+		log.info("[{}] ✅ {} log entry/entries verified", label, count);
 	}
 
-	private void verifyLogPayload(String ctx, JsonNode node) {
+	private void verifyLogEntry(String ctx, JsonNode entry) {
 		// ── Required fields ──
-		assertTrue(node.hasNonNull("clientId"), ctx + ": missing 'clientId'");
-		assertTrue(node.hasNonNull("principalId"), ctx + ": missing 'principalId'");
-		assertTrue(node.hasNonNull("decisionResult"), ctx + ": missing 'decisionResult'");
-		assertTrue(node.hasNonNull("action"), ctx + ": missing 'action'");
+		assertTrue(entry.hasNonNull("client_id"), ctx + ": missing 'client_id'");
+		assertTrue(entry.hasNonNull("principal_id"), ctx + ": missing 'principal_id'");
+		assertTrue(entry.hasNonNull("decision_result"), ctx + ": missing 'decision_result'");
+		assertTrue(entry.hasNonNull("action"), ctx + ": missing 'action'");
 
 		// ── Value assertions ──
-		String decision = node.get("decisionResult").asText();
-		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decisionResult must be 'ALLOW' or 'DENY', got: " + decision);
+		String decision = entry.get("decision_result").asText();
+		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decision_result must be 'ALLOW' or 'DENY', got: " + decision);
 
 		// action must follow the Cedar action URI format: Namespace::Action::"name"
-		String action = node.get("action").asText();
+		String action = entry.get("action").asText();
 		assertTrue(action.matches(".+::Action::\"[^\"]+\""), ctx + ": action must match Cedar format '<Namespace>::Action::\"<name>\"', got: " + action);
 
 		// clientId must be present and non-blank
-		assertFalse(node.get("clientId").asText("").isBlank(), ctx + ": clientId must not be blank");
+		assertFalse(entry.get("client_id").asText("").isBlank(), ctx + ": client_id must not be blank");
 	}
 
 	/**
 	 * Verifies structural fields and value assertions for every telemetry payload.
 	 *
 	 * <p>
-	 * Required fields: {@code service}, {@code status}, {@code evaluationRequestsCount},
-	 * {@code avgPolicyEvaluationTimeNs} (camelCase – HTTP JSON serialisation).
+	 * Required fields: {@code service}, {@code status}, {@code evaluation_requests_count},
+	 * {@code avg_policy_evaluation_time_ns} (snake_case – proto JSON serialisation).
 	 */
 	private void verifyTelemetryPayloads(List<JsonNode> payloads, String label) {
 		if (payloads.isEmpty()) {
@@ -525,56 +534,44 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			return;
 		}
 		for (int i = 0; i < payloads.size(); i++) {
-			JsonNode node = payloads.get(i);
-			String ctx = label + " telemetry[" + i + "]";
-
-			verifyTelemetryPayload(ctx, node);
+			verifyTelemetryEntry(label + " telemetry[" + i + "]", payloads.get(i).path("entry"));
 		}
 		log.info("[{}] {} telemetry payload(s) verified", label, payloads.size());
 	}
 
 	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
 		if (payloads.isEmpty()) {
-			log.warn("⚠️ [{}] No telemetry payloads received – skipping field checks", label);
+			log.warn("⚠️ [{}] No bulk-telemetry payloads received – skipping field checks", label);
 			return;
 		}
-
 		int count = 0;
 		for (int i = 0; i < payloads.size(); i++) {
-			JsonNode nodeArray = payloads.get(i);
-
-			assertTrue(nodeArray.isArray(), "Bulk Telemetry response should be an array of telemetry payloads, but got: " + nodeArray.getNodeType());
-
-			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " telemetry[" + i + "][" + j + "]";
-				JsonNode node = nodeArray.get(j);
-
-				verifyTelemetryPayload(ctx, node);
+			JsonNode entries = payloads.get(i).path("entries");
+			assertTrue(entries.isArray(), label + " telemetry[" + i + "]: 'entries' must be an array, got: " + entries.getNodeType());
+			for (int j = 0; j < entries.size(); j++) {
+				verifyTelemetryEntry(label + " telemetry[" + i + "][" + j + "]", entries.get(j));
 				count++;
 			}
 		}
 		if (minExpectedEntries >= 0) {
 			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " telemetry entries but got " + count);
 		}
-		log.info("[{}] ✅ {} telemetry payloads verified", label, count);
+		log.info("[{}] ✅ {} telemetry entry/entries verified", label, count);
 	}
 
-	private void verifyTelemetryPayload(String ctx, JsonNode node) {
-		// ── Required fields ──
-		assertTrue(node.hasNonNull("service"), ctx + ": missing 'service'");
-		assertTrue(node.hasNonNull("status"), ctx + ": missing 'status'");
-		assertTrue(node.hasNonNull("evaluationRequestsCount"), ctx + ": missing 'evaluationRequestsCount'");
-		assertTrue(node.hasNonNull("avgPolicyEvaluationTimeNs"), ctx + ": missing 'avgPolicyEvaluationTimeNs'");
+	private void verifyTelemetryEntry(String ctx, JsonNode entry) {
+		assertTrue(entry.hasNonNull("service"), ctx + ": missing 'service'");
+		assertTrue(entry.hasNonNull("status"), ctx + ": missing 'status'");
+		assertTrue(entry.hasNonNull("evaluation_requests_count"), ctx + ": missing 'evaluation_requests_count'");
+		assertTrue(entry.hasNonNull("avg_policy_evaluation_time_ns"), ctx + ": missing 'avg_policy_evaluation_time_ns'");
 
-		// ── Value assertions ──
-		assertEquals("cedarling", node.get("service").asText(), ctx + ": service must be 'cedarling'");
+		assertEquals("cedarling", entry.get("service").asText(), ctx + ": service must be 'cedarling'");
 
-		long evalCount = node.get("evaluationRequestsCount").asLong();
-		assertTrue(evalCount >= 0, ctx + ": evaluationRequestsCount must be >= 0, got " + evalCount);
+		long evalCount = entry.get("evaluation_requests_count").asLong();
+		assertTrue(evalCount >= 0, ctx + ": evaluation_requests_count must be >= 0, got " + evalCount);
 
-		// Average evaluation time must be strictly positive once any evaluation has occurred
-		long avgEvalNs = node.get("avgPolicyEvaluationTimeNs").asLong(-1L);
-		assertTrue(avgEvalNs > 0, ctx + ": avgPolicyEvaluationTimeNs must be > 0, got " + avgEvalNs);
+		long avgEvalNs = entry.get("avg_policy_evaluation_time_ns").asLong(-1L);
+		assertTrue(avgEvalNs > 0, ctx + ": avg_policy_evaluation_time_ns must be > 0, got " + avgEvalNs);
 	}
 
 	// ─── Cross-round comparison ────────────────────────────────────────────────
@@ -597,16 +594,15 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			log.warn("⚠️ Cannot compare telemetry rounds – empty data (r1={}, r2={})", round1.size(), round2.size());
 			return;
 		}
-
-		long r2EvalCount = latestLong(round2, "evaluationRequestsCount");
-		log.info("evaluationRequestsCount — Round 1 (last) = {}  |  Round 2 (last) = {}", r1EvalCount, r2EvalCount);
+		long r2EvalCount = latestEntryLong(round2, "evaluation_requests_count");
+		log.info("evaluation_requests_count – Round 1 (last) = {}  |  Round 2 (last) = {}", r1EvalCount, r2EvalCount);
 
 		// Cedarling accumulates evaluations globally; Round 2 counter must not decrease
-		assertTrue(r2EvalCount >= r1EvalCount, "evaluationRequestsCount must not decrease between rounds: R1=" + r1EvalCount + ", R2=" + r2EvalCount);
+		assertTrue(r2EvalCount >= r1EvalCount, "evaluation_requests_count must not decrease between rounds: R1=" + r1EvalCount + ", R2=" + r2EvalCount);
 
 		// Service name is invariant
-		String r1Service = latestString(round1, "service");
-		String r2Service = latestString(round2, "service");
+		String r1Service = latestEntryString(round1, "service");
+		String r2Service = latestEntryString(round2, "service");
 		assertEquals(r1Service, r2Service, "service name must be consistent across rounds");
 
 		// Round 2 had more authorization calls – the difference should be visible
@@ -614,8 +610,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		log.info("evaluationRequestsCount delta (R2 – R1) = {}", delta);
 		// NOTE: delta could be 0 if Cedarling resets the counter per telemetry interval
 		// rather than accumulating globally. The ≥ assertion above is the safe guard.
-
-		log.info("✅ Cross-round HTTP telemetry comparison passed (delta={})", r2EvalCount - r1EvalCount);
+		log.info("✅ Cross-round gRPC telemetry comparison passed (delta={})", r2EvalCount - r1EvalCount);
 	}
 
 	/**
@@ -626,8 +621,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			log.warn("⚠️ Cannot compare health rounds – empty data (r1={}, r2={})", round1.size(), round2.size());
 			return;
 		}
-		String r1Status = latestString(round1, "status");
-		String r2Status = latestString(round2, "status");
+		String r1Status = latestEntryString(round1, "status");
+		String r2Status = latestEntryString(round2, "status");
 
 		assertEquals("running", r1Status, "Round 1 health status must be 'running'");
 		assertEquals("running", r2Status, "Round 2 health status must be 'running'");
@@ -636,119 +631,138 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	// ─── gRPC request capture utilities ──────────────────────────────────────
-	public List<JsonNode> findCaptured(Map<String, List<JsonNode>> capturedRequests, String label, String endpointPath) {
-
-		List<JsonNode> captured = capturedRequests.entrySet().stream()
-				.filter(entry -> entry.getKey() != null && entry.getKey().endsWith(endpointPath))
-				.map(Map.Entry::getValue).flatMap(List::stream)
-				.collect(Collectors.toList());
-		log.info("[{}] {} request(s) captured at {}", label, captured.size(), endpointPath);
-		return captured;
-	}
 
 	/**
-	 * Polls WireMock for POST requests at {@code endpointPath} until at least one arrives or {@code timeout} elapses, then returns all captured bodies as parsed
-	 * {@link JsonNode}s.
+	 * Polls WireMock until at least one gRPC audit call arrives (on any method) or {@code timeout} elapses, then returns all captured request bodies grouped by
+	 * method name.
 	 *
-	 * @param label        descriptive label for log output
-	 * @param endpointPath WireMock path to watch
-	 * @param timeout      maximum time to wait
-	 * @return list of parsed JSON bodies; empty if nothing arrived in time
+	 * @param label   descriptive label for log output
+	 * @param timeout maximum time to wait
+	 * @return map from gRPC method name to list of parsed JSON bodies; empty map if nothing arrived within the timeout
 	 */
 	private Map<String, List<JsonNode>> awaitAndCapture(String label, Duration timeout) throws InterruptedException {
-
 		long deadline = System.currentTimeMillis() + timeout.toMillis();
 		while (System.currentTimeMillis() < deadline) {
-			List<LoggedRequest> requests = wireMockServer.findAll(postRequestedFor(anyUrl()));
-			if (!requests.isEmpty()) {
-				Map<String, List<JsonNode>> parsed = parseRequestBodies(requests);
-				String logDump = parsed.entrySet().stream().map(entry -> entry.getKey() + " = " + entry.getValue().size()).collect(Collectors.joining(", ", "{", "}"));
-
-				log.info("Requests captured summary: {}", logDump);
+			Map<String, List<JsonNode>> captured = captureAllMethods();
+			if (!captured.isEmpty()) {
+				String summary = captured.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue().size()).collect(Collectors.joining(", ", "{", "}"));
+				log.info("[{}] gRPC requests captured: {}", label, summary);
 
 				if (DUMP_CAPTURED_REQUEST) {
-					parsed.forEach((path, nodes) -> {
-						log.info("Captured {} request(s) at {}:", nodes.size(), path);
+					captured.forEach((m, nodes) -> {
+						log.debug("Captured {} request(s) via gRPC {}:", nodes.size(), m);
 						for (int i = 0; i < nodes.size(); i++) {
-							log.info("  [{}][{}]: {}", path, i, nodes.get(i).toPrettyString());
+							log.debug("  [{}][{}]: {}", m, i, nodes.get(i).toPrettyString());
 						}
 					});
 				}
-				return parsed;
+				return captured;
 			}
 			Thread.sleep(500);
 		}
-		log.warn("[{}] Timeout ({}s) – no requests arrived", label, timeout.toSeconds());
+		log.warn("[{}] Timeout ({}s) – no gRPC audit requests arrived", label, timeout.toSeconds());
 		return Collections.emptyMap();
 	}
 
-	private void awaitDuration(Duration timeout) throws InterruptedException {
-		long deadline = System.currentTimeMillis() + timeout.toMillis();
+	/**
+	 * Queries the WireMock request journal for all recorded gRPC calls and returns their decoded JSON bodies grouped by method name.
+	 *
+	 * <p>
+	 * WireMock gRPC maps every incoming call to an HTTP POST at the path {@code /<fully-qualified-service-name>/<MethodName>}. For {@code audit.proto} that means
+	 * {@code /io.jans.lock.audit.AuditService/ProcessHealth} etc. The gRPC extension decodes the proto binary payload to JSON before recording it in the journal,
+	 * so {@link LoggedRequest#getBodyAsString()} returns a plain JSON string that Jackson can parse directly.
+	 *
+	 * @return map keyed by simple method name (e.g. {@code "ProcessHealth"})
+	 */
+	private Map<String, List<JsonNode>> captureAllMethods() {
+		Map<String, List<JsonNode>> result = new HashMap<>();
+
+		for (String method : ALL_GRPC_METHODS) {
+			// FIX: WireMock gRPC uses the fully-qualified path, not just the method name.
+			// Pattern: /<package>.<ServiceName>/<MethodName>
+			String grpcUrlPath = "/" + AUDIT_SERVICE_FQSN + "/" + method;
+
+			List<LoggedRequest> logged = wireMockServer.findAll(postRequestedFor(urlEqualTo(grpcUrlPath)));
+
+			if (logged.isEmpty()) {
+				continue;
+			}
+
+			List<JsonNode> nodes = logged.stream().map(request -> {
+				try {
+					// The WireMock gRPC extension transcodes the proto binary to JSON
+					// using the descriptor file, so the body is always valid JSON.
+					return objectMapper.readTree(request.getBodyAsString());
+				} catch (Exception ex) {
+					log.warn("Could not parse gRPC body for method {}: {}", method, ex.getMessage());
+					return null;
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+
+			if (!nodes.isEmpty()) {
+				result.put(method, nodes);
+			}
+		}
+		return result;
+	}
+
+	private void awaitDuration(Duration d) throws InterruptedException {
+		long deadline = System.currentTimeMillis() + d.toMillis();
 		while (System.currentTimeMillis() < deadline) {
 			Thread.sleep(500);
 		}
 	}
 
-	private Map<String, List<JsonNode>> parseRequestBodies(List<LoggedRequest> requests) {
-		return requests.stream().map(r -> {
-			try {
-				// Extract clean path (ignoring query parameters)
-				String fullPath = new URI(r.getUrl()).getPath();
-				String contextPath = fullPath.startsWith("/") ? "/" + fullPath.substring(1) : fullPath;
-				// Parse body
-				JsonNode node = objectMapper.readTree(r.getBodyAsString());
-
-				return new AbstractMap.SimpleEntry<>(contextPath, node);
-			} catch (Exception ex) {
-				log.warn("Could not parse request body or URL: {}", r.getUrl(), ex);
-				return null;
-			}
-		})
-				// Remove requests that failed to parse
-				.filter(Objects::nonNull)
-				// Group by the path (key) and collect the JsonNodes (value) into a List
-				.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+	/**
+	 * Retrieves captured payloads for a specific gRPC method from the map produced by {@link #awaitAndCapture}.
+	 */
+	private List<JsonNode> getMethod(Map<String, List<JsonNode>> captured, String label, String method) {
+		List<JsonNode> nodes = captured.getOrDefault(method, Collections.emptyList());
+		log.info("[{}] {} request(s) captured via gRPC {}", label, nodes.size(), method);
+		return nodes;
 	}
 
-	/** Extracts a {@code long} field from the last node in {@code nodes}. */
-	private long latestLong(List<JsonNode> nodes, String field) {
+	// ─── Field extraction helpers ─────────────────────────────────────────────
+
+	private long latestEntryLong(List<JsonNode> nodes, String field) {
 		if (nodes.isEmpty())
 			return 0L;
-		return nodes.get(nodes.size() - 1).path(field).asLong(0L);
+		return nodes.get(nodes.size() - 1).path("entry").path(field).asLong(0L);
 	}
 
-	/** Extracts a {@code String} field from the last node in {@code nodes}. */
-	private String latestString(List<JsonNode> nodes, String field) {
+	private String latestEntryString(List<JsonNode> nodes, String field) {
 		if (nodes.isEmpty())
 			return "";
-		return nodes.get(nodes.size() - 1).path(field).asText("");
-	}
-
-	private List<String> iteratorToList(Iterator<String> it) {
-		List<String> list = new ArrayList<>();
-		it.forEachRemaining(list::add);
-		return list;
+		return nodes.get(nodes.size() - 1).path("entry").path(field).asText("");
 	}
 
 	// ─── WireMock stub configuration ─────────────────────────────────────────
 
 	/**
-	 * Stubs the Lock server discovery document with endpoint URIs that all point back to the WireMock HTTPS port.
+	 * Stubs the Lock server discovery document on the plain HTTP port.
+	 *
+	 * <p>
+	 * <strong>Why HTTP and not HTTPS?</strong> WireMock auto-generates a self-signed TLS certificate with CN={@code tom akehurst}. Cedarling's gRPC transport uses
+	 * Tonic (Rust), which validates the peer certificate via rustls. Even with {@code lockAcceptInvalidCerts=true} Tonic rejects the cert with
+	 * {@code invalid peer certificate: UnknownIssuer} because the CA is not trusted – that flag only controls HTTP connections, not the Tonic gRPC layer.
+	 *
+	 * <p>
+	 * WireMock's HTTP connector listens with {@code (http/1.1, h2c)} – it supports HTTP/2 cleartext, so gRPC over h2c works without any certificate at all.
+	 * Pointing {@code lockServerConfigurationUri} at the plain HTTP port causes Cedarling to derive the gRPC target from an {@code http://} base URL and connect
+	 * via h2c, bypassing TLS entirely and eliminating the UnknownIssuer failure.
 	 */
 	private void configureWellKnownEndpoint() {
-		int port = wireMockServer.getHttpsPort();
-
-		String fullUrl = "https://localhost:" + port + WELL_KNOWN_PATH;
-		log.info("Configuring WireMock well-known endpoint stub at: {}", fullUrl);
+		int port = wireMockServer.getPort(); // plain HTTP / h2c port – no TLS
+		log.info("Configuring well-known stub: http://localhost:{}{}", port, WELL_KNOWN_PATH);
 
 		String body = """
 				{
 				  "version": "1.0",
-				  "issuer": "https://localhost:%d",
+				  "issuer": "http://localhost:%d",
 				  "audit": {
-				    "health_endpoint":    "https://localhost:%d/jans-lock/api/v1/audit/health",
-				    "log_endpoint":       "https://localhost:%d/jans-lock/api/v1/audit/log",
-				    "telemetry_endpoint": "https://localhost:%d/jans-lock/api/v1/audit/telemetry"
+				    "health_endpoint":    "http://localhost:%d/jans-lock/api/v1/audit/health",
+				    "log_endpoint":       "http://localhost:%d/jans-lock/api/v1/audit/log",
+				    "telemetry_endpoint": "http://localhost:%d/jans-lock/api/v1/audit/telemetry"
 				  }
 				}
 				""".formatted(port, port, port, port);
@@ -756,20 +770,52 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		wireMockServer.stubFor(get(urlEqualTo(WELL_KNOWN_PATH)).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(body)));
 	}
 
-	/** Stubs all six audit endpoints (single + bulk) to return HTTP 200 OK. */
-	private void configureAuditEndpoints() {
+	/**
+	 * Registers WireMock stubs for all six gRPC audit methods defined in {@link #ALL_GRPC_METHODS} using the official WireMock gRPC DSL.
+	 *
+	 * <p>
+	 * <strong>Why {@link WireMockGrpcService}?</strong> {@code WireMockGrpcService.stubFor()} uses WireMock's admin REST API (HTTP port) to register gRPC-aware
+	 * stubs. The previous code called {@code wireMockServer.addStubMapping(method(...).willReturn(...).build(ok))} which is incorrect for two reasons:
+	 * <ol>
+	 * <li>{@code GrpcStubMappingBuilder.build()} accepts no arguments – the single-arg overload does not exist and causes a compile error.</li>
+	 * <li>Registering a gRPC stub through {@code wireMockServer.addStubMapping()} bypasses the gRPC extension's URL/header enrichment, so WireMock cannot match
+	 * incoming gRPC calls against the stub.</li>
+	 * </ol>
+	 *
+	 * <p>
+	 * The {@link WireMockGrpcService} is lazily initialised here (not as a field initialiser) because the dynamic HTTP port is not yet assigned when the class is
+	 * loaded.
+	 *
+	 * <p>
+	 * <strong>WireMock 4 constructor note:</strong> {@code new WireMock(String, int)} was removed in WireMock 4. The correct way to obtain a client from a
+	 * {@link WireMockExtension} is via {@code wireMockServer.getRuntimeInfo().getWireMock()}, which returns a pre-configured {@link WireMock} instance pointing at
+	 * the correct host and HTTP port.
+	 */
+	private void configureGrpcAuditStubs() {
+		// Lazily create the service wrapper.
+		// getRuntimeInfo().getWireMock() is the WireMock 4-compatible way to obtain
+		// a WireMock client from a WireMockExtension (new WireMock(String,int)
+		// constructor was removed in WireMock 4).
+		if (grpcAuditService == null) {
+			grpcAuditService = new WireMockGrpcService(wireMockServer.getRuntimeInfo().getWireMock(), AUDIT_SERVICE_FQSN);
+		}
+
 		String ok = """
 				{"success": true, "message": "Audit data processed successfully"}
 				""";
-		List.of(HEALTH_PATH, BULK_HEALTH_PATH, LOG_PATH, BULK_LOG_PATH, TELEMETRY_PATH, BULK_TELEMETRY_PATH)
-				.forEach(path -> wireMockServer.stubFor(post(urlEqualTo(path)).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(ok))));
+
+		for (String methodName : ALL_GRPC_METHODS) {
+			// method() is statically imported from WireMockGrpc.
+			// json() is statically imported from WireMockGrpc.
+			grpcAuditService.stubFor(method(methodName).willReturn(json(ok)));
+		}
 	}
 
 	// ─── Cedarling service initialisation ────────────────────────────────────
 
 	/**
-	 * Builds a fully-wired {@link CedarlingAuthorizationService} (no CDI container available in tests) with Lock telemetry enabled and pointing at the WireMock
-	 * HTTPS server.
+	 * Builds a fully-wired {@link CedarlingAuthorizationService} (no CDI container in tests) with Lock telemetry enabled, gRPC audit transport, and targeting the
+	 * WireMock HTTPS server.
 	 */
 	private void initAuthService() throws Exception {
 		Logger svcLog = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
@@ -783,20 +829,22 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		when(appConfig.getCedarlingConfiguration()).thenReturn(cedarConf);
 
 		String policyStoreFn = System.getProperty("user.dir") + "/target/test-classes/test-policy-store";
-		// Point Cedarling at the WireMock discovery document
-		String lockServerUri = "https://localhost:" + wireMockServer.getHttpsPort() + WELL_KNOWN_PATH;
-		String lockAccessTokenJwt = withFutureExp(RAW_LOCK_ACCESS_TOKEN_JWT);
+		// Use the plain HTTP port so Cedarling's Tonic gRPC client connects via h2c
+		// (HTTP/2 cleartext) instead of TLS. WireMock's HTTP connector advertises h2c,
+		// so gRPC works without a certificate. See configureWellKnownEndpoint() for details.
+		String lockServerUri = "http://localhost:" + wireMockServer.getPort() + WELL_KNOWN_PATH;
+		String lockAccessToken = withFutureExp(RAW_LOCK_ACCESS_TOKEN_JWT);
 
 		authService = new CedarlingAuthorizationService() {
 			@Override
 			protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
-				// Delegate to the standard builder; JWT validation is disabled for tests
-				BootstrapConfig bootstrapConfig = BootstrapConfig.builder().applicationName("Lock Server - Test Edition")
-						.policyStoreLocalFn(System.getProperty("user.dir") + "/target/test-classes/test-policy-store").jwtStatusValidation(false).jwtSigValidation(false).logType(LogType.STD_OUT)
-						.logLevel(LogLevel.TRACE)
-						// Lock / telemetry
-						.lock(true).lockAcceptInvalidCerts(true).lockServerConfigurationUri(lockServerUri).lockDynamicConfiguration(true).lockHealthInterval(TELEMETRY_INTERVAL_SEC)
-						.lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessTokenJwt).build();
+				// JWT signature and status validation are disabled for tests;
+				// only the exp claim is patched to a future value.
+				BootstrapConfig bootstrapConfig = BootstrapConfig.builder().applicationName("Lock Server - Test Edition").policyStoreLocalFn(policyStoreFn).jwtStatusValidation(false)
+						.jwtSigValidation(false).logType(LogType.STD_OUT).logLevel(LogLevel.TRACE)
+						// Lock / telemetry settings
+						.lock(true).lockServerConfigurationUri(lockServerUri).lockLockTransport(LockTransport.GRPC).lockAcceptInvalidCerts(true).lockDynamicConfiguration(true)
+						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessToken).build();
 
 				log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
 				return bootstrapConfig;
@@ -817,7 +865,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		jwt2 = withFutureExp(RAW_JWT_2);
 		jwt3 = withFutureExp(RAW_JWT_3);
 
-		log.info("Cedarling service initialised – lock URI: {}", lockServerUri);
+		log.info("Cedarling service initialised (gRPC transport) – lock URI: {}", lockServerUri);
 	}
 
 	// ─── Authorisation helper ─────────────────────────────────────────────────

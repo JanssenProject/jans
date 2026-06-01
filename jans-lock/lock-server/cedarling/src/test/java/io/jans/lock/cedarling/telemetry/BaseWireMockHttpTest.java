@@ -42,7 +42,7 @@ import io.restassured.config.SSLConfig;
  * }
  * }</pre>
  *
- * <p><strong>Note:</strong> the {@link org.junit.jupiter.api.BeforeAll @BeforeAll}
+ * <p>The {@link org.junit.jupiter.api.BeforeAll @BeforeAll}
  * lifecycle method in this class is non-static.  JUnit 5 requires the concrete
  * test class to be annotated with
  * {@code @TestInstance(Lifecycle.PER_CLASS)} for non-static {@code @BeforeAll}

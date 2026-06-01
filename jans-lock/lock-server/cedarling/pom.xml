@@ -18,7 +18,7 @@
 		<maven.compiler.target>15</maven.compiler.target>
 		<maven.compiler.release>15</maven.compiler.release>
 	</properties>
-	
+
 	<build>
 		<resources>
 			<resource>
@@ -31,6 +31,53 @@
 				<directory>src/test/resources</directory>
 			</testResource>
 		</testResources>
+
+		<plugins>
+			<!--
+				Compile audit.proto to a binary descriptor set (audit.dsc).
+				WireMock gRPC extension requires a compiled descriptor file
+				in src/test/resources/wiremock/grpc/ to transcode proto<->JSON.
+				The descriptor is regenerated on every `generate-test-resources`
+				lifecycle phase, so it stays in sync with audit.proto.
+				
+				NOTE: audit.proto imports google/protobuf/timestamp.proto.
+				      includeStdTypes=true bundles the well-known types into
+				      the descriptor so WireMock can resolve them at runtime.
+			-->
+			<plugin>
+				<groupId>com.github.os72</groupId>
+				<artifactId>protoc-jar-maven-plugin</artifactId>
+				<version>3.11.4</version>
+				<executions>
+					<execution>
+						<id>generate-grpc-descriptor</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<protocVersion>3.25.1</protocVersion>
+							<!-- Bundle google/protobuf/timestamp.proto into the descriptor. -->
+							<includeStdTypes>true</includeStdTypes>
+							<inputDirectories>
+								<include>src/test/resources/grpc</include>
+							</inputDirectories>
+							<outputTargets>
+								<!--
+									type=descriptor generates a binary FileDescriptorSet (.dsc).
+									WireMock gRPC scans <rootDir>/grpc/ for *.dsc / *.desc files.
+								-->
+								<outputTarget>
+									<type>descriptor</type>
+									<addSources>none</addSources>
+									<outputDirectory>src/test/resources/wiremock/grpc</outputDirectory>
+								</outputTarget>
+							</outputTargets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -39,10 +86,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-model</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>cedarling-java</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>cedarling-java</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
@@ -70,14 +117,14 @@
 			<artifactId>jakarta.ejb-api</artifactId>
 		</dependency>
 
-		<!-- Servlet -->
+		<!-- Servlet (production scope) -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- RestEasy -->
+		<!-- REST -->
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
@@ -89,12 +136,18 @@
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
-		<!-- Tests -->
+		<!-- ================================================================
+		     TEST dependencies
+		     ================================================================ -->
+
+		<!-- JUnit 5 -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Mockito -->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -105,11 +158,20 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- REST Assured -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- WireMock 4 (modular layout):
+		     wiremock-jetty              - embedded Jetty HTTP/2 server
+		     wiremock-junit5             - JUnit 5 @RegisterExtension / @WireMockTest
+		     wiremock-httpclient-apache5 - HTTP client used by the WireMock admin API
+		     Duplicate wiremock-jetty entry removed from the original pom.
+		-->
 		<dependency>
 			<groupId>org.wiremock</groupId>
 			<artifactId>wiremock-jetty</artifactId>
@@ -122,20 +184,56 @@
 		</dependency>
 		<dependency>
 			<groupId>org.wiremock</groupId>
-			<artifactId>wiremock-jetty</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.wiremock</groupId>
 			<artifactId>wiremock-httpclient-apache5</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!--
+			WireMock gRPC extension.
+			Version 1.0.0-beta.4 is the latest release compatible with
+			wiremock 4.0.0-beta.34 (1.0.0-beta.5 is not yet in Maven Central).
+			This artifact brings grpc-stub, grpc-protobuf, and the server-side
+			Netty transport, but does NOT ship a client-side gRPC transport
+			suitable for ManagedChannelBuilder.  Add grpc-netty-shaded below
+			to provide that transport.
+		-->
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-grpc-extension</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!--
+			FIX: ManagedChannelProvider$ProviderNotFoundException
+			     "No functional channel service provider found.
+			      Try adding a dependency on grpc-okhttp, grpc-netty,
+			      or grpc-netty-shaded artifact"
+
+			ManagedChannelBuilder.forAddress() discovers transport providers
+			via ServiceLoader.  Without an explicit transport on the classpath
+			no provider is found and the build fails in setUpGrpc().
+
+			grpc-netty-shaded bundles its own Netty so it does not conflict
+			with the Netty version pulled in by WireMock / Jetty.
+			Pin to the same gRPC minor version that wiremock-grpc-extension
+			1.0.0-beta.4 uses internally (~1.62.x) to avoid binary
+			incompatibilities between grpc-core and the transport layer.
+		-->
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty-shaded</artifactId>
+			<version>1.62.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Servlet API for tests (Jetty 12 / Jakarta EE 10) -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.0.0</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
+
 		<!-- Documentation -->
 		<dependency>
 			<groupId>io.jans</groupId>
