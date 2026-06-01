@@ -21,7 +21,7 @@ use crate::LogLevel;
 /// based on token expiration claims and a configurable maximum TTL.
 #[derive(Clone)]
 pub(crate) struct TokenCache {
-    cache: Arc<RwLock<SparKV<Arc<Token>>>>,
+    cache: Option<Arc<RwLock<SparKV<Arc<Token>>>>>,
     max_ttl: usize,
     logger: Option<Logger>,
     metrics: Arc<MetricsCollector>,
@@ -57,13 +57,17 @@ impl TokenCache {
         logger: Option<Logger>,
         metrics: Arc<MetricsCollector>,
     ) -> Self {
-        Self {
-            cache: Arc::new(RwLock::new(SparKV::with_config(Config {
+        let cache = (max_ttl > 0).then(|| {
+            Arc::new(RwLock::new(SparKV::with_config(Config {
                 max_ttl: Duration::seconds(i64::try_from(max_ttl).unwrap_or_default()),
                 max_items: capacity,
                 earliest_expiration_eviction,
                 ..Default::default()
-            }))),
+            })))
+        });
+
+        Self {
+            cache,
             max_ttl,
             logger,
             metrics,
@@ -87,14 +91,13 @@ impl TokenCache {
     /// Returns `Some(Arc<Token>)` if the token is found in cache and not expired,
     /// otherwise returns `None`.
     pub(crate) fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
-        if self.max_ttl == 0 {
+        let Some(cache) = &self.cache else {
             self.metrics.record_cache_miss();
             return None;
-        }
+        };
 
         let key = hash_jwt_token(kind, jwt);
-        let result = self
-            .cache
+        let result = cache
             .read()
             .expect("token cache mutex shouldn't be poisoned")
             .get(&key)
@@ -115,9 +118,9 @@ impl TokenCache {
     /// 2. If the token has no `exp` claim and `max_ttl` is > 0, `max_ttl` is used.
     /// 3. If `max_ttl` is 0, the token cache is disabled and no token is cached.
     pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
-        if self.max_ttl == 0 {
+        let Some(cache) = &self.cache else {
             return;
-        }
+        };
 
         if TokenCache::check_token_expired(&token, now) {
             // token is expired, no need to save it
@@ -137,8 +140,7 @@ impl TokenCache {
             .map(|iss| vec![IndexKey::Iss(iss).index_value()])
             .unwrap_or_default();
 
-        let result = self
-            .cache
+        let result = cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
             .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys);
@@ -197,8 +199,11 @@ impl TokenCache {
     /// This should be called periodically to prevent memory leaks from
     /// accumulated expired tokens.
     pub(crate) fn clear_expired(&self) {
-        let cleared = self
-            .cache
+        let Some(cache) = &self.cache else {
+            return;
+        };
+
+        let cleared = cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
             .clear_expired();
@@ -209,7 +214,11 @@ impl TokenCache {
 
     /// Remove tokens from cache by index key
     pub(crate) fn invalidate_by_index(&self, index_key: &IndexKey) {
-        self.cache
+        let Some(cache) = &self.cache else {
+            return;
+        };
+
+        cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
             .remove_by_index(&index_key.index_value());
