@@ -16,11 +16,11 @@
 //! receiver — dropping the [`PolicyStoreRefreshHandle`] closes the channel and
 //! the worker exits at its next select boundary.
 
+use ahash::AHasher;
 use arc_swap::ArcSwap;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use futures::channel::oneshot;
 use futures::future::{Either, select};
-use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -36,7 +36,7 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex};
 use crate::http::cache_headers::CacheValidators;
-use crate::http::{ConditionalFetch, HttpClient};
+use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
 use crate::http::{JoinHandle, spawn_task};
 use crate::jwt::JwtService;
 use crate::log::interface::LogWriter;
@@ -46,6 +46,15 @@ use super::policy_store::{PolicyStoreLoadError, parse_cjar_bytes, parse_lock_mas
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
+
+/// Consecutive ticks where the current strategy fails to add value before we
+/// degrade to a less-efficient one (`Conditional` → `HeadThenGet` →
+/// `PlainGet`).
+const STRATEGY_DEGRADE_THRESHOLD: u32 = 3;
+
+/// Minimum elapsed time between attempts to upgrade back to a more efficient
+/// strategy after a degrade. Keeps a flaky upstream from churning the worker.
+const STRATEGY_REPROBE_INTERVAL_SECS: i64 = 1800;
 
 /// Outcome of a single refresh tick — encoded as `i64` for emission via the
 /// integer-enum `policy_store_refresh.last_outcome` metric.
@@ -61,6 +70,142 @@ pub(crate) enum RefreshOutcome {
     HttpError = 3,
     NetworkError = 4,
     ParseError = 5,
+}
+
+/// Per-source refresh strategy. The worker starts at
+/// [`RefreshStrategy::Conditional`] and degrades automatically when the
+/// upstream proves it doesn't honor the more efficient mode (degrade order:
+/// `Conditional` → `HeadThenGet` → `PlainGet`). A periodic probe attempts
+/// to upgrade back so a transiently misconfigured server doesn't permanently
+/// lock us into a heavier path.
+///
+/// Encoded as `i64` for the `policy_store_refresh.strategy_current` metric.
+#[repr(i64)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RefreshStrategy {
+    /// Send a conditional GET (`If-None-Match` / `If-Modified-Since`); a
+    /// well-behaved server replies `304` when unchanged.
+    Conditional = 1,
+    /// Send a HEAD first, compare cache validators, only do a plain GET when
+    /// they differ. Used when the upstream emits `ETag` / `Last-Modified` but
+    /// ignores conditional request headers.
+    HeadThenGet = 2,
+    /// Last resort — just GET the body every tick and rely on the body hash to
+    /// detect no-op reloads. Used when HEAD doesn't return useful validators
+    /// either, or rejects the request.
+    PlainGet = 3,
+}
+
+/// Per-source strategy tracking and transition counters.
+struct StrategyState {
+    current: RefreshStrategy,
+    /// Consecutive ticks where the current strategy didn't help.
+    degraded_count: u32,
+    /// When we last attempted to upgrade strategy via a Conditional probe.
+    /// Only relevant when `current != Conditional`.
+    last_probe_at: Option<DateTime<Utc>>,
+    /// Cumulative count of `Conditional → HeadThenGet` transitions.
+    conditional_to_head_transitions: u32,
+    /// Cumulative count of `HeadThenGet → PlainGet` transitions.
+    head_to_plain_transitions: u32,
+    /// Cumulative count of probes that successfully upgraded back to
+    /// [`RefreshStrategy::Conditional`].
+    upgrade_to_conditional_transitions: u32,
+}
+
+impl Default for StrategyState {
+    fn default() -> Self {
+        Self {
+            current: RefreshStrategy::Conditional,
+            degraded_count: 0,
+            last_probe_at: None,
+            conditional_to_head_transitions: 0,
+            head_to_plain_transitions: 0,
+            upgrade_to_conditional_transitions: 0,
+        }
+    }
+}
+
+impl StrategyState {
+    /// Decide which strategy to run for this tick. Returns `(strategy,
+    /// is_probe)`. `is_probe = true` indicates we're attempting to upgrade
+    /// from a degraded state — the tick logic uses this to decide whether
+    /// to interpret outcomes as upgrade signals.
+    fn choose_for_tick(&mut self) -> (RefreshStrategy, bool) {
+        if self.current == RefreshStrategy::Conditional {
+            return (RefreshStrategy::Conditional, false);
+        }
+        let now = Utc::now();
+        let due = self.last_probe_at.is_none_or(|t| {
+            now.signed_duration_since(t).num_seconds() >= STRATEGY_REPROBE_INTERVAL_SECS
+        });
+        if due {
+            self.last_probe_at = Some(now);
+            (RefreshStrategy::Conditional, true)
+        } else {
+            (self.current, false)
+        }
+    }
+
+    /// Record that the current strategy didn't help this tick (server returned
+    /// identical body despite conditional headers, or HEAD returned no useful
+    /// validators). Degrades the strategy when the threshold is reached.
+    fn record_degraded(&mut self) {
+        self.degraded_count = self.degraded_count.saturating_add(1);
+        if self.degraded_count < STRATEGY_DEGRADE_THRESHOLD {
+            return;
+        }
+        self.degraded_count = 0;
+        match self.current {
+            RefreshStrategy::Conditional => {
+                self.current = RefreshStrategy::HeadThenGet;
+                self.conditional_to_head_transitions =
+                    self.conditional_to_head_transitions.saturating_add(1);
+            },
+            RefreshStrategy::HeadThenGet => {
+                self.current = RefreshStrategy::PlainGet;
+                self.head_to_plain_transitions =
+                    self.head_to_plain_transitions.saturating_add(1);
+            },
+            // Already at the least efficient strategy — nothing to degrade to.
+            RefreshStrategy::PlainGet => {},
+        }
+    }
+
+    /// Reset the degrade counter — current strategy worked.
+    fn record_helped(&mut self) {
+        self.degraded_count = 0;
+    }
+
+    /// Hard-downgrade after an immediate signal (e.g. HEAD `405`). Skips the
+    /// degrade threshold since the upstream definitively refused the method.
+    fn force_degrade(&mut self) {
+        self.degraded_count = 0;
+        match self.current {
+            RefreshStrategy::Conditional => {
+                self.current = RefreshStrategy::HeadThenGet;
+                self.conditional_to_head_transitions =
+                    self.conditional_to_head_transitions.saturating_add(1);
+            },
+            RefreshStrategy::HeadThenGet => {
+                self.current = RefreshStrategy::PlainGet;
+                self.head_to_plain_transitions =
+                    self.head_to_plain_transitions.saturating_add(1);
+            },
+            RefreshStrategy::PlainGet => {},
+        }
+    }
+
+    /// A Conditional probe just confirmed the upstream supports `304` — upgrade
+    /// back to the efficient path. No-op if already there.
+    fn record_probe_success(&mut self) {
+        if self.current != RefreshStrategy::Conditional {
+            self.current = RefreshStrategy::Conditional;
+            self.degraded_count = 0;
+            self.upgrade_to_conditional_transitions =
+                self.upgrade_to_conditional_transitions.saturating_add(1);
+        }
+    }
 }
 
 /// Captures everything the refresh worker needs to rebuild a complete [`Authz`]
@@ -136,6 +281,7 @@ struct RefreshState {
     validators: CacheValidators,
     last_body_hash: Option<u64>,
     consecutive_failures: u32,
+    strategy: StrategyState,
 }
 
 impl RefreshState {
@@ -187,7 +333,10 @@ fn jitter_pct() -> i128 {
 }
 
 fn body_hash(bytes: &[u8]) -> u64 {
-    let mut h = DefaultHasher::new();
+    // `ahash::AHasher::default()` is process-local and faster than SipHash for
+    // multi-MB payloads — we only need within-process equality, not
+    // cryptographic strength or cross-process stability.
+    let mut h = AHasher::default();
     h.write(bytes);
     h.finish()
 }
@@ -314,6 +463,12 @@ async fn run_worker(
                 )
                 .await;
                 metrics.record_policy_store_refresh(outcome);
+                metrics.record_policy_store_refresh_strategy(
+                    state.strategy.current as i64,
+                    state.strategy.conditional_to_head_transitions,
+                    state.strategy.head_to_plain_transitions,
+                    state.strategy.upgrade_to_conditional_transitions,
+                );
             },
             Either::Right(_) => {
                 log.log_any(
@@ -337,105 +492,256 @@ async fn tick(
     state: &mut RefreshState,
     log: &Logger,
 ) -> RefreshOutcome {
-    let url = source.url();
-    let start = Utc::now();
+    let (strategy, is_probe) = state.strategy.choose_for_tick();
+    match strategy {
+        RefreshStrategy::Conditional => {
+            tick_conditional(source, http_client, rebuilder, authz_swap, state, log, is_probe).await
+        },
+        RefreshStrategy::HeadThenGet => {
+            tick_head_then_get(source, http_client, rebuilder, authz_swap, state, log).await
+        },
+        RefreshStrategy::PlainGet => {
+            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
+        },
+    }
+}
 
+async fn tick_conditional(
+    source: &RefreshSource,
+    http_client: &HttpClient,
+    rebuilder: &AuthzRebuilder,
+    authz_swap: &Arc<ArcSwap<Authz>>,
+    state: &mut RefreshState,
+    log: &Logger,
+    is_probe: bool,
+) -> RefreshOutcome {
+    let url = source.url();
     let fetch_result = http_client
         .get_bytes_conditional(url, &state.validators)
         .await;
 
     match fetch_result {
-        Err(e) => {
-            state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-            let is_net = e.is_max_retries_exceeded();
-            log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                    LogLevel::WARN,
-                    None,
-                ))
-                .set_message(format!(
-                    "policy store refresh: {} against {url}: {e}",
-                    if is_net {
-                        "network error"
-                    } else {
-                        "HTTP error"
-                    }
-                )),
-            );
-            if is_net {
-                RefreshOutcome::NetworkError
-            } else {
-                RefreshOutcome::HttpError
-            }
-        },
+        Err(e) => fetch_error(state, log, url, &e),
         Ok(ConditionalFetch::NotModified) => {
+            // 304 is the only definitive proof the upstream honors our
+            // conditional headers. Reset degrade counter; upgrade if we were
+            // probing from a degraded strategy.
             state.consecutive_failures = 0;
+            if is_probe {
+                state.strategy.record_probe_success();
+            } else {
+                state.strategy.record_helped();
+            }
             RefreshOutcome::NotModified
         },
         Ok(ConditionalFetch::Modified { bytes, validators }) => {
             let new_hash = body_hash(&bytes);
-
-            // Servers sometimes return 200 with byte-identical bodies even when
-            // we sent valid conditional headers. Short-circuit.
             if Some(new_hash) == state.last_body_hash {
+                // Same body despite conditional headers — server ignored them.
                 state.validators = validators;
                 state.consecutive_failures = 0;
+                if !is_probe {
+                    state.strategy.record_degraded();
+                }
                 return RefreshOutcome::NotModified;
             }
-
-            let parsed = match source.parse(&bytes).await {
-                Ok(p) => p,
-                Err(e) => {
-                    state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-                    log.log_any(
-                        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                            LogLevel::ERROR,
-                            None,
-                        ))
-                        .set_message(format!(
-                            "policy store refresh: parse failure for {url}: {e}"
-                        )),
-                    );
-                    return RefreshOutcome::ParseError;
-                },
-            };
-
-            let new_authz = match rebuilder.rebuild(parsed).await {
-                Ok(a) => a,
-                Err(e) => {
-                    state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-                    log.log_any(
-                        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                            LogLevel::ERROR,
-                            None,
-                        ))
-                        .set_message(format!(
-                            "policy store refresh: rebuild failure for {url}: {e}"
-                        )),
-                    );
-                    return RefreshOutcome::ParseError;
-                },
-            };
-
-            authz_swap.store(Arc::new(new_authz));
-            state.validators = validators;
-            state.last_body_hash = Some(new_hash);
-            state.consecutive_failures = 0;
-
-            let elapsed = Utc::now().signed_duration_since(start).num_milliseconds();
-            log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                    LogLevel::INFO,
-                    None,
-                ))
-                .set_message(format!(
-                    "policy store refresh: swapped new store from {url} in {elapsed} ms"
-                )),
-            );
-
-            RefreshOutcome::Success
+            // New body. Whether conditionals are honored is unproven (we can't
+            // distinguish a 304-capable server returning a real change from one
+            // that ignores conditionals and the body happened to change), so
+            // don't change strategy on this path.
+            parse_swap_and_record(
+                source, rebuilder, authz_swap, state, log, url, bytes, new_hash, validators,
+            )
+            .await
         },
     }
+}
+
+async fn tick_head_then_get(
+    source: &RefreshSource,
+    http_client: &HttpClient,
+    rebuilder: &AuthzRebuilder,
+    authz_swap: &Arc<ArcSwap<Authz>>,
+    state: &mut RefreshState,
+    log: &Logger,
+) -> RefreshOutcome {
+    let url = source.url();
+    let head = match http_client.head_validators(url).await {
+        Ok(h) => h,
+        Err(e) => return fetch_error(state, log, url, &e),
+    };
+    match head {
+        HeadOutcome::NotSupported => {
+            // Server explicitly rejected HEAD. Downgrade immediately and fall
+            // through to a plain GET this tick so we still make progress.
+            state.strategy.force_degrade();
+            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
+        },
+        HeadOutcome::Headers(new_validators) => {
+            if !new_validators.has_validator() {
+                // No ETag, no Last-Modified — HEAD added nothing. Count
+                // toward degrade and fall through to GET so we still get
+                // hash-based detection.
+                state.strategy.record_degraded();
+                return tick_plain_get(
+                    source,
+                    http_client,
+                    rebuilder,
+                    authz_swap,
+                    state,
+                    log,
+                )
+                .await;
+            }
+            if validators_match(&new_validators, &state.validators) {
+                state.validators = new_validators;
+                state.consecutive_failures = 0;
+                state.strategy.record_helped();
+                return RefreshOutcome::NotModified;
+            }
+            // Validators differ — fetch the body.
+            state.strategy.record_helped();
+            state.validators = new_validators;
+            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
+        },
+    }
+}
+
+async fn tick_plain_get(
+    source: &RefreshSource,
+    http_client: &HttpClient,
+    rebuilder: &AuthzRebuilder,
+    authz_swap: &Arc<ArcSwap<Authz>>,
+    state: &mut RefreshState,
+    log: &Logger,
+) -> RefreshOutcome {
+    let url = source.url();
+    let response = match http_client.get_with_retry(url).await {
+        Ok(r) => r,
+        Err(e) => return fetch_error(state, log, url, &e),
+    };
+    let status = response.status();
+    let new_validators = CacheValidators::from_headers(response.headers(), Utc::now());
+    let bytes = match response.bytes().await {
+        Ok(b) => b.to_vec(),
+        Err(e) => {
+            state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
+                    .set_message(format!(
+                        "policy store refresh: decode error for {url}: {e} (status {status})"
+                    )),
+            );
+            return RefreshOutcome::NetworkError;
+        },
+    };
+    let new_hash = body_hash(&bytes);
+    if Some(new_hash) == state.last_body_hash {
+        state.validators = new_validators;
+        state.consecutive_failures = 0;
+        return RefreshOutcome::NotModified;
+    }
+    parse_swap_and_record(
+        source,
+        rebuilder,
+        authz_swap,
+        state,
+        log,
+        url,
+        bytes,
+        new_hash,
+        new_validators,
+    )
+    .await
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn parse_swap_and_record(
+    source: &RefreshSource,
+    rebuilder: &AuthzRebuilder,
+    authz_swap: &Arc<ArcSwap<Authz>>,
+    state: &mut RefreshState,
+    log: &Logger,
+    url: &str,
+    bytes: Vec<u8>,
+    new_hash: u64,
+    new_validators: CacheValidators,
+) -> RefreshOutcome {
+    let start = Utc::now();
+    let parsed = match source.parse(&bytes).await {
+        Ok(p) => p,
+        Err(e) => {
+            state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
+                    .set_message(format!("policy store refresh: parse failure for {url}: {e}")),
+            );
+            return RefreshOutcome::ParseError;
+        },
+    };
+
+    let new_authz = match rebuilder.rebuild(parsed).await {
+        Ok(a) => a,
+        Err(e) => {
+            state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
+                    .set_message(format!(
+                        "policy store refresh: rebuild failure for {url}: {e}"
+                    )),
+            );
+            return RefreshOutcome::ParseError;
+        },
+    };
+
+    authz_swap.store(Arc::new(new_authz));
+    state.validators = new_validators;
+    state.last_body_hash = Some(new_hash);
+    state.consecutive_failures = 0;
+
+    let elapsed = Utc::now().signed_duration_since(start).num_milliseconds();
+    log.log_any(
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, None)).set_message(
+            format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
+        ),
+    );
+
+    RefreshOutcome::Success
+}
+
+fn fetch_error(
+    state: &mut RefreshState,
+    log: &Logger,
+    url: &str,
+    e: &crate::http::HttpClientError,
+) -> RefreshOutcome {
+    state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+    let is_net = e.is_max_retries_exceeded();
+    log.log_any(
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None)).set_message(
+            format!(
+                "policy store refresh: {} against {url}: {e}",
+                if is_net { "network error" } else { "HTTP error" }
+            ),
+        ),
+    );
+    if is_net {
+        RefreshOutcome::NetworkError
+    } else {
+        RefreshOutcome::HttpError
+    }
+}
+
+/// `true` if the two validator sets refer to the same resource version — used
+/// by the HEAD-then-GET fallback to decide whether to skip the body fetch.
+fn validators_match(a: &CacheValidators, b: &CacheValidators) -> bool {
+    if let (Some(ea), Some(eb)) = (a.etag.as_ref(), b.etag.as_ref()) {
+        return ea == eb;
+    }
+    if let (Some(la), Some(lb)) = (a.last_modified.as_ref(), b.last_modified.as_ref()) {
+        return la == lb;
+    }
+    false
 }
 
 #[cfg(test)]
@@ -524,5 +830,369 @@ mod tests {
 
         let s = RefreshSource::from_policy_store_source(&PolicyStoreSource::Yaml("..".into()));
         assert!(s.is_none());
+    }
+
+    // ---- Strategy state machine ----
+
+    #[test]
+    fn strategy_starts_at_conditional() {
+        let s = StrategyState::default();
+        assert_eq!(s.current, RefreshStrategy::Conditional);
+    }
+
+    #[test]
+    fn strategy_degrades_after_threshold() {
+        let mut s = StrategyState::default();
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD - 1 {
+            s.record_degraded();
+            assert_eq!(s.current, RefreshStrategy::Conditional);
+        }
+        s.record_degraded();
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(s.conditional_to_head_transitions, 1);
+        // Subsequent degrades climb further down.
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
+            s.record_degraded();
+        }
+        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        assert_eq!(s.head_to_plain_transitions, 1);
+    }
+
+    #[test]
+    fn strategy_record_helped_resets_degrade_counter() {
+        let mut s = StrategyState::default();
+        s.record_degraded();
+        s.record_degraded();
+        s.record_helped();
+        // After helping, threshold should be re-counted from zero.
+        s.record_degraded();
+        assert_eq!(s.current, RefreshStrategy::Conditional, "no degrade yet");
+    }
+
+    #[test]
+    fn strategy_force_degrade_skips_threshold() {
+        let mut s = StrategyState::default();
+        s.force_degrade();
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(s.conditional_to_head_transitions, 1);
+    }
+
+    #[test]
+    fn strategy_probe_success_upgrades_back_to_conditional() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            ..StrategyState::default()
+        };
+        s.record_probe_success();
+        assert_eq!(s.current, RefreshStrategy::Conditional);
+        assert_eq!(s.upgrade_to_conditional_transitions, 1);
+    }
+
+    #[test]
+    fn strategy_choose_returns_conditional_when_current() {
+        let mut s = StrategyState::default();
+        let (chosen, is_probe) = s.choose_for_tick();
+        assert_eq!(chosen, RefreshStrategy::Conditional);
+        assert!(!is_probe);
+    }
+
+    #[test]
+    fn strategy_choose_first_probe_when_degraded() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::HeadThenGet,
+            ..StrategyState::default()
+        };
+        let (chosen, is_probe) = s.choose_for_tick();
+        assert_eq!(chosen, RefreshStrategy::Conditional);
+        assert!(is_probe);
+        assert!(s.last_probe_at.is_some());
+    }
+
+    #[test]
+    fn strategy_choose_returns_current_between_probes() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            last_probe_at: Some(Utc::now()),
+            ..StrategyState::default()
+        };
+        let (chosen, is_probe) = s.choose_for_tick();
+        assert_eq!(chosen, RefreshStrategy::PlainGet);
+        assert!(!is_probe);
+    }
+
+    // ---- validators_match ----
+
+    #[test]
+    fn validators_match_etag_takes_precedence() {
+        let a = CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Tue".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(validators_match(&a, &b), "matching ETag wins");
+    }
+
+    #[test]
+    fn validators_match_falls_back_to_last_modified() {
+        let a = CacheValidators {
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_returns_false_when_neither_present() {
+        let a = CacheValidators::default();
+        let b = CacheValidators::default();
+        assert!(!validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_returns_false_on_different_etag() {
+        let a = CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            etag: Some("\"v2\"".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(!validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_falls_back_to_last_modified_when_etag_only_on_one_side() {
+        // ETag must be on BOTH sides to be considered; otherwise fall back.
+        let a = CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            etag: None,
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_returns_false_when_etag_differs_even_if_lm_matches() {
+        // ETag mismatch is decisive — we do not "rescue" the match via Last-Modified.
+        let a = CacheValidators {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            etag: Some("\"v2\"".to_string()),
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(!validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_returns_false_on_different_last_modified() {
+        let a = CacheValidators {
+            last_modified: Some("Mon, 01 Jan 2024 00:00:00 GMT".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators {
+            last_modified: Some("Tue, 02 Jan 2024 00:00:00 GMT".to_string()),
+            ..CacheValidators::default()
+        };
+        assert!(!validators_match(&a, &b));
+    }
+
+    #[test]
+    fn validators_match_returns_false_when_lm_present_on_one_side_only() {
+        let a = CacheValidators {
+            last_modified: Some("Mon".to_string()),
+            ..CacheValidators::default()
+        };
+        let b = CacheValidators::default();
+        assert!(!validators_match(&a, &b));
+    }
+
+    // ---- Strategy state machine edge cases ----
+
+    #[test]
+    fn strategy_plain_get_does_not_degrade_further() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            ..StrategyState::default()
+        };
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD * 3 {
+            s.record_degraded();
+        }
+        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        // Transition counters should not budge — there's no transition target.
+        assert_eq!(s.head_to_plain_transitions, 0);
+        assert_eq!(s.conditional_to_head_transitions, 0);
+    }
+
+    #[test]
+    fn strategy_force_degrade_at_plain_get_is_noop() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            ..StrategyState::default()
+        };
+        s.force_degrade();
+        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        assert_eq!(s.conditional_to_head_transitions, 0);
+        assert_eq!(s.head_to_plain_transitions, 0);
+    }
+
+    #[test]
+    fn strategy_probe_success_noop_when_already_conditional() {
+        let mut s = StrategyState::default();
+        assert_eq!(s.current, RefreshStrategy::Conditional);
+        s.record_probe_success();
+        assert_eq!(s.current, RefreshStrategy::Conditional);
+        assert_eq!(s.upgrade_to_conditional_transitions, 0);
+    }
+
+    #[test]
+    fn strategy_record_helped_does_not_change_current() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::HeadThenGet,
+            ..StrategyState::default()
+        };
+        s.record_helped();
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+    }
+
+    #[test]
+    fn strategy_cumulative_transitions_accumulate() {
+        // Walk down then probe-back several times to verify the counters
+        // accumulate across cycles instead of being overwritten.
+        let mut s = StrategyState::default();
+        for _ in 0..3 {
+            for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
+                s.record_degraded();
+            }
+            s.record_probe_success();
+        }
+        assert_eq!(s.current, RefreshStrategy::Conditional);
+        assert_eq!(s.conditional_to_head_transitions, 3);
+        assert_eq!(s.upgrade_to_conditional_transitions, 3);
+    }
+
+    #[test]
+    fn strategy_full_walk_down() {
+        // Conditional → HeadThenGet → PlainGet, threshold at each step.
+        let mut s = StrategyState::default();
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
+            s.record_degraded();
+        }
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
+            s.record_degraded();
+        }
+        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        assert_eq!(s.conditional_to_head_transitions, 1);
+        assert_eq!(s.head_to_plain_transitions, 1);
+    }
+
+    #[test]
+    fn strategy_degrade_counter_resets_on_transition() {
+        // After degrading, the counter starts from zero for the next level —
+        // we don't immediately fall off the cliff to PlainGet.
+        let mut s = StrategyState::default();
+        for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
+            s.record_degraded();
+        }
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        // One more degrade should NOT trigger another transition.
+        s.record_degraded();
+        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+    }
+
+    #[test]
+    fn strategy_choose_does_not_advance_probe_clock_when_conditional() {
+        // Calling choose_for_tick while at Conditional must not stamp
+        // last_probe_at — there's no probe to schedule.
+        let mut s = StrategyState::default();
+        let _ = s.choose_for_tick();
+        assert!(s.last_probe_at.is_none());
+    }
+
+    #[test]
+    fn strategy_choose_does_not_reset_degrade_counter() {
+        let mut s = StrategyState {
+            current: RefreshStrategy::HeadThenGet,
+            degraded_count: 2,
+            ..StrategyState::default()
+        };
+        let _ = s.choose_for_tick();
+        assert_eq!(s.degraded_count, 2);
+    }
+
+    // ---- body_hash edge cases ----
+
+    #[test]
+    fn body_hash_handles_empty_bytes() {
+        let h1 = body_hash(b"");
+        let h2 = body_hash(b"");
+        assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn body_hash_differs_between_empty_and_single_byte() {
+        assert_ne!(body_hash(b""), body_hash(b"\0"));
+    }
+
+    #[test]
+    fn body_hash_sensitive_to_byte_order() {
+        assert_ne!(body_hash(b"ab"), body_hash(b"ba"));
+    }
+
+    // ---- next_delay edge cases ----
+
+    #[test]
+    fn next_delay_zero_fresh_for_falls_through_to_base() {
+        // Server hint of zero seconds should NOT collapse the interval to zero —
+        // it falls through to the operator base (which has its own min floor).
+        let s = RefreshState {
+            validators: CacheValidators {
+                fresh_for: Some(Duration::ZERO),
+                ..CacheValidators::default()
+            },
+            ..RefreshState::default()
+        };
+        let d = s.next_delay(60).as_secs();
+        assert!((54..=66).contains(&d), "got {d}");
+    }
+
+    #[test]
+    fn next_delay_saturates_under_maximum_failures() {
+        // u32::MAX consecutive failures must not panic; backoff cap absorbs it.
+        let s = RefreshState {
+            consecutive_failures: u32::MAX,
+            ..RefreshState::default()
+        };
+        let d = s.next_delay(60).as_secs();
+        // Capped at REFRESH_FAILURE_BACKOFF_MAX_SECS (=600) plus ±10% jitter.
+        assert!(d <= 660, "got {d}");
+    }
+
+    #[test]
+    fn next_delay_huge_base_is_bounded_by_no_failure_path() {
+        // Without failures there's no upper bound on base — confirm we still
+        // return a reasonable duration without arithmetic overflow.
+        let s = RefreshState::default();
+        let d = s.next_delay(u64::MAX / 1024).as_secs();
+        assert!(d > 0, "got {d}");
     }
 }
