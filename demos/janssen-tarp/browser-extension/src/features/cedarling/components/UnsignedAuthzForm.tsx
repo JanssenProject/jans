@@ -132,7 +132,9 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
               <div className="border border-gray-200 rounded-lg p-3">
                 <JsonEditor
                   data={formFields.principal}
-                  setData={(e: any) => setFormFields((prev) => ({ ...prev, principal: e }))}
+                  setData={(e: unknown) =>
+                    setFormFields((prev) => ({ ...prev, principal: (e ?? {}) as Record<string, unknown> }))
+                  }
                   rootName="principal"
                 />
               </div>
