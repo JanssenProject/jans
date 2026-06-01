@@ -121,10 +121,23 @@ class AwsSecret(BaseSecret):
         if not names:
             return {}
 
-        payload = b"".join([
-            self.client.get_secret_value(SecretId=name)["SecretBinary"]
-            for name in names
-        ])
+        data = {}
+        payload = b""
+
+        for name in names:
+            fragment = self.client.get_secret_value(SecretId=name)
+            payload = payload + fragment["SecretBinary"]
+
+            try:
+                # validate if combined payload and fragment produces a valid JSON
+                json.loads(payload)
+                break
+            except json.JSONDecodeError:
+                # combined payload is not a valid JSON, proceed to merge with next secret part
+                continue
+
+        if not payload:
+            return {}
 
         try:
             # previously data is compressed using lzma
