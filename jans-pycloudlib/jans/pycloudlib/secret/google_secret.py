@@ -164,10 +164,23 @@ class GoogleSecret(BaseSecret):
         payload = b""
 
         for name in names:
+            fragment = b""
+
             # the secret with given name may not exist or have any versions created yet
             with suppress(NotFound):
-                fragment = self.client.access_secret_version(request={"name": name})
-                payload = payload + fragment.payload.data
+                fragment = self.client.access_secret_version(request={"name": name}).payload.data
+                # payload = payload + fragment.payload.data
+
+            try:
+                # validate if combined payload and fragment produces a valid JSON
+                json.loads(payload + fragment)
+            except json.JSONDecodeError:
+                # combined payload is not a valid JSON, proceed to merge with next secret part
+                continue
+            else:
+                # combined payload is probably a valid JSON
+                payload = payload + fragment
+                break
 
         if not payload:
             return {}
