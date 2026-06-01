@@ -146,6 +146,18 @@ class GoogleSecret(BaseSecret):
         Returns:
             A mapping of secrets (if any)
         """
+        def _get_part_number(name: str) -> int:
+            # Extract part number from secret name like "projects/.../secrets/jans-secret-2/versions/latest"
+            secret_name = name.split("/secrets/")[1].split("/versions/")[0]
+            if secret_name == self.google_secret_name:
+                return 0
+
+            # Extract the numeric suffix
+            try:
+                return int(secret_name.split("-")[-1])
+            except (ValueError, IndexError):
+                return 0
+
         # get a list of secrets with prefixed name
         resp = self.client.list_secrets(
             request={
@@ -157,6 +169,10 @@ class GoogleSecret(BaseSecret):
         # collect all secret names (if any) for further request
         names = [f"{scr.name}/versions/{self.version_id}" for scr in resp]
 
+        # Sort secrets by part number to ensure correct payload assembly
+        # Part 0 is "jans-secret", part N is "jans-secret-N"
+        names.sort(key=_get_part_number)
+
         if not names:
             return {}
 
@@ -164,8 +180,6 @@ class GoogleSecret(BaseSecret):
         payload = b""
 
         for name in names:
-            fragment = b""
-
             # the secret with given name may not exist or have any versions created yet
             with suppress(NotFound):
                 fragment = self.client.access_secret_version(request={"name": name})
