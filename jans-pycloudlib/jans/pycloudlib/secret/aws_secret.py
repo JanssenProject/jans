@@ -112,11 +112,26 @@ class AwsSecret(BaseSecret):
         Returns:
             A mapping of secrets (if any).
         """
+        def _get_part_number(name: str) -> int:
+            # Extract part number from secret name like "jans_secrets", "jans_secrets_1", and so on
+            if name == self.basepath:
+                return 0
+
+            # Extract the numeric suffix
+            try:
+                return int(name.split("_")[-1])
+            except (ValueError, IndexError):
+                return 0
+
         # get all existing multipart secrets
         resp = self.client.list_secrets(
             Filters=[{"Key": "name", "Values": [self.basepath]}],
         )
         names = [secret["Name"] for secret in resp["SecretList"]]
+
+        # Sort secrets by part number to ensure correct payload assembly
+        # Part 0 is "jans_secrets", part N is "jans_secret_N"
+        names.sort(key=_get_part_number)
 
         if not names:
             return {}
