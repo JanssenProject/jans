@@ -10,8 +10,8 @@ keywords:
   - OpenID
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans-auth-server
-  - https://github.com/JanssenProject/docker-jans-auth-server
+  - https://github.com/JanssenProject/jans/tree/main/jans-auth-server
+  - https://github.com/JanssenProject/jans/tree/main/docker-jans-auth-server
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

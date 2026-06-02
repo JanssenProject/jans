@@ -1,0 +1,10 @@
+{
+  "cedar_entity_mapping": {
+    "entity_type": "Jans::User",
+    "id": "some_id"
+  },
+  "sub": "some_sub",
+  "role": [
+    "Teacher"
+  ]
+}

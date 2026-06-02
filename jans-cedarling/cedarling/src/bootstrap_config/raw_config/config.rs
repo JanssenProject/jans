@@ -209,6 +209,28 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_ssa_jwt: Option<String>,
 
+    /// Pre-issued access token to use for Lock Server authentication, bypassing
+    /// the SSA → DCR → `access_token` flow entirely.
+    ///
+    /// When this property is set, Cedarling will skip Dynamic Client Registration
+    /// and use this access token directly to authenticate with Lock Server endpoints
+    /// (log, health, telemetry). Primarily intended for testing and local development
+    /// to simplify the bootstrap flow; may also be used in environments where the
+    /// DCR flow is not available or access tokens are provisioned externally.
+    ///
+    /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
+    /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is
+    /// skipped.
+    ///
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_LOCK_ACCESS_TOKEN_JWT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub lock_access_token_jwt: Option<String>,
+
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -268,8 +290,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
     ///   tokens that do not carry an `exp` claim.
-    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
-    ///   claim; tokens without `exp` are not cached at all.
+    /// - `0`: disables the token cache entirely.
     ///
     /// Default: `5` seconds — small enough to pick up revocation / status-list
     /// changes quickly, large enough to amortise repeated requests for the

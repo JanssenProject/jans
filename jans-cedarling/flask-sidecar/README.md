@@ -17,8 +17,6 @@ To run the API, you will need python 3.11 installed.
   ```
 - Navigate to `jans-cedarling/flask-sidecar`
 - Run `uv sync --locked --python 3.11` to install dependencies
-- Download the [binding library](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl)
-- Install the binding to your local environment: `uv pip install ./cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl`
 - Activate the virtual environment: `source .venv/bin/activate`
 - Navigate to `main/`
 - Run `flask run` to run the API on `http://127.0.0.1:5000`
