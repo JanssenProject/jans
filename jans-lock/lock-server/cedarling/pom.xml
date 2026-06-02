@@ -222,7 +222,7 @@
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.0.0</version>
-			<scope>;rovided</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Documentation -->
