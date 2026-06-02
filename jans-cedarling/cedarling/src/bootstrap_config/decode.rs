@@ -65,14 +65,9 @@ impl BootstrapConfig {
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
             },
-            // Case: get the policy store from a URI (auto-detect .cjar archives)
-            (None, Some(policy_store_uri), None) => {
-                let source = if policy_store_uri.to_lowercase().ends_with(".cjar") {
-                    PolicyStoreSource::CjarUrl(policy_store_uri)
-                } else {
-                    PolicyStoreSource::LockServer(policy_store_uri)
-                };
-                PolicyStoreConfig { source }
+            // Case: get the policy store from a URI (auto-detect archive vs lock server)
+            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(policy_store_uri),
             },
             // Case: get the policy store from a local file or directory
             (None, None, Some(raw_path)) => {

@@ -67,6 +67,14 @@ pub enum PolicyStoreSource {
     /// in the directory structure format (`metadata.json`, `schema.cedarschema`, `policies/`, etc.).
     Directory(PathBuf),
 
+    /// An unresolved URI whose source type (archive vs lock server) is detected
+    /// at load time via HTTP content-type inspection and/or magic byte checking.
+    ///
+    /// During loading, [`load_policy_store`](crate::init::policy_store::load_policy_store)
+    /// resolves this by making an HTTP request to determine whether the URI points
+    /// to a Cedar Archive (`.cjar`) or a Lock Master endpoint.
+    Uri(String),
+
     /// Read policy from Cedar Archive bytes directly.
     ///
     /// The bytes contain a `.cjar` archive (ZIP format) with the policy store.

@@ -12,6 +12,9 @@ use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 
+// ZIP local-file-header magic bytes.
+const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
+
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
 pub enum PolicyStoreLoadError {
@@ -39,6 +42,9 @@ pub enum PolicyStoreLoadError {
     /// Failed to load policy store from directory.
     #[error("Failed to load policy store from directory: {0}")]
     Directory(String),
+    /// Failed to detect policy store from an unresolved URI.
+    #[error("Failed to detect policy store source: {0}")]
+    UriDetection(String),
 }
 
 // LegacyAgamaPolicyStore contains the structure to accommodate several policies,
@@ -120,9 +126,49 @@ pub(crate) async fn load_policy_store(
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path)?,
         PolicyStoreSource::ArchiveBytes(bytes) => load_policy_store_from_archive_bytes(bytes)?,
+        PolicyStoreSource::Uri(uri) => load_policy_store_from_uri(uri, http_client).await?,
     };
 
     Ok(policy_store)
+}
+
+/// Loads the policy store from a URI with content-type-based format detection.
+async fn load_policy_store_from_uri(
+    uri: &str,
+    http_client: &HttpClient,
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    if uri.to_lowercase().ends_with(".cjar") {
+        return load_policy_store_from_cjar_url(uri, http_client).await;
+    }
+
+    let response = http_client.get_with_retry(uri).await?;
+
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("")
+        .to_owned();
+
+    let bytes = response.bytes().await.map_err(|e| {
+        PolicyStoreLoadError::UriDetection(format!("failed to read response body: {e}"))
+    })?;
+
+    if (content_type.is_empty()
+        || content_type.contains("application/octet-stream")
+        || content_type.contains("application/zip"))
+        && bytes.starts_with(&ZIP_MAGIC)
+    {
+        return load_policy_store_from_archive_bytes(&bytes);
+    }
+
+    let agama_policy_store =
+        serde_json::from_slice::<LegacyAgamaPolicyStore>(&bytes).map_err(|e| {
+            PolicyStoreLoadError::UriDetection(format!(
+                "failed to parse the policy store from the response: {e}"
+            ))
+        })?;
+    extract_first_policy_store(&agama_policy_store)
 }
 
 /// Loads the policy store from the Lock Master.
@@ -354,7 +400,8 @@ mod test {
 
     use super::load_policy_store;
     use crate::{
-        PolicyStoreConfig,
+        PolicyStoreConfig, PolicyStoreSource,
+        common::policy_store::test_utils::fixtures,
         http::{HttpClient, HttpClientConfig},
     };
 
@@ -424,6 +471,93 @@ mod test {
         )
         .await
         .expect("Should load policy store from Lock Master file");
+
+        mock_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn can_load_from_uri_with_json_content_type() {
+        let mut mock_server = Server::new_async().await;
+
+        let policy_store_json =
+            include_str!("../../../test_files/policy-store_lock_master_ok.json").to_string();
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(policy_store_json)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store", mock_server.url()).to_string();
+
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri),
+            },
+            &HTTP_CLIENT,
+        )
+        .await
+        .expect("Should load policy store from URI with JSON content-type");
+
+        mock_endpoint.assert();
+    }
+    #[tokio::test]
+    async fn can_load_from_uri_missing_content_type_uses_magic_bytes() {
+        let mut mock_server = Server::new_async().await;
+
+        let archive_bytes = fixtures::minimal_valid()
+            .build_archive()
+            .expect("Should build test archive");
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(200)
+            .with_body(archive_bytes)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store", mock_server.url()).to_string();
+
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri),
+            },
+            &HTTP_CLIENT,
+        )
+        .await
+        .expect("Should load policy store from URI with magic bytes and no content-type");
+
+        mock_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn can_load_from_uri_with_octet_stream_content_type() {
+        let mut mock_server = Server::new_async().await;
+
+        let archive_bytes = fixtures::minimal_valid()
+            .build_archive()
+            .expect("Should build test archive");
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(200)
+            .with_header("content-type", "application/octet-stream")
+            .with_body(archive_bytes)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store", mock_server.url()).to_string();
+
+        load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri),
+            },
+            &HTTP_CLIENT,
+        )
+        .await
+        .expect("Should load policy store from URI with octet-stream content-type");
 
         mock_endpoint.assert();
     }
