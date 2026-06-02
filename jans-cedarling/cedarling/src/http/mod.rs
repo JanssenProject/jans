@@ -247,6 +247,33 @@ impl HttpClient {
             validators: new_validators,
         })
     }
+
+    /// Sends a HEAD request and parses the response headers into a
+    /// [`CacheValidators`]. Used by the HEAD-then-GET fallback strategy when an
+    /// upstream emits `ETag` / `Last-Modified` but ignores `If-None-Match` /
+    /// `If-Modified-Since`. Servers that reject HEAD (`405` / `501`) return
+    /// [`HeadOutcome::NotSupported`] so the caller can downgrade to plain GET.
+    ///
+    /// Intentionally does **not** retry on failure: HEAD here is a probe, and
+    /// the surrounding refresh worker either downgrades to a plain GET on the
+    /// same tick or simply runs again on the next interval. Burning the retry
+    /// budget on a probe would only delay the downgrade.
+    pub(crate) async fn head_validators(&self, uri: &str) -> Result<HeadOutcome, HttpClientError> {
+        let response = self.raw_client.head(uri).send().await.map_err(|e| {
+            let msg = e.to_string();
+            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
+                .with_retry_count(1)
+                .with_last_error(msg)
+        })?;
+        let status = response.status();
+        if status == reqwest::StatusCode::METHOD_NOT_ALLOWED
+            || status == reqwest::StatusCode::NOT_IMPLEMENTED
+        {
+            return Ok(HeadOutcome::NotSupported);
+        }
+        let validators = CacheValidators::from_headers(response.headers(), chrono::Utc::now());
+        Ok(HeadOutcome::Headers(validators))
+    }
 }
 
 /// Outcome of [`HttpClient::get_bytes_conditional`].
@@ -259,6 +286,16 @@ pub(crate) enum ConditionalFetch {
         bytes: Vec<u8>,
         validators: CacheValidators,
     },
+}
+
+/// Outcome of [`HttpClient::head_validators`].
+#[derive(Debug)]
+pub(crate) enum HeadOutcome {
+    /// HEAD succeeded — captured headers (validators may be empty if the server
+    /// didn't set `ETag` / `Last-Modified`).
+    Headers(CacheValidators),
+    /// Server explicitly rejected HEAD (`405` / `501`).
+    NotSupported,
 }
 
 #[derive(Debug)]
@@ -552,6 +589,98 @@ mod test {
             .get_bytes_conditional(&url, &validators)
             .await
             .expect("request");
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_captures_etag_and_last_modified() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(200)
+            .with_header("etag", "\"v3\"")
+            .with_header("last-modified", "Sun, 22 May 2026 12:00:00 GMT")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        match outcome {
+            super::HeadOutcome::Headers(v) => {
+                assert_eq!(v.etag.as_deref(), Some("\"v3\""));
+                assert_eq!(
+                    v.last_modified.as_deref(),
+                    Some("Sun, 22 May 2026 12:00:00 GMT")
+                );
+                assert!(v.has_validator());
+            },
+            super::HeadOutcome::NotSupported => panic!("expected Headers, got NotSupported"),
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_returns_empty_headers_when_no_validators() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        match outcome {
+            super::HeadOutcome::Headers(v) => {
+                assert!(
+                    !v.has_validator(),
+                    "no ETag, no Last-Modified → has_validator() false"
+                );
+            },
+            super::HeadOutcome::NotSupported => panic!("expected Headers, got NotSupported"),
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_405_maps_to_not_supported() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(405)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        assert!(matches!(outcome, super::HeadOutcome::NotSupported));
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_501_maps_to_not_supported() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(501)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        assert!(matches!(outcome, super::HeadOutcome::NotSupported));
         mock.assert_async().await;
     }
 }

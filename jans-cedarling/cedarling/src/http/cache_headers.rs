@@ -97,9 +97,8 @@ impl CacheValidators {
     }
 
     /// True if any conditional-request validator (`ETag` or `Last-Modified`) is
-    /// present. Only used by tests today; production code calls
-    /// [`HttpClient::get_bytes_conditional`] which inspects the fields directly.
-    #[cfg(test)]
+    /// present. Used by the HEAD-then-GET refresh strategy to decide whether
+    /// HEAD added enough information to skip the body fetch.
     pub(crate) fn has_validator(&self) -> bool {
         self.etag.is_some() || self.last_modified.is_some()
     }
