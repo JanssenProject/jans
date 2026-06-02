@@ -136,12 +136,6 @@
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 		<!-- ================================================================
 		     TEST dependencies
 		     ================================================================ -->
@@ -228,7 +222,7 @@
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.0.0</version>
-			<scope>test</scope>
+			<scope>;rovided</scope>
 		</dependency>
 
 		<!-- Documentation -->
