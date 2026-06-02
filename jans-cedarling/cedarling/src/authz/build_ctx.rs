@@ -34,7 +34,7 @@ pub(super) fn build_context(
     build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
-    pushed_data: &HashMap<String, Value>,
+    pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
@@ -98,12 +98,7 @@ pub(super) fn build_context(
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(
-            pushed_data
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect(),
-        );
+        let data_value = Value::Object(serde_json::Map::from_iter(pushed_data));
         let pushed_wrapper = json!({ "data": data_value });
         ctx_entity_refs = merge_json_values(ctx_entity_refs, &pushed_wrapper)?;
     }
@@ -137,7 +132,7 @@ pub(super) fn build_multi_issuer_context(
     token_entities: &HashMap<String, Entity>,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
-    pushed_data: &HashMap<String, Value>,
+    pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     // Start with the request context
     let mut context_json = request_context;
@@ -166,12 +161,7 @@ pub(super) fn build_multi_issuer_context(
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(
-            pushed_data
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect(),
-        );
+        let data_value = Value::Object(serde_json::Map::from_iter(pushed_data));
         let pushed_wrapper = json!({ "data": data_value });
         context_json = merge_json_values(context_json, &pushed_wrapper)?;
     }
