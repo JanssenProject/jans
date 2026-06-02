@@ -136,6 +136,12 @@
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- ================================================================
 		     TEST dependencies
 		     ================================================================ -->
@@ -204,15 +210,6 @@
 		</dependency>
 
 		<!--
-			FIX: ManagedChannelProvider$ProviderNotFoundException
-			     "No functional channel service provider found.
-			      Try adding a dependency on grpc-okhttp, grpc-netty,
-			      or grpc-netty-shaded artifact"
-
-			ManagedChannelBuilder.forAddress() discovers transport providers
-			via ServiceLoader.  Without an explicit transport on the classpath
-			no provider is found and the build fails in setUpGrpc().
-
 			grpc-netty-shaded bundles its own Netty so it does not conflict
 			with the Netty version pulled in by WireMock / Jetty.
 			Pin to the same gRPC minor version that wiremock-grpc-extension
@@ -231,7 +228,7 @@
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.0.0</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Documentation -->
