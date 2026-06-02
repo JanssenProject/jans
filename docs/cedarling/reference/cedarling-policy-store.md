@@ -249,6 +249,52 @@ const bytes = new Uint8Array(await response.arrayBuffer());
 const cedarling = await init_from_archive_bytes(config, bytes);
 ```
 
+## Background refresh
+
+For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory `Authz` instance so long-running processes see policy updates without restart. Refresh is **opt-in** via [`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`](./cedarling-properties.md#refreshing-the-policy-store) and is silently ignored for local sources.
+
+### Per-request consistency
+
+Every public Cedarling method snapshots the current `Authz` via `Arc<ArcSwap<Authz>>::load()` at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all *subsequent* calls.
+
+### Strategy ladder
+
+The worker selects from three fetch strategies and degrades automatically when the upstream proves it doesn't support the more efficient mode. A periodic probe attempts to upgrade back so a transiently misconfigured upstream doesn't permanently lock the worker into a heavier path.
+
+| Strategy | Wire behavior | When the worker uses it |
+|---|---|---|
+| `Conditional` (default) | Conditional GET with `If-None-Match` / `If-Modified-Since`; expects `304 Not Modified` on no-op | Starting state. Lock Server / CDN deployments stay here. |
+| `HeadThenGet` | HEAD first; compare returned `ETag` / `Last-Modified` against cache; full GET only when they differ | Auto-degraded into after three consecutive ticks where the server returned `200` with an identical body despite conditional headers |
+| `PlainGet` | Plain GET every tick; relies on body-hash short-circuit to detect no-op reloads | Auto-degraded into after three consecutive HEAD responses with no useful validators, or immediately on HEAD `405` / `501` |
+
+Across all three strategies the worker maintains a body-hash short-circuit: even when the server returns `200` with byte-identical bytes (some servers ignore conditional headers, some emit non-deterministic `ETag`s), Cedarling skips parse / rebuild / swap entirely.
+
+A `Cache-Control: max-age` / `Expires` hint in any successful response may **shorten** the next sleep but never lengthens it past the operator-configured interval.
+
+### Failure handling
+
+Failures (network, HTTP, parse, rebuild) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
+
+### Metrics
+
+The refresh worker emits the following keys into the `operational_stats` map of each metrics snapshot. Keys are emitted **sparsely** — only when the underlying value is non-zero — so dashboards can distinguish "no observation yet" from a genuine zero reading.
+
+| Key | Meaning |
+|---|---|
+| `policy_store_refresh.last_attempt_secs` | Unix timestamp of the most recent tick attempt |
+| `policy_store_refresh.last_success_secs` | Unix timestamp of the most recent `Success` or `NotModified` outcome |
+| `policy_store_refresh.consecutive_failures` | Current failure streak (resets to zero on success) |
+| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError |
+| `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
+| `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
+| `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
+| `policy_store_refresh.upgrade_to_conditional_transitions` | Cumulative count of probes that upgraded back to `Conditional` |
+| `policy_store_refresh.outcome_success` | Cumulative count of `Success` outcomes |
+| `policy_store_refresh.outcome_not_modified` | Cumulative count of `NotModified` outcomes |
+| `policy_store_refresh.outcome_http_error` | Cumulative count of `HttpError` outcomes |
+| `policy_store_refresh.outcome_network_error` | Cumulative count of `NetworkError` outcomes |
+| `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes |
+
 ## Legacy Single-File Format (JSON)
 
 The following sections document the legacy single-file JSON format.
