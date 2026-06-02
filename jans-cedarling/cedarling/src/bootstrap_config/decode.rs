@@ -142,6 +142,11 @@ impl BootstrapConfig {
             retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Duration::from_secs(raw.http_client_request_timeout),
+            // `0` is the documented "no cap" sentinel.
+            max_response_size_bytes: match raw.http_client_max_response_size_bytes {
+                0 => None,
+                n => Some(n),
+            },
         };
 
         Ok(Self {

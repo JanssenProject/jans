@@ -106,7 +106,7 @@ impl DefaultEntitiesLimits {
     ) -> Result<(), DefaultEntitiesLimitsError> {
         self.validate_entities_len(entities)?;
 
-        for (euid, e) in &entities.inner {
+        for (euid, e) in entities.inner.iter() {
             let json_entity_data = e.to_json_string().map_err(|source| {
                 DefaultEntitiesLimitsError::ConversionError {
                     entity_id: euid.to_string(),
@@ -126,6 +126,7 @@ mod tests {
     use std::collections::HashMap;
     use std::collections::HashSet;
     use std::str::FromStr;
+    use std::sync::Arc;
 
     use super::*;
     use serde_json::json;
@@ -220,7 +221,7 @@ mod tests {
         entities_map.insert(euid, entity);
 
         let valid_entities = DefaultEntities {
-            inner: entities_map.clone(),
+            inner: Arc::new(entities_map.clone()),
         };
         limits
             .validate_default_entities(&valid_entities)
@@ -239,7 +240,7 @@ mod tests {
         entities_map.insert(euid3, entity3);
 
         let too_many_entities = DefaultEntities {
-            inner: entities_map,
+            inner: Arc::new(entities_map),
         };
         let err = limits
             .validate_default_entities(&too_many_entities)
