@@ -293,6 +293,8 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		@Test
 		@DisplayName("gRPC telemetry accumulates correctly across two authorisation rounds")
 		void grpcTelemetryAccumulatesAcrossRounds() throws Exception {
+			//log.info("PORT: {}", wireMockServer.getPort());
+			//log.info("TOKEN: {}", jwt1);
 
 			// ════════════════════════════ ROUND 1 ════════════════════════════
 			log.info("=== ROUND 1 – 5 authorisation calls (4 ALLOW + 1 DENY) ===");
@@ -650,9 +652,9 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 
 				if (DUMP_CAPTURED_REQUEST) {
 					captured.forEach((m, nodes) -> {
-						log.debug("Captured {} request(s) via gRPC {}:", nodes.size(), m);
+						log.info("Captured {} request(s) via gRPC {}:", nodes.size(), m);
 						for (int i = 0; i < nodes.size(); i++) {
-							log.debug("  [{}][{}]: {}", m, i, nodes.get(i).toPrettyString());
+							log.info("  [{}][{}]: {}", m, i, nodes.get(i).toPrettyString());
 						}
 					});
 				}
