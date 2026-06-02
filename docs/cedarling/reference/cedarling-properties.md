@@ -44,6 +44,10 @@ To load the policy store, one of the following properties must be set.
     For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. 
     See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
 
+### Refreshing the policy store
+
+- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+
 ### Optional properties
 
 Properties listed here are optional. If a property value is not set, 
