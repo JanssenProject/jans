@@ -121,7 +121,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **Token cache:**
 
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the cap — the token's `exp` claim is used as the entry TTL; tokens without `exp` are then not cached at all.
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the token cache entirely.
 - **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
 - **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
 
