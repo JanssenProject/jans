@@ -11,12 +11,15 @@ import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.core.TrustStatus;
 
 import io.jans.shibboleth.model.TrustRelationship;
+import io.jans.shibboleth.model.config.profiles.common.ProfileStatus;
 import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.config.profiles.ProfileConfigurationAssert;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.internal.Lists;
 
 
 
@@ -146,6 +149,17 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
 
             failWithMessage("TrustRelationship has discovered entityIDs");
         }
+        return this;
+    }
+
+    public TrustRelationshipAssert hasNoActiveProfileConfiguration() {
+
+        isNotNull();
+        if (!actual.hasNoActiveProfileConfiguration()) {
+           
+            failWithMessage("Trustrelationship has at least one active profile configuration. Expected: none");
+        }
+
         return this;
     }
 

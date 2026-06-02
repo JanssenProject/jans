@@ -19,6 +19,7 @@ import io.jans.shibboleth.model.config.profiles.capabilities.CommonConfiguration
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -96,6 +97,13 @@ public class TrustRelationshipTest {
             SamlProfileConfigurationDefaults.saml2Ecp(),
             SamlProfileConfigurationDefaults.saml2Sso(),
             SamlProfileConfigurationDefaults.saml2Logout()
+        );
+    }
+
+    public static final Stream<Arguments> draftIndividualTrustRelationshipWithSupportedMetadataSources() {
+
+        return Stream.of(
+            
         );
     }
 
@@ -343,7 +351,7 @@ public class TrustRelationshipTest {
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
         @DisplayName(
-            "Given a valid trust relationship " + 
+            "GIVEN a valid trust relationship " + 
             "WHEN updating the display name of an existing TrustRelationship with a null value " +
             "THEN the update should fail with a TrustRelationshipUpdateFailed error"
         )
@@ -361,6 +369,70 @@ public class TrustRelationshipTest {
     @Nested
     @DisplayName("Metadata Source Update Tests")
     public class MetadataSourceUpdateTests {
+
+
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
+        @DisplayName(
+            "GIVEN  " +
+            "   - a valid trustrelationship of ANY nature, DRAFT status, no valid metadatasource and no profile configuration active " +
+            "   - a metadata source of type no metadatasource  (i.e. identical to the current trustrelationship's metadatasource " +
+            "WHEN updating the trustrelationship's metadatasource   " +
+            "THEN   " +
+            "   - the update succeeds   " +
+            "   - the trustrelationship's version stays same    " +
+            "   - the trustrelationship's metadata source is same as the provided metadata source " +
+            "   - the trustrelationship's state remains in DRAFT "
+        )
+        public void shouldBeIdempotent_Given_DraftTrustRelationshipWithNoValidMetadataSourceAndNoActiveProfileConfiguration(TrustRelationship tr) {
+
+            //Given
+            assertThat(tr).hasStatus(TrustStatus.DRAFT);
+            assertThat(tr).hasNoActiveProfileConfiguration();
+
+            //When
+            MetadataSource source = NoMetadataSource.getInstance();
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+
+            //Then 
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship newtr = result.getValue();
+            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
+            assertThat(newtr.getMetadataSource()).isEqualTo(source);
+            assertThat(newtr).hasStatus(TrustStatus.DRAFT);
+
+        }
+
+        @Tag("refactoring-disabled")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftIndividualTrustRelationshipWithSupportedMetadataSources")
+        @DisplayName(
+            "GIVEN  " +
+            "   - a valid trustrelationship of nature INDIVIDUAL, DRAFT status, no valid metadatasource and no profile configuration ACTIVE " +
+            "   - a metadatasource supported for INDIVIDUAL trustrelationships" +
+            "WHEN updating the trustrelationship's metadatasource   " +
+            "THEN " +
+            "   - the update succeeds " +
+            "   - the trustrelationship's  version is incremented " +
+            "   - the trustrelationship's metadata source is same as the provided metadata source " +
+            "   - the trustrelationship's state remains in DRAFT "
+        )
+        public void should_Succeed_Given_IndividualAndDraftWithNoProfileEnabled(TrustRelationship tr, MetadataSource source) {
+            
+            //Given
+            assertThat(tr).isOfNature(TrustNature.INDIVIDUAL);
+            assertThat(tr).hasStatus(TrustStatus.DRAFT);
+            assertThat(tr).hasNoActiveProfileConfiguration();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship newtr = result.getValue();
+            assertThat(newtr).isVersion(tr.getVersion().next());
+            assertThat(newtr).hasStatus(TrustStatus.DRAFT);
+            assertThat(newtr.getMetadataSource()).isEqualTo(source);
+        }
+
 
         @Tag("refactoring")
         @ParameterizedTest

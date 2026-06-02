@@ -230,6 +230,16 @@ public class TrustRelationship {
             .build();
     }
 
+    public boolean hasNoActiveProfileConfiguration() {
+
+        return shibbolethSsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
+            && saml2AttributeQueryProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
+            && saml2ArtifactResolutionProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
+            && saml2EcpProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
+            && saml2SsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE;
+    }
+
+    
     private TrustRelationship withIncrementedVersion() {
 
         return new TrustRelationship(
