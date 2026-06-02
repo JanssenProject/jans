@@ -162,7 +162,7 @@ impl Authz {
             &entities_data.tokens,
             &schema.schema,
             &action,
-            &pushed_data,
+            pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -336,7 +336,7 @@ impl Authz {
             &built_entities,
             &schema.schema,
             &action,
-            &pushed_data,
+            pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -770,8 +770,8 @@ impl AuthorizeEntitiesData {
 
         // Add default entities first
         merged_entities.extend(
-            self.default_entities
-                .inner
+            Arc::try_unwrap(self.default_entities.inner)
+                .unwrap_or_else(|arc| (*arc).clone())
                 .into_values()
                 .map(|e| (e.uid(), e)),
         );

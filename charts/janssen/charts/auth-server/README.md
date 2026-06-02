@@ -14,8 +14,8 @@ OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization S
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans-auth-server>
-* <https://github.com/JanssenProject/docker-jans-auth-server>
+* <https://github.com/JanssenProject/jans/tree/main/jans-auth-server>
+* <https://github.com/JanssenProject/jans/tree/main/docker-jans-auth-server>
 
 ## Requirements
 
