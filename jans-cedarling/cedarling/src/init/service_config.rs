@@ -16,6 +16,12 @@ use bootstrap_config::BootstrapConfig;
 pub(crate) struct ServiceConfig {
     pub policy_store: PolicyStoreWithID,
     pub http_client: HttpClient,
+    /// Hash of the policy-store body bytes captured during initial load — `Some`
+    /// only for URL-based sources (Lock Server, `.cjar` URL). Seeded into the
+    /// refresh worker so the first tick can short-circuit when the upstream
+    /// returns a byte-identical body. `None` for local sources (the refresh
+    /// worker doesn't spawn there).
+    pub initial_body_hash: Option<u64>,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -30,11 +36,12 @@ pub enum ServiceConfigError {
 impl ServiceConfig {
     pub(crate) async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
         let http_client = HttpClient::new(bootstrap.http_client_config)?;
-        let policy_store = load_policy_store(&bootstrap.policy_store_config, &http_client).await?;
+        let loaded = load_policy_store(&bootstrap.policy_store_config, &http_client).await?;
 
         Ok(Self {
-            policy_store,
+            policy_store: loaded.store,
             http_client,
+            initial_body_hash: loaded.body_hash,
         })
     }
 }

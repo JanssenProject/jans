@@ -180,9 +180,11 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             ),
             _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
         };
+        // Explicit field init rather than `..Default::default()`, which would
+        // allocate and immediately discard the default YAML source string.
         Ok(Self {
             source,
-            ..Default::default()
+            refresh_interval_secs: 0,
         })
     }
 }

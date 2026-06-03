@@ -85,6 +85,15 @@ impl<'a> ServiceFactory<'a> {
         self.service_config.http_client.clone()
     }
 
+    /// Body-hash of the policy-store bytes loaded during initial bootstrap, for
+    /// URL-based sources only. Seeds the refresh worker's `last_body_hash` so
+    /// the first periodic tick can short-circuit the parse/rebuild/swap path
+    /// when the upstream returns the same body. `None` for non-URL sources
+    /// (refresh worker doesn't spawn there).
+    pub(crate) fn initial_body_hash(&self) -> Option<u64> {
+        self.service_config.initial_body_hash
+    }
+
     // get log service
     fn log_service(&mut self) -> log::Logger {
         self.log_service.clone()

@@ -32,9 +32,6 @@ pub(crate) struct CacheHeadersState {
     pub fresh_for: Option<Duration>,
     /// `Cache-Control: no-cache` was present — caller should always revalidate.
     pub no_cache: bool,
-    /// `Cache-Control: no-store` was present — caller should not retain the body
-    /// across restarts (we still keep it in-memory; this flag is informational).
-    pub no_store: bool,
 }
 
 impl CacheHeadersState {
@@ -57,10 +54,10 @@ impl CacheHeadersState {
             .filter(|s| !s.is_empty())
             .map(str::to_owned);
 
-        let (cc_max_age, no_cache, no_store) = headers
+        let (cc_max_age, no_cache) = headers
             .get(reqwest::header::CACHE_CONTROL)
             .and_then(|v| v.to_str().ok())
-            .map_or((None, false, false), parse_cache_control);
+            .map_or((None, false), parse_cache_control);
 
         // Cache-Control: max-age wins over Expires when both are present.
         let mut fresh_for = if let Some(secs) = cc_max_age {
@@ -92,7 +89,6 @@ impl CacheHeadersState {
             last_modified,
             fresh_for,
             no_cache,
-            no_store,
         }
     }
 
@@ -104,12 +100,13 @@ impl CacheHeadersState {
     }
 }
 
-/// Parse a `Cache-Control` header value into (`max_age`, `no_cache`, `no_store`).
-/// Tolerant: malformed directives are skipped.
-fn parse_cache_control(value: &str) -> (Option<u64>, bool, bool) {
+/// Parse a `Cache-Control` header value into (`max_age`, `no_cache`).
+/// Tolerant: malformed directives are skipped. `no-store` is intentionally
+/// ignored — the refresh worker keeps validators in process memory and never
+/// persists them, so the directive doesn't change our behavior.
+fn parse_cache_control(value: &str) -> (Option<u64>, bool) {
     let mut max_age: Option<u64> = None;
     let mut no_cache = false;
-    let mut no_store = false;
 
     for raw in value.split(',') {
         let directive = raw.trim();
@@ -120,8 +117,6 @@ fn parse_cache_control(value: &str) -> (Option<u64>, bool, bool) {
         let lower = directive.to_ascii_lowercase();
         if lower == "no-cache" {
             no_cache = true;
-        } else if lower == "no-store" {
-            no_store = true;
         } else if let Some(rest) = lower.strip_prefix("max-age=") {
             // Strip optional quotes; ignore unparseable / negative values.
             let trimmed = rest.trim().trim_matches('"');
@@ -131,7 +126,7 @@ fn parse_cache_control(value: &str) -> (Option<u64>, bool, bool) {
         }
     }
 
-    (max_age, no_cache, no_store)
+    (max_age, no_cache)
 }
 
 /// Parse an HTTP date (RFC 7231 IMF-fixdate, RFC 850, or ANSI C `asctime`).
@@ -225,13 +220,6 @@ mod tests {
         let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.no_cache);
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
-    }
-
-    #[test]
-    fn cache_control_no_store_flag() {
-        let h = headers(&[("cache-control", "no-store")]);
-        let v = CacheHeadersState::from_headers(&h, t0());
-        assert!(v.no_store);
     }
 
     #[test]

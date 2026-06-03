@@ -12,6 +12,7 @@ use cache_headers::CacheHeadersState;
 use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
+#[cfg(test)]
 use serde::Deserialize;
 use std::time::Duration;
 use thiserror::Error;
@@ -128,7 +129,11 @@ impl HttpClient {
         }
     }
 
-    /// Sends a GET request to the specified URI with retry logic.
+    /// Sends a GET request to the specified URI with retry logic. Returns the
+    /// response body as a string wrapped in [`Response`], which the caller can
+    /// then deserialize. Test-only: production callers use [`Self::get_bytes`]
+    /// or [`Self::get_json`].
+    #[cfg(test)]
     pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.raw_client;
@@ -304,11 +309,16 @@ pub(crate) enum HeadOutcome {
     NotSupported,
 }
 
+/// Wrapper around a text response body — lets callers defer JSON deserialization
+/// to a stage where they hold the response. Returned by [`HttpClient::get`].
+/// Test-only.
+#[cfg(test)]
 #[derive(Debug)]
 pub(crate) struct Response {
     text: String,
 }
 
+#[cfg(test)]
 impl Response {
     pub(crate) fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
     where
