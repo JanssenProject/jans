@@ -142,15 +142,18 @@ jobs:
         echo "Services: $services"
         for service in $services; do
           echo "Checking $service"
-          version_id=$(gh api -H "Accept: application/vnd.github+json" \
-            /orgs/JanssenProject/packages/maven/"${service}"/versions \
-            | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-          if [ -n "$version_id" ]; then
+          # --paginate walks every page: 0.0.0-nightly is often buried under
+          # newer release versions (e.g. 1.16.0), so the default first-page-only
+          # lookup misses it and the later deploy fails with 409 Conflict.
+          version_ids=$(gh api --paginate -H "Accept: application/vnd.github+json" \
+            "/orgs/JanssenProject/packages/maven/${service}/versions" \
+            --jq '.[] | select(.name == "0.0.0-nightly") | .id')
+          for version_id in $version_ids; do
             echo "Deleting version $version_id of $service"
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
-              /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service version $version_id"
-          fi
+              "/orgs/JanssenProject/packages/maven/${service}/versions/${version_id}" || echo "Failed to delete $service version $version_id"
+          done
         done
 
   # Build every Java project and deploy its artifacts to GitHub Packages Maven,
