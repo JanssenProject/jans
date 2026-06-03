@@ -89,9 +89,11 @@ where
     Ok(value.max(MIN_JWKS_REFRESH_SECS))
 }
 
-/// Normalize the policy-store refresh interval. `0` means "disabled" and is left
-/// alone. Non-zero values below `MIN_REFRESH_INTERVAL_SECS` are clamped up to
-/// avoid a busy-poll against the upstream.
+/// Normalize the policy-store refresh interval. Accepts the value either as a
+/// raw integer or as a numeric string (env-var values arrive as the latter, JSON
+/// configs typically as the former). `0` means "disabled" and is left alone.
+/// Non-zero values below [`PolicyStoreConfig::MIN_REFRESH_INTERVAL_SECS`] are
+/// clamped up to avoid a busy-poll against the upstream.
 pub(super) fn deserialize_policy_store_refresh_interval<'de, D>(
     deserializer: D,
 ) -> Result<u64, D::Error>
