@@ -347,6 +347,17 @@ fn maybe_spawn_refresh_worker(
         return None;
     }
     let source = RefreshSource::from_policy_store_source(&config.policy_store_config.source)?;
+    let (interval_secs, clamped) = config.policy_store_config.effective_refresh_interval();
+    if clamped {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
+                .set_message(format!(
+                    "CEDARLING_POLICY_STORE_REFRESH_INTERVAL={} is below the minimum; clamped to {} seconds",
+                    config.policy_store_config.refresh_interval_secs,
+                    interval_secs,
+                )),
+        );
+    }
     let rebuilder = AuthzRebuilder {
         jwt_config: config.jwt_config.clone(),
         authorization_config: config.authorization_config.clone(),
@@ -357,7 +368,7 @@ fn maybe_spawn_refresh_worker(
     };
     let ctx = WorkerContext {
         source,
-        interval_secs: config.policy_store_config.refresh_interval_secs,
+        interval_secs,
         http_client: service_factory.http_client_for_refresh(),
         rebuilder,
         authz_swap,
