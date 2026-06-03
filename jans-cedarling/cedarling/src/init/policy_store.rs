@@ -75,15 +75,23 @@ fn extract_first_policy_store(
 }
 
 /// Outcome of [`load_policy_store`]: the parsed store plus, for URL-based
-/// sources, the body-hash of the bytes we loaded. The refresh worker seeds its
-/// `last_body_hash` with this value so the first periodic fetch can short-
-/// circuit the parse+rebuild+swap path when the upstream returns an identical
-/// body. `body_hash` is `None` for sources that don't make sense to refresh
-/// (local files, inline JSON/YAML, in-memory archive bytes) — the refresh
-/// worker doesn't spawn for those sources anyway.
+/// sources, both the body-hash and the parsed cache validators (`ETag`,
+/// `Last-Modified`, `max-age` / `Expires`) captured from the bootstrap
+/// response. The refresh worker seeds **both** `last_body_hash` and
+/// `validators` with these values so the first periodic tick can:
+///
+/// - send a conditional GET that may return `304 Not Modified` (no body
+///   downloaded at all — the optimal path), and
+/// - failing that, still short-circuit on the body-hash compare when the
+///   upstream returns a byte-identical body despite ignored conditional
+///   headers.
+///
+/// Both are `None` / empty for non-URL sources (local files, inline JSON/YAML,
+/// in-memory archive bytes) — the refresh worker doesn't spawn there anyway.
 pub(crate) struct LoadedPolicyStore {
     pub store: PolicyStoreWithID,
     pub body_hash: Option<u64>,
+    pub validators: crate::http::cache_headers::CacheHeadersState,
 }
 
 /// Loads the policy store based on the provided configuration.
@@ -100,6 +108,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
+                validators: crate::http::cache_headers::CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
@@ -108,6 +117,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
+                validators: crate::http::cache_headers::CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::LockServer(policy_store_uri) => {
@@ -120,6 +130,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
+                validators: crate::http::cache_headers::CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::FileYaml(path) => {
@@ -130,17 +141,20 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
+                validators: crate::http::cache_headers::CacheHeadersState::default(),
             }
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
             store: load_policy_store_from_cjar_file(path).await?,
             body_hash: None,
+            validators: crate::http::cache_headers::CacheHeadersState::default(),
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
             store: load_policy_store_from_cjar_file(path)?,
             body_hash: None,
+            validators: crate::http::cache_headers::CacheHeadersState::default(),
         },
         PolicyStoreSource::CjarUrl(url) => {
             load_policy_store_from_cjar_url(url, http_client).await?
@@ -149,15 +163,18 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
             store: load_policy_store_from_directory(path).await?,
             body_hash: None,
+            validators: crate::http::cache_headers::CacheHeadersState::default(),
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
             store: load_policy_store_from_directory(path)?,
             body_hash: None,
+            validators: crate::http::cache_headers::CacheHeadersState::default(),
         },
         PolicyStoreSource::ArchiveBytes(bytes) => LoadedPolicyStore {
             store: load_policy_store_from_archive_bytes(bytes)?,
             body_hash: None,
+            validators: crate::http::cache_headers::CacheHeadersState::default(),
         },
     };
 
@@ -171,15 +188,28 @@ async fn load_policy_store_from_lock_master(
     uri: &str,
     http_client: &HttpClient,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    // Fetch as bytes (not parsed JSON) so we can hash the wire body for the
-    // refresh-worker initial-tick short-circuit. Magic-byte sniffing in the
-    // refresh worker also handles the case where Lock Server starts serving
-    // `.cjar` archives in the future.
-    let bytes = http_client.get_bytes(uri).await?;
+    // Fetch via `get_with_retry` so we can capture both the response headers
+    // (for seeding `RefreshState.validators` — `ETag` / `Last-Modified` /
+    // `Cache-Control`) and the raw bytes (for seeding `last_body_hash`).
+    // Magic-byte sniffing in the refresh worker handles the case where Lock
+    // Server starts serving `.cjar` archives in the future.
+    let response = http_client.get_with_retry(uri).await?;
+    let status = response.status();
+    let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
+        response.headers(),
+        chrono::Utc::now(),
+    );
+    let bytes = response.bytes().await.map_err(|e| {
+        http_utils::HttpRequestError::new(
+            http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
+            Some(status),
+        )
+    })?;
     let store = parse_lock_master_bytes(&bytes)?;
     Ok(LoadedPolicyStore {
         store,
         body_hash: Some(crate::init::policy_store_refresh::body_hash(&bytes)),
+        validators,
     })
 }
 
@@ -306,11 +336,27 @@ async fn load_policy_store_from_cjar_url(
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
-    // Fetch the archive bytes via HTTP
-    let bytes = http_client
-        .get_bytes(url)
+    // Fetch via `get_with_retry` to capture response headers (for the refresh
+    // worker's initial `validators` seed) alongside the body bytes (for the
+    // `last_body_hash` seed).
+    let response = http_client.get_with_retry(url).await.map_err(|e| {
+        PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}"))
+    })?;
+    let status = response.status();
+    let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
+        response.headers(),
+        chrono::Utc::now(),
+    );
+    let bytes: Vec<u8> = response
+        .bytes()
         .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
+        .map_err(|e| {
+            http_utils::HttpRequestError::new(
+                http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
+                Some(status),
+            )
+        })?
+        .to_vec();
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
@@ -337,6 +383,7 @@ async fn load_policy_store_from_cjar_url(
             metadata: Some(store_metadata),
         },
         body_hash: Some(body_hash),
+        validators,
     })
 }
 
@@ -349,11 +396,27 @@ async fn load_policy_store_from_cjar_url(
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
-    // Fetch the archive bytes via HTTP
-    let bytes = http_client
-        .get_bytes(url)
+    // Fetch via `get_with_retry` to capture response headers (for the refresh
+    // worker's initial `validators` seed) alongside the body bytes (for the
+    // `last_body_hash` seed).
+    let response = http_client.get_with_retry(url).await.map_err(|e| {
+        PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}"))
+    })?;
+    let status = response.status();
+    let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
+        response.headers(),
+        chrono::Utc::now(),
+    );
+    let bytes: Vec<u8> = response
+        .bytes()
         .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
+        .map_err(|e| {
+            http_utils::HttpRequestError::new(
+                http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
+                Some(status),
+            )
+        })?
+        .to_vec();
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
@@ -375,6 +438,7 @@ async fn load_policy_store_from_cjar_url(
             metadata: Some(store_metadata),
         },
         body_hash: Some(body_hash),
+        validators,
     })
 }
 

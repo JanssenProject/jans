@@ -366,6 +366,17 @@ pub(crate) fn body_hash(bytes: &[u8]) -> u64 {
     h.finish()
 }
 
+/// `true` when `new_hash` matches the last body hash recorded in `state` —
+/// meaning the upstream returned a byte-identical body and the worker can skip
+/// parse / rebuild / swap. Returns `false` on the first tick of the worker
+/// **unless** `RefreshState.last_body_hash` was seeded from the initial
+/// bootstrap load (see `WorkerContext::initial_body_hash`). Extracted so
+/// `tick_conditional`, `tick_plain_get`, and the unit tests share one
+/// definition of the short-circuit decision.
+fn should_short_circuit(new_hash: u64, state: &RefreshState) -> bool {
+    Some(new_hash) == state.last_body_hash
+}
+
 /// Identifies which kind of URL-based source we are refreshing — the parse step
 /// differs (JSON for Lock Master, ZIP archive for `.cjar`).
 #[derive(Debug, Clone)]
@@ -436,6 +447,13 @@ pub(crate) struct WorkerContext {
     /// so the very first periodic tick can short-circuit the parse/rebuild/swap
     /// path when the upstream returns a byte-identical body.
     pub(crate) initial_body_hash: Option<u64>,
+    /// Cache validators (`ETag`, `Last-Modified`, `max-age` / `Expires`)
+    /// captured from the initial bootstrap response. Used to seed
+    /// `RefreshState.validators` so the very first periodic conditional GET
+    /// can send `If-None-Match` / `If-Modified-Since` and potentially get a
+    /// `304` back with zero body bytes downloaded — the optimal first-tick
+    /// path. Empty for non-URL sources.
+    pub(crate) initial_validators: CacheHeadersState,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -456,6 +474,7 @@ pub(crate) fn spawn_refresh_worker(ctx: WorkerContext) -> PolicyStoreRefreshHand
 async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
     let mut state = RefreshState {
         last_body_hash: ctx.initial_body_hash,
+        validators: ctx.initial_validators.clone(),
         ..RefreshState::default()
     };
     let mut shutdown_rx = shutdown_rx;
@@ -538,7 +557,7 @@ async fn tick_conditional(
         },
         Ok(ConditionalFetch::Modified { bytes, validators }) => {
             let new_hash = body_hash(&bytes);
-            if Some(new_hash) == state.last_body_hash {
+            if should_short_circuit(new_hash, state) {
                 // Same body despite conditional headers — server ignored them.
                 state.validators = validators;
                 state.consecutive_failures = 0;
@@ -613,7 +632,7 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
         },
     };
     let new_hash = body_hash(&bytes);
-    if Some(new_hash) == state.last_body_hash {
+    if should_short_circuit(new_hash, state) {
         state.validators = new_validators;
         state.consecutive_failures = 0;
         return RefreshOutcome::NotModified;
@@ -783,23 +802,37 @@ mod tests {
     fn refresh_state_seed_short_circuits_first_tick_on_identical_body() {
         // Seeding `last_body_hash` from the initial load is the whole point of
         // the plumbing through `WorkerContext::initial_body_hash`: when the
-        // first periodic tick fetches a byte-identical body, the hash compare
-        // must short-circuit before any parse / rebuild / swap work happens.
+        // first periodic tick fetches a byte-identical body, the production
+        // `should_short_circuit` helper used by `tick_conditional` and
+        // `tick_plain_get` must return true so we skip parse / rebuild / swap.
         let bytes = b"identical-policy-store-body";
-        let seed = body_hash(bytes);
-
         let state = RefreshState {
-            last_body_hash: Some(seed),
+            last_body_hash: Some(body_hash(bytes)),
             ..RefreshState::default()
         };
 
-        // Same bytes → hash matches the seed → the short-circuit branch in
-        // tick_conditional / tick_plain_get would treat this as NotModified.
-        assert_eq!(Some(body_hash(bytes)), state.last_body_hash);
+        assert!(
+            should_short_circuit(body_hash(bytes), &state),
+            "seeded state must short-circuit when the upstream returns the same bytes (would otherwise pay one wasted parse/rebuild on every process startup)",
+        );
+        assert!(
+            !should_short_circuit(body_hash(b"different-body"), &state),
+            "different bytes must NOT short-circuit — first tick has to fall through to parse + rebuild + swap so policy updates land",
+        );
+    }
 
-        // Different bytes → hash diverges → first tick falls through to the
-        // parse/rebuild/swap path as expected.
-        assert_ne!(Some(body_hash(b"different-body")), state.last_body_hash);
+    #[test]
+    fn should_short_circuit_returns_false_on_unseeded_state() {
+        // An un-seeded RefreshState (`last_body_hash = None`) must never claim
+        // a match. This is the pre-seed-fix behavior — any hash compared
+        // against `None` returns false, so the first tick always falls through
+        // to parse/rebuild/swap. Seeding (above) is the optimization; this
+        // test pins the safe default.
+        let state = RefreshState::default();
+        assert!(
+            !should_short_circuit(body_hash(b"anything"), &state),
+            "with no seed, no hash can match — first tick must always fall through",
+        );
     }
 
     #[test]
