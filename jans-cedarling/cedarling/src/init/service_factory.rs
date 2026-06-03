@@ -94,6 +94,14 @@ impl<'a> ServiceFactory<'a> {
         self.service_config.initial_body_hash
     }
 
+    /// Cache validators (`ETag`, `Last-Modified`, freshness window) captured
+    /// from the initial bootstrap response. Seeds the refresh worker's
+    /// `validators` so the very first periodic conditional GET can return
+    /// `304 Not Modified` with zero body bytes downloaded.
+    pub(crate) fn initial_validators(&self) -> crate::http::cache_headers::CacheHeadersState {
+        self.service_config.initial_validators.clone()
+    }
+
     // get log service
     fn log_service(&mut self) -> log::Logger {
         self.log_service.clone()

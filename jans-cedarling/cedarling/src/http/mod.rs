@@ -154,7 +154,9 @@ impl HttpClient {
     ///
     /// This method will attempt to fetch the resource up to the configured `max_retries`,
     /// with exponential backoff between each attempt. Useful for fetching binary content
-    /// like archive files.
+    /// like archive files. Test-only: production callers use [`Self::get_with_retry`]
+    /// so they can capture response headers alongside the body.
+    #[cfg(test)]
     pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.raw_client;

@@ -6,7 +6,9 @@
 //! Parses HTTP cache validation headers used by the policy-store refresh worker.
 //!
 //! Recognized headers (RFC 7234 / RFC 9111):
-//! - `Cache-Control` — `max-age=N`, `no-cache`, `no-store`
+//! - `Cache-Control` — `max-age=N`, `no-cache` (`no-store` is intentionally
+//!   ignored: validators live only in process memory and are never persisted,
+//!   so the directive has no observable effect)
 //! - `Expires` — RFC 7231 IMF-fixdate
 //! - `ETag` — opaque validator quoted-string
 //! - `Last-Modified` — RFC 7231 IMF-fixdate (stored verbatim for echoing back)

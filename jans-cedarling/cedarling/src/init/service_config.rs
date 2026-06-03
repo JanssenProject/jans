@@ -22,6 +22,11 @@ pub(crate) struct ServiceConfig {
     /// returns a byte-identical body. `None` for local sources (the refresh
     /// worker doesn't spawn there).
     pub initial_body_hash: Option<u64>,
+    /// Cache validators (`ETag`, `Last-Modified`, `max-age` / `Expires`)
+    /// captured from the initial bootstrap response. Seeded into the refresh
+    /// worker so the very first periodic conditional GET can return `304 Not
+    /// Modified` without downloading any body bytes. Empty for non-URL sources.
+    pub initial_validators: crate::http::cache_headers::CacheHeadersState,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -42,6 +47,7 @@ impl ServiceConfig {
             policy_store: loaded.store,
             http_client,
             initial_body_hash: loaded.body_hash,
+            initial_validators: loaded.validators,
         })
     }
 }

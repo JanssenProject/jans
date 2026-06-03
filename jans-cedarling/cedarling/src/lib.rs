@@ -375,6 +375,7 @@ fn maybe_spawn_refresh_worker(
         metrics,
         log,
         initial_body_hash: service_factory.initial_body_hash(),
+        initial_validators: service_factory.initial_validators(),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }
