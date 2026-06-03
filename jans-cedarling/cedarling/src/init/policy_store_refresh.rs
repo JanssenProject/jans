@@ -383,6 +383,14 @@ impl RefreshSource {
     }
 
     async fn parse(&self, bytes: &[u8]) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+        // Magic-byte sniff — the ZIP local-file-header signature `PK\x03\x04`
+        // disambiguates `.cjar` archives from JSON regardless of source type.
+        // Future-proofs the Lock Server path: if Lock Server starts serving
+        // `.cjar` archives at a URL whose suffix doesn't end in `.cjar`, we
+        // route to the archive parser instead of failing with a JSON error.
+        if bytes.starts_with(b"PK\x03\x04") {
+            return parse_cjar_bytes(bytes).await;
+        }
         match self {
             Self::LockServer { .. } => parse_lock_master_bytes(bytes),
             Self::CjarUrl { .. } => parse_cjar_bytes(bytes).await,
