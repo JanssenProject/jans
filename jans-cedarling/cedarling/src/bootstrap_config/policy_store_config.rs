@@ -39,6 +39,22 @@ impl PolicyStoreConfig {
                 PolicyStoreSource::CjarUrl(_) | PolicyStoreSource::LockServer(_)
             )
     }
+
+    /// Returns the effective refresh interval after applying the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor, plus a boolean indicating whether
+    /// clamping occurred. `0` (disabled) passes through unchanged. Callers
+    /// should emit a `WARN` log when `clamped` is true so operators see the
+    /// silent normalization. Single point of normalization so deserializer
+    /// inputs (env vars, JSON, dict) can't drift apart.
+    #[must_use]
+    pub(crate) fn effective_refresh_interval(&self) -> (u64, bool) {
+        let raw = self.refresh_interval_secs;
+        if raw == 0 || raw >= Self::MIN_REFRESH_INTERVAL_SECS {
+            (raw, false)
+        } else {
+            (Self::MIN_REFRESH_INTERVAL_SECS, true)
+        }
+    }
 }
 
 impl Default for PolicyStoreConfig {

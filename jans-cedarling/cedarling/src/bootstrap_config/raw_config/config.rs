@@ -20,8 +20,8 @@ use super::default_values::{
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
-    deserialize_or_parse_string_as_json, deserialize_policy_store_refresh_interval,
-    deserialize_status_list_refresh_interval_max, parse_option_string,
+    deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
+    parse_option_string,
 };
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
@@ -446,11 +446,14 @@ pub struct BootstrapConfigRaw {
 
     /// Base refresh interval, in seconds, for periodic background refresh of
     /// remote policy stores (`CjarUrl` / `LockServer`). `0` disables refresh and
-    /// preserves the load-once-at-startup behavior. Non-zero values below `5`
-    /// are clamped to `5`. A server `Cache-Control: max-age` / `Expires` hint
-    /// can *shorten* the next interval but never extends it.
+    /// preserves the load-once-at-startup behavior. Non-zero values below the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor are clamped at service-init time (with
+    /// a `WARN` log emitted) so the worker never busy-polls the upstream — see
+    /// [`PolicyStoreConfig::effective_refresh_interval`]. A server
+    /// `Cache-Control: max-age` / `Expires` hint can *shorten* the next
+    /// interval but never extends it.
     #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
-    #[serde(deserialize_with = "deserialize_policy_store_refresh_interval")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub policy_store_refresh_interval_secs: u64,
 }
 
