@@ -9,14 +9,18 @@ name: Janssen Build & Publish
 #      distribution jars + client jars
 #      - anonymous downloads consumed by the Dockerfiles and jans-linux-setup.
 #
-# This replaces the artifact build+publish role previously performed on
-# jenkins.jans.io. GitHub Packages Maven rejects re-publishing an existing
-# version, so the `cleanup` job deletes the prior `0.0.0-nightly` package
-# versions before the nightly deploy.
+# Released binaries are cosign-signed and covered by SLSA level 3 provenance
+# (slsa-github-generator), matching build-packages.yml.
+#
+# This replaces the artifact build+publish role previously performed by the
+# jenkins.jans.io "Full rebuild" job. The module list and order mirror that
+# job. GitHub Packages Maven rejects re-publishing an existing version, so the
+# `cleanup` job deletes the prior `0.0.0-nightly` versions before deploy.
+#
+# Triggered by the nightly tag push (recreated by build-nightly-build.yml) and
+# by version tags, so SLSA provenance is generated from a push event.
 
 on:
-  schedule:
-    - cron: '0 8 * * *'
   push:
     tags:
       - 'v**'
@@ -30,7 +34,7 @@ on:
       modules:
         description: 'Space-separated project dirs to build/deploy, in dependency order'
         required: false
-        default: 'jans-bom jans-core jans-orm jans-auth-server agama jans-config-api jans-scim jans-fido2 jans-link jans-lock/lock-server jans-casa jans-shibboleth-idp'
+        default: 'jans-bom jans-orm jans-core agama jans-auth-server jans-cedarling/bindings/cedarling-java jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
 
 permissions:
   contents: read
@@ -40,7 +44,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  DEFAULT_MODULES: 'jans-bom jans-core jans-orm jans-auth-server agama jans-config-api jans-scim jans-fido2 jans-link jans-lock/lock-server jans-casa jans-shibboleth-idp'
+  # Authoritative build/deploy order, mirroring the jenkins.jans.io "Full rebuild" job.
+  # NOTE: jans-shibboleth-idp is intentionally excluded until it is ready to publish.
+  # NOTE: jans-keycloak / jans-keycloak-link were commented out in the jenkins job too.
+  DEFAULT_MODULES: 'jans-bom jans-orm jans-core agama jans-auth-server jans-cedarling/bindings/cedarling-java jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
 
 jobs:
   # Delete the existing 0.0.0-nightly Maven package versions so the nightly
@@ -63,10 +70,8 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
-        elif [[ "${{ github.event_name }}" == "push" ]]; then
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
         else
-          TAG_NAME="nightly"
+          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
     - name: Delete 0.0.0-nightly package versions
@@ -104,7 +109,7 @@ jobs:
   # then upload the service WARs + plugin/client jars to the GitHub Release.
   build-and-publish:
     needs: cleanup
-    if: github.repository == 'JanssenProject/jans' && github.event_name != 'pull_request'
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     permissions:
@@ -136,10 +141,8 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
-        elif [[ "${{ github.event_name }}" == "push" ]]; then
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
         else
-          TAG_NAME="nightly"
+          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
         if [[ "${TAG_NAME}" == "nightly" ]]; then
@@ -169,11 +172,14 @@ jobs:
     - name: Build and deploy to GitHub Packages Maven
       run: |
         set -euo pipefail
+        # cedarling-java downloads its native lib from the GitHub release named by
+        # this tag; the rest of the modules ignore the property.
         for m in ${{ steps.mods.outputs.modules }}; do
           echo "::group::deploy ${m}"
           mvn -B -ntp -s "${GITHUB_WORKSPACE}/.github/maven-settings.xml" \
             -f "${m}" \
             -Dmaven.test.skip=true \
+            -Dcedarling.release.tag="${{ steps.ver.outputs.tag }}" \
             clean deploy
           echo "::endgroup::"
         done
@@ -196,6 +202,25 @@ jobs:
         echo "Collected:"; ls -la "$OUT"
         echo "dir=${OUT}" >> "$GITHUB_OUTPUT"
 
+    - name: Compute SHA256 digests for SLSA provenance
+      id: digest
+      run: |
+        set -euo pipefail
+        cd "${{ steps.collect.outputs.dir }}"
+        : > /tmp/maven-digest.sha256
+        for f in *; do
+          [ -f "$f" ] || continue
+          sha256sum "$f" >> /tmp/maven-digest.sha256
+        done
+        cat /tmp/maven-digest.sha256
+
+    - name: Upload digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: maven-digest
+        path: /tmp/maven-digest.sha256
+        retention-days: 1
+
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
@@ -213,3 +238,51 @@ jobs:
           cosign sign-blob --yes --bundle "${f}.bundle" "$f"
           gh release upload "$TAG" "$f" "${f}.bundle" --repo "${{ github.repository }}" --clobber
         done
+
+  # Merge the artifact digests into a single base64 subjects string for SLSA.
+  collect-maven-digests:
+    needs: build-and-publish
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - name: Resolve release tag
+      id: tag
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "tag=${{ inputs.target_tag }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Download digest artifact
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        name: maven-digest
+        path: /tmp/maven-digests
+    - name: Merge and encode digests
+      id: merge
+      run: |
+        MERGED=$(cat /tmp/maven-digests/*.sha256 | grep -v '^$' || true)
+        echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+  # SLSA level 3 provenance for the released Maven binaries.
+  provenance-maven:
+    needs: [collect-maven-digests]
+    if: github.repository == 'JanssenProject/jans' && needs.collect-maven-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-maven-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-maven-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: maven-artifacts.intoto.jsonl
