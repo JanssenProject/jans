@@ -56,7 +56,7 @@ pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
 use init::policy_store_refresh::{
-    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
+    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, WorkerContext,
 };
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -355,16 +355,16 @@ fn maybe_spawn_refresh_worker(
         data_store: data,
         metrics: metrics.clone(),
     };
-    let handle = spawn_refresh_worker(
+    let ctx = WorkerContext {
         source,
-        config.policy_store_config.refresh_interval_secs,
-        service_factory.http_client_for_refresh(),
+        interval_secs: config.policy_store_config.refresh_interval_secs,
+        http_client: service_factory.http_client_for_refresh(),
         rebuilder,
         authz_swap,
         metrics,
         log,
-    );
-    Some(Arc::new(handle))
+    };
+    Some(Arc::new(spawn_refresh_worker(ctx)))
 }
 
 /// Log detailed information about the loaded policy store metadata, including

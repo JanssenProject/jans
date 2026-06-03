@@ -386,32 +386,27 @@ impl Drop for PolicyStoreRefreshHandle {
     }
 }
 
+/// Read-only worker context — handles and config that don't change between
+/// ticks. Owned by [`spawn_refresh_worker`] / [`run_worker`] for the lifetime
+/// of the background task; tick functions take `&WorkerContext`. Per-tick
+/// mutable state lives in [`RefreshState`].
+pub(crate) struct WorkerContext {
+    pub(crate) source: RefreshSource,
+    pub(crate) interval_secs: u64,
+    pub(crate) http_client: HttpClient,
+    pub(crate) rebuilder: AuthzRebuilder,
+    pub(crate) authz_swap: Arc<ArcSwap<Authz>>,
+    pub(crate) metrics: Arc<MetricsCollector>,
+    pub(crate) log: Logger,
+}
+
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
 /// whose `Drop` signals the worker to exit.
-#[allow(clippy::too_many_arguments)]
-pub(crate) fn spawn_refresh_worker(
-    source: RefreshSource,
-    interval_secs: u64,
-    http_client: HttpClient,
-    rebuilder: AuthzRebuilder,
-    authz_swap: Arc<ArcSwap<Authz>>,
-    metrics: Arc<MetricsCollector>,
-    log: Logger,
-) -> PolicyStoreRefreshHandle {
+pub(crate) fn spawn_refresh_worker(ctx: WorkerContext) -> PolicyStoreRefreshHandle {
     let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
 
     let join = spawn_task(async move {
-        run_worker(
-            source,
-            interval_secs,
-            http_client,
-            rebuilder,
-            authz_swap,
-            metrics,
-            log,
-            shutdown_rx,
-        )
-        .await;
+        run_worker(ctx, shutdown_rx).await;
     });
 
     PolicyStoreRefreshHandle {
@@ -420,50 +415,32 @@ pub(crate) fn spawn_refresh_worker(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-async fn run_worker(
-    source: RefreshSource,
-    interval_secs: u64,
-    http_client: HttpClient,
-    rebuilder: AuthzRebuilder,
-    authz_swap: Arc<ArcSwap<Authz>>,
-    metrics: Arc<MetricsCollector>,
-    log: Logger,
-    shutdown_rx: oneshot::Receiver<()>,
-) {
+async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
     let mut state = RefreshState::default();
     let mut shutdown_rx = shutdown_rx;
 
-    log.log_any(
+    ctx.log.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(
             LogLevel::INFO,
             None,
         ))
         .set_message(format!(
             "policy store refresh worker started (url={}, interval={}s)",
-            source.url(),
-            interval_secs,
+            ctx.source.url(),
+            ctx.interval_secs,
         )),
     );
 
     loop {
-        let delay = state.next_delay(interval_secs);
+        let delay = state.next_delay(ctx.interval_secs);
         let sleep_fut = sleep(delay);
         futures::pin_mut!(sleep_fut);
 
         match select(sleep_fut, &mut shutdown_rx).await {
             Either::Left(((), _)) => {
-                let outcome = tick(
-                    &source,
-                    &http_client,
-                    &rebuilder,
-                    &authz_swap,
-                    &mut state,
-                    &log,
-                )
-                .await;
-                metrics.record_policy_store_refresh(outcome);
-                metrics.record_policy_store_refresh_strategy(
+                let outcome = tick(&ctx, &mut state).await;
+                ctx.metrics.record_policy_store_refresh(outcome);
+                ctx.metrics.record_policy_store_refresh_strategy(
                     state.strategy.current as i64,
                     state.strategy.conditional_to_head_transitions,
                     state.strategy.head_to_plain_transitions,
@@ -471,7 +448,7 @@ async fn run_worker(
                 );
             },
             Either::Right(_) => {
-                log.log_any(
+                ctx.log.log_any(
                     LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                         LogLevel::DEBUG,
                         None,
@@ -484,44 +461,28 @@ async fn run_worker(
     }
 }
 
-async fn tick(
-    source: &RefreshSource,
-    http_client: &HttpClient,
-    rebuilder: &AuthzRebuilder,
-    authz_swap: &Arc<ArcSwap<Authz>>,
-    state: &mut RefreshState,
-    log: &Logger,
-) -> RefreshOutcome {
+async fn tick(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
     let (strategy, is_probe) = state.strategy.choose_for_tick();
     match strategy {
-        RefreshStrategy::Conditional => {
-            tick_conditional(source, http_client, rebuilder, authz_swap, state, log, is_probe).await
-        },
-        RefreshStrategy::HeadThenGet => {
-            tick_head_then_get(source, http_client, rebuilder, authz_swap, state, log).await
-        },
-        RefreshStrategy::PlainGet => {
-            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
-        },
+        RefreshStrategy::Conditional => tick_conditional(ctx, state, is_probe).await,
+        RefreshStrategy::HeadThenGet => tick_head_then_get(ctx, state).await,
+        RefreshStrategy::PlainGet => tick_plain_get(ctx, state).await,
     }
 }
 
 async fn tick_conditional(
-    source: &RefreshSource,
-    http_client: &HttpClient,
-    rebuilder: &AuthzRebuilder,
-    authz_swap: &Arc<ArcSwap<Authz>>,
+    ctx: &WorkerContext,
     state: &mut RefreshState,
-    log: &Logger,
     is_probe: bool,
 ) -> RefreshOutcome {
-    let url = source.url();
-    let fetch_result = http_client
+    let url = ctx.source.url();
+    let fetch_result = ctx
+        .http_client
         .get_bytes_conditional(url, &state.validators)
         .await;
 
     match fetch_result {
-        Err(e) => fetch_error(state, log, url, &e),
+        Err(e) => fetch_error(ctx, state, &e),
         Ok(ConditionalFetch::NotModified) => {
             // 304 is the only definitive proof the upstream honors our
             // conditional headers. Reset degrade counter; upgrade if we were
@@ -549,33 +510,23 @@ async fn tick_conditional(
             // distinguish a 304-capable server returning a real change from one
             // that ignores conditionals and the body happened to change), so
             // don't change strategy on this path.
-            parse_swap_and_record(
-                source, rebuilder, authz_swap, state, log, url, bytes, new_hash, validators,
-            )
-            .await
+            parse_swap_and_record(ctx, state, bytes, new_hash, validators).await
         },
     }
 }
 
-async fn tick_head_then_get(
-    source: &RefreshSource,
-    http_client: &HttpClient,
-    rebuilder: &AuthzRebuilder,
-    authz_swap: &Arc<ArcSwap<Authz>>,
-    state: &mut RefreshState,
-    log: &Logger,
-) -> RefreshOutcome {
-    let url = source.url();
-    let head = match http_client.head_validators(url).await {
+async fn tick_head_then_get(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
+    let url = ctx.source.url();
+    let head = match ctx.http_client.head_validators(url).await {
         Ok(h) => h,
-        Err(e) => return fetch_error(state, log, url, &e),
+        Err(e) => return fetch_error(ctx, state, &e),
     };
     match head {
         HeadOutcome::NotSupported => {
             // Server explicitly rejected HEAD. Downgrade immediately and fall
             // through to a plain GET this tick so we still make progress.
             state.strategy.force_degrade();
-            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
+            tick_plain_get(ctx, state).await
         },
         HeadOutcome::Headers(new_validators) => {
             if !new_validators.has_validator() {
@@ -583,15 +534,7 @@ async fn tick_head_then_get(
                 // toward degrade and fall through to GET so we still get
                 // hash-based detection.
                 state.strategy.record_degraded();
-                return tick_plain_get(
-                    source,
-                    http_client,
-                    rebuilder,
-                    authz_swap,
-                    state,
-                    log,
-                )
-                .await;
+                return tick_plain_get(ctx, state).await;
             }
             if validators_match(&new_validators, &state.validators) {
                 state.validators = new_validators;
@@ -602,23 +545,16 @@ async fn tick_head_then_get(
             // Validators differ — fetch the body.
             state.strategy.record_helped();
             state.validators = new_validators;
-            tick_plain_get(source, http_client, rebuilder, authz_swap, state, log).await
+            tick_plain_get(ctx, state).await
         },
     }
 }
 
-async fn tick_plain_get(
-    source: &RefreshSource,
-    http_client: &HttpClient,
-    rebuilder: &AuthzRebuilder,
-    authz_swap: &Arc<ArcSwap<Authz>>,
-    state: &mut RefreshState,
-    log: &Logger,
-) -> RefreshOutcome {
-    let url = source.url();
-    let response = match http_client.get_with_retry(url).await {
+async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
+    let url = ctx.source.url();
+    let response = match ctx.http_client.get_with_retry(url).await {
         Ok(r) => r,
-        Err(e) => return fetch_error(state, log, url, &e),
+        Err(e) => return fetch_error(ctx, state, &e),
     };
     let status = response.status();
     let new_validators = CacheValidators::from_headers(response.headers(), Utc::now());
@@ -626,7 +562,7 @@ async fn tick_plain_get(
         Ok(b) => b.to_vec(),
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-            log.log_any(
+            ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
                     .set_message(format!(
                         "policy store refresh: decode error for {url}: {e} (status {status})"
@@ -641,38 +577,23 @@ async fn tick_plain_get(
         state.consecutive_failures = 0;
         return RefreshOutcome::NotModified;
     }
-    parse_swap_and_record(
-        source,
-        rebuilder,
-        authz_swap,
-        state,
-        log,
-        url,
-        bytes,
-        new_hash,
-        new_validators,
-    )
-    .await
+    parse_swap_and_record(ctx, state, bytes, new_hash, new_validators).await
 }
 
-#[allow(clippy::too_many_arguments)]
 async fn parse_swap_and_record(
-    source: &RefreshSource,
-    rebuilder: &AuthzRebuilder,
-    authz_swap: &Arc<ArcSwap<Authz>>,
+    ctx: &WorkerContext,
     state: &mut RefreshState,
-    log: &Logger,
-    url: &str,
     bytes: Vec<u8>,
     new_hash: u64,
     new_validators: CacheValidators,
 ) -> RefreshOutcome {
+    let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match source.parse(&bytes).await {
+    let parsed = match ctx.source.parse(&bytes).await {
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-            log.log_any(
+            ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
                     .set_message(format!("policy store refresh: parse failure for {url}: {e}")),
             );
@@ -680,11 +601,11 @@ async fn parse_swap_and_record(
         },
     };
 
-    let new_authz = match rebuilder.rebuild(parsed).await {
+    let new_authz = match ctx.rebuilder.rebuild(parsed).await {
         Ok(a) => a,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-            log.log_any(
+            ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
                     .set_message(format!(
                         "policy store refresh: rebuild failure for {url}: {e}"
@@ -694,13 +615,13 @@ async fn parse_swap_and_record(
         },
     };
 
-    authz_swap.store(Arc::new(new_authz));
+    ctx.authz_swap.store(Arc::new(new_authz));
     state.validators = new_validators;
     state.last_body_hash = Some(new_hash);
     state.consecutive_failures = 0;
 
     let elapsed = Utc::now().signed_duration_since(start).num_milliseconds();
-    log.log_any(
+    ctx.log.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, None)).set_message(
             format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
         ),
@@ -710,14 +631,14 @@ async fn parse_swap_and_record(
 }
 
 fn fetch_error(
+    ctx: &WorkerContext,
     state: &mut RefreshState,
-    log: &Logger,
-    url: &str,
     e: &crate::http::HttpClientError,
 ) -> RefreshOutcome {
+    let url = ctx.source.url();
     state.consecutive_failures = state.consecutive_failures.saturating_add(1);
     let is_net = e.is_max_retries_exceeded();
-    log.log_any(
+    ctx.log.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None)).set_message(
             format!(
                 "policy store refresh: {} against {url}: {e}",
