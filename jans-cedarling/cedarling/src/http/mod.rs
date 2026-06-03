@@ -260,9 +260,15 @@ impl HttpClient {
     /// budget on a probe would only delay the downgrade.
     pub(crate) async fn head_validators(&self, uri: &str) -> Result<HeadOutcome, HttpClientError> {
         let response = self.raw_client.head(uri).send().await.map_err(|e| {
-            let msg = e.to_string();
+            // No retry path — this is a single probe by design. We reuse
+            // `MaxRetriesExceeded` because the surrounding refresh-worker
+            // classifier (`HttpRequestError::is_max_retries_exceeded()`) uses
+            // it to route transport failures into the `NetworkError` metric
+            // bucket. `retry_count(0)` keeps `Display` from claiming we
+            // retried.
+            let msg = format!("HEAD probe send() failed: {e}");
             HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
-                .with_retry_count(1)
+                .with_retry_count(0)
                 .with_last_error(msg)
         })?;
         let status = response.status();
