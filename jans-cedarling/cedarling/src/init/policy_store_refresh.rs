@@ -35,7 +35,7 @@ use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex};
-use crate::http::cache_headers::CacheValidators;
+use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
 use crate::http::{JoinHandle, spawn_task};
 use crate::jwt::JwtService;
@@ -278,7 +278,7 @@ pub(crate) enum RebuildError {
 /// Mutable per-source state — what we learned from the previous response.
 #[derive(Default)]
 struct RefreshState {
-    validators: CacheValidators,
+    validators: CacheHeadersState,
     last_body_hash: Option<u64>,
     consecutive_failures: u32,
     strategy: StrategyState,
@@ -557,7 +557,7 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
         Err(e) => return fetch_error(ctx, state, &e),
     };
     let status = response.status();
-    let new_validators = CacheValidators::from_headers(response.headers(), Utc::now());
+    let new_validators = CacheHeadersState::from_headers(response.headers(), Utc::now());
     let bytes = match response.bytes().await {
         Ok(b) => b.to_vec(),
         Err(e) => {
@@ -585,7 +585,7 @@ async fn parse_swap_and_record(
     state: &mut RefreshState,
     bytes: Vec<u8>,
     new_hash: u64,
-    new_validators: CacheValidators,
+    new_validators: CacheHeadersState,
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
@@ -655,7 +655,7 @@ fn fetch_error(
 
 /// `true` if the two validator sets refer to the same resource version — used
 /// by the HEAD-then-GET fallback to decide whether to skip the body fetch.
-fn validators_match(a: &CacheValidators, b: &CacheValidators) -> bool {
+fn validators_match(a: &CacheHeadersState, b: &CacheHeadersState) -> bool {
     if let (Some(ea), Some(eb)) = (a.etag.as_ref(), b.etag.as_ref()) {
         return ea == eb;
     }
@@ -680,7 +680,7 @@ mod tests {
     #[test]
     fn next_delay_honors_shorter_server_hint() {
         let s = RefreshState {
-            validators: CacheValidators {
+            validators: CacheHeadersState {
                 fresh_for: Some(Duration::from_secs(60)),
                 ..CacheValidators::default()
             },
@@ -695,9 +695,9 @@ mod tests {
     fn next_delay_caps_server_hint_at_base() {
         let s = RefreshState {
             // Server says "fresh for an hour" but operator chose 30s.
-            validators: CacheValidators {
+            validators: CacheHeadersState {
                 fresh_for: Some(Duration::from_secs(3600)),
-                ..CacheValidators::default()
+                ..CacheHeadersState::default()
             },
             ..RefreshState::default()
         };
@@ -845,48 +845,48 @@ mod tests {
 
     #[test]
     fn validators_match_etag_takes_precedence() {
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Tue".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(validators_match(&a, &b), "matching ETag wins");
     }
 
     #[test]
     fn validators_match_falls_back_to_last_modified() {
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(validators_match(&a, &b));
     }
 
     #[test]
     fn validators_match_returns_false_when_neither_present() {
-        let a = CacheValidators::default();
-        let b = CacheValidators::default();
+        let a = CacheHeadersState::default();
+        let b = CacheHeadersState::default();
         assert!(!validators_match(&a, &b));
     }
 
     #[test]
     fn validators_match_returns_false_on_different_etag() {
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             etag: Some("\"v2\"".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(!validators_match(&a, &b));
     }
@@ -894,15 +894,15 @@ mod tests {
     #[test]
     fn validators_match_falls_back_to_last_modified_when_etag_only_on_one_side() {
         // ETag must be on BOTH sides to be considered; otherwise fall back.
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             etag: None,
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(validators_match(&a, &b));
     }
@@ -910,39 +910,39 @@ mod tests {
     #[test]
     fn validators_match_returns_false_when_etag_differs_even_if_lm_matches() {
         // ETag mismatch is decisive — we do not "rescue" the match via Last-Modified.
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             etag: Some("\"v2\"".to_string()),
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(!validators_match(&a, &b));
     }
 
     #[test]
     fn validators_match_returns_false_on_different_last_modified() {
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             last_modified: Some("Mon, 01 Jan 2024 00:00:00 GMT".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators {
+        let b = CacheHeadersState {
             last_modified: Some("Tue, 02 Jan 2024 00:00:00 GMT".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
         assert!(!validators_match(&a, &b));
     }
 
     #[test]
     fn validators_match_returns_false_when_lm_present_on_one_side_only() {
-        let a = CacheValidators {
+        let a = CacheHeadersState {
             last_modified: Some("Mon".to_string()),
-            ..CacheValidators::default()
+            ..CacheHeadersState::default()
         };
-        let b = CacheValidators::default();
+        let b = CacheHeadersState::default();
         assert!(!validators_match(&a, &b));
     }
 
@@ -1086,9 +1086,9 @@ mod tests {
         // Server hint of zero seconds should NOT collapse the interval to zero —
         // it falls through to the operator base (which has its own min floor).
         let s = RefreshState {
-            validators: CacheValidators {
+            validators: CacheHeadersState {
                 fresh_for: Some(Duration::ZERO),
-                ..CacheValidators::default()
+                ..CacheHeadersState::default()
             },
             ..RefreshState::default()
         };

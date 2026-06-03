@@ -8,7 +8,7 @@ mod spawn_task;
 
 pub use spawn_task::*;
 
-use cache_headers::CacheValidators;
+use cache_headers::CacheHeadersState;
 use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
@@ -208,7 +208,7 @@ impl HttpClient {
     pub(crate) async fn get_bytes_conditional(
         &self,
         uri: &str,
-        validators: &CacheValidators,
+        validators: &CacheHeadersState,
     ) -> Result<ConditionalFetch, HttpClientError> {
         // Clone the small validator strings so the closure can be `Fn` (callable
         // on each retry attempt).
@@ -234,7 +234,7 @@ impl HttpClient {
         }
 
         let headers = response.headers().clone();
-        let new_validators = CacheValidators::from_headers(&headers, chrono::Utc::now());
+        let new_validators = CacheHeadersState::from_headers(&headers, chrono::Utc::now());
         let bytes = response.bytes().await.map(|b| b.to_vec()).map_err(|e| {
             HttpRequestError::new(
                 HttpRequestReasonError::DecodeResponseBytes(e),
@@ -249,7 +249,7 @@ impl HttpClient {
     }
 
     /// Sends a HEAD request and parses the response headers into a
-    /// [`CacheValidators`]. Used by the HEAD-then-GET fallback strategy when an
+    /// [`CacheHeadersState`]. Used by the HEAD-then-GET fallback strategy when an
     /// upstream emits `ETag` / `Last-Modified` but ignores `If-None-Match` /
     /// `If-Modified-Since`. Servers that reject HEAD (`405` / `501`) return
     /// [`HeadOutcome::NotSupported`] so the caller can downgrade to plain GET.
@@ -277,7 +277,7 @@ impl HttpClient {
         {
             return Ok(HeadOutcome::NotSupported);
         }
-        let validators = CacheValidators::from_headers(response.headers(), chrono::Utc::now());
+        let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
         Ok(HeadOutcome::Headers(validators))
     }
 }
@@ -290,7 +290,7 @@ pub(crate) enum ConditionalFetch {
     /// Server returned a fresh body and (possibly) new cache validators.
     Modified {
         bytes: Vec<u8>,
-        validators: CacheValidators,
+        validators: CacheHeadersState,
     },
 }
 
@@ -299,7 +299,7 @@ pub(crate) enum ConditionalFetch {
 pub(crate) enum HeadOutcome {
     /// HEAD succeeded — captured headers (validators may be empty if the server
     /// didn't set `ETag` / `Last-Modified`).
-    Headers(CacheValidators),
+    Headers(CacheHeadersState),
     /// Server explicitly rejected HEAD (`405` / `501`).
     NotSupported,
 }
@@ -323,7 +323,7 @@ pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
-    use crate::http::cache_headers::CacheValidators;
+    use crate::http::cache_headers::CacheHeadersState;
     use crate::http::{HttpClient, HttpClientConfig};
 
     use mockito::Server;
@@ -519,7 +519,7 @@ mod test {
             .await;
 
         let client = HttpClient::new(HTTP_CONF).expect("client");
-        let validators = crate::http::cache_headers::CacheValidators {
+        let validators = crate::http::cache_headers::CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             ..Default::default()
         };
@@ -551,7 +551,7 @@ mod test {
         let url = format!("{}/store", server.url());
 
         let result = client
-            .get_bytes_conditional(&url, &CacheValidators::default())
+            .get_bytes_conditional(&url, &CacheHeadersState::default())
             .await
             .expect("request");
 
@@ -585,7 +585,7 @@ mod test {
             .await;
 
         let client = HttpClient::new(HTTP_CONF).expect("client");
-        let validators = crate::http::cache_headers::CacheValidators {
+        let validators = crate::http::cache_headers::CacheHeadersState {
             last_modified: Some("Sun, 22 May 2026 12:00:00 GMT".to_string()),
             ..Default::default()
         };

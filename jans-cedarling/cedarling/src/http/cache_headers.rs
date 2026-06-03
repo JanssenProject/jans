@@ -20,7 +20,7 @@ use std::time::Duration;
 
 /// Cache state extracted from a single HTTP response.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub(crate) struct CacheValidators {
+pub(crate) struct CacheHeadersState {
     /// Strong or weak `ETag`, including the quote marks and any `W/` prefix.
     pub etag: Option<String>,
     /// `Last-Modified` value as the server sent it. Stored verbatim for echoing
@@ -37,8 +37,8 @@ pub(crate) struct CacheValidators {
     pub no_store: bool,
 }
 
-impl CacheValidators {
-    /// Parse a [`HeaderMap`] into [`CacheValidators`].
+impl CacheHeadersState {
+    /// Parse a [`HeaderMap`] into [`CacheHeadersState`].
     ///
     /// `now` is injected so callers can test deterministically. In production
     /// pass [`Utc::now()`].
@@ -182,8 +182,8 @@ mod tests {
 
     #[test]
     fn empty_headers_produce_empty_validators() {
-        let v = CacheValidators::from_headers(&HeaderMap::new(), t0());
-        assert_eq!(v, CacheValidators::default());
+        let v = CacheHeadersState::from_headers(&HeaderMap::new(), t0());
+        assert_eq!(v, CacheHeadersState::default());
         assert!(!v.has_validator());
     }
 
@@ -193,7 +193,7 @@ mod tests {
             ("etag", "\"abc123\""),
             ("last-modified", "Sun, 06 Nov 1994 08:49:37 GMT"),
         ]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.etag.as_deref(), Some("\"abc123\""));
         assert_eq!(
             v.last_modified.as_deref(),
@@ -205,7 +205,7 @@ mod tests {
     #[test]
     fn weak_etag_preserved_verbatim() {
         let h = headers(&[("etag", "W/\"weak-tag\"")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.etag.as_deref(), Some("W/\"weak-tag\""));
     }
 
@@ -215,14 +215,14 @@ mod tests {
             ("cache-control", "max-age=600"),
             ("expires", "Sun, 22 May 2027 12:00:00 GMT"),
         ]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, Some(Duration::from_secs(600)));
     }
 
     #[test]
     fn cache_control_no_cache_zeros_freshness() {
         let h = headers(&[("cache-control", "max-age=600, no-cache")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.no_cache);
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
     }
@@ -230,35 +230,35 @@ mod tests {
     #[test]
     fn cache_control_no_store_flag() {
         let h = headers(&[("cache-control", "no-store")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.no_store);
     }
 
     #[test]
     fn expires_in_future_yields_positive_fresh_for() {
         let h = headers(&[("expires", "Fri, 22 May 2026 13:00:00 GMT")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, Some(Duration::from_secs(3600)));
     }
 
     #[test]
     fn expires_in_past_yields_zero_fresh_for() {
         let h = headers(&[("expires", "Mon, 01 Jan 1990 00:00:00 GMT")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
     }
 
     #[test]
     fn malformed_max_age_is_ignored() {
         let h = headers(&[("cache-control", "max-age=banana")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, None);
     }
 
     #[test]
     fn negative_max_age_is_ignored() {
         let h = headers(&[("cache-control", "max-age=-30")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         // u64::parse rejects "-30" so this is treated as absent.
         assert_eq!(v.fresh_for, None);
     }
@@ -266,14 +266,14 @@ mod tests {
     #[test]
     fn malformed_expires_is_ignored() {
         let h = headers(&[("expires", "not a date")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, None);
     }
 
     #[test]
     fn directives_are_case_insensitive() {
         let h = headers(&[("cache-control", "MAX-AGE=42, NO-CACHE")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.no_cache);
         // no-cache zeroes the freshness even when max-age was set.
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
@@ -282,14 +282,14 @@ mod tests {
     #[test]
     fn empty_directive_segments_skipped() {
         let h = headers(&[("cache-control", ",,max-age=15,,")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, Some(Duration::from_secs(15)));
     }
 
     #[test]
     fn whitespace_only_etag_is_treated_as_absent() {
         let h = headers(&[("etag", "   ")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.etag.is_none());
         assert!(!v.has_validator());
     }
@@ -298,7 +298,7 @@ mod tests {
     fn rfc850_date_format_parsed() {
         // chrono parses with a 2-digit year extended to 19xx.
         let h = headers(&[("expires", "Sunday, 22-May-94 12:00:00 GMT")]);
-        let v = CacheValidators::from_headers(&h, t0());
+        let v = CacheHeadersState::from_headers(&h, t0());
         // In the past, so fresh_for is zero (not None).
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
     }
