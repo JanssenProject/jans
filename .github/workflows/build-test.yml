@@ -1,48 +1,52 @@
-name: Janssen Build & Test
+name: Janssen Build & Publish
+
+# Builds the Janssen Java projects and publishes their artifacts to GitHub.
+#
+# Two destinations (see plan: offboard jenkins.jans.io -> GitHub):
+#   1. GitHub Packages Maven (maven.pkg.github.com/JanssenProject/jans) via `mvn deploy`
+#      - canonical home for io.jans:* dependency resolution (authenticated).
+#   2. GitHub Release assets (nightly / vX.Y.Z) for the service WARs + plugin
+#      distribution jars + client jars
+#      - anonymous downloads consumed by the Dockerfiles and jans-linux-setup.
+#
+# This replaces the artifact build+publish role previously performed on
+# jenkins.jans.io. GitHub Packages Maven rejects re-publishing an existing
+# version, so the `cleanup` job deletes the prior `0.0.0-nightly` package
+# versions before the nightly deploy.
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "jans-**"
-      - "agama"
   schedule:
     - cron: '0 8 * * *'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "jans-**"
-      - "agama"
+  push:
+    tags:
+      - 'v**'
+      - 'nightly'
   workflow_dispatch:
     inputs:
-      project:
-        type: choice
-        options:
-          - "jans-bom"
-          - "jans-orm"
-          - "jans-core"
-          - "jans-lock/lock-server"
-          - "agama"
-          - "jans-auth-server"
-          - "jans-link"
-          - "jans-fido2"
-          - "jans-scim"
-          - "jans-config-api"
-          - "jans-casa"
-          - "jans-shibboleth-idp"
-          - "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-config-api jans-casa jans-shibboleth-idp"
-        description: 'Service'
+      target_tag:
+        description: 'Release tag to publish artifacts to (e.g. nightly or v1.2.3)'
         required: true
-        default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-config-api jans-casa jans-shibboleth-idp"
-concurrency:
-  group: run-once
-  cancel-in-progress: false
+        default: 'nightly'
+      modules:
+        description: 'Space-separated project dirs to build/deploy, in dependency order'
+        required: false
+        default: 'jans-bom jans-core jans-orm jans-auth-server agama jans-config-api jans-scim jans-fido2 jans-link jans-lock/lock-server jans-casa jans-shibboleth-idp'
+
 permissions:
   contents: read
+
+concurrency:
+  group: build-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DEFAULT_MODULES: 'jans-bom jans-core jans-orm jans-auth-server agama jans-config-api jans-scim jans-fido2 jans-link jans-lock/lock-server jans-casa jans-shibboleth-idp'
+
 jobs:
+  # Delete the existing 0.0.0-nightly Maven package versions so the nightly
+  # deploy can re-publish them (GitHub Packages Maven is immutable per-version).
   cleanup:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-22.04
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,8 +58,19 @@ jobs:
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
-    - name: Get version ID for 0.0.0-nightly
-      id: get_version_id
+    - name: Resolve tag
+      id: tag
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          TAG_NAME="${{ inputs.target_tag }}"
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        else
+          TAG_NAME="nightly"
+        fi
+        echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+    - name: Delete 0.0.0-nightly package versions
+      if: steps.tag.outputs.tag == 'nightly'
       run: |
         page=1
         services=""
@@ -83,4 +98,118 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service version $version_id"
           fi
+        done
+
+  # Build every Java project and deploy its artifacts to GitHub Packages Maven,
+  # then upload the service WARs + plugin/client jars to the GitHub Release.
+  build-and-publish:
+    needs: cleanup
+    if: github.repository == 'JanssenProject/jans' && github.event_name != 'pull_request'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    permissions:
+      contents: read    # read source
+      packages: write   # deploy to GitHub Packages Maven
+      id-token: write   # cosign keyless signing
+    env:
+      # GitHub Packages auth for .github/maven-settings.xml (server id "github").
+      JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MAVEN_OPTS: -Xmx5g -Dhttp.keepAlive=false
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        distribution: temurin
+        java-version: '17'
+        cache: maven
+
+    - name: Resolve tag and version
+      id: ver
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          TAG_NAME="${{ inputs.target_tag }}"
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        else
+          TAG_NAME="nightly"
+        fi
+        echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+        if [[ "${TAG_NAME}" == "nightly" ]]; then
+          echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
+        else
+          echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Select modules
+      id: mods
+      run: |
+        MODULES="${{ github.event.inputs.modules }}"
+        [ -z "$MODULES" ] && MODULES="${DEFAULT_MODULES}"
+        echo "modules=${MODULES}" >> "$GITHUB_OUTPUT"
+
+    # For a versioned release the poms (fixed at 0.0.0-nightly) must be bumped
+    # before deploy. Nightly publishes 0.0.0-nightly as-is.
+    - name: Set release version in poms
+      if: steps.ver.outputs.version != '0.0.0-nightly'
+      run: |
+        for m in ${{ steps.mods.outputs.modules }}; do
+          mvn -B -ntp -f "$m" \
+            org.codehaus.mojo:versions-maven-plugin:2.16.2:set \
+            -DnewVersion="${{ steps.ver.outputs.version }}" -DgenerateBackupPoms=false || true
+        done
+
+    - name: Build and deploy to GitHub Packages Maven
+      run: |
+        set -euo pipefail
+        for m in ${{ steps.mods.outputs.modules }}; do
+          echo "::group::deploy ${m}"
+          mvn -B -ntp -s "${GITHUB_WORKSPACE}/.github/maven-settings.xml" \
+            -f "${m}" \
+            -Dmaven.test.skip=true \
+            clean deploy
+          echo "::endgroup::"
+        done
+
+    - name: Collect release binaries (WARs + plugin/client jars)
+      id: collect
+      run: |
+        set -euo pipefail
+        OUT=/tmp/release-artifacts
+        mkdir -p "$OUT"
+        MODULES="${{ steps.mods.outputs.modules }}"
+        # Service WARs and plugin distribution jars consumed by Dockerfiles + jans-linux-setup.
+        find $MODULES -type f -path '*/target/*.war' -exec cp -v {} "$OUT/" \; || true
+        find $MODULES -type f -path '*/target/*-distribution.jar' -exec cp -v {} "$OUT/" \; || true
+        find $MODULES -type f -path '*/target/*-jar-with-dependencies.jar' -exec cp -v {} "$OUT/" \; || true
+        # Extra client/model jars referenced by installers (fido2 client/model, casa-config).
+        find jans-fido2 -type f -path '*/target/jans-fido2-client-*.jar' -exec cp -v {} "$OUT/" \; || true
+        find jans-fido2 -type f -path '*/target/jans-fido2-model-*.jar' -exec cp -v {} "$OUT/" \; || true
+        find jans-casa  -type f -path '*/target/casa-config-*.jar'        -exec cp -v {} "$OUT/" \; || true
+        echo "Collected:"; ls -la "$OUT"
+        echo "dir=${OUT}" >> "$GITHUB_OUTPUT"
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+    - name: Sign and upload binaries to release
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        TAG: ${{ steps.ver.outputs.tag }}
+        DIR: ${{ steps.collect.outputs.dir }}
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+        cd "$DIR"
+        for f in *; do
+          [ -f "$f" ] || continue
+          cosign sign-blob --yes --bundle "${f}.bundle" "$f"
+          gh release upload "$TAG" "$f" "${f}.bundle" --repo "${{ github.repository }}" --clobber
         done
