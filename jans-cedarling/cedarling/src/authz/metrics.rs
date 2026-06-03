@@ -305,6 +305,7 @@ pub(crate) struct MetricsCollector {
     policy_store_refresh_outcome_http_error: AtomicI64,
     policy_store_refresh_outcome_network_error: AtomicI64,
     policy_store_refresh_outcome_parse_error: AtomicI64,
+    policy_store_refresh_outcome_rebuild_error: AtomicI64,
 }
 
 impl MetricsCollector {
@@ -328,6 +329,7 @@ impl MetricsCollector {
             policy_store_refresh_outcome_http_error: AtomicI64::new(0),
             policy_store_refresh_outcome_network_error: AtomicI64::new(0),
             policy_store_refresh_outcome_parse_error: AtomicI64::new(0),
+            policy_store_refresh_outcome_rebuild_error: AtomicI64::new(0),
         }
     }
 
@@ -350,6 +352,7 @@ impl MetricsCollector {
             policy_store_refresh_outcome_http_error: AtomicI64::new(0),
             policy_store_refresh_outcome_network_error: AtomicI64::new(0),
             policy_store_refresh_outcome_parse_error: AtomicI64::new(0),
+            policy_store_refresh_outcome_rebuild_error: AtomicI64::new(0),
         }
     }
 
@@ -373,6 +376,7 @@ impl MetricsCollector {
             RefreshOutcome::HttpError => &self.policy_store_refresh_outcome_http_error,
             RefreshOutcome::NetworkError => &self.policy_store_refresh_outcome_network_error,
             RefreshOutcome::ParseError => &self.policy_store_refresh_outcome_parse_error,
+            RefreshOutcome::RebuildError => &self.policy_store_refresh_outcome_rebuild_error,
         };
         per_outcome.fetch_add(1, Ordering::Relaxed);
 
@@ -385,7 +389,8 @@ impl MetricsCollector {
             },
             RefreshOutcome::HttpError
             | RefreshOutcome::NetworkError
-            | RefreshOutcome::ParseError => {
+            | RefreshOutcome::ParseError
+            | RefreshOutcome::RebuildError => {
                 self.policy_store_refresh_consecutive_failures
                     .fetch_add(1, Ordering::Relaxed);
             },
@@ -677,75 +682,7 @@ impl MetricsCollector {
             .clone();
 
         let mut ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
-
-        // Inject policy-store refresh state into the snapshot. Keys are emitted
-        // only when their value is non-zero so consumers can distinguish
-        // "no observation yet" from a genuine zero reading.
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.last_attempt_secs",
-            &self.policy_store_refresh_last_attempt_secs,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.last_success_secs",
-            &self.policy_store_refresh_last_success_secs,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.consecutive_failures",
-            &self.policy_store_refresh_consecutive_failures,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.last_outcome",
-            &self.policy_store_refresh_last_outcome,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.strategy_current",
-            &self.policy_store_refresh_strategy_current,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.conditional_to_head_transitions",
-            &self.policy_store_refresh_conditional_to_head_transitions,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.head_to_plain_transitions",
-            &self.policy_store_refresh_head_to_plain_transitions,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.upgrade_to_conditional_transitions",
-            &self.policy_store_refresh_upgrade_to_conditional_transitions,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.outcome_success",
-            &self.policy_store_refresh_outcome_success,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.outcome_not_modified",
-            &self.policy_store_refresh_outcome_not_modified,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.outcome_http_error",
-            &self.policy_store_refresh_outcome_http_error,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.outcome_network_error",
-            &self.policy_store_refresh_outcome_network_error,
-        );
-        insert_if_nonzero(
-            &mut ops,
-            "policy_store_refresh.outcome_parse_error",
-            &self.policy_store_refresh_outcome_parse_error,
-        );
+        self.inject_policy_store_refresh_state(&mut ops);
 
         MetricsSnapshot {
             policy_stats,
@@ -753,6 +690,83 @@ impl MetricsCollector {
             operational_stats: ops,
             interval_secs,
         }
+    }
+
+    /// Injects the long-running policy-store-refresh counters into the
+    /// `operational_stats` map. Keys are emitted **sparsely** — only when their
+    /// underlying value is non-zero — so consumers can distinguish "no
+    /// observation yet" from a genuine zero reading.
+    fn inject_policy_store_refresh_state(&self, ops: &mut HashMap<String, i64>) {
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.last_attempt_secs",
+            &self.policy_store_refresh_last_attempt_secs,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.last_success_secs",
+            &self.policy_store_refresh_last_success_secs,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.consecutive_failures",
+            &self.policy_store_refresh_consecutive_failures,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.last_outcome",
+            &self.policy_store_refresh_last_outcome,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.strategy_current",
+            &self.policy_store_refresh_strategy_current,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.conditional_to_head_transitions",
+            &self.policy_store_refresh_conditional_to_head_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.head_to_plain_transitions",
+            &self.policy_store_refresh_head_to_plain_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.upgrade_to_conditional_transitions",
+            &self.policy_store_refresh_upgrade_to_conditional_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_success",
+            &self.policy_store_refresh_outcome_success,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_not_modified",
+            &self.policy_store_refresh_outcome_not_modified,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_http_error",
+            &self.policy_store_refresh_outcome_http_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_network_error",
+            &self.policy_store_refresh_outcome_network_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_parse_error",
+            &self.policy_store_refresh_outcome_parse_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_rebuild_error",
+            &self.policy_store_refresh_outcome_rebuild_error,
+        );
     }
 }
 
@@ -1221,6 +1235,7 @@ mod tests {
         collector.record_policy_store_refresh(RefreshOutcome::ParseError);
         collector.record_policy_store_refresh(RefreshOutcome::ParseError);
         collector.record_policy_store_refresh(RefreshOutcome::ParseError);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
@@ -1239,8 +1254,28 @@ mod tests {
         );
         assert_eq!(
             snap.operational_stats
+                .get("policy_store_refresh.outcome_rebuild_error"),
+            Some(&1),
+        );
+        assert_eq!(
+            snap.operational_stats
                 .get("policy_store_refresh.last_outcome"),
-            Some(&(RefreshOutcome::ParseError as i64)),
+            Some(&(RefreshOutcome::RebuildError as i64)),
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_rebuild_error_bumps_consecutive_failures() {
+        use crate::init::policy_store_refresh::RefreshOutcome;
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&2),
+            "RebuildError counts as a failure for the streak"
         );
     }
 
