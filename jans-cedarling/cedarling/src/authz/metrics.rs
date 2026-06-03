@@ -684,67 +684,67 @@ impl MetricsCollector {
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.last_attempt_secs",
-            self.policy_store_refresh_last_attempt_secs.load(Ordering::Relaxed),
+            &self.policy_store_refresh_last_attempt_secs,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.last_success_secs",
-            self.policy_store_refresh_last_success_secs.load(Ordering::Relaxed),
+            &self.policy_store_refresh_last_success_secs,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.consecutive_failures",
-            self.policy_store_refresh_consecutive_failures.load(Ordering::Relaxed),
+            &self.policy_store_refresh_consecutive_failures,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.last_outcome",
-            self.policy_store_refresh_last_outcome.load(Ordering::Relaxed),
+            &self.policy_store_refresh_last_outcome,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.strategy_current",
-            self.policy_store_refresh_strategy_current.load(Ordering::Relaxed),
+            &self.policy_store_refresh_strategy_current,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.conditional_to_head_transitions",
-            self.policy_store_refresh_conditional_to_head_transitions.load(Ordering::Relaxed),
+            &self.policy_store_refresh_conditional_to_head_transitions,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.head_to_plain_transitions",
-            self.policy_store_refresh_head_to_plain_transitions.load(Ordering::Relaxed),
+            &self.policy_store_refresh_head_to_plain_transitions,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.upgrade_to_conditional_transitions",
-            self.policy_store_refresh_upgrade_to_conditional_transitions.load(Ordering::Relaxed),
+            &self.policy_store_refresh_upgrade_to_conditional_transitions,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.outcome_success",
-            self.policy_store_refresh_outcome_success.load(Ordering::Relaxed),
+            &self.policy_store_refresh_outcome_success,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.outcome_not_modified",
-            self.policy_store_refresh_outcome_not_modified.load(Ordering::Relaxed),
+            &self.policy_store_refresh_outcome_not_modified,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.outcome_http_error",
-            self.policy_store_refresh_outcome_http_error.load(Ordering::Relaxed),
+            &self.policy_store_refresh_outcome_http_error,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.outcome_network_error",
-            self.policy_store_refresh_outcome_network_error.load(Ordering::Relaxed),
+            &self.policy_store_refresh_outcome_network_error,
         );
         insert_if_nonzero(
             &mut ops,
             "policy_store_refresh.outcome_parse_error",
-            self.policy_store_refresh_outcome_parse_error.load(Ordering::Relaxed),
+            &self.policy_store_refresh_outcome_parse_error,
         );
 
         MetricsSnapshot {
@@ -756,10 +756,13 @@ impl MetricsCollector {
     }
 }
 
-/// Inserts `value` into `map` under `key` only when `value` is non-zero.
-/// Used to keep "no observation yet" indistinguishable from missing in the
-/// emitted metric map.
-fn insert_if_nonzero(map: &mut HashMap<String, i64>, key: &str, value: i64) {
+/// Reads `atomic` with `Relaxed` ordering and inserts the value into `map`
+/// under `key` only when it's non-zero. Used to keep "no observation yet"
+/// indistinguishable from missing in the emitted metric map. Taking the
+/// `AtomicI64` directly drops the per-call `.load(Ordering::Relaxed)`
+/// boilerplate and pins the ordering choice to one place.
+fn insert_if_nonzero(map: &mut HashMap<String, i64>, key: &str, atomic: &AtomicI64) {
+    let value = atomic.load(Ordering::Relaxed);
     if value != 0 {
         map.insert(key.to_string(), value);
     }
