@@ -69,7 +69,13 @@ pub(crate) enum RefreshOutcome {
     NotModified = 2,
     HttpError = 3,
     NetworkError = 4,
+    /// Body was fetched but couldn't be parsed into a `PolicyStoreWithID`
+    /// (malformed JSON, broken `.cjar` archive, etc.).
     ParseError = 5,
+    /// Body parsed cleanly but rebuilding the dependent services failed
+    /// (trusted-issuer validation, JWT service init / JWKS refetch, entity
+    /// builder). The bytes are well-formed; the rebuild side is broken.
+    RebuildError = 6,
 }
 
 /// Per-source refresh strategy. The worker starts at
@@ -350,10 +356,11 @@ fn jitter_pct() -> i128 {
     i128::from(n % 21) - 10
 }
 
-fn body_hash(bytes: &[u8]) -> u64 {
-    // `ahash::AHasher::default()` is process-local and faster than SipHash for
-    // multi-MB payloads — we only need within-process equality, not
-    // cryptographic strength or cross-process stability.
+/// Hash policy-store body bytes for within-process equality comparisons
+/// (refresh-worker short-circuit + initial-load seed). Uses `ahash` —
+/// process-local seeds, deterministic within the process, not cryptographically
+/// strong nor stable across processes (we don't need either).
+pub(crate) fn body_hash(bytes: &[u8]) -> u64 {
     let mut h = AHasher::default();
     h.write(bytes);
     h.finish()
@@ -424,6 +431,11 @@ pub(crate) struct WorkerContext {
     pub(crate) authz_swap: Arc<ArcSwap<Authz>>,
     pub(crate) metrics: Arc<MetricsCollector>,
     pub(crate) log: Logger,
+    /// Body-hash of the policy-store bytes captured during initial bootstrap
+    /// (`None` for non-URL sources). Used to seed `RefreshState.last_body_hash`
+    /// so the very first periodic tick can short-circuit the parse/rebuild/swap
+    /// path when the upstream returns a byte-identical body.
+    pub(crate) initial_body_hash: Option<u64>,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -442,7 +454,10 @@ pub(crate) fn spawn_refresh_worker(ctx: WorkerContext) -> PolicyStoreRefreshHand
 }
 
 async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
-    let mut state = RefreshState::default();
+    let mut state = RefreshState {
+        last_body_hash: ctx.initial_body_hash,
+        ..RefreshState::default()
+    };
     let mut shutdown_rx = shutdown_rx;
 
     ctx.log.log_any(
@@ -637,7 +652,7 @@ async fn parse_swap_and_record(
                         "policy store refresh: rebuild failure for {url}: {e}"
                     )),
             );
-            return RefreshOutcome::ParseError;
+            return RefreshOutcome::RebuildError;
         },
     };
 
@@ -762,6 +777,29 @@ mod tests {
     #[test]
     fn body_hash_differs_for_different_bytes() {
         assert_ne!(body_hash(b"hello"), body_hash(b"world"));
+    }
+
+    #[test]
+    fn refresh_state_seed_short_circuits_first_tick_on_identical_body() {
+        // Seeding `last_body_hash` from the initial load is the whole point of
+        // the plumbing through `WorkerContext::initial_body_hash`: when the
+        // first periodic tick fetches a byte-identical body, the hash compare
+        // must short-circuit before any parse / rebuild / swap work happens.
+        let bytes = b"identical-policy-store-body";
+        let seed = body_hash(bytes);
+
+        let state = RefreshState {
+            last_body_hash: Some(seed),
+            ..RefreshState::default()
+        };
+
+        // Same bytes → hash matches the seed → the short-circuit branch in
+        // tick_conditional / tick_plain_get would treat this as NotModified.
+        assert_eq!(Some(body_hash(bytes)), state.last_body_hash);
+
+        // Different bytes → hash diverges → first tick falls through to the
+        // parse/rebuild/swap path as expected.
+        assert_ne!(Some(body_hash(b"different-body")), state.last_body_hash);
     }
 
     #[test]
