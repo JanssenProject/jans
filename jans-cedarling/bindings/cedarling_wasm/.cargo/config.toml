@@ -1,0 +1,24 @@
+# Size-optimized release profile for the WASM build only.
+#
+# Cargo discovers .cargo/config.toml from the current directory upward, so this
+# file applies ONLY when cargo runs inside this crate directory — which is what
+# wasm-pack does. Native binding builds run from the workspace root and never see
+# it, so they keep the speed-oriented [profile.release] (opt-level = 3) defined in
+# jans-cedarling/Cargo.toml.
+#
+# This is a config-based profile, NOT a [profile.*] in a member Cargo.toml — the
+# latter is silently ignored by Cargo ("profiles for the non root package will be
+# ignored"). Config-based profiles are honored and merge over the workspace root
+# profile key-by-key (debug-assertions/overflow-checks are inherited from root).
+#
+# Why not a custom cargo profile + `wasm-pack --profile`: wasm-pack 0.14 ignores
+# the wasm-opt metadata for custom profile names, dropping our wasm-opt feature
+# flags. Why not [env] here: a config [env] block does not override a profile.
+#
+# wasm-opt flags live in Cargo.toml; fat-LTO output uses bulk-memory and
+# nontrapping float-to-int, which wasm-opt must be told to allow or it fails.
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+strip = true
