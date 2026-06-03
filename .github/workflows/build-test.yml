@@ -176,10 +176,14 @@ jobs:
         # this tag; the rest of the modules ignore the property.
         for m in ${{ steps.mods.outputs.modules }}; do
           echo "::group::deploy ${m}"
+          # altDeploymentRepository supplies the deploy target for modules whose
+          # pom omits <distributionManagement> (e.g. cedarling-java); it matches
+          # the id+url the other modules already declare, so it is a no-op for them.
           mvn -B -ntp -s "${GITHUB_WORKSPACE}/.github/maven-settings.xml" \
             -f "${m}" \
             -Dmaven.test.skip=true \
             -Dcedarling.release.tag="${{ steps.ver.outputs.tag }}" \
+            -DaltDeploymentRepository="github::https://maven.pkg.github.com/JanssenProject/jans" \
             clean deploy
           echo "::endgroup::"
         done
