@@ -7,8 +7,9 @@ use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::default_values::{
-    default_enabled_feature_toggle, default_http_client_max_retries,
-    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval,
     default_log_channel_capacity, default_log_max_retries,
     default_status_list_refresh_interval_max, default_token_cache_capacity,
     default_token_cache_max_ttl, default_true,
@@ -209,6 +210,28 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_ssa_jwt: Option<String>,
 
+    /// Pre-issued access token to use for Lock Server authentication, bypassing
+    /// the SSA → DCR → `access_token` flow entirely.
+    ///
+    /// When this property is set, Cedarling will skip Dynamic Client Registration
+    /// and use this access token directly to authenticate with Lock Server endpoints
+    /// (log, health, telemetry). Primarily intended for testing and local development
+    /// to simplify the bootstrap flow; may also be used in environments where the
+    /// DCR flow is not available or access tokens are provisioned externally.
+    ///
+    /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
+    /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is
+    /// skipped.
+    ///
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_LOCK_ACCESS_TOKEN_JWT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub lock_access_token_jwt: Option<String>,
+
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -268,8 +291,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
     ///   tokens that do not carry an `exp` claim.
-    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
-    ///   claim; tokens without `exp` are not cached at all.
+    /// - `0`: disables the token cache entirely.
     ///
     /// Default: `5` seconds — small enough to pick up revocation / status-list
     /// changes quickly, large enough to amortise repeated requests for the
@@ -388,6 +410,17 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub http_client_request_retry_delay: u64,
+
+    /// Maximum HTTP response body size, in bytes. Rejects oversized responses
+    /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
+    /// before they're fully buffered into memory. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
+        default = "default_http_client_max_response_size_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_max_response_size_bytes: u64,
 
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.

@@ -40,7 +40,7 @@ pub struct JwtConfig {
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
     /// Maximum TTL (in seconds) for cached tokens.
-    /// Zero means no TTL limit is applied.
+    /// Zero disables the token cache entirely.
     ///
     /// Defaults to [`Self::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS`] (5 seconds): small
     /// enough that revocation / status-list changes are picked up promptly while

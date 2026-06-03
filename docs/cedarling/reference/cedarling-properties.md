@@ -79,6 +79,7 @@ the Cedarling will use the default value as specified in the property definition
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
+- **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. Default is `10485760` (10 MB).
 
 **Advanced configuration:**
 
@@ -93,6 +94,7 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-master-configuration`.
 - **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : `enabled` | `disabled`, controls whether Cedarling should listen for SSE config updates. Default is `disabled`.
 - **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
+- **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server authentication. When set, Cedarling skips the SSA → DCR → access token flow entirely and uses this token directly to authenticate with Lock Server endpoints (log, health, telemetry). **Primarily intended for testing and local development** to simplify the bootstrap flow when a full Auth Server / DCR setup is not desired. This token may also be used when token issuance is managed externally or DCR is not available. If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and a warning is emitted. **Not available on WASM builds.**
 - **`CEDARLING_LOCK_LOG_INTERVAL`** : How often to send log messages to Lock Server (0 to turn off transmission).
 - **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often to send health messages to Lock Server (0 to turn off transmission).
 - **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Server (0 to turn off transmission).
@@ -120,7 +122,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **Token cache:**
 
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the cap — the token's `exp` claim is used as the entry TTL; tokens without `exp` are then not cached at all.
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the token cache entirely.
 - **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
 - **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
 
@@ -132,6 +134,3 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 **Decision logging for tokens:**
 
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim, or you need a different identifier.
-
-
-
