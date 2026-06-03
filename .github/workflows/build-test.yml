@@ -142,18 +142,30 @@ jobs:
         echo "Services: $services"
         for service in $services; do
           echo "Checking $service"
-          # --paginate walks every page: 0.0.0-nightly is often buried under
-          # newer release versions (e.g. 1.16.0), so the default first-page-only
-          # lookup misses it and the later deploy fails with 409 Conflict.
-          version_ids=$(gh api --paginate -H "Accept: application/vnd.github+json" \
+          # --paginate walks every page: a 0.0.0-nightly buried under newer
+          # release versions (e.g. 1.16.0) is missed by a first-page-only lookup,
+          # leaving it to fail the later deploy with 409 Conflict.
+          versions=$(gh api --paginate -H "Accept: application/vnd.github+json" \
             "/orgs/JanssenProject/packages/maven/${service}/versions" \
-            --jq '.[] | select(.name == "0.0.0-nightly") | .id')
-          for version_id in $version_ids; do
-            echo "Deleting version $version_id of $service"
-            gh api --method DELETE \
-              -H "Accept: application/vnd.github+json" \
-              "/orgs/JanssenProject/packages/maven/${service}/versions/${version_id}" || echo "Failed to delete $service version $version_id"
-          done
+            --jq '.[] | "\(.id) \(.name)"')
+          [ -z "$versions" ] && continue
+          total=$(printf '%s\n' "$versions" | grep -c .)
+          nightly_ids=$(printf '%s\n' "$versions" | awk '$2=="0.0.0-nightly"{print $1}')
+          [ -z "$nightly_ids" ] && continue
+          nightly_count=$(printf '%s\n' "$nightly_ids" | grep -c .)
+          if [ "$total" -le "$nightly_count" ]; then
+            # GitHub forbids deleting the last version of a package, so a brand-new
+            # package whose only version is 0.0.0-nightly must be deleted wholesale.
+            echo "Only nightly version(s) present; deleting package $service"
+            gh api --method DELETE -H "Accept: application/vnd.github+json" \
+              "/orgs/JanssenProject/packages/maven/${service}" || echo "Failed to delete package $service"
+          else
+            for version_id in $nightly_ids; do
+              echo "Deleting version $version_id of $service"
+              gh api --method DELETE -H "Accept: application/vnd.github+json" \
+                "/orgs/JanssenProject/packages/maven/${service}/versions/${version_id}" || echo "Failed to delete $service version $version_id"
+            done
+          fi
         done
 
   # Build every Java project and deploy its artifacts to GitHub Packages Maven,
