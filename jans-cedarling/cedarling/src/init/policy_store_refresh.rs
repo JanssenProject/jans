@@ -126,14 +126,26 @@ impl Default for StrategyState {
     }
 }
 
+/// Selection emitted by [`StrategyState::choose_for_tick`]: which strategy the
+/// tick should run, and whether running it is an upgrade-probe attempt
+/// (i.e. differs from `current` because we're testing whether the upstream
+/// has recovered).
+struct StrategyChoice {
+    strategy: RefreshStrategy,
+    /// `true` when the chosen strategy is *not* the current one — the tick
+    /// logic interprets outcomes (especially `304`) as upgrade signals
+    /// rather than steady-state results.
+    is_probe: bool,
+}
+
 impl StrategyState {
-    /// Decide which strategy to run for this tick. Returns `(strategy,
-    /// is_probe)`. `is_probe = true` indicates we're attempting to upgrade
-    /// from a degraded state — the tick logic uses this to decide whether
-    /// to interpret outcomes as upgrade signals.
-    fn choose_for_tick(&mut self) -> (RefreshStrategy, bool) {
+    /// Decide which strategy to run for this tick.
+    fn choose_for_tick(&mut self) -> StrategyChoice {
         if self.current == RefreshStrategy::Conditional {
-            return (RefreshStrategy::Conditional, false);
+            return StrategyChoice {
+                strategy: RefreshStrategy::Conditional,
+                is_probe: false,
+            };
         }
         let now = Utc::now();
         let due = self.last_probe_at.is_none_or(|t| {
@@ -141,9 +153,15 @@ impl StrategyState {
         });
         if due {
             self.last_probe_at = Some(now);
-            (RefreshStrategy::Conditional, true)
+            StrategyChoice {
+                strategy: RefreshStrategy::Conditional,
+                is_probe: true,
+            }
         } else {
-            (self.current, false)
+            StrategyChoice {
+                strategy: self.current,
+                is_probe: false,
+            }
         }
     }
 
@@ -462,9 +480,9 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
 }
 
 async fn tick(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
-    let (strategy, is_probe) = state.strategy.choose_for_tick();
-    match strategy {
-        RefreshStrategy::Conditional => tick_conditional(ctx, state, is_probe).await,
+    let choice = state.strategy.choose_for_tick();
+    match choice.strategy {
+        RefreshStrategy::Conditional => tick_conditional(ctx, state, choice.is_probe).await,
         RefreshStrategy::HeadThenGet => tick_head_then_get(ctx, state).await,
         RefreshStrategy::PlainGet => tick_plain_get(ctx, state).await,
     }
@@ -682,7 +700,7 @@ mod tests {
         let s = RefreshState {
             validators: CacheHeadersState {
                 fresh_for: Some(Duration::from_secs(60)),
-                ..CacheValidators::default()
+                ..CacheHeadersState::default()
             },
             ..RefreshState::default()
         };
@@ -812,9 +830,9 @@ mod tests {
     #[test]
     fn strategy_choose_returns_conditional_when_current() {
         let mut s = StrategyState::default();
-        let (chosen, is_probe) = s.choose_for_tick();
-        assert_eq!(chosen, RefreshStrategy::Conditional);
-        assert!(!is_probe);
+        let choice = s.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::Conditional);
+        assert!(!choice.is_probe);
     }
 
     #[test]
@@ -823,9 +841,9 @@ mod tests {
             current: RefreshStrategy::HeadThenGet,
             ..StrategyState::default()
         };
-        let (chosen, is_probe) = s.choose_for_tick();
-        assert_eq!(chosen, RefreshStrategy::Conditional);
-        assert!(is_probe);
+        let choice = s.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::Conditional);
+        assert!(choice.is_probe);
         assert!(s.last_probe_at.is_some());
     }
 
@@ -836,9 +854,9 @@ mod tests {
             last_probe_at: Some(Utc::now()),
             ..StrategyState::default()
         };
-        let (chosen, is_probe) = s.choose_for_tick();
-        assert_eq!(chosen, RefreshStrategy::PlainGet);
-        assert!(!is_probe);
+        let choice = s.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::PlainGet);
+        assert!(!choice.is_probe);
     }
 
     // ---- validators_match ----
