@@ -54,9 +54,13 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
 
     public String generateSecretKeyUri(byte[] secretKey, String displayName) {
         logger.trace("Generating secret key URI");
-        // getURI base32-encodes the secret in the otpauth:// URI, as scanners expect.
-        URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
-        return uri.toString();
+        try {
+            // getURI base32-encodes the secret in the otpauth:// URI, as scanners expect.
+            URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
+            return uri.toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not build TOTP key URI", e);
+        }
     }
 
     public String getExternalUid(String secretKey, String code) {
