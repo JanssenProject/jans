@@ -59,10 +59,11 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # =======
 
 # @TODO: add shibboleth as plugin when artifact is ready
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
+RUN set -e \
+    && mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
     && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
     do \
-        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
+        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
 
 # ===========
