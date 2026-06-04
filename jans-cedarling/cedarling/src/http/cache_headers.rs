@@ -69,7 +69,18 @@ impl CacheHeadersState {
             .and_then(|v| v.to_str().ok())
             .and_then(parse_http_date)
         {
-            let delta = expires_at.signed_duration_since(now);
+            // RFC 9111 §5.3: freshness lifetime from `Expires` is computed
+            // against the response's `Date` header — not the client's wall
+            // clock — so clock skew between client and origin doesn't
+            // (mis)classify a fresh response as stale or vice versa. Fall back
+            // to `now` only when the server omitted `Date` (allowed by RFC
+            // 7231 §7.1.1.2 for origins with no reliable clock).
+            let reference_time = headers
+                .get(reqwest::header::DATE)
+                .and_then(|v| v.to_str().ok())
+                .and_then(parse_http_date)
+                .unwrap_or(now);
+            let delta = expires_at.signed_duration_since(reference_time);
             // Negative or zero ⇒ already stale, treat as fresh_for=0 so the
             // worker will revalidate immediately on its next tick.
             Some(if delta.num_seconds() > 0 {
@@ -236,6 +247,58 @@ mod tests {
         let h = headers(&[("expires", "Mon, 01 Jan 1990 00:00:00 GMT")]);
         let v = CacheHeadersState::from_headers(&h, t0());
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
+    }
+
+    #[test]
+    fn expires_freshness_uses_response_date_when_present_per_rfc_9111() {
+        // Server: Date=12:00, Expires=12:30 → freshness = 30 minutes
+        // Client wall clock: t0()=12:00 here (matches origin), but the
+        // assertion holds regardless of skew because we anchor on `Date`.
+        let h = headers(&[
+            ("date", "Fri, 22 May 2026 12:00:00 GMT"),
+            ("expires", "Fri, 22 May 2026 12:30:00 GMT"),
+        ]);
+        let v = CacheHeadersState::from_headers(&h, t0());
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::from_secs(1800)),
+            "freshness must be Expires - Date (RFC 9111 §5.3), independent of client clock",
+        );
+    }
+
+    #[test]
+    fn expires_freshness_immune_to_client_clock_skew() {
+        // Server-side timeline: Date=12:00, Expires=12:30 → 30 min freshness.
+        // Client's clock is 10 minutes behind the origin (11:50). Without the
+        // RFC 9111 fix, we'd compute Expires-now = 40 minutes (overestimated)
+        // and the worker would refresh too late. With Date-anchored
+        // arithmetic, we get the correct 30 minutes regardless.
+        use chrono::TimeZone;
+        let client_now_skewed = Utc.with_ymd_and_hms(2026, 5, 22, 11, 50, 0).unwrap();
+        let h = headers(&[
+            ("date", "Fri, 22 May 2026 12:00:00 GMT"),
+            ("expires", "Fri, 22 May 2026 12:30:00 GMT"),
+        ]);
+        let v = CacheHeadersState::from_headers(&h, client_now_skewed);
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::from_secs(1800)),
+            "Date-anchored freshness must ignore client clock skew",
+        );
+    }
+
+    #[test]
+    fn expires_falls_back_to_client_now_when_date_header_missing() {
+        // RFC 7231 §7.1.1.2 lets origins skip the Date header when they have
+        // no reliable clock. In that case we fall back to the client's wall
+        // clock — best effort.
+        let h = headers(&[("expires", "Fri, 22 May 2026 13:00:00 GMT")]);
+        let v = CacheHeadersState::from_headers(&h, t0());
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::from_secs(3600)),
+            "with no Date header, fall back to client `now`",
+        );
     }
 
     #[test]
