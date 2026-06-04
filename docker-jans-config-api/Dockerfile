@@ -44,9 +44,10 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2026-05-04 10:08'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
@@ -61,7 +62,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
     && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
+        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
 
 # ===========

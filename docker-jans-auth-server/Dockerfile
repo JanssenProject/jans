@@ -54,9 +54,10 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2026-04-23 15:20'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
@@ -83,11 +84,11 @@ RUN set -e \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
     && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
+        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
     done
 
 # Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
-RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
+RUN wget -nv https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
 

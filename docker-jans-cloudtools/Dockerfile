@@ -15,9 +15,10 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2025-12-18 08:20'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 
@@ -32,6 +33,10 @@ RUN mkdir -p ${SCHEDULER_HOME}/bin \
     ${SCHEDULER_HOME}/lib \
     ${SCHEDULER_HOME}/logs
 
+# TODO(jenkins-offboarding): kc-jans-scheduler (keycloak) is not built in this
+# repository (no jans-keycloak module) and is not published to the GitHub
+# release. It must be given a GitHub-hosted source before jenkins.jans.io is
+# shut down, or docker-jans-cloudtools will fail to build.
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
     && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
     && rm -rf /tmp/kc-scheduler.zip \

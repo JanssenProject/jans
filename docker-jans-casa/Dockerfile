@@ -33,9 +33,10 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2026-02-19 08:51'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-${CN_VERSION}.war
 
 # Install Casa
 RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
@@ -46,12 +47,12 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
 RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
     && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding strong-authn-settings; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
+        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
     done
 
 # casa agama
 RUN mkdir -p /usr/share/java \
-    && wget -q https://maven.jans.io/maven/io/jans/casa-agama/${CN_VERSION}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
+    && wget -q https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
 
 # ===========
 # Assets sync
