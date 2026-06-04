@@ -22,29 +22,6 @@ ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 
-# ============
-# KC scheduler
-# ============
-
-ENV SCHEDULER_HOME=/opt/kc-scheduler
-
-RUN mkdir -p ${SCHEDULER_HOME}/bin \
-    ${SCHEDULER_HOME}/conf \
-    ${SCHEDULER_HOME}/lib \
-    ${SCHEDULER_HOME}/logs
-
-# TODO(jenkins-offboarding): kc-jans-scheduler (keycloak) is not built in this
-# repository (no jans-keycloak module) and is not published to the GitHub
-# release. It must be given a GitHub-hosted source before jenkins.jans.io is
-# shut down, or docker-jans-cloudtools will fail to build.
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
-    && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
-    && rm -rf /tmp/kc-scheduler.zip \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
-
-RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
-    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
-
 # ===========
 # Assets sync
 # ===========
@@ -59,8 +36,7 @@ WORKDIR /tmp/jans
 RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
     && git sparse-checkout add jans-pycloudlib \
-    && git checkout ${JANS_SOURCE_VERSION} \
-    && mkdir -p /app/templates/kc-scheduler
+    && git checkout ${JANS_SOURCE_VERSION}
 
 WORKDIR /
 
@@ -165,7 +141,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cloudtools" \
 RUN mkdir -p /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
-COPY templates /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
@@ -176,9 +151,7 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 # adjust ownership and permission
 RUN chown -R 1000:0 /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 /opt/kc-scheduler \
-    && chown -R 1000:0 /app/templates
+    && chmod 664 /opt/java/lib/security/cacerts
 
 USER 1000
 
