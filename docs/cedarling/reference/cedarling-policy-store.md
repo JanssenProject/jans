@@ -191,38 +191,39 @@ Example with parent relationships (`entities/users.json`):
 
 #### Trusted Issuer Files
 
-Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. Each file contains a JSON object mapping issuer IDs to their configurations:
+Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. **Each file describes exactly one issuer** as a JSON object with the issuer's fields at the top level:
 
 ```json
 {
-  "jans_issuer": {
-    "name": "Jans Server",
-    "description": "Primary Janssen Identity Provider",
-    "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
-    "token_metadata": {
-      "access_token": {
-        "trusted": true,
-        "entity_type_name": "Jans::Access_token",
-        "token_id": "jti",
-      },
-      "id_token": {
-        "trusted": true,
-        "entity_type_name": "Jans::Id_token",
-        "token_id": "jti"
-      }
+  "name": "Jans Server",
+  "description": "Primary Janssen Identity Provider",
+  "configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_token",
+      "token_id": "jti"
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Id_token",
+      "token_id": "jti"
     }
   }
 }
 ```
 
-Each trusted issuer configuration includes:
+Each trusted issuer file includes:
 
-- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity)
-- **`description`**: Optional description of the issuer
-- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint
-- **`token_metadata`**: Map of token types to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema))
+- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
+- **`description`**: Optional description of the issuer.
+- **`configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint.
+- **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
+- **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
 
-You can define multiple issuers in a single file or split them across multiple files in the `trusted-issuers/` directory.
+To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
+
+> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations — and a different field name (`openid_configuration_endpoint`). Per-file format and embedded format are not interchangeable.
 
 #### Cedar Archive (.cjar) Format
 
