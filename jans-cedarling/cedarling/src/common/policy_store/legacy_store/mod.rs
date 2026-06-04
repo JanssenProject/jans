@@ -544,7 +544,7 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
             name: v.name,
             description: v.description,
             cedar_version: v.cedar_version,
-            schema: v.schema.map(|s| s.into()),
+            schema: v.schema.map(std::convert::Into::into),
             policies: v.policies.into(),
             trusted_issuers: v
                 .trusted_issuers
