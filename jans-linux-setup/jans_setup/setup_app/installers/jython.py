@@ -11,7 +11,7 @@ from setup_app.installers.base import BaseInstaller
 
 class JythonInstaller(BaseInstaller, SetupUtils):
 
-    jython_link = 'https://maven.jans.io/maven/io/jans/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
+    jython_link = 'https://repo1.maven.org/maven2/org/python/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(jython_link)), jython_link),
             ]
