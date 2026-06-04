@@ -297,21 +297,26 @@ fn register_gucs_inner() {
 }
 
 fn register_enum_gucs() {
+    // Enforcement-affecting GUCs are Suset (superuser-only): an unprivileged
+    // role flipping these in its own session would neutralize Cedar
+    // authorization for that session — directly impacting any RLS policy
+    // that relies on cedarling_authorized* since RLS evaluates in the
+    // querying user's session.
     GucRegistry::define_enum_guc(
         c"cedarling.mode",
-        c"Cedarling operation mode.",
+        c"Cedarling operation mode (superuser only).",
         c"enforcement: apply policy decisions. instrumentation: evaluate and log, still return the decision. shadow: evaluate and trace but always return true so RLS stays permissive (useful for rollout dry-runs).",
         &MODE,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 
     GucRegistry::define_enum_guc(
         c"cedarling.fail_mode",
-        c"Fail-closed vs fail-open on authorization errors.",
+        c"Fail-closed vs fail-open on authorization errors (superuser only).",
         c"closed: deny on errors (default). open: allow reads on errors (use with caution).",
         &FAIL_MODE,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 
@@ -326,10 +331,10 @@ fn register_enum_gucs() {
 
     GucRegistry::define_enum_guc(
         c"cedarling.strategy",
-        c"Access strategy for rows that fail authorization.",
+        c"Access strategy for rows that fail authorization (superuser only).",
         c"filter: exclude the row (standard RLS). mask: return the row with masked columns (requires configured cedarling.mask_rules).",
         &STRATEGY,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 
@@ -344,10 +349,10 @@ fn register_enum_gucs() {
 
     GucRegistry::define_enum_guc(
         c"cedarling.where_partial_fallback",
-        c"Fragment cedarling_where returns when at least one matched policy cannot be lowered to SQL.",
+        c"Fragment cedarling_where returns when at least one matched policy cannot be lowered to SQL (superuser only).",
         c"deny (default): return 'FALSE' (fail-closed). permit: return 'TRUE' (safe only when paired with row-by-row cedarling_authorized* RLS).",
         &WHERE_PARTIAL_FALLBACK,
-        GucContext::Userset,
+        GucContext::Suset,
         GucFlags::empty(),
     );
 }

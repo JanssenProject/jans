@@ -323,9 +323,9 @@ or cluster-wide (`ALTER SYSTEM SET ...; SELECT pg_reload_conf();`).
 | GUC | Type | Default | Purpose |
 | --- | --- | --- | --- |
 | `cedarling.bootstrap_config` | text (superuser) | — | Path to the Cedarling bootstrap YAML. Required for any `#[pg_extern]` that talks to the engine. Only superusers can set it. |
-| `cedarling.mode` | enum | `enforcement` | `enforcement` / `instrumentation` / `shadow`. Shadow always returns `true` and writes a trace. |
-| `cedarling.strategy` | enum | `filter` | `filter` (exclude unauthorized rows) or `mask` (return the row with masked columns). |
-| `cedarling.fail_mode` | enum | `closed` | `closed` (deny on engine errors) or `open` (allow on engine errors). A single `SET cedarling.fail_mode = 'open'` turns Cedarling outages into wholesale `ALLOW` for the session. |
+| `cedarling.mode` | enum (superuser) | `enforcement` | `enforcement` / `instrumentation` / `shadow`. `instrumentation` evaluates and logs the decision but still returns it (useful for canary). `shadow` always returns `true` and writes a trace. Superuser-only so unprivileged sessions can't switch into shadow to bypass authorization. |
+| `cedarling.strategy` | enum (superuser) | `filter` | `filter` (exclude unauthorized rows) or `mask` (return the row with masked columns). Superuser-only. |
+| `cedarling.fail_mode` | enum (superuser) | `closed` | `closed` (deny on engine errors) or `open` (allow on engine errors). A single `SET cedarling.fail_mode = 'open'` turns Cedarling outages into wholesale `ALLOW` for the session, so this is superuser-only. |
 | `cedarling.log_level` | enum | `info` | `debug` / `info` / `warn` / `error`. |
 | `cedarling.cache_ttl` | int | `300` | Decision cache TTL in seconds. |
 | `cedarling.cache_size` | int | `8192` | Maximum cached decisions per backend. Set to `0` to disable. |
@@ -336,7 +336,7 @@ or cluster-wide (`ALTER SYSTEM SET ...; SELECT pg_reload_conf();`).
 | `cedarling.trace_buffer_size` | int | `1024` | Ring-buffer capacity for `cedarling_recent_traces` (range `0..=65536`); runtime `SET` changes apply immediately in the current backend. |
 | `cedarling.policy_history_size` | int | `16` | Maximum rows retained in `cedarling.policy_history`. |
 | `cedarling.diff_mode` | enum | `structural` | `structural` (per-policy-id diff, default) or `lines` (legacy line diff). |
-| `cedarling.where_partial_fallback` | enum | `deny` | Fragment `cedarling_where` returns when at least one matched policy can't be lowered. `deny` (default) → `'FALSE'`, safe for standalone use. `permit` → `'TRUE'`, safe only when paired with row-by-row RLS. |
+| `cedarling.where_partial_fallback` | enum (superuser) | `deny` | Fragment `cedarling_where` returns when at least one matched policy can't be lowered. `deny` (default) → `'FALSE'`, safe for standalone use. `permit` → `'TRUE'`, safe only when paired with row-by-row RLS. Superuser-only so an unprivileged session can't downgrade unhandled residuals to `TRUE`. |
 | `cedarling.schema_validate_strict` | bool | `on` | When `on`, `cedarling_validate_schema` uses the real Cedar parser; `off` falls back to lexical identifier extraction. |
 | `cedarling.mask_hash_salt` | text (superuser) | — | Salt used by `MaskType::Hash`. When unset, `hash` masks return a sentinel and emit one warning. Superuser-only like `bootstrap_config` and `policy_version`. |
 
