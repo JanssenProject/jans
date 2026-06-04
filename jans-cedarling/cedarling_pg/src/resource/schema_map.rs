@@ -203,7 +203,7 @@ pub fn cedarling_register_entity_map(
         return false;
     }
     let id_columns = sanitize_id_columns(id_columns);
-    Spi::connect_mut(|client| {
+    let ok = Spi::connect_mut(|client| {
         client.update(
             "INSERT INTO cedarling.entity_map(table_oid, entity_type, id_columns)
              VALUES ($1::oid, $2, $3)
@@ -219,7 +219,13 @@ pub fn cedarling_register_entity_map(
         )?;
         Ok::<(), pgrx::spi::Error>(())
     })
-    .is_ok()
+    .is_ok();
+    // entity_map controls which Cedar entity a row is evaluated as; cached
+    // decisions taken under the old mapping must not survive the change.
+    if ok {
+        crate::authz::cache::global_cache().clear_all();
+    }
+    ok
 }
 
 #[cfg(test)]

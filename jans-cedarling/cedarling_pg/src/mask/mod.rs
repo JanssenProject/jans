@@ -42,7 +42,7 @@ pub fn cedarling_set_mask_config(
     {
         return false;
     }
-    Spi::connect_mut(|client| {
+    let ok = Spi::connect_mut(|client| {
         client.update(
             "INSERT INTO cedarling.mask_rules(table_name,column_name,mask_type,mask_value,updated_at)
              VALUES ($1,$2,$3,$4,now())
@@ -53,7 +53,13 @@ pub fn cedarling_set_mask_config(
         )?;
         Ok::<(), pgrx::spi::Error>(())
     })
-    .is_ok()
+    .is_ok();
+    // Mask rules shape decisions under `cedarling.strategy = mask`; cached
+    // decisions taken before this write must not survive the change.
+    if ok {
+        crate::authz::cache::global_cache().clear_all();
+    }
+    ok
 }
 
 /// Preview masking logic as a pure SQL function — useful for interactive testing.

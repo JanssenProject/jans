@@ -274,8 +274,19 @@ fn lower_scalar_literal(raw: &str) -> Option<String> {
     if t.eq_ignore_ascii_case("false") {
         return Some("FALSE".to_string());
     }
-    if t.parse::<i64>().is_ok() || t.parse::<f64>().is_ok() {
+    if t.parse::<i64>().is_ok() {
         return Some(t.to_string());
+    }
+    // f64::parse accepts "inf", "-inf", "nan", "infinity" (any case). Emitting
+    // those verbatim into SQL would silently change the predicate (Postgres
+    // comparisons against NaN/Infinity have surprising semantics — `col = nan`
+    // is always NULL, so the row drops out silently). Reject so the policy
+    // falls through to the unhandled-residual path.
+    if let Ok(f) = t.parse::<f64>() {
+        if f.is_finite() {
+            return Some(t.to_string());
+        }
+        return None;
     }
     if t.starts_with('"') && t.ends_with('"') && t.len() >= 2 {
         let inner = &t[1..t.len() - 1];
@@ -747,6 +758,23 @@ mod tests {
             lower_scalar_literal(r#""C:\\path""#),
             Some(r"'C:\path'".to_string()),
             "Cedar windows path should lower to matching SQL literal"
+        );
+    }
+
+    #[test]
+    fn lower_scalar_literal_rejects_non_finite_floats() {
+        for raw in ["inf", "-inf", "Infinity", "-Infinity", "nan", "NaN"] {
+            assert_eq!(
+                lower_scalar_literal(raw),
+                None,
+                "non-finite float `{raw}` must not lower (would silently distort the SQL predicate)"
+            );
+        }
+        // Finite floats still lower so we don't regress numeric pushdown.
+        assert_eq!(
+            lower_scalar_literal("3.14"),
+            Some("3.14".to_string()),
+            "finite float should lower as-is"
         );
     }
 

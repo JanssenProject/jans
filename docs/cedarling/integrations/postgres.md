@@ -44,7 +44,7 @@ A typical authorization flow:
 
 1. A `SELECT` against a protected table fires its RLS policy.
 2. The policy invokes a `cedarling_*` function (for example
-   `cedarling_authorized_row(students, 'Read')`).
+   `cedarling_authorized_row_jwt(students, 'Read')`, the 2-arg JWT helper).
 3. The extension materializes the row as a Cedar entity, attaches the
    transaction-local token bundle (`cedarling.tokens`), and asks the embedded
    Cedarling engine for a decision.
@@ -121,10 +121,13 @@ ARCHIVE="cedarling_pg-${VER}-pg${PG}-linux-x86_64.tar.gz"
 curl -fSLO "https://github.com/JanssenProject/jans/releases/download/${TAG}/${ARCHIVE}"
 curl -fSLO "https://github.com/JanssenProject/jans/releases/download/${TAG}/${ARCHIVE}.bundle"
 
-# Optional but recommended.
+# Optional but recommended. Both --certificate-identity-regexp and
+# --certificate-oidc-issuer are required by cosign verify-blob; omitting
+# either makes the command error out.
 cosign verify-blob \
   --bundle "${ARCHIVE}.bundle" \
-  --certificate-oidc-issuer-regexp='https://token.actions.githubusercontent.com' \
+  --certificate-identity-regexp "https://github.com/JanssenProject/jans/.github/workflows/build-packages\\.yml@refs/tags/.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   "${ARCHIVE}"
 ```
 
@@ -285,9 +288,9 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 
 | Function | Purpose |
 | --- | --- |
-| `cedarling_validate_schema(table regclass, cedar_schema_path text) → jsonb` | Real `cedar_policy::Schema` parse + `pg_attribute` type compatibility check. Reports `missing_in_table`, `missing_in_schema`, `type_mismatches`. |
+| `cedarling_validate_schema(table_oid oid, cedar_schema_path text) → jsonb` | Real `cedar_policy::Schema` parse + `pg_attribute` type compatibility check. Reports `missing_in_table`, `missing_in_schema`, `type_mismatches`. Pass a table name as `'mytable'::regclass::oid` — `regclass` does not auto-cast to `oid`. |
 | `cedarling_validate_schema(table_name text, cedar_schema_path text) → jsonb` | `text` overload for backwards compatibility. |
-| `cedarling_register_entity_map(table regclass, entity_type text, id_columns text[]) → bool` | Override the default `table → Cedar entity type` mapping used by row helpers. |
+| `cedarling_register_entity_map(table oid, entity_type text, id_columns text[]) → bool` | Override the default `table → Cedar entity type` mapping used by row helpers. Pass a table name as `'mytable'::regclass::oid`. |
 
 ### Masking
 
@@ -296,7 +299,7 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | `cedarling_set_mask_config(table_name text, column_name text, mask_type text, mask_value text) → bool` | Upsert into `cedarling.mask_rules`. `mask_type` is one of `null`, `redact`, `partial`, `range`, `hash`, `fixed`. |
 | `cedarling_test_masking(original_value text, data_type text, mask_type text, mask_config text) → text` | Apply a single mask and return the result. The hash salt comes from `cedarling.mask_hash_salt` (GUC), not a function argument. |
 | `cedarling_mask_plan(table_name text, action text DEFAULT NULL) → jsonb` | List masking rules for `table_name`. The optional `action` is echoed in the JSON metadata only (reserved for future action-scoped rules). |
-| `cedarling_mask_row(row jsonb, table_name text) → jsonb` | Apply masks to a JSONB row using table/column rules and the default registry. |
+| `cedarling_mask_row(row_json jsonb, table_name text) → jsonb` | Apply masks to a JSONB row using table/column rules and the default registry. |
 
 ### Observability
 
