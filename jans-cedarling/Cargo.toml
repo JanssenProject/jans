@@ -40,8 +40,11 @@ pedantic = "warn"
 duration-suboptimal-units = { level = "allow", priority = 1 }
 
 
+# Native release builds (java/python/go/uniffi) are speed-oriented.
+# The WASM target is size-oriented instead: it overrides these keys via the
+# config-based profile in bindings/cedarling_wasm/.cargo/config.toml, which Cargo
+# only picks up when building from that directory (i.e. under wasm-pack). Native
+# builds run from this workspace root and never see it.
 [profile.release]
 debug-assertions = false
-opt-level = "z"
-codegen-units = 1
 overflow-checks = false

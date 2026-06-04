@@ -1,0 +1,18 @@
+{
+  "policy_store_id": "6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327",
+  "generated_date": "2026-03-13T02:28:22.283762+00:00",
+  "files": {
+    "metadata.json": {
+      "size": 333,
+      "checksum": "sha1:775ee637a9578c56e46f1a5c6e8a29987720bc03"
+    },
+    "policies/allow_teacher.cedar": {
+      "size": 149,
+      "checksum": "sha1:3865fc8acb05bf0c464aaefabd5225e03d41ade3"
+    },
+    "schema.cedarschema": {
+      "size": 3765,
+      "checksum": "sha1:9ab5e508c9209fbd74447b57900075ec6826a411"
+    }
+  }
+}

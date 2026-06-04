@@ -79,6 +79,7 @@ the Cedarling will use the default value as specified in the property definition
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
+- **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. Default is `10485760` (10 MB).
 
 **Advanced configuration:**
 
@@ -121,7 +122,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 **Token cache:**
 
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the cap — the token's `exp` claim is used as the entry TTL; tokens without `exp` are then not cached at all.
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `5` seconds — small enough that revocation and status-list changes are picked up quickly, large enough to amortise repeated requests for the same token. Effective TTL is `min(time-until-exp, max_ttl)` when both apply. Setting this to `0` disables the token cache entirely.
 - **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
 - **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
 

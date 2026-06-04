@@ -2208,9 +2208,11 @@ dependencies = [
 name = "http_utils"
 version = "0.1.0"
 dependencies = [
+ "mockito",
  "reqwest",
  "serde",
- "thiserror 2.0.18",
+ "serde_json",
+ "thiserror",
  "tokio",
 ]
 
