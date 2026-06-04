@@ -10,14 +10,6 @@
 
 use pgrx::extension_sql;
 
-// Imports are referenced from the `requires = [...]` list of the second `extension_sql!` block;
-// rustc's `unused_imports` check doesn't follow into the macro expansion.
-#[allow(unused_imports)]
-use crate::policy::versions::{
-    cedarling_diff_policies, cedarling_register_policy_version, cedarling_rollback_policy,
-    cedarling_use_policy,
-};
-
 extension_sql!(
     r"
 -- Namespace for cedarling_pg catalog objects.
@@ -86,16 +78,31 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 
 extension_sql!(
     r"
+-- Policy-lifecycle functions: file-system access + global policy swap.
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_diff_policies(text, text) FROM PUBLIC;
+
+-- Authorization-input mutators: cedarling.mask_rules controls what columns get
+-- masked; cedarling.entity_map controls which Cedar entity a row evaluates as.
+-- Both are decision-shaping inputs, so the writers are owner-only.
+REVOKE EXECUTE ON FUNCTION cedarling_set_mask_config(text, text, text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_register_entity_map(oid, text, text[]) FROM PUBLIC;
+
+-- Defense in depth: PostgreSQL grants no PUBLIC privileges on these tables by
+-- default, but make it explicit so a later `GRANT ALL ... TO PUBLIC` in a
+-- different migration doesn't silently open the door.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.mask_rules FROM PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.entity_map FROM PUBLIC;
 ",
     name = "cedarling_pg_policy_function_privileges",
     requires = [
-        cedarling_use_policy,
-        cedarling_register_policy_version,
-        cedarling_rollback_policy,
-        cedarling_diff_policies,
+        crate::policy::versions::cedarling_use_policy,
+        crate::policy::versions::cedarling_register_policy_version,
+        crate::policy::versions::cedarling_rollback_policy,
+        crate::policy::versions::cedarling_diff_policies,
+        crate::mask::cedarling_set_mask_config,
+        crate::resource::schema_map::cedarling_register_entity_map,
     ],
 );
