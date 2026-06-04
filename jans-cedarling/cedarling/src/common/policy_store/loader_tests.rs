@@ -154,26 +154,18 @@ fn test_validate_directory_missing_metadata() {
 }
 
 #[test]
-fn test_validate_directory_missing_schema() {
+fn test_validate_directory_missing_schema_is_optional() {
     let temp_dir = TempDir::new().unwrap();
     let dir = temp_dir.path();
 
-    // Create metadata but no schema
+    // Create metadata and policies dir but no schema — should pass since schema is optional
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
-    let err = result.expect_err("Expected error for missing schema.cedarschema");
-    assert!(
-        matches!(
-            &err,
-            PolicyStoreError::Validation(ValidationError::MissingRequiredFile { file })
-            if file.contains("schema")
-        ),
-        "Expected MissingRequiredFile error for schema.cedarschema, got: {err:?}"
-    );
+    result.expect("Expected success: schema.cedarschema is now optional");
 }
 
 #[test]
@@ -232,7 +224,7 @@ fn test_load_directory_success() {
         loaded_directory.metadata.policy_store.name,
         "Test Policy Store"
     );
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(loaded_directory.schema.is_some());
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "test-policy.cedar");
 }
@@ -537,12 +529,12 @@ fn test_load_and_parse_schema_end_to_end() {
 
     // Schema should be loaded
     assert!(
-        !loaded_directory.schema.is_empty(),
+        loaded_directory.schema.is_some(),
         "Schema should not be empty"
     );
 
     // Parse the schema
-    let parsed = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
+    let parsed = ParsedSchema::parse(loaded_directory.schema.as_deref().unwrap(), "schema.cedarschema")
         .expect("Should parse schema");
     assert_eq!(parsed.filename, "schema.cedarschema");
     assert_eq!(parsed.content, schema_content);
@@ -1080,7 +1072,7 @@ fn test_complete_policy_store_with_issuers() {
 
     // Verify all components are loaded
     assert_eq!(loaded_directory.metadata.name(), "Test Policy Store");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(loaded_directory.schema.is_some());
     assert!(!loaded_directory.policies.is_empty());
     assert!(!loaded_directory.entities.is_empty());
     assert!(!loaded_directory.trusted_issuers.is_empty());
@@ -1088,7 +1080,7 @@ fn test_complete_policy_store_with_issuers() {
     // Parse and validate all components
 
     // Schema
-    let parsed_schema = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
+    let parsed_schema = ParsedSchema::parse(loaded_directory.schema.as_deref().unwrap(), "schema.cedarschema")
         .expect("Should parse schema");
     parsed_schema.validate().expect("Schema should be valid");
 
@@ -1200,7 +1192,7 @@ fn test_archive_vfs_end_to_end_from_file() {
     // Step 4: Verify all components loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "Archive Test Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "abcdef123456");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(loaded_directory.schema.is_some());
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "allow.cedar");
     assert_eq!(loaded_directory.entities.len(), 1);
@@ -1208,7 +1200,10 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 5: Verify components can be parsed
 
-    let parsed_schema = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
+    let schema_str = loaded_directory.schema.as_deref()
+        .expect("Should have schema content for parsing");
+
+    let parsed_schema = ParsedSchema::parse(schema_str, "schema.cedarschema")
         .expect("Should parse schema from archive");
 
     let parsed_entities = EntityParser::parse_entities(
@@ -1239,7 +1234,7 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     // Verify loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "WASM Archive Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(loaded_directory.schema.is_some());
     assert_eq!(loaded_directory.policies.len(), 1);
 }
 
@@ -1362,5 +1357,5 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
     assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
     assert_eq!(loaded_directory.policies.len(), 1);
-    assert!(loaded_directory.schema.contains("Equiv"));
+    assert!(loaded_directory.schema.as_deref().unwrap().contains("Equiv"));
 }

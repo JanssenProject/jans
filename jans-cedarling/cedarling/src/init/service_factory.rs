@@ -127,14 +127,30 @@ impl<'a> ServiceFactory<'a> {
             logger.log_any(log_entry);
         }
 
+        // Warn when strict schema validation is disabled but schema is present
+        if !self.bootstrap_config.authorization_config.strict_schema_validation
+            && policy_store.schema.is_some()
+        {
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(
+                "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — schema present but not enforced"
+                    .to_string(),
+            );
+
+            logger.log_any(log_entry);
+        }
+
         let policy_store = self.policy_store()?;
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(&logger));
-        let schema = &policy_store.schema.validator_schema;
+        let schema = &policy_store.schema.as_ref().map(|s| &s.validator_schema);
         let entity_builder = EntityBuilder::new(
             issuers_index,
-            Some(schema),
+            schema.as_deref(),
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);

@@ -248,19 +248,14 @@ fn test_invalid_policy_store_entry() {
     });
 
     let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for missing schema in policy store entry");
-    assert!(
-        err.to_string()
-            .contains("missing required field 'schema' or 'cedar_schema' in policy store entry"),
-        "Error should mention missing schema field, got: {err}"
-    );
+    result.expect("schema is now optional, should succeed without schema field");
 
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
                 "name": "test",
-                "schema": "test",
+                "schema": null,
             }
         }
     });

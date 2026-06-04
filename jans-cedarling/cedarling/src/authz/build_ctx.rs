@@ -15,20 +15,30 @@ use std::collections::HashMap;
 
 use super::errors::BuildContextError;
 
-/// Constructs the authorization context by adding the built entities from the tokens and pushed data.
+/// Constructs the authorization context by dispatching to schema or no-schema implementation.
 ///
-/// ## Context Merging
-///
-/// Values are merged in the following order:
-/// 1. **Request Context** - Values passed directly in the authorization request
-/// 2. **Entity References** - Built entity references from tokens
-/// 3. **Pushed Data** - Data from the `DataStore` (injected under `context.data`)
-///
-/// **Important:** Merges will error on key conflicts via `merge_json_values`, which returns
-/// `BuildContextError::KeyConflict` when any key collision occurs. Callers must resolve
-/// conflicts before invoking this function. Pushed data is always placed under the `data`
-/// namespace to avoid conflicts.
+/// When a schema is available, entity references from tokens are injected into the context
+/// based on the action's context shape. Without a schema, only request context and pushed
+/// data are merged.
 pub(super) fn build_context(
+    config: &AuthzConfig,
+    request_context: Value,
+    build_entities: &BuiltEntities,
+    schema: Option<&cedar_policy::Schema>,
+    action: &cedar_policy::EntityUid,
+    pushed_data: HashMap<String, Value>,
+) -> Result<cedar_policy::Context, BuildContextError> {
+    match schema {
+        Some(s) => build_context_with_schema(config, request_context, build_entities, s, action, pushed_data),
+        None => build_context_no_schema(request_context, pushed_data),
+    }
+}
+
+/// Constructs the authorization context using schema-based entity references.
+///
+/// Builds context by looking up the action's expected context shape in the Cedar schema
+/// and injecting matching entity references from the built entities.
+pub(super) fn build_context_with_schema(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
@@ -36,17 +46,18 @@ pub(super) fn build_context(
     action: &cedar_policy::EntityUid,
     pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
+    let store_schema = config.policy_store.schema.as_ref()
+        .ok_or_else(|| BuildContextError::ContextCreation(
+            "build_context_with_schema called but policy store has no schema".to_string()
+        ))?;
+    let json_schema = &store_schema.json;
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
-    let json_schema = &config.policy_store.schema.json;
 
-    // TODO: we would to implement a way for the user to decide which entities
-    // should be added to the context that doesn't use the Cedar schema.
     let action_schema = json_schema
         .get_action(&namespace, action_name)
         .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
 
-    // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
@@ -105,9 +116,29 @@ pub(super) fn build_context(
 
     let context = merge_json_values(request_context, &ctx_entity_refs)?;
     let context: cedar_policy::Context =
-        cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
+        cedar_policy::Context::from_json_value(context, Some((schema, action)))
+            .map_err(|e| BuildContextError::ContextCreation(e.to_string()))?;
 
     Ok(context)
+}
+
+/// Constructs the authorization context without schema-based entity references.
+///
+/// Merges request context and pushed data directly. Entity references are not injected
+/// because the schema is unavailable.
+pub(super) fn build_context_no_schema(
+    request_context: Value,
+    pushed_data: HashMap<String, Value>,
+) -> Result<cedar_policy::Context, BuildContextError> {
+    let mut context_json = request_context;
+    if !pushed_data.is_empty() {
+        let data_value = Value::Object(serde_json::Map::from_iter(pushed_data));
+        let pushed_wrapper = json!({ "data": data_value });
+        context_json = merge_json_values(context_json, &pushed_wrapper)?;
+    }
+
+    cedar_policy::Context::from_json_value(context_json, None)
+        .map_err(|e| BuildContextError::ContextCreation(e.to_string()))
 }
 
 /// Constructs the authorization context for multi-issuer requests with token collection
@@ -130,7 +161,7 @@ pub(super) fn build_context(
 pub(super) fn build_multi_issuer_context(
     request_context: Value,
     token_entities: &HashMap<String, Entity>,
-    schema: &cedar_policy::Schema,
+    schema: Option<&cedar_policy::Schema>,
     action: &cedar_policy::EntityUid,
     pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
@@ -167,7 +198,7 @@ pub(super) fn build_multi_issuer_context(
     }
 
     // Create Cedar context
-    let context = cedar_policy::Context::from_json_value(context_json, Some((schema, action)))
+    let context = cedar_policy::Context::from_json_value(context_json, schema.map(|s| (s, action)))
         .map_err(|e| BuildContextError::ContextCreation(e.to_string()))?;
 
     Ok(context)

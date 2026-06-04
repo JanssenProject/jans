@@ -63,8 +63,8 @@ pub struct PolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     pub cedar_version: Option<Version>,
 
-    /// Cedar schema
-    pub schema: CedarSchema,
+    /// Cedar schema (optional — `None` when strict schema validation is disabled)
+    pub schema: Option<CedarSchema>,
 
     /// Cedar policy set
     pub policies: PoliciesContainer,
