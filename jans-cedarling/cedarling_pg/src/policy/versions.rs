@@ -102,13 +102,25 @@ pub fn cedarling_use_policy(version: &str) -> bool {
             guc_config::CedarlingLogLevelGuc::Error,
             &format!("cedarling_use_policy: failed to set cedarling.policy_version: {e}"),
         );
-        if let Err(e2) = engine::rollback_policy() {
-            extension_log::log_diagnostic(
+        match engine::rollback_policy() {
+            // Previous engine restored; state consistent again.
+            Ok(Some(_)) => {},
+            // First use_policy call in this backend: nothing to roll back to.
+            // Engine is running the new policy but `cedarling.policy_version`
+            // is stale. Surface this so the operator can take action.
+            Ok(None) => extension_log::log_diagnostic(
+                guc_config::CedarlingLogLevelGuc::Error,
+                &format!(
+                    "cedarling_use_policy: GUC set failed and no previous engine exists to roll back to; engine is now running '{}' but cedarling.policy_version remains unchanged. Re-run cedarling_use_policy or restart the backend to resync.",
+                    resolved.version_guc_value
+                ),
+            ),
+            Err(e2) => extension_log::log_diagnostic(
                 guc_config::CedarlingLogLevelGuc::Error,
                 &format!(
                     "cedarling_use_policy: GUC set failed AND engine rollback also failed; engine and cedarling.policy_version are now inconsistent: {e2}"
                 ),
-            );
+            ),
         }
         return false;
     }
