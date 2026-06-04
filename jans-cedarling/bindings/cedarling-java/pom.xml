@@ -31,6 +31,13 @@
         <connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
         <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
     </scm>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>mavencentral</id>
