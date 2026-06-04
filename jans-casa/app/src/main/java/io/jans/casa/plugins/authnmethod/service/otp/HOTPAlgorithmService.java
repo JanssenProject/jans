@@ -1,10 +1,7 @@
 package io.jans.casa.plugins.authnmethod.service.otp;
 
-import com.google.common.io.BaseEncoding;
-import com.lochbridge.oath.otp.HOTPValidationResult;
-import com.lochbridge.oath.otp.HOTPValidator;
-import com.lochbridge.oath.otp.keyprovisioning.OTPAuthURIBuilder;
-import com.lochbridge.oath.otp.keyprovisioning.OTPKey;
+import com.github.bastiaanjansen.otp.HMACAlgorithm;
+import com.github.bastiaanjansen.otp.HOTPGenerator;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.HOTPConfig;
 import org.slf4j.Logger;
@@ -13,14 +10,14 @@ import org.zkoss.util.Pair;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.net.URI;
 import java.util.Base64;
-
-import static com.lochbridge.oath.otp.keyprovisioning.OTPKey.OTPType;
 
 /**
  * Created by jgomer on 2018-06-28.
  * An app. scoped bean that encapsulates logic related to generating and validating OTP keys.
  * See https://tools.ietf.org/html/rfc6238 and https://tools.ietf.org/html/rfc4226.
+ * Migrated from com.lochbridge.oath to com.github.bastiaanjansen:otp-java.
  */
 @ApplicationScoped
 public class HOTPAlgorithmService implements IOTPAlgorithm {
@@ -43,17 +40,17 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
         return Utils.randomBytes(conf.getKeyLength());
     }
 
+    private HOTPGenerator buildGenerator(byte[] secret) {
+        return new HOTPGenerator.Builder(secret)
+                .withPasswordLength(conf.getDigits())
+                .withAlgorithm(HMACAlgorithm.SHA1)
+                .build();
+    }
+
     public String generateSecretKeyUri(byte[] secretKey, String displayName) {
-
-        String secretKeyBase32 = BaseEncoding.base32().omitPadding().encode(secretKey);
-        OTPKey otpKey = new OTPKey(secretKeyBase32, OTPType.HOTP);
-
-        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName.replace(':', ' '));
-        uribe = uribe.issuer(issuer).digits(conf.getDigits());
-
         logger.trace("Generating secret key URI");
-        return uribe.build().toUriString();
-
+        URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
+        return uri.toString();
     }
 
     public String getExternalUid(String secretKey, String code) {
@@ -71,12 +68,20 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     public Pair<Boolean, Long> validateKey(String secretKey, String otpCode, int movingFactor, Integer alternativeLookAheadWindow) {
-        
+
         byte[] bsecret = Base64.getUrlDecoder().decode(secretKey);
-        
+
         int window = alternativeLookAheadWindow == null ? conf.getLookAheadWindow() : alternativeLookAheadWindow;
-        HOTPValidationResult result = HOTPValidator.lookAheadWindow(window).validate(bsecret, movingFactor, conf.getDigits(), otpCode);
-        return result.isValid() ? new Pair<>(true, result.getNewMovingFactor()) : new Pair<>(false, null);   
+        // otp-java's verify(code, counter) checks a single counter; iterate the look-ahead
+        // window ourselves so we can return the matched counter as the new moving factor
+        // (lochbridge's HOTPValidationResult.getNewMovingFactor()).
+        HOTPGenerator generator = buildGenerator(bsecret);
+        for (long counter = movingFactor; counter <= (long) movingFactor + window; counter++) {
+            if (generator.verify(otpCode, counter)) {
+                return new Pair<>(true, counter + 1);
+            }
+        }
+        return new Pair<>(false, null);
     }
-    
+
 }
