@@ -707,6 +707,11 @@ mod tests {
     }
 
     #[pg_test]
+    fn test_signed_authorized_allow_then_deny() {
+        crate::functions::pg_test_authorized_signed::run_signed_authorized_allow_then_deny();
+    }
+
+    #[pg_test]
     fn test_unsigned_unconditional_permit_returns_true() {
         crate::authz::pg_test_where::run_unsigned_unconditional_permit_returns_true();
     }

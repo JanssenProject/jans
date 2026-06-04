@@ -10,6 +10,22 @@
 
 use pgrx::extension_sql;
 
+// The `requires = [...]` list on the second `extension_sql!` block below is
+// resolved by pgrx's SQL entity graph by *bare entity name* — fully qualified
+// paths there fail with "could not find `requires` target". Bringing the bare
+// names into scope keeps the macro syntactically valid; `#[allow(unused_imports)]`
+// is required because the macro expands to graph metadata, not a Rust reference,
+// so rustc's lint pass cannot see these imports as used.
+#[allow(unused_imports)]
+use crate::mask::cedarling_set_mask_config;
+#[allow(unused_imports)]
+use crate::policy::versions::{
+    cedarling_diff_policies, cedarling_register_policy_version, cedarling_rollback_policy,
+    cedarling_use_policy,
+};
+#[allow(unused_imports)]
+use crate::resource::schema_map::cedarling_register_entity_map;
+
 extension_sql!(
     r"
 -- Namespace for cedarling_pg catalog objects.
@@ -98,11 +114,11 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.entity_map FROM PUBLIC;
 ",
     name = "cedarling_pg_policy_function_privileges",
     requires = [
-        crate::policy::versions::cedarling_use_policy,
-        crate::policy::versions::cedarling_register_policy_version,
-        crate::policy::versions::cedarling_rollback_policy,
-        crate::policy::versions::cedarling_diff_policies,
-        crate::mask::cedarling_set_mask_config,
-        crate::resource::schema_map::cedarling_register_entity_map,
+        cedarling_use_policy,
+        cedarling_register_policy_version,
+        cedarling_rollback_policy,
+        cedarling_diff_policies,
+        cedarling_set_mask_config,
+        cedarling_register_entity_map,
     ],
 );
