@@ -1,0 +1,89 @@
+name: Mirror third-party artifacts to GitHub Packages
+
+# One-time / on-demand mirror of gluu-fork dependencies that are NOT available
+# on Maven Central, from maven.jans.io to GitHub Packages Maven. This lets the
+# project poms drop the maven.jans.io / maven.gluu.org repositories.
+#
+# Run this (while maven.jans.io is still alive) BEFORE merging the pom
+# repository repoint, otherwise these dependencies will not resolve.
+#
+# Currently mirrors:
+#   com.lochbridge.oath:oath-parent:0.0.1-SNAPSHOT             (pom)
+#   com.lochbridge.oath:oath-otp:0.0.1-SNAPSHOT               (jar + pom)
+#   com.lochbridge.oath:oath-otp-keyprovisioning:0.0.1-SNAPSHOT (jar + pom)
+#
+# (jython-standalone was switched to org.python on Maven Central; richfaces is
+# only dependency-managed and never resolved, so neither needs mirroring.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_base:
+        description: 'Source Maven repository base URL'
+        required: true
+        default: 'https://maven.jans.io/maven'
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # GitHub Packages auth for .github/maven-settings.xml (server id "github").
+      JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SRC: ${{ github.event.inputs.source_base }}
+      TARGET_URL: https://maven.pkg.github.com/JanssenProject/jans
+      GROUP: com.lochbridge.oath
+      VER: 0.0.1-SNAPSHOT
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Download from source and deploy to GitHub Packages
+      run: |
+        set -euo pipefail
+        WORK=/tmp/mirror
+        mkdir -p "$WORK"
+        GROUP_PATH="com/lochbridge/oath"
+
+        dl() {  # $1 = artifactId, $2 = extension
+          local url="${SRC}/${GROUP_PATH}/$1/${VER}/$1-${VER}.$2"
+          echo "Downloading ${url}"
+          curl -fsSL "${url}" -o "${WORK}/$1-${VER}.$2"
+        }
+
+        deploy() {  # $1 = artifactId, $2 = packaging (jar|pom)
+          local file
+          if [ "$2" = "pom" ]; then file="${WORK}/$1-${VER}.pom"; else file="${WORK}/$1-${VER}.$2"; fi
+          mvn -B -ntp -s "${GITHUB_WORKSPACE}/.github/maven-settings.xml" \
+            org.apache.maven.plugins:maven-deploy-plugin:3.1.1:deploy-file \
+            -DrepositoryId=github -Durl="${TARGET_URL}" \
+            -DgroupId="${GROUP}" -DartifactId="$1" -Dversion="${VER}" \
+            -Dpackaging="$2" -Dfile="${file}" -DpomFile="${WORK}/$1-${VER}.pom"
+        }
+
+        # Parent pom first (the otp artifacts inherit from it).
+        dl oath-parent pom
+        deploy oath-parent pom
+
+        for a in oath-otp oath-otp-keyprovisioning; do
+          dl "$a" pom
+          dl "$a" jar
+          deploy "$a" jar
+        done
