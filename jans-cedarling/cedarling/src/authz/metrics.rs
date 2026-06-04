@@ -306,6 +306,7 @@ pub(crate) struct MetricsCollector {
     policy_store_refresh_outcome_network_error: AtomicI64,
     policy_store_refresh_outcome_parse_error: AtomicI64,
     policy_store_refresh_outcome_rebuild_error: AtomicI64,
+    policy_store_refresh_outcome_decode_error: AtomicI64,
 }
 
 impl MetricsCollector {
@@ -330,6 +331,7 @@ impl MetricsCollector {
             policy_store_refresh_outcome_network_error: AtomicI64::new(0),
             policy_store_refresh_outcome_parse_error: AtomicI64::new(0),
             policy_store_refresh_outcome_rebuild_error: AtomicI64::new(0),
+            policy_store_refresh_outcome_decode_error: AtomicI64::new(0),
         }
     }
 
@@ -353,6 +355,7 @@ impl MetricsCollector {
             policy_store_refresh_outcome_network_error: AtomicI64::new(0),
             policy_store_refresh_outcome_parse_error: AtomicI64::new(0),
             policy_store_refresh_outcome_rebuild_error: AtomicI64::new(0),
+            policy_store_refresh_outcome_decode_error: AtomicI64::new(0),
         }
     }
 
@@ -377,6 +380,7 @@ impl MetricsCollector {
             RefreshOutcome::NetworkError => &self.policy_store_refresh_outcome_network_error,
             RefreshOutcome::ParseError => &self.policy_store_refresh_outcome_parse_error,
             RefreshOutcome::RebuildError => &self.policy_store_refresh_outcome_rebuild_error,
+            RefreshOutcome::DecodeError => &self.policy_store_refresh_outcome_decode_error,
         };
         per_outcome.fetch_add(1, Ordering::Relaxed);
 
@@ -390,7 +394,8 @@ impl MetricsCollector {
             RefreshOutcome::HttpError
             | RefreshOutcome::NetworkError
             | RefreshOutcome::ParseError
-            | RefreshOutcome::RebuildError => {
+            | RefreshOutcome::RebuildError
+            | RefreshOutcome::DecodeError => {
                 self.policy_store_refresh_consecutive_failures
                     .fetch_add(1, Ordering::Relaxed);
             },
@@ -766,6 +771,11 @@ impl MetricsCollector {
             ops,
             "policy_store_refresh.outcome_rebuild_error",
             &self.policy_store_refresh_outcome_rebuild_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_decode_error",
+            &self.policy_store_refresh_outcome_decode_error,
         );
     }
 }
@@ -1276,6 +1286,34 @@ mod tests {
                 .get("policy_store_refresh.consecutive_failures"),
             Some(&2),
             "RebuildError counts as a failure for the streak"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_decode_error_distinct_from_network_error() {
+        use crate::init::policy_store_refresh::RefreshOutcome;
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
+        collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
+        collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_decode_error"),
+            Some(&2),
+            "DecodeError must increment its own per-outcome counter",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_network_error"),
+            Some(&1),
+            "DecodeError must not increment outcome_network_error — the whole point of the variant is to distinguish them",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&3),
+            "DecodeError counts toward the failure streak (response read failed → the refresh did not succeed)",
         );
     }
 

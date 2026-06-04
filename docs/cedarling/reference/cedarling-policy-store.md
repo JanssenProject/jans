@@ -284,7 +284,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.last_attempt_secs` | Unix timestamp of the most recent tick attempt |
 | `policy_store_refresh.last_success_secs` | Unix timestamp of the most recent `Success` or `NotModified` outcome |
 | `policy_store_refresh.consecutive_failures` | Current failure streak (resets to zero on success) |
-| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError |
+| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError |
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
@@ -295,6 +295,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_network_error` | Cumulative count of `NetworkError` outcomes |
 | `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes (body couldn't be parsed) |
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
+| `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
 
 ## Legacy Single-File Format (JSON)
 

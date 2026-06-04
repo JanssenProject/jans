@@ -76,6 +76,13 @@ pub(crate) enum RefreshOutcome {
     /// (trusted-issuer validation, JWT service init / JWKS refetch, entity
     /// builder). The bytes are well-formed; the rebuild side is broken.
     RebuildError = 6,
+    /// The HTTP transaction completed with a success status but reading the
+    /// response body failed (TCP drop mid-stream, malformed transfer encoding,
+    /// content-decoding failure, etc.). Distinct from `NetworkError` (couldn't
+    /// reach the upstream) and `HttpError` (4xx/5xx status) so dashboards can
+    /// triage "received a response but couldn't read it" without conflating it
+    /// with connectivity loss.
+    DecodeError = 7,
 }
 
 /// Per-source refresh strategy. The worker starts at
@@ -625,10 +632,13 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
             ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
                     .set_message(format!(
-                        "policy store refresh: decode error for {url}: {e} (status {status})"
+                        "policy store refresh: body decode error for {url}: {e} (status {status})"
                     )),
             );
-            return RefreshOutcome::NetworkError;
+            // HTTP transaction completed (we have a status); body read failed.
+            // Classify as DecodeError, not NetworkError, so triage can
+            // distinguish "couldn't reach upstream" from "read response body".
+            return RefreshOutcome::DecodeError;
         },
     };
     let new_hash = body_hash(&bytes);
