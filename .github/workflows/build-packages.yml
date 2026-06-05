@@ -1,10 +1,13 @@
 name: Publish packages
 
 on:
-  push:
-    tags:
-    - 'v**'
-    - 'nightly'
+  # Chained after the publish workflow so the service WARs/jars exist on the
+  # release before install.py downloads them. build-nightly-build recreates the
+  # nightly tag -> "Janssen Build & Publish" publishes -> this runs.
+  workflow_run:
+    workflows: ["Janssen Build & Publish"]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       target_tag:
@@ -59,7 +62,7 @@ jobs:
   publish_binary_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -120,6 +123,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
         path: temp-jans
 
     - name: Getting build dependencies
@@ -142,7 +146,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -226,7 +230,7 @@ jobs:
   build_and_upload_python_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -252,6 +256,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -307,7 +313,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -370,7 +376,7 @@ jobs:
   build_cedarling_wasm:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -382,6 +388,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -417,7 +425,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
         
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
@@ -482,7 +490,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
@@ -504,7 +512,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -524,7 +532,7 @@ jobs:
   build_demo_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
     needs: build_cedarling_wasm
     runs-on: ubuntu-latest
     steps:
@@ -535,6 +543,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
     - name: Build with Ubuntu
       continue-on-error: true
       env:
@@ -547,7 +557,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VER="${{ inputs.target_tag }}"
         else
-          VER=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VER=${{ github.event.workflow_run.head_branch }}
         fi
 
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
@@ -595,7 +605,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VER="${{ inputs.target_tag }}"
         else
-          VER=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VER=${{ github.event.workflow_run.head_branch }}
         fi
         DIGEST_FILE="/tmp/demo-digest.sha256"
         rm -f "${DIGEST_FILE}"
@@ -617,7 +627,7 @@ jobs:
   build_cedarling_python:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -655,6 +665,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -694,7 +706,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
@@ -791,7 +803,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
 
         TAG=$(echo "${VERSION}" | sed 's/^v//')
@@ -849,7 +861,7 @@ jobs:
   build_cedarling_go:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -872,6 +884,8 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -907,7 +921,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+            VERSION=${{ github.event.workflow_run.head_branch }}
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
@@ -968,7 +982,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+            VERSION=${{ github.event.workflow_run.head_branch }}
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
@@ -1028,7 +1042,7 @@ jobs:
   build_cedarling_krakend:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
     needs: build_cedarling_go
     runs-on: ubuntu-22.04
     permissions:
@@ -1044,6 +1058,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -1051,7 +1067,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1116,7 +1132,7 @@ jobs:
   build_cedarling_uniffi:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -1128,6 +1144,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -1147,7 +1165,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1190,7 +1208,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1239,7 +1257,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1257,7 +1275,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1284,7 +1302,7 @@ jobs:
     needs: [publish_binary_packages]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1296,7 +1314,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download binary digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1315,7 +1333,7 @@ jobs:
     needs: [collect-binary-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages)) &&
       needs.collect-binary-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1334,7 +1352,7 @@ jobs:
     needs: [build_and_upload_python_packages]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1346,7 +1364,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download python digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1365,7 +1383,7 @@ jobs:
     needs: [collect-python-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages)) &&
       needs.collect-python-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1384,7 +1402,7 @@ jobs:
     needs: [build_cedarling_wasm]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1396,7 +1414,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download WASM digest artifact
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1414,7 +1432,7 @@ jobs:
     needs: [collect-wasm-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm)) &&
       needs.collect-wasm-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1433,7 +1451,7 @@ jobs:
     needs: [build_cedarling_python]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1445,7 +1463,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download Cedarling Python digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1464,7 +1482,7 @@ jobs:
     needs: [collect-cedarling-python-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python)) &&
       needs.collect-cedarling-python-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1483,7 +1501,7 @@ jobs:
     needs: [build_cedarling_go]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1495,7 +1513,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download Cedarling Go digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1514,7 +1532,7 @@ jobs:
     needs: [collect-cedarling-go-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go)) &&
       needs.collect-cedarling-go-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1533,7 +1551,7 @@ jobs:
     needs: [build_cedarling_krakend]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1545,7 +1563,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download KrakenD digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1564,7 +1582,7 @@ jobs:
     needs: [collect-cedarling-krakend-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend)) &&
       needs.collect-cedarling-krakend-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1583,7 +1601,7 @@ jobs:
     needs: [build_cedarling_uniffi]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1595,7 +1613,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download UniFFI digest artifact
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1613,7 +1631,7 @@ jobs:
     needs: [collect-cedarling-uniffi-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi)) &&
       needs.collect-cedarling-uniffi-digests.outputs.hashes != ''
     permissions:
       actions: read
@@ -1632,7 +1650,7 @@ jobs:
     needs: [build_demo_packages]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1644,7 +1662,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download demo digest artifact
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -1662,7 +1680,7 @@ jobs:
     needs: [collect-demo-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages)) &&
       needs.collect-demo-digests.outputs.hashes != ''
     permissions:
       actions: read
