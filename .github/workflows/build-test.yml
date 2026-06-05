@@ -210,8 +210,10 @@ jobs:
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
         if [[ "${TAG_NAME}" == "nightly" ]]; then
           echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
+          echo "native_version=0.0.0" >> "$GITHUB_OUTPUT"
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')" >> "$GITHUB_OUTPUT"
+          echo "native_version=$(echo "${TAG_NAME}" | sed 's/^v//')" >> "$GITHUB_OUTPUT"
         fi
 
     # Build the ordered module list. Non-dispatch events (tag push) and
@@ -246,6 +248,40 @@ jobs:
         echo "Selected modules: $MODULES"
         echo "modules=${MODULES}" >> "$GITHUB_OUTPUT"
 
+    # cedarling-java bundles the Rust uniffi native lib + Kotlin bindings, which
+    # its pom downloads from the release. build-nightly-build empties the release
+    # before this runs, and build-packages (which normally produces them) runs
+    # AFTER this workflow -> build them here and upload them so cedarling-java
+    # (and jans-lock, which depends on it) can build.
+    - name: Install Protoc (for cedarling native)
+      if: contains(steps.mods.outputs.modules, 'cedarling-java')
+      run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+    - name: Install Rust (for cedarling native)
+      if: contains(steps.mods.outputs.modules, 'cedarling-java')
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+
+    - name: Build and upload cedarling uniffi native lib + kotlin bindings
+      if: contains(steps.mods.outputs.modules, 'cedarling-java')
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        NV: ${{ steps.ver.outputs.native_version }}
+        TAG: ${{ steps.ver.outputs.tag }}
+      run: |
+        set -euo pipefail
+        cargo build -r --locked -p cedarling_uniffi
+        cp ../../target/release/libcedarling_uniffi.so "libcedarling_uniffi-${NV}.so"
+        cargo run --locked --bin uniffi-bindgen generate \
+          --library "${GITHUB_WORKSPACE}/jans-cedarling/target/release/libcedarling_uniffi.so" \
+          --language kotlin --out-dir ./
+        zip -r "cedarling_uniffi-kotlin-${NV}.zip" uniffi
+        gh release upload "${TAG}" \
+          "libcedarling_uniffi-${NV}.so" "cedarling_uniffi-kotlin-${NV}.zip" \
+          --repo "${{ github.repository }}" --clobber
+
     # For a versioned release the poms (fixed at 0.0.0-nightly) must be bumped
     # before deploy. Nightly publishes 0.0.0-nightly as-is.
     - name: Set release version in poms
@@ -268,6 +304,7 @@ jobs:
             -f "${m}" \
             -Dmaven.test.skip=true \
             -Dcedarling.release.tag="${{ steps.ver.outputs.tag }}" \
+            -Dcedarling.native.version="${{ steps.ver.outputs.native_version }}" \
             clean deploy
           echo "::endgroup::"
         done
