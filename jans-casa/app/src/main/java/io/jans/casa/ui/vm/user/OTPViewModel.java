@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lochbridge.oath.otp.keyprovisioning.OTPKey.OTPType;
+import io.jans.casa.plugins.authnmethod.service.otp.OTPType;
 
 /**
  * This is the ViewModel of page otp-detail.zul. It controls the CRUD of HOTP/TOTP devices

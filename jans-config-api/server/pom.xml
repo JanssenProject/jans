@@ -219,7 +219,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>io.jans</groupId>
+			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
