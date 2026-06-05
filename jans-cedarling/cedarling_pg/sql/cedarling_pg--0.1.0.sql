@@ -7,7 +7,7 @@ The ordering of items is not stable, it is driven by a dependency graph.
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:21
+-- cedarling_pg/src/catalog.rs:29
 
 -- Namespace for cedarling_pg catalog objects.
 CREATE SCHEMA IF NOT EXISTS cedarling;
@@ -179,7 +179,7 @@ AS 'MODULE_PATHNAME', 'cedarling_current_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:203
+-- cedarling_pg/src/policy/versions.rs:215
 -- cedarling_pg::policy::versions::cedarling_diff_policies
 CREATE  FUNCTION "cedarling_diff_policies"(
 	"old" TEXT, /* & str */
@@ -212,7 +212,7 @@ AS 'MODULE_PATHNAME', 'cedarling_last_trace_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:82
+-- cedarling_pg/src/mask/mod.rs:88
 -- cedarling_pg::mask::cedarling_mask_plan
 CREATE  FUNCTION "cedarling_mask_plan"(
 	"table_name" TEXT, /* & str */
@@ -224,7 +224,7 @@ AS 'MODULE_PATHNAME', 'cedarling_mask_plan_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:127
+-- cedarling_pg/src/mask/mod.rs:133
 -- cedarling_pg::mask::cedarling_mask_row
 CREATE  FUNCTION "cedarling_mask_row"(
 	"row_json" jsonb, /* pgrx :: datum :: JsonB */
@@ -272,7 +272,7 @@ AS 'MODULE_PATHNAME', 'cedarling_register_policy_version_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:151
+-- cedarling_pg/src/policy/versions.rs:163
 -- cedarling_pg::policy::versions::cedarling_rollback_policy
 CREATE  FUNCTION "cedarling_rollback_policy"() RETURNS bool /* bool */
 STRICT VOLATILE PARALLEL UNSAFE
@@ -315,7 +315,7 @@ AS 'MODULE_PATHNAME', 'cedarling_status_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/mask/mod.rs:60
+-- cedarling_pg/src/mask/mod.rs:66
 -- cedarling_pg::mask::cedarling_test_masking
 CREATE  FUNCTION "cedarling_test_masking"(
 	"original_value" TEXT, /* Option < & str > */
@@ -340,18 +340,33 @@ AS 'MODULE_PATHNAME', 'cedarling_use_policy_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/catalog.rs:87
+-- cedarling_pg/src/catalog.rs:95
 -- requires:
 --   cedarling_use_policy
 --   cedarling_register_policy_version
 --   cedarling_rollback_policy
 --   cedarling_diff_policies
+--   cedarling_set_mask_config
+--   cedarling_register_entity_map
 
 
+-- Policy-lifecycle functions: file-system access + global policy swap.
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_diff_policies(text, text) FROM PUBLIC;
+
+-- Authorization-input mutators: cedarling.mask_rules controls what columns get
+-- masked; cedarling.entity_map controls which Cedar entity a row evaluates as.
+-- Both are decision-shaping inputs, so the writers are owner-only.
+REVOKE EXECUTE ON FUNCTION cedarling_set_mask_config(text, text, text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_register_entity_map(oid, text, text[]) FROM PUBLIC;
+
+-- Defense in depth: PostgreSQL grants no PUBLIC privileges on these tables by
+-- default, but make it explicit so a later `GRANT ALL ... TO PUBLIC` in a
+-- different migration doesn't silently open the door.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.mask_rules FROM PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.entity_map FROM PUBLIC;
 /* </end connected objects> */
 
 /* <begin connected objects> */
@@ -379,7 +394,7 @@ AS 'MODULE_PATHNAME', 'cedarling_validate_schema_by_oid_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/authz/where_clause.rs:611
+-- cedarling_pg/src/authz/where_clause.rs:622
 -- cedarling_pg::authz::where_clause::cedarling_where
 CREATE  FUNCTION "cedarling_where"(
 	"table_name" TEXT, /* & str */
