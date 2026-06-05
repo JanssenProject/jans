@@ -50,12 +50,13 @@ RUN wget -q https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOL
 # ===============
 
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2025-02-02 00:00'
 
 # Download Janssen Shibboleth IDP WAR
 # Set CN_REQUIRE_WAR_DOWNLOAD=false for development builds when WAR is not available
 ARG CN_REQUIRE_WAR_DOWNLOAD=true
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-shibboleth-idp-webapp/${CN_VERSION}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
 
 #RUN mkdir -p ${SHIBBOLETH_HOME}/war \
 #   && if [ "${CN_REQUIRE_WAR_DOWNLOAD}" = "true" ]; then \

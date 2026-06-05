@@ -261,33 +261,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'loggingLevel': 'TRACE',
                                     }
 
-        if Config.get('config_patch_creds'):
-            data = None
-            datajs = None
-            patch_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'protected/jans-auth/jans-auth-test-config-patch.json')
-            req = urllib.request.Request(patch_url)
-            credentials = Config.get('config_patch_creds')
-            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
-            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
-            self.logIt("Retreiving auto test ciba patch from " + patch_url)
-
-            try:
-                resp = urllib.request.urlopen(req)
-                data = resp.read()
-                self.logIt("Auto test ciba patch retreived")
-            except:
-                self.logIt("Can't retreive auto test ciba patch", True)
-
-            if data:
-                try:
-                    datajs = json.loads(data.decode())
-                except:
-                    self.logIt("Can't decode json for auto test ciba patch", True)
-
-            if datajs:
-                jans_auth_conf_dynamic_changes.update(datajs)
-                self.logIt("jans_auth_conf_dynamic was updated with auto test ciba patch")
-
         self.dbUtils.set_jans_auth_conf_dynamic(jans_auth_conf_dynamic_changes)
 
         self.enable_cusom_scripts()

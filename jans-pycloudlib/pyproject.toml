@@ -30,13 +30,14 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
-    # handle CVE-2025-50181 and CVE-2025-50182
-    "urllib3>=2.5.0",
+    # handle CVE-2025-50181, CVE-2025-50182, GHSA-mf9v-mfxr-j63j, GHSA-qccp-gfcp-xxvc
+    "urllib3>=2.7.0",
 
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    "kubernetes>=11.0",
+    # don't use v36 until patches available
+    "kubernetes>=11.0,<36.0",
 
     # the ldap3 library is not removed for the following reasons:
     #
@@ -49,7 +50,7 @@ dependencies = [
 
     "backoff>=2.1.2",
     "docker>=3.7.2",
-    "cryptography>=46.0.5",
+    "cryptography>=46.0.7",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
     "sqlalchemy>=2.0",

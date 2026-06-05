@@ -168,6 +168,8 @@ impl JwtService {
         jwt_config.normalize();
         let jwt_config = &jwt_config;
 
+        warn_if_jwt_validation_disabled(jwt_config, logger.as_ref());
+
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
@@ -543,6 +545,29 @@ impl TrustedIssuerLoadingInfo for JwtService {
     }
 }
 
+/// Emits a WARN log entry once per `JwtService::new` when either JWT signature
+/// or status validation has been explicitly disabled. The defaults are strict,
+/// so reaching this code means an operator opted out.
+fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logger>) {
+    if !jwt_config.jwt_sig_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT signature validation is disabled (CEDARLING_JWT_SIG_VALIDATION=disabled); \
+             tokens are accepted without cryptographic verification"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+
+    if !jwt_config.jwt_status_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT status validation is disabled (CEDARLING_JWT_STATUS_VALIDATION=disabled); \
+             revoked tokens may continue to be accepted"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::JwtService;
@@ -568,6 +593,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
