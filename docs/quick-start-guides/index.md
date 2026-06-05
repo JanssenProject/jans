@@ -9,9 +9,9 @@ tags:
 Get up and running quickly with the Janssen Project. Choose a quick start
 guide below based on what you want to try:
 
-## [Docker Quick Start](../janssen-server/install/docker-install/quick-start.md)
+## Janssen server Quick Start
 
-Deploy Janssen Server using Docker containers. This is the fastest way to
+Deploy Janssen Server using [Docker containers](../janssen-server/install/docker-install/quick-start.md) or [Helm based local Kubernetes environment](../janssen-server/install/helm-install/prerequisites/local.md). This is the fastest way to
 get a working Janssen Server instance for testing and development.
 
 ## [Casa Quick Start](../casa/administration/quick-start.md)
