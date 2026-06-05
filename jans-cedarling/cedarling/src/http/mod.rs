@@ -33,6 +33,7 @@ pub(crate) struct HttpClient {
     retry_delay: Duration,
     #[allow(unused)]
     max_retries: u32,
+    max_response_size_bytes: Option<u64>,
 }
 
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
@@ -48,6 +49,11 @@ pub struct HttpClientConfig {
     /// Maximum time to wait for a single HTTP request to complete.
     #[cfg(not(target_arch = "wasm32"))]
     pub request_timeout: Duration,
+    /// Upper bound on response body size in bytes. `None` disables the cap.
+    /// Applied to every HTTP fetch (JWKS, OIDC config, status list, policy
+    /// store, Lock Server endpoints) so a hostile or compromised remote can't
+    /// exhaust the backend's memory with an oversized response.
+    pub max_response_size_bytes: Option<u64>,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -68,6 +74,10 @@ impl HttpClientConfig {
 
     /// Default base retry delay used when building an [`HttpClient`] without explicit config.
     pub const DEFAULT_RETRY_DELAY: Duration = Duration::from_secs(3);
+
+    /// Default response body cap (10 MB). Generous enough for the largest realistic
+    /// JWKS / OIDC config / policy-store payload while still bounding memory use.
+    pub const DEFAULT_MAX_RESPONSE_SIZE_BYTES: u64 = 10 * 1024 * 1024;
 }
 
 impl Default for HttpClientConfig {
@@ -77,6 +87,7 @@ impl Default for HttpClientConfig {
             retry_delay: Self::DEFAULT_RETRY_DELAY,
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Self::DEFAULT_REQUEST_TIMEOUT,
+            max_response_size_bytes: Some(Self::DEFAULT_MAX_RESPONSE_SIZE_BYTES),
         }
     }
 }
@@ -105,28 +116,30 @@ impl HttpClient {
             raw_client,
             retry_delay: conf.retry_delay,
             max_retries: conf.max_retries,
+            max_response_size_bytes: conf.max_response_size_bytes,
         })
+    }
+
+    /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
+    /// (e.g. when they need to inspect headers before consuming the body).
+    pub(crate) fn max_response_size_bytes(&self) -> Option<u64> {
+        self.max_response_size_bytes
     }
 
     /// Creates a new Sender with the configured backoff strategy.
     pub(crate) fn create_sender(&self) -> Sender {
-        #[cfg(not(test))]
-        {
-            Sender::new(Backoff::new_exponential(
-                self.retry_delay,
-                Some(self.max_retries),
-            ))
-        }
-
-        // We implement a faster retry for the tests (faster backoff, but still
-        // respects the configured max_retries count).
-        #[cfg(test)]
-        {
-            Sender::new(Backoff::new_exponential(
-                Duration::from_millis(10),
-                Some(self.max_retries),
-            ))
-        }
+        let backoff = {
+            #[cfg(not(test))]
+            {
+                Backoff::new_exponential(self.retry_delay, Some(self.max_retries))
+            }
+            // Faster backoff for tests, but still respects max_retries count.
+            #[cfg(test)]
+            {
+                Backoff::new_exponential(Duration::from_millis(10), Some(self.max_retries))
+            }
+        };
+        Sender::new(backoff).with_max_response_size(self.max_response_size_bytes)
     }
 
     /// Sends a GET request to the specified URI with retry logic. Returns the
@@ -347,6 +360,7 @@ mod test {
         max_retries: 3,
         request_timeout: Duration::from_millis(500),
         retry_delay: Duration::from_secs(5),
+        max_response_size_bytes: None,
     };
 
     #[tokio::test]
@@ -504,6 +518,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(1),
             request_timeout,
+            max_response_size_bytes: None,
         })
         .expect("Should create HttpClient");
 

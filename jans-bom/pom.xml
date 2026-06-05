@@ -65,8 +65,9 @@
 		<jackrabbit.version>2.22.2</jackrabbit.version>
 
 		<bc.version>1.79</bc.version>
-		<junit.jupiter.version>5.9.2</junit.jupiter.version>
-		<mockito.version>5.1.1</mockito.version>
+		<junit.version>5.11.4</junit.version>
+		<mockito.version>5.23.0</mockito.version>
+		<wiremock.version>4.0.0-beta.34</wiremock.version>
 
 		<jetty.version>11.0.24</jetty.version>
 	</properties>
@@ -923,26 +924,22 @@
 				<version>4.0.0.Final</version>
 				<scope>test</scope>
 			</dependency>
-			<!-- JUnit Jupiter -->
+
+			<!-- Test dependecies -->
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-bom</artifactId>
+				<version>${mockito.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- Mockito -->
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
@@ -950,15 +947,33 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-inline</artifactId>
-				<version>${mockito.version}</version>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>6.0.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>${mockito.version}</version>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-junit5</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-jetty</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-httpclient-apache5</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-grpc-extension</artifactId>
+				<version>1.0.0-beta.5</version>
 				<scope>test</scope>
 			</dependency>
 

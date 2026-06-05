@@ -7,8 +7,9 @@ use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::default_values::{
-    default_enabled_feature_toggle, default_http_client_max_retries,
-    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval,
     default_log_channel_capacity, default_log_max_retries,
     default_status_list_refresh_interval_max,
     default_token_cache_capacity, default_token_cache_max_ttl, default_true,
@@ -409,6 +410,17 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub http_client_request_retry_delay: u64,
+
+    /// Maximum HTTP response body size, in bytes. Rejects oversized responses
+    /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
+    /// before they're fully buffered into memory. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
+        default = "default_http_client_max_response_size_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_max_response_size_bytes: u64,
 
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
