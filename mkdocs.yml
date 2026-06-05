@@ -58,10 +58,7 @@ nav:
     - Welcome: index.md
     - Platform Goals: janssen-server/planning/platform-goal.md
     - Use Cases: janssen-server/planning/use-cases.md
-    - Quick Start Guides:
-      - Overview: quick-start-guides/index.md
-      - Docker Quick Start: janssen-server/install/docker-install/quick-start.md
-      - Casa Quick Start: casa/administration/quick-start.md
+    - Quick Start Guides: quick-start-guides/index.md
     - Terminology:
       - Learning Reference: janssen-server/reference/learning-reference.md
 
@@ -362,6 +359,7 @@ nav:
       - JSON Web Keys: janssen-server/config-guide/auth-server-config/json-web-key-config.md
     - Casa (Self-Service Portal):
       - casa/index.md
+      - Quick start: casa/administration/quick-start.md
       - Administration:
         - Admin Console: casa/administration/admin-console.md
         - About 2FA: casa/administration/2fa-basics.md
