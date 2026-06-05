@@ -22,8 +22,8 @@ Config.install_jans_shib_pre_released = True
 class ShibbolethInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-shibboleth-idp-webapp.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-shibboleth-idp-webapp/{0}/jans-shibboleth-idp-webapp-{0}.war').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'shibboleth-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/shibboleth-plugin/{0}/shibboleth-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-shibboleth-idp-webapp.war'), base.determine_jans_artifact_url('maven/io/jans/jans-shibboleth-idp-webapp/{0}/jans-shibboleth-idp-webapp-{0}.war').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'shibboleth-plugin.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-config-api/plugins/shibboleth-plugin/{0}/shibboleth-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):

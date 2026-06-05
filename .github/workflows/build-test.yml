@@ -272,21 +272,32 @@ jobs:
           echo "::endgroup::"
         done
 
-    - name: Collect release binaries (WARs + plugin/client jars)
+    # Collect from the local Maven repo so every asset carries its Maven
+    # coordinate filename (<artifactId>-<version>[-classifier].<ext>). The
+    # Dockerfiles and jans-linux-setup request exactly these names, so the
+    # release asset names must match them (the per-module target/ finalNames
+    # are inconsistent, e.g. fido2-server.war vs jans-fido2-server).
+    - name: Collect release binaries (coordinate-named, from local repo)
       id: collect
       run: |
         set -euo pipefail
         OUT=/tmp/release-artifacts
         mkdir -p "$OUT"
-        MODULES="${{ steps.mods.outputs.modules }}"
-        # Service WARs and plugin distribution jars consumed by Dockerfiles + jans-linux-setup.
-        find $MODULES -type f -path '*/target/*.war' -exec cp -v {} "$OUT/" \; || true
-        find $MODULES -type f -path '*/target/*-distribution.jar' -exec cp -v {} "$OUT/" \; || true
-        find $MODULES -type f -path '*/target/*-jar-with-dependencies.jar' -exec cp -v {} "$OUT/" \; || true
-        # Extra client/model jars referenced by installers (fido2 client/model, casa-config).
-        find jans-fido2 -type f -path '*/target/jans-fido2-client-*.jar' -exec cp -v {} "$OUT/" \; || true
-        find jans-fido2 -type f -path '*/target/jans-fido2-model-*.jar' -exec cp -v {} "$OUT/" \; || true
-        find jans-casa  -type f -path '*/target/casa-config-*.jar'        -exec cp -v {} "$OUT/" \; || true
+        VERSION="${{ steps.ver.outputs.version }}"
+        M2="${HOME}/.m2/repository/io/jans"
+        # Service WARs, config-api plugin distribution jars, casa plugin and
+        # auth-client uber-jars, the casa-agama project zip, the lock
+        # service-deps pack, and the fido2 client/model + casa-config jars.
+        find "$M2" -type f -path "*/${VERSION}/*" \( \
+               -name '*.war' \
+            -o -name '*-distribution.jar' \
+            -o -name '*-jar-with-dependencies.jar' \
+            -o -name '*-project.zip' \
+            -o -name '*-service-deps-pack.zip' \
+            -o -name "jans-fido2-client-${VERSION}.jar" \
+            -o -name "jans-fido2-model-${VERSION}.jar" \
+            -o -name "casa-config-${VERSION}.jar" \
+          \) -exec cp -v {} "$OUT/" \;
         echo "Collected:"; ls -la "$OUT"
         echo "dir=${OUT}" >> "$GITHUB_OUTPUT"
 
