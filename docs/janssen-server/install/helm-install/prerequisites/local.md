@@ -31,7 +31,7 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-vers
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
 
-#### Accessing Endpoints
+### Accessing Endpoints
 
 The installer adds a hosts record in the VM. To access from outside the VM, map the VM IP to your FQDN.
 
