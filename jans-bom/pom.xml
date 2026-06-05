@@ -90,16 +90,6 @@
 			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
-		<repository>
-			<id>gluu</id>
-			<name>Gluu repository</name>
-			<url>https://maven.gluu.org/maven</url>
-		</repository>
-		<repository>
 			<id>mulesoft</id>
 			<name>mulesoft</name>
 			<url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
@@ -656,7 +646,7 @@
 
 			<!-- Jython -->
 			<dependency>
-				<groupId>io.jans</groupId>
+				<groupId>org.python</groupId>
 				<artifactId>jython-standalone</artifactId>
 				<version>2.7.4</version>
 			</dependency>
