@@ -9,8 +9,10 @@ import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
-import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+
+import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +51,11 @@ public class McpServerMain {
                         ToolHandler toolHandler = new ToolHandler(apiClient);
 
                         // Create JSON mapper
-                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonMapper jsonMapper = new JsonMapper();
 
                         // Create STDIO transport
                         StdioServerTransportProvider transportProvider = new StdioServerTransportProvider(
-                                        new JacksonMcpJsonMapper(objectMapper));
+                                        new JacksonMcpJsonMapper(jsonMapper));
 
                         // Create server capabilities
                         McpSchema.ServerCapabilities capabilities = McpSchema.ServerCapabilities.builder()
@@ -123,7 +125,7 @@ public class McpServerMain {
                                 toolHandler::handleListClients));
         }
 
-        private static McpServerFeatures.SyncToolSpecification createTool(
+        private static McpServerFeatures.SyncToolRegistration createTool(
                         String name,
                         String description,
                         Map<String, Object> inputSchema,
@@ -138,9 +140,16 @@ public class McpServerMain {
                                 .inputSchema(schema)
                                 .build();
 
-                return new McpServerFeatures.SyncToolSpecification(
-                                tool,
-                                (exchange, arguments) -> executor.execute(arguments));
+                /*
+                 * return new McpServerFeatures.SyncToolRegistration ( tool, (exchange,
+                 * arguments) -> executor.execute(arguments));
+                 */
+                
+                return  McpServerFeatures.SyncToolRegistration registration = new McpServerFeatures.SyncToolRegistration(
+                        tool,
+                        (exchange, arguments) -> executor.execute(arguments));
+                       
+                  
         }
 
         @FunctionalInterface

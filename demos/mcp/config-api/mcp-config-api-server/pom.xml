@@ -19,8 +19,7 @@
         <dependency>
             <groupId>io.modelcontextprotocol.sdk</groupId>
             <artifactId>mcp</artifactId>
-            <!-- TODO: upgrade to >=1.1.1 — see https://github.com/JanssenProject/jans/issues/14192 -->
-            <version>0.16.0</version>
+            <version>1.1.1</version>
         </dependency>
 
         
