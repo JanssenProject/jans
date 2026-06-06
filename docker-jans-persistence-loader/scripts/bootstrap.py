@@ -2,9 +2,11 @@ import os
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence_conn
+from jans.pycloudlib.utils import as_boolean
 
 from hybrid_setup import HybridBackend
 from sql_setup import SQLBackend
+from test_data_setup import TestDataLoader
 from upgrade import Upgrade
 
 
@@ -37,6 +39,12 @@ def main():
     with manager.create_lock("persistence-loader-custom"):
         backend = backend_cls(manager)
         backend.customize()
+
+    # load integration-test data (gated; disabled by default). Used by the
+    # GitHub Actions integration-test workflow running against the AIO image.
+    if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
+        with manager.create_lock("persistence-loader-test-data"):
+            TestDataLoader(manager).load()
 
 
 if __name__ == "__main__":

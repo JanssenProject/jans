@@ -46,7 +46,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/site/site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli \
+    && cp -R ${JANS_SETUP_DIR}/templates/test /app/templates/test
 
 WORKDIR /
 
