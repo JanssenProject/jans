@@ -524,7 +524,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        return hotp.getURI(issuer, userDisplayName).toString()
+        return hotp.getURI(0, issuer, userDisplayName).toString()
 
     # TOTP methods
     def generateSecretTotpKey(self):
