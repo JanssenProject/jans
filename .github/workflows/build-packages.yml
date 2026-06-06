@@ -123,7 +123,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
         path: temp-jans
 
     - name: Getting build dependencies
@@ -257,7 +257,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -389,7 +389,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -544,7 +544,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Build with Ubuntu
       continue-on-error: true
       env:
@@ -666,7 +666,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -885,7 +885,7 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -1059,7 +1059,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -1145,7 +1145,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
