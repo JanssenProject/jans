@@ -127,121 +127,63 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build AIO image from source
-        if: ${{ inputs.aio_image == '' }}
+      - name: Build AIO image (with integration-test env baked in)
         run: |
           set -euo pipefail
-          docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
-          docker build -t local/config-api:ci ./docker-jans-config-api
-          docker build -t local/aio:ci \
-            --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
-            --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
-            ./docker-jans-all-in-one
-          echo "AIO_IMAGE=local/aio:ci" >> "$GITHUB_ENV"
-
-      - name: Use prebuilt AIO image
-        if: ${{ inputs.aio_image != '' }}
-        run: echo "AIO_IMAGE=${{ inputs.aio_image }}" >> "$GITHUB_ENV"
-
-      - name: Start database
-        run: |
-          set -euo pipefail
-          docker network create jans-net
-          if [ "${{ matrix.persistence }}" = "PGSQL" ]; then
-            docker run -d --name jans-db --network jans-net \
-              -e POSTGRES_DB="$DB_NAME" -e POSTGRES_USER="$DB_USER" -e POSTGRES_PASSWORD="$DB_PASSWORD" \
-              -p ${{ steps.db.outputs.port }}:5432 ${{ steps.db.outputs.image }}
+          if [ -n "${{ inputs.aio_image }}" ]; then
+            docker pull "${{ inputs.aio_image }}"
+            base_image="${{ inputs.aio_image }}"
           else
-            docker run -d --name jans-db --network jans-net \
-              -e MYSQL_DATABASE="$DB_NAME" -e MYSQL_USER="$DB_USER" -e MYSQL_PASSWORD="$DB_PASSWORD" \
-              -e MYSQL_ROOT_PASSWORD="$DB_PASSWORD" \
-              -p ${{ steps.db.outputs.port }}:3306 ${{ steps.db.outputs.image }}
+            docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
+            docker build -t local/config-api:ci ./docker-jans-config-api
+            docker build -t local/aio:ci \
+              --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
+              --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
+              ./docker-jans-all-in-one
+            base_image="local/aio:ci"
           fi
-          echo "Waiting for the database to accept connections..."
-          for i in $(seq 1 30); do
-            if docker exec jans-db sh -c "exit 0" 2>/dev/null && \
-               timeout 3 bash -c "</dev/tcp/127.0.0.1/${{ steps.db.outputs.port }}" 2>/dev/null; then
-              echo "DB port open"; break
-            fi
-            sleep 5
-          done
-
-      - name: Start AIO
-        run: |
-          set -euo pipefail
-          mkdir -p "$PWD/aio-conf"
-          printf '%s' "$DB_PASSWORD" > "$PWD/aio-conf/sql_password"
-          docker run -d --name jans-aio --network jans-net \
-            --add-host "${JANS_FQDN}:127.0.0.1" \
-            -v "$PWD/aio-conf/sql_password":/etc/jans/conf/sql_password:ro \
-            -e CN_HOSTNAME="$JANS_FQDN" \
-            -e CN_PERSISTENCE_TYPE=sql \
-            -e CN_SQL_DB_DIALECT=${{ steps.db.outputs.dialect }} \
-            -e CN_SQL_DB_HOST=jans-db \
-            -e CN_SQL_DB_PORT=${{ steps.db.outputs.port }} \
-            -e CN_SQL_DB_NAME="$DB_NAME" \
-            -e CN_SQL_DB_USER="$DB_USER" \
-            -e CN_SQL_DB_SCHEMA=${{ steps.db.outputs.schema }} \
-            -e CN_SQL_DB_TIMEZONE=UTC \
-            -e CN_PERSISTENCE_LOAD_TEST_DATA=true \
-            -e CN_CONFIG_API_TEST_CLIENT_ID="$CN_CONFIG_API_TEST_CLIENT_ID" \
-            -e CN_CONFIG_API_TEST_CLIENT_SECRET="$CN_CONFIG_API_TEST_CLIENT_SECRET" \
-            -e CN_CONFIG_API_TEST_CLIENT_TRUSTED="$CN_CONFIG_API_TEST_CLIENT_TRUSTED" \
-            "$AIO_IMAGE"
-
-      - name: Start TLS proxy
-        run: |
-          set -euo pipefail
-          openssl req -x509 -newkey rsa:2048 -nodes -days 3 \
-            -keyout "$PWD/aio-conf/tls.key" -out "$PWD/aio-conf/tls.crt" \
-            -subj "/CN=${JANS_FQDN}" -addext "subjectAltName=DNS:${JANS_FQDN}"
-          cat > "$PWD/aio-conf/proxy.conf" <<EOF
-          server {
-            listen 443 ssl;
-            server_name ${JANS_FQDN};
-            ssl_certificate /etc/nginx/tls.crt;
-            ssl_certificate_key /etc/nginx/tls.key;
-            client_max_body_size 0;
-            location / {
-              proxy_pass http://jans-aio:8080;
-              proxy_set_header Host \$host;
-              proxy_set_header X-Forwarded-For \$remote_addr;
-              proxy_set_header X-Forwarded-Proto https;
-            }
-          }
+          # Bake the integration-test env into a thin layer, tagged as the image the
+          # AIO demo compose expects, so start_janssen_aio_demo.sh uses it unchanged.
+          cat > Dockerfile.ci-aio <<EOF
+          FROM ${base_image}
+          ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
+          ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
+          ENV CN_CONFIG_API_TEST_CLIENT_SECRET=${CN_CONFIG_API_TEST_CLIENT_SECRET}
+          ENV CN_CONFIG_API_TEST_CLIENT_TRUSTED=${CN_CONFIG_API_TEST_CLIENT_TRUSTED}
           EOF
-          docker run -d --name jans-proxy --network jans-net -p 443:443 \
-            -v "$PWD/aio-conf/tls.crt":/etc/nginx/tls.crt:ro \
-            -v "$PWD/aio-conf/tls.key":/etc/nginx/tls.key:ro \
-            -v "$PWD/aio-conf/proxy.conf":/etc/nginx/conf.d/default.conf:ro \
-            nginx:1.27-alpine
-          echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
+          docker build -t ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly - < Dockerfile.ci-aio
 
-      - name: Wait for the AIO to become healthy
+      - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
         run: |
           set -uo pipefail
-          end=$((SECONDS + 900))
-          ok=""
+          # Brings up the full compose stack (consul/vault/traefik/db/aio) using our
+          # locally-tagged AIO image, and waits for readiness. Tolerate its built-in
+          # timeout and re-check with a longer window (test-data load can be slow).
+          bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 \
+            || echo "[warn] demo-script readiness gate did not pass; re-checking with a longer timeout"
+          echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
+          end=$((SECONDS + 1200)); ok=""
           while [ $SECONDS -lt $end ]; do
             code=$(curl -sk -o /dev/null -w '%{http_code}' "https://${JANS_FQDN}/.well-known/openid-configuration" || true)
             echo "openid-configuration: $code"
             if [ "$code" = "200" ]; then ok=1; break; fi
-            sleep 15
+            sleep 20
           done
           if [ -z "$ok" ]; then
             echo "::error::AIO did not become healthy in time"
-            docker logs jans-aio | tail -n 200 || true
+            docker compose -f automation/compose.yaml ps || true
+            docker logs jans 2>&1 | tail -n 300 || true
             exit 1
           fi
           for ep in scim-configuration fido2-configuration; do
             curl -sk -o /dev/null -w "$ep: %{http_code}\n" "https://${JANS_FQDN}/.well-known/$ep" || true
           done
 
-      - name: Import AIO certificate into the JDK truststore
+      - name: Import AIO CA certificate into the JDK truststore
         run: |
           set -euo pipefail
           keytool -import -trustcacerts -noprompt -alias "${JANS_FQDN}" \
-            -file "$PWD/aio-conf/tls.crt" \
+            -file automation/jans-aio-demo/templates/ca.crt \
             -keystore "${JAVA_HOME}/lib/security/cacerts" -storepass changeit
 
       - name: Extract live secrets from the AIO
@@ -249,7 +191,7 @@ jobs:
         run: |
           set -euo pipefail
           # adapter-agnostic: read through the AIO's own pycloudlib manager
-          payload=$(docker exec -i -e DB_PASSWORD="$DB_PASSWORD" jans-aio python3 - <<'PY'
+          payload=$(docker exec -i -e DB_PASSWORD="$DB_PASSWORD" jans python3 - <<'PY'
           import json
           from jans.pycloudlib import get_manager
           from jans.pycloudlib.utils import encode_text
@@ -271,12 +213,12 @@ jobs:
             v=$(echo "$payload" | python3 -c "import json,sys;print(json.load(sys.stdin)['$k'])")
             echo "::add-mask::$v"
           done
-          echo "$payload" > "$PWD/aio-conf/secrets.json"
+          echo "$payload" > "$GITHUB_WORKSPACE/aio-secrets.json"
 
       - name: Render test profiles
         run: |
           set -euo pipefail
-          read_json() { python3 -c "import json;print(json.load(open('$PWD/aio-conf/secrets.json'))['$1'])"; }
+          read_json() { python3 -c "import json;print(json.load(open('$GITHUB_WORKSPACE/aio-secrets.json'))['$1'])"; }
           export JANS_FQDN
           export ENCODE_SALT="$(read_json salt)"
           export SCIM_CLIENT_ID="$(read_json scim_id)"
@@ -377,11 +319,14 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Dump AIO logs on failure
+      - name: Dump stack logs on failure
         if: failure()
         run: |
-          docker logs jans-aio | tail -n 400 || true
-          docker logs jans-proxy | tail -n 50 || true
+          docker compose -f automation/compose.yaml ps || true
+          docker logs jans 2>&1 | tail -n 400 || true
+          docker logs traefik 2>&1 | tail -n 50 || true
+          docker logs consul 2>&1 | tail -n 30 || true
+          docker logs vault 2>&1 | tail -n 30 || true
 
       - name: Gate on test outcome
         if: always()
