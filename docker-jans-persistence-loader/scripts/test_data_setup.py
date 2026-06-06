@@ -25,6 +25,8 @@ import json
 import logging.config
 import os
 import re
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
@@ -74,6 +76,17 @@ TEST_SCRIPT_INUMS = ("2DAF-F995", "2DAF-F996", "4BBE-C6A8", "A51E-76DA", "0300-B
 TEST_DEFAULT_SCOPE_INUMS = ("C4F6", "7D91")
 
 JANS_AUTH_CONFIG_DN = "ou=jans-auth,ou=configuration,o=jans"
+
+# DN suffix -> SQL table, used to apply the ``changetype: modify`` records in the
+# test data LDIFs (pycloudlib's create_from_ldif only inserts plain entries).
+DN_TABLE_SUFFIX = (
+    ("ou=attributes,o=jans", "jansAttr"),
+    ("ou=scopes,o=jans", "jansScope"),
+    ("ou=scripts,o=jans", "jansCustomScript"),
+    ("ou=groups,o=jans", "jansGrp"),
+    ("ou=people,o=jans", "jansPerson"),
+    ("ou=clients,o=jans", "jansClnt"),
+)
 
 # jans-auth dynamic-config overrides required by the test-suite (mirrors
 # test_data_loader.load_test_data).
@@ -229,7 +242,103 @@ class TestDataLoader:
                 logger.warning("Test data file %s not found; skipping", path)
                 continue
             logger.info("Importing test data %s", path)
-            self.client.create_from_ldif(path, ctx)
+            self._import_ldif(path, ctx)
+
+    def _import_ldif(self, path, ctx):
+        """Import an LDIF, splitting plain entries from ``changetype: modify`` ops.
+
+        pycloudlib's ``create_from_ldif`` only inserts plain entries; the test data
+        also carries modify records (e.g. flipping ``jansDefScope``, adding group
+        members), so those are applied separately.
+        """
+        records = re.split(r"\n[ \t]*\n", Path(path).read_text())
+        add_records, modify_records = [], []
+        for record in records:
+            # skip blank separators and comment-only blocks (no DN to act on)
+            if not re.search(r"(?im)^[ \t]*dn:", record):
+                continue
+            if re.search(r"(?im)^[ \t]*changetype:[ \t]*modify\b", record):
+                modify_records.append(record)
+            else:
+                add_records.append(record)
+
+        if add_records:
+            with NamedTemporaryFile("w", suffix=".ldif", delete=False) as tmp:
+                tmp.write("\n\n".join(add_records) + "\n")
+                tmp_path = tmp.name
+            try:
+                self.client.create_from_ldif(tmp_path, ctx)
+            finally:
+                os.unlink(tmp_path)
+
+        for record in modify_records:
+            self._apply_modify(record)
+
+    @staticmethod
+    def _table_for_dn(dn):
+        low = dn.lower()
+        for suffix, table in DN_TABLE_SUFFIX:
+            if low.endswith(suffix):
+                return table
+        return None
+
+    def _apply_modify(self, record):
+        """Apply a single ``changetype: modify`` record (replace/add)."""
+        lines = [
+            ln for ln in record.splitlines()
+            if ln.strip() and not ln.lstrip().startswith("#")
+        ]
+        dn = op = attr = None
+        for ln in lines:
+            key, _, val = ln.partition(":")
+            key = key.strip().lower()
+            val = val.strip()
+            if key == "dn":
+                dn = val
+            elif key in ("replace", "add") and attr is None:
+                op, attr = key, val
+
+        if not dn or not attr:
+            return
+
+        table = self._table_for_dn(dn)
+        if not table:
+            logger.warning("test-data modify: unmapped dn %s; skipping", dn)
+            return
+
+        new_values = [
+            ln.partition(":")[2].strip()
+            for ln in lines
+            if ln.partition(":")[0].strip().lower() == attr.lower()
+        ]
+        if not new_values:
+            return
+
+        doc_id = doc_id_from_dn(dn)
+        row = self.client.get(table, doc_id, [attr])
+        if not row:
+            logger.warning("test-data modify: %s not found in %s; skipping", dn, table)
+            return
+
+        value = self._merged_value(row.get(attr), new_values, op)
+        logger.info("test-data modify: %s %s on %s", op, attr, dn)
+        self.client.update(table, doc_id, {attr: value})
+
+    @staticmethod
+    def _merged_value(existing, new_values, op):
+        # multivalued JSON column: non-simple {"v": [...]} or simple [...]
+        if isinstance(existing, dict) and "v" in existing:
+            current = list(existing.get("v") or [])
+            merged = current + [v for v in new_values if v not in current] if op == "add" else list(new_values)
+            return {"v": merged}
+        if isinstance(existing, list):
+            merged = existing + [v for v in new_values if v not in existing] if op == "add" else list(new_values)
+            return merged
+        # scalar column: booleans are stored as integers (e.g. jansDefScope, jansEnabled)
+        value = new_values[0]
+        if isinstance(existing, (bool, int)):
+            return 1 if value.strip().lower() in ("true", "1", "yes") else 0
+        return value
 
     def add_scim_password_grant(self):
         """Add the ``password`` grant to the SCIM test client."""
