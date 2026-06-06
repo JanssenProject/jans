@@ -7,4 +7,9 @@ public class UnsupportedOperation extends TrustError  {
         
         super(message);
     }
+
+    public static UnsupportedOperation withMessage(String message) {
+
+        return new UnsupportedOperation(message);
+    }
 }
