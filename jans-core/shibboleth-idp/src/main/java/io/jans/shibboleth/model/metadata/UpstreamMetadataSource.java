@@ -23,7 +23,7 @@ public class UpstreamMetadataSource implements MetadataSource {
         return MetadataSourceType.UPSTREAM;
     }
 
-    public static TrustResult<UpstreamMetadataSource> of(Id parentId, EntityId entityId) {
+    public static TrustResult<MetadataSource> of(Id parentId, EntityId entityId) {
 
         if ( parentId == null ) {
 

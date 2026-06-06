@@ -3,9 +3,11 @@ package io.jans.shibboleth.model.rules;
 import java.util.Objects;
 
 import io.jans.shibboleth.model.BuildContext;
+import io.jans.shibboleth.model.TrustRelationship;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.error.OperationRestrictedToNature;
-import io.jans.shibboleth.model.error.TrustRelationshipConsistencyFailure;
+import io.jans.shibboleth.model.error.TrustError;
+import io.jans.shibboleth.model.error.DomainObjectConsistencyFailed;
 import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 import io.jans.shibboleth.model.util.TrustResult;
@@ -25,16 +27,9 @@ public class MetadataSourceCompatibilityRule {
         if ( !isCompatible(context.getMetadataSource(),context.getNature()) ) {
 
             TrustNature required_nature = context.getNature() == TrustNature.INDIVIDUAL ? TrustNature.AGGREGATE : TrustNature.INDIVIDUAL;
-            
-            return TrustResult.failure(
-                TrustRelationshipConsistencyFailure.because(
-                    OperationRestrictedToNature.of(
-                        "updateMetadataSource", 
-                        required_nature,
-                        context.getNature()
-                    )
-                )
-            );
+
+            TrustError cause = OperationRestrictedToNature.of("updateMetadataSource",required_nature,context.getNature());
+            return TrustResult.failure( DomainObjectConsistencyFailed.forClassWithCause(TrustRelationship.class, cause) );
         }
 
         return TrustResult.success(null);
