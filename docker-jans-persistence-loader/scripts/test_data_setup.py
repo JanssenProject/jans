@@ -271,8 +271,15 @@ class TestDataLoader:
             finally:
                 os.unlink(tmp_path)
 
+        if modify_records:
+            # force a fresh metadata reflection so every table (incl. ones only
+            # touched by modifies) is known before issuing updates
+            self.client._metadata = None
         for record in modify_records:
-            self._apply_modify(record)
+            try:
+                self._apply_modify(record)
+            except Exception as exc:  # noqa: BLE001 - test data enrichment is best-effort
+                logger.warning("test-data modify skipped (%s)", exc)
 
     @staticmethod
     def _table_for_dn(dn):
@@ -314,6 +321,10 @@ class TestDataLoader:
         if not new_values:
             return
 
+        if self.client.metadata.tables.get(table) is None:
+            logger.warning("test-data modify: table %s not reflected for %s; skipping", table, dn)
+            return
+
         doc_id = doc_id_from_dn(dn)
         row = self.client.get(table, doc_id, [attr])
         if not row:
@@ -324,8 +335,7 @@ class TestDataLoader:
         logger.info("test-data modify: %s %s on %s", op, attr, dn)
         self.client.update(table, doc_id, {attr: value})
 
-    @staticmethod
-    def _merged_value(existing, new_values, op):
+    def _merged_value(self, existing, new_values, op):
         # multivalued JSON column: non-simple {"v": [...]} or simple [...]
         if isinstance(existing, dict) and "v" in existing:
             current = list(existing.get("v") or [])
@@ -334,6 +344,10 @@ class TestDataLoader:
         if isinstance(existing, list):
             merged = existing + [v for v in new_values if v not in existing] if op == "add" else list(new_values)
             return merged
+        # an ``add`` op only targets a multivalued attribute; if the column is
+        # currently empty/NULL, initialise it with the right JSON shape
+        if op == "add":
+            return list(new_values) if self.client.use_simple_json else {"v": list(new_values)}
         # scalar column: booleans are stored as integers (e.g. jansDefScope, jansEnabled)
         value = new_values[0]
         if isinstance(existing, (bool, int)):
