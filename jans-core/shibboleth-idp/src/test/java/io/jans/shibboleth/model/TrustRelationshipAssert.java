@@ -157,7 +157,19 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         isNotNull();
         if (!actual.hasNoActiveProfileConfiguration()) {
            
-            failWithMessage("Trustrelationship has at least one active profile configuration. Expected: none");
+            failWithMessage("TrustRelationship has at least one active profile configuration. Expected: none");
+        }
+
+        return this;
+    }
+
+    public TrustRelationshipAssert hasNoReleasedAttributes() {
+
+        isNotNull();
+
+        if (!actual.hasNoReleasedAttributes()) {
+
+            failWithMessage("TrustRelationship has at least one released attribute. Expected: none");
         }
 
         return this;

@@ -3,11 +3,15 @@ package io.jans.shibboleth.model;
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
+import io.jans.shibboleth.model.metadata.ManualMetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 import io.jans.shibboleth.model.metadata.NoMetadataSource;
 import io.jans.shibboleth.model.metadata.UpstreamMetadataSource;
-
+import io.jans.shibboleth.model.metadata.UriMetadataSource;
+import io.jans.shibboleth.model.metadata.manual.AssertionConsumerService;
+import io.jans.shibboleth.model.metadata.manual.SamlBinding;
+import io.jans.shibboleth.model.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.model.config.profiles.*;
 import io.jans.shibboleth.model.config.profiles.common.*;
 import io.jans.shibboleth.model.util.TrustResult;
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.Tag;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
+import java.net.URI;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.*;
@@ -100,10 +105,25 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static final Stream<Arguments> draftIndividualTrustRelationshipWithSupportedMetadataSources() {
+    public static final Stream<Arguments> draftIndividualTrustRelationshipWithSupportedMetadataSources () {
 
+        
+        AssertionConsumerService acs = AssertionConsumerService.of(URI.create("https://sp.gluu.org/login"),SamlBinding.HTTP_POST).getValue();
+
+        MetadataSource filesource = FileMetadataSource.of("/var/gluu/sp_metadata.xml").getValue();
+        MetadataSource urisource = UriMetadataSource.of(URI.create("https://sp.gluu.org/my/sp.xml")).getValue();
+        MetadataSource upstreamsource = UpstreamMetadataSource.of(Id.generate(),EntityId.of("sp.gluu.org").getValue()).getValue();
+        MetadataSource manualsource  = ManualMetadataSource.withNoSigningCertificate()
+            .entityId(EntityId.of("sp.gluu.org").getValue())
+            .validUntil(ValidityPeriod.daysFromNow(1))
+            .assertionConsumerService(acs)
+            .build().getValue();
+        
         return Stream.of(
-            
+            Arguments.of(draftIndividualTrustRelationship(),filesource),
+            Arguments.of(draftIndividualTrustRelationship(),urisource),
+            Arguments.of(draftIndividualTrustRelationship(),upstreamsource),
+            Arguments.of(draftIndividualTrustRelationship(),manualsource)
         );
     }
 
@@ -137,7 +157,8 @@ public class TrustRelationshipTest {
                 .hasStatus(TrustStatus.DRAFT)
                 .isVersion(Version.initial())
                 .hasNoMetadataSource()
-                .hasNoDiscoveredEntityIds();
+                .hasNoDiscoveredEntityIds()
+                .hasNoReleasedAttributes();
         
             assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
                 .usesDefaultConfiguration();
@@ -167,11 +188,11 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = TrustRelationship.create(null,"Jans TR",nature);
 
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipCreationFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
 
             result = TrustRelationship.create(" ","JansRP",nature);
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipCreationFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
         }
 
         @Tag("refactoring")
@@ -184,7 +205,7 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = TrustRelationship.create("JansTR","Jans TR",null);
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipCreationFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
         }
 
         @Tag("refactoring")
@@ -362,7 +383,7 @@ public class TrustRelationshipTest {
 
             //Then
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
     }
 
@@ -404,13 +425,13 @@ public class TrustRelationshipTest {
 
         }
 
-        @Tag("refactoring-disabled")
+        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftIndividualTrustRelationshipWithSupportedMetadataSources")
         @DisplayName(
             "GIVEN  " +
             "   - a valid trustrelationship of nature INDIVIDUAL, DRAFT status, no valid metadatasource and no profile configuration ACTIVE " +
-            "   - a metadatasource supported for INDIVIDUAL trustrelationships" +
+            "   - a metadatasource supported for INDIVIDUAL trustrelationships (except nometadatasource)" +
             "WHEN updating the trustrelationship's metadatasource   " +
             "THEN " +
             "   - the update succeeds " +
@@ -445,7 +466,7 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(null);
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @Tag("refactoring")
@@ -461,7 +482,7 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
 
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @Tag("refactoring")
@@ -477,7 +498,7 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
             
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @ParameterizedTest
@@ -509,7 +530,7 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.updateProfileConfiguration(null);
             assertThat(result.isFailure());
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @Disabled
@@ -542,7 +563,7 @@ public class TrustRelationshipTest {
             EntityIds entityIds = EntityIds.empty();
             TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(entityIds);
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @Test
@@ -557,7 +578,7 @@ public class TrustRelationshipTest {
             EntityIds entityIds = null;
             TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(entityIds);
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
 
         @Test
@@ -575,7 +596,7 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(EntityIds.empty());
             assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(TrustRelationshipUpdateFailed.class);
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         }
       
     }

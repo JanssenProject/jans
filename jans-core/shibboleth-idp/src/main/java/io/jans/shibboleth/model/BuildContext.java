@@ -33,6 +33,8 @@ public class BuildContext {
     private final Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
     private final Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
     private final Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+    
+    private final ReleasedAttributes releasedAttributes;
 
     public BuildContext(TrustRelationship original,
         Id id, DisplayName displayName, Description description,
@@ -41,7 +43,7 @@ public class BuildContext {
         Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration, 
         Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration,
         Saml2EcpProfileConfiguration saml2EcpProfileConfiguration, Saml2SsoProfileConfiguration saml2SsoProfileConfiguration,
-        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration ) {
+        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration, ReleasedAttributes releasedAttributes ) {
         
         this.original = original;
         this.id = id;
@@ -58,6 +60,7 @@ public class BuildContext {
         this.saml2EcpProfileConfiguration = saml2EcpProfileConfiguration;
         this.saml2SsoProfileConfiguration = saml2SsoProfileConfiguration;
         this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
+        this.releasedAttributes = releasedAttributes;
     }
 
     public TrustRelationship getOriginal() {
@@ -133,5 +136,10 @@ public class BuildContext {
     public Saml2LogoutProfileConfiguration getSaml2LogoutProfileConfiguration() {
 
         return saml2LogoutProfileConfiguration;
+    }
+
+    public ReleasedAttributes getReleasedAttributes() {
+
+        return releasedAttributes;
     }
 }
