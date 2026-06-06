@@ -267,7 +267,7 @@ class TestDataLoader:
                 tmp.write("\n\n".join(add_records) + "\n")
                 tmp_path = tmp.name
             try:
-                self.client.create_from_ldif(tmp_path, ctx)
+                self.client.create_from_ldif(tmp_path, ctx, self._known_columns_only)
             finally:
                 os.unlink(tmp_path)
 
@@ -280,6 +280,22 @@ class TestDataLoader:
                 self._apply_modify(record)
             except Exception as exc:  # noqa: BLE001 - test data enrichment is best-effort
                 logger.warning("test-data modify skipped (%s)", exc)
+
+    def _known_columns_only(self, table_name, column_mapping):
+        """Drop attributes that have no matching column in the (reflected) table.
+
+        The test LDIFs carry a few attributes (e.g. ``creationDate``) that are not
+        columns of their SQL table; pycloudlib's insert would otherwise raise
+        ``CompileError: Unconsumed column names``.
+        """
+        table = self.client.metadata.tables.get(table_name)
+        if table is None:
+            return column_mapping
+        valid = set(table.c.keys())
+        dropped = [key for key in column_mapping if key not in valid]
+        if dropped:
+            logger.warning("test-data: dropping unknown column(s) %s for %s", dropped, table_name)
+        return {key: value for key, value in column_mapping.items() if key in valid}
 
     @staticmethod
     def _table_for_dn(dn):
@@ -415,8 +431,16 @@ class TestDataLoader:
         self.add_custom_columns()
         ctx = self.build_ctx()
         self.import_test_data(ctx)
-        self.add_scim_password_grant()
-        self.update_auth_dynamic_conf()
-        self.enable_test_scripts()
-        self.set_default_scopes()
+        # Post-import config tweaks are best-effort: a failure here must not crash
+        # the persistence-loader (which would crash-loop and keep the AIO unhealthy).
+        for step in (
+            self.add_scim_password_grant,
+            self.update_auth_dynamic_conf,
+            self.enable_test_scripts,
+            self.set_default_scopes,
+        ):
+            try:
+                step()
+            except Exception as exc:  # noqa: BLE001 - best-effort enrichment
+                logger.warning("test-data step %s failed (%s)", step.__name__, exc)
         logger.info("Integration-test data loaded")
