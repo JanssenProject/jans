@@ -50,7 +50,7 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     public String generateSecretKeyUri(byte[] secretKey, String displayName) {
         logger.trace("Generating secret key URI");
         try {
-            URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
+            URI uri = buildGenerator(secretKey).getURI(0, issuer, displayName.replace(':', ' '));
             return uri.toString();
         } catch (Exception e) {
             throw new IllegalStateException("Could not build HOTP key URI", e);
