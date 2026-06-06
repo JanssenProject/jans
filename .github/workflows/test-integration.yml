@@ -161,6 +161,11 @@ jobs:
           # timeout and re-check with a longer window (test-data load can be slow).
           bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 \
             || echo "[warn] demo-script readiness gate did not pass; re-checking with a longer timeout"
+          # The demo generates its TLS certs as mode-600 files owned by the host user; the
+          # in-container configurator (uid 1000) cannot read the mounted ca.key/web_https.key,
+          # so relax the perms and restart the AIO to let the configurator load succeed.
+          chmod -R a+rwX automation/jans-aio-demo/templates 2>/dev/null || true
+          docker restart jans >/dev/null 2>&1 || true
           echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
           end=$((SECONDS + 1200)); ok=""
           while [ $SECONDS -lt $end ]; do
