@@ -1,7 +1,7 @@
 package io.jans.casa.plugins.authnmethod.service.otp;
 
-import com.github.bastiaanjansen.otp.HMACAlgorithm;
-import com.github.bastiaanjansen.otp.TOTPGenerator;
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.TOTPConfig;
 import org.slf4j.Logger;
