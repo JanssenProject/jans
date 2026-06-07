@@ -18,9 +18,9 @@ import jarray
 import json
 import sys
 from com.google.common.io import BaseEncoding
-from com.bastiaanjansen.otp import HMACAlgorithm
-from com.bastiaanjansen.otp import HOTPGenerator
-from com.bastiaanjansen.otp import TOTPGenerator
+from com.github.bastiaanjansen.otp import HMACAlgorithm
+from com.github.bastiaanjansen.otp import HOTPGenerator
+from com.github.bastiaanjansen.otp import TOTPGenerator
 from java.security import SecureRandom
 from java.time import Duration
 from java.util import Arrays, HashMap
@@ -524,7 +524,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        return hotp.getURI(0, issuer, userDisplayName).toString()
+        return hotp.getURI(issuer, userDisplayName).toString()
 
     # TOTP methods
     def generateSecretTotpKey(self):
