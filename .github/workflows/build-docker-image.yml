@@ -1,11 +1,14 @@
 name: Build and Publish Releases to Hub
 
 on:
-  schedule:
-    - cron: "0 23 * * *"
+  # Chained after the publish workflow so the service WARs exist on the release
+  # before the Dockerfiles pull them. (Replaces the standalone nightly cron,
+  # which collided with build-nightly-build recreating the release.)
+  workflow_run:
+    workflows: ["Janssen Build & Publish"]
+    types:
+      - completed
   push:
-    tags:
-      - "*"
     branches:
       - main
   pull_request:
@@ -100,6 +103,12 @@ permissions:
 
 jobs:
   docker:
+    # On workflow_run, only proceed when the publish workflow succeeded for a
+    # release tag. Other events (PR, main push, manual dispatch) run as before.
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v')))
     permissions:
       packages: write
       id-token: write
@@ -123,6 +132,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
           sparse-checkout: |
             docker-jans-${{ matrix.docker-images }}
@@ -173,8 +183,8 @@ jobs:
             if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
               # PR: get changed files via GitHub API
               DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
-            elif [[ "${{ github.event_name }}" == "schedule" || "${{ github.ref_type }}" == "tag" ]]; then
-              # Nightly schedule or tag push: build all images
+            elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+              # Chained: the nightly/release publish completed -> build all images
               DIRECTORIES_CHANGED="$ALL_SERVICES"
             else
               # Direct branch push: use git diff to find which docker dirs changed.
