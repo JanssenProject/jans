@@ -328,10 +328,16 @@ jobs:
         if: failure()
         run: |
           docker compose -f automation/compose.yaml ps || true
-          docker logs jans 2>&1 | tail -n 400 || true
-          docker logs traefik 2>&1 | tail -n 50 || true
-          docker logs consul 2>&1 | tail -n 30 || true
-          docker logs vault 2>&1 | tail -n 30 || true
+          echo "::group::supervisorctl status (which AIO programs are RUNNING/FATAL)"
+          docker exec jans supervisorctl -c /app/conf/supervisord.conf status || true
+          echo "::endgroup::"
+          echo "::group::AIO key events (services + errors)"
+          docker logs jans 2>&1 | grep -aiE "persistence-loader -|configurator -|jans-auth -|ERROR|Exception|Traceback|exited:|FATAL|gave up|Started oejs.Server|WaitError|OutOfMemory|Killed" | tail -n 300 || true
+          echo "::endgroup::"
+          echo "::group::AIO full tail"
+          docker logs jans 2>&1 | tail -n 250 || true
+          echo "::endgroup::"
+          docker logs traefik 2>&1 | tail -n 30 || true
 
       - name: Gate on test outcome
         if: always()
