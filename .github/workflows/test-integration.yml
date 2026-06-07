@@ -1,0 +1,348 @@
+name: integration-tests
+
+# Java integration test-suite, run against an all-in-one (AIO) server with the
+# integration test-data loaded (CN_PERSISTENCE_LOAD_TEST_DATA=true). Replaces the
+# jenkins.jans.io / docker-jans-monolith test runner.
+#
+# Flow per matrix leg (MYSQL / PGSQL):
+#   build persistence-loader + config-api (from this checkout) + assemble AIO
+#   -> run DB + AIO + a TLS terminating proxy
+#   -> extract live secrets from the AIO -> render profiles/<fqdn>/
+#   -> import the AIO cert into the JDK truststore
+#   -> build the modules (skip tests) then `mvn -Dcfg=<fqdn> test` per module
+#   -> publish results (step summary + artifact + PR check).
+
+on:
+  workflow_dispatch:
+    inputs:
+      persistence:
+        description: "Persistence backend(s) to test"
+        type: choice
+        options: ["BOTH", "MYSQL", "PGSQL"]
+        default: "BOTH"
+      aio_image:
+        description: "Prebuilt AIO image to test (leave empty to build from this checkout)"
+        type: string
+        default: ""
+  schedule:
+    - cron: "0 4 * * *"
+  pull_request:
+    paths:
+      - "docker-jans-persistence-loader/**"
+      - "docker-jans-config-api/**"
+      - "docker-jans-all-in-one/**"
+      - ".github/workflows/test-integration.yml"
+      - ".github/workflows/scripts/render_test_profiles.py"
+      - "jans-auth-server/**"
+      - "jans-scim/**"
+      - "jans-config-api/**"
+      - "jans-fido2/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Compute persistence matrix
+        id: matrix
+        run: |
+          # PR runs are kept cheap (single backend); nightly/dispatch cover both.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "MYSQL" ]; then
+            echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "PGSQL" ]; then
+            echo 'matrix=["PGSQL"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix=["MYSQL","PGSQL"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  integration:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        persistence: ${{ fromJson(needs.setup.outputs.matrix) }}
+    env:
+      JANS_FQDN: aio.jans.io
+      DB_NAME: jans
+      DB_USER: jans
+      DB_PASSWORD: "Test1234#"
+      # config-api test client, pinned so the suite has deterministic credentials
+      CN_CONFIG_API_TEST_CLIENT_ID: "1801.00000000-0000-0000-0000-00000000c1ce"
+      CN_CONFIG_API_TEST_CLIENT_SECRET: "integration-test-config-api-secret"
+      CN_CONFIG_API_TEST_CLIENT_TRUSTED: "true"
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Resolve DB parameters
+        id: db
+        run: |
+          if [ "${{ matrix.persistence }}" = "PGSQL" ]; then
+            {
+              echo "image=postgres:16"
+              echo "port=5432"
+              echo "dialect=pgsql"
+              echo "jdbc=postgresql"
+              echo "schema=public"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "image=mysql:8.0"
+              echo "port=3306"
+              echo "dialect=mysql"
+              echo "jdbc=mysql"
+              echo "schema=$DB_NAME"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build AIO image (with integration-test env baked in)
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.aio_image }}" ]; then
+            docker pull "${{ inputs.aio_image }}"
+            base_image="${{ inputs.aio_image }}"
+          else
+            docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
+            docker build -t local/config-api:ci ./docker-jans-config-api
+            docker build -t local/aio:ci \
+              --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
+              --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
+              ./docker-jans-all-in-one
+            base_image="local/aio:ci"
+          fi
+          # Bake the integration-test env into a thin layer, tagged as the image the
+          # AIO demo compose expects, so start_janssen_aio_demo.sh uses it unchanged.
+          cat > Dockerfile.ci-aio <<EOF
+          FROM ${base_image}
+          ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
+          ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
+          ENV CN_CONFIG_API_TEST_CLIENT_SECRET=${CN_CONFIG_API_TEST_CLIENT_SECRET}
+          ENV CN_CONFIG_API_TEST_CLIENT_TRUSTED=${CN_CONFIG_API_TEST_CLIENT_TRUSTED}
+          EOF
+          docker build -t ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly - < Dockerfile.ci-aio
+
+      - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
+        run: |
+          set -uo pipefail
+          # Brings up the full compose stack (consul/vault/traefik/db/aio) using our
+          # locally-tagged AIO image, and waits for readiness. Tolerate its built-in
+          # timeout and re-check with a longer window (test-data load can be slow).
+          bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 \
+            || echo "[warn] demo-script readiness gate did not pass; re-checking with a longer timeout"
+          # The demo generates its TLS certs as mode-600 files owned by the host user; the
+          # in-container configurator (uid 1000) cannot read the mounted ca.key/web_https.key,
+          # so relax the perms and restart the AIO to let the configurator load succeed.
+          chmod -R a+rwX automation/jans-aio-demo/templates 2>/dev/null || true
+          docker restart jans >/dev/null 2>&1 || true
+          echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
+          end=$((SECONDS + 1200)); ok=""
+          while [ $SECONDS -lt $end ]; do
+            code=$(curl -sk -o /dev/null -w '%{http_code}' "https://${JANS_FQDN}/.well-known/openid-configuration" || true)
+            echo "openid-configuration: $code"
+            if [ "$code" = "200" ]; then ok=1; break; fi
+            sleep 20
+          done
+          if [ -z "$ok" ]; then
+            echo "::error::AIO did not become healthy in time"
+            docker compose -f automation/compose.yaml ps || true
+            docker logs jans 2>&1 | tail -n 300 || true
+            exit 1
+          fi
+          for ep in scim-configuration fido2-configuration; do
+            curl -sk -o /dev/null -w "$ep: %{http_code}\n" "https://${JANS_FQDN}/.well-known/$ep" || true
+          done
+
+      - name: Import AIO CA certificate into the JDK truststore
+        run: |
+          set -euo pipefail
+          keytool -import -trustcacerts -noprompt -alias "${JANS_FQDN}" \
+            -file automation/jans-aio-demo/templates/ca.crt \
+            -keystore "${JAVA_HOME}/lib/security/cacerts" -storepass changeit
+
+      - name: Extract live secrets from the AIO
+        id: secrets
+        run: |
+          set -euo pipefail
+          # adapter-agnostic: read through the AIO's own pycloudlib manager
+          payload=$(docker exec -i -e DB_PASSWORD="$DB_PASSWORD" jans python3 - <<'PY'
+          import json
+          from jans.pycloudlib import get_manager
+          from jans.pycloudlib.utils import encode_text
+          import os
+          m = get_manager()
+          salt = m.secret.get("encoded_salt")
+          print(json.dumps({
+              "salt": salt,
+              "scim_id": m.config.get("scim_client_id") or "",
+              "scim_pw": m.secret.get("scim_client_pw") or "",
+              "jca_id": m.config.get("jca_client_id") or "",
+              "jca_enc": m.secret.get("jca_client_encoded_pw") or "",
+              "db_pw_enc": encode_text(os.environ["DB_PASSWORD"], salt).decode(),
+          }))
+          PY
+          )
+          # mask the sensitive values in logs
+          for k in salt scim_pw jca_enc db_pw_enc; do
+            v=$(echo "$payload" | python3 -c "import json,sys;print(json.load(sys.stdin)['$k'])")
+            echo "::add-mask::$v"
+          done
+          echo "$payload" > "$GITHUB_WORKSPACE/aio-secrets.json"
+
+      - name: Render test profiles
+        run: |
+          set -euo pipefail
+          read_json() { python3 -c "import json;print(json.load(open('$GITHUB_WORKSPACE/aio-secrets.json'))['$1'])"; }
+          export JANS_FQDN
+          export ENCODE_SALT="$(read_json salt)"
+          export SCIM_CLIENT_ID="$(read_json scim_id)"
+          export SCIM_CLIENT_PW="$(read_json scim_pw)"
+          export JCA_CLIENT_ID="$(read_json jca_id)"
+          export JCA_CLIENT_ENCODED_PW="$(read_json jca_enc)"
+          export JCA_TEST_CLIENT_ID="$CN_CONFIG_API_TEST_CLIENT_ID"
+          export JCA_TEST_CLIENT_SECRET="$CN_CONFIG_API_TEST_CLIENT_SECRET"
+          export RDBM_NAME_STR=${{ steps.db.outputs.jdbc }}
+          export RDBM_DB="$DB_NAME"
+          export RDBM_SCHEMA_NAME=${{ steps.db.outputs.schema }}
+          export RDBM_PORT=${{ steps.db.outputs.port }}
+          export RDBM_USER="$DB_USER"
+          export RDBM_PASSWORD_ENC="$(read_json db_pw_enc)"
+          python3 .github/workflows/scripts/render_test_profiles.py
+
+      - name: Build modules (skip tests)
+        env:
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for mod in jans-orm jans-auth-server jans-scim jans-config-api jans-fido2; do
+            echo "::group::build $mod"
+            mvn -B -ntp -s .github/maven-settings.xml \
+              -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae \
+              -f "$mod/pom.xml" clean install
+            echo "::endgroup::"
+          done
+
+      - name: Run integration tests
+        env:
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          mkdir -p test-reports
+          # module-name:relative-dir (HTTP suites that target the AIO over the network)
+          modules="jans-auth-client:jans-auth-server/client \
+                   jans-scim-client:jans-scim/client \
+                   jans-config-api:jans-config-api \
+                   jans-fido2-client:jans-fido2/client"
+          status=0
+          for entry in $modules; do
+            name="${entry%%:*}"; dir="${entry##*:}"
+            echo "::group::test $name ($dir)"
+            ( cd "$dir" && mvn -B -ntp -s "$GITHUB_WORKSPACE/.github/maven-settings.xml" \
+                -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false -DfailIfNoTests=false test ) \
+              && echo "$name PASSED" || { echo "$name FAILED"; status=1; }
+            # collect any surefire results produced by this module
+            find "$dir" -path '*/target/surefire-reports/*.xml' -exec sh -c \
+              'cp "$1" "test-reports/'"$name"'-$(basename "$1")"' _ {} \; 2>/dev/null || true
+            echo "::endgroup::"
+          done
+          echo "TESTS_STATUS=$status" >> "$GITHUB_ENV"
+
+      - name: Summarise results
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, os, xml.etree.ElementTree as ET
+          rows, tot = [], {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
+          for f in sorted(glob.glob("test-reports/*.xml")):
+              try:
+                  r = ET.parse(f).getroot()
+              except ET.ParseError:
+                  continue
+              if r.tag != "testng-results":
+                  continue
+              g = lambda k: int(r.get(k, 0))
+              rows.append((os.path.basename(f), g("total"), g("passed"), g("failed"), g("skipped")))
+              for k in tot:
+                  tot[k] += g(k)
+          print(f"## Integration tests — {os.environ.get('MATRIX','')}\n")
+          print("| Report | Total | Passed | Failed | Skipped |")
+          print("|---|---:|---:|---:|---:|")
+          for name, t, p, fl, s in rows:
+              print(f"| {name} | {t} | {p} | {fl} | {s} |")
+          print(f"| **Total** | **{tot['total']}** | **{tot['passed']}** | **{tot['failed']}** | **{tot['skipped']}** |")
+          PY
+        env:
+          MATRIX: ${{ matrix.persistence }}
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: test-reports-${{ matrix.persistence }}
+          path: test-reports/
+          if-no-files-found: warn
+
+      - name: Publish test report (PR check)
+        if: always()
+        continue-on-error: true
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        with:
+          name: integration-tests (${{ matrix.persistence }})
+          # surefire also emits JUnit-format TEST-*.xml; testng-results.xml feeds the step summary
+          path: "test-reports/*TEST-*.xml"
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: |
+          docker compose -f automation/compose.yaml ps || true
+          echo "::group::supervisorctl status (which AIO programs are RUNNING/FATAL)"
+          docker exec jans supervisorctl -c /app/conf/supervisord.conf status || true
+          echo "::endgroup::"
+          echo "::group::AIO key events (services + errors)"
+          docker logs jans 2>&1 | grep -aiE "persistence-loader -|configurator -|jans-auth -|ERROR|Exception|Traceback|exited:|FATAL|gave up|Started oejs.Server|WaitError|OutOfMemory|Killed" | tail -n 300 || true
+          echo "::endgroup::"
+          echo "::group::AIO full tail"
+          docker logs jans 2>&1 | tail -n 250 || true
+          echo "::endgroup::"
+          docker logs traefik 2>&1 | tail -n 30 || true
+
+      - name: Gate on test outcome
+        if: always()
+        run: |
+          if [ "${TESTS_STATUS:-1}" != "0" ]; then
+            echo "::error::one or more integration test modules failed"
+            exit 1
+          fi

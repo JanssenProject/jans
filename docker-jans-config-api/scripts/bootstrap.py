@@ -349,14 +349,19 @@ class PersistenceSetup:
             self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
         # test client
+        #
+        # The id/secret/trusted flag may be pinned via env so an external
+        # integration-test suite (e.g. the GitHub Actions workflow) can target
+        # the config-api with deterministic credentials. When the env vars are
+        # unset the previous random behaviour is preserved.
         ctx["test_client_id"] = self.manager.config.get("test_client_id")
         if not ctx["test_client_id"]:
-            ctx["test_client_id"] = f"{uuid4()}"
+            ctx["test_client_id"] = os.environ.get("CN_CONFIG_API_TEST_CLIENT_ID", "") or f"{uuid4()}"
             self.manager.config.set("test_client_id", ctx["test_client_id"])
 
         ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
         if not ctx["test_client_pw"]:
-            ctx["test_client_pw"] = get_random_chars()
+            ctx["test_client_pw"] = os.environ.get("CN_CONFIG_API_TEST_CLIENT_SECRET", "") or get_random_chars()
             self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
 
         ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
@@ -365,6 +370,10 @@ class PersistenceSetup:
                 ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
             ).decode()
             self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+
+        ctx["test_client_trusted"] = "true" if as_boolean(
+            os.environ.get("CN_CONFIG_API_TEST_CLIENT_TRUSTED", "false")
+        ) else "false"
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
