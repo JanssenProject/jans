@@ -108,7 +108,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
-                validators: crate::http::cache_headers::CacheHeadersState::default(),
+                validators: CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
@@ -117,7 +117,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
-                validators: crate::http::cache_headers::CacheHeadersState::default(),
+                validators: CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::LockServer(policy_store_uri) => {
@@ -130,7 +130,7 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
-                validators: crate::http::cache_headers::CacheHeadersState::default(),
+                validators: CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::FileYaml(path) => {
@@ -141,20 +141,20 @@ pub(crate) async fn load_policy_store(
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store)?,
                 body_hash: None,
-                validators: crate::http::cache_headers::CacheHeadersState::default(),
+                validators: CacheHeadersState::default(),
             }
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
             store: load_policy_store_from_cjar_file(path).await?,
             body_hash: None,
-            validators: crate::http::cache_headers::CacheHeadersState::default(),
+            validators: CacheHeadersState::default(),
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
             store: load_policy_store_from_cjar_file(path)?,
             body_hash: None,
-            validators: crate::http::cache_headers::CacheHeadersState::default(),
+            validators: CacheHeadersState::default(),
         },
         PolicyStoreSource::CjarUrl(url) => {
             load_policy_store_from_cjar_url(url, http_client).await?
@@ -163,18 +163,18 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
             store: load_policy_store_from_directory(path).await?,
             body_hash: None,
-            validators: crate::http::cache_headers::CacheHeadersState::default(),
+            validators: CacheHeadersState::default(),
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
             store: load_policy_store_from_directory(path)?,
             body_hash: None,
-            validators: crate::http::cache_headers::CacheHeadersState::default(),
+            validators: CacheHeadersState::default(),
         },
         PolicyStoreSource::ArchiveBytes(bytes) => LoadedPolicyStore {
             store: load_policy_store_from_archive_bytes(bytes)?,
             body_hash: None,
-            validators: crate::http::cache_headers::CacheHeadersState::default(),
+            validators: CacheHeadersState::default(),
         },
     };
 
@@ -195,10 +195,7 @@ async fn load_policy_store_from_lock_master(
     // Server starts serving `.cjar` archives in the future.
     let response = http_client.get_with_retry(uri).await?;
     let status = response.status();
-    let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
-        response.headers(),
-        chrono::Utc::now(),
-    );
+    let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
     let bytes = response.bytes().await.map_err(|e| {
         http_utils::HttpRequestError::new(
             http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
@@ -337,10 +334,7 @@ async fn load_policy_store_from_cjar_url(
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
     let status = response.status();
-    let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
-        response.headers(),
-        chrono::Utc::now(),
-    );
+    let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
     let bytes: Vec<u8> = response
         .bytes()
         .await
