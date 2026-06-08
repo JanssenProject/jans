@@ -55,8 +55,10 @@ use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
+use init::policy_store::{load_policy_store, LoadedPolicyStore};
 use init::policy_store_refresh::{
-    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, WorkerContext,
+    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
+    RefreshWorkerSeed, WorkerContext,
 };
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -165,27 +167,11 @@ impl Cedarling {
         )
         .await?;
 
-        let service_config = ServiceConfig::new(config)
-            .await
-            .inspect(|_| {
-                log.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::DEBUG,
-                        None,
-                    ))
-                    .set_message("configuration parsed successfully".to_string()),
-                );
-            })
-            .inspect_err(|err| {
-                log.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::ERROR,
-                        None,
-                    ))
-                    .set_error(err.to_string())
-                    .set_message("configuration parsed with error".to_string()),
-                );
-            })?;
+        // Bootstrap-load: build HttpClient + load policy store. Returns the
+        // service config plus the refresh-worker seed in one shot so the
+        // seed values (initial body hash, initial cache validators) stay in
+        // lexical scope right next to the refresh-worker spawn below.
+        let (service_config, refresh_seed) = perform_bootstrap_load(config, &log).await?;
 
         let policy_count = service_config
             .policy_store
@@ -234,6 +220,7 @@ impl Cedarling {
             log.clone(),
             data.clone(),
             metrics.clone(),
+            refresh_seed,
         );
 
         Ok(Cedarling {
@@ -332,9 +319,61 @@ impl TrustedIssuerLoadingInfo for Cedarling {
     }
 }
 
+/// Build the HTTP client and load the policy store from the bootstrap config.
+/// Returns the parts the rest of `Cedarling::new` needs: the [`ServiceConfig`]
+/// for service-factory construction, and the [`RefreshWorkerSeed`] for the
+/// refresh worker's first-tick short-circuit. Wraps both fallible steps so
+/// the existing "configuration parsed successfully" / "...with error" log
+/// behavior covers the whole bootstrap unit.
+async fn perform_bootstrap_load(
+    config: &BootstrapConfig,
+    log: &log::Logger,
+) -> Result<(ServiceConfig, RefreshWorkerSeed), ServiceConfigError> {
+    let raw_load: Result<(http::HttpClient, LoadedPolicyStore), ServiceConfigError> = async {
+        let http_client = http::HttpClient::new(config.http_client_config)?;
+        let loaded = load_policy_store(&config.policy_store_config, &http_client).await?;
+        Ok((http_client, loaded))
+    }
+    .await;
+
+    let (http_client, loaded) = raw_load
+        .inspect(|_| {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, None))
+                    .set_message("configuration parsed successfully".to_string()),
+            );
+        })
+        .inspect_err(|err| {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
+                    .set_error(err.to_string())
+                    .set_message("configuration parsed with error".to_string()),
+            );
+        })?;
+
+    let LoadedPolicyStore {
+        store: policy_store,
+        body_hash,
+        validators,
+    } = loaded;
+    Ok((
+        ServiceConfig {
+            policy_store,
+            http_client,
+        },
+        RefreshWorkerSeed {
+            initial_body_hash: body_hash,
+            initial_validators: validators,
+        },
+    ))
+}
+
 /// Spawn the background policy-store refresh worker if the source is a remote
 /// URL and a non-zero refresh interval was configured. Returns `None` for
-/// local sources or when refresh is disabled.
+/// local sources or when refresh is disabled. The `seed` carries the
+/// `body_hash` and `validators` captured during initial bootstrap so the
+/// first periodic tick can short-circuit — passed in directly from the
+/// bootstrap-load result rather than detoured through `ServiceFactory`.
 fn maybe_spawn_refresh_worker(
     config: &BootstrapConfig,
     service_factory: &ServiceFactory<'_>,
@@ -342,6 +381,7 @@ fn maybe_spawn_refresh_worker(
     log: log::Logger,
     data: Arc<context_data_api::DataStore>,
     metrics: Arc<authz::metrics::MetricsCollector>,
+    seed: RefreshWorkerSeed,
 ) -> Option<Arc<PolicyStoreRefreshHandle>> {
     if !config.policy_store_config.refresh_enabled() {
         return None;
@@ -374,8 +414,8 @@ fn maybe_spawn_refresh_worker(
         authz_swap,
         metrics,
         log,
-        initial_body_hash: service_factory.initial_body_hash(),
-        initial_validators: service_factory.initial_validators(),
+        initial_body_hash: seed.initial_body_hash,
+        initial_validators: seed.initial_validators,
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }

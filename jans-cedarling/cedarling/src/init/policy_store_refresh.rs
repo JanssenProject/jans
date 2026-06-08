@@ -78,10 +78,7 @@ pub(crate) enum RefreshOutcome {
     RebuildError = 6,
     /// The HTTP transaction completed with a success status but reading the
     /// response body failed (TCP drop mid-stream, malformed transfer encoding,
-    /// content-decoding failure, etc.). Distinct from `NetworkError` (couldn't
-    /// reach the upstream) and `HttpError` (4xx/5xx status) so dashboards can
-    /// triage "received a response but couldn't read it" without conflating it
-    /// with connectivity loss.
+    /// content-decoding failure, etc.).
     DecodeError = 7,
 }
 
@@ -195,8 +192,7 @@ impl StrategyState {
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
-                self.head_to_plain_transitions =
-                    self.head_to_plain_transitions.saturating_add(1);
+                self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
             },
             // Already at the least efficient strategy — nothing to degrade to.
             RefreshStrategy::PlainGet => {},
@@ -220,8 +216,7 @@ impl StrategyState {
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
-                self.head_to_plain_transitions =
-                    self.head_to_plain_transitions.saturating_add(1);
+                self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
             },
             RefreshStrategy::PlainGet => {},
         }
@@ -437,6 +432,25 @@ impl Drop for PolicyStoreRefreshHandle {
     }
 }
 
+/// Snapshot of the bootstrap-load result that the refresh worker uses to
+/// short-circuit its very first periodic tick:
+///
+/// - `initial_body_hash` — `ahash` of the bytes we already loaded. If the
+///   upstream returns a byte-identical body on the first refresh, the worker
+///   skips parse + rebuild + swap entirely.
+/// - `initial_validators` — `ETag` / `Last-Modified` / `Cache-Control` captured
+///   from the bootstrap response, so the first conditional GET can return
+///   `304 Not Modified` with **zero** body bytes downloaded.
+///
+/// Empty / `None` for non-URL sources (the worker doesn't spawn there anyway).
+/// Carried as a small named struct rather than two loose parameters so the
+/// spawn-site signature stays under the clippy `too_many_arguments` threshold
+/// without needing a `#[allow]` attribute.
+pub(crate) struct RefreshWorkerSeed {
+    pub initial_body_hash: Option<u64>,
+    pub initial_validators: CacheHeadersState,
+}
+
 /// Read-only worker context — handles and config that don't change between
 /// ticks. Owned by [`spawn_refresh_worker`] / [`run_worker`] for the lifetime
 /// of the background task; tick functions take `&WorkerContext`. Per-tick
@@ -630,10 +644,13 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                    .set_message(format!(
-                        "policy store refresh: body decode error for {url}: {e} (status {status})"
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: body decode error for {url}: {e} (status {status})"
+                )),
             );
             // HTTP transaction completed (we have a status); body read failed.
             // Classify as DecodeError, not NetworkError, so triage can
@@ -664,8 +681,13 @@ async fn parse_swap_and_record(
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_message(format!("policy store refresh: parse failure for {url}: {e}")),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: parse failure for {url}: {e}"
+                )),
             );
             return RefreshOutcome::ParseError;
         },
@@ -676,10 +698,13 @@ async fn parse_swap_and_record(
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_message(format!(
-                        "policy store refresh: rebuild failure for {url}: {e}"
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: rebuild failure for {url}: {e}"
+                )),
             );
             return RefreshOutcome::RebuildError;
         },
@@ -692,9 +717,13 @@ async fn parse_swap_and_record(
 
     let elapsed = Utc::now().signed_duration_since(start).num_milliseconds();
     ctx.log.log_any(
-        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, None)).set_message(
-            format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
-        ),
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ))
+        .set_message(format!(
+            "policy store refresh: swapped new store from {url} in {elapsed} ms"
+        )),
     );
 
     RefreshOutcome::Success
@@ -709,12 +738,18 @@ fn fetch_error(
     state.consecutive_failures = state.consecutive_failures.saturating_add(1);
     let is_net = e.is_max_retries_exceeded();
     ctx.log.log_any(
-        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None)).set_message(
-            format!(
-                "policy store refresh: {} against {url}: {e}",
-                if is_net { "network error" } else { "HTTP error" }
-            ),
-        ),
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ))
+        .set_message(format!(
+            "policy store refresh: {} against {url}: {e}",
+            if is_net {
+                "network error"
+            } else {
+                "HTTP error"
+            }
+        )),
     );
     if is_net {
         RefreshOutcome::NetworkError
