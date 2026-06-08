@@ -224,7 +224,10 @@ fn test_load_directory_success() {
         loaded_directory.metadata.policy_store.name,
         "Test Policy Store"
     );
-    assert!(loaded_directory.schema.is_some());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "test-policy.cedar");
 }
@@ -534,8 +537,11 @@ fn test_load_and_parse_schema_end_to_end() {
     );
 
     // Parse the schema
-    let parsed = ParsedSchema::parse(loaded_directory.schema.as_deref().unwrap(), "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed = ParsedSchema::parse(
+        loaded_directory.schema.as_deref().unwrap(),
+        "schema.cedarschema",
+    )
+    .expect("Should parse schema");
     assert_eq!(parsed.filename, "schema.cedarschema");
     assert_eq!(parsed.content, schema_content);
 
@@ -1072,7 +1078,10 @@ fn test_complete_policy_store_with_issuers() {
 
     // Verify all components are loaded
     assert_eq!(loaded_directory.metadata.name(), "Test Policy Store");
-    assert!(loaded_directory.schema.is_some());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert!(!loaded_directory.policies.is_empty());
     assert!(!loaded_directory.entities.is_empty());
     assert!(!loaded_directory.trusted_issuers.is_empty());
@@ -1080,8 +1089,11 @@ fn test_complete_policy_store_with_issuers() {
     // Parse and validate all components
 
     // Schema
-    let parsed_schema = ParsedSchema::parse(loaded_directory.schema.as_deref().unwrap(), "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed_schema = ParsedSchema::parse(
+        loaded_directory.schema.as_deref().unwrap(),
+        "schema.cedarschema",
+    )
+    .expect("Should parse schema");
     parsed_schema.validate().expect("Schema should be valid");
 
     // Policies
@@ -1192,7 +1204,10 @@ fn test_archive_vfs_end_to_end_from_file() {
     // Step 4: Verify all components loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "Archive Test Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "abcdef123456");
-    assert!(loaded_directory.schema.is_some());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "allow.cedar");
     assert_eq!(loaded_directory.entities.len(), 1);
@@ -1200,7 +1215,9 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 5: Verify components can be parsed
 
-    let schema_str = loaded_directory.schema.as_deref()
+    let schema_str = loaded_directory
+        .schema
+        .as_deref()
         .expect("Should have schema content for parsing");
 
     let parsed_schema = ParsedSchema::parse(schema_str, "schema.cedarschema")
@@ -1234,7 +1251,10 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     // Verify loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "WASM Archive Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
-    assert!(loaded_directory.schema.is_some());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
 }
 
@@ -1357,5 +1377,13 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
     assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
     assert_eq!(loaded_directory.policies.len(), 1);
-    assert!(loaded_directory.schema.as_deref().unwrap().contains("Equiv"));
+    assert!(
+        loaded_directory
+            .schema
+            .as_deref()
+            .unwrap()
+            .contains("Equiv"),
+        "expected loaded_directory.schema to contain 'Equiv' but got {:?}",
+        loaded_directory.schema.as_deref()
+    );
 }
