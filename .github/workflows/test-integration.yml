@@ -184,6 +184,9 @@ jobs:
             docker compose -f automation/compose.yaml ps || true
             docker exec jans supervisorctl -c /app/conf/supervisord.conf status 2>&1 || true
             docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Traceback|Started oejs.Server|FATAL|exited|WaitError|OutOfMemory" | tail -n 200 || true
+            echo "--- KEY MATERIAL DIAGNOSTIC (where does the jansConfWebKeys date come from?) ---"
+            echo "[configurator /etc/certs/auth-keys.json head]"; docker exec jans sh -c 'head -c 400 /etc/certs/auth-keys.json' 2>&1 || true; echo
+            docker exec jans python3 -c 'import base64; from jans.pycloudlib import get_manager; from jans.pycloudlib.persistence.sql import SqlClient, doc_id_from_dn; m=get_manager(); s=m.secret.get("auth_openid_key_base64") or ""; print("[secret auth_openid_key_base64 decoded :300]", (base64.b64decode(s).decode("utf-8","replace")[:300] if s else "EMPTY")); c=SqlClient(m); r=c.get("jansAppConf", doc_id_from_dn("ou=jans-auth,ou=configuration,o=jans"), ["jansConfWebKeys"]) or {}; print("[DB jansConfWebKeys :300]", str(r.get("jansConfWebKeys"))[:300])' 2>&1 || true
             exit 1
           fi
           for ep in scim-configuration fido2-configuration; do
