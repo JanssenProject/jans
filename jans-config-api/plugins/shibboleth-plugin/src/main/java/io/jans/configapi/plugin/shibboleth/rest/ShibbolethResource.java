@@ -270,13 +270,15 @@ public class ShibbolethResource extends BaseResource {
     public Response updateTrustRelationshipData(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
 
-        logger.info("Update TrustRelationship for File");
+        logger.error("\n\n Update TrustRelationship for File");
 
         if (logger.isInfoEnabled()) {
             logger.info("Update TrustRelationship identified by trustRelationshipForm:{}, metadatafile:{}",
                     escapeLog(trustRelationshipForm), escapeLog(metadatafile));
         }
-
+        logger.error("\n\n\n Update TrustRelationship identified by trustRelationshipForm:{}, metadatafile:{}",
+                trustRelationshipForm, metadatafile);
+        
         validateTrustRelationshipForm(trustRelationshipForm, metadatafile, true);
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
         shibbolethService.updateTrustRelationship(trustRelationship, metadatafile);

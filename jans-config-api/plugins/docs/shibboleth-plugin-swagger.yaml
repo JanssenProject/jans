@@ -632,7 +632,26 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: |
+                    [
+                      {
+                        "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                        "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                        "displayName": "TR-2",
+                        "description": "Trust-relationship 2",
+                        "entityType": "individual",
+                        "metadataSource": {
+                          "metadataSourceType": "file"
+                        },
+                        "releasedAttributes": [
+                          "inum=C4F7,ou=scopes,o=jans",
+                          "inum=10B2,ou=scopes,o=jans"
+                        ],
+                        "status": "draft",
+                        "version": 0,
+                        "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                      }
+                    ]
         "401":
           description: Unauthorized
         "500":
