@@ -218,6 +218,21 @@ public class TokenRestWebServiceValidator {
         }
     }
 
+    /**
+     * Validates subject_token_type for ID-JAG token exchange.
+     * Accepts id_token, saml2, and refresh_token as per the spec.
+     */
+    public void validateIdJagSubjectTokenType(String subjectTokenType, OAuth2AuditLog auditLog) {
+        if (SUBJECT_TOKEN_TYPE_ID_TOKEN.equalsIgnoreCase(subjectTokenType)
+                || SUBJECT_TOKEN_TYPE_SAML2.equalsIgnoreCase(subjectTokenType)
+                || SUBJECT_TOKEN_TYPE_REFRESH_TOKEN.equalsIgnoreCase(subjectTokenType)) {
+            return;
+        }
+        String msg = String.format("Unsupported subject_token_type for ID-JAG exchange: %s. Supported: id_token, saml2, refresh_token.", subjectTokenType);
+        log.trace(msg);
+        throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+    }
+
     public void validateActorTokenType(String actorTokenType, OAuth2AuditLog auditLog) {
         if (!ACTOR_TOKEN_TYPE_DEVICE_SECRET.equalsIgnoreCase(actorTokenType)) {
             String msg = String.format("Unsupported actor_token_type: %s", actorTokenType);
