@@ -202,7 +202,8 @@ jobs:
       - name: Import AIO CA certificate into the JDK truststore
         run: |
           set -euo pipefail
-          keytool -import -trustcacerts -noprompt -alias "${JANS_FQDN}" \
+          # The setup-java JDK's cacerts is not writable by the runner user, so import as root.
+          sudo "${JAVA_HOME}/bin/keytool" -import -trustcacerts -noprompt -alias "${JANS_FQDN}" \
             -file automation/jans-aio-demo/templates/ca.crt \
             -keystore "${JAVA_HOME}/lib/security/cacerts" -storepass changeit
 
