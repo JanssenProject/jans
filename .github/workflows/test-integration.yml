@@ -156,16 +156,22 @@ jobs:
       - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
         run: |
           set -uo pipefail
-          # Brings up the full compose stack (consul/vault/traefik/db/aio) using our
-          # locally-tagged AIO image, and waits for readiness. Tolerate its built-in
-          # timeout and re-check with a longer window (test-data load can be slow).
-          bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 \
-            || echo "[warn] demo-script readiness gate did not pass; re-checking with a longer timeout"
-          # The demo generates its TLS certs as mode-600 files owned by the host user; the
-          # in-container configurator (uid 1000) cannot read the mounted ca.key/web_https.key,
-          # so relax the perms and restart the AIO to let the configurator load succeed.
-          chmod -R a+rwX automation/jans-aio-demo/templates 2>/dev/null || true
-          docker restart jans >/dev/null 2>&1 || true
+          # Bring up the full compose stack (consul/vault/traefik/db/aio) using our
+          # locally-tagged AIO image. The demo writes its TLS certs as mode-600 files owned
+          # by the host user, but the in-container configurator (uid 1000) must read the
+          # mounted ca.key/web_https.key on its FIRST run. Run the demo in the background and
+          # relax the cert perms as they appear so the configurator loads them without a
+          # restart -- a restart re-runs key generation against a half-initialised keystore,
+          # which writes a "Keystore was tampered with" error string into jansConfWebKeys and
+          # breaks jans-auth/config-api WebKeysConfiguration parsing.
+          bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 &
+          demo_pid=$!
+          for _ in $(seq 1 120); do
+            [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true
+            kill -0 "$demo_pid" 2>/dev/null || break
+            sleep 2
+          done
+          wait "$demo_pid" 2>/dev/null || echo "[warn] demo-script readiness gate did not pass; re-checking below"
           echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
           end=$((SECONDS + 600)); ok=""; poll=0
           while [ $SECONDS -lt $end ]; do
