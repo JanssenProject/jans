@@ -197,7 +197,7 @@ Trusted issuer configuration files in the `trusted-issuers/` directory define id
 {
   "name": "Jans Server",
   "description": "Primary Janssen Identity Provider",
-  "configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
+  "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
   "token_metadata": {
     "access_token": {
       "trusted": true,
@@ -217,13 +217,13 @@ Each trusted issuer file includes:
 
 - **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
 - **`description`**: Optional description of the issuer.
-- **`configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint.
+- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, `configuration_endpoint` is also accepted.
 - **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
 - **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
 
 To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
 
-> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations — and a different field name (`openid_configuration_endpoint`). Per-file format and embedded format are not interchangeable.
+> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
 
 #### Cedar Archive (.cjar) Format
 
