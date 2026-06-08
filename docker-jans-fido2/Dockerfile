@@ -103,7 +103,7 @@ ARG MDS_DOWNLOAD_DATE='2022-10-03'
 RUN WGET_RETRY="--tries=5 --timeout=30 --waitretry=10 --retry-connrefused --retry-on-http-error=429,500,502,503,504" \
     && wget -q ${WGET_RETRY} https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /app/static/fido2/authenticator_cert/ \
     && wget -q ${WGET_RETRY} https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
-    && wget -q ${WGET_RETRY} http://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
+    && wget -q ${WGET_RETRY} https://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
 
 # ======
 # Python
