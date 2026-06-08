@@ -50,16 +50,6 @@
 			<name>JBoss Repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
-		<repository>
-			<id>gluu</id>
-			<name>Gluu project repository</name>
-			<url>https://maven.gluu.org/maven</url>
-		</repository>
 	</repositories>
 
 	<scm>

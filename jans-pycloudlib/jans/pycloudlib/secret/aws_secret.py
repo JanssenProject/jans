@@ -112,19 +112,47 @@ class AwsSecret(BaseSecret):
         Returns:
             A mapping of secrets (if any).
         """
+        def _get_part_number(name: str) -> int:
+            # Extract part number from secret name like "jans_secrets", "jans_secrets_1", and so on
+            if name == self.basepath:
+                return 0
+
+            # Extract the numeric suffix
+            try:
+                return int(name.split("_")[-1])
+            except (ValueError, IndexError):
+                return 0
+
         # get all existing multipart secrets
         resp = self.client.list_secrets(
             Filters=[{"Key": "name", "Values": [self.basepath]}],
         )
         names = [secret["Name"] for secret in resp["SecretList"]]
 
+        # Sort secrets by part number to ensure correct payload assembly
+        # Part 0 is "jans_secrets", part N is "jans_secret_N"
+        names.sort(key=_get_part_number)
+
         if not names:
             return {}
 
-        payload = b"".join([
-            self.client.get_secret_value(SecretId=name)["SecretBinary"]
-            for name in names
-        ])
+        data = {}
+        payload = b""
+
+        for name in names:
+            fragment = self.client.get_secret_value(SecretId=name)
+            payload = payload + fragment["SecretBinary"]
+
+            try:
+                # validate if combined payload and fragment produces a valid JSON
+                json.loads(payload)
+                break
+            except json.JSONDecodeError:
+                # combined payload is not a valid JSON, proceed to merge with next secret part
+                continue
+
+        if not payload:
+            return {}
 
         try:
             # previously data is compressed using lzma

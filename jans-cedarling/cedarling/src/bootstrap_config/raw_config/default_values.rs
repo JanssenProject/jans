@@ -68,3 +68,7 @@ pub(super) fn default_http_client_max_retries() -> u32 {
 pub(super) fn default_http_client_retry_delay_secs() -> u64 {
     HttpClientConfig::DEFAULT_RETRY_DELAY.as_secs()
 }
+
+pub(super) fn default_http_client_max_response_size_bytes() -> u64 {
+    HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES
+}
