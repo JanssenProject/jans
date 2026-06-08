@@ -10,7 +10,7 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
-use crate::http::{HttpClient, HttpClientError};
+use crate::http::{HttpClient, HttpClientError, cache_headers::CacheHeadersState};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -91,7 +91,7 @@ fn extract_first_policy_store(
 pub(crate) struct LoadedPolicyStore {
     pub store: PolicyStoreWithID,
     pub body_hash: Option<u64>,
-    pub validators: crate::http::cache_headers::CacheHeadersState,
+    pub validators: CacheHeadersState,
 }
 
 /// Loads the policy store based on the provided configuration.
@@ -240,12 +240,9 @@ pub(crate) async fn parse_cjar_bytes(
     let store_metadata = loaded.metadata.clone();
 
     #[cfg(not(target_arch = "wasm32"))]
-    let legacy_store =
-        tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
-            .await
-            .map_err(|e| {
-                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
-            })??;
+    let legacy_store = tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
+        .await
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
     #[cfg(target_arch = "wasm32")]
     let legacy_store = convert_archive_to_legacy(loaded)?;
 
@@ -335,9 +332,10 @@ async fn load_policy_store_from_cjar_url(
     // Fetch via `get_with_retry` to capture response headers (for the refresh
     // worker's initial `validators` seed) alongside the body bytes (for the
     // `last_body_hash` seed).
-    let response = http_client.get_with_retry(url).await.map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}"))
-    })?;
+    let response = http_client
+        .get_with_retry(url)
+        .await
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
     let status = response.status();
     let validators = crate::http::cache_headers::CacheHeadersState::from_headers(
         response.headers(),
@@ -363,12 +361,9 @@ async fn load_policy_store_from_cjar_url(
     let store_metadata = loaded.metadata.clone();
 
     #[cfg(not(target_arch = "wasm32"))]
-    let legacy_store =
-        tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
-            .await
-            .map_err(|e| {
-                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
-            })??;
+    let legacy_store = tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
+        .await
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
     #[cfg(target_arch = "wasm32")]
     let legacy_store = convert_archive_to_legacy(loaded)?;
 
@@ -484,7 +479,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
