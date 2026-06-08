@@ -282,7 +282,11 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                     path: schema_path.clone(),
                     source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
                 }),
-            Err(_) => Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(source) => Err(PolicyStoreError::FileReadError {
+                path: schema_path.clone(),
+                source,
+            }),
         }
     }
 
