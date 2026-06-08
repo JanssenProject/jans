@@ -167,17 +167,23 @@ jobs:
           chmod -R a+rwX automation/jans-aio-demo/templates 2>/dev/null || true
           docker restart jans >/dev/null 2>&1 || true
           echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
-          end=$((SECONDS + 1200)); ok=""
+          end=$((SECONDS + 600)); ok=""; poll=0
           while [ $SECONDS -lt $end ]; do
             code=$(curl -sk -o /dev/null -w '%{http_code}' "https://${JANS_FQDN}/.well-known/openid-configuration" || true)
             echo "openid-configuration: $code"
             if [ "$code" = "200" ]; then ok=1; break; fi
+            poll=$((poll + 1))
+            if [ $((poll % 6)) -eq 0 ]; then
+              echo "--- jans-auth progress (poll ${poll}) ---"
+              docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Started oejs.Server|FATAL|exited|WaitError" | tail -n 10 || true
+            fi
             sleep 20
           done
           if [ -z "$ok" ]; then
             echo "::error::AIO did not become healthy in time"
             docker compose -f automation/compose.yaml ps || true
-            docker logs jans 2>&1 | tail -n 300 || true
+            docker exec jans supervisorctl -c /app/conf/supervisord.conf status 2>&1 || true
+            docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Traceback|Started oejs.Server|FATAL|exited|WaitError|OutOfMemory" | tail -n 200 || true
             exit 1
           fi
           for ep in scim-configuration fido2-configuration; do
