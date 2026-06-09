@@ -262,23 +262,46 @@ jobs:
           export RDBM_PASSWORD_ENC="$(read_json db_pw_enc)"
           python3 .github/workflows/scripts/render_test_profiles.py
 
-      - name: Build and test all modules (full build, tests enabled)
+      - name: Build modules (skip tests)
+        env:
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Compile + install with the default profile; the live FQDN is only needed at test time.
+          for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+            echo "::group::build $mod"
+            mvn -B -ntp -s .github/maven-settings.xml \
+              -Dcfg=default -Dmaven.test.skip=true -fae \
+              -f "$mod/pom.xml" clean install
+            echo "::endgroup::"
+          done
+
+      - name: Run integration suites (against the AIO)
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
           mkdir -p test-reports
-          # Full build with tests enabled (Jenkins-parity): each reactor runs its unit AND
-          # integration suites against the AIO via the rendered -Dcfg=<fqdn> profiles.
-          # failure.ignore lets every suite run; the Gate step fails on the collected results.
-          for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
-            echo "::group::build+test $mod"
-            mvn -B -ntp -s .github/maven-settings.xml \
-              -Dcfg="$JANS_FQDN" -Dmaven.test.failure.ignore=true -DfailIfNoTests=false -fae \
-              -f "$mod/pom.xml" clean install \
-              || echo "[warn] $mod: build or tests reported problems"
+          # HTTP suites targeting the live AIO via the rendered -Dcfg=<fqdn> profiles. surefire.timeout
+          # bounds each fork so a looping browser-flow test cannot hang the job.
+          for dir in jans-auth-server/client jans-scim/client jans-config-api jans-fido2/client; do
+            echo "::group::test $dir"
+            ( cd "$dir" && mvn -B -ntp -s "$GITHUB_WORKSPACE/.github/maven-settings.xml" \
+                -Dcfg="$JANS_FQDN" -Dmaven.test.failure.ignore=true -DfailIfNoTests=false \
+                -Dsurefire.timeout=900 test ) || echo "[warn] $dir reported problems"
             echo "::endgroup::"
           done
+
+      - name: Run unit suites
+        env:
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          # In-process unit suites (no live server); default profile, fork timeout as a safety net.
+          OPTS="-B -ntp -s .github/maven-settings.xml -Dcfg=default -Dmaven.test.failure.ignore=true -Dsurefire.timeout=900 -DfailIfNoTests=false"
+          mvn $OPTS -f jans-orm/pom.xml test || echo "[warn] jans-orm units reported problems"
+          mvn $OPTS -f jans-core/pom.xml test || echo "[warn] jans-core units reported problems"
+          mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test || echo "[warn] jans-auth-server units reported problems"
 
       - name: Collect surefire reports
         if: always()
