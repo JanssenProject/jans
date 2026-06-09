@@ -266,5 +266,47 @@ public class TrustRelationshipTest {
             TrustRelationship unchanged = result.getValue();
             assertThat(unchanged).isEqualTo(tr);
         }
+
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship with an existing description " + 
+            "WHEN updateDescription() is called with a different description " + 
+            "THEN the operation succeeds, updates the description and increments the version "
+        )
+        public void shouldUpdateDescriptionAndIncrementVersion_whenDifferentDescriptionProvided(TrustRelationship tr) {
+
+            Description newDescription = Description.of(tr.getDescription().getValue()+" Updated");
+            assertThat(tr.getDescription()).isNotEqualTo(newDescription);
+
+            TrustResult<TrustRelationship> result = tr.updateDescription(newDescription);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship changed = result.getValue();
+
+            assertThat(changed.getDescription()).isEqualTo(newDescription);
+            assertThat(changed.getVersion()).isEqualTo(tr.getVersion().next());
+        }
+
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship with an existing description " +
+            "WHEN updateDescription() is called with the same current description " +
+            "THEN the operation is idempotent (no changes to the TrustRelationship) " 
+        )
+        public void shouldNotChangeState_whenUpdateDescriptionWithSameDescription(TrustRelationship tr) {
+
+            Description sameDescription = Description.of(tr.getDescription().getValue());
+            assertThat(tr.getDescription()).isEqualTo(sameDescription);
+
+            TrustResult<TrustRelationship> result = tr.updateDescription(sameDescription);
+            assertThat(result.isSuccess()).isTrue();
+
+            TrustRelationship unchanged = result.getValue();
+            assertThat(unchanged).isEqualTo(tr);
+        }
+
     }
 }
