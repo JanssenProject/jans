@@ -186,7 +186,7 @@ impl StrategyState {
         self.degraded_count = 0;
         match self.current {
             RefreshStrategy::Conditional => {
-                self.current = RefreshStrategy::HeadTh0enGet;
+                self.current = RefreshStrategy::HeadThenGet;
                 self.conditional_to_head_transitions =
                     self.conditional_to_head_transitions.saturating_add(1);
             },
@@ -434,6 +434,16 @@ impl Drop for PolicyStoreRefreshHandle {
     }
 }
 
+/// Snapshot of the bootstrap-load result that the refresh worker uses to
+/// short-circuit its very first periodic tick. Carried as a small named
+/// struct rather than two loose parameters so the spawn-site signature
+/// stays under the clippy `too_many_arguments` threshold without needing
+/// a `#[allow]` attribute.
+pub(crate) struct RefreshWorkerSeed {
+    pub initial_body_hash: Option<u64>,
+    pub initial_validators: CacheHeadersState,
+}
+
 /// Read-only worker context — handles and config that don't change between
 /// ticks. Owned by [`spawn_refresh_worker`] / [`run_worker`] for the lifetime
 /// of the background task; tick functions take `&WorkerContext`. Per-tick
@@ -547,10 +557,13 @@ async fn tick_conditional(
 
     match fetch_result {
         Err(e) => fetch_error(ctx, state, &e),
-        Ok(ConditionalFetch::NotModified) => {
+        Ok(ConditionalFetch::NotModified { validators }) => {
             // 304 is the only definitive proof the upstream honors our
             // conditional headers. Reset degrade counter; upgrade if we were
-            // probing from a degraded strategy.
+            // probing from a degraded strategy. Adopt any cache headers the
+            // server refreshed on the 304 (RFC 7234 §4.3.4) — e.g. an
+            // extended `max-age` — so the next tick respects them.
+            state.validators = validators;
             state.consecutive_failures = 0;
             if is_probe {
                 state.strategy.record_probe_success();
@@ -797,12 +810,19 @@ mod tests {
     fn body_hash_stable_for_same_bytes() {
         let a = body_hash(b"hello");
         let b = body_hash(b"hello");
-        assert_eq!(a, b);
+        assert_eq!(
+            a, b,
+            "body_hash must be stable for identical byte slices — the short-circuit relies on byte-equal bodies producing the same hash within a process",
+        );
     }
 
     #[test]
     fn body_hash_differs_for_different_bytes() {
-        assert_ne!(body_hash(b"hello"), body_hash(b"world"));
+        assert_ne!(
+            body_hash(b"hello"),
+            body_hash(b"world"),
+            "body_hash must differ for different byte slices — otherwise the short-circuit would skip rebuilds when the policy store actually changed",
+        );
     }
 
     #[test]
@@ -846,15 +866,24 @@ mod tests {
     fn refresh_source_construction_from_url() {
         let s =
             RefreshSource::from_policy_store_source(&PolicyStoreSource::CjarUrl("http://x".into()));
-        assert!(matches!(s, Some(RefreshSource::CjarUrl { .. })));
+        assert!(
+            matches!(s, Some(RefreshSource::CjarUrl { .. })),
+            "PolicyStoreSource::CjarUrl must map to RefreshSource::CjarUrl, got {s:?}",
+        );
 
         let s = RefreshSource::from_policy_store_source(&PolicyStoreSource::LockServer(
             "http://y".into(),
         ));
-        assert!(matches!(s, Some(RefreshSource::LockServer { .. })));
+        assert!(
+            matches!(s, Some(RefreshSource::LockServer { .. })),
+            "PolicyStoreSource::LockServer must map to RefreshSource::LockServer, got {s:?}",
+        );
 
         let s = RefreshSource::from_policy_store_source(&PolicyStoreSource::Yaml("..".into()));
-        assert!(s.is_none());
+        assert!(
+            s.is_none(),
+            "non-URL sources (Yaml/Json/file paths/archive bytes) must produce no RefreshSource — the worker doesn't spawn for them, got {s:?}",
+        );
     }
 
     // ---- Strategy state machine ----
@@ -862,25 +891,48 @@ mod tests {
     #[test]
     fn strategy_starts_at_conditional() {
         let s = StrategyState::default();
-        assert_eq!(s.current, RefreshStrategy::Conditional);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "fresh StrategyState must start at the most efficient strategy",
+        );
     }
 
     #[test]
     fn strategy_degrades_after_threshold() {
         let mut s = StrategyState::default();
-        for _ in 0..STRATEGY_DEGRADE_THRESHOLD - 1 {
+        for i in 0..STRATEGY_DEGRADE_THRESHOLD - 1 {
             s.record_degraded();
-            assert_eq!(s.current, RefreshStrategy::Conditional);
+            assert_eq!(
+                s.current,
+                RefreshStrategy::Conditional,
+                "degrade {} of {STRATEGY_DEGRADE_THRESHOLD} must not yet transition — threshold is consecutive ticks",
+                i + 1,
+            );
         }
         s.record_degraded();
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
-        assert_eq!(s.conditional_to_head_transitions, 1);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "exactly STRATEGY_DEGRADE_THRESHOLD consecutive degrades must transition Conditional → HeadThenGet",
+        );
+        assert_eq!(
+            s.conditional_to_head_transitions, 1,
+            "transition counter must increment exactly once per Conditional → HeadThenGet",
+        );
         // Subsequent degrades climb further down.
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
         }
-        assert_eq!(s.current, RefreshStrategy::PlainGet);
-        assert_eq!(s.head_to_plain_transitions, 1);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::PlainGet,
+            "another threshold's worth of degrades must transition HeadThenGet → PlainGet",
+        );
+        assert_eq!(
+            s.head_to_plain_transitions, 1,
+            "head_to_plain_transitions counter must increment exactly once per HeadThenGet → PlainGet",
+        );
     }
 
     #[test]
@@ -891,15 +943,26 @@ mod tests {
         s.record_helped();
         // After helping, threshold should be re-counted from zero.
         s.record_degraded();
-        assert_eq!(s.current, RefreshStrategy::Conditional, "no degrade yet");
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "record_helped must reset the degrade counter so the next single degrade does not transition",
+        );
     }
 
     #[test]
     fn strategy_force_degrade_skips_threshold() {
         let mut s = StrategyState::default();
         s.force_degrade();
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
-        assert_eq!(s.conditional_to_head_transitions, 1);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "force_degrade must transition immediately, without waiting for the threshold",
+        );
+        assert_eq!(
+            s.conditional_to_head_transitions, 1,
+            "force_degrade must increment the transition counter the same as a threshold-triggered degrade",
+        );
     }
 
     #[test]
@@ -909,16 +972,30 @@ mod tests {
             ..StrategyState::default()
         };
         s.record_probe_success();
-        assert_eq!(s.current, RefreshStrategy::Conditional);
-        assert_eq!(s.upgrade_to_conditional_transitions, 1);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "a successful Conditional probe must restore the most efficient strategy",
+        );
+        assert_eq!(
+            s.upgrade_to_conditional_transitions, 1,
+            "upgrade_to_conditional_transitions must increment exactly once per upgrade",
+        );
     }
 
     #[test]
     fn strategy_choose_returns_conditional_when_current() {
         let mut s = StrategyState::default();
         let choice = s.choose_for_tick();
-        assert_eq!(choice.strategy, RefreshStrategy::Conditional);
-        assert!(!choice.is_probe);
+        assert_eq!(
+            choice.strategy,
+            RefreshStrategy::Conditional,
+            "choose_for_tick must return the current strategy when already at Conditional",
+        );
+        assert!(
+            !choice.is_probe,
+            "is_probe must be false when not probing — we're already at the most efficient strategy",
+        );
     }
 
     #[test]
@@ -928,9 +1005,19 @@ mod tests {
             ..StrategyState::default()
         };
         let choice = s.choose_for_tick();
-        assert_eq!(choice.strategy, RefreshStrategy::Conditional);
-        assert!(choice.is_probe);
-        assert!(s.last_probe_at.is_some());
+        assert_eq!(
+            choice.strategy,
+            RefreshStrategy::Conditional,
+            "a first choose_for_tick after a degrade must run a Conditional probe to test for upstream recovery",
+        );
+        assert!(
+            choice.is_probe,
+            "is_probe must be true so tick logic interprets 304 as an upgrade signal rather than a steady-state result",
+        );
+        assert!(
+            s.last_probe_at.is_some(),
+            "choose_for_tick must stamp last_probe_at when scheduling a probe so the reprobe interval can be enforced",
+        );
     }
 
     #[test]
@@ -941,8 +1028,15 @@ mod tests {
             ..StrategyState::default()
         };
         let choice = s.choose_for_tick();
-        assert_eq!(choice.strategy, RefreshStrategy::PlainGet);
-        assert!(!choice.is_probe);
+        assert_eq!(
+            choice.strategy,
+            RefreshStrategy::PlainGet,
+            "while inside the reprobe interval window, choose_for_tick must return the current strategy unchanged",
+        );
+        assert!(
+            !choice.is_probe,
+            "no probe is scheduled inside the reprobe window — is_probe must be false",
+        );
     }
 
     // ---- validators_match ----
