@@ -24,6 +24,11 @@ on:
         description: "Prebuilt AIO image to test (leave empty to build from this checkout)"
         type: string
         default: ""
+      log_level:
+        description: "AIO log level (TRACE = detailed FILE logs to debug a failure; INFO = default, lower memory)"
+        type: choice
+        options: ["INFO", "TRACE"]
+        default: "INFO"
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -158,6 +163,9 @@ jobs:
       - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
         run: |
           set -uo pipefail
+          # TRACE (detailed FILE logs) is opt-in via the log_level input: the demo enables TRACE +
+          # FILE logging when JANS_CI_CD_RUN is set; default (unset) stays INFO/STDOUT (lower memory).
+          [ "${{ inputs.log_level }}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
           # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
           # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A
           # restart instead would re-run key-gen against a half-initialised keystore and corrupt
@@ -332,21 +340,24 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Dump AIO service logs
+      - name: Collect AIO logs
         if: always()
         run: |
-          echo "::group::supervisorctl status (which AIO programs are RUNNING/FATAL)"
-          docker exec jans supervisorctl -c /app/conf/supervisord.conf status || true
-          echo "::endgroup::"
-          echo "::group::jetty service logs (scim 503 / config-api 401 / auth)"
-          docker exec jans sh -c 'for s in jans-auth jans-config-api jans-scim jans-fido2; do
-              echo "===== $s ====="; tail -n 120 /opt/jans/jetty/$s/logs/*.log 2>/dev/null;
-            done' || true
-          echo "::endgroup::"
+          mkdir -p aio-logs
+          # container log carries STDOUT/INFO output (incl. configurator + persistence-loader)
+          docker logs jans > aio-logs/aio-container.log 2>&1 || true
+          docker logs traefik > aio-logs/traefik.log 2>&1 || true
+          docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
+          docker compose -f automation/compose.yaml ps > aio-logs/compose-ps.txt 2>&1 || true
+          # per-service jetty logs (where FILE/TRACE output lands)
+          for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
+            docker cp "jans:/opt/jans/jetty/$s/logs" "aio-logs/$s" 2>/dev/null || true
+          done
+          # quick view in the step log
+          echo "::group::supervisord status"; cat aio-logs/supervisord-status.txt 2>/dev/null || true; echo "::endgroup::"
           echo "::group::AIO key events"
-          docker logs jans 2>&1 | grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|Traceback|exited:|FATAL|gave up|503|Unauthorized|Started oejs.Server" | tail -n 300 || true
+          grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|FATAL|503|Unauthorized" aio-logs/aio-container.log | tail -n 200 || true
           echo "::endgroup::"
-          docker logs traefik 2>&1 | grep -aiE "503|error|level=err" | tail -n 40 || true
 
       - name: Gate on test outcome
         if: always()
@@ -369,3 +380,12 @@ jobs:
           if failed:
               sys.exit(f"::error::{failed} test(s) failed")
           PY
+
+      - name: Upload AIO logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: aio-logs-${{ matrix.persistence }}
+          path: aio-logs/
+          if-no-files-found: warn
+          retention-days: 5
