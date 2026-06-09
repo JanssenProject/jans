@@ -80,7 +80,6 @@ Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 Commands:
   certmanager   Manage cert and crypto keys
   cleanup       Cleanup expired entries in persistence
-  kc-sync       Sync config between jans-config-api and Keycloak
 ```
 
 ### certmanager
@@ -181,16 +180,6 @@ Example:
 
 ```
 cloudtools cleanup --limit 500
-```
-
-#### kc-sync
-
-Sync config between jans-config-api and Keycloak.
-
-Example:
-
-```
-cloudtools kc-sync
 ```
 
 ### Kubernetes CronJob Example
