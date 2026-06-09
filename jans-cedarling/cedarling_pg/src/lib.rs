@@ -756,6 +756,143 @@ mod tests {
         crate::functions::pg_test_authorized_signed::run_signed_authorized_allow_then_deny();
     }
 
+    /// Asserts `cedarling.context` and `cedarling.tokens` check hooks
+    /// (`guc_config.rs:261-287`) reject invalid input at SET time. The validator
+    /// logic is unit-tested in `validate.rs`; this is the only test that proves
+    /// the hooks are actually wired through `define_string_guc_with_hooks` and
+    /// that the SET surfaces as a SQL error to the caller (not a silent accept).
+    ///
+    /// Negative cases are wrapped in a PL/pgSQL `DO` block so the
+    /// `invalid_parameter_value` raised by the check hook is caught at the
+    /// subtransaction boundary — a bare `Spi::run("SET ...")` would propagate
+    /// the ERROR and abort the test's outer transaction before we could inspect
+    /// the result.
+    #[pg_test]
+    fn test_guc_check_hooks_reject_invalid_input_at_set_time() {
+        // Negative — context must be a JSON object; an array is rejected.
+        // If the SET unexpectedly succeeds, the inner RAISE (custom SQLSTATE
+        // outside the WHEN clause) propagates and surfaces as a test failure.
+        Spi::run(
+            r"DO $$
+            BEGIN
+                SET cedarling.context = '[]';
+                RAISE EXCEPTION 'expected SET cedarling.context = ''[]'' to fail at SET time but it succeeded';
+            EXCEPTION
+                WHEN invalid_parameter_value THEN
+                    NULL;
+            END $$;",
+        )
+        .expect("invalid context SET should be rejected by the check hook with SQLSTATE 22023");
+
+        // Negative — malformed JSON is rejected.
+        Spi::run(
+            r"DO $$
+            BEGIN
+                SET cedarling.tokens = '{';
+                RAISE EXCEPTION 'expected SET cedarling.tokens = ''{{'' to fail at SET time but it succeeded';
+            EXCEPTION
+                WHEN invalid_parameter_value THEN
+                    NULL;
+            END $$;",
+        )
+        .expect("invalid tokens SET should be rejected by the check hook with SQLSTATE 22023");
+
+        // Positive — valid object is accepted, valid JSON tokens are accepted.
+        Spi::run("SET cedarling.context = '{}'")
+            .expect("SET cedarling.context = '{}' should succeed");
+        Spi::run("SET cedarling.tokens = '{}'")
+            .expect("SET cedarling.tokens = '{}' should succeed");
+        Spi::run("RESET cedarling.context").ok();
+        Spi::run("RESET cedarling.tokens").ok();
+    }
+
+    #[pg_test]
+    fn test_diff_policies_structural_lines_and_io_error() {
+        use std::fs;
+
+        let work = std::env::temp_dir()
+            .join(format!("cedarling_pg_diff_policies_test_{}", std::process::id()));
+        let _ = fs::remove_dir_all(&work);
+        fs::create_dir_all(&work).expect("temp work dir");
+
+        // Old policy set: one permit, conditional on x == 1.
+        let old = work.join("old.cedar");
+        fs::write(
+            &old,
+            r#"@id("p1") permit(principal, action, resource) when { resource.x == 1 };"#,
+        )
+        .expect("write old");
+
+        // New policy set: same id but different body (modified), plus a brand new forbid (added).
+        let new = work.join("new.cedar");
+        fs::write(
+            &new,
+            r#"@id("p1") permit(principal, action, resource) when { resource.x == 2 };
+               @id("p2") forbid(principal, action, resource);"#,
+        )
+        .expect("write new");
+
+        let old_s = old.to_str().expect("old path utf8");
+        let new_s = new.to_str().expect("new path utf8");
+
+        // Structural mode (default) — diff by policy id.
+        Spi::run("RESET cedarling.diff_mode").expect("RESET diff_mode");
+        let structural = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+            "SELECT cedarling_diff_policies($1, $2)",
+            &[old_s.into(), new_s.into()],
+        )
+        .expect("SPI structural diff")
+        .expect("structural diff jsonb not NULL");
+        assert_eq!(structural.0["ok"], serde_json::json!(true));
+        assert!(
+            structural.0["modified"].as_array().is_some_and(|a| !a.is_empty()),
+            "structural diff should surface modified p1: {:?}",
+            structural.0
+        );
+        assert!(
+            structural.0["added"].as_array().is_some_and(|a| !a.is_empty()),
+            "structural diff should surface added p2: {:?}",
+            structural.0
+        );
+
+        // Lines mode — same fixtures, dispatch through the legacy line-oriented path.
+        Spi::run("SET cedarling.diff_mode = 'lines'").expect("SET diff_mode = lines");
+        let lines = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+            "SELECT cedarling_diff_policies($1, $2)",
+            &[old_s.into(), new_s.into()],
+        )
+        .expect("SPI lines diff")
+        .expect("lines diff jsonb not NULL");
+        assert_eq!(lines.0["ok"], serde_json::json!(true));
+        assert!(
+            lines.0["added"].as_array().is_some_and(|a| !a.is_empty())
+                || lines.0["removed"].as_array().is_some_and(|a| !a.is_empty()),
+            "lines diff should surface at least one added/removed line: {:?}",
+            lines.0
+        );
+        Spi::run("RESET cedarling.diff_mode").expect("RESET diff_mode");
+
+        // File I/O error branch — non-existent path should fall into the error arm at
+        // `versions.rs:223-233` (ok=false, error populated, arrays empty).
+        let err = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+            "SELECT cedarling_diff_policies($1, $2)",
+            &[
+                "/cedarling_pg_no_such_dir/old.cedar".into(),
+                new_s.into(),
+            ],
+        )
+        .expect("SPI error case")
+        .expect("error jsonb not NULL");
+        assert_eq!(err.0["ok"], serde_json::json!(false));
+        assert!(
+            err.0["error"].as_str().is_some_and(|s| !s.is_empty()),
+            "error branch must populate an `error` string: {:?}",
+            err.0
+        );
+
+        let _ = fs::remove_dir_all(&work);
+    }
+
     #[pg_test]
     fn test_jwt_row_uses_cedarling_tokens_guc() {
         crate::functions::pg_test_authorized_signed::run_jwt_row_uses_cedarling_tokens_guc();
