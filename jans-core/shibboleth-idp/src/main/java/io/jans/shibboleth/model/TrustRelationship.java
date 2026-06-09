@@ -268,27 +268,12 @@ public class TrustRelationship {
         );
     }
 
-    public static TrustResult<TrustRelationship> create (String displayName,String description,TrustNature nature ) {
-
-
-        if (nature == null) {
-            TrustError cause = CannotBeNullOrBlank.forField("nature");
-           return TrustResult.failure(DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class,cause));
-        }
-
-        TrustResult<DisplayName> displayNameResult = DisplayName.of(displayName);
-        if (displayNameResult.isFailure()) {
-
-            TrustError cause = CannotBeNullOrBlank.forField("displayName");
-            return TrustResult.failure(DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class, cause));
-        }
-
-        Description desc = Description.of(description);
-
+    public static TrustResult<TrustRelationship> create (DisplayName displayName,Description description,TrustNature nature ) {
+    
         return builder()
             .withId(Id.unassigned())
-            .withDisplayName(displayNameResult.getValue())
-            .withDescription(desc)
+            .withDisplayName(displayName)
+            .withDescription(description)
             .withNature(nature)
             .withVersion(Version.initial())
             .withStatus(TrustStatus.DRAFT)
@@ -376,7 +361,7 @@ public class TrustRelationship {
 
         public Builder withDescription(Description description) {
 
-            this.description = description != null ? description : Description.of("");
+            this.description = description;
             return this;
         }
 

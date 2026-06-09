@@ -44,24 +44,43 @@ import static io.jans.shibboleth.model.TrustRelationshipAssert.assertThat;
 public class TrustRelationshipTest {
     
 
+    private static final Stream<Arguments> creationParametersWithValidValues() {
+
+        var individualTrDisplayName = io.jans.shibboleth.model.core.DisplayName.of("IndividualTR").getValue();
+        var aggregateTrDisplayName  = io.jans.shibboleth.model.core.DisplayName.of("AggregateTR").getValue();
+
+        var individualTrDescription = Description.of("Individual TR");
+        var aggregateTrDescription  = Description.of("Aggregate TR");
+        return Stream.of(
+            Arguments.of(individualTrDisplayName,individualTrDescription,TrustNature.INDIVIDUAL),
+            Arguments.of(aggregateTrDisplayName,aggregateTrDescription,TrustNature.AGGREGATE)
+        );
+    }
+
+    private static final Stream<Arguments> creationParametersWithNullValuesAndMissingFieldNames() {
+
+        var displayName = io.jans.shibboleth.model.core.DisplayName.of("SomeTR").getValue();
+        var description = Description.of("Some TR");
+        var trustnature = TrustNature.INDIVIDUAL;
+
+        return Stream.of(
+            Arguments.of(displayName,description,null,"nature"),
+            Arguments.of(displayName,null,trustnature,"description"),
+           Arguments.of(null,description,trustnature,"displayName")
+        );
+    }
     private static final TrustRelationship draftIndividualTrustRelationship() {
         
-        return TrustRelationship.create("IndividualTR","Individual TR",TrustNature.INDIVIDUAL).getValue();
+        var displayName = io.jans.shibboleth.model.core.DisplayName.of("IndividualTR").getValue();
+        var description = Description.of("Individual TR");
+        return TrustRelationship.create(displayName,description,TrustNature.INDIVIDUAL).getValue();
     }
 
     private static final TrustRelationship draftAggregateTrustRelationship() {
 
-        return TrustRelationship.create("AggregateTR", "Aggregate TR", TrustNature.AGGREGATE).getValue();
-    }
-
-    private static final TrustRelationship activatingIndividualTrustRelationship() {
-
-        /*TrustRelationship tr = createDraftIndividualTrustRelationship();
-
-        tr.updateMetadataSource(validFileMetadataSource());
-        tr.enableSamlProfileForTesting(ProfileType.SAML2_SSO);
-        */
-        return null;
+        var displayName = io.jans.shibboleth.model.core.DisplayName.of("AggregateTR").getValue();
+        var description = Description.of("Aggregate TR");
+        return TrustRelationship.create(displayName,description, TrustNature.AGGREGATE).getValue();
     }
 
     public static final Stream<TrustRelationship> draftTrustRelationshipsByNature() {
@@ -128,31 +147,31 @@ public class TrustRelationshipTest {
     }
 
     @Nested
-    @DisplayName("TrustRelationship Creation Tests")
+    @DisplayName("Creation Tests")
     public class CreationTests {
 
         @Tag("refactoring")
         @ParameterizedTest
-        @EnumSource(TrustNature.class)
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithValidValues")
         @DisplayName(
-            "GIVEN all valid creation parameters " + 
-            "WHEN creating trustrelationship " +
-            "THEN it should create a trust relationship in DRAFT STATUS " +
-            "  with initial version " +
-            "  with no metadata source configured yet " +
-            "  and using all default profile configurations ")
-        public void shouldCreateTrustRelationshipInInitialDraftState(TrustNature nature) {
+            "GIVEN valid creation parameters " + 
+            "WHEN create() is called " +
+            "THEN it should create a trust relationship in DRAFT STATUS with defaults ")
+        public void shouldCreateTrustRelationshipInDraftStateWithDefaults(
+            io.jans.shibboleth.model.core.DisplayName displayName, 
+            Description description, TrustNature nature) {
             
-            TrustResult<TrustRelationship> result = TrustRelationship.create("TestTR","Test TR",nature);
+            TrustResult<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
 
             assertThat(result.isSuccess()).isTrue();
 
             TrustRelationship trustrelationship = result.getValue();
             var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("TestTR").getValue();
 
-            assertThat(trustrelationship).isNew()
-                .hasDisplayName(newDisplayName)
-                .hasDescription(Description.of("Test TR"))
+            assertThat(trustrelationship)
+                .isNew()
+                .hasDisplayName(displayName)
+                .hasDescription(description)
                 .isOfNature(nature)
                 .hasStatus(TrustStatus.DRAFT)
                 .isVersion(Version.initial())
@@ -177,427 +196,28 @@ public class TrustRelationshipTest {
         }
 
         @Tag("refactoring")
-        @Test
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithNullValuesAndMissingFieldNames")
         @DisplayName(
-            "GIVEN blank or null displayName " +
-            "WHEN creating trustrelationship " + 
-            "THEN creation fails with a CannotBeNullOrBlank error")
-        public void shouldRejectNullOrEmptyDisplayName() {
+            "GIVEN a null value for any required parameter (displayName, description or nature) " +
+            "WHEN create() is called " +
+            "THEN the method call fails with the appropriate error "
+        )
+        public void shouldFailCreationWhenAnyRequiredParameterIsNull(
+            io.jans.shibboleth.model.core.DisplayName displayName, 
+            Description description, TrustNature nature, String missingFieldName) {
 
-            final TrustNature nature = TrustNature.INDIVIDUAL;
-            TrustResult<TrustRelationship> result = TrustRelationship.create(null,"Jans TR",nature);
-
+            TrustResult<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
             assertThat(result.isFailure()).isTrue();
+
             assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
-
-            result = TrustRelationship.create(" ","JansRP",nature);
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
+            DomainObjectCreationFailed error = (DomainObjectCreationFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause.getFieldName()).isEqualTo(missingFieldName);
         }
-
-        @Tag("refactoring")
-        @Test
-        @DisplayName(
-            "GIVEN null trust nature " + 
-            "WHEN creating trustrelationship " +
-            "THEN creation fails with a CannotBeNullOrBlank error ")
-        public void shouldRejectNoTrustNature() {
-
-            TrustResult<TrustRelationship> result = TrustRelationship.create("JansTR","Jans TR",null);
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
-        }
-
-        @Tag("refactoring")
-        @Test
-        @DisplayName(
-            "GIVEN a valid display name, a valid trust nature and a null description " +
-            "WHEN creating a new trustrelationship " + 
-            "THEN it is created with a blank description")
-        public void shouldCreateTrustRelationshipWithBlankDescription() {
-
-            TrustResult<TrustRelationship> result = TrustRelationship.create("JansTR",null,TrustNature.INDIVIDUAL);
-            assertThat(result.isSuccess()).isTrue();
-            assertThat(result.getValue().getDescription()).isEqualTo(Description.of(""));
-        }
-
        
     }
 
-    @Nested
-    @DisplayName("Basic Info Update Tests")
-    public class BasicInfoUpdateTests {
 
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN  " +
-            " - a valid trust relationship in any state " +
-            " - a display name which is different from the current trust relationship's display name " +
-            "WHEN updating the display name of the existing TrustRelationship with the new display name " +
-            "THEN " +
-            "  - the operation should succeed " +
-            "  - the TrustRelationship's version should be incremented " +
-            "  - the TrustRelationship's display name is the provided display name "
-        )
-        public void shouldUpdateDisplayNameAndIncrementVersionWhenNewDifferentNameIsProvided(TrustRelationship tr) {
-
-            //Given 
-            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of("Jans new TR").getValue();
-            assertThat(tr.getDisplayName()).isNotEqualTo(newDisplayName);
-
-            //When 
-            TrustResult<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
-
-            //Then
-            assertThat(result.isSuccess()).isTrue();
-            final TrustRelationship newtr = result.getValue();
-            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion().next());
-            assertThat(newtr.getDisplayName()).isEqualTo(newDisplayName);
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN " +
-            " - a valid trust relationship in any state " +
-            " - a description which is different from the current trust relationship's description " +
-            "WHEN updating the description of the trust relationship with the new description " +
-            "THEN " +
-            " - the operation should succeed " +
-            " - the trustrelationship's version should be incremented " +
-            " - the trustrelationship's description is the same as the newly provided description "
-        )
-        public void shouldUpdateDescriptionAndIncrementVersionWhenNewDifferentDescriptionIsProvided(TrustRelationship tr) {
-
-            //Given 
-            Description new_description = Description.of("Jans New Description");
-            assertThat(tr.getDescription()).isNotEqualTo(new_description);
-
-            //When
-            TrustResult<TrustRelationship> result = tr.updateDescription(new_description);
-
-            //Then
-            assertThat(result.isSuccess()).isTrue();
-            final TrustRelationship newtr = result.getValue();
-            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion().next());
-            assertThat(newtr.getDescription()).isEqualTo(new_description);
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN a valid trust relationship with a  non-empty description " + 
-            "WHEN updateDescription(null) is called  " +
-            "THEN description is cleared and version is incremented"
-        )
-        public void shouldAllowNullToClearDescription(TrustRelationship tr) {
-
-            //Given 
-            assertThat(tr.getDescription().getValue()).isNotBlank();
-
-            //When
-            TrustResult<TrustRelationship> result = tr.updateDescription(null);
-
-            //Then
-            assertThat(result.isSuccess()).isTrue();
-            final TrustRelationship newtr = result.getValue();
-            assertThat(newtr).hasDescription(Description.of(""));
-            assertThat(newtr).isVersion(tr.getVersion().next());
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN  " +
-            "   - a valid trustrelationship in any status " +
-            "   - a display name identical to the existing trustrelationship's display name " +
-            "WHEN updating the display name of the trustrelationship with the said display name " +
-            "THEN " +
-            "   - the update should succeed " +
-            "   - the display name should be unchanged " +
-            "   - the version should be unchanged "
-        )
-        public void shouldBeIdempotentWhenUpdatingDisplayName(TrustRelationship tr) {
-
-            //Given
-            var displayName = io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue()).getValue();
-            assertThat(displayName).isEqualTo(tr.getDisplayName());
-
-            //When 
-            TrustResult<TrustRelationship> result = tr.updateDisplayName(displayName);
-
-            //Then
-            assertThat(result.isSuccess()).isTrue();
-            TrustRelationship newtr = result.getValue();
-            assertThat(newtr.getDisplayName()).isEqualTo(tr.getDisplayName());
-            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN  " +
-            "   - a valid trustrelationship in any status " +
-            "   - a description identical to the existing trustrelationship's description " +
-            "WHEN updating the description of the trustrelationship with the said description " +
-            "THEN   " +
-            "   - the update should succeed " +
-            "   - the description should be unchanged   " +
-            "   - the version should be unchanged " 
-        )
-        public void shouldBeIdempotentWhenUpdatingDescription(TrustRelationship tr) {
-
-            //Given 
-            Description description = Description.of(tr.getDescription().getValue());
-            assertThat(description).isEqualTo(tr.getDescription());
-
-            //When 
-            TrustResult<TrustRelationship> result = tr.updateDescription(description);
-
-            //Then
-            assertThat(result.isSuccess()).isTrue();
-            TrustRelationship newtr = result.getValue();
-            assertThat(newtr.getDescription()).isEqualTo(tr.getDescription());
-            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN a valid trust relationship " + 
-            "WHEN updating the display name of an existing TrustRelationship with a null value " +
-            "THEN the update should fail with a TrustRelationshipUpdateFailed error"
-        )
-        public void shouldFailWithTrustRelationshipUpdateFailedWhenDisplayNameIsNull(TrustRelationship tr) {
-
-            //When
-            TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
-
-            //Then
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("Metadata Source Update Tests")
-    public class MetadataSourceUpdateTests {
-
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN  " +
-            "   - a valid trustrelationship of ANY nature, DRAFT status, no valid metadatasource and no profile configuration active " +
-            "   - a metadata source of type no metadatasource  (i.e. identical to the current trustrelationship's metadatasource " +
-            "WHEN updating the trustrelationship's metadatasource   " +
-            "THEN   " +
-            "   - the update succeeds   " +
-            "   - the trustrelationship's version stays same    " +
-            "   - the trustrelationship's metadata source is same as the provided metadata source " +
-            "   - the trustrelationship's state remains in DRAFT "
-        )
-        public void shouldBeIdempotent_Given_DraftTrustRelationshipWithNoValidMetadataSourceAndNoActiveProfileConfiguration(TrustRelationship tr) {
-
-            //Given
-            assertThat(tr).hasStatus(TrustStatus.DRAFT);
-            assertThat(tr).hasNoActiveProfileConfiguration();
-
-            //When
-            MetadataSource source = NoMetadataSource.getInstance();
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
-
-            //Then 
-            assertThat(result.isSuccess()).isTrue();
-            TrustRelationship newtr = result.getValue();
-            assertThat(newtr.getVersion()).isEqualTo(tr.getVersion());
-            assertThat(newtr.getMetadataSource()).isEqualTo(source);
-            assertThat(newtr).hasStatus(TrustStatus.DRAFT);
-
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftIndividualTrustRelationshipWithSupportedMetadataSources")
-        @DisplayName(
-            "GIVEN  " +
-            "   - a valid trustrelationship of nature INDIVIDUAL, DRAFT status, no valid metadatasource and no profile configuration ACTIVE " +
-            "   - a metadatasource supported for INDIVIDUAL trustrelationships (except nometadatasource)" +
-            "WHEN updating the trustrelationship's metadatasource   " +
-            "THEN " +
-            "   - the update succeeds " +
-            "   - the trustrelationship's  version is incremented " +
-            "   - the trustrelationship's metadata source is same as the provided metadata source " +
-            "   - the trustrelationship's state remains in DRAFT "
-        )
-        public void should_Succeed_Given_IndividualAndDraftWithNoProfileEnabled(TrustRelationship tr, MetadataSource source) {
-            
-            //Given
-            assertThat(tr).isOfNature(TrustNature.INDIVIDUAL);
-            assertThat(tr).hasStatus(TrustStatus.DRAFT);
-            assertThat(tr).hasNoActiveProfileConfiguration();
-
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
-            assertThat(result.isSuccess()).isTrue();
-            TrustRelationship newtr = result.getValue();
-            assertThat(newtr).isVersion(tr.getVersion().next());
-            assertThat(newtr).hasStatus(TrustStatus.DRAFT);
-            assertThat(newtr.getMetadataSource()).isEqualTo(source);
-        }
-
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship  " +
-            "WHEN updateMetadataSource(null) is called " +
-            "THEN the operation fails with trustrelationshipupdatefailed message")
-        public void shouldRejectNullMetadataSource(TrustRelationship tr) {
-
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(null);
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#sourcesNotAllowedForAggregateTrustRelationship")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship of AGGREGATE nature " +
-            "WHEN updateMetadataSource is called with an unsupported source type " +
-            "THEN return with operation restricted to nature error")
-        public void shouldRejectUnsupportedMetadataTypeForAggregate(MetadataSource source) {
-
-            TrustRelationship tr = draftAggregateTrustRelationship();
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
-
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#sourcesNotAllowedForIndividualTrustRelationship")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship of INDIVIDUAL Nature " +
-            "WHEN updateMetadataSource is called with an unsupported source type " +
-            "THEN return with operation restricted to nature error")
-        public void shouldRejectUnsupportedMetadataTypeForInvididual(MetadataSource source) {
-
-            TrustRelationship tr = draftIndividualTrustRelationship();
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
-            
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship in ACTIVATING state " +
-            "WHEN updateMetadataSource is called with a  supported and valid metadata source type " +
-            "THEN return with operation restricted by status "
-        )
-        public void shouldRejectAnyMetadataChangeWhileActivating(TrustRelationship tr) {
-
-            assertThat(tr).hasStatus(TrustStatus.ACTIVATING);
-        }
-    }
-
-    @Nested
-    @DisplayName("Profile Configuration Update Tests")
-    public class ProfileConfigurationUpdateTests {
-        
-        @Tag("refactoring")
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsByNature")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship " +
-            "WHEN updateProfileConfiguration(null) is called " +
-            "THEN the operation fails with trustrelationship update failed"
-        )
-        public void shouldFailIfProfileConfigurationIsNull(TrustRelationship tr) {
-
-            TrustResult<TrustRelationship> result = tr.updateProfileConfiguration(null);
-            assertThat(result.isFailure());
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @Disabled
-        @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#allProfileConfigurations")
-        @DisplayName(
-            "GIVEN an existing TrustRelationship which is an INDIVIDUAL tr " +
-            "WHEN updateProfileConfiguration() is called with the exact same configuration instance " +
-            "THEN it should return success with no side effects (no version change)"
-        )
-        public <T extends CommonConfigurationCapable> void shouldBeIdempotentWhenSameConfigurationIsProvided() {
-
-        }
-    }
-
-    @Nested
-    @DisplayName("Discovered EntityIds Incorporation Tests")
-    public class DiscoveredEntityIdsIncorporationTests {
-
-        @Test
-        @DisplayName(
-            "GIVEN an existing TrustRelationship that is not of nature AGGREGATE " + 
-            "WHEN incorporateDiscoveredEntityIds is called with a non-null parameter "  +
-            "THEN the operation should fail, with an error of operationrestrictedtonature " )
-        public void shouldFailIfTrustRelationshipNatureIsNotAggregate() {
-
-            TrustRelationship tr = draftIndividualTrustRelationship();
-            assertThat(tr).isOfIndividualNature();
-
-            EntityIds entityIds = EntityIds.empty();
-            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(entityIds);
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @Test
-        @DisplayName(
-            "GIVEN an existing TrustRelationship that is of nature AGGREGATE " +
-            "WHEN incorporateDiscoveredEntityIds is called with a null entityIds " +
-            "THEN the operation should fail, with an error of cannotbenullorblank " )
-        public void shouldFailIfEntityIdsIsNull() {
-
-            TrustRelationship tr = draftAggregateTrustRelationship();
-           
-            EntityIds entityIds = null;
-            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(entityIds);
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-
-        @Test
-        @DisplayName( 
-            "GIVEN an existing TrustRelationship that: " +
-            " - is of nature aggregate " +
-            " - is of any status *but* ACTIVATING " + 
-            "WHEN  incorporateDiscoveredEntityIds is called with a non-null parameter " +
-            "THEN the operation should fail, with an error of invalidstatusforoperation " )
-        public void shouldFailIfTrustRelationshipIsInInvalidStatus() {
-            
-            TrustRelationship tr = draftAggregateTrustRelationship();
-            assertThat(tr).isOfAggregateNature();
-            assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
-
-            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(EntityIds.empty());
-            assertThat(result.isFailure()).isTrue();
-            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-        }
-      
-    }
 }
