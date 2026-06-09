@@ -20,6 +20,7 @@ use crate::entity_builder::{EntityBuilder, InitEntityBuilderError, TrustedIssuer
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -144,6 +145,20 @@ impl<'a> ServiceFactory<'a> {
         }
 
         let policy_store = self.policy_store()?;
+
+        logger.log_any(LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ))
+        .set_message(format!(
+            "Policy store loaded: {} policies, {} issuers, {} entities",
+            policy_store.policies.get_set().policies().count(),
+            policy_store
+                .trusted_issuers
+                .as_ref()
+                .map_or(0, HashMap::len),
+            policy_store.default_entities.entities().len(),
+        )));
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(&logger));
