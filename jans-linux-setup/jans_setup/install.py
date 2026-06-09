@@ -11,7 +11,6 @@ import ssl
 import json
 
 from urllib import request
-from urllib.parse import urljoin, urlparse
 from pathlib import Path
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -22,7 +21,6 @@ SETUP_BRANCH = 'main'
 package_dependencies = []
 jans_dir = '/opt/jans'
 jans_app_dir = '/opt/dist/jans'
-maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 jetty_home = '/opt/jans/jetty'
 jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
 openbanking_zip_file = os.path.join(jans_app_dir, 'openbanking.zip')
@@ -178,16 +176,6 @@ def extract_setup():
     target_setup = os.path.join(argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):
         os.symlink(os.path.join(argsp.setup_dir, 'jans_setup.py'), target_setup)
-
-    o = urlparse(maven_base_url)
-    app_info_fn = os.path.join(argsp.setup_dir, 'app_info.json')
-    with open(app_info_fn) as f:
-        app_info = json.load(f)
-
-    app_info['JANS_MAVEN'] = o._replace(path='').geturl()
-
-    with open(app_info_fn, 'w') as w:
-        json.dump(app_info, w, indent=2)
 
     with open(os.path.join(argsp.setup_dir, 'profile'), 'w') as w:
         w.write(argsp.profile)

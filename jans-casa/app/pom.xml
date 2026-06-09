@@ -237,14 +237,9 @@
 
         <!-- OTP -->
         <dependency>
-            <groupId>com.lochbridge.oath</groupId>
-            <artifactId>oath-otp</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lochbridge.oath</groupId>
-            <artifactId>oath-otp-keyprovisioning</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>com.github.bastiaanjansen</groupId>
+            <artifactId>otp-java</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
         <!-- PF4J -->
