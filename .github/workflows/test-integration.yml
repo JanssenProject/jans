@@ -9,7 +9,7 @@ name: integration-tests
 #   -> run DB + AIO + a TLS terminating proxy
 #   -> extract live secrets from the AIO -> render profiles/<fqdn>/
 #   -> import the AIO cert into the JDK truststore
-#   -> build the modules (skip tests) then `mvn -Dcfg=<fqdn> test` per module
+#   -> full build with tests enabled (mvn install -Dcfg=<fqdn>) across all reactors
 #   -> publish results (step summary + artifact + PR check).
 
 on:
@@ -58,10 +58,8 @@ jobs:
       - name: Compute persistence matrix
         id: matrix
         run: |
-          # PR runs are kept cheap (single backend); nightly/dispatch cover both.
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "MYSQL" ]; then
+          # dispatch can target a single backend; PR/nightly run both.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "MYSQL" ]; then
             echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "PGSQL" ]; then
             echo 'matrix=["PGSQL"]' >> "$GITHUB_OUTPUT"
@@ -72,6 +70,9 @@ jobs:
   integration:
     needs: setup
     runs-on: ubuntu-latest
+    # Gate PR runs behind manual approval (set required reviewers on the `integration-tests`
+    # environment in repo settings); nightly/dispatch are intentional and run ungated.
+    environment: ${{ github.event_name == 'pull_request' && 'integration-tests' || '' }}
     timeout-minutes: 120
     permissions:
       contents: read
@@ -157,14 +158,10 @@ jobs:
       - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
         run: |
           set -uo pipefail
-          # Bring up the full compose stack (consul/vault/traefik/db/aio) using our
-          # locally-tagged AIO image. The demo writes its TLS certs as mode-600 files owned
-          # by the host user, but the in-container configurator (uid 1000) must read the
-          # mounted ca.key/web_https.key on its FIRST run. Run the demo in the background and
-          # relax the cert perms as they appear so the configurator loads them without a
-          # restart -- a restart re-runs key generation against a half-initialised keystore,
-          # which writes a "Keystore was tampered with" error string into jansConfWebKeys and
-          # breaks jans-auth/config-api WebKeysConfiguration parsing.
+          # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
+          # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A
+          # restart instead would re-run key-gen against a half-initialised keystore and corrupt
+          # jansConfWebKeys.
           bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 &
           demo_pid=$!
           for _ in $(seq 1 120); do
@@ -263,11 +260,9 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p test-reports
-          # Full build with tests enabled against the live AIO, mirroring the Jenkins full-build
-          # job: each reactor compiles + runs its unit AND integration suites in one pass. The
-          # integration modules consume the rendered -Dcfg=<fqdn> profiles to reach the AIO; unit
-          # modules ignore -Dcfg. failure.ignore keeps one red suite from stopping the rest -- the
-          # Gate step fails the job on any collected test failure.
+          # Full build with tests enabled (Jenkins-parity): each reactor runs its unit AND
+          # integration suites against the AIO via the rendered -Dcfg=<fqdn> profiles.
+          # failure.ignore lets every suite run; the Gate step fails on the collected results.
           for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
             echo "::group::build+test $mod"
             mvn -B -ntp -s .github/maven-settings.xml \
@@ -324,6 +319,7 @@ jobs:
           name: test-reports-${{ matrix.persistence }}
           path: test-reports/
           if-no-files-found: warn
+          retention-days: 5
 
       - name: Publish test report (PR check)
         if: always()
