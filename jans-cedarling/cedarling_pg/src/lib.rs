@@ -440,6 +440,51 @@ mod tests {
     }
 
     #[pg_test]
+    fn test_mask_plan_returns_registered_rules() {
+        let table = "test_mask_plan_tbl";
+        let _ = Spi::run(&format!(
+            "DELETE FROM cedarling.mask_rules WHERE table_name = '{table}'"
+        ));
+
+        // Empty plan: action defaults to 'Read'; rules array is empty.
+        let empty = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+            "SELECT cedarling_mask_plan($1, NULL)",
+            &[table.into()],
+        )
+        .expect("SPI empty plan")
+        .expect("empty plan jsonb not NULL");
+        assert_eq!(empty.0["table_name"], serde_json::json!(table));
+        assert_eq!(empty.0["action"], serde_json::json!("Read"));
+        assert_eq!(empty.0["rules"], serde_json::json!([]));
+
+        // After registering a rule, cedarling_mask_plan must echo it back.
+        assert!(crate::mask_sql::cedarling_set_mask_config(
+            table, "email", "redact", None
+        ));
+        let plan = Spi::get_one_with_args::<pgrx::datum::JsonB>(
+            "SELECT cedarling_mask_plan($1, $2)",
+            &[table.into(), "Write".into()],
+        )
+        .expect("SPI populated plan")
+        .expect("plan jsonb not NULL");
+        assert_eq!(
+            plan.0["action"],
+            serde_json::json!("Write"),
+            "explicit action must be echoed back, not overridden by the 'Read' default"
+        );
+        let rules = plan.0["rules"]
+            .as_array()
+            .expect("rules must be an array");
+        assert_eq!(rules.len(), 1, "expected exactly one rule, got {rules:?}");
+        assert_eq!(rules[0]["column"], serde_json::json!("email"));
+        assert_eq!(rules[0]["mask_type"], serde_json::json!("redact"));
+
+        let _ = Spi::run(&format!(
+            "DELETE FROM cedarling.mask_rules WHERE table_name = '{table}'"
+        ));
+    }
+
+    #[pg_test]
     fn test_mask_hash_salt_guc_and_hash_masking() {
         // Without salt → sentinel returned
         Spi::run("RESET cedarling.mask_hash_salt").expect("reset mask_hash_salt");
