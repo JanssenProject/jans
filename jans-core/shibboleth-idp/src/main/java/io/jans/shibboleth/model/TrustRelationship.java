@@ -247,6 +247,46 @@ public class TrustRelationship {
         return releasedAttributes.hasNone();
     }
 
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        TrustRelationship other = (TrustRelationship) o;
+        return Objects.equals(id, other.id)
+            && Objects.equals(displayName,other.displayName)
+            && Objects.equals(description,other.description)
+            && Objects.equals(nature,other.nature)
+            && Objects.equals(version,other.version)
+            && Objects.equals(status,other.status)
+            && Objects.equals(metadataSource,other.metadataSource)
+            && Objects.equals(discoveredEntityIds,other.discoveredEntityIds)
+            && Objects.equals(shibbolethSsoProfileConfiguration,other.shibbolethSsoProfileConfiguration)
+            && Objects.equals(saml2ArtifactResolutionProfileConfiguration,other.saml2ArtifactResolutionProfileConfiguration)
+            && Objects.equals(saml2AttributeQueryProfileConfiguration,other.saml2AttributeQueryProfileConfiguration)
+            && Objects.equals(saml2EcpProfileConfiguration,other.saml2EcpProfileConfiguration)
+            && Objects.equals(saml2SsoProfileConfiguration,other.saml2SsoProfileConfiguration)
+            && Objects.equals(saml2LogoutProfileConfiguration,other.saml2LogoutProfileConfiguration)
+            && Objects.equals(releasedAttributes,other.releasedAttributes);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(
+            id,displayName,description,nature,
+            version,status,metadataSource,discoveredEntityIds,
+            shibbolethSsoProfileConfiguration,
+            saml2ArtifactResolutionProfileConfiguration,
+            saml2AttributeQueryProfileConfiguration,
+            saml2EcpProfileConfiguration,
+            saml2SsoProfileConfiguration,
+            saml2LogoutProfileConfiguration,
+            releasedAttributes
+        );
+    }
+
     private TrustRelationship withIncrementedVersion() {
 
         return new TrustRelationship(

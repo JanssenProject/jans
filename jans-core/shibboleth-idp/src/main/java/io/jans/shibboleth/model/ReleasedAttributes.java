@@ -10,6 +10,7 @@ import io.jans.shibboleth.model.error.DomainObjectCreationFailed;
 import io.jans.shibboleth.model.error.TrustError;
 import io.jans.shibboleth.model.util.TrustResult;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class ReleasedAttributes {
@@ -34,6 +35,24 @@ public class ReleasedAttributes {
     public boolean hasNone() {
 
         return attributes.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        
+        if (this == o) return true;
+    
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        ReleasedAttributes other = (ReleasedAttributes) o;
+    
+        return Objects.equals(attributes,other.attributes);
+    }
+    
+    @Override
+    public int hashCode() {
+    
+        return Objects.hash(attributes);
     }
     
     public static Builder from(ReleasedAttributes existing) {

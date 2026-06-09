@@ -247,5 +247,24 @@ public class TrustRelationshipTest {
             assertThat(updated.getDisplayName()).isEqualTo(newDisplayName);
             assertThat(updated.getVersion()).isEqualTo(tr.getVersion().next());
         }
+
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship with an existing display name " +
+            "WHEN updateDisplayName() is called with the same current name " +
+            "THEN the operation should be idempotent (it should not change the TrustRelationship)"
+        )
+        public void shouldNotChangeState_whenUpdateDisplayNameWithSameName(TrustRelationship tr) {
+
+            var sameDisplayName = io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue()).getValue();
+            assertThat(tr.getDisplayName()).isEqualTo(sameDisplayName);
+
+            TrustResult<TrustRelationship> result = tr.updateDisplayName(sameDisplayName);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship unchanged = result.getValue();
+            assertThat(unchanged).isEqualTo(tr);
+        }
     }
 }
