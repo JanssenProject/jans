@@ -477,9 +477,6 @@ impl Authz {
                 None => request_builder_base.build(),
             }
         };
-        // After .build(), the RequestBuilder panics on validation errors.
-        // We use a separate validation step if needed via is_authorized returning errors.
-
         if has_principal {
             Ok(self.authorizer.is_authorized(
                 &request,
