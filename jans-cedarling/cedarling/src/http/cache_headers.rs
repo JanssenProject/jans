@@ -6,9 +6,9 @@
 //! Parses HTTP cache validation headers used by the policy-store refresh worker.
 //!
 //! Recognized headers (RFC 7234 / RFC 9111):
-//! - `Cache-Control` — `max-age=N`, `no-cache` (`no-store` is intentionally
-//!   ignored: validators live only in process memory and are never persisted,
-//!   so the directive has no observable effect)
+//! - `Cache-Control` — `max-age=N`, `no-cache`, `no-store` (both directives
+//!   force the refresh worker's in-memory freshness window to zero so the
+//!   next tick revalidates against the upstream)
 //! - `Expires` — RFC 7231 IMF-fixdate
 //! - `ETag` — opaque validator quoted-string
 //! - `Last-Modified` — RFC 7231 IMF-fixdate (stored verbatim for echoing back)
@@ -114,9 +114,11 @@ impl CacheHeadersState {
 }
 
 /// Parse a `Cache-Control` header value into (`max_age`, `no_cache`).
-/// Tolerant: malformed directives are skipped. `no-store` is intentionally
-/// ignored — the refresh worker keeps validators in process memory and never
-/// persists them, so the directive doesn't change our behavior.
+/// Tolerant: malformed directives are skipped. `no-store` is folded into the
+/// `no_cache` flag: although the directive's RFC 9111 meaning is "don't
+/// persist," a server emitting it is explicitly asking caches to revalidate
+/// instead of using stored values — so we treat the in-memory freshness
+/// window as zero and let the next tick re-check.
 fn parse_cache_control(value: &str) -> (Option<u64>, bool) {
     let mut max_age: Option<u64> = None;
     let mut no_cache = false;
@@ -128,7 +130,7 @@ fn parse_cache_control(value: &str) -> (Option<u64>, bool) {
         }
         // Directives are case-insensitive per RFC 9111
         let lower = directive.to_ascii_lowercase();
-        if lower == "no-cache" {
+        if lower == "no-cache" || lower == "no-store" {
             no_cache = true;
         } else if let Some(rest) = lower.strip_prefix("max-age=") {
             // Strip optional quotes; ignore unparseable / negative values.
@@ -233,6 +235,22 @@ mod tests {
         let v = CacheHeadersState::from_headers(&h, t0());
         assert!(v.no_cache);
         assert_eq!(v.fresh_for, Some(Duration::ZERO));
+    }
+
+    #[test]
+    fn cache_control_no_store_zeros_freshness_alongside_max_age() {
+        // A server emitting `no-store` is asking caches to revalidate instead
+        // of using stored values; even though we never persist to disk, we
+        // still respect the directive by zeroing the in-memory freshness
+        // window so the next tick re-checks the upstream.
+        let h = headers(&[("cache-control", "no-store, max-age=600")]);
+        let v = CacheHeadersState::from_headers(&h, t0());
+        assert!(v.no_cache, "no-store must set no_cache so revalidation fires");
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::ZERO),
+            "no-store must zero freshness even when max-age is present",
+        );
     }
 
     #[test]
