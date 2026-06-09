@@ -150,7 +150,11 @@ impl<'a> ServiceFactory<'a> {
         let schema = &policy_store.schema.as_ref().map(|s| &s.validator_schema);
         let entity_builder = EntityBuilder::new(
             issuers_index,
-            schema.as_deref(),
+            if self.bootstrap_config.authorization_config.strict_schema_validation {
+                schema.as_deref()
+            } else {
+                None
+            },
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);
