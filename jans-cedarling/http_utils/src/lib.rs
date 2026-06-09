@@ -427,29 +427,26 @@ mod tests {
             .create_async()
             .await;
         let resp = reqwest::get(server.url()).await.expect("send");
-        let bytes_result = resp.bytes().await;
-        // If the body read failed (the mockito interrupt) we get an Err,
-        // wrap it and confirm the classifier; if it somehow succeeded, that
-        // means the platform tolerated the truncation — the classifier
-        // still doesn't fire (which is also the correct behavior).
-        if let Err(e) = bytes_result {
-            let err = HttpRequestError::new(
-                HttpRequestReasonError::DecodeResponseBytes(e),
-                Some(reqwest::StatusCode::OK),
-            );
-            assert!(
-                err.is_decode_error(),
-                "DecodeResponseBytes must satisfy is_decode_error()",
-            );
-            assert!(
-                !err.is_max_retries_exceeded(),
-                "DecodeResponseBytes must NOT satisfy is_max_retries_exceeded()",
-            );
-            assert!(
-                !err.is_http_status_error(),
-                "DecodeResponseBytes must NOT satisfy is_http_status_error()",
-            );
-        }
+        let e = resp
+            .bytes()
+            .await
+            .expect_err("expected mockito to truncate response and produce DecodeResponseBytes");
+        let err = HttpRequestError::new(
+            HttpRequestReasonError::DecodeResponseBytes(e),
+            Some(reqwest::StatusCode::OK),
+        );
+        assert!(
+            err.is_decode_error(),
+            "DecodeResponseBytes must satisfy is_decode_error()",
+        );
+        assert!(
+            !err.is_max_retries_exceeded(),
+            "DecodeResponseBytes must NOT satisfy is_max_retries_exceeded()",
+        );
+        assert!(
+            !err.is_http_status_error(),
+            "DecodeResponseBytes must NOT satisfy is_http_status_error()",
+        );
 
         // Cross-check the negative directions on stable error variants.
         let max_retries =

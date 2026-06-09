@@ -581,10 +581,10 @@ mod test {
             .await
             .expect("request");
 
-        assert!(matches!(
-            result,
-            super::ConditionalFetch::NotModified { .. }
-        ));
+        assert!(
+            matches!(result, super::ConditionalFetch::NotModified { .. }),
+            "expected ConditionalFetch::NotModified for a 304 reply to an `If-None-Match: \"v1\"` request, got {result:#?}",
+        );
         mock.assert_async().await;
     }
 
@@ -620,15 +620,22 @@ mod test {
 
         match result {
             super::ConditionalFetch::NotModified { validators } => {
-                assert_eq!(validators.etag.as_deref(), Some("\"v1\""));
+                assert_eq!(
+                    validators.etag.as_deref(),
+                    Some("\"v1\""),
+                    "ETag must be preserved on the 304 path so the next conditional GET still has something to send",
+                );
                 assert_eq!(
                     validators.fresh_for,
                     Some(std::time::Duration::from_secs(120)),
-                    "304 with `Cache-Control: max-age=120` must update fresh_for",
+                    "304 with `Cache-Control: max-age=120` must update fresh_for so the worker honors the server's refreshed freshness window",
                 );
             },
-            super::ConditionalFetch::Modified { .. } => {
-                panic!("expected NotModified with refreshed validators")
+            super::ConditionalFetch::Modified { bytes, validators } => {
+                panic!(
+                    "expected ConditionalFetch::NotModified with refreshed validators, got Modified (body={} bytes, validators={validators:?})",
+                    bytes.len(),
+                )
             },
         }
         mock.assert_async().await;
@@ -657,15 +664,26 @@ mod test {
 
         match result {
             super::ConditionalFetch::Modified { bytes, validators } => {
-                assert_eq!(bytes, b"new-body-bytes");
-                assert_eq!(validators.etag.as_deref(), Some("\"v2\""));
+                assert_eq!(
+                    bytes, b"new-body-bytes",
+                    "200 body must match what the mock served, got {} bytes",
+                    bytes.len(),
+                );
+                assert_eq!(
+                    validators.etag.as_deref(),
+                    Some("\"v2\""),
+                    "ETag from the response headers must be captured for the next conditional GET",
+                );
                 assert_eq!(
                     validators.fresh_for,
-                    Some(std::time::Duration::from_secs(120))
+                    Some(std::time::Duration::from_secs(120)),
+                    "max-age=120 from `Cache-Control` must populate fresh_for",
                 );
-            }
-            super::ConditionalFetch::NotModified { .. } => {
-                panic!("expected Modified, got NotModified")
+            },
+            super::ConditionalFetch::NotModified { validators } => {
+                panic!(
+                    "expected ConditionalFetch::Modified for a 200 reply, got NotModified (validators={validators:?})",
+                )
             },
         }
         mock.assert_async().await;

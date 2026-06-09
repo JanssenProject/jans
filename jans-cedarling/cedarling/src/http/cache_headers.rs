@@ -56,10 +56,30 @@ impl CacheHeadersState {
             .filter(|s| !s.is_empty())
             .map(str::to_owned);
 
-        let (cc_max_age, no_cache) = headers
-            .get(reqwest::header::CACHE_CONTROL)
-            .and_then(|v| v.to_str().ok())
-            .map_or((None, false), parse_cache_control);
+        // RFC 9110 §5.3: a recipient MUST handle multiple field-values for the
+        // same header (sent either as one comma-separated line or as separate
+        // header lines). Fold across all `Cache-Control` field-values so a
+        // directive on the second line still gets honored — `headers.get(...)`
+        // alone would silently drop them.
+        let (cc_max_age, no_cache) = headers.get_all(reqwest::header::CACHE_CONTROL).iter().fold(
+            (None::<u64>, false),
+            |(prev_max_age, prev_no_cache), v| {
+                let Some(s) = v.to_str().ok() else {
+                    return (prev_max_age, prev_no_cache);
+                };
+                let (this_max_age, this_no_cache) = parse_cache_control(s);
+                // `no-cache` is sticky — any field-value carrying it wins.
+                // For `max-age`, the most-restrictive (smallest) value wins:
+                // RFC 9111 §5.2.1.1 lets caches use any value but the
+                // safer choice is the minimum.
+                let merged_max_age = match (prev_max_age, this_max_age) {
+                    (Some(a), Some(b)) => Some(a.min(b)),
+                    (Some(a), None) => Some(a),
+                    (None, b) => b,
+                };
+                (merged_max_age, prev_no_cache || this_no_cache)
+            },
+        );
 
         // Cache-Control: max-age wins over Expires when both are present.
         let mut fresh_for = if let Some(secs) = cc_max_age {
@@ -110,6 +130,31 @@ impl CacheHeadersState {
     /// HEAD added enough information to skip the body fetch.
     pub(crate) fn has_validator(&self) -> bool {
         self.etag.is_some() || self.last_modified.is_some()
+    }
+
+    /// Merge `other` into `self`, keeping any field from `self` when the
+    /// corresponding field in `other` is absent. Used when applying the
+    /// cache headers from a `304 Not Modified` response (RFC 9110 §15.4.5):
+    /// the response *may* refresh `Cache-Control`, `ETag`, `Last-Modified`,
+    /// etc., but **omitted** fields must not erase previously-known
+    /// validators — otherwise a server that sends `304` with only
+    /// `Cache-Control: max-age=…` would wipe our cached `ETag` and force
+    /// the next tick to fetch a body unconditionally.
+    pub(crate) fn merge_from(&mut self, other: Self) {
+        if other.etag.is_some() {
+            self.etag = other.etag;
+        }
+        if other.last_modified.is_some() {
+            self.last_modified = other.last_modified;
+        }
+        if other.fresh_for.is_some() {
+            self.fresh_for = other.fresh_for;
+        }
+        // `no_cache` is a directive flag — preserve only when explicitly set
+        // by the new response; absence does not unset a prior `no-cache`.
+        if other.no_cache {
+            self.no_cache = true;
+        }
     }
 }
 
@@ -250,6 +295,119 @@ mod tests {
             v.fresh_for,
             Some(Duration::ZERO),
             "no-store must zero freshness even when max-age is present",
+        );
+    }
+
+    #[test]
+    fn cache_control_split_across_multiple_header_lines_is_honored() {
+        // RFC 9110 §5.3 permits sending multiple field-values either as one
+        // comma-separated line or as separate header lines. We must honor
+        // directives from every line — `headers.get(...).single()` would
+        // silently drop the second one.
+        let h = headers(&[
+            ("cache-control", "max-age=600"),
+            ("cache-control", "no-store"),
+        ]);
+        let v = CacheHeadersState::from_headers(&h, t0());
+        assert!(
+            v.no_cache,
+            "no-store on a second Cache-Control header line must set no_cache",
+        );
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::ZERO),
+            "no-store from any field-value must force zero freshness",
+        );
+    }
+
+    #[test]
+    fn cache_control_min_max_age_wins_across_lines() {
+        // When multiple Cache-Control lines each carry a max-age, the
+        // smaller wins — RFC 9111 §5.2.1.1 lets caches pick any but the
+        // safer choice is the most-restrictive.
+        let h = headers(&[
+            ("cache-control", "max-age=600"),
+            ("cache-control", "max-age=60"),
+        ]);
+        let v = CacheHeadersState::from_headers(&h, t0());
+        assert_eq!(
+            v.fresh_for,
+            Some(Duration::from_secs(60)),
+            "smallest max-age across lines must win, got {:?}",
+            v.fresh_for,
+        );
+    }
+
+    #[test]
+    fn merge_from_preserves_prior_validators_when_new_is_empty() {
+        // Real 304 case: server replies "Cache-Control: max-age=120" and
+        // omits ETag / Last-Modified. We must keep the prior validators so
+        // the next conditional GET still has something to send — otherwise
+        // we'd fall back to an unconditional fetch.
+        let mut prior = CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Mon, 01 Jan 2024 00:00:00 GMT".to_string()),
+            fresh_for: Some(Duration::from_secs(60)),
+            no_cache: false,
+        };
+        let incoming = CacheHeadersState {
+            fresh_for: Some(Duration::from_secs(120)),
+            ..CacheHeadersState::default()
+        };
+        prior.merge_from(incoming);
+        assert_eq!(
+            prior.etag.as_deref(),
+            Some("\"v1\""),
+            "ETag must survive a 304 that omits the field",
+        );
+        assert_eq!(
+            prior.last_modified.as_deref(),
+            Some("Mon, 01 Jan 2024 00:00:00 GMT"),
+            "Last-Modified must survive a 304 that omits the field",
+        );
+        assert_eq!(
+            prior.fresh_for,
+            Some(Duration::from_secs(120)),
+            "fresh_for present in the new response must overwrite the prior value",
+        );
+    }
+
+    #[test]
+    fn merge_from_overwrites_when_new_provides_value() {
+        // 304 with refreshed ETag (server rotated the validator).
+        let mut prior = CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        let incoming = CacheHeadersState {
+            etag: Some("\"v2\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        prior.merge_from(incoming);
+        assert_eq!(
+            prior.etag.as_deref(),
+            Some("\"v2\""),
+            "new ETag must replace the prior one when present",
+        );
+    }
+
+    #[test]
+    fn merge_from_no_cache_is_sticky_within_a_session() {
+        // If a prior response set no_cache, a subsequent response that omits
+        // the directive must not clear the flag — clearing it would resume
+        // honoring stale `max-age` until the next no-cache response.
+        let mut prior = CacheHeadersState {
+            no_cache: true,
+            ..CacheHeadersState::default()
+        };
+        let incoming = CacheHeadersState {
+            fresh_for: Some(Duration::from_secs(60)),
+            ..CacheHeadersState::default()
+        };
+        prior.merge_from(incoming);
+        assert!(
+            prior.no_cache,
+            "no_cache must be sticky — omission in a later response does not unset it",
         );
     }
 

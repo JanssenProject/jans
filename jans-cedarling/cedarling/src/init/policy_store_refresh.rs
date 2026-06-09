@@ -189,11 +189,18 @@ impl StrategyState {
                 self.current = RefreshStrategy::HeadThenGet;
                 self.conditional_to_head_transitions =
                     self.conditional_to_head_transitions.saturating_add(1);
+                // Stamp the reprobe cooldown so `choose_for_tick` waits
+                // STRATEGY_REPROBE_INTERVAL_SECS before testing Conditional
+                // again — without this, the next tick would immediately
+                // re-probe Conditional and we'd never actually use
+                // HeadThenGet to serve refreshes.
+                self.last_probe_at = Some(Utc::now());
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
                 self.head_to_plain_transitions =
                     self.head_to_plain_transitions.saturating_add(1);
+                self.last_probe_at = Some(Utc::now());
             },
             // Already at the least efficient strategy — nothing to degrade to.
             RefreshStrategy::PlainGet => {},
@@ -214,11 +221,13 @@ impl StrategyState {
                 self.current = RefreshStrategy::HeadThenGet;
                 self.conditional_to_head_transitions =
                     self.conditional_to_head_transitions.saturating_add(1);
+                self.last_probe_at = Some(Utc::now());
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
                 self.head_to_plain_transitions =
                     self.head_to_plain_transitions.saturating_add(1);
+                self.last_probe_at = Some(Utc::now());
             },
             RefreshStrategy::PlainGet => {},
         }
@@ -561,9 +570,10 @@ async fn tick_conditional(
             // 304 is the only definitive proof the upstream honors our
             // conditional headers. Reset degrade counter; upgrade if we were
             // probing from a degraded strategy. Adopt any cache headers the
-            // server refreshed on the 304 (RFC 7234 §4.3.4) — e.g. an
-            // extended `max-age` — so the next tick respects them.
-            state.validators = validators;
+            // server refreshed on the 304 (RFC 9110 §15.4.5) — e.g. an
+            // extended `max-age` — but merge them so that **omitted** fields
+            // don't erase previously-known `ETag` / `Last-Modified`.
+            state.validators.merge_from(validators);
             state.consecutive_failures = 0;
             if is_probe {
                 state.strategy.record_probe_success();
@@ -614,15 +624,30 @@ async fn tick_head_then_get(ctx: &WorkerContext, state: &mut RefreshState) -> Re
                 return tick_plain_get(ctx, state).await;
             }
             if validators_match(&new_validators, &state.validators) {
-                state.validators = new_validators;
+                // No-op vs cache — adopt any refreshed metadata (sticky
+                // merge so HEAD-omitted fields don't erase prior ones)
+                // and commit success.
+                state.validators.merge_from(new_validators);
                 state.consecutive_failures = 0;
                 state.strategy.record_helped();
                 return RefreshOutcome::NotModified;
             }
-            // Validators differ — fetch the body.
-            state.strategy.record_helped();
-            state.validators = new_validators;
-            tick_plain_get(ctx, state).await
+            // Validators differ — fall through to GET. Do **not** commit
+            // `new_validators` or `record_helped()` yet: if the GET fails
+            // we'd be left with HEAD-derived validators that don't match
+            // the body we still hold, and a future HEAD that happens to
+            // match those stale validators would short-circuit incorrectly.
+            // `tick_plain_get` writes its own validators on success
+            // (`parse_swap_and_record` or the short-circuit path), and
+            // `record_helped()` happens there too — see below.
+            let outcome = tick_plain_get(ctx, state).await;
+            if matches!(
+                outcome,
+                RefreshOutcome::Success | RefreshOutcome::NotModified,
+            ) {
+                state.strategy.record_helped();
+            }
+            outcome
         },
     }
 }
@@ -1066,14 +1091,20 @@ mod tests {
             last_modified: Some("Mon".to_string()),
             ..CacheHeadersState::default()
         };
-        assert!(validators_match(&a, &b));
+        assert!(
+            validators_match(&a, &b),
+            "with no ETag on either side, equal Last-Modified must match",
+        );
     }
 
     #[test]
     fn validators_match_returns_false_when_neither_present() {
         let a = CacheHeadersState::default();
         let b = CacheHeadersState::default();
-        assert!(!validators_match(&a, &b));
+        assert!(
+            !validators_match(&a, &b),
+            "with no validators on either side there is nothing to compare — must return false rather than treat absence as agreement",
+        );
     }
 
     #[test]
@@ -1086,7 +1117,10 @@ mod tests {
             etag: Some("\"v2\"".to_string()),
             ..CacheHeadersState::default()
         };
-        assert!(!validators_match(&a, &b));
+        assert!(
+            !validators_match(&a, &b),
+            "different ETags must not match — short-circuit would skip a real update",
+        );
     }
 
     #[test]
@@ -1102,7 +1136,10 @@ mod tests {
             last_modified: Some("Mon".to_string()),
             ..CacheHeadersState::default()
         };
-        assert!(validators_match(&a, &b));
+        assert!(
+            validators_match(&a, &b),
+            "ETag must be on BOTH sides to compare; asymmetric presence must fall back to Last-Modified",
+        );
     }
 
     #[test]
@@ -1118,7 +1155,10 @@ mod tests {
             last_modified: Some("Mon".to_string()),
             ..CacheHeadersState::default()
         };
-        assert!(!validators_match(&a, &b));
+        assert!(
+            !validators_match(&a, &b),
+            "ETag mismatch is decisive — matching Last-Modified must not rescue the comparison",
+        );
     }
 
     #[test]
@@ -1131,7 +1171,10 @@ mod tests {
             last_modified: Some("Tue, 02 Jan 2024 00:00:00 GMT".to_string()),
             ..CacheHeadersState::default()
         };
-        assert!(!validators_match(&a, &b));
+        assert!(
+            !validators_match(&a, &b),
+            "different Last-Modified values must not match",
+        );
     }
 
     #[test]
@@ -1141,7 +1184,10 @@ mod tests {
             ..CacheHeadersState::default()
         };
         let b = CacheHeadersState::default();
-        assert!(!validators_match(&a, &b));
+        assert!(
+            !validators_match(&a, &b),
+            "Last-Modified on only one side cannot match — asymmetric presence must not be treated as agreement",
+        );
     }
 
     // ---- Strategy state machine edge cases ----
@@ -1155,10 +1201,20 @@ mod tests {
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD * 3 {
             s.record_degraded();
         }
-        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::PlainGet,
+            "PlainGet is the floor — repeated record_degraded() must not move below it",
+        );
         // Transition counters should not budge — there's no transition target.
-        assert_eq!(s.head_to_plain_transitions, 0);
-        assert_eq!(s.conditional_to_head_transitions, 0);
+        assert_eq!(
+            s.head_to_plain_transitions, 0,
+            "no head→plain transition can fire from PlainGet",
+        );
+        assert_eq!(
+            s.conditional_to_head_transitions, 0,
+            "no conditional→head transition can fire from PlainGet",
+        );
     }
 
     #[test]
@@ -1168,7 +1224,11 @@ mod tests {
             ..StrategyState::default()
         };
         s.force_degrade();
-        assert_eq!(s.current, RefreshStrategy::PlainGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::PlainGet,
+            "force_degrade at the floor must leave current unchanged",
+        );
         assert_eq!(s.conditional_to_head_transitions, 0);
         assert_eq!(s.head_to_plain_transitions, 0);
     }
@@ -1176,10 +1236,21 @@ mod tests {
     #[test]
     fn strategy_probe_success_noop_when_already_conditional() {
         let mut s = StrategyState::default();
-        assert_eq!(s.current, RefreshStrategy::Conditional);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "default StrategyState must start at Conditional",
+        );
         s.record_probe_success();
-        assert_eq!(s.current, RefreshStrategy::Conditional);
-        assert_eq!(s.upgrade_to_conditional_transitions, 0);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "record_probe_success while already at Conditional must be a no-op",
+        );
+        assert_eq!(
+            s.upgrade_to_conditional_transitions, 0,
+            "no upgrade transition counter increment when already at Conditional",
+        );
     }
 
     #[test]
@@ -1189,7 +1260,11 @@ mod tests {
             ..StrategyState::default()
         };
         s.record_helped();
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "record_helped() only resets the degrade counter — current strategy must not change",
+        );
     }
 
     #[test]
@@ -1203,9 +1278,19 @@ mod tests {
             }
             s.record_probe_success();
         }
-        assert_eq!(s.current, RefreshStrategy::Conditional);
-        assert_eq!(s.conditional_to_head_transitions, 3);
-        assert_eq!(s.upgrade_to_conditional_transitions, 3);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::Conditional,
+            "after each cycle the probe must restore Conditional",
+        );
+        assert_eq!(
+            s.conditional_to_head_transitions, 3,
+            "each conditional→head transition must increment the counter cumulatively, not overwrite",
+        );
+        assert_eq!(
+            s.upgrade_to_conditional_transitions, 3,
+            "each upgrade-back-to-Conditional must increment cumulatively",
+        );
     }
 
     #[test]
@@ -1215,13 +1300,27 @@ mod tests {
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
         }
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "threshold-many degrades from Conditional must land on HeadThenGet",
+        );
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
         }
-        assert_eq!(s.current, RefreshStrategy::PlainGet);
-        assert_eq!(s.conditional_to_head_transitions, 1);
-        assert_eq!(s.head_to_plain_transitions, 1);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::PlainGet,
+            "another threshold-many degrades must reach the PlainGet floor",
+        );
+        assert_eq!(
+            s.conditional_to_head_transitions, 1,
+            "exactly one conditional→head transition expected on the full walk",
+        );
+        assert_eq!(
+            s.head_to_plain_transitions, 1,
+            "exactly one head→plain transition expected on the full walk",
+        );
     }
 
     #[test]
@@ -1232,10 +1331,18 @@ mod tests {
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
         }
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "first transition lands on HeadThenGet",
+        );
         // One more degrade should NOT trigger another transition.
         s.record_degraded();
-        assert_eq!(s.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(
+            s.current,
+            RefreshStrategy::HeadThenGet,
+            "single post-transition degrade must NOT fall straight through to PlainGet — counter must reset on transition",
+        );
     }
 
     #[test]
@@ -1244,7 +1351,11 @@ mod tests {
         // last_probe_at — there's no probe to schedule.
         let mut s = StrategyState::default();
         let _ = s.choose_for_tick();
-        assert!(s.last_probe_at.is_none());
+        assert!(
+            s.last_probe_at.is_none(),
+            "last_probe_at must remain None while at Conditional (no probe to schedule), got {:?}",
+            s.last_probe_at,
+        );
     }
 
     #[test]
@@ -1255,7 +1366,10 @@ mod tests {
             ..StrategyState::default()
         };
         let _ = s.choose_for_tick();
-        assert_eq!(s.degraded_count, 2);
+        assert_eq!(
+            s.degraded_count, 2,
+            "choose_for_tick must not mutate degraded_count — that's only changed by record_degraded / record_helped",
+        );
     }
 
     // ---- body_hash edge cases ----
@@ -1264,17 +1378,28 @@ mod tests {
     fn body_hash_handles_empty_bytes() {
         let h1 = body_hash(b"");
         let h2 = body_hash(b"");
-        assert_eq!(h1, h2);
+        assert_eq!(
+            h1, h2,
+            "empty bytes must hash consistently within a process — otherwise the short-circuit would never fire for empty responses",
+        );
     }
 
     #[test]
     fn body_hash_differs_between_empty_and_single_byte() {
-        assert_ne!(body_hash(b""), body_hash(b"\0"));
+        assert_ne!(
+            body_hash(b""),
+            body_hash(b"\0"),
+            "empty bytes and a single NUL byte must hash to different values — otherwise the short-circuit would conflate them",
+        );
     }
 
     #[test]
     fn body_hash_sensitive_to_byte_order() {
-        assert_ne!(body_hash(b"ab"), body_hash(b"ba"));
+        assert_ne!(
+            body_hash(b"ab"),
+            body_hash(b"ba"),
+            "body_hash must be order-sensitive — same-multiset different-order inputs must hash differently or the short-circuit would skip real changes",
+        );
     }
 
     // ---- next_delay edge cases ----
