@@ -287,6 +287,7 @@ fn merge_json_values(mut base: Value, other: &Value) -> Result<Value, BuildConte
 mod test {
     use super::*;
     use serde_json::json;
+    use std::str::FromStr;
 
     #[test]
     fn can_merge_json_objects() {
@@ -301,7 +302,6 @@ mod test {
 
     #[test]
     fn errors_on_same_keys() {
-        // Test for only two objects
         let obj1 = json!({ "a": 1, "b": 2 });
         let obj2 = json!({ "b": 3, "c": 4 });
         let result = merge_json_values(obj1, &obj2);
@@ -309,6 +309,126 @@ mod test {
         assert!(
             matches!(result, Err(BuildContextError::KeyConflict(key)) if key.as_str() == "b"),
             "Expected an error due to conflicting keys"
+        );
+    }
+
+    #[test]
+    fn build_context_no_schema_merges_context_and_pushed_data() {
+        let request_ctx = json!({ "req": "value" });
+        let pushed = HashMap::from([("key".to_string(), json!("val"))]);
+
+        let result = build_context_no_schema(request_ctx, pushed);
+        let context = result.expect("build_context_no_schema should succeed without schema");
+
+        let ctx_json = context.to_json_value().expect("context should serialize to json");
+        assert_eq!(
+            ctx_json.get("req").and_then(|v| v.as_str()),
+            Some("value"),
+            "context should contain request key"
+        );
+        assert!(
+            ctx_json.get("data").is_some(),
+            "context should contain pushed data under 'data' key"
+        );
+    }
+
+    #[test]
+    fn build_context_no_schema_without_pushed_data() {
+        let request_ctx = json!({ "req": "value" });
+        let pushed = HashMap::new();
+
+        let result = build_context_no_schema(request_ctx.clone(), pushed);
+        let context = result.expect("build_context_no_schema should work without pushed data");
+
+        let ctx_json = context.to_json_value().expect("context should serialize to json");
+        assert_eq!(
+            ctx_json,
+            request_ctx,
+            "context should equal request context unchanged"
+        );
+    }
+
+    #[test]
+    fn build_context_no_schema_errors_on_key_conflict_with_pushed_data() {
+        let request_ctx = json!({ "data": "my_value" });
+        let pushed = HashMap::from([("conflict".to_string(), json!("val"))]);
+
+        let result = build_context_no_schema(request_ctx, pushed);
+        let err = result
+            .expect_err("should error on key conflict between request context and 'data' wrapper");
+        assert!(
+            matches!(&err, BuildContextError::KeyConflict(key) if key == "data"),
+            "expected KeyConflict on 'data' key, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_multi_issuer_context_without_schema() {
+        let request_ctx = json!({ "req": "value" });
+        let token_entities = HashMap::new();
+        let action = cedar_policy::EntityUid::from_str("Test::Action::\"act\"")
+            .expect("valid action uid");
+
+        let result = build_multi_issuer_context(
+            request_ctx.clone(),
+            &token_entities,
+            None,
+            &action,
+            HashMap::new(),
+        );
+        let context = result
+            .expect("build_multi_issuer_context should succeed without schema");
+
+        let ctx_json = context.to_json_value().expect("context should serialize to json");
+        assert_eq!(
+            ctx_json.get("req").and_then(|v| v.as_str()),
+            Some("value"),
+            "context should preserve request fields"
+        );
+        assert!(
+            ctx_json.get("tokens").is_some(),
+            "context should have tokens wrapper"
+        );
+    }
+
+    #[test]
+    fn build_multi_issuer_context_without_schema_includes_token_refs() {
+        let entity = Entity::from_json_str(
+            r#"{"uid":{"type":"Jans::access_token","id":"tok1"},"attrs":{},"parents":[]}"#,
+            None,
+        )
+        .expect("valid entity");
+        let mut token_entities = HashMap::new();
+        token_entities.insert("jans_access_token".to_string(), entity);
+
+        let request_ctx = json!({});
+        let action = cedar_policy::EntityUid::from_str("Jans::Action::\"act\"")
+            .expect("valid action uid");
+
+        let result = build_multi_issuer_context(
+            request_ctx,
+            &token_entities,
+            None,
+            &action,
+            HashMap::new(),
+        );
+        let context = result
+            .expect("build_multi_issuer_context with tokens should succeed");
+
+        let ctx_json = context.to_json_value().expect("context should serialize to json");
+        let tokens = ctx_json
+            .get("tokens")
+            .expect("context should have tokens");
+        assert!(
+            tokens.get("jans_access_token").is_some(),
+            "token entity reference should be in context"
+        );
+        assert_eq!(
+            tokens
+                .get("total_token_count")
+                .and_then(serde_json::Value::as_u64),
+            Some(1),
+            "total_token_count should be 1"
         );
     }
 }

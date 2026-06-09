@@ -378,9 +378,12 @@ fn load_policy_store_from_archive_bytes(
 mod test {
     use std::{path::Path, sync::LazyLock, time::Duration};
 
+    use base64::Engine;
     use mockito::Server;
+    use serde_json::json;
 
-    use super::load_policy_store;
+    use super::{extract_first_policy_store, load_policy_store};
+    use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
     use crate::{
         PolicyStoreConfig,
         http::{HttpClient, HttpClientConfig},
@@ -399,6 +402,108 @@ mod test {
     // NOTE: we probably don't need to test if the deserialization for JSON and YAML
     // works correctly anymore here since we already have tests for those in
     // src/common/policy_store/test.rs...
+
+    fn make_full_legacy_json() -> serde_json::Value {
+        let schema = base64::prelude::BASE64_STANDARD.encode(
+            r#"{
+                "Jans": {
+                    "entityTypes": {},
+                    "actions": {}
+                }
+            }"#,
+        );
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "schema": schema,
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    fn make_no_schema_legacy_json() -> serde_json::Value {
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    fn make_null_schema_legacy_json() -> serde_json::Value {
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "schema": null,
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_with_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_full_legacy_json())
+            .expect("valid legacy store with schema");
+        let result = extract_first_policy_store(&agama, true);
+        result.expect("should succeed with schema and strict=true");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_with_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_full_legacy_json())
+            .expect("valid legacy store with schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed with schema and strict=false");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_missing_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_no_schema_legacy_json())
+            .expect("valid legacy store without schema");
+        let result = extract_first_policy_store(&agama, true);
+        let err = result.expect_err("should error when schema missing and strict=true");
+        assert!(
+            err.to_string().contains("missing required schema"),
+            "error should mention missing schema, got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_missing_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_no_schema_legacy_json())
+            .expect("valid legacy store without schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed when schema missing and strict=false");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_null_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_null_schema_legacy_json())
+            .expect("valid legacy store with null schema");
+        let result = extract_first_policy_store(&agama, true);
+        let err = result.expect_err("should error when schema is null and strict=true");
+        assert!(
+            err.to_string().contains("missing required schema"),
+            "error should mention missing schema, got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_null_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_null_schema_legacy_json())
+            .expect("valid legacy store with null schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed when schema is null and strict=false");
+    }
 
     #[tokio::test]
     async fn can_load_from_json_file() {

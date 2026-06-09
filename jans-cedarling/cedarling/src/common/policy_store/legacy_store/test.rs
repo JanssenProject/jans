@@ -319,6 +319,84 @@ fn test_invalid_policies_format() {
 }
 
 #[test]
+fn test_legacy_policy_store_with_null_schema_succeeds() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": null,
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
+    let agama = result.expect("should deserialize with null schema");
+    let (id, legacy_store) = agama.policy_stores.iter().next().expect("has one store");
+    assert_eq!(id, "test", "store id should match");
+    assert!(
+        legacy_store.schema.is_none(),
+        "schema should be None when null in JSON"
+    );
+
+    // Verify conversion to PolicyStore also yields schema: None
+    let store: super::super::PolicyStore = legacy_store.clone().into();
+    assert!(
+        store.schema.is_none(),
+        "converted PolicyStore should have None schema"
+    );
+}
+
+#[test]
+fn test_legacy_policy_store_missing_schema_field_succeeds() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
+    let agama = result.expect("should deserialize with missing schema field");
+    let (_, legacy_store) = agama.policy_stores.iter().next().expect("has one store");
+    assert!(
+        legacy_store.schema.is_none(),
+        "schema should be None when field is absent"
+    );
+
+    let store: super::super::PolicyStore = legacy_store.clone().into();
+    assert!(
+        store.schema.is_none(),
+        "converted PolicyStore should have None schema"
+    );
+}
+
+#[test]
+fn test_legacy_policy_store_invalid_schema_format_with_non_null_still_errors() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": "invalid_schema",
+                "policies": {}
+            }
+        }
+    });
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
+    let err = result.expect_err("should error on non-null invalid schema");
+    assert!(
+        err.to_string().contains("error parsing schema"),
+        "error should indicate schema parsing failure, got: {err}"
+    );
+}
+
+#[test]
 fn test_invalid_trusted_issuers_format() {
     let schema = base64::prelude::BASE64_STANDARD.encode("{}");
     let json = json!({
