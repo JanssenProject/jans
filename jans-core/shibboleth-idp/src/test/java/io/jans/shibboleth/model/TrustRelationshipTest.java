@@ -69,6 +69,7 @@ public class TrustRelationshipTest {
            Arguments.of(null,description,trustnature,"displayName")
         );
     }
+
     private static final TrustRelationship draftIndividualTrustRelationship() {
         
         var displayName = io.jans.shibboleth.model.core.DisplayName.of("IndividualTR").getValue();
@@ -83,14 +84,9 @@ public class TrustRelationshipTest {
         return TrustRelationship.create(displayName,description, TrustNature.AGGREGATE).getValue();
     }
 
-    public static final Stream<TrustRelationship> draftTrustRelationshipsByNature() {
+    private static final Stream<TrustRelationship> draftTrustRelationshipsOfAllNatures() {
 
         return Stream.of(draftIndividualTrustRelationship(),draftAggregateTrustRelationship());
-    }
-
-    private static final Stream<TrustRelationship> activatingTrustRelationshipsByNature() {
-
-        return null;
     }
 
     public static final Stream<MetadataSource> sourcesNotAllowedForAggregateTrustRelationship() {
@@ -146,6 +142,9 @@ public class TrustRelationshipTest {
         );
     }
 
+    /**
+     * Creation Tests
+     */
     @Nested
     @DisplayName("Creation Tests")
     public class CreationTests {
@@ -156,7 +155,7 @@ public class TrustRelationshipTest {
         @DisplayName(
             "GIVEN valid creation parameters " + 
             "WHEN create() is called " +
-            "THEN it should create a trust relationship in DRAFT STATUS with defaults ")
+            "THEN it should create a TrustRelationship in DRAFT STATUS with defaults ")
         public void shouldCreateTrustRelationshipInDraftStateWithDefaults(
             io.jans.shibboleth.model.core.DisplayName displayName, 
             Description description, TrustNature nature) {
@@ -219,5 +218,34 @@ public class TrustRelationshipTest {
        
     }
 
+    /**
+     * Basic Updates and Idempotency Tests
+     */
+    @Nested
+    @DisplayName("Basic Updates and Idempotency Tests")
+    public class BasicUpdatesAndIdempotencyTests {
 
+        @Tag("refactoring")
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship with an existing display name " +
+            "WHEN updateDisplayName() is called with a different name " +
+            "THEN the operation succeeds, updates the display name and increments the version"
+        )
+        public void shouldUpdateDisplayNameAndIncrementVersion_whenDifferentNameProvided(TrustRelationship tr) {
+
+            var newDisplayName = io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue() + "_updated").getValue();
+
+            assertThat(tr.getDisplayName()).isNotNull();
+            assertThat(tr.getDisplayName()).isNotEqualTo(newDisplayName);
+
+            TrustResult<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(updated.getDisplayName()).isEqualTo(newDisplayName);
+            assertThat(updated.getVersion()).isEqualTo(tr.getVersion().next());
+        }
+    }
 }
