@@ -1060,6 +1060,20 @@ paths:
                     description: Array of string. Each string represents supported type of authorization details.
                     items:
                       type: string
+                  identity_chaining_requested_token_types_supported:
+                    type: array
+                    description: Array of token type URIs that the AS supports as requested_token_type in a token exchange request when the IDENTITY_ASSERTION_AUTHZ_GRANT feature is enabled. Contains urn:ietf:params:oauth:token-type:id-jag when ID-JAG is enabled.
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:oauth:token-type:id-jag
+                  authorization_grant_profiles_supported:
+                    type: array
+                    description: Array of grant profile URIs supported by this AS as Resource AS. Contains urn:ietf:params:oauth:grant-profile:id-jag when ID-JAG is enabled.
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:oauth:grant-profile:id-jag
         500:
           $ref: '#/components/responses/InternalServerError'
   /restv1/introspection:
@@ -3038,7 +3052,7 @@ paths:
                     type: string
                 assertion:
                   type: string
-                  description: Assertion.
+                  description: Assertion JWT. Used with grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer (e.g. ID-JAG bearer grant).
                 refresh_token:
                   type: string
                   description: Refresh token.
@@ -3061,6 +3075,27 @@ paths:
                   type: string
                 rpt:
                   type: string
+                subject_token:
+                  type: string
+                  description: Security token representing the identity of the party on behalf of whom the request is being made. Used with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                subject_token_type:
+                  type: string
+                  description: Identifier for the type of subject_token. For example urn:ietf:params:oauth:token-type:id_token, urn:ietf:params:oauth:token-type:saml2, or urn:ietf:params:oauth:token-type:refresh_token.
+                  example: urn:ietf:params:oauth:token-type:id_token
+                requested_token_type:
+                  type: string
+                  description: Identifier for the type of the requested security token. For example urn:ietf:params:oauth:token-type:id-jag or urn:ietf:params:oauth:token-type:txn-token.
+                  example: urn:ietf:params:oauth:token-type:id-jag
+                audience:
+                  type: string
+                  description: The logical name of the target service or resource where the client intends to use the requested security token. Used with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                actor_token:
+                  type: string
+                  description: Security token representing the actor. Used in delegation scenarios with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                actor_token_type:
+                  type: string
+                  description: Identifier for the type of actor_token.
+                  example: urn:x-oath:params:oauth:token-type:device-secret
       responses:
         200:
           description: OK
@@ -3094,6 +3129,10 @@ paths:
                       type: string
                   id_token:
                     type: string
+                  issued_token_type:
+                    type: string
+                    description: Identifier for the type of the issued token. Present in token exchange responses. For example urn:ietf:params:oauth:token-type:id-jag or urn:ietf:params:oauth:token-type:txn-token.
+                    example: urn:ietf:params:oauth:token-type:id-jag
         400:
           description: Invalid parameters provided to endpoint.
           content:
