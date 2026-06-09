@@ -287,6 +287,13 @@ services:
       - $demo_templates_dir/traefik-tls.yaml:/etc/traefik/conf.d/traefik-tls.yaml
       - $demo_templates_dir/web_https.crt:/etc/certs/web_https.crt
       - $demo_templates_dir/web_https.key:/etc/certs/web_https.key
+    networks:
+      # Alias the FQDN to traefik inside the compose network so in-cluster server-to-server
+      # calls over the public URL (e.g. config-api -> jans-auth introspection on :443) reach
+      # traefik's TLS entrypoint and route back, instead of hitting a dead loopback.
+      default:
+        aliases:
+          - $fqdn
 
 EOF
 
@@ -341,8 +348,6 @@ EOF
   jans:
     image: ghcr.io/janssenproject/jans/all-in-one:$image_version
     container_name: jans
-    extra_hosts:
-      - "$fqdn:$ipaddr"
     environment:
       - CN_CONFIG_CONSUL_HOST=consul
       - CN_CONFIG_CONSUL_NAMESPACE=jans
