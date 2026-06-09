@@ -337,7 +337,6 @@ impl Authz {
             &self.config,
             request.context.clone(),
             &built_entities,
-            schema_ref,
             &action,
             pushed_data,
         )

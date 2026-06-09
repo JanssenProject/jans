@@ -24,13 +24,13 @@ pub(super) fn build_context(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
-    schema: Option<&cedar_policy::Schema>,
     action: &cedar_policy::EntityUid,
     pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    match schema {
-        Some(s) => build_context_with_schema(config, request_context, build_entities, s, action, pushed_data),
-        None => build_context_no_schema(request_context, pushed_data),
+    if config.policy_store.schema.is_some() {
+        build_context_with_schema(config, request_context, build_entities, action, pushed_data)
+    } else {
+        build_context_no_schema(request_context, pushed_data)
     }
 }
 
@@ -42,7 +42,6 @@ pub(super) fn build_context_with_schema(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
-    schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
     pushed_data: HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
@@ -51,6 +50,7 @@ pub(super) fn build_context_with_schema(
             "build_context_with_schema called but policy store has no schema".to_string()
         ))?;
     let json_schema = &store_schema.json;
+    let schema = &store_schema.schema;
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
 
