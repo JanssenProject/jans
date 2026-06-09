@@ -140,6 +140,11 @@ def render():
     _write(REPO / "jans-fido2/client/profiles" / fqdn / "config-fido2-test.properties",
            f"test.server.name={fqdn}\n")
 
+    # agama-engine: render so the jans-auth-server reactor builds under -Dcfg=<fqdn>; the flow
+    # tests also need the sample flows + an agama client deployed to the AS to pass (pending).
+    _write(REPO / "jans-auth-server/agama/engine/profiles" / fqdn / "config-agama-test.properties",
+           f"server=https://{fqdn}\nclientId={FIXED_CLIENT_INUMS['jans_auth_test_client_2_inum']}\n")
+
     # client keystores are copied verbatim from the committed default profiles
     for prof_root in ("jans-auth-server/client/profiles", "jans-auth-server/server/profiles"):
         src = REPO / prof_root / "default" / "client_keystore.p12"

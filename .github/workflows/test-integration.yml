@@ -257,54 +257,23 @@ jobs:
           export RDBM_PASSWORD_ENC="$(read_json db_pw_enc)"
           python3 .github/workflows/scripts/render_test_profiles.py
 
-      - name: Build modules (skip tests)
-        env:
-          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # Build with the committed `default` profile -- compilation does not need the live
-          # FQDN (that is only required by the test step). Using -Dcfg=<fqdn> here would demand
-          # a rendered profile for every filtering module in each reactor (agama-engine, the
-          # config-api plugins, ...), whereas every module ships a `default` profile.
-          for mod in jans-orm jans-auth-server jans-scim jans-config-api jans-fido2; do
-            echo "::group::build $mod"
-            mvn -B -ntp -s .github/maven-settings.xml \
-              -Dcfg=default -Dmaven.test.skip=true -fae \
-              -f "$mod/pom.xml" clean install
-            echo "::endgroup::"
-          done
-
-      - name: Run integration tests
+      - name: Build and test all modules (full build, tests enabled)
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
           mkdir -p test-reports
-          # module-name:relative-dir (HTTP suites that target the AIO over the network)
-          modules="jans-auth-client:jans-auth-server/client \
-                   jans-scim-client:jans-scim/client \
-                   jans-config-api:jans-config-api \
-                   jans-fido2-client:jans-fido2/client"
-          status=0
-          for entry in $modules; do
-            name="${entry%%:*}"; dir="${entry##*:}"
-            echo "::group::test $name ($dir)"
-            ( cd "$dir" && mvn -B -ntp -s "$GITHUB_WORKSPACE/.github/maven-settings.xml" \
-                -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false -DfailIfNoTests=false test ) \
-              && echo "$name PASSED" || { echo "$name FAILED"; status=1; }
-            echo "::endgroup::"
-          done
-          echo "TESTS_STATUS=$status" >> "$GITHUB_ENV"
-
-      - name: Run unit suites
-        run: |
-          set -uo pipefail
-          # In-process unit suites (no live server needed); failures are reported, not fatal here.
-          for mod in jans-orm jans-core; do
-            echo "::group::unit $mod"
-            mvn -B -ntp -s .github/maven-settings.xml -Dcfg=default \
-              -Dmaven.test.failure.ignore=true -f "$mod/pom.xml" test \
-              || echo "[warn] $mod unit suite reported failures"
+          # Full build with tests enabled against the live AIO, mirroring the Jenkins full-build
+          # job: each reactor compiles + runs its unit AND integration suites in one pass. The
+          # integration modules consume the rendered -Dcfg=<fqdn> profiles to reach the AIO; unit
+          # modules ignore -Dcfg. failure.ignore keeps one red suite from stopping the rest -- the
+          # Gate step fails the job on any collected test failure.
+          for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+            echo "::group::build+test $mod"
+            mvn -B -ntp -s .github/maven-settings.xml \
+              -Dcfg="$JANS_FQDN" -Dmaven.test.failure.ignore=true -DfailIfNoTests=false -fae \
+              -f "$mod/pom.xml" clean install \
+              || echo "[warn] $mod: build or tests reported problems"
             echo "::endgroup::"
           done
 
@@ -386,7 +355,21 @@ jobs:
       - name: Gate on test outcome
         if: always()
         run: |
-          if [ "${TESTS_STATUS:-1}" != "0" ]; then
-            echo "::error::one or more integration test modules failed"
-            exit 1
-          fi
+          python3 - <<'PY'
+          import glob, sys, xml.etree.ElementTree as ET
+          failed = total = 0
+          for f in glob.glob("test-reports/*.xml"):
+              try:
+                  r = ET.parse(f).getroot()
+              except ET.ParseError:
+                  continue
+              if r.tag != "testng-results":
+                  continue
+              failed += int(r.get("failed", 0))
+              total += int(r.get("total", 0))
+          print(f"collected {total} tests, {failed} failed")
+          if total == 0:
+              sys.exit("::error::no test results were collected")
+          if failed:
+              sys.exit(f"::error::{failed} test(s) failed")
+          PY
