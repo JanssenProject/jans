@@ -282,13 +282,15 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p test-reports
-          # HTTP suites targeting the live AIO via the rendered -Dcfg=<fqdn> profiles. surefire.timeout
-          # bounds each fork so a looping browser-flow test cannot hang the job.
-          for dir in jans-auth-server/client jans-scim/client jans-config-api jans-fido2/client; do
+          # HTTP suites vs the live AIO. Each suite is hard-bounded with `timeout` (surefire's own
+          # timeout did not stop it): jans-auth-server/client's browser-flow tests can loop on the
+          # AIO login-page JS that HtmlUnit cannot evaluate.
+          # auth-client runs last: if its browser-flow tests hang to the timeout, the others are done.
+          for dir in jans-scim/client jans-config-api jans-fido2/client jans-auth-server/client; do
             echo "::group::test $dir"
-            ( cd "$dir" && mvn -B -ntp -s "$GITHUB_WORKSPACE/.github/maven-settings.xml" \
-                -Dcfg="$JANS_FQDN" -Dmaven.test.failure.ignore=true -DfailIfNoTests=false \
-                -Dsurefire.timeout=900 test ) || echo "[warn] $dir reported problems"
+            timeout -k 30 900 bash -c \
+              "cd '$dir' && mvn -B -ntp -s '$GITHUB_WORKSPACE/.github/maven-settings.xml' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false test" \
+              || echo "[warn] $dir reported failures or timed out"
             echo "::endgroup::"
           done
 
@@ -297,11 +299,11 @@ jobs:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
-          # In-process unit suites (no live server); default profile, fork timeout as a safety net.
-          OPTS="-B -ntp -s .github/maven-settings.xml -Dcfg=default -Dmaven.test.failure.ignore=true -Dsurefire.timeout=900 -DfailIfNoTests=false"
-          mvn $OPTS -f jans-orm/pom.xml test || echo "[warn] jans-orm units reported problems"
-          mvn $OPTS -f jans-core/pom.xml test || echo "[warn] jans-core units reported problems"
-          mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test || echo "[warn] jans-auth-server units reported problems"
+          # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
+          OPTS="-B -ntp -s .github/maven-settings.xml -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
+          timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test || echo "[warn] jans-orm units reported problems or timed out"
+          timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test || echo "[warn] jans-core units reported problems or timed out"
+          timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test || echo "[warn] jans-auth-server units reported problems or timed out"
 
       - name: Collect surefire reports
         if: always()
