@@ -291,12 +291,34 @@ jobs:
             ( cd "$dir" && mvn -B -ntp -s "$GITHUB_WORKSPACE/.github/maven-settings.xml" \
                 -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false -DfailIfNoTests=false test ) \
               && echo "$name PASSED" || { echo "$name FAILED"; status=1; }
-            # collect any surefire results produced by this module
-            find "$dir" -path '*/target/surefire-reports/*.xml' -exec sh -c \
-              'cp "$1" "test-reports/'"$name"'-$(basename "$1")"' _ {} \; 2>/dev/null || true
             echo "::endgroup::"
           done
           echo "TESTS_STATUS=$status" >> "$GITHUB_ENV"
+
+      - name: Run unit suites
+        run: |
+          set -uo pipefail
+          # In-process unit suites (no live server needed); failures are reported, not fatal here.
+          for mod in jans-orm jans-core; do
+            echo "::group::unit $mod"
+            mvn -B -ntp -s .github/maven-settings.xml -Dcfg=default \
+              -Dmaven.test.failure.ignore=true -f "$mod/pom.xml" test \
+              || echo "[warn] $mod unit suite reported failures"
+            echo "::endgroup::"
+          done
+
+      - name: Collect surefire reports
+        if: always()
+        run: |
+          set -uo pipefail
+          mkdir -p test-reports
+          # Sweep every reactor so auth-client + unit reports are captured (path-prefixed names).
+          find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
+            -path '*/target/surefire-reports/*.xml' 2>/dev/null | while read -r f; do
+            mod=$(printf '%s' "$f" | sed -E 's#/target/surefire-reports/.*##; s#[/ ]+#_#g')
+            cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
+          done
+          echo "collected $(find test-reports -name '*.xml' 2>/dev/null | wc -l) report files"
 
       - name: Summarise results
         if: always()
@@ -344,20 +366,21 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Dump stack logs on failure
-        if: failure()
+      - name: Dump AIO service logs
+        if: always()
         run: |
-          docker compose -f automation/compose.yaml ps || true
           echo "::group::supervisorctl status (which AIO programs are RUNNING/FATAL)"
           docker exec jans supervisorctl -c /app/conf/supervisord.conf status || true
           echo "::endgroup::"
-          echo "::group::AIO key events (services + errors)"
-          docker logs jans 2>&1 | grep -aiE "persistence-loader -|configurator -|jans-auth -|ERROR|Exception|Traceback|exited:|FATAL|gave up|Started oejs.Server|WaitError|OutOfMemory|Killed" | tail -n 300 || true
+          echo "::group::jetty service logs (scim 503 / config-api 401 / auth)"
+          docker exec jans sh -c 'for s in jans-auth jans-config-api jans-scim jans-fido2; do
+              echo "===== $s ====="; tail -n 120 /opt/jans/jetty/$s/logs/*.log 2>/dev/null;
+            done' || true
           echo "::endgroup::"
-          echo "::group::AIO full tail"
-          docker logs jans 2>&1 | tail -n 250 || true
+          echo "::group::AIO key events"
+          docker logs jans 2>&1 | grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|Traceback|exited:|FATAL|gave up|503|Unauthorized|Started oejs.Server" | tail -n 300 || true
           echo "::endgroup::"
-          docker logs traefik 2>&1 | tail -n 30 || true
+          docker logs traefik 2>&1 | grep -aiE "503|error|level=err" | tail -n 40 || true
 
       - name: Gate on test outcome
         if: always()
