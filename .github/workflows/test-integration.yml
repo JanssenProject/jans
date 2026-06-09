@@ -261,10 +261,14 @@ jobs:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          # Build with the committed `default` profile -- compilation does not need the live
+          # FQDN (that is only required by the test step). Using -Dcfg=<fqdn> here would demand
+          # a rendered profile for every filtering module in each reactor (agama-engine, the
+          # config-api plugins, ...), whereas every module ships a `default` profile.
           for mod in jans-orm jans-auth-server jans-scim jans-config-api jans-fido2; do
             echo "::group::build $mod"
             mvn -B -ntp -s .github/maven-settings.xml \
-              -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae \
+              -Dcfg=default -Dmaven.test.skip=true -fae \
               -f "$mod/pom.xml" clean install
             echo "::endgroup::"
           done
