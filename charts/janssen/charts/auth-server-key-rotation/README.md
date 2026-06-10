@@ -14,7 +14,7 @@ Responsible for regenerating auth-keys per x hours
 
 ## Source Code
 
-* <https://github.com/JanssenProject/docker-jans-cloudtools>
+* <https://github.com/JanssenProject/jans/tree/main/docker-jans-cloudtools>
 
 ## Requirements
 

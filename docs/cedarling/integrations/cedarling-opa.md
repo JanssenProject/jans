@@ -148,7 +148,7 @@ deny_reasons := result.reasons
 
 Required:
 
-- Go 1.25+
+- Go 1.26+
 - Rust toolchain 1.95+
 
 Optional:

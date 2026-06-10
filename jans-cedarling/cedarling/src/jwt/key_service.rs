@@ -359,6 +359,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
@@ -452,6 +453,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
