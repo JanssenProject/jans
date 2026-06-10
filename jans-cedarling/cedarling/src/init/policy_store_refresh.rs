@@ -760,25 +760,39 @@ fn fetch_error(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-    let is_net = e.is_max_retries_exceeded();
+    let (kind, outcome) = classify_fetch_error(e);
     ctx.log.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(
             LogLevel::WARN,
             None,
         ))
-        .set_message(format!(
-            "policy store refresh: {} against {url}: {e}",
-            if is_net {
-                "network error"
-            } else {
-                "HTTP error"
-            }
-        )),
+        .set_message(format!("policy store refresh: {kind} against {url}: {e}")),
     );
-    if is_net {
-        RefreshOutcome::NetworkError
+    outcome
+}
+
+/// Pure classifier for [`fetch_error`] — extracted so unit tests can pin the
+/// routing without constructing a full [`WorkerContext`].
+///
+/// Order matters:
+/// 1. **Body decode failure** (`DecodeResponseBytes`) — distinct bucket so
+///    truncated bodies don't conflate with status errors.
+/// 2. **HTTP status error** (`status_code.is_some()`) — covers the case the
+///    retry layer collapses 4xx/5xx exhaustion into `MaxRetriesExceeded` but
+///    still carries the response status; without this, *every* GET-path
+///    `HttpError` outcome would silently land in `NetworkError`.
+/// 3. **Transport failure** (`is_max_retries_exceeded()` with no status) —
+///    DNS / TCP / TLS; nothing arrived.
+/// 4. **Fallback** — any other variant routes to `HttpError`.
+fn classify_fetch_error(e: &crate::http::HttpClientError) -> (&'static str, RefreshOutcome) {
+    if e.is_decode_error() {
+        ("body decode error", RefreshOutcome::DecodeError)
+    } else if e.status_code().is_some() {
+        ("HTTP error", RefreshOutcome::HttpError)
+    } else if e.is_max_retries_exceeded() {
+        ("network error", RefreshOutcome::NetworkError)
     } else {
-        RefreshOutcome::HttpError
+        ("HTTP error", RefreshOutcome::HttpError)
     }
 }
 
@@ -1468,5 +1482,66 @@ mod tests {
         let s = RefreshState::default();
         let d = s.next_delay(u64::MAX / 1024).as_secs();
         assert!(d > 0, "got {d}");
+    }
+
+    // ---- classify_fetch_error: routing for HTTP / network / decode / status ----
+
+    #[test]
+    fn classify_max_retries_exceeded_without_status_routes_to_network_error() {
+        // Pure transport failure: DNS / TCP / TLS — no response, no status.
+        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        let err = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
+        let (kind, outcome) = classify_fetch_error(&err);
+        assert_eq!(
+            kind, "network error",
+            "MaxRetriesExceeded with no status must classify as a transport-level network error",
+        );
+        assert_eq!(
+            outcome,
+            RefreshOutcome::NetworkError,
+            "no-status MaxRetriesExceeded must surface as NetworkError, got {outcome:?}",
+        );
+    }
+
+    #[test]
+    fn classify_max_retries_exceeded_with_status_routes_to_http_error() {
+        // The retry layer collapses 4xx/5xx exhaustion into MaxRetriesExceeded
+        // with `status_code = Some(...)`. Without this routing, every GET-path
+        // HTTP error would silently land in NetworkError — the regression the
+        // reviewer flagged.
+        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        let err = HttpRequestError::new(
+            HttpRequestReasonError::MaxRetriesExceeded,
+            Some(reqwest::StatusCode::NOT_FOUND),
+        );
+        let (kind, outcome) = classify_fetch_error(&err);
+        assert_eq!(
+            kind, "HTTP error",
+            "MaxRetriesExceeded carrying a status code means the upstream replied — classify as HttpError",
+        );
+        assert_eq!(
+            outcome,
+            RefreshOutcome::HttpError,
+            "retry-exhausted 4xx/5xx must surface as HttpError, not NetworkError, got {outcome:?}",
+        );
+    }
+
+    #[test]
+    fn classify_http_status_error_routes_to_http_error() {
+        // The typed `HttpStatusError` variant (from `head_validators` when a
+        // non-success status arrives outside the retry path) routes the same
+        // way — explicit status error → HttpError.
+        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        let err = HttpRequestError::new(
+            HttpRequestReasonError::HttpStatusError,
+            Some(reqwest::StatusCode::INTERNAL_SERVER_ERROR),
+        );
+        let (kind, outcome) = classify_fetch_error(&err);
+        assert_eq!(kind, "HTTP error");
+        assert_eq!(
+            outcome,
+            RefreshOutcome::HttpError,
+            "HttpStatusError variant must surface as HttpError, got {outcome:?}",
+        );
     }
 }

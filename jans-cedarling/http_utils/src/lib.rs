@@ -83,6 +83,18 @@ impl HttpRequestError {
         matches!(self.reason, HttpRequestReasonError::HttpStatusError)
     }
 
+    /// The HTTP status code captured at the failure point, if any. `Some(...)`
+    /// means the HTTP transaction reached a status (whether 2xx, 3xx, 4xx, or
+    /// 5xx); `None` means the failure happened before a response arrived
+    /// (DNS, TCP connect, TLS, etc.). Callers can use this to disambiguate
+    /// "couldn't reach upstream" from "got a bad status" — particularly
+    /// useful when the retry layer collapses 4xx/5xx exhaustion into the
+    /// generic `MaxRetriesExceeded` variant: a `Some(status)` there still
+    /// means we received responses, just unacceptable ones.
+    pub fn status_code(&self) -> Option<StatusCode> {
+        self.status_code
+    }
+
     pub fn with_retry_count(mut self, count: u32) -> Self {
         self.retry_count = count;
         self
