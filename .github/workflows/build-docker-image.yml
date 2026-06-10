@@ -274,6 +274,7 @@ jobs:
             REQUIRED_IMAGES="auth-server config-api configurator fido2 persistence-loader scim casa"
             for img in $REQUIRED_IMAGES; do
               echo "Waiting for docker ($img) to complete..."
+              CONCLUSION=""
               for attempt in $(seq 1 60); do
                 CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
                   --paginate --jq ".jobs[] | select(.name == \"docker ($img)\") | .conclusion" 2>/dev/null || echo "")
@@ -285,6 +286,10 @@ jobs:
                 fi
                 sleep 30
               done
+              if [[ "$CONCLUSION" != "success" && "$CONCLUSION" != "skipped" ]]; then
+                echo "  docker ($img) timed out waiting. Aborting all-in-one build."
+                exit 1
+              fi
             done
           fi
 
