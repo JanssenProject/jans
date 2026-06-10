@@ -219,19 +219,49 @@ public class TrustRelationship {
         return saml2LogoutProfileConfiguration;
     }
 
-    public <T extends CommonConfigurationCapable> TrustResult<TrustRelationship> updateProfileConfiguration(T profileConfiguration) {
-
-        if (profileConfiguration == null) {
-
-            return TrustResult.failure(
-                DomainObjectUpdateFailed.forClassWithCause(getClass(),CannotBeNullOrBlank.forField("profileConfiguration"))
-            );
-        }
+    public TrustResult<TrustRelationship> updateShibbolethSsoProfileConfiguration(ShibbolethSsoProfileConfiguration profileconfig) {
 
         return from(this)
-            .withProfileConfiguration(profileConfiguration)
+            .withShibbolethSsoProfileConfiguration(profileconfig)
             .build();
     }
+
+    public TrustResult<TrustRelationship> updateSaml2AttributeQueryProfileConfiguration(Saml2AttributeQueryProfileConfiguration profileconfig) {
+
+        return from(this)
+            .withSaml2AttributeQueryProfileConfiguration(profileconfig)
+            .build();
+    }
+
+    public TrustResult<TrustRelationship> updateSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
+
+        return from(this)
+            .withSaml2ArtifactResolutionProfileConfiguration(profileconfig)
+            .build();
+    }
+
+    public TrustResult<TrustRelationship> updateSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
+
+        return from(this)
+            .withSaml2EcpProfileConfiguration(profileconfig)
+            .build();
+    }
+
+    public TrustResult<TrustRelationship> updateSaml2SsoProfileConfiguration(Saml2SsoProfileConfiguration profileconfig) {
+
+        return from(this)
+            .withSaml2SsoProfileConfiguration(profileconfig)
+            .build();
+
+    }
+
+    public TrustResult<TrustRelationship> updateSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
+
+        return from(this)
+            .withSaml2LogoutProfileConfiguration(profileconfig)
+            .build();
+    }
+    
 
     public boolean hasNoActiveProfileConfiguration() {
 
@@ -319,12 +349,12 @@ public class TrustRelationship {
             .withStatus(TrustStatus.DRAFT)
             .withMetadataSource(new NoMetadataSource())
             .withDiscoveredEntityIds(EntityIds.empty())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
-            .withProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .withShibbolethSsoProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withSaml2ArtifactResolutionProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withSaml2AttributeQueryProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withSaml2EcpProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withSaml2SsoProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
+            .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
             .withReleasedAttributes(ReleasedAttributes.empty())
             .build();
     }
@@ -435,31 +465,39 @@ public class TrustRelationship {
             return this;
         }
 
-        public <T extends CommonConfigurationCapable> Builder withProfileConfiguration(T profileConfiguration) {
+        public Builder withShibbolethSsoProfileConfiguration(ShibbolethSsoProfileConfiguration profileconfig) {
 
+            this.shibbolethSsoProfileConfiguration = profileconfig;
+            return this;
+        }
 
-            switch(profileConfiguration.getType()) {
+        public Builder withSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
 
-                case SHIBBOLETH_SSO:
-                    this.shibbolethSsoProfileConfiguration = (ShibbolethSsoProfileConfiguration) profileConfiguration;
-                    break;
-                case SAML2_ARTIFACT_RESOLUTION:
-                    this.saml2ArtifactResolutionProfileConfiguration = (Saml2ArtifactResolutionProfileConfiguration) profileConfiguration;
-                    break;
-                case SAML2_ATTRIBUTE_QUERY:
-                    this.saml2AttributeQueryProfileConfiguration = (Saml2AttributeQueryProfileConfiguration) profileConfiguration;
-                    break;
-                case SAML2_ECP:
-                    this.saml2EcpProfileConfiguration = (Saml2EcpProfileConfiguration) profileConfiguration;
-                    break;
-                case SAML2_SSO:
-                    this.saml2SsoProfileConfiguration = (Saml2SsoProfileConfiguration) profileConfiguration;
-                    break;
-                case SAML2_LOGOUT:
-                    this.saml2LogoutProfileConfiguration = (Saml2LogoutProfileConfiguration) profileConfiguration;
-                    break;
-            }
+            this.saml2ArtifactResolutionProfileConfiguration = profileconfig;
+            return this;
+        }
 
+        public Builder withSaml2AttributeQueryProfileConfiguration(Saml2AttributeQueryProfileConfiguration profileconfig) {
+
+            this.saml2AttributeQueryProfileConfiguration = profileconfig;
+            return this;
+        }
+
+        public Builder withSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
+
+            this.saml2EcpProfileConfiguration = profileconfig;
+            return this;
+        }
+
+        public Builder withSaml2SsoProfileConfiguration(Saml2SsoProfileConfiguration profileconfig) {
+
+            this.saml2SsoProfileConfiguration = profileconfig;
+            return this;
+        }
+
+        public Builder withSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
+
+            this.saml2LogoutProfileConfiguration = profileconfig;
             return this;
         }
 

@@ -16,6 +16,11 @@ public class DomainObjectUpdateFailed extends TrustError {
         this.message = cause != null ? this.message + " : " + cause.getMessage() : this.message;
     }
 
+    public TrustError getCause() {
+
+        return cause;
+    }
+
     @Override
     public String toString() {
 

@@ -102,7 +102,7 @@ public class TrustRelationshipTest {
 
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurations() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurationsAndProfileTypes() {
 
         TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
         TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
@@ -110,20 +110,20 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual nature 
-            Arguments.of(individual,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration()), 
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
 
             //Aggregate nature
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration()), 
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration()) 
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
         );
     }
 
@@ -309,43 +309,102 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurations")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurationsAndProfileTypes")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with no metadatasources " + 
-            "WHEN updateProfileConfiguration() is called " +
+            "WHEN updateXXXProfileConfiguration() is called " +
             "THEN the operation updates the profile configuration and maintains the DRAFT status "
         )
-        public <T extends CommonConfigurationCapable> void shouldUpdateProfileConfigurationAndStayInDraft_whenNoMetadataSource(TrustRelationship tr, T profileconfig) {
+        public void shouldUpdateProfileConfigurationAndStayInDraft_whenNoMetadataSource(TrustRelationship tr, Object profileconfig, ProfileType profiletype) {
 
 
             assertThat(tr).isInDraftStatus();
             assertThat(tr).hasNoMetadataSource();
 
-            TrustResult<TrustRelationship> result = tr.updateProfileConfiguration(profileconfig);
-            assertThat(result.isSuccess()).isTrue();
-            TrustRelationship same_or_updated_tr = result.getValue();
+            TrustResult<TrustRelationship> result = null;
+            TrustRelationship same_or_updated_tr = null;
 
-            switch(profileconfig.getType()) {
+            switch(profiletype) {
                 case SHIBBOLETH_SSO:
+                    result = tr.updateShibbolethSsoProfileConfiguration((ShibbolethSsoProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getShibbolethSsoProfileConfiguration()).isEqualTo(profileconfig);
                     break;
                 case SAML2_ATTRIBUTE_QUERY:
+                    result = tr.updateSaml2AttributeQueryProfileConfiguration((Saml2AttributeQueryProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2AttributeQueryProfileConfiguration()).isEqualTo(profileconfig);
                     break;
                 case SAML2_ARTIFACT_RESOLUTION:
+                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration((Saml2ArtifactResolutionProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2ArtifactResolutionProfileConfiguration()).isEqualTo(profileconfig);
                     break;
                 case SAML2_ECP:
+                    result = tr.updateSaml2EcpProfileConfiguration((Saml2EcpProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2EcpProfileConfiguration()).isEqualTo(profileconfig);
                     break;
                 case SAML2_SSO:
+                    result = tr.updateSaml2SsoProfileConfiguration((Saml2SsoProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2SsoProfileConfiguration()).isEqualTo(profileconfig);
                     break;
                 case SAML2_LOGOUT:
+                    result = tr.updateSaml2LogoutProfileConfiguration((Saml2LogoutProfileConfiguration)profileconfig);
+                    assertThat(result.isSuccess()).isTrue();
+                    same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2LogoutProfileConfiguration()).isEqualTo(profileconfig);
                     break;
-            } 
+            }
+
+            assertThat(result)
+                .withFailMessage("Unsupported profile configuration specified during tests")
+                .isNotNull();
         }
 
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship " +
+            "WHEN updateDisplayName() is called with a null parameter " + 
+            "THEN the call should fail with the appropriate error " 
+        )
+        public void shouldFailWhenUpdateDisplayNameWithNull(TrustRelationship tr) {
+
+             TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
+             assertThat(result.isFailure()).isTrue();
+             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+             assertThat(error.getCause()).isNotNull();
+             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+             CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+             assertThat(cause.getFieldName()).isEqualTo("displayName");
+        }
+
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship " +
+            "WHEN updateMetadataSource() is called with a null parameter " +
+            "THEN the call should fail with the appropriate error "
+        )
+        public void shouldFailWhenUpdateMetadataSourceWithNull(TrustRelationship tr) {
+
+            TrustResult<TrustRelationship> result = tr.<ShibbolethSsoProfileConfiguration>updateMetadataSource(null);
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isNotNull();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        }
     }
 }
