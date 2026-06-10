@@ -198,8 +198,7 @@ impl StrategyState {
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
-                self.head_to_plain_transitions =
-                    self.head_to_plain_transitions.saturating_add(1);
+                self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
                 self.last_probe_at = Some(Utc::now());
             },
             // Already at the least efficient strategy — nothing to degrade to.
@@ -225,8 +224,7 @@ impl StrategyState {
             },
             RefreshStrategy::HeadThenGet => {
                 self.current = RefreshStrategy::PlainGet;
-                self.head_to_plain_transitions =
-                    self.head_to_plain_transitions.saturating_add(1);
+                self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
                 self.last_probe_at = Some(Utc::now());
             },
             RefreshStrategy::PlainGet => {},
@@ -665,10 +663,13 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                    .set_message(format!(
-                        "policy store refresh: body decode error for {url}: {e} (status {status})"
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: body decode error for {url}: {e} (status {status})"
+                )),
             );
             // HTTP transaction completed (we have a status); body read failed.
             // Classify as DecodeError, not NetworkError, so triage can
@@ -699,8 +700,13 @@ async fn parse_swap_and_record(
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_message(format!("policy store refresh: parse failure for {url}: {e}")),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: parse failure for {url}: {e}"
+                )),
             );
             return RefreshOutcome::ParseError;
         },
@@ -711,10 +717,13 @@ async fn parse_swap_and_record(
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_message(format!(
-                        "policy store refresh: rebuild failure for {url}: {e}"
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!(
+                    "policy store refresh: rebuild failure for {url}: {e}"
+                )),
             );
             return RefreshOutcome::RebuildError;
         },
@@ -727,9 +736,13 @@ async fn parse_swap_and_record(
 
     let elapsed = Utc::now().signed_duration_since(start).num_milliseconds();
     ctx.log.log_any(
-        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, None)).set_message(
-            format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
-        ),
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ))
+        .set_message(format!(
+            "policy store refresh: swapped new store from {url} in {elapsed} ms"
+        )),
     );
 
     RefreshOutcome::Success
@@ -744,12 +757,18 @@ fn fetch_error(
     state.consecutive_failures = state.consecutive_failures.saturating_add(1);
     let is_net = e.is_max_retries_exceeded();
     ctx.log.log_any(
-        LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None)).set_message(
-            format!(
-                "policy store refresh: {} against {url}: {e}",
-                if is_net { "network error" } else { "HTTP error" }
-            ),
-        ),
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ))
+        .set_message(format!(
+            "policy store refresh: {} against {url}: {e}",
+            if is_net {
+                "network error"
+            } else {
+                "HTTP error"
+            }
+        )),
     );
     if is_net {
         RefreshOutcome::NetworkError
@@ -1229,8 +1248,14 @@ mod tests {
             RefreshStrategy::PlainGet,
             "force_degrade at the floor must leave current unchanged",
         );
-        assert_eq!(s.conditional_to_head_transitions, 0);
-        assert_eq!(s.head_to_plain_transitions, 0);
+        assert_eq!(
+            s.conditional_to_head_transitions, 0,
+            "no conditional→head transition can fire when force_degrade is invoked at the PlainGet floor",
+        );
+        assert_eq!(
+            s.head_to_plain_transitions, 0,
+            "no head→plain transition can fire when force_degrade is invoked at the PlainGet floor",
+        );
     }
 
     #[test]

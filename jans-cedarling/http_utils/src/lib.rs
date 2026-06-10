@@ -403,10 +403,13 @@ mod tests {
         let err = read_response_capped(resp, Some(1024))
             .await
             .expect_err("body exceeds cap");
-        assert!(matches!(
-            err,
-            HttpRequestReasonError::ResponseTooLarge { limit: 1024, .. }
-        ));
+        assert!(
+            matches!(
+                err,
+                HttpRequestReasonError::ResponseTooLarge { limit: 1024, .. }
+            ),
+            "body over the 1024-byte cap must surface as ResponseTooLarge {{ limit: 1024, .. }}, got {err:?}",
+        );
     }
 
     #[tokio::test]
@@ -451,13 +454,28 @@ mod tests {
         // Cross-check the negative directions on stable error variants.
         let max_retries =
             HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
-        assert!(!max_retries.is_decode_error());
-        assert!(max_retries.is_max_retries_exceeded());
+        assert!(
+            !max_retries.is_decode_error(),
+            "MaxRetriesExceeded must not satisfy is_decode_error() — the three classifiers are mutually exclusive",
+        );
+        assert!(
+            max_retries.is_max_retries_exceeded(),
+            "MaxRetriesExceeded variant must satisfy is_max_retries_exceeded()",
+        );
 
         let status =
             HttpRequestError::new(HttpRequestReasonError::HttpStatusError, None);
-        assert!(!status.is_decode_error());
-        assert!(!status.is_max_retries_exceeded());
-        assert!(status.is_http_status_error());
+        assert!(
+            !status.is_decode_error(),
+            "HttpStatusError must not satisfy is_decode_error() — they classify different failure modes",
+        );
+        assert!(
+            !status.is_max_retries_exceeded(),
+            "HttpStatusError must not satisfy is_max_retries_exceeded() — that variant is for transport-exhausted retries, not status errors",
+        );
+        assert!(
+            status.is_http_status_error(),
+            "HttpStatusError variant must satisfy is_http_status_error()",
+        );
     }
 }

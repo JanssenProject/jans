@@ -741,9 +741,16 @@ mod test {
                     v.last_modified.as_deref(),
                     Some("Sun, 22 May 2026 12:00:00 GMT")
                 );
-                assert!(v.has_validator());
+                assert!(
+                    v.has_validator(),
+                    "captured validators must register as a validator pair — ETag={:?}, Last-Modified={:?}",
+                    v.etag,
+                    v.last_modified,
+                );
             },
-            super::HeadOutcome::NotSupported => panic!("expected Headers, got NotSupported"),
+            super::HeadOutcome::NotSupported => {
+                panic!("expected HeadOutcome::Headers from a 200 response with validators, got NotSupported")
+            },
         }
         mock.assert_async().await;
     }
@@ -788,7 +795,10 @@ mod test {
         let url = format!("{}/store", server.url());
 
         let outcome = client.head_validators(&url).await.expect("request");
-        assert!(matches!(outcome, super::HeadOutcome::NotSupported));
+        assert!(
+            matches!(outcome, super::HeadOutcome::NotSupported),
+            "HEAD 405 must map to NotSupported so the strategy machine downgrades to PlainGet, got {outcome:#?}",
+        );
         mock.assert_async().await;
     }
 
@@ -806,7 +816,10 @@ mod test {
         let url = format!("{}/store", server.url());
 
         let outcome = client.head_validators(&url).await.expect("request");
-        assert!(matches!(outcome, super::HeadOutcome::NotSupported));
+        assert!(
+            matches!(outcome, super::HeadOutcome::NotSupported),
+            "HEAD 501 must map to NotSupported so the strategy machine downgrades to PlainGet, got {outcome:#?}",
+        );
         mock.assert_async().await;
     }
 
