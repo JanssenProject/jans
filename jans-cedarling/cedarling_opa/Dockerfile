@@ -1,5 +1,5 @@
 ARG BUILDPLATFORM="linux/amd64"
-ARG BUILDERIMAGE="golang:1.25-trixie@sha256:adc12eea75e38959793d88b5c15f9f8ad20fee5ece9d3d5ae05c7d7c2d430f4b"
+ARG BUILDERIMAGE="golang:1.26-trixie@sha256:82c8738642b733f7d2f44b057375ec90d17c294ff6689aedc628afa9c2b2ceff"
 # Use distroless as minimal base image to package the manager binary
 ARG BASEIMAGE="gcr.io/distroless/cc-debian12:nonroot@sha256:bd2899c12b335c827750ccf2359879eab09c09b206023dcebea408947d54127c"
 

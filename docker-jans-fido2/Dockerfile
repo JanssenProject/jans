@@ -96,11 +96,14 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 
 WORKDIR /
 
-# download external files
+# download external files; the MDS TOC is Cloudflare-rate-limited and jans-fido2
+# refreshes it at runtime, so its seed download is best-effort
 ARG MDS_DOWNLOAD_DATE='2022-10-03'
-RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /app/static/fido2/authenticator_cert/ \
-    && wget -q https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
-    && wget -q http://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
+RUN WGET_RETRY="--tries=5 --timeout=30 --waitretry=10 --retry-connrefused --retry-on-http-error=429,500,502,503,504" \
+    && wget -nv ${WGET_RETRY} https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /app/static/fido2/authenticator_cert/ \
+    && wget -nv ${WGET_RETRY} https://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/ \
+    && { wget -nv ${WGET_RETRY} -U "Mozilla/5.0" https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
+         || { : > /etc/jans/conf/fido2/mds/toc/toc.jwt; echo "WARN: FIDO MDS TOC seed download failed; jans-fido2 will fetch it at runtime"; }; }
 
 # ======
 # Python
