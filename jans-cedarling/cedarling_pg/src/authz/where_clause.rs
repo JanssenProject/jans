@@ -454,7 +454,28 @@ fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
 /// (which `PolicyMetadata` callers should not produce, but we cannot prove)
 /// is treated as unhandled rather than silently mis-lowered.
 fn lower_policy_to_sql(meta: &PolicyMetadata) -> Option<String> {
-    if cedar_policy::Policy::parse(None, &meta.source).is_err() {
+    let Ok(policy) = cedar_policy::Policy::parse(None, &meta.source) else {
+        return None;
+    };
+
+    // Head-constraint safety check: the upstream `get_matching_policies_*`
+    // filter (cedarling/src/common/policy_store.rs:352-380) is *type-level* —
+    // a policy with `resource == Foo::"42"` reaches us for every `Foo`-typed
+    // row, and a `permit(principal == User::"alice", ...)` reaches us for
+    // every User-typed principal. Lowering only the `when`/`unless` body in
+    // those cases drops the head's identity restriction and produces a SQL
+    // fragment that matches *more rows* than the underlying Cedar policy
+    // allows. The SQL predicate alone cannot re-impose a principal- or
+    // resource-identity bound here — row-by-row RLS via
+    // `cedarling_authorized*` can, so this routes the policy to the
+    // unhandled-residual path. The action constraint is intentionally not
+    // checked: `matching_policies_for_table` already filters policies by
+    // the specific action we're lowering for.
+    use cedar_policy::{PrincipalConstraint, ResourceConstraint};
+    if !matches!(policy.principal_constraint(), PrincipalConstraint::Any) {
+        return None;
+    }
+    if !matches!(policy.resource_constraint(), ResourceConstraint::Any) {
         return None;
     }
 
@@ -988,6 +1009,94 @@ mod tests {
             lower_policy_to_sql(&m),
             None,
             "unparseable policy source should not lower"
+        );
+    }
+
+    /// Regression coverage for the head-constraint over-permit bug.
+    ///
+    /// Cedarling's `get_matching_policies` filters by entity TYPE, not by
+    /// specific scope IDs (see `cedarling/src/common/policy_store.rs:352-380`),
+    /// so a policy with `resource == Foo::"42"` reaches `lower_policy_to_sql`
+    /// for every Foo-typed row. Lowering only the body would drop the head's
+    /// identity restriction and produce a SQL fragment that matches **more
+    /// rows than Cedar permits**. The fix routes any non-`Any` principal or
+    /// resource constraint to the unhandled-residual path.
+    #[test]
+    fn lower_policy_to_sql_rejects_eq_resource_head_constraint() {
+        // Body-less policy that previously lowered to TRUE despite the head
+        // restricting to a single resource.
+        let m = meta(
+            "p1",
+            PolicyEffect::Permit,
+            r#"permit(principal, action, resource == Doc::"42");"#,
+        );
+        assert_eq!(
+            lower_policy_to_sql(&m),
+            None,
+            "resource == Doc::\"42\" must not lower to TRUE — SQL alone cannot enforce a per-id resource bound"
+        );
+    }
+
+    #[test]
+    fn lower_policy_to_sql_rejects_eq_principal_head_constraint() {
+        let m = meta(
+            "p1",
+            PolicyEffect::Permit,
+            r#"permit(principal == User::"alice", action, resource);"#,
+        );
+        assert_eq!(
+            lower_policy_to_sql(&m),
+            None,
+            "principal == User::\"alice\" must not lower — SQL has no principal context"
+        );
+    }
+
+    #[test]
+    fn lower_policy_to_sql_rejects_head_constraint_even_with_when_body() {
+        // Most dangerous variant: `when` body looks lowerable but the head
+        // restricts to a single resource. Pre-fix, this lowered to
+        // `"public" = TRUE` and dropped the resource id constraint entirely.
+        let m = meta(
+            "p1",
+            PolicyEffect::Permit,
+            r#"permit(principal, action, resource == Doc::"42") when { resource.public == true };"#,
+        );
+        assert_eq!(
+            lower_policy_to_sql(&m),
+            None,
+            "head `resource == Doc::\"42\"` must take precedence over an otherwise-lowerable when body"
+        );
+    }
+
+    #[test]
+    fn lower_policy_to_sql_rejects_in_and_is_head_constraints() {
+        for source in [
+            r#"permit(principal in User::"alice", action, resource);"#,
+            r#"permit(principal is User, action, resource);"#,
+            r#"permit(principal, action, resource in Doc::"42");"#,
+            r#"permit(principal, action, resource is Doc);"#,
+        ] {
+            let m = meta("p", PolicyEffect::Permit, source);
+            assert_eq!(
+                lower_policy_to_sql(&m),
+                None,
+                "non-`Any` head constraint must not lower: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn lower_policy_to_sql_accepts_fully_open_head() {
+        // The fix must not regress the truly unconstrained case.
+        let m = meta(
+            "p1",
+            PolicyEffect::Permit,
+            "permit(principal, action, resource);",
+        );
+        assert_eq!(
+            lower_policy_to_sql(&m).as_deref(),
+            Some("TRUE"),
+            "fully open head with no body should still lower to TRUE"
         );
     }
 
