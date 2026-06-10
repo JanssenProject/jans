@@ -184,26 +184,7 @@ impl StrategyState {
             return;
         }
         self.degraded_count = 0;
-        match self.current {
-            RefreshStrategy::Conditional => {
-                self.current = RefreshStrategy::HeadThenGet;
-                self.conditional_to_head_transitions =
-                    self.conditional_to_head_transitions.saturating_add(1);
-                // Stamp the reprobe cooldown so `choose_for_tick` waits
-                // STRATEGY_REPROBE_INTERVAL_SECS before testing Conditional
-                // again — without this, the next tick would immediately
-                // re-probe Conditional and we'd never actually use
-                // HeadThenGet to serve refreshes.
-                self.last_probe_at = Some(Utc::now());
-            },
-            RefreshStrategy::HeadThenGet => {
-                self.current = RefreshStrategy::PlainGet;
-                self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
-                self.last_probe_at = Some(Utc::now());
-            },
-            // Already at the least efficient strategy — nothing to degrade to.
-            RefreshStrategy::PlainGet => {},
-        }
+        self.degrade_one_step();
     }
 
     /// Reset the degrade counter — current strategy worked.
@@ -215,6 +196,20 @@ impl StrategyState {
     /// degrade threshold since the upstream definitively refused the method.
     fn force_degrade(&mut self) {
         self.degraded_count = 0;
+        self.degrade_one_step();
+    }
+
+    /// Move `current` one step down the `Conditional → HeadThenGet → PlainGet`
+    /// ladder, bump the matching transition counter, and stamp the reprobe
+    /// cooldown so `choose_for_tick` waits `STRATEGY_REPROBE_INTERVAL_SECS`
+    /// before testing the more efficient strategy again — without that stamp,
+    /// the next tick would immediately re-probe `Conditional` and we'd never
+    /// actually use the degraded strategy to serve refreshes. No-op when
+    /// already at the `PlainGet` floor. Single source of truth shared by
+    /// [`Self::record_degraded`] and [`Self::force_degrade`] so a future
+    /// strategy level (or extra per-transition side effect) only needs to
+    /// be added here.
+    fn degrade_one_step(&mut self) {
         match self.current {
             RefreshStrategy::Conditional => {
                 self.current = RefreshStrategy::HeadThenGet;
@@ -227,6 +222,7 @@ impl StrategyState {
                 self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
                 self.last_probe_at = Some(Utc::now());
             },
+            // Already at the least efficient strategy — nothing to degrade to.
             RefreshStrategy::PlainGet => {},
         }
     }
