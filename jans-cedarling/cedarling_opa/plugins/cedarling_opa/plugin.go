@@ -236,7 +236,7 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 		p.logger.Info(err.Error())
 		return
 	}
-	var tokenEntities []cedarling_go.TokenInput
+	tokenEntities := []cedarling_go.TokenInput{}
 	for _, token := range tokens.Tokens {
 		new_token := cedarling_go.TokenInput{
 			Mapping: token.Mapping,
