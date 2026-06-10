@@ -9,7 +9,7 @@ mod spawn_task;
 pub use spawn_task::*;
 
 use cache_headers::CacheHeadersState;
-use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender};
+use http_utils::{read_response_capped, Backoff, HttpRequestError, HttpRequestReasonError, Sender};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
 #[cfg(test)]
@@ -261,17 +261,34 @@ impl HttpClient {
             });
         }
 
-        let bytes = response.bytes().await.map(|b| b.to_vec()).map_err(|e| {
-            HttpRequestError::new(
-                HttpRequestReasonError::DecodeResponseBytes(e),
-                Some(status),
-            )
-        })?;
+        // Enforce the configured body-size cap. Old prod path
+        // (get_bytes → send_bytes → read_response_capped) bounded this; raw
+        // `response.bytes()` here would let a hostile / misconfigured upstream
+        // buffer multi-GB bodies into the worker on every refresh tick.
+        let bytes = read_response_capped(response, self.max_response_size_bytes)
+            .await
+            .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
 
         Ok(ConditionalFetch::Modified {
             bytes,
             validators: new_validators,
         })
+    }
+
+    /// Read a [`reqwest::Response`] body into bytes while enforcing this
+    /// client's configured response-size cap (`max_response_size_bytes`).
+    /// Exposed so the policy-store loader and refresh worker — which need to
+    /// stream the response headers separately (to capture cache validators)
+    /// before reading the body — can still get the cap that the bulk helpers
+    /// (`get_bytes`, `get_json`, etc.) apply internally.
+    pub(crate) async fn read_response_capped(
+        &self,
+        response: reqwest::Response,
+    ) -> Result<Vec<u8>, HttpClientError> {
+        let status = response.status();
+        read_response_capped(response, self.max_response_size_bytes)
+            .await
+            .map_err(|reason| HttpRequestError::new(reason, Some(status)))
     }
 
     /// Sends a HEAD request and parses the response headers into a
@@ -868,5 +885,42 @@ mod test {
     #[tokio::test]
     async fn head_validators_500_propagates_as_error() {
         assert_head_status_propagates_as_error(500).await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_enforces_max_response_size_cap() {
+        // Regression test: prior to the cap-routing fix the conditional-GET
+        // path read `response.bytes().await` raw, dropping the
+        // CEDARLING_HTTP_MAX_RESPONSE_SIZE guard. A hostile upstream returning
+        // a multi-GB body could exhaust memory on every refresh tick.
+        let mut server = Server::new_async().await;
+        // Body larger than the cap we'll configure.
+        let big_body = vec![0u8; 4096];
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .with_body(big_body)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let conf = HttpClientConfig {
+            max_response_size_bytes: Some(1024),
+            ..HTTP_CONF
+        };
+        let client = HttpClient::new(conf).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let err = client
+            .get_bytes_conditional(&url, &CacheHeadersState::default())
+            .await
+            .expect_err("body over the cap must surface as an error, not be silently buffered");
+        let msg = err.to_string();
+        assert!(
+            msg.contains("response body exceeds the configured limit")
+                || msg.contains("ResponseTooLarge"),
+            "cap-exceeded must surface as a ResponseTooLarge error, got: {msg}",
+        );
+        mock.assert_async().await;
     }
 }

@@ -658,8 +658,12 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
     };
     let status = response.status();
     let new_validators = CacheHeadersState::from_headers(response.headers(), Utc::now());
-    let bytes = match response.bytes().await {
-        Ok(b) => b.to_vec(),
+    // Route through the client's `read_response_capped` helper so
+    // `CEDARLING_HTTP_MAX_RESPONSE_SIZE` bounds the refresh-tick body the same
+    // way it bounds bootstrap loads — a hostile/oversized upstream can't
+    // exhaust memory on every periodic tick.
+    let bytes = match ctx.http_client.read_response_capped(response).await {
+        Ok(b) => b,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
             ctx.log.log_any(
@@ -671,9 +675,10 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
                     "policy store refresh: body decode error for {url}: {e} (status {status})"
                 )),
             );
-            // HTTP transaction completed (we have a status); body read failed.
-            // Classify as DecodeError, not NetworkError, so triage can
-            // distinguish "couldn't reach upstream" from "read response body".
+            // HTTP transaction completed (we have a status); body read failed
+            // (decode error OR cap exceeded). Classify as DecodeError, not
+            // NetworkError, so triage can distinguish "couldn't reach upstream"
+            // from "read response body".
             return RefreshOutcome::DecodeError;
         },
     };

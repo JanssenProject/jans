@@ -194,14 +194,11 @@ async fn load_policy_store_from_lock_master(
     // Magic-byte sniffing in the refresh worker handles the case where Lock
     // Server starts serving `.cjar` archives in the future.
     let response = http_client.get_with_retry(uri).await?;
-    let status = response.status();
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
-    let bytes = response.bytes().await.map_err(|e| {
-        http_utils::HttpRequestError::new(
-            http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
-            Some(status),
-        )
-    })?;
+    // Route through the client's capped reader so the bootstrap load honors
+    // `CEDARLING_HTTP_MAX_RESPONSE_SIZE` — a multi-GB body on the very first
+    // policy-store fetch shouldn't be able to exhaust memory.
+    let bytes = http_client.read_response_capped(response).await?;
     let store = parse_lock_master_bytes(&bytes)?;
     Ok(LoadedPolicyStore {
         store,
@@ -333,18 +330,13 @@ async fn load_policy_store_from_cjar_url(
         .get_with_retry(url)
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
-    let status = response.status();
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
-    let bytes: Vec<u8> = response
-        .bytes()
+    // Cap-aware body read: `CEDARLING_HTTP_MAX_RESPONSE_SIZE` bounds the
+    // archive download so an oversized `.cjar` URL can't exhaust memory.
+    let bytes = http_client
+        .read_response_capped(response)
         .await
-        .map_err(|e| {
-            http_utils::HttpRequestError::new(
-                http_utils::HttpRequestReasonError::DecodeResponseBytes(e),
-                Some(status),
-            )
-        })?
-        .to_vec();
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to read archive body: {e}")))?;
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
