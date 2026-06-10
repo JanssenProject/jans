@@ -813,14 +813,31 @@ fn classify_fetch_error(e: &crate::http::HttpClientError) -> (&'static str, Refr
 
 /// `true` if the two validator sets refer to the same resource version — used
 /// by the HEAD-then-GET fallback to decide whether to skip the body fetch.
+///
+/// `ETag`s are compared per RFC 7232 §2.3.2 **weak comparison** semantics —
+/// this is the comparison required by `If-None-Match` (the conditional we
+/// actually send). Concretely: ignore each side's optional `W/` prefix and
+/// compare the opaque quoted-string portion. Without this, a server that
+/// returns `W/"v1"` from HEAD but stored `"v1"` from a prior GET would force
+/// an unnecessary full GET every tick, defeating the bandwidth-saving point
+/// of the HEAD probe.
 fn validators_match(a: &CacheHeadersState, b: &CacheHeadersState) -> bool {
     if let (Some(ea), Some(eb)) = (a.etag.as_ref(), b.etag.as_ref()) {
-        return ea == eb;
+        return etag_opaque_tag(ea) == etag_opaque_tag(eb);
     }
     if let (Some(la), Some(lb)) = (a.last_modified.as_ref(), b.last_modified.as_ref()) {
         return la == lb;
     }
     false
+}
+
+/// Strip the optional `W/` weak-validator prefix from an `ETag`, returning the
+/// opaque quoted-string portion used for weak comparison. Per RFC 7232 §2.3.1
+/// the prefix is exactly the two ASCII characters `W/`; anything else (e.g.
+/// surrounding whitespace, an uppercase scheme indicator) is part of the
+/// opaque tag and stays.
+fn etag_opaque_tag(etag: &str) -> &str {
+    etag.strip_prefix("W/").unwrap_or(etag)
 }
 
 #[cfg(test)]
@@ -1274,6 +1291,67 @@ mod tests {
         assert!(
             !validators_match(&a, &b),
             "different Last-Modified values must not match",
+        );
+    }
+
+    #[test]
+    fn validators_match_weak_etag_equals_strong_for_same_tag() {
+        // RFC 7232 §2.3.2: `If-None-Match` uses weak comparison, so
+        // W/"v1" and "v1" must compare equal even though the strings differ.
+        // Without this the HEAD probe would force an unnecessary full GET
+        // every tick when the upstream uses weak ETags (CDN-rewritten,
+        // proxy-stripped W/ prefix, etc.).
+        let weak = CacheHeadersState {
+            etag: Some("W/\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        let strong = CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        assert!(
+            validators_match(&weak, &strong),
+            "weak `W/\"v1\"` and strong `\"v1\"` must match under If-None-Match semantics (RFC 7232 §2.3.2)",
+        );
+        // Both directions.
+        assert!(
+            validators_match(&strong, &weak),
+            "comparison must be symmetric — strong vs weak must also match",
+        );
+    }
+
+    #[test]
+    fn validators_match_weak_etags_match_each_other() {
+        let a = CacheHeadersState {
+            etag: Some("W/\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        let b = CacheHeadersState {
+            etag: Some("W/\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        assert!(
+            validators_match(&a, &b),
+            "two identical weak ETags must match",
+        );
+    }
+
+    #[test]
+    fn validators_match_weak_etag_still_distinguishes_different_tags() {
+        // Weak comparison strips the prefix but the opaque tag itself must
+        // still differ — otherwise the short-circuit would conflate different
+        // resource versions.
+        let a = CacheHeadersState {
+            etag: Some("W/\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        let b = CacheHeadersState {
+            etag: Some("W/\"v2\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        assert!(
+            !validators_match(&a, &b),
+            "different opaque tags must not match even when both are weak",
         );
     }
 
