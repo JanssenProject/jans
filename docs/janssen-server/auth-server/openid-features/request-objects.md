@@ -191,7 +191,8 @@ Configure per-client Request Object behavior via TUI (`Auth Server` -> `Clients`
 | `request_object_signing_alg` | JWS algorithm that must be used to sign Request Objects sent to the OP. Request Objects signed with another algorithm are rejected. Used for both `request` and `request_uri`. The value `none` may be used unless server policy forbids it. |
 | `request_object_encryption_alg` | JWE `alg` the RP may use to encrypt Request Objects. Include this when symmetric encryption is used so the OP can derive the key from `client_secret`. If both signing and encryption are used, the object is signed then encrypted (nested JWT). |
 | `request_object_encryption_enc` | JWE `enc` algorithm. If `request_object_encryption_alg` is set, `request_object_encryption_enc` should also be provided (default in spec: `A128CBC-HS256`). |
-| `request_uris` | Pre-registered `request_uri` values. When the client defines this list, Janssen only accepts `request_uri` values that match. When [requireRequestUriRegistration](../../reference/json/properties/janssenauthserver-properties.md#requirerequesturiregistration) is `true` in discovery, pre-registration is required. If request file contents can change, include the base64url SHA-256 hash of the file as the URI fragment. |
+| `request_uris` | Pre-registered `request_uri` values. When the client defines this list, Janssen only accepts `request_uri` values that match. When discovery claim `require_request_uri_registration` is `true` (controlled by [requireRequestUriRegistration](../../reference/json/properties/janssenauthserver-properties.md#requirerequesturiregistration)), pre-registration is required. If request file contents can change, include the base64url SHA-256 hash of the file as the URI fragment. |
+
 
 Example client registration fragment:
 
