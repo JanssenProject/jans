@@ -132,14 +132,24 @@ impl CacheHeadersState {
         self.etag.is_some() || self.last_modified.is_some()
     }
 
-    /// Merge `other` into `self`, keeping any field from `self` when the
-    /// corresponding field in `other` is absent. Used when applying the
-    /// cache headers from a `304 Not Modified` response (RFC 9110 §15.4.5):
-    /// the response *may* refresh `Cache-Control`, `ETag`, `Last-Modified`,
-    /// etc., but **omitted** fields must not erase previously-known
-    /// validators — otherwise a server that sends `304` with only
-    /// `Cache-Control: max-age=…` would wipe our cached `ETag` and force
-    /// the next tick to fetch a body unconditionally.
+    /// Apply cache headers from a fresh response (typically a `304`) to
+    /// `self`. Field semantics differ on purpose:
+    ///
+    /// - **Validators** (`etag`, `last_modified`) identify the *resource
+    ///   version*. Per RFC 9110 §15.4.5 a `304` only carries them when
+    ///   refreshed; an omitted field must not erase our cached value, or the
+    ///   next conditional GET would have nothing to send.
+    ///
+    /// - **`fresh_for`** is a *per-response* property — "this specific
+    ///   response is fresh for N seconds". A new response that omits
+    ///   `Cache-Control` / `Expires` is making no freshness claim, and
+    ///   carrying forward an old value would pin the worker cadence to a
+    ///   long-ago `max-age` indefinitely. We always overwrite, including
+    ///   with `None`.
+    ///
+    /// - **`no_cache`** is a sticky directive: once a response asks for
+    ///   revalidation, a later response that omits the directive does not
+    ///   automatically unset it.
     pub(crate) fn merge_from(&mut self, other: Self) {
         if other.etag.is_some() {
             self.etag = other.etag;
@@ -147,11 +157,10 @@ impl CacheHeadersState {
         if other.last_modified.is_some() {
             self.last_modified = other.last_modified;
         }
-        if other.fresh_for.is_some() {
-            self.fresh_for = other.fresh_for;
-        }
-        // `no_cache` is a directive flag — preserve only when explicitly set
-        // by the new response; absence does not unset a prior `no-cache`.
+        // Per-response, not per-resource — overwrite unconditionally (a `None`
+        // means "no freshness claim this time", which the worker should honor
+        // rather than pretending an earlier max-age still applies).
+        self.fresh_for = other.fresh_for;
         if other.no_cache {
             self.no_cache = true;
         }
@@ -369,6 +378,45 @@ mod tests {
             prior.fresh_for,
             Some(Duration::from_secs(120)),
             "fresh_for present in the new response must overwrite the prior value",
+        );
+    }
+
+    #[test]
+    fn merge_from_clears_stale_fresh_for_when_new_response_omits_it() {
+        // Regression: prior to this fix `merge_from` kept the old `fresh_for`
+        // when the new response omitted Cache-Control / Expires, pinning the
+        // worker cadence to a long-ago max-age. Concrete scenario the
+        // reviewer flagged: bootstrap response sent `Cache-Control:
+        // max-age=10`, operator set `REFRESH_INTERVAL=3600`, every later 304
+        // omits Cache-Control. Without overwrite-with-None semantics,
+        // `next_delay`'s `min(server_fresh, base)` would keep choosing 10s
+        // forever — ~360× more upstream traffic than configured.
+        let mut prior = CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            last_modified: Some("Mon".to_string()),
+            fresh_for: Some(Duration::from_secs(10)),
+            no_cache: false,
+        };
+        let incoming = CacheHeadersState {
+            // No Cache-Control / Expires on this response — only validators.
+            etag: Some("\"v1\"".to_string()),
+            ..CacheHeadersState::default()
+        };
+        prior.merge_from(incoming);
+        assert_eq!(
+            prior.fresh_for, None,
+            "fresh_for must clear when the new response makes no freshness claim — otherwise the old per-response max-age locks the worker cadence indefinitely",
+        );
+        // Validators must still survive — only fresh_for changes semantics.
+        assert_eq!(
+            prior.etag.as_deref(),
+            Some("\"v1\""),
+            "validators must remain sticky even when fresh_for clears",
+        );
+        assert_eq!(
+            prior.last_modified.as_deref(),
+            Some("Mon"),
+            "Last-Modified must remain sticky even when fresh_for clears",
         );
     }
 
