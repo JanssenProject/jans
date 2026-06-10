@@ -205,6 +205,18 @@ jobs:
             curl -sk -o /dev/null -w "$ep: %{http_code}\n" "https://${JANS_FQDN}/.well-known/$ep" || true
           done
 
+      - name: Reload jans-scim (pick up test SCIM custom attributes)
+        run: |
+          set -uo pipefail
+          # jans-scim caches the SCIM extension at init; restart it so the loader's scimCustom*
+          # attributes are recognised (jans-linux-setup likewise restarts jans-scim after loading).
+          docker exec jans supervisorctl -c /app/conf/supervisord.conf restart jans-scim || true
+          for _ in $(seq 1 30); do
+            code=$(curl -sk -o /dev/null -w "%{http_code}" "https://${JANS_FQDN}/.well-known/scim-configuration" || true)
+            [ "$code" = "200" ] && { echo "jans-scim back up"; break; }
+            sleep 4
+          done
+
       - name: Import AIO CA certificate into the JDK truststore
         run: |
           set -euo pipefail

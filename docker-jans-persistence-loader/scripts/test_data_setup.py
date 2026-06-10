@@ -86,6 +86,7 @@ DN_TABLE_SUFFIX = (
     ("ou=groups,o=jans", "jansGrp"),
     ("ou=people,o=jans", "jansPerson"),
     ("ou=clients,o=jans", "jansClnt"),
+    ("ou=configuration,o=jans", "jansAppConf"),  # root config row (carries the jansAuthMode=basic modify)
 )
 
 # jans-auth dynamic-config overrides required by the test-suite (mirrors
