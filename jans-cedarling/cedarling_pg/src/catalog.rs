@@ -19,6 +19,12 @@ use pgrx::extension_sql;
 #[allow(unused_imports)]
 use crate::mask::cedarling_set_mask_config;
 #[allow(unused_imports)]
+use crate::observability::status::cedarling_status;
+#[allow(unused_imports)]
+use crate::observability::trace::{
+    cedarling_explain, cedarling_last_trace, cedarling_recent_traces,
+};
+#[allow(unused_imports)]
 use crate::policy::versions::{
     cedarling_diff_policies, cedarling_register_policy_version, cedarling_rollback_policy,
     cedarling_use_policy,
@@ -111,6 +117,18 @@ REVOKE EXECUTE ON FUNCTION cedarling_register_entity_map(oid, text, text[]) FROM
 -- different migration doesn't silently open the door.
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.mask_rules FROM PUBLIC;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.entity_map FROM PUBLIC;
+
+-- Observability readers: the trace ring is per-backend, so under connection
+-- pooling (PgBouncer / app-side pools) a low-privilege role can read trace
+-- entries produced by other sessions that previously ran on the same backend.
+-- Entries surface resource_type / resource_id / principal_id / diag_errors —
+-- authorization metadata, not row contents, but still cross-session leakage.
+-- Lock these to the extension owner; grant to a dedicated observability role
+-- as needed.
+REVOKE EXECUTE ON FUNCTION cedarling_last_trace() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_recent_traces(int) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_explain(text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION cedarling_status() FROM PUBLIC;
 ",
     name = "cedarling_pg_policy_function_privileges",
     requires = [
@@ -120,5 +138,9 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON cedarling.entity_map FROM PUBLIC;
         cedarling_diff_policies,
         cedarling_set_mask_config,
         cedarling_register_entity_map,
+        cedarling_last_trace,
+        cedarling_recent_traces,
+        cedarling_explain,
+        cedarling_status,
     ],
 );

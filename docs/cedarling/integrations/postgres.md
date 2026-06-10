@@ -303,12 +303,20 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 
 ### Observability
 
+All four functions are `REVOKE EXECUTE … FROM PUBLIC` because the trace ring
+is per-backend: under connection pooling (PgBouncer, app-side pools), a
+low-privilege session can read trace entries produced by other sessions that
+previously ran on the same backend. Entries surface authorization metadata
+(`resource_type`, `resource_id`, `principal_id`, `diag_errors`) — not row
+contents, but still cross-session leakage. Grant explicitly to the
+observability/monitoring roles that need them.
+
 | Function | Purpose |
 | --- | --- |
-| `cedarling_status() → jsonb` | Health classification (`healthy` / `degraded` / `unhealthy`), trusted-issuer counts, request totals, allowed/denied/error counts, cache hit-rate, last error, last policy update. `first_request_time` is when the first authorize call ran in this backend (not extension load time). |
-| `cedarling_last_trace() → jsonb` | The most recent `AuthorizationTrace` (request id, decision, matched policy ids, diagnostic errors, cache-hit flag, shadow flag, duration, `policy_version` at evaluation time). |
-| `cedarling_recent_traces(limit int) → jsonb` | The trailing window of traces from the ring buffer. |
-| `cedarling_explain(resource_json text, action text) → jsonb` | One-off authorization that bypasses the cache and the request counters, returning the full enriched trace plus matched policies. |
+| `cedarling_status() → jsonb` | Owner-only. Health classification (`healthy` / `degraded` / `unhealthy`), trusted-issuer counts, request totals, allowed/denied/error counts, cache hit-rate, last error, last policy update. `first_request_time` is when the first authorize call ran in this backend (not extension load time). |
+| `cedarling_last_trace() → jsonb` | Owner-only. The most recent `AuthorizationTrace` (request id, decision, matched policy ids, diagnostic errors, cache-hit flag, shadow flag, duration, `policy_version` at evaluation time). |
+| `cedarling_recent_traces(limit int) → jsonb` | Owner-only. The trailing window of traces from the ring buffer. |
+| `cedarling_explain(resource_json text, action text) → jsonb` | Owner-only. One-off authorization that bypasses the cache and the request counters, returning the full enriched trace plus matched policies. Reads and writes the trace ring like the other authorize functions, so it inherits the same cross-session-leakage profile. |
 
 ### Catalog tables (in the `cedarling` schema)
 
