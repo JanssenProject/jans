@@ -1,7 +1,8 @@
 package io.jans.casa.plugins.authnmethod.service.otp;
 
-import com.github.bastiaanjansen.otp.HMACAlgorithm;
-import com.github.bastiaanjansen.otp.TOTPGenerator;
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
+import com.google.common.io.BaseEncoding;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.TOTPConfig;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     private TOTPGenerator buildGenerator(byte[] secret) {
-        return new TOTPGenerator.Builder(secret)
+        return new TOTPGenerator.Builder(BaseEncoding.base32().omitPadding().encode(secret))
                 .withHOTPGenerator(builder -> {
                     builder.withPasswordLength(conf.getDigits());
                     builder.withAlgorithm(hmacShaAlgorithm);
