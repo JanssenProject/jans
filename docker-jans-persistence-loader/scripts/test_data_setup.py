@@ -28,6 +28,8 @@ import re
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+from sqlalchemy import Table
+
 from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
 
@@ -339,8 +341,13 @@ class TestDataLoader:
             return
 
         if self.client.metadata.tables.get(table) is None:
-            logger.warning("test-data modify: table %s not reflected for %s; skipping", table, dn)
-            return
+            # the bulk reflect occasionally omits a table (seen for jansCustomScript); reflect
+            # just this one on demand before giving up.
+            try:
+                Table(table, self.client.metadata, autoload_with=self.client.engine)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("test-data modify: table %s not reflectable for %s (%s); skipping", table, dn, exc)
+                return
 
         doc_id = doc_id_from_dn(dn)
         row = self.client.get(table, doc_id, [attr])

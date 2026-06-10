@@ -216,6 +216,11 @@ jobs:
             [ "$code" = "200" ] && { echo "jans-scim back up"; break; }
             sleep 4
           done
+          # diagnostic: confirm the scimCustom* attrs in the DB and whether jans-scim built the extension
+          echo "::group::SCIM custom-attr diagnostic"
+          docker exec jans python3 -c 'from jans.pycloudlib import get_manager; from jans.pycloudlib.persistence.sql import SqlClient, doc_id_from_dn; c=SqlClient(get_manager()); [print("scim attr", i, c.get("jansAttr", doc_id_from_dn(f"inum={i},ou=attributes,o=jans"), ["jansAttrName","jansScimCustomAttr","jansStatus"])) for i in ("ADA6","70F0","653A")]' 2>&1 || true
+          curl -sk "https://${JANS_FQDN}/jans-scim/restv1/v2/Schemas" 2>/dev/null | grep -aoiE "scimCustom[A-Za-z]+|urn:[^\"]*extension[^\"]*User" | sort -u | head || echo "(SCIM /Schemas not readable without auth)"
+          echo "::endgroup::"
 
       - name: Import AIO CA certificate into the JDK truststore
         run: |
