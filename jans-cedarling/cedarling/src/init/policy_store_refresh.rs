@@ -584,7 +584,11 @@ async fn tick_conditional(
             let new_hash = body_hash(&bytes);
             if should_short_circuit(new_hash, state) {
                 // Same body despite conditional headers — server ignored them.
-                state.validators = validators;
+                // Body is unchanged so this is the same resource version;
+                // merge so a response that omits ETag (e.g. a reverse proxy
+                // stripping it) doesn't erase our cached validators and force
+                // the next conditional GET to fetch the body unconditionally.
+                state.validators.merge_from(validators);
                 state.consecutive_failures = 0;
                 if !is_probe {
                     state.strategy.record_degraded();
@@ -684,7 +688,11 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
     };
     let new_hash = body_hash(&bytes);
     if should_short_circuit(new_hash, state) {
-        state.validators = new_validators;
+        // Same body as last successful load — same resource version. Merge
+        // (don't replace) so a 200 that drops ETag (some proxies strip it)
+        // doesn't erase the validators that let the next conditional GET
+        // potentially win a 304.
+        state.validators.merge_from(new_validators);
         state.consecutive_failures = 0;
         return RefreshOutcome::NotModified;
     }
@@ -933,6 +941,53 @@ mod tests {
         assert!(
             !should_short_circuit(body_hash(b"anything"), &state),
             "with no seed, no hash can match — first tick must always fall through",
+        );
+    }
+
+    #[test]
+    fn body_hash_short_circuit_merges_validators_rather_than_overwriting() {
+        // Regression: a 200 that drops ETag on an identical body would
+        // previously wipe `state.etag`, so the next conditional GET sent no
+        // `If-None-Match` and the upstream could never reply 304 again — the
+        // worker would download the full body every tick.
+        //
+        // We can't drive `tick_conditional` directly without a full
+        // WorkerContext, so we exercise the contract on the state-mutation
+        // helper merge_from (which the short-circuit now calls).
+        let mut state = RefreshState {
+            last_body_hash: Some(body_hash(b"unchanged body")),
+            validators: CacheHeadersState {
+                etag: Some("\"v1\"".to_string()),
+                last_modified: Some("Mon".to_string()),
+                fresh_for: Some(Duration::from_secs(60)),
+                ..CacheHeadersState::default()
+            },
+            ..RefreshState::default()
+        };
+
+        // Simulate a 200-identical-body reply that omits ETag (some proxies
+        // strip it). After merge: ETag survives, Last-Modified survives,
+        // fresh_for overwrites (per-response semantics — see Finding #5).
+        let response_with_no_etag = CacheHeadersState {
+            // No ETag — the misbehaving proxy case.
+            last_modified: Some("Mon".to_string()),
+            ..CacheHeadersState::default()
+        };
+        state.validators.merge_from(response_with_no_etag);
+
+        assert_eq!(
+            state.validators.etag.as_deref(),
+            Some("\"v1\""),
+            "ETag must survive a 200-identical-body that drops the field — otherwise the next conditional GET has nothing to send and we'd re-download forever",
+        );
+        assert_eq!(
+            state.validators.last_modified.as_deref(),
+            Some("Mon"),
+            "Last-Modified must survive on the short-circuit path",
+        );
+        assert_eq!(
+            state.validators.fresh_for, None,
+            "fresh_for is per-response — a response that omits Cache-Control must clear it (Finding #5)",
         );
     }
 

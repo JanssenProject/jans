@@ -9,7 +9,7 @@ mod spawn_task;
 pub use spawn_task::*;
 
 use cache_headers::CacheHeadersState;
-use http_utils::{read_response_capped, Backoff, HttpRequestError, HttpRequestReasonError, Sender};
+use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender, read_response_capped};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
 #[cfg(test)]
@@ -328,11 +328,12 @@ impl HttpClient {
             // `HttpError` metric bucket rather than counting it toward
             // `degraded_count` as a strategy ineffectiveness signal.
             let msg = format!("HEAD probe rejected with status {status}");
-            return Err(
-                HttpRequestError::new(HttpRequestReasonError::HttpStatusError, Some(status))
-                    .with_retry_count(0)
-                    .with_last_error(msg),
-            );
+            return Err(HttpRequestError::new(
+                HttpRequestReasonError::HttpStatusError,
+                Some(status),
+            )
+            .with_retry_count(0)
+            .with_last_error(msg));
         }
         let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
         Ok(HeadOutcome::Headers(validators))
@@ -682,7 +683,8 @@ mod test {
         match result {
             super::ConditionalFetch::Modified { bytes, validators } => {
                 assert_eq!(
-                    bytes, b"new-body-bytes",
+                    bytes,
+                    b"new-body-bytes",
                     "200 body must match what the mock served, got {} bytes",
                     bytes.len(),
                 );
@@ -711,10 +713,7 @@ mod test {
         let mut server = Server::new_async().await;
         let mock = server
             .mock("GET", "/store")
-            .match_header(
-                "if-modified-since",
-                "Sun, 22 May 2026 12:00:00 GMT",
-            )
+            .match_header("if-modified-since", "Sun, 22 May 2026 12:00:00 GMT")
             .with_status(200)
             .with_body(b"x")
             .expect(1)
@@ -766,7 +765,9 @@ mod test {
                 );
             },
             super::HeadOutcome::NotSupported => {
-                panic!("expected HeadOutcome::Headers from a 200 response with validators, got NotSupported")
+                panic!(
+                    "expected HeadOutcome::Headers from a 200 response with validators, got NotSupported"
+                )
             },
         }
         mock.assert_async().await;
