@@ -79,17 +79,12 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
                     customScriptConfiguration.getName(), context, result);
             return result;
         } catch (WebApplicationException e) {
-            if (log.isTraceEnabled()) {
-                log.trace("WebApplicationException from script", e);
-            }
+            log.error(e.getMessage(), e);
             throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            saveScriptError(context.getScript().getCustomScript(), ex);
-            throw new WebApplicationException(errorResponseFactory
-                    .newErrorResponse(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.ACCESS_DENIED, "", "Unable to run 'executeExternalAuthenticate' method in ROPC script."))
-                    .build());
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+            return false;
         }
     }
 
