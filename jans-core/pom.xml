@@ -217,11 +217,6 @@
             <url>https://repo1.maven.org/maven2/org/bouncycastle</url>
         </repository>
         <repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
-        <repository>
             <id>mulesoft</id>
             <name>mulesoft</name>
             <url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>

@@ -6,7 +6,7 @@ A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicya
 
 To compile OPA with the Cedarling plugin, you need the following:
 
-- Go 1.25+
+- Go 1.26+
 - Rust toolchain 1.95+
 - Make (for building the plugin. This build process is currently Linux only).
 
