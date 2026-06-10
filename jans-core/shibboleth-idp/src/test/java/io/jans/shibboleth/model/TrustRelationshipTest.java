@@ -71,54 +71,60 @@ public class TrustRelationshipTest {
         );
     }
 
-    private static final TrustRelationship draftIndividualTrustRelationship() {
-        
-        var displayName = io.jans.shibboleth.model.core.DisplayName.of("IndividualTR").getValue();
-        var description = Description.of("Individual TR");
-        return TrustRelationship.create(displayName,description,TrustNature.INDIVIDUAL).getValue();
-    }
-
-    private static final TrustRelationship draftAggregateTrustRelationship() {
-
-        var displayName = io.jans.shibboleth.model.core.DisplayName.of("AggregateTR").getValue();
-        var description = Description.of("Aggregate TR");
-        return TrustRelationship.create(displayName,description, TrustNature.AGGREGATE).getValue();
-    }
-
     private static final Stream<TrustRelationship> draftTrustRelationshipsOfAllNatures() {
 
-        return Stream.of(draftIndividualTrustRelationship(),draftAggregateTrustRelationship());
+        return Stream.of(
+            TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+            TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()
+        );
     }
 
     private static final Stream<Arguments> draftTrustRelationshipsWithSupportedMetadataSources() {
 
-        AssertionConsumerService acs = AssertionConsumerService.of(URI.create("https://sp.gluu.org/login"),SamlBinding.HTTP_POST).getValue();
-        MetadataSource filesource = FileMetadataSource.of("/var/gluu/sp_metadata.xml").getValue();
-        MetadataSource urisource = UriMetadataSource.of(URI.create("https://sp.gluu.org/my/sp.xml")).getValue();
-        MetadataSource upstreamsource = UpstreamMetadataSource.of(Id.generate(),EntityId.of("sp.gluu.org").getValue()).getValue();
-        MetadataSource manualsource  = ManualMetadataSource.withNoSigningCertificate()
-            .entityId(EntityId.of("sp.gluu.org").getValue())
-            .validUntil(ValidityPeriod.daysFromNow(1))
-            .assertionConsumerService(acs)
-            .build().getValue();
-        MetadataSource mdq = MdqMetadataSource.of(URI.create("https://sp.gluu.org/mdq/")).getValue();
-        
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+
         return Stream.of( 
 
             //Individual nature 
-            Arguments.of(draftIndividualTrustRelationship(),NoMetadataSource.getInstance()),
-            Arguments.of(draftIndividualTrustRelationship(),filesource),
-            Arguments.of(draftIndividualTrustRelationship(),urisource),
-            Arguments.of(draftIndividualTrustRelationship(),upstreamsource),
-            Arguments.of(draftIndividualTrustRelationship(),manualsource),
+            Arguments.of(individual,NoMetadataSource.getInstance()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
 
             //Aggregate nature 
-            Arguments.of(draftAggregateTrustRelationship(),NoMetadataSource.getInstance()),
-            Arguments.of(draftAggregateTrustRelationship(),filesource),
-            Arguments.of(draftAggregateTrustRelationship(),urisource),
-            Arguments.of(draftAggregateTrustRelationship(),mdq)
+            Arguments.of(aggregate,NoMetadataSource.getInstance()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource())
         );
 
+    }
+
+    private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurations() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+
+        return Stream.of(
+
+            //Individual nature 
+            Arguments.of(individual,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration()), 
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration()),
+
+            //Aggregate nature
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration()), 
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration()) 
+        );
     }
 
     /**
@@ -221,9 +227,9 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
 
             assertThat(result.isSuccess()).isTrue();
-            TrustRelationship updated = result.getValue();
-            assertThat(updated.getDisplayName()).isEqualTo(newDisplayName);
-            assertThat(updated.getVersion()).isEqualTo(tr.getVersion().next());
+            TrustRelationship updated_tr = result.getValue();
+            assertThat(updated_tr.getDisplayName()).isEqualTo(newDisplayName);
+            assertThat(updated_tr.getVersion()).isEqualTo(tr.getVersion().next());
         }
 
         @ParameterizedTest
@@ -240,8 +246,8 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.updateDisplayName(sameDisplayName);
             assertThat(result.isSuccess()).isTrue();
-            TrustRelationship unchanged = result.getValue();
-            assertThat(unchanged).isEqualTo(tr);
+            TrustRelationship same_tr = result.getValue();
+            assertThat(same_tr).isEqualTo(tr);
         }
 
         @ParameterizedTest
@@ -258,10 +264,10 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.updateDescription(newDescription);
             assertThat(result.isSuccess()).isTrue();
-            TrustRelationship changed = result.getValue();
+            TrustRelationship updated_tr = result.getValue();
 
-            assertThat(changed.getDescription()).isEqualTo(newDescription);
-            assertThat(changed.getVersion()).isEqualTo(tr.getVersion().next());
+            assertThat(updated_tr.getDescription()).isEqualTo(newDescription);
+            assertThat(updated_tr.getVersion()).isEqualTo(tr.getVersion().next());
         }
 
         @ParameterizedTest
@@ -279,8 +285,8 @@ public class TrustRelationshipTest {
             TrustResult<TrustRelationship> result = tr.updateDescription(sameDescription);
             assertThat(result.isSuccess()).isTrue();
 
-            TrustRelationship unchanged = result.getValue();
-            assertThat(unchanged).isEqualTo(tr);
+            TrustRelationship same_tr = result.getValue();
+            assertThat(same_tr).isEqualTo(tr);
         }
 
         @ParameterizedTest
@@ -297,9 +303,48 @@ public class TrustRelationshipTest {
 
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
             assertThat(result.isSuccess()).isTrue();
-            TrustRelationship changed = result.getValue();
-            assertThat(changed.getMetadataSource()).isEqualTo(source);
-            assertThat(changed).isInDraftStatus();
+            TrustRelationship updated_tr = result.getValue();
+            assertThat(updated_tr.getMetadataSource()).isEqualTo(source);
+            assertThat(updated_tr).isInDraftStatus();
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurations")
+        @DisplayName(
+            "GIVEN a DRAFT TrustRelationship with no metadatasources " + 
+            "WHEN updateProfileConfiguration() is called " +
+            "THEN the operation updates the profile configuration and maintains the DRAFT status "
+        )
+        public <T extends CommonConfigurationCapable> void shouldUpdateProfileConfigurationAndStayInDraft_whenNoMetadataSource(TrustRelationship tr, T profileconfig) {
+
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(tr).hasNoMetadataSource();
+
+            TrustResult<TrustRelationship> result = tr.updateProfileConfiguration(profileconfig);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship same_or_updated_tr = result.getValue();
+
+            switch(profileconfig.getType()) {
+                case SHIBBOLETH_SSO:
+                    assertThat(same_or_updated_tr.getShibbolethSsoProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+                case SAML2_ATTRIBUTE_QUERY:
+                    assertThat(same_or_updated_tr.getSaml2AttributeQueryProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+                case SAML2_ARTIFACT_RESOLUTION:
+                    assertThat(same_or_updated_tr.getSaml2ArtifactResolutionProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+                case SAML2_ECP:
+                    assertThat(same_or_updated_tr.getSaml2EcpProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+                case SAML2_SSO:
+                    assertThat(same_or_updated_tr.getSaml2SsoProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+                case SAML2_LOGOUT:
+                    assertThat(same_or_updated_tr.getSaml2LogoutProfileConfiguration()).isEqualTo(profileconfig);
+                    break;
+            } 
         }
 
     }

@@ -11,30 +11,24 @@ import java.util.Objects;
 
 public class EntityId {
 
-    private final String value;
+    private final URI value;
 
-    private EntityId(String value) {
+    private EntityId(URI value) {
 
-        this.value = value.trim();
+        this.value = value;
     }
 
-    public static TrustResult<EntityId> of(String value) {
+    public static TrustResult<EntityId> of(URI value) {
 
-        if (value == null  || value.trim().isEmpty() ) {
+        if (value == null) {
 
             return TrustResult.failure(CannotBeNullOrBlank.forField("value"));
-        }
-
-        try {
-            URI uri = new URI(value);
-        }catch(URISyntaxException e) {
-            return TrustResult.failure(InvalidUriSyntax.forValue(value));
         }
 
         return TrustResult.success(new EntityId(value));
     }
 
-    public String getValue() {
+    public URI getValue() {
 
         return value;
     }
@@ -59,6 +53,6 @@ public class EntityId {
     @Override
     public String toString() {
 
-        return value;
+        return "EntityId[" + value + "]";
     }
 }

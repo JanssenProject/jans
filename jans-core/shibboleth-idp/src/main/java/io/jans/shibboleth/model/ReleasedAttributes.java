@@ -60,6 +60,11 @@ public class ReleasedAttributes {
         return new Builder(existing);
     }
 
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
     public static ReleasedAttributes empty() {
 
         return new ReleasedAttributes(Set.of());
@@ -110,7 +115,7 @@ public class ReleasedAttributes {
                     error = CannotBeNullOrBlank.forField("attribute");
                     return this;
                 }
-                attributes.add(attr);
+                this.attributes.add(attr);
             }
 
             return this;
