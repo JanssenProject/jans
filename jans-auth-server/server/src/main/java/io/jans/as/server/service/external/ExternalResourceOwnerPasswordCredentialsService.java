@@ -19,10 +19,6 @@ import jakarta.inject.Named;
 import java.util.List;
 
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import jakarta.inject.Inject;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.token.TokenErrorResponseType;
 
 /**
 * @author Yuriy Zabrovarnyy
@@ -35,9 +31,6 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
 
     private static final long serialVersionUID = -1070021905117551202L;
 
-    @Inject
-    private transient ErrorResponseFactory errorResponseFactory;
-    
     public ExternalResourceOwnerPasswordCredentialsService() {
         super(CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
     }
@@ -79,7 +72,9 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
                     customScriptConfiguration.getName(), context, result);
             return result;
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace("WebApplicationException from script", e);
+            }
             throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
