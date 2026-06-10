@@ -100,7 +100,11 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 
 extension_sql!(
     r"
--- Policy-lifecycle functions: file-system access + global policy swap.
+-- Policy-lifecycle functions: file-system access + per-backend engine swap
+-- (`cedarling_use_policy` / `_rollback_policy` mutate a process-local Rust
+-- static; the catalog/GUC writes are transactional but the engine swap is
+-- not — operators who want cluster-wide propagation should update
+-- `cedarling.bootstrap_config` and reconnect, not rely on these functions).
 REVOKE EXECUTE ON FUNCTION cedarling_use_policy(text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_register_policy_version(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION cedarling_rollback_policy() FROM PUBLIC;

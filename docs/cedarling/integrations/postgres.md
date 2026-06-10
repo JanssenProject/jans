@@ -247,6 +247,18 @@ either restart affected backends or call `cedarling_use_policy()` with the new
 bootstrap path (or a registered version name) so Cedarling reloads policy in
 place.
 
+> **The engine swap is per-backend and non-transactional.**
+> `cedarling_use_policy` / `cedarling_rollback_policy` mutate a process-local
+> Rust static, so they only affect the current connection's backend — other
+> sessions keep running the engine they originally loaded. A `ROLLBACK` after
+> a successful call undoes the `cedarling.policy_history` row and the
+> `cedarling.policy_version` GUC update, but **not** the engine swap itself
+> (the next authorize call on this connection will still use the post-swap
+> policy). For cluster-wide changes update `cedarling.bootstrap_config` via
+> `ALTER SYSTEM ... + pg_reload_conf()` and reconnect every affected backend
+> (or restart the cluster) rather than relying on `cedarling_use_policy()`
+> to propagate.
+
 ## SQL function reference
 
 All functions are created in the `public` schema; catalog tables live in
@@ -280,8 +292,8 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | Function | Purpose |
 | --- | --- |
 | `cedarling_register_policy_version(name text, bootstrap_path text) → bool` | Upsert a named policy version into `cedarling.policy_versions`. |
-| `cedarling_use_policy(name_or_path text) → bool` | Resolve `name` against the registry, fall back to treating it as a filesystem path; rebuild the engine and record the change in `cedarling.policy_history`. |
-| `cedarling_rollback_policy() → bool` | Restore the previous policy version (also recorded in `cedarling.policy_history`). |
+| `cedarling_use_policy(name_or_path text) → bool` | Resolve `name` against the registry, fall back to treating it as a filesystem path; rebuild the engine and record the change in `cedarling.policy_history`. **Per-backend, non-transactional**: the engine is a process-local Rust static so the swap only affects the current connection's backend, and a `ROLLBACK` after a successful call undoes the catalog row and the GUC update but **not** the engine itself. For cluster-wide updates set `cedarling.bootstrap_config` (`ALTER SYSTEM` + `pg_reload_conf()`) and reconnect. |
+| `cedarling_rollback_policy() → bool` | Restore the previous policy version (also recorded in `cedarling.policy_history`). Same per-backend, non-transactional caveats as `cedarling_use_policy`. |
 | `cedarling_diff_policies(old text, new text) → jsonb` | Structural per-policy-id diff via `cedar_policy::PolicySet` (default), or line diff when `cedarling.diff_mode = 'lines'`. |
 
 ### Schema and entity mapping
