@@ -4,6 +4,7 @@ import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
+import io.jans.shibboleth.model.metadata.MdqMetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 import io.jans.shibboleth.model.metadata.NoMetadataSource;
@@ -89,42 +90,9 @@ public class TrustRelationshipTest {
         return Stream.of(draftIndividualTrustRelationship(),draftAggregateTrustRelationship());
     }
 
-    public static final Stream<MetadataSource> sourcesNotAllowedForAggregateTrustRelationship() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithSupportedMetadataSources() {
 
-        MetadataSource upstream = mock(MetadataSource.class);
-        when(upstream.getType()).thenReturn(MetadataSourceType.UPSTREAM);
-
-        MetadataSource manual = mock(MetadataSource.class);
-        when(manual.getType()).thenReturn(MetadataSourceType.MANUAL);
-
-        return Stream.of(upstream,manual);
-    }
-
-    public static final Stream<MetadataSource> sourcesNotAllowedForIndividualTrustRelationship() {
-
-        MetadataSource mdq = mock(MetadataSource.class);
-        when(mdq.getType()).thenReturn(MetadataSourceType.MDQ);
-
-        return Stream.of(mdq);
-    }
-
-    public static final Stream<? extends CommonConfigurationCapable> allProfileConfigurationDefaults() {
-
-        return Stream.of(
-            SamlProfileConfigurationDefaults.shibbolethSso(),
-            SamlProfileConfigurationDefaults.saml2AttributeQuery(),
-            SamlProfileConfigurationDefaults.saml2ArtifactResolution(),
-            SamlProfileConfigurationDefaults.saml2Ecp(),
-            SamlProfileConfigurationDefaults.saml2Sso(),
-            SamlProfileConfigurationDefaults.saml2Logout()
-        );
-    }
-
-    public static final Stream<Arguments> draftIndividualTrustRelationshipWithSupportedMetadataSources () {
-
-        
         AssertionConsumerService acs = AssertionConsumerService.of(URI.create("https://sp.gluu.org/login"),SamlBinding.HTTP_POST).getValue();
-
         MetadataSource filesource = FileMetadataSource.of("/var/gluu/sp_metadata.xml").getValue();
         MetadataSource urisource = UriMetadataSource.of(URI.create("https://sp.gluu.org/my/sp.xml")).getValue();
         MetadataSource upstreamsource = UpstreamMetadataSource.of(Id.generate(),EntityId.of("sp.gluu.org").getValue()).getValue();
@@ -133,13 +101,24 @@ public class TrustRelationshipTest {
             .validUntil(ValidityPeriod.daysFromNow(1))
             .assertionConsumerService(acs)
             .build().getValue();
+        MetadataSource mdq = MdqMetadataSource.of(URI.create("https://sp.gluu.org/mdq/")).getValue();
         
-        return Stream.of(
+        return Stream.of( 
+
+            //Individual nature 
+            Arguments.of(draftIndividualTrustRelationship(),NoMetadataSource.getInstance()),
             Arguments.of(draftIndividualTrustRelationship(),filesource),
             Arguments.of(draftIndividualTrustRelationship(),urisource),
             Arguments.of(draftIndividualTrustRelationship(),upstreamsource),
-            Arguments.of(draftIndividualTrustRelationship(),manualsource)
+            Arguments.of(draftIndividualTrustRelationship(),manualsource),
+
+            //Aggregate nature 
+            Arguments.of(draftAggregateTrustRelationship(),NoMetadataSource.getInstance()),
+            Arguments.of(draftAggregateTrustRelationship(),filesource),
+            Arguments.of(draftAggregateTrustRelationship(),urisource),
+            Arguments.of(draftAggregateTrustRelationship(),mdq)
         );
+
     }
 
     /**
@@ -149,7 +128,7 @@ public class TrustRelationshipTest {
     @DisplayName("Creation Tests")
     public class CreationTests {
 
-        @Tag("refactoring")
+
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithValidValues")
         @DisplayName(
@@ -172,7 +151,7 @@ public class TrustRelationshipTest {
                 .hasDisplayName(displayName)
                 .hasDescription(description)
                 .isOfNature(nature)
-                .hasStatus(TrustStatus.DRAFT)
+                .isInDraftStatus()
                 .isVersion(Version.initial())
                 .hasNoMetadataSource()
                 .hasNoDiscoveredEntityIds()
@@ -194,7 +173,6 @@ public class TrustRelationshipTest {
                 .usesDefaultConfiguration();
         }
 
-        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithNullValuesAndMissingFieldNames")
         @DisplayName(
@@ -225,11 +203,11 @@ public class TrustRelationshipTest {
     @DisplayName("Basic Updates and Idempotency Tests")
     public class BasicUpdatesAndIdempotencyTests {
 
-        @Tag("refactoring")
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
-            "GIVEN a TrustRelationship with an existing display name " +
+            "GIVEN a DRAFT TrustRelationship with an existing display name " +
             "WHEN updateDisplayName() is called with a different name " +
             "THEN the operation succeeds, updates the display name and increments the version"
         )
@@ -248,11 +226,10 @@ public class TrustRelationshipTest {
             assertThat(updated.getVersion()).isEqualTo(tr.getVersion().next());
         }
 
-        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
-            "GIVEN a TrustRelationship with an existing display name " +
+            "GIVEN a DRAFT TrustRelationship with an existing display name " +
             "WHEN updateDisplayName() is called with the same current name " +
             "THEN the operation should be idempotent (it should not change the TrustRelationship)"
         )
@@ -267,11 +244,10 @@ public class TrustRelationshipTest {
             assertThat(unchanged).isEqualTo(tr);
         }
 
-        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
-            "GIVEN a TrustRelationship with an existing description " + 
+            "GIVEN a DRAFT TrustRelationship with an existing description " + 
             "WHEN updateDescription() is called with a different description " + 
             "THEN the operation succeeds, updates the description and increments the version "
         )
@@ -288,11 +264,10 @@ public class TrustRelationshipTest {
             assertThat(changed.getVersion()).isEqualTo(tr.getVersion().next());
         }
 
-        @Tag("refactoring")
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
-            "GIVEN a TrustRelationship with an existing description " +
+            "GIVEN a DRAFT TrustRelationship with an existing description " +
             "WHEN updateDescription() is called with the same current description " +
             "THEN the operation is idempotent (no changes to the TrustRelationship) " 
         )
@@ -306,6 +281,25 @@ public class TrustRelationshipTest {
 
             TrustRelationship unchanged = result.getValue();
             assertThat(unchanged).isEqualTo(tr);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithSupportedMetadataSources")
+        @DisplayName (
+            "GIVEN a DRAFT TrustRelationship with no active profiles " +
+            "WHEN updateMetadataSource() is called " +
+            "THEN the operation updates the metadata source, and maintains the DRAFT status"
+        )
+        public void shouldUpdateMetadataSourceAndStayInDraft_whenNoActiveProfiles(TrustRelationship tr,MetadataSource source) {
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(tr).hasNoActiveProfileConfiguration();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship changed = result.getValue();
+            assertThat(changed.getMetadataSource()).isEqualTo(source);
+            assertThat(changed).isInDraftStatus();
         }
 
     }

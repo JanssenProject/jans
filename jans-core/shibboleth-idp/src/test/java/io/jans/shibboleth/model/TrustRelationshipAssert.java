@@ -92,7 +92,7 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return isOfNature(TrustNature.AGGREGATE);
     }
 
-    public TrustRelationshipAssert hasStatus(TrustStatus status) {
+    public TrustRelationshipAssert isInStatus(TrustStatus status) {
 
         isNotNull();
 
@@ -102,6 +102,31 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         }
 
         return this;
+    }
+
+    public TrustRelationshipAssert isInDraftStatus() {
+
+        return isInStatus(TrustStatus.DRAFT);
+    }
+
+    public TrustRelationshipAssert isInReadyStatus() {
+
+        return isInStatus(TrustStatus.READY);
+    }
+
+    public TrustRelationshipAssert isInActivatingStatus() {
+
+        return isInStatus(TrustStatus.ACTIVATING);
+    }
+
+    public TrustRelationshipAssert isInActiveStatus() {
+
+        return isInStatus(TrustStatus.ACTIVE);
+    }
+
+    public TrustRelationshipAssert isInInactiveStatus() {
+
+        return isInStatus(TrustStatus.INACTIVE);
     }
 
     public TrustRelationshipAssert doesNotHaveStatus(TrustStatus status) {
