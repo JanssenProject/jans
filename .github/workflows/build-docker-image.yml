@@ -111,7 +111,7 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
+        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -269,6 +269,24 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
           echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
+          # all-in-one depends on other images being pushed first; poll until each required job completes
+          if [[ "${{ matrix.docker-images }}" == "all-in-one" && "${{ github.event_name }}" != "pull_request" ]]; then
+            REQUIRED_IMAGES="auth-server config-api configurator fido2 persistence-loader scim casa"
+            for img in $REQUIRED_IMAGES; do
+              echo "Waiting for docker ($img) to complete..."
+              for attempt in $(seq 1 60); do
+                CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+                  --paginate --jq ".jobs[] | select(.name == \"docker ($img)\") | .conclusion" 2>/dev/null || echo "")
+                if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
+                  echo "  docker ($img): $CONCLUSION"; break
+                elif [[ "$CONCLUSION" == "failure" || "$CONCLUSION" == "cancelled" || "$CONCLUSION" == "timed_out" ]]; then
+                  echo "  docker ($img) failed with: $CONCLUSION. Aborting all-in-one build."
+                  exit 1
+                fi
+                sleep 30
+              done
+            done
+          fi
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.10
@@ -433,260 +451,3 @@ jobs:
                 gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
             fi
 
-  docker-aio:
-    needs: [docker]
-    if: always()
-    permissions:
-      packages: write
-      id-token: write
-      attestations: write
-      pull-requests: read
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
-        with:
-          egress-policy: audit
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
-
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          sparse-checkout: |
-            docker-jans-all-in-one
-            automation
-
-      - name: Check docker directories that changed
-        id: build_docker_image
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BUILD=true
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ "${{ inputs.build_all }}" == "true" || "${{ inputs.all_in_one }}" == "true" ]]; then
-              echo "build=${BUILD}" >> $GITHUB_OUTPUT
-            fi
-          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "build=${BUILD}" >> $GITHUB_OUTPUT
-          else
-            pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-            if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
-              CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans-all-in-one' || true)
-            else
-              BEFORE="${{ github.event.before }}"
-              if [[ -z "$BEFORE" || "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
-                CHANGED="docker-jans-all-in-one"
-              else
-                CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans-all-in-one' || true)
-              fi
-            fi
-            if [[ -n "$CHANGED" ]]; then
-              echo "build=${BUILD}" >> $GITHUB_OUTPUT
-            fi
-          fi
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "build=${BUILD}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Install dependencies
-        if: steps.build_docker_image.outputs.build
-        run: |
-            python3 -m pip install --upgrade pip --user
-            python3 -m pip install -r ./automation/requirements.txt --user
-
-      - name: Prepare
-        if: steps.build_docker_image.outputs.build
-        id: prep
-        run: |
-          REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-          DOCKER_FILE_LOCATION=./docker-jans-all-in-one
-          PLATFORMS="linux/amd64,linux/arm64"
-          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
-          DOCKER_IMAGE=ghcr.io/$REPOSITORY/all-in-one
-          VERSION=${MAIN_VERSION}
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          BUILD=true
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
-          fi
-          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
-          if [ ! -z "$MANUAL_IMAGE_TAG" ]
-          then
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
-            VERSION=$MANUAL_IMAGE_TAG
-            echo "Manual image tag has been inputted by the user"
-          else
-            echo "$TAGS"
-          fi
-          CN_VERSION=${{ github.event.inputs.cn_version }}
-          if [ ! -z "$CN_VERSION" ]
-          then
-            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
-            echo "War version has been modified."
-          else
-            echo "$CN_VERSION"
-          fi
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
-
-      - name: Setup Python 3.10
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.10"
-
-      - name: Install Python dependencies
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          sudo apt-get update
-          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
-          sudo pip3 install --ignore-installed setuptools --upgrade
-          sudo pip3 install --ignore-installed -r ./automation/requirements.txt
-          sudo apt-get update
-          sudo apt-get install jq
-
-      - name: Update Build date in Dockerfile
-        if: github.event_name == 'workflow_dispatch'
-        id: update_build_date_in_dockerfile
-        run: |
-          sudo python3 ./automation/auto_update_build_date.py
-
-      - name: Free disk space
-        if: steps.build_docker_image.outputs.build
-        run: |
-          echo "=== Disk space before cleanup ==="
-          df -h
-          echo "=== Removing pre-installed tools ==="
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/lib/android || true
-          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
-          sudo rm -rf /usr/local/share/boost || true
-          sudo rm -rf /usr/share/swift || true
-          echo "=== Cleaning Docker ==="
-          docker system prune -af --volumes || true
-          echo "=== Cleaning apt cache ==="
-          sudo apt-get clean || true
-          sudo rm -rf /var/lib/apt/lists/* || true
-          echo "=== Disk space after cleanup ==="
-          df -h
-
-      - name: Set up QEMU
-        if: steps.build_docker_image.outputs.build
-        uses: docker/setup-qemu-action@e9a73d053822dd261763972e27a1731c06462d91 # master
-        with:
-          image: tonistiigi/binfmt:master
-          platforms: ${{ steps.prep.outputs.platforms }}
-
-      - name: Set up Docker Buildx
-        if: steps.build_docker_image.outputs.build
-        id: buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
-
-      - name: Login to ghcr
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push
-        if: steps.build_docker_image.outputs.build
-        id: docker_build
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: ${{ steps.prep.outputs.dockerfilelocation }}
-          file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
-          sbom: true
-          provenance: true
-          platforms: ${{ steps.prep.outputs.platforms }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.prep.outputs.tags }}
-          cache-from: type=gha,scope=all-in-one
-          cache-to: type=gha,mode=max,scope=all-in-one
-
-      - name: Prune BuildKit cache
-        if: always()
-        run: docker buildx prune -af --keep-storage 2GB || true
-
-      - name: Image digest
-        if: steps.build_docker_image.outputs.build
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Sign the images with GitHub OIDC Token
-        if: steps.build_docker_image.outputs.build
-        env:
-          DIGEST: ${{ steps.docker_build.outputs.digest }}
-          TAGS: ${{ steps.prep.outputs.tags }}
-        run: |
-          images=""
-          for tag in ${TAGS//,/ }; do
-            if [[ $tag == *"_dev"* && $TAGS == *","* ]]; then
-              continue
-            fi
-            images+="${tag}@${DIGEST} "
-          done
-          if [[ -n $images ]]; then
-            cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
-          fi
-
-      - name: Derive lowercase image name for SLSA attestation
-        id: image_ref
-        if: steps.build_docker_image.outputs.build && github.event_name != 'pull_request'
-        env:
-          TAGS: ${{ steps.prep.outputs.tags }}
-        run: |
-          FIRST_TAG=$(printf '%s' "$TAGS" | cut -d',' -f1)
-          IMAGE_NAME="${FIRST_TAG%%:*}"
-          echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
-
-      - name: Generate SLSA provenance attestation for container image
-        if: steps.build_docker_image.outputs.build && github.event_name != 'pull_request'
-        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
-        with:
-          subject-name: ${{ steps.image_ref.outputs.name }}
-          subject-digest: ${{ steps.docker_build.outputs.digest }}
-          push-to-registry: true
-
-      - name: Run Trivy vulnerability scanner
-        if: steps.build_docker_image.outputs.build
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
-        with:
-          image-ref: ghcr.io/janssenproject/jans/all-in-one:${{ steps.prep.outputs.version }}
-          format: 'json'
-          output: 'trivy-report.json'
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-
-      - name: Generate Trivy Table Report
-        if: steps.build_docker_image.outputs.build
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
-        with:
-          image-ref: ghcr.io/janssenproject/jans/all-in-one:${{ steps.prep.outputs.version }}
-          format: 'table'
-          output: 'trivy-report.txt'
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-
-      - name: Sign Trivy Reports
-        if: steps.build_docker_image.outputs.build
-        env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        run: |
-          cosign sign-blob --yes \
-            --bundle trivy-report.json.bundle \
-            trivy-report.json
-          cosign sign-blob --yes \
-            --bundle trivy-report.txt.bundle \
-            trivy-report.txt
-            if [[ -z "${{ github.event.release.tag_name }}" ]]; then
-                gh release upload "nightly" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber || echo "Failed to upload Trivy reports to nightly release"
-            else
-                gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
-            fi
