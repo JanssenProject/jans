@@ -717,6 +717,12 @@ async fn parse_swap_and_record(
         },
     };
 
+    // Capture the refreshed policy count BEFORE `parsed` is moved into
+    // `rebuild`. Used to refresh the `instance.policy_count` gauge after the
+    // swap — otherwise the gauge would stay pinned to the bootstrap value
+    // forever even though authorization decisions use the new set.
+    let new_policy_count = parsed.policies.get_set().num_of_policies();
+
     let new_authz = match ctx.rebuilder.rebuild(parsed).await {
         Ok(a) => a,
         Err(e) => {
@@ -735,6 +741,11 @@ async fn parse_swap_and_record(
     };
 
     ctx.authz_swap.store(Arc::new(new_authz));
+    // Keep the `instance.policy_count` gauge in sync with the freshly-swapped
+    // store. Before this update the gauge reported the bootstrap count
+    // indefinitely, diverging silently from what the authz engine actually
+    // evaluates.
+    ctx.metrics.set_policy_count(new_policy_count);
     state.validators = new_validators;
     state.last_body_hash = Some(new_hash);
     state.consecutive_failures = 0;

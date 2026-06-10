@@ -966,6 +966,41 @@ mod tests {
     }
 
     #[test]
+    fn set_policy_count_updates_gauge_for_next_snapshot() {
+        // Refresh-worker contract: after a successful policy-store swap with a
+        // different policy count, the `instance.policy_count` gauge must
+        // reflect the new value on subsequent snapshots. Without this the
+        // gauge would stay pinned at the bootstrap value indefinitely while
+        // authorization decisions used the new set.
+        let collector = MetricsCollector::new(5);
+        let snap_initial = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_initial.operational_stats.get("instance.policy_count"),
+            Some(&5),
+            "initial gauge must report the bootstrap count",
+        );
+
+        collector.set_policy_count(50);
+        let snap_after_swap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_after_swap.operational_stats.get("instance.policy_count"),
+            Some(&50),
+            "snapshot after set_policy_count(50) must report 50, not the stale bootstrap value",
+        );
+
+        // Another swap to a smaller set — gauge must move both directions,
+        // not just monotonically grow.
+        collector.set_policy_count(3);
+        let snap_after_shrink = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_after_shrink.operational_stats.get("instance.policy_count"),
+            Some(&3),
+            "gauge must reflect a shrunk policy set as well, got {:?}",
+            snap_after_shrink.operational_stats.get("instance.policy_count"),
+        );
+    }
+
+    #[test]
     fn timing_recorder_empty_returns_zeros() {
         let mut recorder = TimingRecorder::new();
         let (p50, p95, p99, max) = recorder.drain_and_compute();
