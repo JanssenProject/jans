@@ -1465,8 +1465,11 @@ fn test_load_schema_from_schemas_directory() {
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".").expect("Should succeed");
@@ -1513,8 +1516,11 @@ fn test_load_schema_from_schemas_directory_deterministic_order() {
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".").expect("Should succeed");
@@ -1558,8 +1564,11 @@ fn test_load_schema_single_file_takes_precedence_over_schemas_dir() {
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".").expect("Should succeed");
@@ -1594,8 +1603,11 @@ fn test_load_schema_from_schemas_dir_empty_directory_returns_none() {
 
     // Empty schemas/ directory — no schema.cedarschema and no schemas/*.cedarschema
     vfs.create_dir_all("schemas").unwrap();
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
@@ -1627,17 +1639,20 @@ fn test_load_schema_from_schemas_dir_invalid_extension() {
     )
     .unwrap();
 
-    vfs.create_file("schemas/valid.cedarschema", b"namespace App { entity User; }")
-        .unwrap();
-
     vfs.create_file(
-        "schemas/invalid.txt",
-        b"namespace App { entity Resource; }",
+        "schemas/valid.cedarschema",
+        b"namespace App { entity User; }",
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
+    vfs.create_file("schemas/invalid.txt", b"namespace App { entity Resource; }")
         .unwrap();
+
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
@@ -1682,8 +1697,11 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".").expect("Should succeed");
@@ -1695,8 +1713,8 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     assert!(content.contains("entity Document"));
 
     // Verify the schema can actually be parsed
-    use super::super::schema_parser::ParsedSchema;
-    let parsed = ParsedSchema::parse(&content, "schemas (combined)").expect("Combined schema should parse");
+    let parsed =
+        ParsedSchema::parse(&content, "schemas (combined)").expect("Combined schema should parse");
     parsed.validate().expect("Combined schema should be valid");
 }
 
@@ -1727,12 +1745,14 @@ fn test_load_schema_from_schemas_dir_in_archive() {
         // Schema files in schemas/ directory
         let options = FileOptions::<ExtendedFileOptions>::default()
             .compression_method(CompressionMethod::Deflated);
-        zip.start_file("schemas/part1.cedarschema", options).unwrap();
+        zip.start_file("schemas/part1.cedarschema", options)
+            .unwrap();
         zip.write_all(b"namespace Part1 { entity A; }").unwrap();
 
         let options = FileOptions::<ExtendedFileOptions>::default()
             .compression_method(CompressionMethod::Deflated);
-        zip.start_file("schemas/part2.cedarschema", options).unwrap();
+        zip.start_file("schemas/part2.cedarschema", options)
+            .unwrap();
         zip.write_all(b"namespace Part2 { entity B; }").unwrap();
 
         // Policies
@@ -1745,19 +1765,27 @@ fn test_load_schema_from_schemas_dir_in_archive() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)
-        .expect("Should create ArchiveVfs from bytes");
+    let archive_vfs =
+        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let result = loader.load_directory(".").expect("Archive load should succeed");
+    let result = loader
+        .load_directory(".")
+        .expect("Archive load should succeed");
 
     assert!(
         result.schema.is_some(),
         "Schema should be present from schemas/ dir in archive"
     );
     let content = result.schema.unwrap();
-    assert!(content.contains("namespace Part1"), "Should contain Part1 namespace");
-    assert!(content.contains("namespace Part2"), "Should contain Part2 namespace");
+    assert!(
+        content.contains("namespace Part1"),
+        "Should contain Part1 namespace"
+    );
+    assert!(
+        content.contains("namespace Part2"),
+        "Should contain Part2 namespace"
+    );
 }
 
 #[test]
@@ -1779,8 +1807,11 @@ fn test_load_schema_from_schemas_dir_not_a_directory() {
 
     // schemas is a file, not a directory
     vfs.create_file("schemas", b"not a directory").unwrap();
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
@@ -1815,8 +1846,11 @@ fn test_load_schema_from_schemas_dir_io_error() {
     )
     .unwrap();
 
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
@@ -1847,14 +1881,22 @@ fn test_load_schema_from_schemas_dir_empty_file() {
 
     // Empty .cedarschema file — Cedar considers this a valid (empty) fragment
     vfs.create_file("schemas/empty.cedarschema", b"").unwrap();
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Empty file is valid Cedar schema fragment");
+    let result = loader
+        .load_directory(".")
+        .expect("Empty file is valid Cedar schema fragment");
 
     assert!(result.schema.is_some(), "Schema should be present");
-    assert!(result.schema.as_deref().unwrap().is_empty(), "Schema should be empty string");
+    assert!(
+        result.schema.as_deref().unwrap().is_empty(),
+        "Schema should be empty string"
+    );
 }
 
 #[test]
@@ -1880,14 +1922,14 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     )
     .unwrap();
 
+    vfs.create_file("schemas/bad.txt", b"namespace App { entity Admin; }")
+        .unwrap();
+
     vfs.create_file(
-        "schemas/bad.txt",
-        b"namespace App { entity Admin; }",
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
     )
     .unwrap();
-
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
@@ -1920,22 +1962,21 @@ fn test_load_directory_schema_read_error_propagated() {
     )
     .unwrap();
 
-    vfs.create_file(
-        "schema.cedarschema",
-        b"namespace Test { entity User; }",
-    )
-    .unwrap();
+    vfs.create_file("schema.cedarschema", b"namespace Test { entity User; }")
+        .unwrap();
 
     vfs.create_dir_all("policies").unwrap();
-    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
-        .unwrap();
+    vfs.create_file(
+        "policies/test.cedar",
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
 
-    let err = result.expect_err(
-        "Expected FileReadError when schema file read returns non-NotFound IO error",
-    );
+    let err = result
+        .expect_err("Expected FileReadError when schema file read returns non-NotFound IO error");
     assert!(
         matches!(&err, PolicyStoreError::FileReadError { path, .. } if path.contains("schema")),
         "Expected FileReadError for schema file, got: {err:?}"

@@ -742,7 +742,10 @@ mod tests {
 
         // Verify schema contains all entities
         let schema = parsed.get_schema();
-        let type_names: Vec<_> = schema.entity_types().map(|id| id.to_string()).collect();
+        let type_names: Vec<_> = schema
+            .entity_types()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             type_names.contains(&"Users::User".to_string()),
             "Should contain Users::User"
@@ -826,12 +829,12 @@ mod tests {
         let files = vec![
             (
                 "types.cedarschema".to_string(),
-                r#"
+                r"
                 namespace App {
                     entity User;
                     entity File;
                 }
-                "#
+                "
                 .to_string(),
             ),
             (
@@ -857,7 +860,10 @@ mod tests {
 
         let schema = parsed.get_schema();
         let actions: Vec<_> = schema.actions().collect();
-        let action_names: Vec<_> = actions.iter().map(|a| a.to_string()).collect();
+        let action_names: Vec<_> = actions
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             action_names.contains(&"App::Action::\"read\"".to_string()),
             "Should contain read action, got: {action_names:?}"
