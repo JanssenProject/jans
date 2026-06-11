@@ -69,6 +69,33 @@ public class Base64UtilTest extends BaseTest {
         String stringResult = Base64Util.base64urlencodeUnsignedBigInt(BIG_INTEGER_UNSIGNED_EXAMPLE,1);
         assertEquals(stringResult, BIG_INTEGER_TEXT_URL_BASE64, "Base64Util.base64urlencodeUnsignedBigInt(BigInteger) have returned an incorrect String ");
     }
+    
+    @Test
+    public void base64urlencodeUnsignedBigInt_targetLength_withLeadingSignByte_stripsSignAndPadsCorrectly() {
+        showTitle("base64urlencodeUnsignedBigInt_targetLength_withLeadingSignByte_stripsSignAndPadsCorrectly");
+        BigInteger bi = new BigInteger("8000", 16);
+        String expectedBase64Url = "AACAQA";
+        String stringResult = Base64Util.base64urlencodeUnsignedBigInt(bi, 4);
+        assertEquals(expectedBase64Url, stringResult, "Should strip the 0x00 sign byte and correctly pad the true magnitude.");
+    }
+    
+    @Test
+    public void base64urlencodeUnsignedBigInt_targetLength_zeroValue_returnsAllZerosBase64() {
+        showTitle("base64urlencodeUnsignedBigInt_targetLength_zeroValue_returnsAllZerosBase64");
+        BigInteger bi = BigInteger.ZERO;
+        String expectedBase64Url = "AAAA";
+        String stringResult = Base64Util.base64urlencodeUnsignedBigInt(bi, 3);
+        assertEquals(expectedBase64Url, stringResult, "Zero value should yield an all-zero byte array of the expected length.");
+    }
+
+    @Test
+    public void base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException() {
+        showTitle("base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException");
+        BigInteger bi = new BigInteger("0100", 16); 
+        assertThrows(Exception.class, () -> {
+            Base64Util.base64urlencodeUnsignedBigInt(bi, 1);
+        }, "Should throw an exception if the BigInteger magnitude exceeds the requested target length.");
+    }
 
     @Test
     public void bytesToHex_validByteArrayPlainText_correctStringHex() {
