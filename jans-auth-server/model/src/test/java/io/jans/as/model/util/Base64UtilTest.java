@@ -75,7 +75,7 @@ public class Base64UtilTest extends BaseTest {
     public void base64urlencodeUnsignedBigInt_targetLength_withLeadingSignByte_stripsSignAndPadsCorrectly() {
         showTitle("base64urlencodeUnsignedBigInt_targetLength_withLeadingSignByte_stripsSignAndPadsCorrectly");
         BigInteger bi = new BigInteger("8000", 16);
-        String expectedBase64Url = "AACAQA";
+        String expectedBase64Url = "AACAAA";
         String stringResult = Base64Util.base64urlencodeUnsignedBigInt(bi, 4);
         assertEquals(expectedBase64Url, stringResult, "Should strip the 0x00 sign byte and correctly pad the true magnitude.");
     }
@@ -93,9 +93,9 @@ public class Base64UtilTest extends BaseTest {
     public void base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException() {
         showTitle("base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException");
         BigInteger bi = new BigInteger("0100", 16); 
-        assertThrows(IllegalArgumentException.class, () -> {
+	org.testng.Assert.assertThrows(IllegalArgumentException.class, () -> {
             Base64Util.base64urlencodeUnsignedBigInt(bi, 1);
-        }, "Should throw an exception if the BigInteger magnitude exceeds the requested target length.");
+        });
     }
 
     @Test
