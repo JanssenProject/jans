@@ -174,8 +174,9 @@ jobs:
           # https://$JANS_FQDN (traefik publishes 443 on the droplet).
           "${SSH[@]}" "set -e
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update -qq
-            apt-get install -y -qq openjdk-17-jdk maven rsync
+            cloud-init status --wait 2>/dev/null || true
+            apt-get -o DPkg::Lock::Timeout=600 update -qq
+            apt-get -o DPkg::Lock::Timeout=600 install -y -qq openjdk-17-jdk maven rsync
             grep -q '$JANS_FQDN\$' /etc/hosts || echo '127.0.0.1 $JANS_FQDN' >> /etc/hosts"
           # Drive the whole jans-side flow on the VM. Env is expanded HERE (runner) into the remote
           # command so the matrix/secret values land in the VM shell.
