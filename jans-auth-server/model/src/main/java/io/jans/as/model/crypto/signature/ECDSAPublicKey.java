@@ -68,6 +68,24 @@ public class ECDSAPublicKey extends PublicKey {
     public void setY(BigInteger y) {
         this.y = y;
     }
+    
+    private int getCoordinateByteLength() {
+        if (signatureAlgorithm == null) {
+            return 32; 
+        }
+        
+        switch (signatureAlgorithm) {
+            case SignatureAlgorithm.ES256:
+            case SignatureAlgorithm.ES256K:
+                return 32;  
+            case SignatureAlgorithm.ES384:
+                return 48;  
+            case SignatureAlgorithm.ES512:
+                return 66;  
+            default:
+                return 32;
+        }
+    }
 
     @Override
     public JSONObject toJSONObject() throws JSONException {
@@ -75,8 +93,11 @@ public class ECDSAPublicKey extends PublicKey {
 
         jsonObject.put(MODULUS, JSONObject.NULL);
         jsonObject.put(EXPONENT, JSONObject.NULL);
-        jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(x));
-        jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(y));
+
+        int targetLength = getCoordinateByteLength();
+    
+        jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(x,targetLength));
+        jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(y,targetLength));
 
         return jsonObject;
     }
