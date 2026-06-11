@@ -105,6 +105,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
+          persist-credentials: false
 
       - name: Provision CI droplet
         id: vm
@@ -169,7 +172,7 @@ jobs:
           set -euo pipefail
           SSH=(ssh -i id_ci -o StrictHostKeyChecking=no -o ServerAliveInterval=30 "root@$IP")
           # Ship the checkout (incl. render script + maven-settings); docker is installed by the demo script.
-          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" --exclude .git ./ "root@$IP:/root/jans/"
+          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" ./ "root@$IP:/root/jans/"
           # $JANS_FQDN expands on the runner; the host -> loopback alias lets the VM reach the AIO at
           # https://$JANS_FQDN (traefik publishes 443 on the droplet).
           "${SSH[@]}" "set -e
