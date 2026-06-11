@@ -72,22 +72,25 @@ impl PolicyStoreManager {
     ///
     /// This is the main entry point for converting policy stores loaded from
     /// directory or archive format into the legacy format used by the rest of Cedarling.
+    ///
+    /// When `strict_schema_validation` is `true`, a missing schema causes an error.
+    /// When `false`, missing schema is allowed (schemaless mode).
     pub(crate) fn convert_to_legacy(
         loaded: LoadedPolicyStore,
+        strict_schema_validation: bool,
     ) -> Result<PolicyStore, ConversionError> {
-        Self::convert_to_legacy_with_logger(loaded, None)
-    }
-
-    /// Convert a `LoadedPolicyStore` to `PolicyStore` with optional logging.
-    ///
-    /// This version accepts an optional logger for structured logging during conversion.
-    /// Use this when a logger is available to get detailed conversion logs.
-    fn convert_to_legacy_with_logger(
-        loaded: LoadedPolicyStore,
-        logger: Option<&Logger>,
-    ) -> Result<PolicyStore, ConversionError> {
-        // 1. Convert schema
-        let cedar_schema = Self::convert_schema(&loaded.schema)?;
+        // 1. Convert schema (now optional)
+        let cedar_schema = match loaded.schema {
+            Some(ref schema_content) => {
+                Some(Self::convert_schema(schema_content)?)
+            },
+            None if strict_schema_validation => {
+                return Err(ConversionError::SchemaConversion(
+                    "missing required schema in policy store".to_string(),
+                ));
+            },
+            None => None,
+        };
 
         // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
@@ -96,8 +99,8 @@ impl PolicyStoreManager {
         // 3. Convert trusted issuers
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
-        // 4. Convert entities (logs hierarchy warnings if logger provided)
-        let raw_entities = Self::convert_entities(&loaded.entities, logger)?;
+        // 4. Convert entities
+        let raw_entities = Self::convert_entities(&loaded.entities, None)?;
 
         // Convert raw entities to DefaultEntitiesWithWarns
         let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
@@ -106,13 +109,6 @@ impl PolicyStoreManager {
 
         // 5. Parse cedar version
         let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
-
-        logger.log_any(PolicyStoreLogEntry::info(format!(
-            "Policy store conversion complete: {} policies, {} issuers, {} entities",
-            policies_container.get_set().policies().count(),
-            trusted_issuers.as_ref().map_or(0, HashMap::len),
-            default_entities.entities().len()
-        )));
 
         Ok(PolicyStore {
             name: loaded.metadata.policy_store.name,
@@ -633,19 +629,10 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_minimal() {
+    fn test_convert_to_legacy_without_schema_strict_true_errors() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            schema: r#"
-        namespace TestApp {
-            entity User;
-            action "read" appliesTo {
-                principal: [User],
-                resource: [User]
-            };
-        }
-    "#
-            .to_string(),
+            schema: None,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -655,7 +642,97 @@ mod tests {
             trusted_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded);
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let err = result.expect_err(
+            "Expected error when strict_schema_validation is true but schema is missing",
+        );
+        assert!(
+            matches!(&err, ConversionError::SchemaConversion(msg) if msg.contains("missing required schema")),
+            "Expected SchemaConversion error about missing schema, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_convert_to_legacy_without_schema_strict_false_succeeds() {
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: None,
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let store = result.expect(
+            "Should succeed when strict_schema_validation is false even without schema",
+        );
+        assert!(
+            store.schema.is_none(),
+            "schema should be None when no schema was loaded"
+        );
+    }
+
+    #[test]
+    fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(r#"
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#
+            .to_string()),
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let store = result.expect(
+            "Should succeed with schema even when strict_schema_validation is false",
+        );
+        assert!(
+            store.schema.is_some(),
+            "schema should be Some when schema content was provided"
+        );
+    }
+
+    #[test]
+    fn test_convert_to_legacy_minimal() {
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(r#"
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#
+            .to_string()),
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
@@ -672,7 +749,7 @@ mod tests {
     fn test_convert_to_legacy_full() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            schema: r#"
+            schema: Some(r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -681,7 +758,7 @@ mod tests {
             };
         }
     "#
-            .to_string(),
+            .to_string()),
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -710,7 +787,7 @@ mod tests {
             }],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded);
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();

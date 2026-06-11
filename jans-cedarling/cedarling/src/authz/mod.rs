@@ -157,10 +157,12 @@ impl Authz {
         // Capture pushed data info for logging before context is built
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
 
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
+
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
             &entities_data.tokens,
-            &schema.schema,
+            schema_ref,
             &action,
             pushed_data,
         )
@@ -172,7 +174,7 @@ impl Authz {
         let resource_uid = entities_data.resource.uid();
 
         let entities = entities_data
-            .entities(Some(&schema.schema))
+            .entities(schema_ref)
             .map_err(AuthorizeError::ValidateEntities)
             .inspect_err(|e| {
                 self.config.metrics.record_error(e);
@@ -304,6 +306,7 @@ impl Authz {
         let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::from)
@@ -334,7 +337,6 @@ impl Authz {
             &self.config,
             request.context.clone(),
             &built_entities,
-            &schema.schema,
             &action,
             pushed_data,
         )
@@ -345,7 +347,7 @@ impl Authz {
 
         let entities = Entities::from_entities(
             principal.into_iter().chain([resource]),
-            Some(&schema.schema),
+            schema_ref,
         )
         .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
         .inspect_err(|e| {
@@ -359,6 +361,11 @@ impl Authz {
             action: action.clone(),
             resource: resource_uid.clone(),
             context,
+        })
+        .map_err(AuthorizeError::RequestValidation)
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
         })?;
 
         let result = AuthorizeResult::new(response.clone(), request_id);
@@ -453,18 +460,23 @@ impl Authz {
     ) -> Result<cedar_policy::Response, Box<cedar_policy::RequestValidationError>> {
         let has_principal = parameters.principal.is_some();
 
-        let mut request_builder = cedar_policy::Request::builder()
+        let request_builder_base = cedar_policy::Request::builder()
             .action(parameters.action)
             .resource(parameters.resource)
-            .context(parameters.context)
-            .schema(&self.config.policy_store.schema.schema);
+            .context(parameters.context);
 
-        if let Some(principal) = parameters.principal {
-            request_builder = request_builder.principal(principal);
-        }
-
-        let request = request_builder.build().map_err(Box::new)?;
-
+        let request = if let Some(schema) = &self.config.policy_store.schema {
+            let request_builder = request_builder_base.schema(&schema.schema);
+            match parameters.principal {
+                Some(principal) => request_builder.principal(principal).build()?,
+                None => request_builder.build()?,
+            }
+        } else {
+            match parameters.principal {
+                Some(principal) => request_builder_base.principal(principal).build(),
+                None => request_builder_base.build(),
+            }
+        };
         if has_principal {
             Ok(self.authorizer.is_authorized(
                 &request,

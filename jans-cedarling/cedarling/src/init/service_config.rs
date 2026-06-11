@@ -30,7 +30,12 @@ pub enum ServiceConfigError {
 impl ServiceConfig {
     pub(crate) async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
         let http_client = HttpClient::new(bootstrap.http_client_config)?;
-        let policy_store = load_policy_store(&bootstrap.policy_store_config, &http_client).await?;
+        let policy_store = load_policy_store(
+            &bootstrap.policy_store_config,
+            &http_client,
+            bootstrap.authorization_config.strict_schema_validation,
+        )
+        .await?;
 
         Ok(Self {
             policy_store,
