@@ -69,24 +69,6 @@ public class ECDSAPublicKey extends PublicKey {
         this.y = y;
     }
     
-    private int getCoordinateByteLength() {
-        if (signatureAlgorithm == null) {
-            throw new IllegalStateException("Signature algorithm must be set for ECDSA public key serialization");
-        }
-        
-        switch (signatureAlgorithm) {
-            case ES256:
-            case ES256K:
-                return 32;  
-            case ES384:
-                return 48;  
-            case ES512:
-                return 66;  
-            default:
-                throw new IllegalArgumentException("Unsupported signature algorithm for ECDSA key serialization: " + signatureAlgorithm);
-        }
-    }
-
     @Override
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
@@ -94,7 +76,7 @@ public class ECDSAPublicKey extends PublicKey {
         jsonObject.put(MODULUS, JSONObject.NULL);
         jsonObject.put(EXPONENT, JSONObject.NULL);
 
-        int targetLength = getCoordinateByteLength();
+        int targetLength = this.getSignatureAlgorithm().getCoordinateByteLength();
     
         jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(x,targetLength));
         jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(y,targetLength));

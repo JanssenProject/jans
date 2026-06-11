@@ -45,32 +45,13 @@ public class ECDSAPrivateKey extends PrivateKey {
         this.d = d;
     }
 
-    private int getCoordinateByteLength() {
-        SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm();
-        if (signatureAlgorithm == null) {
-            throw new IllegalStateException("Signature algorithm must be set for ECDSA private key serialization");
-        }
-        
-        switch (signatureAlgorithm) {
-            case ES256:
-            case ES256K:
-                return 32;  
-            case ES384:
-                return 48;  
-            case ES512:
-                return 66;  
-            default:
-                throw new IllegalArgumentException("Unsupported signature algorithm for ECDSA key serialization: " + signatureAlgorithm);
-        }
-    }
-    
     @Override
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(MODULUS, JSONObject.NULL);
         jsonObject.put(EXPONENT, JSONObject.NULL);
 
-        int targetLength = getCoordinateByteLength();
+        int targetLength = this.getSignatureAlgorithm().getCoordinateByteLength();
         
         jsonObject.put(D, Base64Util.base64urlencodeUnsignedBigInt(d, targetLength));
 
