@@ -40,6 +40,7 @@ impl PolicyStoreLogEntry {
     /// operations, such as successful loads, completed validations, or routine status
     /// updates. This is the recommended choice for most non-error, non-warning policy
     /// store events that should be visible in production logs.
+    #[allow(dead_code)]
     pub(super) fn info(msg: impl Into<String>) -> Self {
         Self::new(msg, Some(LogLevel::INFO))
     }

@@ -20,6 +20,7 @@ use crate::entity_builder::{EntityBuilder, InitEntityBuilderError, TrustedIssuer
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -127,14 +128,49 @@ impl<'a> ServiceFactory<'a> {
             logger.log_any(log_entry);
         }
 
+        // Warn when strict schema validation is disabled
+        if !self.bootstrap_config.authorization_config.strict_schema_validation {
+            let msg = if policy_store.schema.is_some() {
+                "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — schema present but not enforced"
+            } else {
+                "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — no schema loaded; policies run without attribute validation"
+            };
+
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(msg.to_string());
+
+            logger.log_any(log_entry);
+        }
+
         let policy_store = self.policy_store()?;
+
+        logger.log_any(LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ))
+        .set_message(format!(
+            "Policy store loaded: {} policies, {} issuers, {} entities",
+            policy_store.policies.get_set().policies().count(),
+            policy_store
+                .trusted_issuers
+                .as_ref()
+                .map_or(0, HashMap::len),
+            policy_store.default_entities.entities().len(),
+        )));
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(&logger));
-        let schema = &policy_store.schema.validator_schema;
+        let schema = &policy_store.schema.as_ref().map(|s| &s.validator_schema);
         let entity_builder = EntityBuilder::new(
             issuers_index,
-            Some(schema),
+            if self.bootstrap_config.authorization_config.strict_schema_validation {
+                schema.as_deref()
+            } else {
+                None
+            },
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);
