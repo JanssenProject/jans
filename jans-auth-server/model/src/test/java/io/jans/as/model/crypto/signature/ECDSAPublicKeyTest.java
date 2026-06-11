@@ -44,8 +44,8 @@ public class ECDSAPublicKeyTest extends BaseTest {
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
         byte[] yBytes = Base64Util.base64urldecode(jwk.getString("y"));
 
-        assertEquals(xBytes.length, 32, "P-384 x coordinate must be exactly 48 bytes");
-        assertEquals(yBytes.length, 32, "P-384 y coordinate must be exactly 48 bytes");
+        assertEquals(xBytes.length, 48, "P-384 x coordinate must be exactly 48 bytes");
+        assertEquals(yBytes.length, 48, "P-384 y coordinate must be exactly 48 bytes");
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ECDSAPublicKeyTest extends BaseTest {
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
         byte[] yBytes = Base64Util.base64urldecode(jwk.getString("y"));
 
-        assertEquals(xBytes.length, 32, "P-521 x coordinate must be exactly 66 bytes");
-        assertEquals(yBytes.length, 32, "P-521 y coordinate must be exactly 66 bytes");
+        assertEquals(xBytes.length, 66, "P-521 x coordinate must be exactly 66 bytes");
+        assertEquals(yBytes.length, 66, "P-521 y coordinate must be exactly 66 bytes");
     }
 }
