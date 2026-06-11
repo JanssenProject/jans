@@ -173,7 +173,7 @@ public class TrustRelationshipTest {
      * Creation Tests
      */
     @Nested
-    @DisplayName("Creation Tests")
+    @DisplayName("Foundation & Creation -- Creation Tests")
     public class CreationTests {
 
 
@@ -248,8 +248,8 @@ public class TrustRelationshipTest {
      * Basic Updates and Idempotency Tests
      */
     @Nested
-    @DisplayName("Basic Updates and Idempotency Tests")
-    public class BasicUpdatesAndIdempotencyTests {
+    @DisplayName("Foundation & Creation -- Basic Updates In Draft")
+    public class BasicUpdatesWithIdempotencyAndNullityTests {
 
         
         @ParameterizedTest
@@ -430,6 +430,12 @@ public class TrustRelationshipTest {
             assertThat(same_or_updated_tr.getReleasedAttributes()).isEqualTo(attributes);
         }
 
+    }
+
+    @Nested
+    @DisplayName("Foundation & Creation -- Update Nullability Tests ")
+    public class UpdateNullabilityTests {
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -438,19 +444,19 @@ public class TrustRelationshipTest {
             "THEN the call should fail with the appropriate error " 
         )
         public void shouldFailWhenUpdateDisplayNameWithNull(TrustRelationship tr) {
-
-             TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
-             assertThat(result.isFailure()).isTrue();
-             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-
-             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-             assertThat(error.getCause()).isNotNull();
-             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-             CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
-             assertThat(cause.getFieldName()).isEqualTo("displayName");
+            
+            TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isNotNull();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause.getFieldName()).isEqualTo("displayName");
         }
-
-
+        
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -459,16 +465,17 @@ public class TrustRelationshipTest {
             "THEN the call should fail with the appropriate error "
         )
         public void shouldFailWhenUpdateMetadataSourceWithNull(TrustRelationship tr) {
-
+        
             TrustResult<TrustRelationship> result = tr.<ShibbolethSsoProfileConfiguration>updateMetadataSource(null);
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-
+        
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isNotNull();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
         }
-
+        
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndProfileTypes")
         @DisplayName(
@@ -477,9 +484,9 @@ public class TrustRelationshipTest {
             "THEN the call should fail with the appropriate error "
         )
         public void shouldFailWhenUpdateProfileConfigurationWithNull(TrustRelationship tr, ProfileType profiletype,String requiredFieldName) {
-
+        
             TrustResult<TrustRelationship> result = null;
-            
+                    
             switch(profiletype) {
                 case SHIBBOLETH_SSO:
                     result = tr.updateShibbolethSsoProfileConfiguration(null);
@@ -503,16 +510,16 @@ public class TrustRelationshipTest {
                     fail("Profile type '%s' unsupported in tests", profiletype);
                     break;
             }
-
+        
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-            
+                    
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
             CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
             assertThat(cause.getFieldName()).isEqualTo(requiredFieldName);
         }
-
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -521,7 +528,7 @@ public class TrustRelationshipTest {
             "THEN the operation fails with the appropriate error"
         )
         public void shouldFailWhenUpdateReleasedAttributesWithNull(TrustRelationship tr) {
-
+        
             TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(null);
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -530,5 +537,6 @@ public class TrustRelationshipTest {
             CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
             assertThat(cause.getFieldName()).isEqualTo("releasedAttributes");
         }
+        
     }
 }
