@@ -93,7 +93,7 @@ public class Base64UtilTest extends BaseTest {
     public void base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException() {
         showTitle("base64urlencodeUnsignedBigInt_targetLength_expectedLengthTooSmall_throwsException");
         BigInteger bi = new BigInteger("0100", 16); 
-        assertThrows(Exception.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             Base64Util.base64urlencodeUnsignedBigInt(bi, 1);
         }, "Should throw an exception if the BigInteger magnitude exceeds the requested target length.");
     }
