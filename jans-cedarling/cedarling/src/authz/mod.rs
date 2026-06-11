@@ -345,28 +345,26 @@ impl Authz {
             self.config.metrics.record_authz_error();
         })?;
 
-        let entities = Entities::from_entities(
-            principal.into_iter().chain([resource]),
-            schema_ref,
-        )
-        .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
-        .inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        let entities = Entities::from_entities(principal.into_iter().chain([resource]), schema_ref)
+            .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
-        let response = self.execute_authorize(ExecuteAuthorizeParameters {
-            entities: &entities,
-            principal: principal_uid.clone(),
-            action: action.clone(),
-            resource: resource_uid.clone(),
-            context,
-        })
-        .map_err(AuthorizeError::RequestValidation)
-        .inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        let response = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let result = AuthorizeResult::new(response.clone(), request_id);
 
@@ -783,8 +781,7 @@ impl AuthorizeEntitiesData {
             .saturating_add(self.issuers.len())
             .saturating_add(self.tokens.len())
             .saturating_add(self.default_entities.inner.len());
-        let mut merged_entities: HashMap<EntityUid, Entity> =
-            HashMap::with_capacity(capacity);
+        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::with_capacity(capacity);
 
         // Add request entities first (these may be overwritten by default entities)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
@@ -808,5 +805,198 @@ impl AuthorizeEntitiesData {
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, Box<cedar_policy::entities_errors::EntitiesError>> {
         Entities::from_entities(self.into_iter(), schema).map_err(Box::new)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use std::collections::HashMap;
+    use std::sync::Arc;
+
+    fn to_entity(json: serde_json::Value) -> Entity {
+        Entity::from_json_value(json, None).expect("entity from json")
+    }
+
+    fn default_entities(jsons: &[serde_json::Value]) -> DefaultEntities {
+        let inner: HashMap<EntityUid, Entity> = jsons
+            .iter()
+            .map(|j| {
+                let entity = to_entity(j.clone());
+                (entity.uid().clone(), entity)
+            })
+            .collect();
+        DefaultEntities {
+            inner: Arc::new(inner),
+        }
+    }
+
+    #[test]
+    fn default_takes_precedence_over_resource_on_uid_collision() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "evil", "is_admin": false}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "trusted", "is_admin": true}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::Org::\"org1\"".parse().unwrap();
+        let entity = ents.get(&uid).expect("org1 entity");
+        let json = entity.to_json_value().expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/name").and_then(|v| v.as_str()),
+            Some("trusted")
+        );
+        assert_eq!(
+            json.pointer("/attrs/is_admin").and_then(|v| v.as_bool()),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn default_takes_precedence_over_issuer_on_uid_collision() {
+        let mut issuers = HashSet::new();
+        issuers.insert(to_entity(json!({"uid": {"type": "Jans::Issuer", "id": "iss1"}, "attrs": {"trusted": false}, "parents": []})));
+        let data = AuthorizeEntitiesData {
+            issuers,
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Issuer", "id": "iss1"}, "attrs": {"trusted": true}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::Issuer::\"iss1\"".parse().unwrap();
+        let json = ents
+            .get(&uid)
+            .expect("issuer entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/trusted").and_then(|v| v.as_bool()),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn default_takes_precedence_over_token_on_uid_collision() {
+        let mut tokens = HashMap::new();
+        tokens.insert(
+            "tok1".to_string(),
+            to_entity(json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "evil"}, "parents": []})),
+        );
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens,
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "read"}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::access_token::\"tok1\"".parse().unwrap();
+        let json = ents
+            .get(&uid)
+            .expect("token entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/scope").and_then(|v| v.as_str()),
+            Some("read")
+        );
+    }
+
+    #[test]
+    fn unique_uids_all_present() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        assert!(
+            ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
+                .is_some()
+        );
+        assert!(ents.get(&"Jans::Org::\"org1\"".parse().unwrap()).is_some());
+        assert_eq!(ents.iter().count(), 2);
+    }
+
+    #[test]
+    fn empty_defaults_produces_only_request_entities() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: DefaultEntities::default(),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        assert!(
+            ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
+                .is_some()
+        );
+        assert_eq!(ents.iter().count(), 1);
+    }
+
+    #[test]
+    fn defaults_win_when_both_resource_and_issuer_collide() {
+        let mut issuers = HashSet::new();
+        issuers.insert(to_entity(json!({"uid": {"type": "Jans::Group", "id": "admin"}, "attrs": {"role": "user"}, "parents": []})));
+        let data = AuthorizeEntitiesData {
+            issuers,
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "evil"}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "trusted"}, "parents": []}),
+                json!({"uid": {"type": "Jans::Group", "id": "admin"}, "attrs": {"role": "admin"}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+
+        let org_uid: EntityUid = "Jans::Org::\"org1\"".parse().unwrap();
+        let org_json = ents
+            .get(&org_uid)
+            .expect("org entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            org_json.pointer("/attrs/name").and_then(|v| v.as_str()),
+            Some("trusted")
+        );
+
+        let group_uid: EntityUid = "Jans::Group::\"admin\"".parse().unwrap();
+        let group_json = ents
+            .get(&group_uid)
+            .expect("group entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            group_json.pointer("/attrs/role").and_then(|v| v.as_str()),
+            Some("admin")
+        );
     }
 }
