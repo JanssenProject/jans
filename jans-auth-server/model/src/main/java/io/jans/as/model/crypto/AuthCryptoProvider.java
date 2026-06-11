@@ -573,7 +573,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getName());
             }
             int targetLengthInBits = algorithm.getKeyLength();
-            int targetLength = targetLengthInBits / 8;
+            int targetLength = (targetLengthInBits + 7) / 8;
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX(), targetLength));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY(), targetLength));
         }
