@@ -775,20 +775,22 @@ pub(super) struct AuthorizeEntitiesData {
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     ///
-    /// This method merges request entities with default entities, where request entities
-    /// take precedence over default entities in case of UID conflicts.
+    /// This method merges request entities with default entities, where default entities
+    /// (from the policy store) take precedence over request-supplied entities in case of
+    /// UID conflicts. This ensures that policy-store entities — which represent
+    /// change-controlled, trusted shared state — cannot be overwritten by attacker-controlled
+    /// request data.
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
+        let capacity = 1usize // resource
+            .saturating_add(self.issuers.len())
+            .saturating_add(self.tokens.len())
+            .saturating_add(self.user.is_some() as usize)
+            .saturating_add(self.workload.is_some() as usize)
+            .saturating_add(self.default_entities.inner.len());
+        let mut merged_entities: HashMap<EntityUid, Entity> =
+            HashMap::with_capacity(capacity);
 
-        // Add default entities first
-        merged_entities.extend(
-            Arc::try_unwrap(self.default_entities.inner)
-                .unwrap_or_else(|arc| (*arc).clone())
-                .into_values()
-                .map(|e| (e.uid(), e)),
-        );
-
-        // Add request entities (these will override default entities if conflicts exist)
+        // Add request entities first (these may be overwritten by default entities)
         merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
@@ -796,6 +798,14 @@ impl AuthorizeEntitiesData {
             vec![self.user, self.workload]
                 .into_iter()
                 .flatten()
+                .map(|e| (e.uid(), e)),
+        );
+
+        // Add default entities last (these take precedence over request entities if UID conflicts exist)
+        merged_entities.extend(
+            Arc::try_unwrap(self.default_entities.inner)
+                .unwrap_or_else(|arc| (*arc).clone())
+                .into_values()
                 .map(|e| (e.uid(), e)),
         );
 
