@@ -38,6 +38,7 @@ on:
       - "docker-jans-all-in-one/**"
       - ".github/workflows/test-integration.yml"
       - ".github/workflows/scripts/render_test_profiles.py"
+      - "automation/ci/run_aio_integration.sh"
       - "jans-auth-server/**"
       - "jans-scim/**"
       - "jans-config-api/**"
@@ -105,235 +106,100 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: maven
-
-      - name: Resolve DB parameters
-        id: db
-        run: |
-          if [ "${{ matrix.persistence }}" = "PGSQL" ]; then
-            {
-              echo "image=postgres:16"
-              echo "port=5432"
-              echo "dialect=pgsql"
-              echo "jdbc=postgresql"
-              echo "schema=public"
-            } >> "$GITHUB_OUTPUT"
-          else
-            {
-              echo "image=mysql:8.0"
-              echo "port=3306"
-              echo "dialect=mysql"
-              echo "jdbc=mysql"
-              echo "schema=$DB_NAME"
-            } >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build AIO image (with integration-test env baked in)
-        run: |
-          set -euo pipefail
-          if [ -n "${{ inputs.aio_image }}" ]; then
-            docker pull "${{ inputs.aio_image }}"
-            base_image="${{ inputs.aio_image }}"
-          else
-            docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
-            docker build -t local/config-api:ci ./docker-jans-config-api
-            docker build -t local/aio:ci \
-              --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
-              --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
-              ./docker-jans-all-in-one
-            base_image="local/aio:ci"
-          fi
-          # Bake the integration-test env into a thin layer, tagged as the image the
-          # AIO demo compose expects, so start_janssen_aio_demo.sh uses it unchanged.
-          cat > Dockerfile.ci-aio <<EOF
-          FROM ${base_image}
-          ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
-          ENV CN_SCIM_ENABLED=true
-          ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
-          ENV CN_CONFIG_API_TEST_CLIENT_SECRET=${CN_CONFIG_API_TEST_CLIENT_SECRET}
-          ENV CN_CONFIG_API_TEST_CLIENT_TRUSTED=${CN_CONFIG_API_TEST_CLIENT_TRUSTED}
-          EOF
-          docker build -t ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly - < Dockerfile.ci-aio
-
-      - name: Start the AIO demo stack (consul + vault + traefik + DB + AIO)
-        run: |
-          set -uo pipefail
-          # TRACE (detailed FILE logs) is opt-in via the log_level input: the demo enables TRACE +
-          # FILE logging when JANS_CI_CD_RUN is set; default (unset) stays INFO/STDOUT (lower memory).
-          [ "${{ inputs.log_level }}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
-          # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
-          # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A
-          # restart instead would re-run key-gen against a half-initialised keystore and corrupt
-          # jansConfWebKeys.
-          bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "${{ matrix.persistence }}" "" 127.0.0.1 &
-          demo_pid=$!
-          for _ in $(seq 1 120); do
-            [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true
-            kill -0 "$demo_pid" 2>/dev/null || break
-            sleep 2
-          done
-          wait "$demo_pid" 2>/dev/null || echo "[warn] demo-script readiness gate did not pass; re-checking below"
-          echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
-          end=$((SECONDS + 600)); ok=""; poll=0
-          while [ $SECONDS -lt $end ]; do
-            code=$(curl -sk -o /dev/null -w '%{http_code}' "https://${JANS_FQDN}/.well-known/openid-configuration" || true)
-            echo "openid-configuration: $code"
-            if [ "$code" = "200" ]; then ok=1; break; fi
-            poll=$((poll + 1))
-            if [ $((poll % 6)) -eq 0 ]; then
-              echo "--- jans-auth progress (poll ${poll}) ---"
-              docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Started oejs.Server|FATAL|exited|WaitError" | tail -n 10 || true
-            fi
-            sleep 20
-          done
-          if [ -z "$ok" ]; then
-            echo "::error::AIO did not become healthy in time"
-            docker compose -f automation/compose.yaml ps || true
-            docker exec jans supervisorctl -c /app/conf/supervisord.conf status 2>&1 || true
-            docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Traceback|Started oejs.Server|FATAL|exited|WaitError|OutOfMemory" | tail -n 200 || true
-            echo "--- KEY MATERIAL DIAGNOSTIC (where does the jansConfWebKeys date come from?) ---"
-            echo "[configurator /etc/certs/auth-keys.json head]"; docker exec jans sh -c 'head -c 400 /etc/certs/auth-keys.json' 2>&1 || true; echo
-            docker exec jans python3 -c 'import base64; from jans.pycloudlib import get_manager; from jans.pycloudlib.persistence.sql import SqlClient, doc_id_from_dn; m=get_manager(); s=m.secret.get("auth_openid_key_base64") or ""; print("[secret auth_openid_key_base64 decoded :300]", (base64.b64decode(s).decode("utf-8","replace")[:300] if s else "EMPTY")); c=SqlClient(m); r=c.get("jansAppConf", doc_id_from_dn("ou=jans-auth,ou=configuration,o=jans"), ["jansConfWebKeys"]) or {}; print("[DB jansConfWebKeys :300]", str(r.get("jansConfWebKeys"))[:300])' 2>&1 || true
-            exit 1
-          fi
-          for ep in scim-configuration fido2-configuration; do
-            curl -sk -o /dev/null -w "$ep: %{http_code}\n" "https://${JANS_FQDN}/.well-known/$ep" || true
-          done
-
-      - name: Reload jans-scim (pick up test SCIM custom attributes)
-        run: |
-          set -uo pipefail
-          # jans-scim caches the SCIM extension at init; restart it so the loader's scimCustom*
-          # attributes are recognised (jans-linux-setup likewise restarts jans-scim after loading).
-          docker exec jans supervisorctl -c /app/conf/supervisord.conf restart jans-scim || true
-          for _ in $(seq 1 30); do
-            code=$(curl -sk -o /dev/null -w "%{http_code}" "https://${JANS_FQDN}/.well-known/scim-configuration" || true)
-            [ "$code" = "200" ] && { echo "jans-scim back up"; break; }
-            sleep 4
-          done
-          # diagnostic: confirm the scimCustom* attrs in the DB and whether jans-scim built the extension
-          echo "::group::SCIM custom-attr diagnostic"
-          docker exec jans python3 -c 'from jans.pycloudlib import get_manager; from jans.pycloudlib.persistence.sql import SqlClient, doc_id_from_dn; c=SqlClient(get_manager()); [print("scim attr", i, c.get("jansAttr", doc_id_from_dn(f"inum={i},ou=attributes,o=jans"), ["jansAttrName","jansScimCustomAttr","jansStatus"])) for i in ("ADA6","70F0","653A")]' 2>&1 || true
-          curl -sk "https://${JANS_FQDN}/jans-scim/restv1/v2/Schemas" 2>/dev/null | grep -aoiE "scimCustom[A-Za-z]+|urn:[^\"]*extension[^\"]*User" | sort -u | head || echo "(SCIM /Schemas not readable without auth)"
-          echo "::endgroup::"
-
-      - name: Import AIO CA certificate into the JDK truststore
-        run: |
-          set -euo pipefail
-          # The setup-java JDK's cacerts is not writable by the runner user, so import as root.
-          sudo "${JAVA_HOME}/bin/keytool" -import -trustcacerts -noprompt -alias "${JANS_FQDN}" \
-            -file automation/jans-aio-demo/templates/ca.crt \
-            -keystore "${JAVA_HOME}/lib/security/cacerts" -storepass changeit
-
-      - name: Extract live secrets from the AIO
-        id: secrets
-        run: |
-          set -euo pipefail
-          # adapter-agnostic: read through the AIO's own pycloudlib manager
-          payload=$(docker exec -i -e DB_PASSWORD="$DB_PASSWORD" jans python3 - <<'PY'
-          import json
-          from jans.pycloudlib import get_manager
-          from jans.pycloudlib.utils import encode_text
-          import os
-          m = get_manager()
-          salt = m.secret.get("encoded_salt")
-          print(json.dumps({
-              "salt": salt,
-              "scim_id": m.config.get("scim_client_id") or "",
-              "scim_pw": m.secret.get("scim_client_pw") or "",
-              "jca_id": m.config.get("jca_client_id") or "",
-              "jca_enc": m.secret.get("jca_client_encoded_pw") or "",
-              "db_pw_enc": encode_text(os.environ["DB_PASSWORD"], salt).decode(),
-          }))
-          PY
-          )
-          # mask the sensitive values in logs
-          for k in salt scim_pw jca_enc db_pw_enc; do
-            v=$(echo "$payload" | python3 -c "import json,sys;print(json.load(sys.stdin)['$k'])")
-            echo "::add-mask::$v"
-          done
-          echo "$payload" > "$GITHUB_WORKSPACE/aio-secrets.json"
-
-      - name: Render test profiles
-        run: |
-          set -euo pipefail
-          read_json() { python3 -c "import json;print(json.load(open('$GITHUB_WORKSPACE/aio-secrets.json'))['$1'])"; }
-          export JANS_FQDN
-          export ENCODE_SALT="$(read_json salt)"
-          export SCIM_CLIENT_ID="$(read_json scim_id)"
-          export SCIM_CLIENT_PW="$(read_json scim_pw)"
-          export JCA_CLIENT_ID="$(read_json jca_id)"
-          export JCA_CLIENT_ENCODED_PW="$(read_json jca_enc)"
-          export JCA_TEST_CLIENT_ID="$CN_CONFIG_API_TEST_CLIENT_ID"
-          export JCA_TEST_CLIENT_SECRET="$CN_CONFIG_API_TEST_CLIENT_SECRET"
-          export RDBM_NAME_STR=${{ steps.db.outputs.jdbc }}
-          export RDBM_DB="$DB_NAME"
-          export RDBM_SCHEMA_NAME=${{ steps.db.outputs.schema }}
-          export RDBM_PORT=${{ steps.db.outputs.port }}
-          export RDBM_USER="$DB_USER"
-          export RDBM_PASSWORD_ENC="$(read_json db_pw_enc)"
-          python3 .github/workflows/scripts/render_test_profiles.py
-
-      - name: Build modules (skip tests)
+      - name: Provision CI droplet
+        id: vm
         env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -euo pipefail
+          [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set (add a DigitalOcean PAT with droplet create/delete to the repo's Actions secrets)"; exit 1; }
+          # Ephemeral keypair: the public key is registered on the droplet at create time and both
+          # the key + droplet are destroyed in teardown, so no long-lived credential is persisted.
+          ssh-keygen -t rsa -b 4096 -N '' -f id_ci -q
+          key_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/account/keys" \
+            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+            -d "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                       --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
+            | jq -r '.ssh_key.id')
+          droplet_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/droplets" \
+            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+            -d "$(jq -n \
+                  --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                  --argjson key "$key_id" \
+                  --arg run "run-${{ github.run_id }}" \
+                  '{name:$name, region:"nyc1", size:"s-8vcpu-16gb", image:"ubuntu-22-04-x64",
+                    ssh_keys:[$key], tags:["jans-ci", $run]}')" \
+            | jq -r '.droplet.id')
+          {
+            echo "droplet_id=$droplet_id"
+            echo "key_id=$key_id"
+          } >> "$GITHUB_OUTPUT"
+          echo "[info] created droplet $droplet_id (key $key_id)"
+
+      - name: Wait for droplet IP + SSH
+        id: ip
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -euo pipefail
+          ip=""
+          for _ in $(seq 1 60); do
+            ip=$(curl -fsS "https://api.digitalocean.com/v2/droplets/${{ steps.vm.outputs.droplet_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" \
+              | jq -r '.droplet.networks.v4[]? | select(.type=="public") | .ip_address' | head -n1)
+            [ -n "$ip" ] && [ "$ip" != "null" ] && break
+            sleep 10
+          done
+          if [ -z "$ip" ] || [ "$ip" = "null" ]; then echo "::error::droplet never reported a public IP"; exit 1; fi
+          echo "[info] droplet IP: $ip"
+          for _ in $(seq 1 60); do
+            ssh -i id_ci -o StrictHostKeyChecking=no -o ConnectTimeout=10 "root@$ip" true 2>/dev/null && break
+            sleep 10
+          done
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "ip=$ip" >> "$GITHUB_OUTPUT"
+
+      - name: Bootstrap + run on the VM
+        env:
+          IP: ${{ steps.ip.outputs.ip }}
+          GITHUB_ACTOR: ${{ github.actor }}
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Compile + install with the default profile; the live FQDN is only needed at test time.
-          for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
-            echo "::group::build $mod"
-            mvn -B -ntp -s .github/maven-settings.xml \
-              -Dcfg=default -Dmaven.test.skip=true -fae \
-              -f "$mod/pom.xml" clean install
-            echo "::endgroup::"
-          done
+          SSH=(ssh -i id_ci -o StrictHostKeyChecking=no -o ServerAliveInterval=30 "root@$IP")
+          # Ship the checkout (incl. render script + maven-settings); docker is installed by the demo script.
+          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" --exclude .git ./ "root@$IP:/root/jans/"
+          # $JANS_FQDN expands on the runner; the host -> loopback alias lets the VM reach the AIO at
+          # https://$JANS_FQDN (traefik publishes 443 on the droplet).
+          "${SSH[@]}" "set -e
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -qq
+            apt-get install -y -qq openjdk-17-jdk maven rsync
+            grep -q '$JANS_FQDN\$' /etc/hosts || echo '127.0.0.1 $JANS_FQDN' >> /etc/hosts"
+          # Drive the whole jans-side flow on the VM. Env is expanded HERE (runner) into the remote
+          # command so the matrix/secret values land in the VM shell.
+          "${SSH[@]}" "cd /root/jans && \
+            JANS_FQDN='$JANS_FQDN' \
+            JANS_PERSISTENCE='${{ matrix.persistence }}' \
+            AIO_IMAGE='${{ inputs.aio_image }}' \
+            LOG_LEVEL='${{ inputs.log_level }}' \
+            DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
+            CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
+            CN_CONFIG_API_TEST_CLIENT_SECRET='$CN_CONFIG_API_TEST_CLIENT_SECRET' \
+            CN_CONFIG_API_TEST_CLIENT_TRUSTED='$CN_CONFIG_API_TEST_CLIENT_TRUSTED' \
+            GITHUB_ACTOR='$GITHUB_ACTOR' JANS_TOKEN='$JANS_TOKEN' \
+            bash automation/ci/run_aio_integration.sh"
 
-      - name: Run integration suites (against the AIO)
-        env:
-          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -uo pipefail
-          mkdir -p test-reports
-          # HTTP suites vs the live AIO. Each suite is hard-bounded with `timeout` (surefire's own
-          # timeout did not stop it): jans-auth-server/client's browser-flow tests can loop on the
-          # AIO login-page JS that HtmlUnit cannot evaluate.
-          # auth-client runs last: if its browser-flow tests hang to the timeout, the others are done.
-          for dir in jans-scim/client jans-config-api jans-fido2/client jans-auth-server/client; do
-            echo "::group::test $dir"
-            timeout -k 30 900 bash -c \
-              "cd '$dir' && mvn -B -ntp -s '$GITHUB_WORKSPACE/.github/maven-settings.xml' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false test" \
-              || echo "[warn] $dir reported failures or timed out"
-            echo "::endgroup::"
-          done
-
-      - name: Run unit suites
-        env:
-          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -uo pipefail
-          # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
-          OPTS="-B -ntp -s .github/maven-settings.xml -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
-          timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test || echo "[warn] jans-orm units reported problems or timed out"
-          timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test || echo "[warn] jans-core units reported problems or timed out"
-          timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test || echo "[warn] jans-auth-server units reported problems or timed out"
-
-      - name: Collect surefire reports
+      - name: Collect results from the VM
         if: always()
+        env:
+          IP: ${{ steps.ip.outputs.ip }}
         run: |
           set -uo pipefail
-          mkdir -p test-reports
-          # Sweep every reactor so auth-client + unit reports are captured (path-prefixed names).
-          find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
-            -path '*/target/surefire-reports/*.xml' 2>/dev/null | while read -r f; do
-            mod=$(printf '%s' "$f" | sed -E 's#/target/surefire-reports/.*##; s#[/ ]+#_#g')
-            cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
-          done
-          echo "collected $(find test-reports -name '*.xml' 2>/dev/null | wc -l) report files"
+          [ -n "${IP:-}" ] || { echo "[warn] no VM IP; skipping result collection"; exit 0; }
+          scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/test-reports" ./ || true
+          scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/aio-logs" ./ || true
 
       - name: Summarise results
         if: always()
@@ -382,23 +248,13 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: Collect AIO logs
+      - name: AIO key events
         if: always()
         run: |
-          mkdir -p aio-logs
-          # container log carries STDOUT/INFO output (incl. configurator + persistence-loader)
-          docker logs jans > aio-logs/aio-container.log 2>&1 || true
-          docker logs traefik > aio-logs/traefik.log 2>&1 || true
-          docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
-          docker compose -f automation/compose.yaml ps > aio-logs/compose-ps.txt 2>&1 || true
-          # per-service jetty logs (where FILE/TRACE output lands)
-          for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
-            docker cp "jans:/opt/jans/jetty/$s/logs" "aio-logs/$s" 2>/dev/null || true
-          done
-          # quick view in the step log
+          # aio-logs/ was scp'd back from the VM; surface the key events in the step log.
           echo "::group::supervisord status"; cat aio-logs/supervisord-status.txt 2>/dev/null || true; echo "::endgroup::"
           echo "::group::AIO key events"
-          grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|FATAL|503|Unauthorized" aio-logs/aio-container.log | tail -n 200 || true
+          grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|FATAL|503|Unauthorized" aio-logs/aio-container.log 2>/dev/null | tail -n 200 || true
           echo "::endgroup::"
 
       - name: Gate on test outcome
@@ -431,3 +287,38 @@ jobs:
           path: aio-logs/
           if-no-files-found: warn
           retention-days: 5
+
+      - name: Tear down CI droplet
+        if: always()
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          # Best-effort: the reap job is the safety net if this step is skipped (e.g. cancellation).
+          if [ -n "${{ steps.vm.outputs.droplet_id }}" ]; then
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/droplets/${{ steps.vm.outputs.droplet_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
+          fi
+          if [ -n "${{ steps.vm.outputs.key_id }}" ]; then
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/${{ steps.vm.outputs.key_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
+          fi
+
+  # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
+  # droplet tagged run-<run_id>. Tag-scoped so it never touches other runs' droplets.
+  reap:
+    needs: integration
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Delete any leftover droplets for this run
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          curl -fsS -X DELETE \
+            "https://api.digitalocean.com/v2/droplets?tag_name=run-${{ github.run_id }}" \
+            -H "Authorization: Bearer ${DO_TOKEN}" || true
