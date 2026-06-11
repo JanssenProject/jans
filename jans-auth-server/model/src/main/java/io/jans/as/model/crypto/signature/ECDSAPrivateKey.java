@@ -45,12 +45,34 @@ public class ECDSAPrivateKey extends PrivateKey {
         this.d = d;
     }
 
+    private int getCoordinateByteLength() {
+        SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm();
+        if (signatureAlgorithm == null) {
+            return 32; 
+        }
+        
+        switch (signatureAlgorithm) {
+            case SignatureAlgorithm.ES256:
+            case SignatureAlgorithm.ES256K:
+                return 32;  
+            case SignatureAlgorithm.ES384:
+                return 48;  
+            case SignatureAlgorithm.ES512:
+                return 66;  
+            default:
+                return 32;
+        }
+    }
+    
     @Override
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(MODULUS, JSONObject.NULL);
         jsonObject.put(EXPONENT, JSONObject.NULL);
-        jsonObject.put(D, Base64Util.base64urlencodeUnsignedBigInt(d));
+
+        int targetLength = getCoordinateByteLength();
+        
+        jsonObject.put(D, Base64Util.base64urlencodeUnsignedBigInt(d, targetLength));
 
         return jsonObject;
     }
