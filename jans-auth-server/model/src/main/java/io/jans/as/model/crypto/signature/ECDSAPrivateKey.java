@@ -60,7 +60,7 @@ public class ECDSAPrivateKey extends PrivateKey {
             case ES512:
                 return 66;  
             default:
-                throw new IllegalStateException("Signature algorithm must be set for ECDSA private key serialization");
+                throw new IllegalArgumentException("Unsupported signature algorithm for ECDSA key serialization: " + signatureAlgorithm);
         }
     }
     
