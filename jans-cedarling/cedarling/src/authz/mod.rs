@@ -854,7 +854,7 @@ mod tests {
             Some("trusted")
         );
         assert_eq!(
-            json.pointer("/attrs/is_admin").and_then(|v| v.as_bool()),
+            json.pointer("/attrs/is_admin").and_then(serde_json::Value::as_bool),
             Some(true)
         );
     }
@@ -882,7 +882,7 @@ mod tests {
             .to_json_value()
             .expect("to_json");
         assert_eq!(
-            json.pointer("/attrs/trusted").and_then(|v| v.as_bool()),
+            json.pointer("/attrs/trusted").and_then(serde_json::Value::as_bool),
             Some(true)
         );
     }
