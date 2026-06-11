@@ -434,7 +434,6 @@ mod test {
         LazyLock::new(|| TokenEntityMetadata {
             trusted: true,
             entity_type_name: "Jans::AccessToken".into(),
-            principal_mapping: HashSet::new(),
             token_id: "jti".into(),
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });
@@ -595,7 +594,10 @@ mod test {
             claims,
             trusted_iss: None,
         };
-        assert_eq!(result, expected, "validate_jwt should accept trailing-slash iss and produce expected ValidatedJwt with claims and no trusted_iss");
+        assert_eq!(
+            result, expected,
+            "validate_jwt should accept trailing-slash iss and produce expected ValidatedJwt with claims and no trusted_iss"
+        );
     }
 
     #[test]

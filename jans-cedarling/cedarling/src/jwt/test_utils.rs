@@ -16,7 +16,7 @@ use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
 use reqwest::Client;
 use serde::Serialize;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use url::Url;
 
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
@@ -278,6 +278,58 @@ impl MockServer {
                 "iss": iss,
                 "exp": exp,
                 "ttl": ttl_secs,
+                "iat": now,
+            });
+
+            jwt::encode(&header, &claims, &encoding_key)
+                .expect("encode status list JWT")
+                .as_bytes()
+                .to_vec()
+        };
+
+        let endpoint = Some(
+            self.server
+                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+                .with_status(200)
+                .with_header("content-type", "application/statuslist+jwt")
+                .with_body_from_request(move |_| build_jwt_claims())
+                .expect(1)
+                .create(),
+        );
+        self.endpoints.status_list = endpoint;
+    }
+
+    /// Same as [`Self::generate_status_list_endpoint`] but produces a Status List JWT
+    /// that intentionally omits the `ttl` claim. Used to exercise the bootstrap-config
+    /// fallback refresh interval.
+    #[track_caller]
+    pub(crate) fn generate_status_list_endpoint_without_ttl(
+        &mut self,
+        status_list_bits: StatusBitSize,
+        status_list: &[u8],
+    ) {
+        let bits: u8 = status_list_bits.into();
+        let lst = status_list::compress_and_encode(status_list);
+        let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
+        let iss = self.server.url();
+        let header = jwt::Header {
+            alg: self.keys.alg,
+            kid: self.keys.kid.clone(),
+            typ: TokenTypeHeader::StatusListJwt.into(),
+            ..Default::default()
+        };
+        let encoding_key = self.keys.encoding_key.clone();
+        let build_jwt_claims = move || {
+            let now = chrono::Utc::now().timestamp();
+            let exp = now + 3600;
+            let claims = json!({
+                "sub": sub,
+                "status_list": {
+                  "bits": bits,
+                  "lst": lst,
+                },
+                "iss": iss,
+                "exp": exp,
                 "iat": now,
             });
 

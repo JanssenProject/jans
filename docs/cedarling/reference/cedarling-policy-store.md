@@ -191,38 +191,39 @@ Example with parent relationships (`entities/users.json`):
 
 #### Trusted Issuer Files
 
-Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. Each file contains a JSON object mapping issuer IDs to their configurations:
+Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. **Each file describes exactly one issuer** as a JSON object with the issuer's fields at the top level:
 
 ```json
 {
-  "jans_issuer": {
-    "name": "Jans Server",
-    "description": "Primary Janssen Identity Provider",
-    "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
-    "token_metadata": {
-      "access_token": {
-        "trusted": true,
-        "entity_type_name": "Jans::Access_token",
-        "token_id": "jti",
-      },
-      "id_token": {
-        "trusted": true,
-        "entity_type_name": "Jans::Id_token",
-        "token_id": "jti"
-      }
+  "name": "Jans Server",
+  "description": "Primary Janssen Identity Provider",
+  "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_token",
+      "token_id": "jti"
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Id_token",
+      "token_id": "jti"
     }
   }
 }
 ```
 
-Each trusted issuer configuration includes:
+Each trusted issuer file includes:
 
-- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity)
-- **`description`**: Optional description of the issuer
-- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint
-- **`token_metadata`**: Map of token types to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema))
+- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
+- **`description`**: Optional description of the issuer.
+- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, `configuration_endpoint` is also accepted.
+- **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
+- **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
 
-You can define multiple issuers in a single file or split them across multiple files in the `trusted-issuers/` directory.
+To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
+
+> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
 
 #### Cedar Archive (.cjar) Format
 
@@ -367,10 +368,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 ```json
   "policies": {
     "unique_policy_id": {
-      "cedar_version" : "v4.0.0",
-      "name": "Policy for Unique Id",
       "description": "simple policy example",
-      "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": { ... },
     },
     ...
@@ -378,9 +376,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 ```
 
 - **unique_policy_id**: (_String_) A unique policy ID used to for tracking and auditing purposes.
-- **name** : (_String_) A name for the policy
 - **description** : (_String_) A brief description of cedar policy
-- **creation_date** : (_String_) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
 - **policy_content** : (_String_ | _Object_) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
@@ -410,24 +406,15 @@ Here is a non-normative example of the `policies` field:
 ```json
   "policies": {
     "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-      "cedar_version": "v2.7.4",
-      "name": "Policy-the-first",
       "description": "simple policy example for principal workload",
-      "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": "cGVybWl0KAogICAgc..."
     },
     "0fo1kl928Afa0sc9123scma0123891asklajsh1233ab": {
-      "cedar_version": "v2.7.4",
-      "name": "Policy-the-second",
       "description": "another policy example",
-      "creation_date": "2024-09-20T18:22:39.192051",
       "policy_content": "kJW1bWl0KA0g3CAxa..."
     },
     "1fo1kl928Afa0sc9123scma0123891asklajsh1233ac": {
-      "cedar_version": "v2.7.4",
-      "name": "Policy-the-third",
       "description": "another policy example",
-      "creation_date": "2024-09-20T18:22:39.192051",
       "policy_content": {
         "encoding": "none",
         "content_type" : "cedar",
@@ -435,10 +422,7 @@ Here is a non-normative example of the `policies` field:
       }
     },
     "2fo1kl928Afa0sc9123scma0123891asklajsh1233ad": {
-      "cedar_version": "v2.7.4",
-      "name": "Policy-the-fourth",
       "description": "another policy example",
-      "creation_date": "2024-09-20T18:22:39.192051",
       "policy_content": {
         "encoding": "base64",
         "content_type" : "cedar",
@@ -493,7 +477,6 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
   "trusted": true,
   "entity_type_name": "Acme::Access_token",
   "token_id": "jti",
-  "principal_mapping": ["Acme::Workload"],
   "required_claims": ["iss", "exp", "some_custom_claim"]
 }
 ```
@@ -501,8 +484,6 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
 - `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
 - `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`.
 - `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
-
-- `"principal_mapping"` (array[string], Default: `[]`): Describes where references of the created token entity should be included.
 - `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
 
 ## Example Policy store
@@ -515,7 +496,6 @@ Here is a non-normative example of a `cedarling_store.json` file:
   "policies": {
     "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
       "description": "simple policy example",
-      "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": "cedar_policy_encoded_in_base64"
     }
   },

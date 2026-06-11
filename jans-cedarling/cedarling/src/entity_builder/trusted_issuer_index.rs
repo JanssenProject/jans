@@ -185,8 +185,7 @@ mod tests {
             .expect("Should find issuer by origin with trailing slash");
 
         assert_eq!(
-            issuer.name,
-            "Jans",
+            issuer.name, "Jans",
             "lookup-by-origin-with-trailing-slash should normalize the trailing slash and resolve to the 'Jans' issuer"
         );
     }

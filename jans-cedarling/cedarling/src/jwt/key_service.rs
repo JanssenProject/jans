@@ -4,7 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+
+use arc_swap::ArcSwap;
 
 use crate::LogWriter;
 use crate::common::issuer_utils::IssClaim;
@@ -17,15 +19,16 @@ use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+/// A pre-parsed set of decoding keys for a single issuer, ready for
+/// atomic insertion into the key store.
+type ParsedIssuerKeys = Vec<(DecodingKeyInfo, Arc<DecodingKey>)>;
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) struct DecodingKeyInfo {
     pub issuer: Option<IssClaim>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
 }
-
-const MUTEX_POISONED_ERR: &str =
-    "KeyService RwLock poisoned due to another thread panicking while holding the lock";
 
 /// Manages JSON Web Keys (JWKs) used for decoding JWTs.
 ///
@@ -44,9 +47,16 @@ const MUTEX_POISONED_ERR: &str =
 /// Additionally, an on-demand refresh is triggered when a token arrives with
 /// an unknown `kid`. This signal is rate-limited per issuer
 /// (`CEDARLING_JWKS_REFRESH_MIN_INTERVAL`, default 30 s) to prevent abuse.
-#[derive(Default)]
 pub(super) struct KeyService {
-    keys: RwLock<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
+    keys: ArcSwap<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
+}
+
+impl Default for KeyService {
+    fn default() -> Self {
+        Self {
+            keys: ArcSwap::from_pointee(HashMap::new()),
+        }
+    }
 }
 
 impl KeyService {
@@ -77,13 +87,14 @@ impl KeyService {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
-        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
+        // Parse all keys upfront so the rcu closure is infallible.
+        let mut parsed_keys: Vec<(IssClaim, ParsedIssuerKeys)> = Vec::new();
 
         for (issuer, keys) in parsed_stores
             .into_iter()
             .map(|(iss, keys)| (IssClaim::new(&iss), keys))
         {
-            keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&issuer));
+            let mut issuer_keys = Vec::new();
 
             for jwk in keys {
                 let decoding_key =
@@ -101,9 +112,21 @@ impl KeyService {
                     kid: jwk.common.key_id,
                     algorithm,
                 };
-                keys_guard.insert(key_info, Arc::new(decoding_key));
+                issuer_keys.push((key_info, Arc::new(decoding_key)));
             }
+            parsed_keys.push((issuer, issuer_keys));
         }
+
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            for (issuer, keys) in &parsed_keys {
+                new_keys.retain(|k, _| k.issuer.as_ref() != Some(issuer));
+                for (key_info, decoding_key) in keys {
+                    new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+                }
+            }
+            new_keys
+        });
 
         Ok(())
     }
@@ -139,13 +162,11 @@ impl KeyService {
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
         }
 
-        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
-
-        keys_guard.retain(|key_info, _| key_info.issuer.as_ref() != Some(&openid_config.issuer));
+        let mut parsed_keys: Vec<(DecodingKeyInfo, Arc<DecodingKey>)> = Vec::new();
         for parsed_key in keys {
             let key = parsed_key.jwk;
 
-            // We will no support keys with unspecified algorithms
+            // We will not support keys with unspecified algorithms
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
                     "skipping a JWK with a missing algorithm specifier from '{}'",
@@ -176,8 +197,17 @@ impl KeyService {
                 kid: key.common.key_id,
                 algorithm,
             };
-            keys_guard.insert(key_info, Arc::new(decoding_key));
+            parsed_keys.push((key_info, Arc::new(decoding_key)));
         }
+
+        self.keys.rcu(|old| {
+            let mut new_keys = (**old).clone();
+            new_keys.retain(|k, _| k.issuer.as_ref() != Some(&openid_config.issuer));
+            for (key_info, decoding_key) in &parsed_keys {
+                new_keys.insert(key_info.clone(), Arc::clone(decoding_key));
+            }
+            new_keys
+        });
 
         Ok(())
     }
@@ -202,15 +232,11 @@ impl KeyService {
     }
 
     pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<Arc<DecodingKey>> {
-        self.keys
-            .read()
-            .expect(MUTEX_POISONED_ERR)
-            .get(key_info)
-            .cloned()
+        self.keys.load().get(key_info).cloned()
     }
 
     pub(super) fn has_keys(&self) -> bool {
-        !self.keys.read().expect(MUTEX_POISONED_ERR).is_empty()
+        !self.keys.load().is_empty()
     }
 }
 
@@ -333,6 +359,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
@@ -426,6 +453,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 

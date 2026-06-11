@@ -28,7 +28,6 @@ use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
 use serde_json::json;
 use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
-use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid7::Uuid;
@@ -163,7 +162,7 @@ impl Authz {
             &entities_data.tokens,
             &schema.schema,
             &action,
-            &pushed_data,
+            pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -337,7 +336,7 @@ impl Authz {
             &built_entities,
             &schema.schema,
             &action,
-            &pushed_data,
+            pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -716,13 +715,7 @@ fn calculate_elapsed_time(start_time: chrono::DateTime<Utc>) -> i64 {
 }
 
 fn serialize_entities(entities: &Entities) -> serde_json::Value {
-    let mut buf = Vec::new();
-    let cursor = Cursor::new(&mut buf);
-    entities
-        .write_to_json(cursor)
-        .ok()
-        .and_then(|()| serde_json::from_slice(buf.as_slice()).ok())
-        .unwrap_or(serde_json::Value::Null)
+    entities.to_json_value().unwrap_or(serde_json::Value::Null)
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_decision`] method.
@@ -777,8 +770,8 @@ impl AuthorizeEntitiesData {
 
         // Add default entities first
         merged_entities.extend(
-            self.default_entities
-                .inner
+            Arc::try_unwrap(self.default_entities.inner)
+                .unwrap_or_else(|arc| (*arc).clone())
                 .into_values()
                 .map(|e| (e.uid(), e)),
         );

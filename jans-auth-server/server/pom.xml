@@ -490,7 +490,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>io.jans</groupId>
+			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
@@ -910,15 +910,9 @@
 			</repositories>
 			<dependencies>
 				<dependency>
-					<groupId>com.lochbridge.oath</groupId>
-					<artifactId>oath-otp</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
-					<scope>compile</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.lochbridge.oath</groupId>
-					<artifactId>oath-otp-keyprovisioning</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
+					<groupId>com.github.bastiaanjansen</groupId>
+					<artifactId>otp-java</artifactId>
+					<version>2.1.0</version>
 					<scope>compile</scope>
 				</dependency>
 			</dependencies>

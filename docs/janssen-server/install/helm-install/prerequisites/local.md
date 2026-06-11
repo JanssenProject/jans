@@ -26,12 +26,12 @@ Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
 ```bash
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
 
-## Accessing Endpoints
+### Accessing Endpoints
 
 The installer adds a hosts record in the VM. To access from outside the VM, map the VM IP to your FQDN.
 
@@ -52,6 +52,4 @@ If you prefer manual setup:
    kubectl create namespace jans
    ```
 
-## Next Steps
-
-Proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.
+For next step in manual setup, proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.

@@ -22,10 +22,10 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::HttpClientConfig;
 use crate::context_data_api::DataStoreConfig;
 use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
+use crate::HttpClientConfig;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -127,6 +127,7 @@ impl BootstrapConfig {
                 .to_config(raw.trusted_issuer_loader_workers),
             jwks_refresh_interval: raw.jwks_refresh_interval,
             jwks_refresh_min_interval: raw.jwks_refresh_min_interval,
+            status_list_refresh_interval_max: raw.status_list_refresh_interval_max,
         };
 
         let authorization_config = AuthorizationConfig {
@@ -141,6 +142,11 @@ impl BootstrapConfig {
             retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Duration::from_secs(raw.http_client_request_timeout),
+            // `0` is the documented "no cap" sentinel.
+            max_response_size_bytes: match raw.http_client_max_response_size_bytes {
+                0 => None,
+                n => Some(n),
+            },
         };
 
         Ok(Self {
