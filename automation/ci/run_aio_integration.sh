@@ -214,21 +214,24 @@ done
 set +e
 echo "::endgroup::"
 
-mkdir -p test-reports
+mkdir -p test-reports aio-logs
 
 # ---------------------------------------------------------------------------
 # Run integration suites (against the AIO)
 # ---------------------------------------------------------------------------
 echo "::group::run integration suites"
-# HTTP suites vs the live AIO. Each suite is hard-bounded with `timeout` (surefire's own
-# timeout did not stop it): jans-auth-server/client's browser-flow tests can loop on the
-# AIO login-page JS that HtmlUnit cannot evaluate.
-# auth-client runs last: if its browser-flow tests hang to the timeout, the others are done.
+# HTTP suites vs the live AIO. Full per-suite output is captured into aio-logs/ (uploaded as an
+# artifact) since the GitHub run log is too large to fetch reliably. auth-client is by far the
+# slowest: Jenkins runs it serially (~1935 tests, ~28 expected failures) in ~711s and the AIO is
+# slower per round-trip, so the timeout is generous. The HtmlUnit JS EvaluatorException noise is
+# normal -- it floods the Jenkins log too -- and is not itself a failure.
 for dir in jans-scim/client jans-config-api jans-fido2/client jans-auth-server/client; do
   echo "::group::test $dir"
-  timeout -k 30 900 bash -c \
+  suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
+  timeout -k 30 2400 bash -c \
     "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false test" \
-    || echo "[warn] $dir reported failures or timed out"
+    > "$suitelog" 2>&1 || echo "[warn] $dir reported failures or timed out"
+  echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
 done
 echo "::endgroup::"
@@ -239,9 +242,9 @@ echo "::endgroup::"
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
-timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test || echo "[warn] jans-orm units reported problems or timed out"
-timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test || echo "[warn] jans-core units reported problems or timed out"
-timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test || echo "[warn] jans-auth-server units reported problems or timed out"
+timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn] jans-orm units reported problems or timed out"
+timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn] jans-core units reported problems or timed out"
+timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn] jans-auth-server units reported problems or timed out"
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------

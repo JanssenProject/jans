@@ -285,8 +285,8 @@ jobs:
               sys.exit(f"::error::{failed} test(s) failed")
           PY
 
-      - name: Upload AIO logs (on failure)
-        if: failure()
+      - name: Upload AIO logs
+        if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: aio-logs-${{ matrix.persistence }}
