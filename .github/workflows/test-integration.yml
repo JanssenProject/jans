@@ -181,6 +181,7 @@ jobs:
             apt-get -o DPkg::Lock::Timeout=600 update -qq
             apt-get -o DPkg::Lock::Timeout=600 install -y -qq openjdk-17-jdk maven rsync
             command -v docker >/dev/null 2>&1 || curl -fsSL https://get.docker.com | sh
+            git config --global --add safe.directory '*'
             grep -q '$JANS_FQDN\$' /etc/hosts || echo '127.0.0.1 $JANS_FQDN' >> /etc/hosts"
           # Drive the whole jans-side flow on the VM. Env is expanded HERE (runner) into the remote
           # command so the matrix/secret values land in the VM shell.
