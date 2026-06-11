@@ -84,7 +84,7 @@ JANS_AUTH_CONFIG_DN = "ou=jans-auth,ou=configuration,o=jans"
 DN_TABLE_SUFFIX = (
     ("ou=attributes,o=jans", "jansAttr"),
     ("ou=scopes,o=jans", "jansScope"),
-    ("ou=scripts,o=jans", "jansCustomScript"),
+    ("ou=scripts,o=jans", "jansCustomScr"),
     ("ou=groups,o=jans", "jansGrp"),
     ("ou=people,o=jans", "jansPerson"),
     ("ou=clients,o=jans", "jansClnt"),
@@ -341,8 +341,7 @@ class TestDataLoader:
             return
 
         if self.client.metadata.tables.get(table) is None:
-            # the bulk reflect occasionally omits a table (seen for jansCustomScript); reflect
-            # just this one on demand before giving up.
+            # defensive: reflect this single table on demand if the bulk reflect missed it.
             try:
                 Table(table, self.client.metadata, autoload_with=self.client.engine)
             except Exception as exc:  # noqa: BLE001
@@ -418,10 +417,10 @@ class TestDataLoader:
     def enable_test_scripts(self):
         for inum in TEST_SCRIPT_INUMS:
             doc_id = doc_id_from_dn(f"inum={inum},ou=scripts,o=jans")
-            row = self.client.get("jansCustomScript", doc_id, ["jansEnabled", "jansRevision"])
+            row = self.client.get("jansCustomScr", doc_id, ["jansEnabled", "jansRevision"])
             if not row or as_boolean(row.get("jansEnabled")):
                 continue
-            self.client.update("jansCustomScript", doc_id, {
+            self.client.update("jansCustomScr", doc_id, {
                 "jansEnabled": True,
                 "jansRevision": (row.get("jansRevision") or 0) + 1,
             })
