@@ -45,7 +45,10 @@ The new directory-based format uses human-readable Cedar files organized in a st
 ```text
 policy-store/
 ├── metadata.json           # Required: Store identification and versioning
-├── schema.cedarschema      # Required: Cedar schema in human-readable format
+├── schema.cedarschema      # Option A: Single schema file (takes precedence)
+├── schemas/                # Option B: Split schema directory (fallback)
+│   ├── users.cedarschema
+│   └── resources.cedarschema
 ├── policies/               # Required: Directory containing .cedar policy files
 │   ├── allow-read.cedar
 │   └── deny-guest.cedar
@@ -53,6 +56,13 @@ policy-store/
 ├── entities/               # Optional: Directory containing .json entity files
 └── trusted-issuers/        # Optional: Directory containing .json issuer configs
 ```
+
+The schema can be provided in one of two ways (but not both):
+
+- **Option A — single file**: `schema.cedarschema` at the store root. This is the original format.
+- **Option B — split across multiple files**: `schemas/*.cedarschema` directory. Each file is parsed as an independent `SchemaFragment`, then merged via `Schema::from_schema_fragments`. This is useful for large schemas with multiple namespaces.
+
+If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, loading fails with a `MissingSchemaSource` error.
 
 #### metadata.json
 
