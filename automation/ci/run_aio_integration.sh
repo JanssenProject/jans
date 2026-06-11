@@ -100,6 +100,10 @@ done
 if [ -z "$ok" ]; then
   echo "::error::AIO did not become healthy in time"
   docker compose -f automation/compose.yaml ps || true
+  echo "--- DB container state + logs (mysql/postgresql often the cause of an UnknownHostException) ---"
+  docker ps -a --format '{{.Names}} {{.Status}}' | grep -E 'mysql|postgresql' || true
+  docker logs mysql 2>&1 | tail -n 80 || true
+  docker logs postgresql 2>&1 | tail -n 80 || true
   docker exec jans supervisorctl -c /app/conf/supervisord.conf status 2>&1 || true
   docker logs jans 2>&1 | grep -aiE "jans-auth -|configurator -|persistence-loader -|ERROR|Exception|Traceback|Started oejs.Server|FATAL|exited|WaitError|OutOfMemory" | tail -n 200 || true
   echo "--- KEY MATERIAL DIAGNOSTIC (where does the jansConfWebKeys date come from?) ---"
