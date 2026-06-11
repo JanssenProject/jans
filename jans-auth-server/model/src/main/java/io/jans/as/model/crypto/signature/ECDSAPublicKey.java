@@ -71,7 +71,7 @@ public class ECDSAPublicKey extends PublicKey {
     
     private int getCoordinateByteLength() {
         if (signatureAlgorithm == null) {
-            throw new IllegalStateException("Signature algorithm must be set for ECDSA private key serialization");
+            throw new IllegalStateException("Signature algorithm must be set for ECDSA public key serialization");
         }
         
         switch (signatureAlgorithm) {
