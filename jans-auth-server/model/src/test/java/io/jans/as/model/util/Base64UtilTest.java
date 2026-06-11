@@ -64,6 +64,13 @@ public class Base64UtilTest extends BaseTest {
     }
 
     @Test
+    public void base64urlencodeUnsignedBigInt_targetLength_validBigInteger_stringBase64Encoded() {
+        showTitle("base64urlencodeUnsignedBigInt_targetLength_validBigInteger_stringBase64Encoded");
+        String stringResult = Base64Util.base64urlencodeUnsignedBigInt(BIG_INTEGER_UNSIGNED_EXAMPLE,1);
+        assertEquals(stringResult, BIG_INTEGER_TEXT_URL_BASE64, "Base64Util.base64urlencodeUnsignedBigInt(BigInteger) have returned an incorrect String ");
+    }
+
+    @Test
     public void bytesToHex_validByteArrayPlainText_correctStringHex() {
         showTitle("bytesToHex_validByteArrayPlainText_correctStringHex");
         String stringResult = Base64Util.bytesToHex(BYTE_ARRAY_EXAMPLE);
