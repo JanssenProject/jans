@@ -36,6 +36,25 @@ else
   RDBM_SCHEMA="$DB_NAME"
 fi
 
+# Always capture container diagnostics to aio-logs/ on exit, so an early failure (e.g. a DB
+# container OOM-killed before the test phase) still yields a downloadable artifact rather than
+# living only in the unfetchable step log.
+mkdir -p aio-logs
+collect_diag() {
+  local rc=$?
+  echo "::group::container diagnostics (exit=$rc)"
+  docker ps -a > aio-logs/docker-ps.txt 2>&1 || true
+  : > aio-logs/docker-state.txt
+  for c in $(docker ps -aq 2>/dev/null); do
+    nm=$(docker inspect --format '{{.Name}}' "$c" 2>/dev/null | tr -d '/')
+    docker inspect "$c" --format '{{.Name}} status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}}' >> aio-logs/docker-state.txt 2>&1 || true
+    docker logs --tail 3000 "$c" > "aio-logs/container-${nm:-$c}.log" 2>&1 || true
+  done
+  docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
+  echo "::endgroup::"
+}
+trap collect_diag EXIT
+
 # ---------------------------------------------------------------------------
 # Build the AIO image (with integration-test env baked in)
 # ---------------------------------------------------------------------------
@@ -74,6 +93,9 @@ echo "::group::start AIO demo stack"
 # TRACE (detailed FILE logs) is opt-in via LOG_LEVEL: the demo enables TRACE + FILE logging
 # when JANS_CI_CD_RUN is set; default stays INFO/STDOUT (lower memory).
 [ "${LOG_LEVEL:-INFO}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
+# mysql is OOM-killed (exit 137) at the demo default (768M) under the test-data load; the CI VM has
+# 16GB, so raise the cap. start_janssen_aio_demo.sh honours MYSQL_MEM_LIMIT (default stays 768M).
+export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
 # instead would re-run key-gen against a half-initialised keystore and corrupt jansConfWebKeys.

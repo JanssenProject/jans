@@ -317,7 +317,7 @@ EOF
     deploy:
       resources:
         limits:
-          memory: 768M
+          memory: ${MYSQL_MEM_LIMIT:-768M}
     ports:
       - "127.0.0.1:3306:3306"
 
