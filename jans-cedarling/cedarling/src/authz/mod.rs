@@ -851,11 +851,14 @@ mod tests {
         let json = entity.to_json_value().expect("to_json");
         assert_eq!(
             json.pointer("/attrs/name").and_then(|v| v.as_str()),
-            Some("trusted")
+            Some("trusted"),
+            "default org name should override request value"
         );
         assert_eq!(
-            json.pointer("/attrs/is_admin").and_then(serde_json::Value::as_bool),
-            Some(true)
+            json.pointer("/attrs/is_admin")
+                .and_then(serde_json::Value::as_bool),
+            Some(true),
+            "default is_admin should override request false"
         );
     }
 
@@ -882,8 +885,10 @@ mod tests {
             .to_json_value()
             .expect("to_json");
         assert_eq!(
-            json.pointer("/attrs/trusted").and_then(serde_json::Value::as_bool),
-            Some(true)
+            json.pointer("/attrs/trusted")
+                .and_then(serde_json::Value::as_bool),
+            Some(true),
+            "default issuer trusted=true should override request false"
         );
     }
 
@@ -914,7 +919,8 @@ mod tests {
             .expect("to_json");
         assert_eq!(
             json.pointer("/attrs/scope").and_then(|v| v.as_str()),
-            Some("read")
+            Some("read"),
+            "default token scope should override request value"
         );
     }
 
@@ -934,10 +940,18 @@ mod tests {
         let ents = data.entities(None).expect("entities");
         assert!(
             ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
-                .is_some()
+                .is_some(),
+            "resource entity should be present when no UID collision"
         );
-        assert!(ents.get(&"Jans::Org::\"org1\"".parse().unwrap()).is_some());
-        assert_eq!(ents.iter().count(), 2);
+        assert!(
+            ents.get(&"Jans::Org::\"org1\"".parse().unwrap()).is_some(),
+            "default entity should be present when no UID collision"
+        );
+        assert_eq!(
+            ents.iter().count(),
+            2,
+            "both entities should be present with unique UIDs"
+        );
     }
 
     #[test]
@@ -954,9 +968,14 @@ mod tests {
         let ents = data.entities(None).expect("entities");
         assert!(
             ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
-                .is_some()
+                .is_some(),
+            "resource entity should be present with empty defaults"
         );
-        assert_eq!(ents.iter().count(), 1);
+        assert_eq!(
+            ents.iter().count(),
+            1,
+            "only resource entity expected with empty defaults"
+        );
     }
 
     #[test]
@@ -985,7 +1004,8 @@ mod tests {
             .expect("to_json");
         assert_eq!(
             org_json.pointer("/attrs/name").and_then(|v| v.as_str()),
-            Some("trusted")
+            Some("trusted"),
+            "default org name should override request value in multi-collision test"
         );
 
         let group_uid: EntityUid = "Jans::Group::\"admin\"".parse().unwrap();
@@ -996,7 +1016,8 @@ mod tests {
             .expect("to_json");
         assert_eq!(
             group_json.pointer("/attrs/role").and_then(|v| v.as_str()),
-            Some("admin")
+            Some("admin"),
+            "default group role should override request value in multi-collision test"
         );
     }
 }
