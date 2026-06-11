@@ -572,8 +572,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getName());
             }
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
-            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
+            int targetLengthInBits = algorithm.getKeyLength();
+            int targetLength = targetLengthInBits / 8;
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX(), targetLength));
+            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY(), targetLength));
         }
         if (SecurityProviderUtility.isBcProvMode() && use == Use.SIGNATURE
                 && publicKey instanceof org.bouncycastle.jcajce.interfaces.EdDSAPublicKey) {
