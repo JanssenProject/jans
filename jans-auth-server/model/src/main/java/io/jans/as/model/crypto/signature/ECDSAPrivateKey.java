@@ -50,10 +50,7 @@ public class ECDSAPrivateKey extends PrivateKey {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(MODULUS, JSONObject.NULL);
         jsonObject.put(EXPONENT, JSONObject.NULL);
-
-        int targetLength = this.getSignatureAlgorithm().getCoordinateByteLength();
-        
-        jsonObject.put(D, Base64Util.base64urlencodeUnsignedBigInt(d, targetLength));
+        jsonObject.put(D, Base64Util.base64urlencodeUnsignedBigInt(d));
 
         return jsonObject;
     }
