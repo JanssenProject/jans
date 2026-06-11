@@ -164,11 +164,6 @@ public class TrustRelationship {
 
     public TrustResult<TrustRelationship> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
 
-        if (discoveredEntityIds == null) {
-
-            return TrustResult.failure(CannotBeNullOrBlank.forField("discoveredEntityIds"));
-        }
-
         return from(this)
             .withDiscoveredEntityIds(discoveredEntityIds)
             .build();
@@ -277,6 +272,18 @@ public class TrustRelationship {
         return releasedAttributes.hasNone();
     }
 
+    public TrustResult<TrustRelationship> updateReleasedAttributes(ReleasedAttributes attributes) {
+
+        return from(this)
+            .withReleasedAttributes(attributes)
+            .build();
+    }
+
+    public ReleasedAttributes getReleasedAttributes() {
+
+        return releasedAttributes;
+    }
+ 
     @Override
     public boolean equals(Object o) {
 

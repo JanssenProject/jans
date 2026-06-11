@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.junit.jupiter.api.Tag;
-import static org.junit.jupiter.api.Assertions.*;
+//import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
 import java.net.URI;
@@ -124,6 +124,31 @@ public class TrustRelationshipTest {
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
+        );
+    }
+
+    private static final Stream<Arguments> draftTrustRelationshipsWithProfileTypes() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+
+        return Stream.of(
+
+            //Individual nature
+            Arguments.of(individual,ProfileType.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
+            Arguments.of(individual,ProfileType.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
+            Arguments.of(individual,ProfileType.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
+            Arguments.of(individual,ProfileType.SAML2_ECP,"saml2EcpProfileConfiguration"),
+            Arguments.of(individual,ProfileType.SAML2_SSO,"saml2SsoProfileConfiguration"),
+            Arguments.of(individual,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration"),
+
+            //Aggregate nature
+            Arguments.of(aggregate,ProfileType.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
+            Arguments.of(aggregate,ProfileType.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
+            Arguments.of(aggregate,ProfileType.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
+            Arguments.of(aggregate,ProfileType.SAML2_ECP,"saml2EcpProfileConfiguration"),
+            Arguments.of(aggregate,ProfileType.SAML2_SSO,"saml2SsoProfileConfiguration"),
+            Arguments.of(aggregate,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
         );
     }
 
@@ -361,11 +386,11 @@ public class TrustRelationshipTest {
                     same_or_updated_tr = result.getValue();
                     assertThat(same_or_updated_tr.getSaml2LogoutProfileConfiguration()).isEqualTo(profileconfig);
                     break;
+                default:
+                    fail("Profile Type '%s' unsupported in tests",profiletype);
+                    break;
             }
 
-            assertThat(result)
-                .withFailMessage("Unsupported profile configuration specified during tests")
-                .isNotNull();
         }
 
         @ParameterizedTest
@@ -405,6 +430,68 @@ public class TrustRelationshipTest {
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isNotNull();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileTypes")
+        @DisplayName(
+            "GIVEN a TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called with a null parameter " +
+            "THEN the call should fail with the appropriate error "
+        )
+        public void shouldFailWhenUpdateProfileConfigurationWithNull(TrustRelationship tr, ProfileType profiletype,String requiredFieldName) {
+
+            TrustResult<TrustRelationship> result = null;
+            
+            switch(profiletype) {
+                case SHIBBOLETH_SSO:
+                    result = tr.updateShibbolethSsoProfileConfiguration(null);
+                    break;
+                case SAML2_ATTRIBUTE_QUERY:
+                    result = tr.updateSaml2AttributeQueryProfileConfiguration(null);
+                    break;
+                case SAML2_ARTIFACT_RESOLUTION:
+                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration(null);
+                    break;
+                case SAML2_ECP:
+                    result = tr.updateSaml2EcpProfileConfiguration(null);
+                    break;
+                case SAML2_SSO:
+                    result = tr.updateSaml2SsoProfileConfiguration(null);
+                    break;
+                case SAML2_LOGOUT:
+                    result = tr.updateSaml2LogoutProfileConfiguration(null);
+                    break;
+                default:
+                    fail("Profile type '%s' unsupported in tests", profiletype);
+                    break;
+            }
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause.getFieldName()).isEqualTo(requiredFieldName);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a TrustRelationship " +
+            "WHEN updateReleasedAttributes() is called with a null parameter " +
+            "THEN the operation fails with the appropriate error"
+        )
+        public void shouldFailWhenUpdateReleasedAttributesWithNull(TrustRelationship tr) {
+
+            TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(null);
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause.getFieldName()).isEqualTo("releasedAttributes");
         }
     }
 }

@@ -75,6 +75,11 @@ public class RequiredFieldsRule {
             return TrustResult.failure(CannotBeNullOrBlank.forField("saml2LogoutProfileConfiguration"));
         }
 
+        if(context.getReleasedAttributes() == null) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("releasedAttributes"));
+        }
+
         return TrustResult.success(null);
     }
 }
