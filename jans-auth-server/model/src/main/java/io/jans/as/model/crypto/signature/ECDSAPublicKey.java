@@ -71,19 +71,19 @@ public class ECDSAPublicKey extends PublicKey {
     
     private int getCoordinateByteLength() {
         if (signatureAlgorithm == null) {
-            return 32; 
+            throw new IllegalStateException("Signature algorithm must be set for ECDSA private key serialization");
         }
         
         switch (signatureAlgorithm) {
-            case SignatureAlgorithm.ES256:
-            case SignatureAlgorithm.ES256K:
+            case ES256:
+            case ES256K:
                 return 32;  
-            case SignatureAlgorithm.ES384:
+            case ES384:
                 return 48;  
-            case SignatureAlgorithm.ES512:
+            case ES512:
                 return 66;  
             default:
-                return 32;
+                throw new IllegalStateException("Signature algorithm must be set for ECDSA private key serialization");
         }
     }
 
