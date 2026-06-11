@@ -299,6 +299,21 @@ pub(crate) enum ValidationError {
         "Invalid timestamp ordering in metadata.json: updated_date cannot be before created_date"
     )]
     InvalidTimestampOrdering,
+
+    /// Single schema.cedarschema file not found
+    #[error("Required schema file not found: '{path}'")]
+    MissingSingleSchemaFile { path: String },
+
+    /// Schema directory not found
+    #[error("Required schema directory not found: '{path}/'")]
+    MissingSchemaDirectory { path: String },
+
+    /// Neither schema.cedarschema file nor schemas/ directory found
+    #[error("No schema source found: neither '{searched_file}' nor directory '{searched_dir}/' exists")]
+    MissingSchemaSource {
+        searched_file: String,
+        searched_dir: String,
+    },
 }
 
 /// Errors related to archive (.cjar) handling.

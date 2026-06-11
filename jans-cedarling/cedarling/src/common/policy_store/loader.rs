@@ -20,8 +20,9 @@
 
 use std::path::Path;
 
-use super::errors::{PolicyStoreError, ValidationError};
+use super::errors::{CedarSchemaErrorType, PolicyStoreError, ValidationError};
 use super::metadata::PolicyStoreMetadata;
+use super::schema_parser::combine_schema_fragments;
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 
@@ -272,22 +273,166 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
     }
 
-    /// Load schema from schema.cedarschema file. Returns `None` if file does not exist.
+    /// Load schema from schema.cedarschema file or schemas/ directory.
+    ///
+    /// Resolution order:
+    /// 1. `schema.cedarschema` (single file) — takes precedence if present.
+    /// 2. `schemas/*.cedarschema` (directory) — used only when the single file is absent.
+    /// 3. Neither present → returns `MissingSchemaSource` error with both paths.
     fn load_schema(&self, dir: &str) -> Result<Option<String>, PolicyStoreError> {
+        match self.load_single_schema_file(dir) {
+            Ok(content) => Ok(Some(content)),
+            Err(PolicyStoreError::Validation(ValidationError::MissingSingleSchemaFile {
+                path: searched_file,
+            })) => match self.load_schema_from_directory(dir) {
+                Ok(content) => Ok(Some(content)),
+                Err(PolicyStoreError::Validation(ValidationError::MissingSchemaDirectory {
+                    path: searched_dir,
+                })) => Err(ValidationError::MissingSchemaSource {
+                    searched_file,
+                    searched_dir,
+                }
+                .into()),
+                Err(other) => Err(other),
+            },
+            Err(other) => Err(other),
+        }
+    }
+
+    /// Try to load schema from the single schema.cedarschema file.
+    /// Returns `Err(MissingSingleSchemaFile)` if the file does not exist.
+    fn load_single_schema_file(&self, dir: &str) -> Result<String, PolicyStoreError> {
         let schema_path = Self::join_path(dir, "schema.cedarschema");
         match self.vfs.read_file(&schema_path) {
-            Ok(bytes) => String::from_utf8(bytes)
-                .map(Some)
-                .map_err(|e| PolicyStoreError::FileReadError {
-                    path: schema_path.clone(),
-                    source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
-                }),
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Ok(bytes) => String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                path: schema_path.clone(),
+                source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+            }),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Err(ValidationError::MissingSingleSchemaFile { path: schema_path }.into())
+            },
             Err(source) => Err(PolicyStoreError::FileReadError {
                 path: schema_path.clone(),
                 source,
             }),
         }
+    }
+
+    /// Load schema from the schemas/ directory, combining all `.cedarschema` files.
+    /// Returns `Err(MissingSchemaDirectory)` if the directory does not exist.
+    fn load_schema_from_directory(&self, dir: &str) -> Result<String, PolicyStoreError> {
+        let schemas_dir = Self::join_path(dir, "schemas");
+        if !self.vfs.exists(&schemas_dir) {
+            return Err(ValidationError::MissingSchemaDirectory { path: schemas_dir }.into());
+        }
+        if !self.vfs.is_dir(&schemas_dir) {
+            return Err(PolicyStoreError::NotADirectory {
+                path: schemas_dir.clone(),
+            });
+        }
+
+        let entries = self.vfs.read_dir(&schemas_dir).map_err(|source| {
+            PolicyStoreError::DirectoryReadError {
+                path: schemas_dir.clone(),
+                source,
+            }
+        })?;
+
+        let raw_files = self.read_schema_files(entries)?;
+        if raw_files.is_empty() {
+            return Err(ValidationError::MissingSchemaDirectory { path: schemas_dir }.into());
+        }
+
+        let combined = Self::merge_schema_fragments(&raw_files)?;
+        Ok(combined)
+    }
+
+    /// Read and validate all `.cedarschema` files from directory entries.
+    fn read_schema_files(
+        &self,
+        entries: Vec<super::vfs_adapter::DirEntry>,
+    ) -> Result<Vec<(String, String)>, PolicyStoreError> {
+        let mut files: Vec<(String, String)> = Vec::new();
+        for entry in entries {
+            if entry.is_dir {
+                continue;
+            }
+            if !entry.name.to_lowercase().ends_with(".cedarschema") {
+                return Err(ValidationError::InvalidFileExtension {
+                    file: entry.path.clone(),
+                    expected: ".cedarschema".to_string(),
+                    actual: Path::new(&entry.name)
+                        .extension()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("(none)")
+                        .to_string(),
+                }
+                .into());
+            }
+            let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                PolicyStoreError::FileReadError {
+                    path: entry.path.clone(),
+                    source,
+                }
+            })?;
+            let content =
+                String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                    path: entry.path.clone(),
+                    source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                })?;
+            files.push((entry.name, content));
+        }
+        files.sort_by(|a, b| a.0.cmp(&b.0));
+        Ok(files)
+    }
+
+    /// Parse multiple schema fragments and combine them into a single schema text.
+    ///
+    /// Two-step process:
+    /// 1. **Validation** — `Schema::from_schema_fragments()` merges all fragments
+    ///    into a `Schema` (via cedar-policy-core's `ValidatorSchema::from_schema_fragments`,
+    ///    which collects namespace definitions, checks RFC 70 shadowing rules,
+    ///    adds builtin aliases, and resolves cross-references). This catches
+    ///    conflicts (e.g. duplicate entity definitions across files).
+    /// 2. **Fragment building** — `combine_schema_fragments()` serialises each
+    ///    fragment to JSON, deep-merges the namespace maps, and deserialises
+    ///    back into a single `SchemaFragment`. We cannot skip this step:
+    ///    `Schema` has no `to_cedarschema()` method (only `SchemaFragment` does),
+    ///    and downstream code in `manager.rs` needs the fragment for JSON
+    ///    serialisation.
+    fn merge_schema_fragments(raw_files: &[(String, String)]) -> Result<String, PolicyStoreError> {
+        use std::str::FromStr;
+
+        let fragments: Result<Vec<_>, PolicyStoreError> = raw_files
+            .iter()
+            .map(|(name, content)| {
+                cedar_policy::SchemaFragment::from_str(content).map_err(|e| {
+                    PolicyStoreError::CedarSchemaError {
+                        file: name.clone(),
+                        err: CedarSchemaErrorType::ParseError(e.to_string()),
+                    }
+                })
+            })
+            .collect();
+        let fragments = fragments?;
+
+        // Step 1: validate and merge via Schema::from_schema_fragments
+        let _schema =
+            cedar_policy::Schema::from_schema_fragments(fragments.clone()).map_err(|e| {
+                PolicyStoreError::CedarSchemaError {
+                    file: "schemas/*.cedarschema".to_string(),
+                    err: CedarSchemaErrorType::ValidationError(e.to_string()),
+                }
+            })?;
+
+        // Step 2: build a single SchemaFragment for to_cedarschema() downstream
+        let combined_fragment = combine_schema_fragments(&fragments)?;
+        combined_fragment
+            .to_cedarschema()
+            .map_err(|e| PolicyStoreError::CedarSchemaError {
+                file: "schemas/*.cedarschema".to_string(),
+                err: CedarSchemaErrorType::ParseError(e.to_string()),
+            })
     }
 
     /// Load all policy files from policies directory.
