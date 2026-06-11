@@ -127,7 +127,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsWithProfileTypes() {
+    private static final Stream<Arguments> draftTrustRelationshipsAndProfileTypes() {
 
         TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
         TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
@@ -149,6 +149,23 @@ public class TrustRelationshipTest {
             Arguments.of(aggregate,ProfileType.SAML2_ECP,"saml2EcpProfileConfiguration"),
             Arguments.of(aggregate,ProfileType.SAML2_SSO,"saml2SsoProfileConfiguration"),
             Arguments.of(aggregate,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
+        );
+    }
+    
+
+    private static final Stream<Arguments> draftTrustRelationshipsAndReleasedAttributes() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+
+        return Stream.of(
+            //Individual Nature
+            Arguments.of(individual,ReleasedAttributes.empty()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleReleasedAttributes()),
+
+            //Aggregate Nature
+            Arguments.of(aggregate,ReleasedAttributes.empty()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleReleasedAttributes())
         );
     }
 
@@ -394,6 +411,26 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndReleasedAttributes")
+        @DisplayName(
+            "GIVEN a DRAFT TrustRelationship " +
+            "WHEN updateReleasedAttributes is called with a valid parameter " +
+            "THEN the operation updates the released attributes and maintains the DRAFT status"
+        )
+        public void shouldUpdateReleasedAttributesAndStayInDraft(TrustRelationship tr, ReleasedAttributes attributes) {
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(attributes).isNotNull();
+
+            TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(attributes);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship same_or_updated_tr = result.getValue();
+
+            assertThat(same_or_updated_tr).isInDraftStatus();
+            assertThat(same_or_updated_tr.getReleasedAttributes()).isEqualTo(attributes);
+        }
+
+        @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a TrustRelationship " +
@@ -433,7 +470,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileTypes")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndProfileTypes")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called with a null parameter " +

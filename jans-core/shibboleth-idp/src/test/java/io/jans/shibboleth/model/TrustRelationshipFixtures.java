@@ -14,6 +14,7 @@ import io.jans.shibboleth.model.core.Description;
 import io.jans.shibboleth.model.core.DisplayName;
 import io.jans.shibboleth.model.core.EntityId;
 import io.jans.shibboleth.model.core.Id;
+import io.jans.shibboleth.model.core.ReleasedAttribute;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
@@ -130,6 +131,17 @@ public class TrustRelationshipFixtures {
         return Saml2LogoutProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Logout())
             .status(ProfileStatus.ACTIVE)
+            .build()
+            .getValue();
+    }
+
+
+    public static final ReleasedAttributes sampleReleasedAttributes() {
+
+        return ReleasedAttributes
+            .builder()
+            .add(ReleasedAttribute.of(Id.generate(),"foo").getValue())
+            .add(ReleasedAttribute.of(Id.generate(),"bar").getValue())
             .build()
             .getValue();
     }
