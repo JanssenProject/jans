@@ -8,7 +8,7 @@ package io.jans.fido2.ctap;
 
 public enum AttestationFormat {
 
-    fido_u2f("fido-u2f"), packed("packed"), tpm("tpm"), none("none"), apple("apple");
+    fido_u2f("fido-u2f"), packed("packed"), tpm("tpm"), none("none"), apple("apple"), android_key("android-key");
 
     private final String fmt;
 
