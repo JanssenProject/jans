@@ -2,6 +2,7 @@ package io.jans.casa.plugins.authnmethod.service.otp;
 
 import com.bastiaanjansen.otp.HMACAlgorithm;
 import com.bastiaanjansen.otp.HOTPGenerator;
+import com.google.common.io.BaseEncoding;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.HOTPConfig;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     private HOTPGenerator buildGenerator(byte[] secret) {
-        return new HOTPGenerator.Builder(secret)
+        return new HOTPGenerator.Builder(BaseEncoding.base32().omitPadding().encode(secret))
                 .withPasswordLength(conf.getDigits())
                 .withAlgorithm(HMACAlgorithm.SHA1)
                 .build();
