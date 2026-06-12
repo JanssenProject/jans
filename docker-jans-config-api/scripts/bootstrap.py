@@ -371,9 +371,7 @@ class PersistenceSetup:
             ).decode()
             self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
 
-        ctx["test_client_trusted"] = "true" if as_boolean(
-            os.environ.get("CN_CONFIG_API_TEST_CLIENT_TRUSTED", "false")
-        ) else "false"
+        ctx["test_client_trusted"] = str(as_boolean(os.environ.get("CN_CONFIG_API_TEST_CLIENT_TRUSTED", "false"))).lower()
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
