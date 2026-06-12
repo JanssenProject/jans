@@ -15,6 +15,57 @@ use crate::bootstrap_config::BootstrapConfigLoadingError;
 pub struct PolicyStoreConfig {
     /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
+
+    /// Base refresh interval in seconds for URL-based policy store sources
+    /// (`CjarUrl`, `LockServer`). `0` disables background refresh and preserves
+    /// the load-once-at-startup behavior. Ignored for local sources. A server
+    /// `Cache-Control: max-age` / `Expires` hint may *shorten* the next
+    /// interval but never lengthens it.
+    #[serde(default)]
+    pub refresh_interval_secs: u64,
+}
+
+impl PolicyStoreConfig {
+    /// Minimum refresh interval, in seconds — anything smaller is clamped up to
+    /// this value to avoid a busy-poll against the upstream.
+    pub(crate) const MIN_REFRESH_INTERVAL_SECS: u64 = 5;
+
+    /// True if the source is a remote URL and refresh is enabled.
+    #[must_use]
+    pub fn refresh_enabled(&self) -> bool {
+        self.refresh_interval_secs > 0
+            && matches!(
+                self.source,
+                PolicyStoreSource::CjarUrl(_) | PolicyStoreSource::LockServer(_)
+            )
+    }
+
+    /// Returns the effective refresh interval after applying the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor, plus a boolean indicating whether
+    /// clamping occurred. `0` (disabled) passes through unchanged. Callers
+    /// should emit a `WARN` log when `clamped` is true so operators see the
+    /// silent normalization. Single point of normalization so deserializer
+    /// inputs (env vars, JSON, dict) can't drift apart.
+    #[must_use]
+    pub(crate) fn effective_refresh_interval(&self) -> (u64, bool) {
+        let raw = self.refresh_interval_secs;
+        if raw == 0 || raw >= Self::MIN_REFRESH_INTERVAL_SECS {
+            (raw, false)
+        } else {
+            (Self::MIN_REFRESH_INTERVAL_SECS, true)
+        }
+    }
+}
+
+impl Default for PolicyStoreConfig {
+    fn default() -> Self {
+        Self {
+            source: PolicyStoreSource::Yaml(
+                "cedar_version: v4.0.0\npolicy_stores: {}\n".to_string(),
+            ),
+            refresh_interval_secs: 0,
+        }
+    }
 }
 
 /// Raw policy store config
@@ -129,6 +180,11 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             ),
             _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
         };
-        Ok(Self { source })
+        // Explicit field init rather than `..Default::default()`, which would
+        // allocate and immediately discard the default YAML source string.
+        Ok(Self {
+            source,
+            refresh_interval_secs: 0,
+        })
     }
 }

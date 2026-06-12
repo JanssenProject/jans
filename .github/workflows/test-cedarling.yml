@@ -38,10 +38,13 @@ jobs:
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
-      run: cargo test --locked --workspace
+      # cedarling_pg is excluded here — it pulls pgrx-pg-sys, whose build script
+      # requires `cargo pgrx init`. The dedicated postgres_extension_tests job
+      # below covers it end-to-end.
+      run: cargo test --locked --workspace --exclude cedarling_pg
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: cargo +stable clippy --workspace --all-targets -- -D warnings
+      run: cargo +stable clippy --workspace --exclude cedarling_pg --all-targets -- -D warnings
 
   cargo_audit:
     runs-on: ubuntu-latest
@@ -121,7 +124,7 @@ jobs:
         # To upgrade: 1) Find the nightly used by the target dylint release
         # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
         # 3) Update the pin below and in the toolchain install step above
-        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
+        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --path custom-lints
 
   rust_benchmarks:
     runs-on: ubuntu-latest
@@ -143,7 +146,7 @@ jobs:
         workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: cargo bench
+      run: cargo bench --workspace --exclude cedarling_pg
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
       run: |
@@ -363,3 +366,52 @@ jobs:
         export LD_LIBRARY_PATH="${GITHUB_WORKSPACE}/target/release:${LD_LIBRARY_PATH}"
         mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
         python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
+
+  postgres_extension_tests:
+    # Exercises the cedarling_pg Postgres extension under pgrx-managed Postgres.
+    # The workspace-level rust_tests job already runs the non-pgrx unit tests and
+    # clippy; this job additionally:
+    #   1. runs the #[pg_test] suite against a real Postgres backend (cargo pgrx test)
+    #   2. regenerates sql/cedarling_pg--0.1.0.sql and fails if it drifts from the
+    #      committed copy, so the packaged schema stays in sync with #[pg_extern]s.
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        components: clippy
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Install Postgres build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
+          libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
+    - name: Install cargo-pgrx
+      run: cargo install --locked cargo-pgrx --version =0.18.0
+    - name: Initialize pgrx (pg16)
+      run: cargo pgrx init --pg16 download
+    - name: Run cedarling_pg pgrx tests
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx test --features pg16
+    - name: Regenerate extension SQL schema
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql
+    - name: Fail if committed SQL schema drifted
+      working-directory: jans-cedarling/cedarling_pg
+      run: |
+        git --no-pager diff --exit-code sql/cedarling_pg--0.1.0.sql \
+          || (echo "sql/cedarling_pg--0.1.0.sql is out of date; run 'cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql' and commit the result." && exit 1)

@@ -23,7 +23,7 @@ use pyo3::prelude::*;
 /// __eq__(other: Decision) -> bool
 ///     Compares two `Decision` objects for equality.
 #[derive(Debug, Clone)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct Decision {
     inner: cedarling::bindings::Decision,
 }
