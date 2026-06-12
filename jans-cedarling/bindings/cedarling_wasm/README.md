@@ -418,6 +418,10 @@ Cedarling supports multiple ways to load policy stores. **In WASM environments, 
 // Option 1: Fetch policy store from URL (simple)
 const BOOTSTRAP_CONFIG = {
   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // Optional: re-fetch every 60s and atomically swap on change.
+  // Default is 0 (load-once-at-startup). See "Refreshing the policy store"
+  // in docs/cedarling/reference/cedarling-properties.md for details.
+  CEDARLING_POLICY_STORE_REFRESH_INTERVAL: 60,
   // ... other config
 };
 const cedarling = await init(BOOTSTRAP_CONFIG);

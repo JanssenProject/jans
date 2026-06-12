@@ -16,7 +16,7 @@ use pyo3::prelude::*;
 /// - Permit: The policy permits the request.
 /// - Forbid: The policy forbids the request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(name = "PolicyEffect")]
 pub enum PolicyEffect {
     /// The policy permits the request.

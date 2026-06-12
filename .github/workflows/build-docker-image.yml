@@ -1,11 +1,14 @@
 name: Build and Publish Releases to Hub
 
 on:
-  schedule:
-    - cron: "0 23 * * *"
+  # Chained after the publish workflow so the service WARs exist on the release
+  # before the Dockerfiles pull them. (Replaces the standalone nightly cron,
+  # which collided with build-nightly-build recreating the release.)
+  workflow_run:
+    workflows: ["Janssen Build & Publish"]
+    types:
+      - completed
   push:
-    tags:
-      - "*"
     branches:
       - main
   pull_request:
@@ -100,6 +103,12 @@ permissions:
 
 jobs:
   docker:
+    # On workflow_run, only proceed when the publish workflow succeeded for a
+    # release tag. Other events (PR, main push, manual dispatch) run as before.
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v')))
     permissions:
       packages: write
       id-token: write
@@ -108,6 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       max-parallel: 8
       matrix:
         docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
@@ -123,6 +133,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
           sparse-checkout: |
             docker-jans-${{ matrix.docker-images }}
@@ -135,7 +146,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
-          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar cedarling-opa"
+          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa cedarling-flask-sidecar cedarling-opa"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -173,8 +184,8 @@ jobs:
             if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
               # PR: get changed files via GitHub API
               DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
-            elif [[ "${{ github.event_name }}" == "schedule" || "${{ github.ref_type }}" == "tag" ]]; then
-              # Nightly schedule or tag push: build all images
+            elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+              # Chained: the nightly/release publish completed -> build all images
               DIRECTORIES_CHANGED="$ALL_SERVICES"
             else
               # Direct branch push: use git diff to find which docker dirs changed.
@@ -268,15 +279,28 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
           echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
-          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
-            if [[ ${{ github.event_name != 'pull_request' }} ]]; then
-              TEMP_IMG="auth-server cloudtools config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa shibboleth"
-              for i in $TEMP_IMG; do
-                echo "Waiting for $i to be built"
+          # all-in-one depends on other images being pushed first; poll until each required job completes
+          if [[ "${{ matrix.docker-images }}" == "all-in-one" && "${{ github.event_name }}" != "pull_request" ]]; then
+            REQUIRED_IMAGES="auth-server config-api configurator fido2 persistence-loader scim casa"
+            for img in $REQUIRED_IMAGES; do
+              echo "Waiting for docker ($img) to complete..."
+              CONCLUSION=""
+              for attempt in $(seq 1 60); do
+                CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+                  --paginate --jq ".jobs[] | select(.name == \"docker ($img)\") | .conclusion" 2>/dev/null || echo "")
+                if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
+                  echo "  docker ($img): $CONCLUSION"; break
+                elif [[ "$CONCLUSION" == "failure" || "$CONCLUSION" == "cancelled" || "$CONCLUSION" == "timed_out" ]]; then
+                  echo "  docker ($img) failed with: $CONCLUSION. Aborting all-in-one build."
+                  exit 1
+                fi
                 sleep 30
               done
-            fi
+              if [[ "$CONCLUSION" != "success" && "$CONCLUSION" != "skipped" ]]; then
+                echo "  docker ($img) timed out waiting. Aborting all-in-one build."
+                exit 1
+              fi
+            done
           fi
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
@@ -441,3 +465,4 @@ jobs:
             else
                 gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
             fi
+

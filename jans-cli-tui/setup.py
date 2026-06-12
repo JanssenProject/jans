@@ -85,20 +85,22 @@ setup(
     install_requires=[
         "ruamel.yaml>=0.16.5,<0.18.0",
         "PyJWT==2.4.0",
-        "pygments",
+        "pygments>=2.20.0",
         "prompt_toolkit==3.0.33",
         "requests",
-        "urllib3",
+        "urllib3>=2.7.0",
         "pyDes",
         "requests-toolbelt"
     ],
+    python_requires=">=3.10",
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache 2.0 License",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3s",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     include_package_data=True,
 

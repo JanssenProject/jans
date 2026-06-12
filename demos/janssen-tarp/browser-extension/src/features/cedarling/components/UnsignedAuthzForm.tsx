@@ -14,12 +14,12 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
   const [authzLogs, setAuthzLogs] = React.useState('');
   const [expanded, setExpanded] = React.useState(true);
   const [formFields, setFormFields] = React.useState<{
-    principals: unknown[];
+    principal: Record<string, unknown>;
     action: string;
     context: Record<string, unknown>;
     resource: Record<string, unknown>;
   }>({
-    principals: [],
+    principal: {},
     action: '',
     context: {},
     resource: {},
@@ -30,7 +30,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
       const savedRequest = result?.authzRequest_unsigned;
       if (savedRequest) {
         setFormFields({
-          principals: savedRequest.principals ?? [],
+          principal: savedRequest.principal ?? {},
           action: savedRequest.action ?? '',
           context: savedRequest.context ?? {},
           resource: savedRequest.resource ?? {},
@@ -74,7 +74,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
 
   const createCedarlingAuthzRequestObj = async () => {
     const reqObj = {
-      principals: formFields.principals,
+      principal: formFields.principal,
       action: formFields.action,
       context: formFields.context,
       resource: formFields.resource,
@@ -84,7 +84,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
   };
 
   const resetInputs = () => {
-    const emptyRequest = { principals: [], action: '', context: {}, resource: {} };
+    const emptyRequest = { principal: {}, action: '', context: {}, resource: {} };
     setFormFields(emptyRequest);
     chrome.storage.local.set({ authzRequest_unsigned: emptyRequest });
   };
@@ -105,7 +105,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
                 Cedarling Unsigned Authorization
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Build an Unsigned authz request from principals, action, resource, and context — then run
+                Build an Unsigned authz request from principal, action, resource, and context — then run
                 authorization.
               </p>
             </div>
@@ -126,14 +126,16 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
 
         {expanded && (
           <div className="px-5 pb-5 space-y-5 border-t border-gray-100">
-            {/* Principals */}
+            {/* Principal */}
             <div className="pt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Principals:</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Principal:</label>
               <div className="border border-gray-200 rounded-lg p-3">
                 <JsonEditor
-                  data={formFields.principals}
-                  setData={(e: any) => setFormFields((prev) => ({ ...prev, principals: e }))}
-                  rootName="principals"
+                  data={formFields.principal}
+                  setData={(e: unknown) =>
+                    setFormFields((prev) => ({ ...prev, principal: (e ?? {}) as Record<string, unknown> }))
+                  }
+                  rootName="principal"
                 />
               </div>
             </div>

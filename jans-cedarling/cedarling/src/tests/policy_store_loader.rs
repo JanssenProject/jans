@@ -231,6 +231,7 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -242,6 +243,7 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
         },
         lock_config: None,
         max_default_entities: None,
@@ -809,8 +811,10 @@ permit(
     let loaded = crate::init::policy_store::load_policy_store(
         &crate::PolicyStoreConfig {
             source: crate::PolicyStoreSource::CjarFile(archive_path),
+            ..Default::default()
         },
         &http_client,
+        true,
     )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");

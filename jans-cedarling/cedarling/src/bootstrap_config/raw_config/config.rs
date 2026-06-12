@@ -7,11 +7,12 @@ use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::default_values::{
-    default_enabled_feature_toggle, default_http_client_max_retries,
-    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval,
     default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_max, default_token_cache_capacity,
-    default_token_cache_max_ttl, default_true,
+    default_status_list_refresh_interval_max,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -175,6 +176,16 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
 
+    /// When enabled, Cedar schema is required and all policies and entities are validated
+    /// against it. When disabled, Cedarling runs without schema-based validation,
+    /// allowing quick-start and prototyping without a schema.
+    #[serde(
+        rename = "CEDARLING_STRICT_SCHEMA_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub strict_schema_validation: FeatureToggle,
+
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
         rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
@@ -290,8 +301,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
     ///   tokens that do not carry an `exp` claim.
-    /// - `0`: disables the cap. The entry TTL is taken from the token's `exp`
-    ///   claim; tokens without `exp` are not cached at all.
+    /// - `0`: disables the token cache entirely.
     ///
     /// Default: `5` seconds — small enough to pick up revocation / status-list
     /// changes quickly, large enough to amortise repeated requests for the
@@ -411,6 +421,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub http_client_request_retry_delay: u64,
 
+    /// Maximum HTTP response body size, in bytes. Rejects oversized responses
+    /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
+    /// before they're fully buffered into memory. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
+        default = "default_http_client_max_response_size_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_max_response_size_bytes: u64,
+
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
     /// If omitted, the server-driven interval or a 1-hour fallback is used.
@@ -444,6 +465,18 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_status_list_refresh_interval_max")]
     pub status_list_refresh_interval_max: u64,
+
+    /// Base refresh interval, in seconds, for periodic background refresh of
+    /// remote policy stores (`CjarUrl` / `LockServer`). `0` disables refresh and
+    /// preserves the load-once-at-startup behavior. Non-zero values below the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor are clamped at service-init time (with
+    /// a `WARN` log emitted) so the worker never busy-polls the upstream — see
+    /// [`PolicyStoreConfig::effective_refresh_interval`]. A server
+    /// `Cache-Control: max-age` / `Expires` hint can *shorten* the next
+    /// interval but never extends it.
+    #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub policy_store_refresh_interval_secs: u64,
 }
 
 impl Default for BootstrapConfigRaw {
