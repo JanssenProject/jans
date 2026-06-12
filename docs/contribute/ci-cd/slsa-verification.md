@@ -212,6 +212,7 @@ cosign verify \
 | Cedarling Go libraries              | `cedarling-go.intoto.jsonl`      | `provenance-cedarling-go`                        |
 | Cedarling KrakenD plugins           | `cedarling-krakend.intoto.jsonl` | `provenance-cedarling-krakend`                   |
 | Cedarling UniFFI / Kotlin           | `cedarling-uniffi.intoto.jsonl`  | `provenance-cedarling-uniffi`                    |
+| Cedarling PostgreSQL extension      | `cedarling-pg.intoto.jsonl`      | `provenance-cedarling-pg`                        |
 | Demo source zips / Chrome extension | `demo.intoto.jsonl`              | `provenance-demo`                                |
 | Docker images (GHCR)                | Registry attestation             | `docker` (via `actions/attest-build-provenance`) |
 

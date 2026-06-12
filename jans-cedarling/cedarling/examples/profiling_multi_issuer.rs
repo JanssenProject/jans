@@ -99,6 +99,7 @@ async fn init_cedarling_multi_issuer(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
