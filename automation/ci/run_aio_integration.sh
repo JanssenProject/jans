@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-# Whole jans-side integration-test flow, executed ON the ephemeral CI VM (not the
-# GitHub runner). Adapted verbatim from the per-step logic that used to live in
-# .github/workflows/test-integration.yml; relocated here so the heavy HtmlUnit
-# auth-server/client suite runs on an 8-vCPU box instead of the 2-core runner.
-#
-# Run from the repo root (the checkout rsync'd to /root/jans). Builds the AIO from
-# this checkout, brings up the AIO demo stack, extracts live secrets, renders the
-# per-run test profiles, builds the modules, runs the integration + unit suites, and
-# sweeps results into test-reports/ + AIO logs into aio-logs/.
+# Whole jans-side integration-test flow, run ON the ephemeral CI VM (8 vCPU) rather than the
+# 2-core GitHub runner. Run from the repo root (checkout rsync'd to /root/jans).
 #
 # Required env (set by the workflow over SSH):
 #   JANS_FQDN, JANS_PERSISTENCE (MYSQL|PGSQL), LOG_LEVEL (INFO|TRACE),
@@ -36,9 +29,7 @@ else
   RDBM_SCHEMA="$DB_NAME"
 fi
 
-# Always capture container diagnostics to aio-logs/ on exit, so an early failure (e.g. a DB
-# container OOM-killed before the test phase) still yields a downloadable artifact rather than
-# living only in the unfetchable step log.
+# Capture container diagnostics to aio-logs/ on any exit, so an early failure still leaves an artifact.
 mkdir -p aio-logs
 collect_diag() {
   local rc=$?
@@ -58,12 +49,8 @@ trap collect_diag EXIT
 # ---------------------------------------------------------------------------
 # Build jans modules + serve the locally-built config-api artifacts
 # ---------------------------------------------------------------------------
-# The config-api image downloads its WAR + plugin jars from the GitHub "nightly" release; to keep
-# Phase D self-contained (and immune to release-publish gaps) build the reactor now and serve the
-# locally-built artifacts to the config-api docker build via CN_RELEASE_DOWNLOAD_URL. This must
-# precede the AIO build that consumes the config-api WAR. The artifacts land in ~/.m2 with their
-# Maven coordinate names (jans-config-api-server-<ver>.war, <plugin>-plugin-<ver>-distribution.jar),
-# which are exactly what the Dockerfile requests.
+# Build the reactor before the AIO image and serve the locally-built config-api WAR + plugins
+# (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
 echo "::group::build jans modules"
 set -e
 for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
@@ -122,8 +109,7 @@ echo "::group::start AIO demo stack"
 # TRACE (detailed FILE logs) is opt-in via LOG_LEVEL: the demo enables TRACE + FILE logging
 # when JANS_CI_CD_RUN is set; default stays INFO/STDOUT (lower memory).
 [ "${LOG_LEVEL:-INFO}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
-# mysql is OOM-killed (exit 137) at the demo default (768M) under the test-data load; the CI VM has
-# 16GB, so raise the cap. start_janssen_aio_demo.sh honours MYSQL_MEM_LIMIT (default stays 768M).
+# The demo default (768M) OOM-kills mysql under the test-data load; the CI VM has 16GB.
 export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
@@ -253,14 +239,9 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 # Wire the auth-client tests to the AIO's own signing keys
 # ---------------------------------------------------------------------------
-# The client-signing/crypto suites register a client with
-# clientJwksUri=https://<fqdn>/jans-auth-client/test/resources/jwks.json and sign client
-# assertions with clientKeyStoreFile. The old static VMs served that jwks from a web root
-# (matching a pre-generated keystore); the AIO does not, so jans-auth cannot fetch the
-# client's keys and every signed-JWT test fails + retries (866 vs Jenkins's 84). Fix: hand
-# the test client the AIO's own signing keystore AND serve the AIO's public JWKS at that
-# path via a traefik-routed nginx sidecar -- both halves are the same keypair, so the
-# server-side signature/decryption checks pass.
+# Client-signing tests register with clientJwksUri=<fqdn>/jans-auth-client/test/resources/jwks.json
+# and sign with clientKeyStoreFile. The AIO doesn't serve that jwks path, so give the test client the
+# AIO's own keystore and serve the AIO's public JWKS there (same keypair) via a traefik nginx sidecar.
 echo "::group::wire test client to AIO keys"
 set +e
 JKS_PASS="$(read_json jks_pass)"
@@ -313,11 +294,8 @@ mkdir -p test-reports aio-logs
 # Run integration suites (against the AIO)
 # ---------------------------------------------------------------------------
 echo "::group::run integration suites"
-# HTTP suites vs the live AIO. Full per-suite output is captured into aio-logs/ (uploaded as an
-# artifact) since the GitHub run log is too large to fetch reliably. auth-client is by far the
-# slowest: Jenkins runs it serially (~1935 tests, ~28 expected failures) in ~711s and the AIO is
-# slower per round-trip, so the timeout is generous. The HtmlUnit JS EvaluatorException noise is
-# normal -- it floods the Jenkins log too -- and is not itself a failure.
+# HTTP suites vs the live AIO; per-suite output -> aio-logs/ (the run log is too large to fetch).
+# auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
 for dir in jans-scim/client jans-config-api jans-fido2/client jans-auth-server/client; do
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"

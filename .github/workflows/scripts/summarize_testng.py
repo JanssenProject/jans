@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
-"""De-duplicate TestNG retries and summarise distinct test outcomes.
+"""De-duplicate TestNG RetryAnalyzer retries and report distinct test outcomes.
 
-The jans-auth-server/client (and some other) suites use a TestNG RetryAnalyzer. testng-results.xml
-counts *every* retry attempt in its ``total``/``failed`` totals, so a flaky/slow test that fails
-twice and then passes still inflates ``failed`` -- on the AIO that turned ~21 real failures into a
-reported 486+. This collapses retries by (class, method, parameters), keeps each test's final
-outcome (PASS > SKIP > FAIL), and reports the distinct counts, which are comparable to Jenkins.
-
-Failures in KNOWN_FAILING_CLASSES are pre-existing application bugs unrelated to the Jenkins
-offboarding; they are reported but do not fail the gate, so the gate tracks *regressions* in the
-offboarding-relevant suites instead.
+testng-results.xml counts every retry attempt, so a flaky test that fails then passes still inflates
+``failed``. This collapses retries by (class, method, parameters), keeps each test's final outcome
+(PASS > SKIP > FAIL), and reports distinct counts comparable to Jenkins. Failures in
+KNOWN_FAILING_CLASSES are accepted as a baseline (reported, non-gating).
 
 Usage:
-  summarize_testng.py [--dir test-reports]            # print a Markdown summary to stdout
-  summarize_testng.py [--dir test-reports] --gate     # one-line tally; exit 1 on a regression
-                                                       # (a distinct failure outside the baseline)
-                                                       # or if no results were found
+  summarize_testng.py [--dir DIR]           # Markdown summary to stdout
+  summarize_testng.py [--dir DIR] --gate    # one-line tally; exit 1 on a regression or no results
 """
 import glob
 import os
