@@ -278,7 +278,8 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Resolution order:
     /// 1. `schema.cedarschema` (single file) — takes precedence if present.
     /// 2. `schemas/*.cedarschema` (directory) — used only when the single file is absent.
-    /// 3. Neither present → returns `MissingSchemaSource` error with both paths.
+    /// 3. `schemas/*.cedarschema` directory empty → returns `EmptySchemaDirectory` error.
+    /// 4. Neither present → returns `MissingSchemaSource` error with both paths.
     fn load_schema(&self, dir: &str) -> Result<Option<String>, PolicyStoreError> {
         match self.load_single_schema_file(dir) {
             Ok(content) => Ok(Some(content)),
@@ -320,6 +321,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load schema from the schemas/ directory, combining all `.cedarschema` files.
     /// Returns `Err(MissingSchemaDirectory)` if the directory does not exist.
+    /// Returns `Err(EmptySchemaDirectory)` if the directory exists but contains no `.cedarschema` files.
     fn load_schema_from_directory(&self, dir: &str) -> Result<String, PolicyStoreError> {
         let schemas_dir = Self::join_path(dir, "schemas");
         if !self.vfs.exists(&schemas_dir) {
@@ -340,7 +342,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
         let raw_files = self.read_schema_files(entries)?;
         if raw_files.is_empty() {
-            return Err(ValidationError::MissingSchemaDirectory { path: schemas_dir }.into());
+            return Err(ValidationError::EmptySchemaDirectory { path: schemas_dir }.into());
         }
 
         let combined = Self::merge_schema_fragments(&raw_files)?;

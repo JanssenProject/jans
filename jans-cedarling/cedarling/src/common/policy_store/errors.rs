@@ -308,6 +308,10 @@ pub(crate) enum ValidationError {
     #[error("Required schema directory not found: '{path}/'")]
     MissingSchemaDirectory { path: String },
 
+    /// Schema directory exists but is empty (no .cedarschema files)
+    #[error("Schema directory '{path}/' exists but contains no .cedarschema files")]
+    EmptySchemaDirectory { path: String },
+
     /// Neither schema.cedarschema file nor schemas/ directory found
     #[error("No schema source found: neither '{searched_file}' nor directory '{searched_dir}/' exists")]
     MissingSchemaSource {

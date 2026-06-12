@@ -1612,13 +1612,13 @@ fn test_load_schema_from_schemas_dir_empty_directory_returns_none() {
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".");
 
-    let err = result.expect_err("Expected MissingSchemaSource error for empty schemas/ dir");
+    let err = result.expect_err("Expected EmptySchemaDirectory error for empty schemas/ dir");
     assert!(
         matches!(
             &err,
-            PolicyStoreError::Validation(ValidationError::MissingSchemaSource { .. })
+            PolicyStoreError::Validation(ValidationError::EmptySchemaDirectory { .. })
         ),
-        "Expected MissingSchemaSource error, got: {err:?}"
+        "Expected EmptySchemaDirectory error, got: {err:?}"
     );
 }
 
