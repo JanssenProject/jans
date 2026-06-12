@@ -30,3 +30,11 @@ pub enum ServiceConfigError {
     #[error(transparent)]
     InitHttpClient(#[from] InitializeHttpClientError),
 }
+
+// Note: this branch deliberately drops the `ServiceConfig::new(bootstrap)`
+// constructor from `main`. The refresh-worker seed plumbing requires
+// `Cedarling::new` to keep the `LoadedPolicyStore` (with `body_hash` and
+// `validators`) in lexical scope after the load, so the load now happens at
+// the call site in `lib.rs::perform_bootstrap_load` and the result is
+// destructured there. `strict_schema_validation` is forwarded at that call
+// site (see `lib.rs`).

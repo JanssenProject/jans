@@ -451,7 +451,7 @@ pub(crate) struct LegacyPolicyStore {
     pub name: String,
     pub description: Option<String>,
     pub cedar_version: Option<Version>,
-    pub schema: LegacyCedarSchema,
+    pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
@@ -478,11 +478,12 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
         let schema = obj
             .get("schema")
             .or_else(|| obj.get("cedar_schema"))
-            .ok_or_else(|| {
-                de::Error::custom(
-                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
-                )
-            })?;
+            .filter(|v| !v.is_null())
+            .map(|v| {
+                LegacyCedarSchema::deserialize(v)
+                    .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))
+            })
+            .transpose()?;
 
         let policies = obj
             .get("policies")
@@ -510,8 +511,7 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                 .transpose()
                 .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?
                 .flatten(),
-            schema: LegacyCedarSchema::deserialize(schema)
-                .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))?,
+            schema,
             policies: LegacyPoliciesContainer::deserialize(policies)
                 .map_err(|e| de::Error::custom(format!("error parsing policies: {e}")))?,
             trusted_issuers: obj
@@ -544,7 +544,7 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
             name: v.name,
             description: v.description,
             cedar_version: v.cedar_version,
-            schema: v.schema.into(),
+            schema: v.schema.map(std::convert::Into::into),
             policies: v.policies.into(),
             trusted_issuers: v
                 .trusted_issuers

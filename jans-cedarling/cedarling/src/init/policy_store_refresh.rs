@@ -276,10 +276,23 @@ impl AuthzRebuilder {
 
         let issuers_map = trusted_issuers.unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&issuers_map, Some(&self.log));
-        let schema = &policy_store.schema.validator_schema;
+        // Mirror the bootstrap path (see `ServiceFactory::authz_service`):
+        // `policy_store.schema` is now `Option<CedarSchema>` and we only feed
+        // the validator schema into `EntityBuilder` when strict validation
+        // is enabled — otherwise we pass `None` so the builder doesn't
+        // enforce attribute typing.
+        let schema = policy_store.schema.as_ref().map(|s| &s.validator_schema);
         let default_entities = policy_store.default_entities.entities().to_owned();
-        let entity_builder = EntityBuilder::new(issuers_index, Some(schema), default_entities)
-            .map_err(|e| RebuildError::EntityBuilder(e.to_string()))?;
+        let entity_builder = EntityBuilder::new(
+            issuers_index,
+            if self.authorization_config.strict_schema_validation {
+                schema
+            } else {
+                None
+            },
+            default_entities,
+        )
+        .map_err(|e| RebuildError::EntityBuilder(e.to_string()))?;
         let entity_builder = Arc::new(entity_builder);
 
         let config = AuthzConfig {
@@ -407,18 +420,22 @@ impl RefreshSource {
         }
     }
 
-    async fn parse(&self, bytes: &[u8]) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    async fn parse(
+        &self,
+        bytes: &[u8],
+        strict_schema_validation: bool,
+    ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
         // Magic-byte sniff — the ZIP local-file-header signature `PK\x03\x04`
         // disambiguates `.cjar` archives from JSON regardless of source type.
         // Future-proofs the Lock Server path: if Lock Server starts serving
         // `.cjar` archives at a URL whose suffix doesn't end in `.cjar`, we
         // route to the archive parser instead of failing with a JSON error.
         if bytes.starts_with(b"PK\x03\x04") {
-            return parse_cjar_bytes(bytes).await;
+            return parse_cjar_bytes(bytes, strict_schema_validation).await;
         }
         match self {
-            Self::LockServer { .. } => parse_lock_master_bytes(bytes),
-            Self::CjarUrl { .. } => parse_cjar_bytes(bytes).await,
+            Self::LockServer { .. } => parse_lock_master_bytes(bytes, strict_schema_validation),
+            Self::CjarUrl { .. } => parse_cjar_bytes(bytes, strict_schema_validation).await,
         }
     }
 }
@@ -471,6 +488,12 @@ pub(crate) struct WorkerContext {
     /// `304` back with zero body bytes downloaded — the optimal first-tick
     /// path. Empty for non-URL sources.
     pub(crate) initial_validators: CacheHeadersState,
+    /// Forwarded from `BootstrapConfig.authorization_config` so each refresh
+    /// tick enforces the same "schema must be present" invariant the
+    /// bootstrap load did. Without this, a refresh against a store that
+    /// dropped its schema could install a configuration the startup path
+    /// would have rejected.
+    pub(crate) strict_schema_validation: bool,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -704,7 +727,7 @@ async fn parse_swap_and_record(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match ctx.source.parse(&bytes).await {
+    let parsed = match ctx.source.parse(&bytes, ctx.strict_schema_validation).await {
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);

@@ -331,7 +331,12 @@ async fn perform_bootstrap_load(
 ) -> Result<(ServiceConfig, RefreshWorkerSeed), ServiceConfigError> {
     let raw_load: Result<(http::HttpClient, LoadedPolicyStore), ServiceConfigError> = async {
         let http_client = http::HttpClient::new(config.http_client_config)?;
-        let loaded = load_policy_store(&config.policy_store_config, &http_client).await?;
+        let loaded = load_policy_store(
+            &config.policy_store_config,
+            &http_client,
+            config.authorization_config.strict_schema_validation,
+        )
+        .await?;
         Ok((http_client, loaded))
     }
     .await;
@@ -416,6 +421,7 @@ fn maybe_spawn_refresh_worker(
         log,
         initial_body_hash: seed.initial_body_hash,
         initial_validators: seed.initial_validators,
+        strict_schema_validation: config.authorization_config.strict_schema_validation,
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }

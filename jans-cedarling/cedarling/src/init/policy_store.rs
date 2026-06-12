@@ -9,8 +9,9 @@ use std::{fs, io};
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
-use crate::common::policy_store::{ConversionError, PolicyStoreWithID};
-use crate::http::{HttpClient, HttpClientError, cache_headers::CacheHeadersState};
+use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
+use crate::http::cache_headers::CacheHeadersState;
+use crate::http::{HttpClient, HttpClientError};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -46,6 +47,7 @@ pub enum PolicyStoreLoadError {
 // extract the first 'policy_stores' entry.
 fn extract_first_policy_store(
     agama_policy_store: &LegacyAgamaPolicyStore,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     if agama_policy_store.policy_stores.len() != 1 {
         return Err(PolicyStoreLoadError::InvalidStore(format!(
@@ -59,15 +61,25 @@ fn extract_first_policy_store(
         .policy_stores
         .iter()
         .take(1)
-        .map(|(k, v)| PolicyStoreWithID {
-            id: k.to_owned(),
-            store: v.to_owned().into(), // Convert LegacyPolicyStore -> PolicyStore
-            metadata: None,             // Legacy format doesn't include metadata
+        .map(|(k, v)| {
+            let store: PolicyStore = v.to_owned().into();
+            PolicyStoreWithID {
+                id: k.to_owned(),
+                store,
+                metadata: None,
+            }
         })
         .next();
 
     match policy_store_option {
-        Some(policy_store) => Ok(policy_store.clone()),
+        Some(policy_store) => {
+            if strict_schema_validation && policy_store.schema.is_none() {
+                return Err(PolicyStoreLoadError::InvalidStore(
+                    "missing required schema in policy store".to_string(),
+                ));
+            }
+            Ok(policy_store)
+        },
         None => Err(PolicyStoreLoadError::InvalidStore(
             "error retrieving first policy_stores element".into(),
         )),
@@ -96,17 +108,22 @@ pub(crate) struct LoadedPolicyStore {
 
 /// Loads the policy store based on the provided configuration.
 ///
-/// This function supports multiple sources for loading policies.
+/// This function supports multiple sources for loading policies. The
+/// `strict_schema_validation` flag is forwarded to every parser path so that
+/// the bootstrap-time invariant "policy store must declare a schema" is
+/// enforced consistently regardless of which source the operator picked
+/// (file, URL, archive, etc.).
 pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
     http_client: &HttpClient,
+    strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     let loaded = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
             LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store)?,
+                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
             }
@@ -115,20 +132,25 @@ pub(crate) async fn load_policy_store(
             let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store)?,
+                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
             }
         },
         PolicyStoreSource::LockServer(policy_store_uri) => {
-            load_policy_store_from_lock_master(policy_store_uri, http_client).await?
+            load_policy_store_from_lock_master(
+                policy_store_uri,
+                http_client,
+                strict_schema_validation,
+            )
+            .await?
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(&policy_json)?;
             LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store)?,
+                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
             }
@@ -139,14 +161,14 @@ pub(crate) async fn load_policy_store(
             let agama_policy_store =
                 serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
             LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store)?,
+                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
             }
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
-            store: load_policy_store_from_cjar_file(path).await?,
+            store: load_policy_store_from_cjar_file(path, strict_schema_validation).await?,
             body_hash: None,
             validators: CacheHeadersState::default(),
         },
@@ -157,11 +179,11 @@ pub(crate) async fn load_policy_store(
             validators: CacheHeadersState::default(),
         },
         PolicyStoreSource::CjarUrl(url) => {
-            load_policy_store_from_cjar_url(url, http_client).await?
+            load_policy_store_from_cjar_url(url, http_client, strict_schema_validation).await?
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
-            store: load_policy_store_from_directory(path).await?,
+            store: load_policy_store_from_directory(path, strict_schema_validation).await?,
             body_hash: None,
             validators: CacheHeadersState::default(),
         },
@@ -172,7 +194,7 @@ pub(crate) async fn load_policy_store(
             validators: CacheHeadersState::default(),
         },
         PolicyStoreSource::ArchiveBytes(bytes) => LoadedPolicyStore {
-            store: load_policy_store_from_archive_bytes(bytes)?,
+            store: load_policy_store_from_archive_bytes(bytes, strict_schema_validation)?,
             body_hash: None,
             validators: CacheHeadersState::default(),
         },
@@ -187,6 +209,7 @@ pub(crate) async fn load_policy_store(
 async fn load_policy_store_from_lock_master(
     uri: &str,
     http_client: &HttpClient,
+    strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     // Fetch via `get_with_retry` so we can capture both the response headers
     // (for seeding `RefreshState.validators` — `ETag` / `Last-Modified` /
@@ -199,7 +222,7 @@ async fn load_policy_store_from_lock_master(
     // `CEDARLING_HTTP_MAX_RESPONSE_SIZE` — a multi-GB body on the very first
     // policy-store fetch shouldn't be able to exhaust memory.
     let bytes = http_client.read_response_capped(response).await?;
-    let store = parse_lock_master_bytes(&bytes)?;
+    let store = parse_lock_master_bytes(&bytes, strict_schema_validation)?;
     Ok(LoadedPolicyStore {
         store,
         body_hash: Some(crate::init::policy_store_refresh::body_hash(&bytes)),
@@ -212,9 +235,10 @@ async fn load_policy_store_from_lock_master(
 /// to be able to send conditional-request headers.
 pub(crate) fn parse_lock_master_bytes(
     bytes: &[u8],
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let agama_policy_store: LegacyAgamaPolicyStore = serde_json::from_slice(bytes)?;
-    extract_first_policy_store(&agama_policy_store)
+    extract_first_policy_store(&agama_policy_store, strict_schema_validation)
 }
 
 /// Parses already-fetched `.cjar` archive bytes into a [`PolicyStoreWithID`].
@@ -224,6 +248,7 @@ pub(crate) fn parse_lock_master_bytes(
 /// blocking thread; WASM is single-threaded and calls it inline.
 pub(crate) async fn parse_cjar_bytes(
     bytes: &[u8],
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
@@ -234,11 +259,13 @@ pub(crate) async fn parse_cjar_bytes(
     let store_metadata = loaded.metadata.clone();
 
     #[cfg(not(target_arch = "wasm32"))]
-    let legacy_store = tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
-        .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
+    let legacy_store = tokio::task::spawn_blocking(move || {
+        convert_archive_to_legacy(loaded, strict_schema_validation)
+    })
+    .await
+    .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
     #[cfg(target_arch = "wasm32")]
-    let legacy_store = convert_archive_to_legacy(loaded)?;
+    let legacy_store = convert_archive_to_legacy(loaded, strict_schema_validation)?;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -254,8 +281,9 @@ pub(crate) async fn parse_cjar_bytes(
 /// `async` wrapper there would have nothing to await.
 fn convert_archive_to_legacy(
     loaded: crate::common::policy_store::loader::LoadedPolicyStore,
+    strict_schema_validation: bool,
 ) -> Result<crate::common::policy_store::PolicyStore, PolicyStoreLoadError> {
-    PolicyStoreManager::convert_to_legacy(loaded).map_err(Into::into)
+    PolicyStoreManager::convert_to_legacy(loaded, strict_schema_validation).map_err(Into::into)
 }
 
 /// Loads the policy store from a Cedar Archive (.cjar) file.
@@ -265,8 +293,9 @@ fn convert_archive_to_legacy(
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_cjar_file(
     path: &Path,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::{loader, manager::PolicyStoreManager};
+    use crate::common::policy_store::loader;
 
     let loaded = loader::load_policy_store_archive(path)
         .await
@@ -277,12 +306,11 @@ async fn load_policy_store_from_cjar_file(
     let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
-    let legacy_store =
-        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
-            .await
-            .map_err(|e| {
-                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
-            })??;
+    let legacy_store = tokio::task::spawn_blocking(move || {
+        convert_archive_to_legacy(loaded, strict_schema_validation)
+    })
+    .await
+    .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -320,6 +348,7 @@ fn load_policy_store_from_cjar_file(
 async fn load_policy_store_from_cjar_url(
     url: &str,
     http_client: &HttpClient,
+    strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
@@ -347,11 +376,13 @@ async fn load_policy_store_from_cjar_url(
     let store_metadata = loaded.metadata.clone();
 
     #[cfg(not(target_arch = "wasm32"))]
-    let legacy_store = tokio::task::spawn_blocking(move || convert_archive_to_legacy(loaded))
-        .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
+    let legacy_store = tokio::task::spawn_blocking(move || {
+        convert_archive_to_legacy(loaded, strict_schema_validation)
+    })
+    .await
+    .map_err(|e| PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}")))??;
     #[cfg(target_arch = "wasm32")]
-    let legacy_store = convert_archive_to_legacy(loaded)?;
+    let legacy_store = convert_archive_to_legacy(loaded, strict_schema_validation)?;
 
     Ok(LoadedPolicyStore {
         store: PolicyStoreWithID {
@@ -371,6 +402,7 @@ async fn load_policy_store_from_cjar_url(
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_directory(
     path: &Path,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
@@ -385,12 +417,11 @@ async fn load_policy_store_from_directory(
     let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
-    let legacy_store =
-        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
-            .await
-            .map_err(|e| {
-                PolicyStoreLoadError::Directory(format!("Conversion task panicked: {e}"))
-            })??;
+    let legacy_store = tokio::task::spawn_blocking(move || {
+        convert_archive_to_legacy(loaded, strict_schema_validation)
+    })
+    .await
+    .map_err(|e| PolicyStoreLoadError::Directory(format!("Conversion task panicked: {e}")))??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -426,6 +457,7 @@ fn load_policy_store_from_directory(
 /// Works on all platforms including WASM.
 fn load_policy_store_from_archive_bytes(
     bytes: &[u8],
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
@@ -438,8 +470,8 @@ fn load_policy_store_from_archive_bytes(
     let store_id = loaded.metadata.policy_store.id.clone();
     let store_metadata = loaded.metadata.clone();
 
-    // Convert to legacy format using PolicyStoreManager
-    let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
+    // Convert to legacy format using the shared helper
+    let legacy_store = convert_archive_to_legacy(loaded, strict_schema_validation)?;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -452,9 +484,12 @@ fn load_policy_store_from_archive_bytes(
 mod test {
     use std::{path::Path, sync::LazyLock, time::Duration};
 
+    use base64::Engine;
     use mockito::Server;
+    use serde_json::json;
 
-    use super::load_policy_store;
+    use super::{extract_first_policy_store, load_policy_store};
+    use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
     use crate::{
         PolicyStoreConfig,
         http::{HttpClient, HttpClientConfig},
@@ -474,6 +509,108 @@ mod test {
     // works correctly anymore here since we already have tests for those in
     // src/common/policy_store/test.rs...
 
+    fn make_full_legacy_json() -> serde_json::Value {
+        let schema = base64::prelude::BASE64_STANDARD.encode(
+            r#"{
+                "Jans": {
+                    "entityTypes": {},
+                    "actions": {}
+                }
+            }"#,
+        );
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "schema": schema,
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    fn make_no_schema_legacy_json() -> serde_json::Value {
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    fn make_null_schema_legacy_json() -> serde_json::Value {
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "schema": null,
+                    "policies": {}
+                }
+            }
+        })
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_with_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_full_legacy_json())
+            .expect("valid legacy store with schema");
+        let result = extract_first_policy_store(&agama, true);
+        result.expect("should succeed with schema and strict=true");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_with_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_full_legacy_json())
+            .expect("valid legacy store with schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed with schema and strict=false");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_missing_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_no_schema_legacy_json())
+            .expect("valid legacy store without schema");
+        let result = extract_first_policy_store(&agama, true);
+        let err = result.expect_err("should error when schema missing and strict=true");
+        assert!(
+            err.to_string().contains("missing required schema"),
+            "error should mention missing schema, got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_missing_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_no_schema_legacy_json())
+            .expect("valid legacy store without schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed when schema missing and strict=false");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_null_schema_strict_true() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_null_schema_legacy_json())
+            .expect("valid legacy store with null schema");
+        let result = extract_first_policy_store(&agama, true);
+        let err = result.expect_err("should error when schema is null and strict=true");
+        assert!(
+            err.to_string().contains("missing required schema"),
+            "error should mention missing schema, got: {err}"
+        );
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_null_schema_strict_false() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_null_schema_legacy_json())
+            .expect("valid legacy store with null schema");
+        let result = extract_first_policy_store(&agama, false);
+        result.expect("should succeed when schema is null and strict=false");
+    }
+
     #[tokio::test]
     async fn can_load_from_json_file() {
         load_policy_store(
@@ -484,6 +621,7 @@ mod test {
                 ..Default::default()
             },
             &HTTP_CLIENT,
+            true,
         )
         .await
         .expect("Should load policy store from JSON file");
@@ -499,6 +637,7 @@ mod test {
                 ..Default::default()
             },
             &HTTP_CLIENT,
+            true,
         )
         .await
         .expect("Should load policy store from YAML file");
@@ -527,6 +666,7 @@ mod test {
                 ..Default::default()
             },
             &HTTP_CLIENT,
+            true,
         )
         .await
         .expect("Should load policy store from Lock Master file");

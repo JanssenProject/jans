@@ -176,6 +176,16 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
 
+    /// When enabled, Cedar schema is required and all policies and entities are validated
+    /// against it. When disabled, Cedarling runs without schema-based validation,
+    /// allowing quick-start and prototyping without a schema.
+    #[serde(
+        rename = "CEDARLING_STRICT_SCHEMA_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub strict_schema_validation: FeatureToggle,
+
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
         rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
