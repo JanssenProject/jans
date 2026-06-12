@@ -33,7 +33,7 @@ use serde_pyobject::from_pyobject;
 ///     Initialize a new EntityData from a dictionary.
 ///     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
 #[derive(Clone, serde::Deserialize)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct EntityData {
     /// Cedar entity mapping info
     #[pyo3(set)]
@@ -46,7 +46,7 @@ pub struct EntityData {
 
 /// Cedar entity mapping information
 #[derive(Clone, serde::Deserialize)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct CedarEntityMapping {
     /// entity type name
     #[pyo3(set)]

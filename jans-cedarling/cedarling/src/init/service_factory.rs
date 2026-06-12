@@ -78,6 +78,14 @@ impl<'a> ServiceFactory<'a> {
         self.service_config.policy_store.metadata.as_ref()
     }
 
+    /// Returns a clone of the HTTP client used during service initialization.
+    /// Exposed so the policy-store refresh worker can reuse the same client
+    /// (and therefore the same timeout / retry configuration) for its periodic
+    /// fetches.
+    pub(crate) fn http_client_for_refresh(&self) -> crate::http::HttpClient {
+        self.service_config.http_client.clone()
+    }
+
     // get log service
     fn log_service(&mut self) -> log::Logger {
         self.log_service.clone()

@@ -1,0 +1,19 @@
+[package]
+name = "cedarling_pg_codegen"
+version = "0.1.0"
+edition = "2024"
+description = "Generate Cedar schema (.cedarschema) files from live PostgreSQL tables for cedarling_pg."
+license = "Apache-2.0"
+publish = false
+
+[[bin]]
+name = "cedarling-pg-codegen"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+postgres = "0.19"
+anyhow = "1.0"
+
+[lints]
+workspace = true
