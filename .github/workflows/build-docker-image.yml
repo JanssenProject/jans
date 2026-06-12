@@ -386,7 +386,7 @@ jobs:
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
           build-args: |
-            JANS_SOURCE_VERSION=${{ github.event.workflow_run.head_sha || github.sha }}
+            JANS_SOURCE_VERSION=${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
           platforms: ${{ steps.prep.outputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
