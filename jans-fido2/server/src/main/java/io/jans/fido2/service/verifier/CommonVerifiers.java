@@ -286,10 +286,11 @@ public class CommonVerifiers {
     }
 
     void verifyClientJSONType(JsonNode clientJsonNode, String type) {
-        if (clientJsonNode.has("type")) {
-            if (!type.equals(clientJsonNode.get("type").asText())) {
-                throw errorResponseFactory.invalidRequest("Invalid client json parameters");
-            }
+        if (!clientJsonNode.hasNonNull("type")) {
+            throw errorResponseFactory.invalidRequest("Invalid clientData: missing 'type'");
+        }
+        if (!type.equals(clientJsonNode.get("type").asText())) {
+            throw errorResponseFactory.invalidRequest("Invalid clientData.type: expected '" + type + "'");
         }
     }
 

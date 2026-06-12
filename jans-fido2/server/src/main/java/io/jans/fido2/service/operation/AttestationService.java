@@ -249,7 +249,9 @@ public class AttestationService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(attestationResult.getResponse().getClientDataJSON());
-		
+		// FIDO2 conformance: registration clientData.type must be exactly "webauthn.create".
+		commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);

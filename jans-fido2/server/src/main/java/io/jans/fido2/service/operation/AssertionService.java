@@ -320,6 +320,8 @@ public class AssertionService {
 		}
 		// Verify client data
 		JsonNode clientJsonNode = commonVerifiers.verifyClientJSON(response.getClientDataJSON());
+		// FIDO2 conformance: assertion clientData.type must be exactly "webauthn.get".
+		commonVerifiers.verifyClientJSONTypeIsGet(clientJsonNode);
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientJsonNode);
@@ -329,6 +331,14 @@ public class AssertionService {
 				.parallelStream().findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
+
+		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
+		// instead of relying solely on the DB lookup above.
+		String issuedChallenge = authenticationData.getChallenge();
+		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
+			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
+		}
+
 		log.debug("Fido2AuthenticationData: " + authenticationData.toString());
 		// Verify domain
 		domainVerifier.verifyDomain(authenticationData.getOrigin(), clientJsonNode);

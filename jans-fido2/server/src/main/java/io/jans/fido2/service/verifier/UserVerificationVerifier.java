@@ -29,7 +29,7 @@ public class UserVerificationVerifier {
     private Logger log;
 
     public boolean verifyUserPresent(AuthData authData) {
-        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_PRESENT) == 1) {
+        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_PRESENT) != 0) {
             return true;
         } else {
             throw new Fido2RuntimeException("User not present");
@@ -37,11 +37,7 @@ public class UserVerificationVerifier {
     }
 
     public boolean verifyUserVerified(AuthData authData) {
-        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_VERIFIED) == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return (authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_VERIFIED) != 0;
     }
 
 	public void verifyUserVerificationOption(UserVerification userVerification, AuthData authData) {

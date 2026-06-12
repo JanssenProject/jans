@@ -95,6 +95,9 @@ public class AssertionVerifier {
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
         commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
+        // FIDO2 / WebAuthn requires the User-Present (UP) bit to be set on every assertion.
+        userVerificationVerifier.verifyUserPresent(authData);
+
         log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
         userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
