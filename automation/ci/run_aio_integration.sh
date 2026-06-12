@@ -56,6 +56,34 @@ collect_diag() {
 trap collect_diag EXIT
 
 # ---------------------------------------------------------------------------
+# Build jans modules + serve the locally-built config-api artifacts
+# ---------------------------------------------------------------------------
+# The config-api image downloads its WAR + plugin jars from the GitHub "nightly" release; to keep
+# Phase D self-contained (and immune to release-publish gaps) build the reactor now and serve the
+# locally-built artifacts to the config-api docker build via CN_RELEASE_DOWNLOAD_URL. This must
+# precede the AIO build that consumes the config-api WAR. The artifacts land in ~/.m2 with their
+# Maven coordinate names (jans-config-api-server-<ver>.war, <plugin>-plugin-<ver>-distribution.jar),
+# which are exactly what the Dockerfile requests.
+echo "::group::build jans modules"
+set -e
+for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+  echo "::group::build $mod"
+  mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
+    -f "$mod/pom.xml" clean install
+  echo "::endgroup::"
+done
+if [ -z "${AIO_IMAGE:-}" ]; then
+  LOCAL_RELEASE="$REPO_ROOT/local-release"
+  mkdir -p "$LOCAL_RELEASE"
+  find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
+    \( -name '*.war' -o -name '*-distribution.jar' \) -exec cp -f {} "$LOCAL_RELEASE/" \;
+  echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
+  ( cd "$LOCAL_RELEASE" && exec python3 -m http.server 8088 >/dev/null 2>&1 ) &
+fi
+set +e
+echo "::endgroup::"
+
+# ---------------------------------------------------------------------------
 # Build the AIO image (with integration-test env baked in)
 # ---------------------------------------------------------------------------
 echo "::group::build AIO image"
@@ -65,7 +93,8 @@ if [ -n "${AIO_IMAGE:-}" ]; then
   base_image="$AIO_IMAGE"
 else
   docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
-  docker build -t local/config-api:ci ./docker-jans-config-api
+  docker build --network=host --build-arg CN_RELEASE_DOWNLOAD_URL=http://127.0.0.1:8088 \
+    -t local/config-api:ci ./docker-jans-config-api
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -276,22 +305,8 @@ echo "served test jwks.json via traefik: $jcode"
 set +e
 echo "::endgroup::"
 
-# ---------------------------------------------------------------------------
-# Build modules (skip tests)
-# ---------------------------------------------------------------------------
-echo "::group::build modules"
-set -e
-# Compile + install with the default profile; the live FQDN is only needed at test time.
-for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
-  echo "::group::build $mod"
-  mvn -B -ntp -s "$MVN_SETTINGS" \
-    -Dcfg=default -Dmaven.test.skip=true -fae \
-    -f "$mod/pom.xml" clean install
-  echo "::endgroup::"
-done
-set +e
-echo "::endgroup::"
-
+# Modules were already built + installed before the AIO image (see "build jans modules" above), so
+# the per-suite `mvn test` below resolves them from the local repo without rebuilding.
 mkdir -p test-reports aio-logs
 
 # ---------------------------------------------------------------------------
