@@ -1114,6 +1114,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#background-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background refresh
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background refresh">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-request-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-request consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-ladder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy ladder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#legacy-single-file-format-json" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1690,6 +1751,8 @@
       
         
       
+        
+      
     
     
     
@@ -1904,6 +1967,67 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#background-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background refresh
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background refresh">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-request-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-request consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-ladder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy ladder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2580,6 +2704,114 @@ permit(
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
+<h2 id="background-refresh">Background refresh<a class="headerlink" href="#background-refresh" title="Permanent link">#</a></h2>
+<p>For URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a <code>.cjar</code>), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory <code>Authz</code> instance so long-running processes see policy updates without restart. Refresh is <strong>opt-in</strong> via <a href="../cedarling-properties/#refreshing-the-policy-store"><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></a> and is silently ignored for local sources.</p>
+<h3 id="per-request-consistency">Per-request consistency<a class="headerlink" href="#per-request-consistency" title="Permanent link">#</a></h3>
+<p>Every public Cedarling method snapshots the current <code>Authz</code> via <code>Arc&lt;ArcSwap&lt;Authz&gt;&gt;::load()</code> at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all <em>subsequent</em> calls.</p>
+<h3 id="strategy-ladder">Strategy ladder<a class="headerlink" href="#strategy-ladder" title="Permanent link">#</a></h3>
+<p>The worker selects from three fetch strategies and degrades automatically when the upstream proves it doesn't support the more efficient mode. A periodic probe attempts to upgrade back so a transiently misconfigured upstream doesn't permanently lock the worker into a heavier path.</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Wire behavior</th>
+<th>When the worker uses it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Conditional</code> (default)</td>
+<td>Conditional GET with <code>If-None-Match</code> / <code>If-Modified-Since</code>; expects <code>304 Not Modified</code> on no-op</td>
+<td>Starting state. Lock Server / CDN deployments stay here.</td>
+</tr>
+<tr>
+<td><code>HeadThenGet</code></td>
+<td>HEAD first; compare returned <code>ETag</code> / <code>Last-Modified</code> against cache; full GET only when they differ</td>
+<td>Auto-degraded into after three consecutive ticks where the server returned <code>200</code> with an identical body despite conditional headers</td>
+</tr>
+<tr>
+<td><code>PlainGet</code></td>
+<td>Plain GET every tick; relies on body-hash short-circuit to detect no-op reloads</td>
+<td>Auto-degraded into after three consecutive HEAD responses with no useful validators, or immediately on HEAD <code>405</code> / <code>501</code></td>
+</tr>
+</tbody>
+</table>
+<p>Across all three strategies the worker maintains a body-hash short-circuit: even when the server returns <code>200</code> with byte-identical bytes (some servers ignore conditional headers, some emit non-deterministic <code>ETag</code>s), Cedarling skips parse / rebuild / swap entirely.</p>
+<p>A <code>Cache-Control: max-age</code> / <code>Expires</code> hint in any successful response may <strong>shorten</strong> the next sleep but never lengthens it past the operator-configured interval.</p>
+<h3 id="failure-handling">Failure handling<a class="headerlink" href="#failure-handling" title="Permanent link">#</a></h3>
+<p>Failures (network, HTTP, parse, rebuild) leave the previously loaded <code>Authz</code> in place and exponentially back off the next attempt — <code>interval × 2^failures</code>, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.</p>
+<h3 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">#</a></h3>
+<p>The refresh worker emits the following keys into the <code>operational_stats</code> map of each metrics snapshot. Keys are emitted <strong>sparsely</strong> — only when the underlying value is non-zero — so dashboards can distinguish "no observation yet" from a genuine zero reading.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>policy_store_refresh.last_attempt_secs</code></td>
+<td>Unix timestamp of the most recent tick attempt</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.last_success_secs</code></td>
+<td>Unix timestamp of the most recent <code>Success</code> or <code>NotModified</code> outcome</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.consecutive_failures</code></td>
+<td>Current failure streak (resets to zero on success)</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.last_outcome</code></td>
+<td>Integer enum: <code>1</code>=Success, <code>2</code>=NotModified, <code>3</code>=HttpError, <code>4</code>=NetworkError, <code>5</code>=ParseError, <code>6</code>=RebuildError, <code>7</code>=DecodeError</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.strategy_current</code></td>
+<td>Integer enum: <code>1</code>=Conditional, <code>2</code>=HeadThenGet, <code>3</code>=PlainGet</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.conditional_to_head_transitions</code></td>
+<td>Cumulative count of <code>Conditional → HeadThenGet</code> degrades</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.head_to_plain_transitions</code></td>
+<td>Cumulative count of <code>HeadThenGet → PlainGet</code> degrades</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.upgrade_to_conditional_transitions</code></td>
+<td>Cumulative count of probes that upgraded back to <code>Conditional</code></td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_success</code></td>
+<td>Cumulative count of <code>Success</code> outcomes</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_not_modified</code></td>
+<td>Cumulative count of <code>NotModified</code> outcomes</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_http_error</code></td>
+<td>Cumulative count of <code>HttpError</code> outcomes</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_network_error</code></td>
+<td>Cumulative count of <code>NetworkError</code> outcomes</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_parse_error</code></td>
+<td>Cumulative count of <code>ParseError</code> outcomes (body couldn't be parsed)</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_rebuild_error</code></td>
+<td>Cumulative count of <code>RebuildError</code> outcomes (body parsed, but <code>JwtService</code> / <code>EntityBuilder</code> / trusted-issuer rebuild failed)</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_decode_error</code></td>
+<td>Cumulative count of <code>DecodeError</code> outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="legacy-single-file-format-json">Legacy Single-File Format (JSON)<a class="headerlink" href="#legacy-single-file-format-json" title="Permanent link">#</a></h2>
 <p>The following sections document the legacy single-file JSON format.</p>
 <h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
@@ -3227,7 +3459,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 8, 2026 13:43:00 UTC"><span class="timeago" datetime="2026-06-08T13:43:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 8, 2026 13:43:00 UTC">2026-06-08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 12, 2026 09:20:19 UTC"><span class="timeago" datetime="2026-06-12T09:20:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 12, 2026 09:20:19 UTC">2026-06-12</span>
   </span>
 
     
