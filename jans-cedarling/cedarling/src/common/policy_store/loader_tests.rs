@@ -1707,10 +1707,26 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     let result = loader.load_directory(".").expect("Should succeed");
 
     let content = result.schema.unwrap();
-    assert!(content.contains("namespace Users"));
-    assert!(content.contains("namespace Docs"));
-    assert!(content.contains("entity User"));
-    assert!(content.contains("entity Document"));
+    assert!(
+        content.contains("namespace Users"),
+        "expected merged schema to contain namespace Users; got: {}",
+        content
+    );
+    assert!(
+        content.contains("namespace Docs"),
+        "expected merged schema to contain namespace Docs; got: {}",
+        content
+    );
+    assert!(
+        content.contains("entity User"),
+        "expected merged schema to contain entity User; got: {}",
+        content
+    );
+    assert!(
+        content.contains("entity Document"),
+        "expected merged schema to contain entity Document; got: {}",
+        content
+    );
 
     // Verify the schema can actually be parsed
     let parsed =

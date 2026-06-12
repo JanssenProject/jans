@@ -679,9 +679,22 @@ mod tests {
         let result = ParsedSchema::parse_multiple(&files);
         let parsed = result.expect("parse_multiple should succeed");
 
-        assert!(parsed.content.contains("entity User"));
-        assert!(parsed.content.contains("entity Resource"));
-        assert_eq!(parsed.filename, "users.cedarschema, resources.cedarschema");
+        assert!(
+            parsed.content.contains("entity User"),
+            "expected merged schema content to contain 'entity User'; got: {}",
+            parsed.content
+        );
+        assert!(
+            parsed.content.contains("entity Resource"),
+            "expected merged schema content to contain 'entity Resource'; got: {}",
+            parsed.content
+        );
+        assert_eq!(
+            parsed.filename,
+            "users.cedarschema, resources.cedarschema",
+            "expected parsed filename to be 'users.cedarschema, resources.cedarschema'; got: {}",
+            parsed.filename
+        );
 
         parsed.validate().expect("Combined schema should be valid");
     }
@@ -762,8 +775,16 @@ mod tests {
         // Verify JSON conversion works (via fragment)
         let fragment = parsed.get_fragment();
         let json = fragment.to_json_string().expect("Should serialize to JSON");
-        assert!(json.contains("Users::User") || json.contains("Users"));
-        assert!(json.contains("Docs::Document") || json.contains("Docs"));
+        assert!(
+            json.contains("Users::User") || json.contains("Users"),
+            "expected JSON to contain Users namespace; got: {}",
+            json
+        );
+        assert!(
+            json.contains("Docs::Document") || json.contains("Docs"),
+            "expected JSON to contain Docs namespace; got: {}",
+            json
+        );
     }
 
     #[test]
