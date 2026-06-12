@@ -19,7 +19,7 @@ use pyo3::prelude::*;
 /// error : str
 ///     The error message describing the evaluation failure.
 #[derive(Debug, Clone)]
-#[pyclass(get_all)]
+#[pyclass(get_all, from_py_object)]
 pub struct PolicyEvaluationError {
     /// Id of the policy with an error
     id: String,

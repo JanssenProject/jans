@@ -24,7 +24,7 @@ use pyo3::prelude::*;
 /// - DateTime: DateTime extension type
 /// - Duration: Duration extension type
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(name = "CedarType")]
 pub enum CedarType {
     /// String type
