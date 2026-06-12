@@ -40,9 +40,9 @@ def main():
         backend = backend_cls(manager)
         backend.customize()
 
-    # load integration-test data (gated; disabled by default). Used by the
-    # GitHub Actions integration-test workflow running against the AIO image.
-    if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
+    # load integration-test data (gated; disabled by default; SQL backends only, since
+    # TestDataLoader uses SqlClient). Used by the GitHub Actions integration-test workflow.
+    if persistence_type == "sql" and as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
         with manager.create_lock("persistence-loader-test-data"):
             TestDataLoader(manager).load()
 

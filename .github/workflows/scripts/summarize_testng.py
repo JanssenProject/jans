@@ -22,9 +22,14 @@ RANK = {"PASS": 3, "SKIP": 2, "FAIL": 1}
 # accepted as a baseline so the gate flags *regressions* in the offboarding-relevant suites rather
 # than these known application-level bugs. Revisit as the underlying issues are fixed (e.g. #14249).
 KNOWN_FAILING_CLASSES = {
-    "Fido2MetricsTest",                                                # config-api fido2-plugin (#14249)
-    "QueryParamCreateUpdateTest", "FullUserTest", "PatchUserExtTest",  # jans-scim-client
-    "PatchReplaceUserTest", "PatchDeleteUserTest", "Fido2DeviceTest", "UserTokensTest",
+    "io.jans.configapi.plugin.fido2.test.Fido2MetricsTest",             # config-api fido2-plugin (#14249)
+    "io.jans.scim2.client.patch.PatchUserExtTest",                      # jans-scim-client
+    "io.jans.scim2.client.patch.PatchReplaceUserTest",
+    "io.jans.scim2.client.patch.PatchDeleteUserTest",
+    "io.jans.scim2.client.singleresource.QueryParamCreateUpdateTest",
+    "io.jans.scim2.client.singleresource.FullUserTest",
+    "io.jans.scim2.client.singleresource.Fido2DeviceTest",
+    "io.jans.scim2.client.tokens.UserTokensTest",
 }
 
 
@@ -64,7 +69,7 @@ def main():
     passed, failed, skipped = c.get("PASS", 0), c.get("FAIL", 0), c.get("SKIP", 0)
     retries = max(0, raw_total - total)
 
-    fails_by_class = Counter(cn.rsplit(".", 1)[-1] for (cn, _, _), st in distinct.items() if st == "FAIL")
+    fails_by_class = Counter(cn for (cn, _, _), st in distinct.items() if st == "FAIL")
     known = sum(n for cls, n in fails_by_class.items() if cls in KNOWN_FAILING_CLASSES)
     regressions = failed - known
 
@@ -74,7 +79,7 @@ def main():
         if total == 0:
             sys.exit("::error::no test results were collected")
         if regressions:
-            offenders = ", ".join(f"{cls}({n})" for cls, n in fails_by_class.most_common()
+            offenders = ", ".join(f"{cls.rsplit('.', 1)[-1]}({n})" for cls, n in fails_by_class.most_common()
                                   if cls not in KNOWN_FAILING_CLASSES)
             sys.exit(f"::error::{regressions} distinct test failure(s) outside the known baseline: {offenders}")
         sys.exit(0)
@@ -89,7 +94,7 @@ def main():
         print("|---|---:|---|")
         for cls, n in fails_by_class.most_common(25):
             tag = "known baseline" if cls in KNOWN_FAILING_CLASSES else "**REGRESSION**"
-            print(f"| {cls} | {n} | {tag} |")
+            print(f"| {cls.rsplit('.', 1)[-1]} | {n} | {tag} |")
     else:
         print("_No distinct failures._")
 

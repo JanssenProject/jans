@@ -64,7 +64,7 @@ jobs:
       - name: Compute persistence matrix
         id: matrix
         run: |
-          # dispatch can target a single backend; PR/nightly run both.
+          # dispatch can target a single backend; PR/nightly run both (full MySQL + PostgreSQL coverage).
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "MYSQL" ]; then
             echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "PGSQL" ]; then
@@ -275,7 +275,7 @@ jobs:
           fi
 
   # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
-  # droplet tagged run-<run_id>. Tag-scoped so it never touches other runs' droplets.
+  # droplet tagged run-<run_id> and any SSH key named jans-ci-<run_id>-*, scoped to this run only.
   reap:
     needs: integration
     if: always()
@@ -293,3 +293,16 @@ jobs:
           curl -fsS -X DELETE \
             "https://api.digitalocean.com/v2/droplets?tag_name=run-${{ github.run_id }}" \
             -H "Authorization: Bearer ${DO_TOKEN}" || true
+      - name: Delete any leftover SSH keys for this run
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          # Keys can't be tagged, so match the per-leg name prefix jans-ci-<run_id>.
+          curl -fsS "https://api.digitalocean.com/v2/account/keys?per_page=200" \
+            -H "Authorization: Bearer ${DO_TOKEN}" \
+            | jq -r --arg p "jans-ci-${{ github.run_id }}" '.ssh_keys[]? | select(.name | startswith($p)) | .id' \
+            | while read -r kid; do
+                [ -n "$kid" ] && curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/$kid" \
+                  -H "Authorization: Bearer ${DO_TOKEN}" || true
+              done
