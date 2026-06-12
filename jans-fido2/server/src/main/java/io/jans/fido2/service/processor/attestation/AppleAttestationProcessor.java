@@ -82,8 +82,14 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			CredAndCounterData credIdAndCounters) {
 
 		log.info("AttStmt: " + attStmt.asText());
-		
-		
+
+		// Apple attestation is always a FULL attestation. A missing x5c means the statement
+		// cannot be verified, so it must be rejected rather than silently accepted.
+		if (!attStmt.hasNonNull("x5c")) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
+					"Apple attestation statement must contain x5c");
+		}
+
 		// Check attStmt and it contains "x5c" then its a FULL attestation.
 		if (attStmt.hasNonNull("x5c")) {
 
