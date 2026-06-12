@@ -345,7 +345,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             return Err(ValidationError::EmptySchemaDirectory { path: schemas_dir }.into());
         }
 
-        let combined = Self::merge_schema_fragments(&raw_files)?;
+        let combined = Self::combine_schema_files(&raw_files)?;
         Ok(combined)
     }
 
@@ -393,12 +393,9 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Combine multiple `.cedarschema` files into a single schema text.
     ///
-    /// Delegates to [`ParsedSchema::parse_multiple`] which:
-    /// 1. Parses each file as a `SchemaFragment`
-    /// 2. Validates all fragments via `Schema::from_schema_fragments`
-    /// 3. Merges into a single `SchemaFragment` via JSON round-trip
-    ///    ([`combine_schema_fragments`])
-    fn merge_schema_fragments(raw_files: &[SchemaFile]) -> Result<String, PolicyStoreError> {
+    /// Delegates to [`ParsedSchema::parse_multiple`] for parsing, validation,
+    /// and JSON-round-trip merging (see [`combine_schema_fragments`]).
+    fn combine_schema_files(raw_files: &[SchemaFile]) -> Result<String, PolicyStoreError> {
         ParsedSchema::parse_multiple(raw_files).map(|parsed| parsed.content)
     }
 
