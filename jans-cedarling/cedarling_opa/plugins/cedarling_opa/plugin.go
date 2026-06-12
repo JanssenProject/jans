@@ -24,8 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"mime"
-	"net/http"
 	"os"
 	"sync"
 
@@ -177,102 +175,50 @@ func (Factory) Validate(_ *plugins.Manager, config []byte) (any, error) {
 	return parsedConfig, nil
 }
 
-func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
-	request_id := r.Header.Get("X-Request-ID")
-	if request_id != "" {
-		w.Header().Add("X-Request-ID", request_id)
+func extractTokens(subject *Entity) ([]cedarling_go.TokenInput, error) {
+	if subject == nil {
+		return nil, fmt.Errorf("Subject empty")
 	}
-	if r.Method != "GET" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
-		return
-	}
-	w.Header().Add("Content-Type", "application/json")
-	globalInstanceMu.RLock()
-	plugin := globalInstance
-	globalInstanceMu.RUnlock()
-	if plugin == nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Plugin not available"})
-		return
-	}
-	metadata := PDPMetadata{
-		PolicyDecisionPoint:      p.config.Host,
-		AccessEvaluationEndpoint: fmt.Sprintf("%s/access/v1/evaluation", p.config.Host),
-	}
-	w.WriteHeader(200)
-	if err := json.NewEncoder(w).Encode(metadata); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
-		return
-	}
-}
-
-func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Request) {
-	requestId := r.Header.Get("X-Request-ID")
-	if requestId != "" {
-		w.Header().Add("X-Request-ID", requestId)
-	}
-	contentType := r.Header.Get("Content-Type")
-	mediaType, _, err := mime.ParseMediaType(contentType)
-	if r.Method != "POST" || err != nil || mediaType != "application/json" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
-		p.logger.Info(err.Error())
-		return
-	}
-	w.Header().Add("Content-Type", "application/json")
-	var request EvaluationRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
-		p.logger.Info(err.Error())
-		return
-	}
+	entity := *subject
 	var tokens TokenList
-	if err := json.Unmarshal(request.Subject.Properties, &tokens); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid token input"})
-		p.logger.Info(err.Error())
-		return
+	if err := json.Unmarshal(entity.Properties, &tokens); err != nil {
+		return nil, err
 	}
-	tokenEntities := []cedarling_go.TokenInput{}
+	output := []cedarling_go.TokenInput{}
 	for _, token := range tokens.Tokens {
-		new_token := cedarling_go.TokenInput{
+		temp := cedarling_go.TokenInput{
 			Mapping: token.Mapping,
 			Payload: token.Payload,
 		}
-		tokenEntities = append(tokenEntities, new_token)
+		output = append(output, temp)
 	}
-	var resourceEntity cedarling_go.EntityData
-	err = json.Unmarshal(request.Resource.Properties, &resourceEntity)
+	return output, nil
+}
+
+func extractResource(resource *Entity) (cedarling_go.EntityData, error) {
+	var output cedarling_go.EntityData
+	if resource == nil {
+		return output, fmt.Errorf("Resource empty")
+	}
+	err := json.Unmarshal(resource.Properties, &output)
+	return output, err
+}
+
+func (p *CedarPlugin) Evaluate(subject *Entity, action string, resource *Entity, context map[string]any) (*cedarling_go.MultiIssuerAuthorizeResult, error) {
+	tokens, err := extractTokens(subject)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid resource input"})
-		p.logger.Info(err.Error())
-		return
+		return nil, err
 	}
-	cedarAction := request.Action.Name
-	cedarling_request := cedarling_go.AuthorizeMultiIssuerRequest{
-		Tokens:   tokenEntities,
-		Action:   cedarAction,
+	resourceEntity, err := extractResource(resource)
+	if err != nil {
+		return nil, err
+	}
+	authorization_request := cedarling_go.AuthorizeMultiIssuerRequest{
+		Tokens:   tokens,
+		Action:   action,
 		Resource: resourceEntity,
-		Context:  request.Context,
+		Context:  context,
 	}
-	result, err := p.cedar.AuthorizeMultiIssuer(cedarling_request)
-	if err != nil {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
-		return
-	}
-	response := EvaluationResponse{
-		Decision: result.Decision,
-	}
-	w.WriteHeader(200)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
-		p.logger.Info(err.Error())
-		return
-	}
+	authorization_result, err := p.cedar.AuthorizeMultiIssuer(authorization_request)
+	return &authorization_result, err
 }

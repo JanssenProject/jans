@@ -48,3 +48,18 @@ type EvaluationResponse struct {
 	Decision bool           `json:"decision"`
 	Context  map[string]any `json:"context,omitempty"`
 }
+
+type MultipleEvaluationBase struct {
+	Subject  *Entity        `json:"subject,omitempty"`
+	Resource *Entity        `json:"resource,omitempty"`
+	Action   *Action        `json:"action,omitempty"`
+	Context  map[string]any `json:"context,omitempty"`
+}
+
+type MultipleEvaluationRequest struct {
+	Subject    *Entity                  `json:"subject,omitempty"`
+	Resource   *Entity                  `json:"resource,omitempty"`
+	Action     *Action                  `json:"action,omitempty"`
+	Context    map[string]any           `json:"context,omitempty"`
+	Evaluation []MultipleEvaluationBase `json:"evaluation,omitempty"`
+}
