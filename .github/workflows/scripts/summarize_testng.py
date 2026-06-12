@@ -79,7 +79,7 @@ def main():
         if total == 0:
             sys.exit("::error::no test results were collected")
         if regressions:
-            offenders = ", ".join(f"{cls.rsplit('.', 1)[-1]}({n})" for cls, n in fails_by_class.most_common()
+            offenders = ", ".join(f"{cls}({n})" for cls, n in fails_by_class.most_common()
                                   if cls not in KNOWN_FAILING_CLASSES)
             sys.exit(f"::error::{regressions} distinct test failure(s) outside the known baseline: {offenders}")
         sys.exit(0)
@@ -94,7 +94,7 @@ def main():
         print("|---|---:|---|")
         for cls, n in fails_by_class.most_common(25):
             tag = "known baseline" if cls in KNOWN_FAILING_CLASSES else "**REGRESSION**"
-            print(f"| {cls.rsplit('.', 1)[-1]} | {n} | {tag} |")
+            print(f"| {cls} | {n} | {tag} |")
     else:
         print("_No distinct failures._")
 
