@@ -57,7 +57,7 @@ public class ECDSAPublicKeyTest extends BaseTest {
         raw[0] = 0x01; // non-zero so it's a valid 31-byte magnitude
         BigInteger shortCoord = new BigInteger(1, raw);
 
-        ECDSAPublicKey key = new ECDSAPublicKey(SignatureAlgorithm.ES384, shortCoord, shortCoord);
+        ECDSAPublicKey key = new ECDSAPublicKey(SignatureAlgorithm.ES512, shortCoord, shortCoord);
         JSONObject jwk = key.toJSONObject();
 
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
