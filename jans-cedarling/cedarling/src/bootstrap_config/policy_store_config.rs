@@ -36,7 +36,9 @@ impl PolicyStoreConfig {
         self.refresh_interval_secs > 0
             && matches!(
                 self.source,
-                PolicyStoreSource::CjarUrl(_) | PolicyStoreSource::LockServer(_)
+                PolicyStoreSource::CjarUrl(_)
+                    | PolicyStoreSource::LockServer(_)
+                    | PolicyStoreSource::Uri(_)
             )
     }
 

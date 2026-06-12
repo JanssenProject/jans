@@ -218,10 +218,6 @@ async fn load_policy_store_from_uri(
     http_client: &HttpClient,
     strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    if uri.to_lowercase().ends_with(".cjar") {
-        return load_policy_store_from_cjar_url(uri, http_client, strict_schema_validation).await;
-    }
-
     let response = http_client.get_with_retry(uri).await?;
 
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
@@ -241,7 +237,7 @@ async fn load_policy_store_from_uri(
         && bytes.starts_with(&ZIP_MAGIC)
     {
         return Ok(LoadedPolicyStore {
-            store: load_policy_store_from_archive_bytes(&bytes, strict_schema_validation)?,
+            store: parse_cjar_bytes(&bytes, strict_schema_validation).await?,
             body_hash: Some(body_hash),
             validators,
         });
