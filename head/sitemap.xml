@@ -189,6 +189,10 @@
          <lastmod>2026-06-12</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/head/cedarling/integrations/postgres/</loc>
+         <lastmod>2026-06-12</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/head/cedarling/integrations/terraform-authz-jwt/</loc>
          <lastmod>2026-06-12</lastmod>
     </url>
