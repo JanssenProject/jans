@@ -426,26 +426,53 @@ mod tests {
 
     #[tokio::test]
     async fn is_decode_error_true_only_for_response_bytes_failure() {
-        // Trigger a real `DecodeResponseBytes` by reading a body from a
-        // closed connection. We start a mockito server, fetch a response,
-        // then drop the server before reading the body.
-        let mut server = mockito::Server::new_async().await;
-        server
-            .mock("GET", "/")
-            .with_status(200)
-            // Advertise more bytes than we'll actually send so reqwest fails
-            // mid-stream when trying to read the body.
-            .with_chunked_body(|w| {
-                std::io::Write::write_all(w, b"partial").ok();
-                Err(std::io::Error::other("simulated mid-stream failure"))
-            })
-            .create_async()
-            .await;
-        let resp = reqwest::get(server.url()).await.expect("send");
+        // We want a real `DecodeResponseBytes`: response status + headers
+        // arrive, but the body stream is truncated before all of the
+        // advertised `Content-Length` bytes show up.
+        //
+        // Mockito's `with_chunked_body(|w| Err(...))` *can* produce that
+        // state, but in practice mockito tears the connection down before
+        // the response line reaches the client, so reqwest reports
+        // `IncompleteMessage` at send-time — a flaky race we hit on CI.
+        // A one-shot raw TCP listener gives us deterministic control: we
+        // send full headers (with `Content-Length: 1000`), flush, write 7
+        // bytes of body, then close — the client always sees the response,
+        // then always sees the truncated body.
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+        let addr = listener.local_addr().expect("local_addr");
+        let server = std::thread::spawn(move || {
+            let (mut sock, _) = listener.accept().expect("accept");
+            // Drain the request headers so the kernel doesn't RST the
+            // connection while we're writing the response.
+            let mut buf = [0u8; 1024];
+            let mut total = 0usize;
+            while total < buf.len() {
+                match sock.read(&mut buf[total..]) {
+                    Ok(0) => break,
+                    Ok(n) => {
+                        total += n;
+                        if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
+                            break;
+                        }
+                    },
+                    Err(_) => break,
+                }
+            }
+            sock.write_all(
+                b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n",
+            )
+            .expect("write headers");
+            sock.flush().expect("flush headers");
+            // Far fewer than the advertised 1000 bytes, then drop = close.
+            let _ = sock.write_all(b"partial");
+        });
+        let resp = reqwest::get(format!("http://{addr}/")).await.expect("send");
         let e = resp
             .bytes()
             .await
-            .expect_err("expected mockito to truncate response and produce DecodeResponseBytes");
+            .expect_err("expected truncated body to produce DecodeResponseBytes");
+        server.join().ok();
         let err = HttpRequestError::new(
             HttpRequestReasonError::DecodeResponseBytes(e),
             Some(reqwest::StatusCode::OK),
