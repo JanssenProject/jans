@@ -188,6 +188,7 @@ print(json.dumps({
     "scim_pw": m.secret.get("scim_client_pw") or "",
     "jca_id": m.config.get("jca_client_id") or "",
     "jca_enc": m.secret.get("jca_client_encoded_pw") or "",
+    "jks_pass": m.secret.get("auth_openid_jks_pass") or m.config.get("auth_openid_jks_pass") or "",
     "db_pw_enc": encode_text(os.environ["DB_PASSWORD"], salt).decode(),
 }))
 PY
@@ -217,6 +218,61 @@ export RDBM_PORT="$RDBM_PORT"
 export RDBM_USER="$DB_USER"
 export RDBM_PASSWORD_ENC="$(read_json db_pw_enc)"
 python3 .github/workflows/scripts/render_test_profiles.py
+set +e
+echo "::endgroup::"
+
+# ---------------------------------------------------------------------------
+# Wire the auth-client tests to the AIO's own signing keys
+# ---------------------------------------------------------------------------
+# The client-signing/crypto suites register a client with
+# clientJwksUri=https://<fqdn>/jans-auth-client/test/resources/jwks.json and sign client
+# assertions with clientKeyStoreFile. The old static VMs served that jwks from a web root
+# (matching a pre-generated keystore); the AIO does not, so jans-auth cannot fetch the
+# client's keys and every signed-JWT test fails + retries (866 vs Jenkins's 84). Fix: hand
+# the test client the AIO's own signing keystore AND serve the AIO's public JWKS at that
+# path via a traefik-routed nginx sidecar -- both halves are the same keypair, so the
+# server-side signature/decryption checks pass.
+echo "::group::wire test client to AIO keys"
+set +e
+JKS_PASS="$(read_json jks_pass)"
+docker cp jans:/etc/certs/auth-keys.jks "$REPO_ROOT/aio-auth-keys.jks"
+convert_ks() {  # AIO keystore (type ambiguous) -> PKCS12 with the template's "secret" password
+  local dst="$1"; rm -f "$dst"; mkdir -p "$(dirname "$dst")"
+  for st in pkcs12 JKS; do
+    "${JAVA_HOME}/bin/keytool" -importkeystore -noprompt \
+      -srckeystore "$REPO_ROOT/aio-auth-keys.jks" -srcstoretype "$st" -srcstorepass "$JKS_PASS" \
+      -destkeystore "$dst" -deststoretype PKCS12 -deststorepass secret >/dev/null 2>&1 && return 0
+    rm -f "$dst"
+  done
+  return 1
+}
+for prof in jans-auth-server/client/profiles jans-auth-server/server/profiles; do
+  convert_ks "$REPO_ROOT/$prof/$JANS_FQDN/client_keystore.p12" \
+    && echo "wrote AIO keystore -> $prof/$JANS_FQDN/client_keystore.p12" \
+    || echo "[warn] keystore conversion failed for $prof"
+done
+# Serve the AIO's public JWKS (+ a sector_identifier) at the path the tests expect.
+res="$REPO_ROOT/test-resources/jans-auth-client/test/resources"
+mkdir -p "$res"
+curl -sk "https://${JANS_FQDN}/jans-auth/restv1/jwks" -o "$res/jwks.json"
+printf '["https://%s/jans-auth-rp/home.htm","https://client.example.com/cb","https://client.example.com/cb1","https://client.example.com/cb2","https://client.example.com/cb3"]\n' \
+  "$JANS_FQDN" > "$res/sector_identifier.js"
+NET=$(docker inspect traefik -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' | awk '{print $1}')
+docker rm -f testres >/dev/null 2>&1 || true
+docker run -d --name testres --network "$NET" \
+  -v "$res:/usr/share/nginx/html/jans-auth-client/test/resources:ro" \
+  --label "traefik.enable=true" \
+  --label "traefik.http.routers.testres.rule=Host(\`${JANS_FQDN}\`) && PathPrefix(\`/jans-auth-client\`)" \
+  --label "traefik.http.routers.testres.entrypoints=websecure" \
+  --label "traefik.http.routers.testres.priority=5000" \
+  --label "traefik.http.services.testres.loadbalancer.server.port=80" \
+  nginx:alpine >/dev/null
+jcode=""
+for _ in $(seq 1 20); do
+  jcode=$(curl -sk -o /dev/null -w '%{http_code}' "https://${JANS_FQDN}/jans-auth-client/test/resources/jwks.json" || true)
+  [ "$jcode" = "200" ] && break; sleep 2
+done
+echo "served test jwks.json via traefik: $jcode"
 set +e
 echo "::endgroup::"
 
