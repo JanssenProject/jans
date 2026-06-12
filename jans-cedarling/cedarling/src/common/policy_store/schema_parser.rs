@@ -92,6 +92,18 @@ fn deep_merge(
     }
 }
 
+/// A schema file with its name and content.
+///
+/// Used when loading multiple schema files that need to be combined
+/// into a single schema (see [`ParsedSchema::parse_multiple`]).
+#[derive(Debug, Clone)]
+pub(super) struct SchemaFile {
+    /// File name (e.g. `"users.cedarschema"`)
+    pub name: String,
+    /// Raw Cedar schema content
+    pub content: String,
+}
+
 /// A parsed and validated Cedar schema.
 ///
 /// Contains the schema, fragment, and metadata about the source file.
@@ -169,8 +181,7 @@ impl ParsedSchema {
     /// API to merge `SchemaFragment`s or to convert `Schema` → `SchemaFragment`
     /// (cedar-policy 4.11). The only workaround is to round-trip through JSON:
     /// `to_json_value()` → deep-merge namespace maps → `from_json_value()`.
-    #[allow(dead_code)]
-    pub(super) fn parse_multiple(files: &[(String, String)]) -> Result<Self, PolicyStoreError> {
+    pub(super) fn parse_multiple(files: &[SchemaFile]) -> Result<Self, PolicyStoreError> {
         if files.is_empty() {
             return Err(PolicyStoreError::CedarSchemaError {
                 file: "(no files)".to_string(),
@@ -182,10 +193,10 @@ impl ParsedSchema {
         let mut combined_content = String::new();
         let mut filenames = Vec::new();
 
-        for (filename, content) in files {
+        for SchemaFile { name, content } in files {
             let fragment = SchemaFragment::from_str(content).map_err(|e| {
                 PolicyStoreError::CedarSchemaError {
-                    file: filename.clone(),
+                    file: name.clone(),
                     err: CedarSchemaErrorType::ParseError(e.to_string()),
                 }
             })?;
@@ -194,7 +205,7 @@ impl ParsedSchema {
                 combined_content.push('\n');
             }
             combined_content.push_str(content);
-            filenames.push(filename.clone());
+            filenames.push(name.clone());
             fragments.push(fragment);
         }
 
@@ -666,14 +677,14 @@ mod tests {
     #[test]
     fn test_parse_multiple_valid() {
         let files = vec![
-            (
-                "users.cedarschema".to_string(),
-                r"namespace App { entity User; }".to_string(),
-            ),
-            (
-                "resources.cedarschema".to_string(),
-                r"namespace App { entity Resource; }".to_string(),
-            ),
+            SchemaFile {
+                name: "users.cedarschema".to_string(),
+                content: r"namespace App { entity User; }".to_string(),
+            },
+            SchemaFile {
+                name: "resources.cedarschema".to_string(),
+                content: r"namespace App { entity Resource; }".to_string(),
+            },
         ];
 
         let result = ParsedSchema::parse_multiple(&files);
@@ -718,14 +729,14 @@ mod tests {
     #[test]
     fn test_parse_multiple_with_invalid_file() {
         let files = vec![
-            (
-                "valid.cedarschema".to_string(),
-                r"namespace App { entity User; }".to_string(),
-            ),
-            (
-                "invalid.cedarschema".to_string(),
-                "this is not valid cedar schema".to_string(),
-            ),
+            SchemaFile {
+                name: "valid.cedarschema".to_string(),
+                content: r"namespace App { entity User; }".to_string(),
+            },
+            SchemaFile {
+                name: "invalid.cedarschema".to_string(),
+                content: "this is not valid cedar schema".to_string(),
+            },
         ];
 
         let result = ParsedSchema::parse_multiple(&files);
@@ -740,14 +751,14 @@ mod tests {
     #[test]
     fn test_parse_multiple_different_namespaces() {
         let files = vec![
-            (
-                "users.cedarschema".to_string(),
-                r"namespace Users { entity User; }".to_string(),
-            ),
-            (
-                "docs.cedarschema".to_string(),
-                r"namespace Docs { entity Document; entity Folder; }".to_string(),
-            ),
+            SchemaFile {
+                name: "users.cedarschema".to_string(),
+                content: r"namespace Users { entity User; }".to_string(),
+            },
+            SchemaFile {
+                name: "docs.cedarschema".to_string(),
+                content: r"namespace Docs { entity Document; entity Folder; }".to_string(),
+            },
         ];
 
         let result = ParsedSchema::parse_multiple(&files);
@@ -848,19 +859,19 @@ mod tests {
     #[test]
     fn test_parse_multiple_with_actions() {
         let files = vec![
-            (
-                "types.cedarschema".to_string(),
-                r"
+            SchemaFile {
+                name: "types.cedarschema".to_string(),
+                content: r"
                 namespace App {
                     entity User;
                     entity File;
                 }
                 "
                 .to_string(),
-            ),
-            (
-                "actions.cedarschema".to_string(),
-                r#"
+            },
+            SchemaFile {
+                name: "actions.cedarschema".to_string(),
+                content: r#"
                 namespace App {
                     action "read" appliesTo {
                         principal: [User],
@@ -869,7 +880,7 @@ mod tests {
                 }
                 "#
                 .to_string(),
-            ),
+            },
         ];
 
         let result = ParsedSchema::parse_multiple(&files);

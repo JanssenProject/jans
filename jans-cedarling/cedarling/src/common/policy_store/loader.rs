@@ -20,9 +20,9 @@
 
 use std::path::Path;
 
-use super::errors::{CedarSchemaErrorType, PolicyStoreError, ValidationError};
+use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::PolicyStoreMetadata;
-use super::schema_parser::combine_schema_fragments;
+use super::schema_parser::{ParsedSchema, SchemaFile};
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 
@@ -353,8 +353,8 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     fn read_schema_files(
         &self,
         entries: Vec<super::vfs_adapter::DirEntry>,
-    ) -> Result<Vec<(String, String)>, PolicyStoreError> {
-        let mut files: Vec<(String, String)> = Vec::new();
+    ) -> Result<Vec<SchemaFile>, PolicyStoreError> {
+        let mut files: Vec<SchemaFile> = Vec::new();
         for entry in entries {
             if entry.is_dir {
                 continue;
@@ -382,59 +382,24 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                     path: entry.path.clone(),
                     source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
                 })?;
-            files.push((entry.name, content));
+            files.push(SchemaFile {
+                name: entry.name,
+                content,
+            });
         }
-        files.sort_by(|a, b| a.0.cmp(&b.0));
+        files.sort_by(|a, b| a.name.cmp(&b.name));
         Ok(files)
     }
 
-    /// Parse multiple schema fragments and combine them into a single schema text.
+    /// Combine multiple `.cedarschema` files into a single schema text.
     ///
-    /// Two-step process:
-    /// 1. **Validation** — `Schema::from_schema_fragments()` merges all fragments
-    ///    into a `Schema` (via cedar-policy-core's `ValidatorSchema::from_schema_fragments`,
-    ///    which collects namespace definitions, checks RFC 70 shadowing rules,
-    ///    adds builtin aliases, and resolves cross-references). This catches
-    ///    conflicts (e.g. duplicate entity definitions across files).
-    /// 2. **Fragment building** — `combine_schema_fragments()` serialises each
-    ///    fragment to JSON, deep-merges the namespace maps, and deserialises
-    ///    back into a single `SchemaFragment`. We cannot skip this step:
-    ///    `Schema` has no `to_cedarschema()` method (only `SchemaFragment` does),
-    ///    and downstream code in `manager.rs` needs the fragment for JSON
-    ///    serialisation.
-    fn merge_schema_fragments(raw_files: &[(String, String)]) -> Result<String, PolicyStoreError> {
-        use std::str::FromStr;
-
-        let fragments: Result<Vec<_>, PolicyStoreError> = raw_files
-            .iter()
-            .map(|(name, content)| {
-                cedar_policy::SchemaFragment::from_str(content).map_err(|e| {
-                    PolicyStoreError::CedarSchemaError {
-                        file: name.clone(),
-                        err: CedarSchemaErrorType::ParseError(e.to_string()),
-                    }
-                })
-            })
-            .collect();
-        let fragments = fragments?;
-
-        // Step 1: validate and merge via Schema::from_schema_fragments
-        let _schema =
-            cedar_policy::Schema::from_schema_fragments(fragments.clone()).map_err(|e| {
-                PolicyStoreError::CedarSchemaError {
-                    file: "schemas/*.cedarschema".to_string(),
-                    err: CedarSchemaErrorType::ValidationError(e.to_string()),
-                }
-            })?;
-
-        // Step 2: build a single SchemaFragment for to_cedarschema() downstream
-        let combined_fragment = combine_schema_fragments(&fragments)?;
-        combined_fragment
-            .to_cedarschema()
-            .map_err(|e| PolicyStoreError::CedarSchemaError {
-                file: "schemas/*.cedarschema".to_string(),
-                err: CedarSchemaErrorType::ParseError(e.to_string()),
-            })
+    /// Delegates to [`ParsedSchema::parse_multiple`] which:
+    /// 1. Parses each file as a `SchemaFragment`
+    /// 2. Validates all fragments via `Schema::from_schema_fragments`
+    /// 3. Merges into a single `SchemaFragment` via JSON round-trip
+    ///    ([`combine_schema_fragments`])
+    fn merge_schema_fragments(raw_files: &[SchemaFile]) -> Result<String, PolicyStoreError> {
+        ParsedSchema::parse_multiple(raw_files).map(|parsed| parsed.content)
     }
 
     /// Load all policy files from policies directory.
