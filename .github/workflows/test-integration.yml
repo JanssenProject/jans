@@ -210,27 +210,9 @@ jobs:
       - name: Summarise results
         if: always()
         run: |
-          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import glob, os, xml.etree.ElementTree as ET
-          rows, tot = [], {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
-          for f in sorted(glob.glob("test-reports/*.xml")):
-              try:
-                  r = ET.parse(f).getroot()
-              except ET.ParseError:
-                  continue
-              if r.tag != "testng-results":
-                  continue
-              g = lambda k: int(r.get(k, 0))
-              rows.append((os.path.basename(f), g("total"), g("passed"), g("failed"), g("skipped")))
-              for k in tot:
-                  tot[k] += g(k)
-          print(f"## Integration tests — {os.environ.get('MATRIX','')}\n")
-          print("| Report | Total | Passed | Failed | Skipped |")
-          print("|---|---:|---:|---:|---:|")
-          for name, t, p, fl, s in rows:
-              print(f"| {name} | {t} | {p} | {fl} | {s} |")
-          print(f"| **Total** | **{tot['total']}** | **{tot['passed']}** | **{tot['failed']}** | **{tot['skipped']}** |")
-          PY
+          # De-duplicates TestNG RetryAnalyzer re-runs so the totals reflect distinct tests
+          # (comparable to Jenkins) rather than every retry attempt.
+          python3 .github/workflows/scripts/summarize_testng.py >> "$GITHUB_STEP_SUMMARY" || true
         env:
           MATRIX: ${{ matrix.persistence }}
 
@@ -265,25 +247,8 @@ jobs:
 
       - name: Gate on test outcome
         if: always()
-        run: |
-          python3 - <<'PY'
-          import glob, sys, xml.etree.ElementTree as ET
-          failed = total = 0
-          for f in glob.glob("test-reports/*.xml"):
-              try:
-                  r = ET.parse(f).getroot()
-              except ET.ParseError:
-                  continue
-              if r.tag != "testng-results":
-                  continue
-              failed += int(r.get("failed", 0))
-              total += int(r.get("total", 0))
-          print(f"collected {total} tests, {failed} failed")
-          if total == 0:
-              sys.exit("::error::no test results were collected")
-          if failed:
-              sys.exit(f"::error::{failed} test(s) failed")
-          PY
+        # Gates on distinct failures (retries de-duplicated), so flaky-but-passing tests don't trip it.
+        run: python3 .github/workflows/scripts/summarize_testng.py --gate
 
       - name: Upload AIO logs
         if: always()
