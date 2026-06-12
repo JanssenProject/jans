@@ -784,7 +784,7 @@ impl AuthorizeEntitiesData {
         let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::with_capacity(capacity);
 
         // Add request entities first (these may be overwritten by default entities)
-        merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
+        merged_entities.insert(self.resource.uid(), self.resource);
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
 
