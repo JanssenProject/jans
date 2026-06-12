@@ -87,7 +87,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -95,7 +94,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -115,6 +113,8 @@ paths:
                         "adoptionRate": 1,
                         "totalUniqueUsers": 1
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -143,7 +143,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -151,7 +150,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -173,6 +171,8 @@ paths:
                         },
                         "browsers": {}
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -201,7 +201,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -209,7 +208,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -225,6 +223,8 @@ paths:
                   value: "{\n    \"errorCategories\": {},\n    \"failureRate\": 0.75,\n\
                     \    \"successRate\": 0.25,\n\t\"completionRate\": 0.48,\n\t\"\
                     dropOffRate\": 0.52,\n    \"topErrors\": {}\n}\n"
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -274,7 +274,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -282,7 +281,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -340,6 +338,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -375,7 +375,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -383,7 +382,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -405,6 +403,8 @@ paths:
                         "avgRegistrationSuccessRate": 0.25,
                         "avgAuthenticationSuccessRate": 0
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -447,7 +447,6 @@ paths:
         description: "Start date/time for entries report. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -455,7 +454,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -500,6 +498,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -548,7 +548,6 @@ paths:
         description: "Start date/time for entries report. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -556,7 +555,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -599,6 +597,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -694,7 +694,6 @@ paths:
         description: "Start date/time for entries report. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -702,7 +701,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -769,6 +767,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -837,7 +837,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -845,7 +844,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -864,6 +862,8 @@ paths:
                         "registrationMaxDuration": 890,
                         "registrationMinDuration": 210
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -919,6 +919,8 @@ paths:
                         },
                         "currentPeriod": {}
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -955,7 +957,6 @@ paths:
         description: "Start date/time for the log entries report. Accepted format\
           \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
           \ 31-12-2025 and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       - name: end_date
@@ -963,7 +964,6 @@ paths:
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
           \ and 2025-12-31T23:59:59Z."
-        required: true
         schema:
           type: string
       responses:
@@ -1012,6 +1012,8 @@ paths:
                         }
                       ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -1549,50 +1551,14 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationAttempts:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationSuccessRate:
-          type: number
-          format: double
-        fallbackEvents:
-          type: integer
-          format: int64
         errorCounts:
           type: object
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         deviceTypes:
           type: object
           additionalProperties:
@@ -1602,6 +1568,42 @@ components:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
