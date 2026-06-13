@@ -1,0 +1,316 @@
+name: integration-tests
+
+# Java integration test-suite, run against an all-in-one (AIO) server with the
+# integration test-data loaded (CN_PERSISTENCE_LOAD_TEST_DATA=true). Replaces the
+# jenkins.jans.io / docker-jans-monolith test runner.
+#
+# Flow per matrix leg (MYSQL / PGSQL):
+#   build persistence-loader + config-api (from this checkout) + assemble AIO
+#   -> run DB + AIO + a TLS terminating proxy
+#   -> extract live secrets from the AIO -> render profiles/<fqdn>/
+#   -> import the AIO cert into the JDK truststore
+#   -> full build with tests enabled (mvn install -Dcfg=<fqdn>) across all reactors
+#   -> publish results (step summary + artifact + PR check).
+
+on:
+  workflow_dispatch:
+    inputs:
+      persistence:
+        description: "Persistence backend(s) to test"
+        type: choice
+        options: ["BOTH", "MYSQL", "PGSQL"]
+        default: "BOTH"
+      aio_image:
+        description: "Prebuilt AIO image to test (leave empty to build from this checkout)"
+        type: string
+        default: ""
+      log_level:
+        description: "AIO log level (TRACE = detailed FILE logs to debug a failure; INFO = default, lower memory)"
+        type: choice
+        options: ["INFO", "TRACE"]
+        default: "INFO"
+  schedule:
+    - cron: "0 4 * * *"
+  pull_request:
+    paths:
+      - "docker-jans-persistence-loader/**"
+      - "docker-jans-config-api/**"
+      - "docker-jans-all-in-one/**"
+      - ".github/workflows/test-integration.yml"
+      - ".github/workflows/scripts/render_test_profiles.py"
+      - "automation/ci/run_aio_integration.sh"
+      - "jans-auth-server/**"
+      - "jans-scim/**"
+      - "jans-config-api/**"
+      - "jans-fido2/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Compute persistence matrix
+        id: matrix
+        run: |
+          # dispatch can target a single backend; PR/nightly run both (full MySQL + PostgreSQL coverage).
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "MYSQL" ]; then
+            echo 'matrix=["MYSQL"]' >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.persistence }}" = "PGSQL" ]; then
+            echo 'matrix=["PGSQL"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix=["MYSQL","PGSQL"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  integration:
+    needs: setup
+    runs-on: ubuntu-latest
+    # Gate PR runs behind manual approval (set required reviewers on the `integration-tests`
+    # environment in repo settings); nightly/dispatch are intentional and run ungated.
+    environment: ${{ github.event_name == 'pull_request' && 'integration-tests' || '' }}
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        persistence: ${{ fromJson(needs.setup.outputs.matrix) }}
+    env:
+      JANS_FQDN: aio.jans.io
+      DB_NAME: jans
+      DB_USER: jans
+      DB_PASSWORD: "Test1234#"
+      # config-api test client, pinned so the suite has deterministic credentials
+      CN_CONFIG_API_TEST_CLIENT_ID: "1801.00000000-0000-0000-0000-00000000c1ce"
+      CN_CONFIG_API_TEST_CLIENT_SECRET: "integration-test-config-api-secret"
+      CN_CONFIG_API_TEST_CLIENT_TRUSTED: "true"
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
+          persist-credentials: false
+
+      - name: Provision CI droplet
+        id: vm
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -euo pipefail
+          [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set (add a DigitalOcean PAT with droplet create/delete to the repo's Actions secrets)"; exit 1; }
+          # Ephemeral keypair: the public key is registered on the droplet at create time and both
+          # the key + droplet are destroyed in teardown, so no long-lived credential is persisted.
+          ssh-keygen -t rsa -b 4096 -N '' -f id_ci -q
+          key_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/account/keys" \
+            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+            -d "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                       --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
+            | jq -r '.ssh_key.id')
+          droplet_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/droplets" \
+            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+            -d "$(jq -n \
+                  --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                  --argjson key "$key_id" \
+                  --arg run "run-${{ github.run_id }}" \
+                  '{name:$name, region:"nyc1", size:"s-8vcpu-16gb", image:"ubuntu-22-04-x64",
+                    ssh_keys:[$key], tags:["jans-ci", $run]}')" \
+            | jq -r '.droplet.id')
+          {
+            echo "droplet_id=$droplet_id"
+            echo "key_id=$key_id"
+          } >> "$GITHUB_OUTPUT"
+          echo "[info] created droplet $droplet_id (key $key_id)"
+
+      - name: Wait for droplet IP + SSH
+        id: ip
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -euo pipefail
+          ip=""
+          for _ in $(seq 1 60); do
+            ip=$(curl -fsS "https://api.digitalocean.com/v2/droplets/${{ steps.vm.outputs.droplet_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" \
+              | jq -r '.droplet.networks.v4[]? | select(.type=="public") | .ip_address' | head -n1)
+            [ -n "$ip" ] && [ "$ip" != "null" ] && break
+            sleep 10
+          done
+          if [ -z "$ip" ] || [ "$ip" = "null" ]; then echo "::error::droplet never reported a public IP"; exit 1; fi
+          echo "[info] droplet IP: $ip"
+          for _ in $(seq 1 60); do
+            ssh -i id_ci -o StrictHostKeyChecking=no -o ConnectTimeout=10 "root@$ip" true 2>/dev/null && break
+            sleep 10
+          done
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "ip=$ip" >> "$GITHUB_OUTPUT"
+
+      - name: Bootstrap + run on the VM
+        env:
+          IP: ${{ steps.ip.outputs.ip }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SSH=(ssh -i id_ci -o StrictHostKeyChecking=no -o ServerAliveInterval=30 "root@$IP")
+          # Ship the checkout (incl. render script + maven-settings); docker is installed by the demo script.
+          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" ./ "root@$IP:/root/jans/"
+          # $JANS_FQDN expands on the runner; the host -> loopback alias lets the VM reach the AIO at
+          # https://$JANS_FQDN (traefik publishes 443 on the droplet).
+          "${SSH[@]}" "set -e
+            export DEBIAN_FRONTEND=noninteractive
+            cloud-init status --wait 2>/dev/null || true
+            apt-get -o DPkg::Lock::Timeout=600 update -qq
+            apt-get -o DPkg::Lock::Timeout=600 install -y -qq openjdk-17-jdk maven rsync
+            command -v docker >/dev/null 2>&1 || curl -fsSL https://get.docker.com | sh
+            git config --global --add safe.directory '*'
+            grep -q '$JANS_FQDN\$' /etc/hosts || echo '127.0.0.1 $JANS_FQDN' >> /etc/hosts"
+          # Drive the whole jans-side flow on the VM. Env is expanded HERE (runner) into the remote
+          # command so the matrix/secret values land in the VM shell.
+          "${SSH[@]}" "cd /root/jans && \
+            JANS_FQDN='$JANS_FQDN' \
+            JANS_PERSISTENCE='${{ matrix.persistence }}' \
+            AIO_IMAGE='${{ inputs.aio_image }}' \
+            LOG_LEVEL='${{ inputs.log_level }}' \
+            DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
+            CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
+            CN_CONFIG_API_TEST_CLIENT_SECRET='$CN_CONFIG_API_TEST_CLIENT_SECRET' \
+            CN_CONFIG_API_TEST_CLIENT_TRUSTED='$CN_CONFIG_API_TEST_CLIENT_TRUSTED' \
+            GITHUB_ACTOR='$GITHUB_ACTOR' JANS_TOKEN='$JANS_TOKEN' \
+            bash automation/ci/run_aio_integration.sh"
+
+      - name: Collect results from the VM
+        if: always()
+        env:
+          IP: ${{ steps.ip.outputs.ip }}
+        run: |
+          set -uo pipefail
+          [ -n "${IP:-}" ] || { echo "[warn] no VM IP; skipping result collection"; exit 0; }
+          scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/test-reports" ./ || true
+          scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/aio-logs" ./ || true
+
+      - name: Summarise results
+        if: always()
+        run: |
+          # De-duplicates TestNG RetryAnalyzer re-runs so the totals reflect distinct tests
+          # (comparable to Jenkins) rather than every retry attempt.
+          python3 .github/workflows/scripts/summarize_testng.py >> "$GITHUB_STEP_SUMMARY" || true
+        env:
+          MATRIX: ${{ matrix.persistence }}
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: test-reports-${{ matrix.persistence }}
+          path: test-reports/
+          if-no-files-found: warn
+          retention-days: 5
+
+      - name: Publish test report (PR check)
+        if: always()
+        continue-on-error: true
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        with:
+          name: integration-tests (${{ matrix.persistence }})
+          # surefire also emits JUnit-format TEST-*.xml; testng-results.xml feeds the step summary
+          path: "test-reports/*TEST-*.xml"
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: AIO key events
+        if: always()
+        run: |
+          # aio-logs/ was scp'd back from the VM; surface the key events in the step log.
+          echo "::group::supervisord status"; cat aio-logs/supervisord-status.txt 2>/dev/null || true; echo "::endgroup::"
+          echo "::group::AIO key events"
+          grep -aiE "jans-auth -|jans-scim -|jans-config-api -|jans-fido2 -|ERROR|Exception|FATAL|503|Unauthorized" aio-logs/aio-container.log 2>/dev/null | tail -n 200 || true
+          echo "::endgroup::"
+
+      - name: Gate on test outcome
+        if: always()
+        # Gates on distinct failures (retries de-duplicated), so flaky-but-passing tests don't trip it.
+        run: python3 .github/workflows/scripts/summarize_testng.py --gate
+
+      - name: Upload AIO logs
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: aio-logs-${{ matrix.persistence }}
+          path: aio-logs/
+          if-no-files-found: warn
+          retention-days: 5
+
+      - name: Tear down CI droplet
+        if: always()
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          # Best-effort: the reap job is the safety net if this step is skipped (e.g. cancellation).
+          if [ -n "${{ steps.vm.outputs.droplet_id }}" ]; then
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/droplets/${{ steps.vm.outputs.droplet_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
+          fi
+          if [ -n "${{ steps.vm.outputs.key_id }}" ]; then
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/${{ steps.vm.outputs.key_id }}" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
+          fi
+
+  # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
+  # droplet tagged run-<run_id> and any SSH key named jans-ci-<run_id>-*, scoped to this run only.
+  reap:
+    needs: integration
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Delete any leftover droplets for this run
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          curl -fsS -X DELETE \
+            "https://api.digitalocean.com/v2/droplets?tag_name=run-${{ github.run_id }}" \
+            -H "Authorization: Bearer ${DO_TOKEN}" || true
+      - name: Delete any leftover SSH keys for this run
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          # Keys can't be tagged; collect this run's keys (exact prefix jans-ci-<run_id>-) across all
+          # pages, then delete -- collect-then-delete so deletions don't shift the pages mid-walk.
+          prefix="jans-ci-${{ github.run_id }}-"
+          ids=""
+          page=1
+          while :; do
+            resp=$(curl -fsS "https://api.digitalocean.com/v2/account/keys?per_page=200&page=${page}" \
+              -H "Authorization: Bearer ${DO_TOKEN}") || break
+            ids="$ids $(jq -r --arg p "$prefix" '.ssh_keys[]? | select(.name | startswith($p)) | .id' <<<"$resp")"
+            jq -e '.links.pages.next' >/dev/null 2>&1 <<<"$resp" || break
+            page=$((page + 1))
+          done
+          for kid in $ids; do
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/$kid" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
+          done
