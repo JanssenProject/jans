@@ -161,7 +161,7 @@ use std::time::Duration;
 ///     :returns: A DataStoreStats object
 ///     :raises DataErrorCtx: If the operation fails
 #[derive(Clone)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct Cedarling {
     inner: cedarling::blocking::Cedarling,
 }

@@ -164,6 +164,10 @@ instance = Cedarling(bootstrap_config)
 # From a URL (.cjar or Lock Server)
 # In your bootstrap-config.yaml:
 # CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar"
+# # Optional: re-fetch the policy store every 60s and atomically swap on change.
+# # Default is 0 (load-once-at-startup). See "Refreshing the policy store" in
+# # docs/cedarling/reference/cedarling-properties.md for details.
+# CEDARLING_POLICY_STORE_REFRESH_INTERVAL: 60
 bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
 instance = Cedarling(bootstrap_config)
 
