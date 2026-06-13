@@ -298,18 +298,19 @@ jobs:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
         run: |
           set -uo pipefail
-          # Keys can't be tagged; page through them all and match this run's exact prefix jans-ci-<run_id>-
-          # (trailing - avoids matching another run whose id shares the numeric prefix).
+          # Keys can't be tagged; collect this run's keys (exact prefix jans-ci-<run_id>-) across all
+          # pages, then delete -- collect-then-delete so deletions don't shift the pages mid-walk.
           prefix="jans-ci-${{ github.run_id }}-"
+          ids=""
           page=1
           while :; do
             resp=$(curl -fsS "https://api.digitalocean.com/v2/account/keys?per_page=200&page=${page}" \
               -H "Authorization: Bearer ${DO_TOKEN}") || break
-            jq -r --arg p "$prefix" '.ssh_keys[]? | select(.name | startswith($p)) | .id' <<<"$resp" \
-              | while read -r kid; do
-                  [ -n "$kid" ] && curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/$kid" \
-                    -H "Authorization: Bearer ${DO_TOKEN}" || true
-                done
+            ids="$ids $(jq -r --arg p "$prefix" '.ssh_keys[]? | select(.name | startswith($p)) | .id' <<<"$resp")"
             jq -e '.links.pages.next' >/dev/null 2>&1 <<<"$resp" || break
             page=$((page + 1))
+          done
+          for kid in $ids; do
+            curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/$kid" \
+              -H "Authorization: Bearer ${DO_TOKEN}" || true
           done
