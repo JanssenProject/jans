@@ -25,6 +25,8 @@ public class ECDSAPublicKeyTest extends BaseTest {
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
         byte[] yBytes = Base64Util.base64urldecode(jwk.getString("y"));
 
+        assertEquals(xBytes.length, 32, "P-256 x must be exactly 32 bytes");
+        assertEquals(yBytes.length, 32, "P-256 y must be exactly 32 bytes");
         assertEquals(new BigInteger(1, xBytes), shortCoord, "P-256 x coordinate value must be preserved");
         assertEquals(new BigInteger(1, yBytes), shortCoord, "P-256 y coordinate value must be preserved");
     }
@@ -44,6 +46,8 @@ public class ECDSAPublicKeyTest extends BaseTest {
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
         byte[] yBytes = Base64Util.base64urldecode(jwk.getString("y"));
 
+        assertEquals(xBytes.length, 48, "P-384 x must be exactly 48 bytes");
+        assertEquals(yBytes.length, 48, "P-384 y must be exactly 48 bytes");
         assertEquals(new BigInteger(1, xBytes), shortCoord, "P-384 x coordinate value must be preserved");
         assertEquals(new BigInteger(1, yBytes), shortCoord, "P-384 y coordinate value must be preserved");
     }
@@ -63,6 +67,8 @@ public class ECDSAPublicKeyTest extends BaseTest {
         byte[] xBytes = Base64Util.base64urldecode(jwk.getString("x"));
         byte[] yBytes = Base64Util.base64urldecode(jwk.getString("y"));
 
+        assertEquals(xBytes.length, 66, "P-521 x must be exactly 66 bytes");
+        assertEquals(yBytes.length, 66, "P-521 y must be exactly 66 bytes");
         assertEquals(new BigInteger(1, xBytes), shortCoord, "P-521 x coordinate value must be preserved");
         assertEquals(new BigInteger(1, yBytes), shortCoord, "P-521 y coordinate value must be preserved");
     }
