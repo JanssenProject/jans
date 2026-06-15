@@ -1,6 +1,31 @@
 package cedarlingopa
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type EvaluationsSemantic string
+
+const (
+	ExecuteAll          EvaluationsSemantic = "execute_all"
+	DenyOnFirstDeny     EvaluationsSemantic = "deny_on_first_deny"
+	PermitOnFirstPermit EvaluationsSemantic = "permit_on_first_permit"
+)
+
+func (e *EvaluationsSemantic) UnMarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	switch EvaluationsSemantic(s) {
+	case ExecuteAll, DenyOnFirstDeny, PermitOnFirstPermit:
+		*e = EvaluationsSemantic(s)
+		return nil
+	default:
+		return fmt.Errorf("Invalid evaluation semantic %s", s)
+	}
+}
 
 type PDPMetadata struct {
 	PolicyDecisionPoint      string `json:"policy_decision_point"`
@@ -56,10 +81,15 @@ type MultipleEvaluationBase struct {
 	Context  map[string]any `json:"context,omitempty"`
 }
 
+type Option struct {
+	EvaluationSemantic EvaluationsSemantic `json:"evaluation_semantic,omitempty"`
+}
+
 type MultipleEvaluationRequest struct {
 	Subject    *Entity                  `json:"subject,omitempty"`
 	Resource   *Entity                  `json:"resource,omitempty"`
 	Action     *Action                  `json:"action,omitempty"`
 	Context    map[string]any           `json:"context,omitempty"`
 	Evaluation []MultipleEvaluationBase `json:"evaluation,omitempty"`
+	Options    *Option                  `json:"options,omitempty"`
 }

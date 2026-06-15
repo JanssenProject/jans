@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
-
-	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 )
 
 func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,32 +36,6 @@ func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
 		return
 	}
-}
-
-func createCedarlingRequestFromAuthZen(tokens_raw []byte, resource_raw []byte, action string, context map[string]any) (*cedarling_go.AuthorizeMultiIssuerRequest, error) {
-	var tokens TokenList
-	if err := json.Unmarshal(tokens_raw, &tokens); err != nil {
-		return nil, err
-	}
-	tokenEntities := []cedarling_go.TokenInput{}
-	for _, token := range tokens.Tokens {
-		new_token := cedarling_go.TokenInput{
-			Mapping: token.Mapping,
-			Payload: token.Payload,
-		}
-		tokenEntities = append(tokenEntities, new_token)
-	}
-	var resourceEntity cedarling_go.EntityData
-	if err := json.Unmarshal(resource_raw, &resourceEntity); err != nil {
-		return nil, err
-	}
-	cedarling_request := cedarling_go.AuthorizeMultiIssuerRequest{
-		Tokens:   tokenEntities,
-		Action:   action,
-		Resource: resourceEntity,
-		Context:  context,
-	}
-	return &cedarling_request, nil
 }
 
 func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Request) {

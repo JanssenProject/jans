@@ -106,6 +106,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	p.cedar = instance
 	p.manager.ExtraRoute("/.well-known/authzen-configuration", "metadata", p.MetaDataHandler)
 	p.manager.ExtraRoute("/access/v1/evaluation", "evaluation", p.AccessEvaluationHandler)
+	p.manager.ExtraRoute("/access/v1/evaluations", "evaluations", p.AccessEvaluationsHandler)
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
 	setGlobalInstance(p)
 	return nil
