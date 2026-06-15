@@ -28,6 +28,7 @@ import io.jans.shibboleth.model.config.profiles.common.RequestSigningRequirement
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
+import io.jans.shibboleth.model.rules.consistency.TrustConsistencyRules;
 import io.jans.shibboleth.model.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.model.util.TrustResult;
 
@@ -519,7 +520,7 @@ public class TrustRelationship {
         public TrustResult<TrustRelationship> build() {
 
             BuildContext build_context = createBuildContext();
-            TrustResult<Void> rules_enforcement_result = TrustRules.enforce(build_context);
+            TrustResult<Void> rules_enforcement_result = TrustConsistencyRules.enforce(build_context);
 
             if (rules_enforcement_result.isFailure()) {
                 

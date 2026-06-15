@@ -1,17 +1,15 @@
-package io.jans.shibboleth.model;
+package io.jans.shibboleth.model.rules.consistency;
 
 import java.util.List;
-
-import io.jans.shibboleth.model.rules.MetadataSourceCompatibilityRule;
-import io.jans.shibboleth.model.rules.RequiredFieldsRule;
+import io.jans.shibboleth.model.BuildContext;
 import io.jans.shibboleth.model.util.TrustResult;
 
-public class TrustRules {
+public class TrustConsistencyRules {
     
-    private TrustRules() {}
+    private TrustConsistencyRules() {}
 
     @FunctionalInterface
-    public interface TrustRule {
+    public interface TrustConsistencyRule {
 
         TrustResult<Void> check(BuildContext context);
     }
@@ -22,9 +20,9 @@ public class TrustRules {
         return enforce(context,defaultRules());
     }
 
-    public static TrustResult<Void> enforce(BuildContext context, List<TrustRule> rules) {
+    public static TrustResult<Void> enforce(BuildContext context, List<TrustConsistencyRule> rules) {
 
-        for (TrustRule rule : rules) {
+        for (TrustConsistencyRule rule : rules) {
             TrustResult<Void> result = rule.check(context);
             if(result.isFailure()) {
 
@@ -35,7 +33,7 @@ public class TrustRules {
         return TrustResult.success(null);
     }
 
-    private static final List<TrustRule> defaultRules() {
+    private static final List<TrustConsistencyRule> defaultRules() {
 
         return List.of(
             RequiredFieldsRule::check,

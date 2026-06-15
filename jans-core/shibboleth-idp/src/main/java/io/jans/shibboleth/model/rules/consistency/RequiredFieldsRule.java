@@ -1,4 +1,4 @@
-package io.jans.shibboleth.model.rules;
+package io.jans.shibboleth.model.rules.consistency;
 
 import io.jans.shibboleth.model.BuildContext;
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;

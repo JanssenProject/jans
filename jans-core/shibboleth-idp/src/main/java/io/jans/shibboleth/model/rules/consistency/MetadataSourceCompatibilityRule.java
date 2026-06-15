@@ -1,4 +1,4 @@
-package io.jans.shibboleth.model.rules;
+package io.jans.shibboleth.model.rules.consistency;
 
 import java.util.Objects;
 
