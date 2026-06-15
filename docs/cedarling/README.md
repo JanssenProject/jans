@@ -16,7 +16,7 @@ environments like databases, browser-based applications, mobile apps, API gatewa
 embedded devices. At less than 2M in size, it's small enough to load into your browser or
 mobile application. When embedded, the Cedarling avoids slow cloud policy decisions,
 enabling sub-millisecond performance. The Cedarling never fetches data to make a
-decision--this is a performance killer and would make the PDP unreliable. Much of the
+decision as this is a performance killer and would make the PDP unreliable. Much of the
 data needed for Cedarling authorization decisions is contained in the tokens (e.g. JWTs).
 It's also possible to push data into the Cedarling for additional context.
 
@@ -30,16 +30,16 @@ The Cedarling can be:
 
 ![](../assets/cedarling/cedarling-readme-01.jpg)
 
-The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP),
+In addition to being a library, the Cedarling is an embeddable Policy Decision Point (PDP),
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
-Janssen Lock Server to centralize collection of decision logs--a record of allowed or denied
+Janssen Lock Server to centralize collection of decision logs, which are a record of allowed or denied
 access to a capability. Lock Server can enable enterprises to perform threat detection and
 stream the logs to a SIEM or ITDR.
 
 The Cedarling supports JWT validation and claims mapping. Validation includes checking the
 signature against a list of trusted issuers, validating the contents of the token (e.g.
-check the `exp` and `nbf`), and checking if the JWT is active or revoked via the
+checking the `exp` and `nbf`), and checking if the JWT is active or revoked via the
 [OAuth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-19.html)
 specification. Claims mapping provides a mechanism to map data from the JWT payload to Cedar
 entities, making the data available for policy evaluation.
@@ -60,7 +60,7 @@ entities, making the data available for policy evaluation.
     language features.
 
 
-On initialization, the Cedarling loads a "policy store" -- a set of policies, a schema,
+On initialization, the Cedarling loads a "policy store", which is a set of policies, a schema,
 and a list of trusted token issuers. Policy stores are application-specific, meaning each
 store does **not** contain all policies and schema for all applications in your domain.
 Each policy store has unique policies and a schema needed only for one specific
@@ -70,18 +70,18 @@ application.
 
 At a high level, developers interact with the Cedarling using five core interfaces:
 
-* **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
-* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application-asserted principal.
-* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on JWT tokens from one or more issuers.
-* **Context Data API** (`data`) – Pushes external data into the evaluation context, making it available in Cedar policies through the `context.data` namespace.
-* **Logging** (`log`) – Retrieves decision and system logs for auditing. 
+* **Initialization** (`init`) - Loads the policy store and retrieves configuration settings.
+* **Authorization** (`authorize_unsigned`) - Evaluates policies with an application-asserted principal.
+* **Multi-Issuer Authorization** (`authorize_multi_issuer`) - Evaluates policies based on JWT tokens from one or more issuers.
+* **Context Data API** (`data`) - Pushes external data into the evaluation context, making it available in Cedar policies through the `context.data` namespace.
+* **Logging** (`log`) - Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the
 Cedarling to read its [bootstrap properties](./reference/cedarling-properties.md) and load its
 [policy store](./reference/cedarling-policy-store.md). If configured for JWT validation, the Cedarling
 will fetch the most recent issuer public keys and metadata.
 
-The `authorize_unsigned` method is used when the application asserts the principal identity directly. This is useful when JWTs have already been validated by the application, or when working with non-token based principals. It answers the question: "Is this action, on this resource, given this context, allowed for this principal?" The Cedarling returns the decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed.
+The `authorize_unsigned` method is used when the application asserts the principal identity directly. This is useful when JWTs have already been validated by the application, or when working with non-token based principals. It answers the question: "Is this action, on this resource, given this context, allowed for this principal?" The Cedarling returns the decision-*allow* or *deny*. If denied, the Cedarling returns "diagnostics"-additional context to clarify why the decision was not allowed.
 
 The `authorize_multi_issuer` method is designed for JWT-based authorization. Applications provide one or more JWT tokens, and the Cedarling validates each token, converts them to Cedar entities, and evaluates policies based on the token entities. This approach is useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
 
@@ -109,16 +109,15 @@ The following diagram is a high-level picture of the Cedarling components:
 TBAC helps developers implement security based on JWTs from trusted issuers like identity
 providers, hardware platforms, and federations.
 
-The Cedarling `authorize_multi_issuer` interface allows the developer to pass not one
-token, but several tokens--even if they are signed by different issuers. This enables
-the developer to assert not only the human identity, for example an `id_token`, but
+The Cedarling `authorize_multi_issuer` interface allows the developer to pass one or more tokens, even if they are signed by different issuers.
+This enables the developer to assert not only the human identity, for example an `id_token`, but
 other tokens like access tokens or transaction tokens, or whatever new kind of tokens
 may next evolve. The Cedarling answers this question: *"Given this bundle of tokens, is this action on this resource allowed in this context?"*
 Or you could say more simply, *"Does this bundle of tokens authorize this capability?"*
 
 ## Cedarling and Zero Trust
 
-Zero Trust is a modern security model that assumes no implicit trust—every request must be
+Zero Trust is a modern security model that assumes no implicit trust-every request must be
 explicitly authorized based on policies, identity, and context. The Cedarling enables
 end-to-end Zero Trust enforcement by embedding fine-grained authorization across the
 entire security stack, from client devices to backend services and databases.
@@ -166,10 +165,10 @@ hypothetical mobile application architecture:
 Traditional access control models assume network perimeters are secure, leading to
 excessive trust in internal components. The Cedarling aligns with Zero Trust by:
 
-- Eliminating implicit trust—each authorization decision is enforced based on real-time 
+- Eliminating implicit trust-each authorization decision is enforced based on real-time 
   policies.
 - Improving re-usability of policies across applications to enable multi-layer security
-- Ensuring consistent policies—from client devices to backend services and databases, 
+- Ensuring consistent policies-from client devices to backend services and databases, 
   enforcing the same security rules everywhere.
 
 ### Cedarling and Threat Detection
@@ -177,6 +176,7 @@ excessive trust in internal components. The Cedarling aligns with Zero Trust by:
 Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging
 every decision. These logs can be analyzed in a SIEM (Security Information and Event
 Management) system to detect:
+
 - Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized
   location).
 - Token misuse (e.g., an expired JWT being replayed).
@@ -193,8 +193,8 @@ explicitly authorized everywhere.
 !!! tip "Why is it "The Cedarling""
 
     In every system where it runs, the Cedarling becomes the guardian of policy, the 
-    gatekeeper of decisions. It’s lightweight, fast, and embedded close to the action—
-    evaluating access at the speed of the web. Like the kernel, the compiler, or the 
+    gatekeeper of decisions. It’s lightweight, fast, and embedded close to the action-evaluating 
+    access at the speed of the web. Like the kernel, the compiler, or the 
     firewall, it earns the definite article because it does something definite. It stands in 
     your stack, quiet but crucial, deciding who gets through. The Cedarling isn’t a library. 
     It’s a presence.
