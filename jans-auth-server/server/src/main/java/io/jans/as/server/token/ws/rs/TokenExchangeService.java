@@ -18,6 +18,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalIdentityAssertionService;
 import io.jans.as.server.service.external.ExternalTokenExchangeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -83,6 +84,9 @@ public class TokenExchangeService {
 
     @Inject
     private ExternalTokenExchangeService externalTokenExchangeService;
+
+    @Inject
+    private ExternalIdentityAssertionService externalIdentityAssertionService;
 
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
@@ -271,7 +275,15 @@ public class TokenExchangeService {
 
         // §4.3.3: MUST include granted resource and authorization_details in the issued ID-JAG
         final String idJagJwt = idJagService.issueIdJag(executionContext, subjectJwt, audience, scope, resource, authzDetailsParam);
-        return idJagService.buildTokenExchangeResponse(idJagJwt);
+        JSONObject response = idJagService.buildTokenExchangeResponse(idJagJwt);
+        final JSONObject responseClone = new JSONObject(response.toString());
+        if (externalIdentityAssertionService.externalModifyResponse(response, executionContext)) {
+            log.debug("Successfully ran identity-assertion script modifyResponse.");
+        } else {
+            response = responseClone;
+            log.trace("Reverted ID-JAG response: identity-assertion script modifyResponse returned false.");
+        }
+        return response;
     }
 
     public String createNewDeviceSecret(String sessionDn, Client client, String scope) {
