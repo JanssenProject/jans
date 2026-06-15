@@ -17,7 +17,7 @@ pub struct PolicyStoreConfig {
     pub source: PolicyStoreSource,
 
     /// Base refresh interval in seconds for URL-based policy store sources
-    /// (`CjarUrl`, `LockServer`). `0` disables background refresh and preserves
+    /// (`CjarUrl`, `LockServer`, `Uri`). `0` disables background refresh and preserves
     /// the load-once-at-startup behavior. Ignored for local sources. A server
     /// `Cache-Control: max-age` / `Expires` hint may *shorten* the next
     /// interval but never lengthens it.

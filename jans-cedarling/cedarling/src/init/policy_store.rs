@@ -14,7 +14,7 @@ use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{HttpClient, HttpClientError};
 
 // ZIP local-file-header magic bytes.
-const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
+pub(super) const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -43,9 +43,6 @@ pub enum PolicyStoreLoadError {
     /// Failed to load policy store from directory.
     #[error("Failed to load policy store from directory: {0}")]
     Directory(String),
-    /// Failed to detect policy store from an unresolved URI.
-    #[error("Failed to detect policy store source: {0}")]
-    UriDetection(String),
 }
 
 // LegacyAgamaPolicyStore contains the structure to accommodate several policies,
@@ -221,21 +218,11 @@ async fn load_policy_store_from_uri(
     let response = http_client.get_with_retry(uri).await?;
 
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
-    let content_type = response
-        .headers()
-        .get(reqwest::header::CONTENT_TYPE)
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("")
-        .to_owned();
 
     let bytes = http_client.read_response_capped(response).await?;
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
-    if (content_type.is_empty()
-        || content_type.contains("application/octet-stream")
-        || content_type.contains("application/zip"))
-        && bytes.starts_with(&ZIP_MAGIC)
-    {
+    if bytes.starts_with(&ZIP_MAGIC) {
         return Ok(LoadedPolicyStore {
             store: parse_cjar_bytes(&bytes, strict_schema_validation).await?,
             body_hash: Some(body_hash),

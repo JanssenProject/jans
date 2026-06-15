@@ -121,7 +121,6 @@ impl BootstrapConfig {
 /// Build [`PolicyStoreConfig`] from the three mutually-exclusive raw source
 /// fields (`CEDARLING_POLICY_STORE_LOCAL`, `_URI`, `_LOCAL_FN`).
 /// Returns an error if none or more than one are set, and also normalizes the
-/// URI case (`.cjar` suffix → archive source, otherwise Lock Server).
 fn build_policy_store_config(
     raw: &BootstrapConfigRaw,
 ) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
@@ -137,7 +136,7 @@ fn build_policy_store_config(
             source: PolicyStoreSource::Json(policy_store),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
         }),
-        // Case: get the policy store from a URI (auto-detect .cjar archives)
+        // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
