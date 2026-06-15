@@ -31,7 +31,7 @@ To load the policy store, one of the following properties must be set.
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
 - **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
-      - URLs ending in `.cjar` → loads as Cedar Archive
+      - URL points to an archive → loads as Cedar Archive (`.cjar`)
       - Other URLs → loads as legacy JSON from Lock Server
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
