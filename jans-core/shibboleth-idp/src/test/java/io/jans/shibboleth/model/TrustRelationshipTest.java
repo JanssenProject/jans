@@ -744,7 +744,12 @@ public class TrustRelationshipTest {
 
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
-        public void shouldTransitionToDraft_whenAllProfilesDisabled(TrustRelationship tr) {
+        @DisplayName(
+            "GIVEN a READY TrustRelationship with at least one active profile configuration " + 
+            "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
+            "THEN should transit to DRAFT and increment version "
+        )
+        public void shouldTransitionToDraft_whenAllProfilesDisabledFromReady(TrustRelationship tr) {
 
             assertThat(tr).isInReadyStatus();
             assertThat(tr).hasRealMetadataSource();
@@ -809,6 +814,29 @@ public class TrustRelationshipTest {
             assertThat(updated).isInDraftStatus();
             assertThat(updated).isVersion(currentversion);
         }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a READY TrustRelationship with a real metadata source " +
+            "WHEN updateMetadataSource() is called with NoMetadataSource " +
+            "THEN should transition to DRAFT and increment version " 
+        )
+        public void shouldTransitionToDraft_whenMetadataSourceSetToNoneFromReady(TrustRelationship tr) {
+
+            assertThat(tr).isInReadyStatus();
+            assertThat(tr).hasRealMetadataSource();
+            assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+        
     }
 
 }
