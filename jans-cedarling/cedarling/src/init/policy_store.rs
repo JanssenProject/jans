@@ -209,7 +209,7 @@ pub(crate) async fn load_policy_store(
     Ok(loaded)
 }
 
-/// Loads the policy store from a URI with content-type-based format detection.
+/// Loads the policy store from a URI with ZIP magic byte-based format detection.
 async fn load_policy_store_from_uri(
     uri: &str,
     http_client: &HttpClient,
