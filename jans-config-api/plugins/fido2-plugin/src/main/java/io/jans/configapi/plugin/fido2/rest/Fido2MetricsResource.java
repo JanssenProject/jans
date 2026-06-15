@@ -48,8 +48,6 @@ import org.slf4j.Logger;
 public class Fido2MetricsResource extends BaseResource {
 
     private static final String METRICS_DATE_FORMAT = "dd-MM-yyyy";
-    private static final String START_TIME = "Start time";
-    private static final String END_TIME = "End time";
     
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
     private static final String ALL_PARAM = "Search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}";
