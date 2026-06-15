@@ -110,20 +110,20 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual nature 
-            Arguments.of(individual,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
+            Arguments.of(individual,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
 
             //Aggregate nature
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
         );
     }
 
@@ -166,6 +166,25 @@ public class TrustRelationshipTest {
             //Aggregate Nature
             Arguments.of(aggregate,ReleasedAttributes.empty()),
             Arguments.of(individual,TrustRelationshipFixtures.sampleReleasedAttributes())
+        );
+    }
+
+    private static final Stream<Arguments> draftTrustRelationshipsWithAnActiveProfileAndRealMetadataSource() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithActiveProfile();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithActiveProfile();
+        return Stream.of(
+
+            //Individual Nature
+            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
+
+            //Aggregate Nature
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource())
         );
     }
 
@@ -538,5 +557,29 @@ public class TrustRelationshipTest {
             assertThat(cause.getFieldName()).isEqualTo("releasedAttributes");
         }
         
+    }
+
+    @Nested
+    @DisplayName("State Transitions -- DRAFT <-> READY Transitions")
+    public class DraftToReadyAndViceVersaTransitionsTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithAnActiveProfileAndRealMetadataSource")
+        @DisplayName(
+            "GIVEN a DRAFT TrustRelationship  with at least one active profile " +
+            "WHEN updateMetadataSource() is called with a no-NONE metadata source " +
+            "THEN the TrustRelationship should transition to READY state "
+        )
+        public void shouldTransitionToReady_whenMetadataSourceAddedWithActiveProfile(TrustRelationship tr,  MetadataSource source) {
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
+            assertThat(source.getType()).isNotEqualTo(MetadataSourceType.NONE);
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(updated).isInReadyStatus();
+        }
     }
 }

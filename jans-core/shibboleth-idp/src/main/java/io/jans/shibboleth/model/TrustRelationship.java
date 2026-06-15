@@ -28,6 +28,7 @@ import io.jans.shibboleth.model.config.profiles.common.RequestSigningRequirement
 import io.jans.shibboleth.model.core.*;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
+import io.jans.shibboleth.model.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
@@ -531,7 +532,7 @@ public class TrustRelationship {
                 }
             }
 
-            TrustRelationship candidate = createCandidateTrustRelationship();
+            TrustRelationship candidate = createCandidate();
 
             if(creatingNewInstance()) {
 
@@ -543,34 +544,35 @@ public class TrustRelationship {
                 return TrustResult.success(original);
             }
 
-            TrustRelationship final_trust_relationship = applyStateTransitions(candidate);
 
-            return TrustResult.success(final_trust_relationship.withIncrementedVersion());
+            return TrustResult.success(
+                applyStateTransitions(candidate).withIncrementedVersion()
+            );
         }
         
         private final BuildContext createBuildContext() {
 
-            return new BuildContext(
-                original, 
-                id, 
-                displayName, 
-                description,
-                nature, 
-                version, 
-                status, 
-                metadataSource, 
-                discoveredEntityIds, 
-                shibbolethSsoProfileConfiguration, 
-                saml2ArtifactResolutionProfileConfiguration, 
-                saml2AttributeQueryProfileConfiguration, 
-                saml2EcpProfileConfiguration, 
-                saml2SsoProfileConfiguration, 
-                saml2LogoutProfileConfiguration,
-                releasedAttributes
-            );
+            return new BuildContext (
+                    original,
+                    id,
+                    displayName,
+                    description,
+                    nature,
+                    version,
+                    status,
+                    metadataSource,
+                    discoveredEntityIds,
+                    shibbolethSsoProfileConfiguration,
+                    saml2ArtifactResolutionProfileConfiguration,
+                    saml2AttributeQueryProfileConfiguration,
+                    saml2EcpProfileConfiguration,
+                    saml2SsoProfileConfiguration,
+                    saml2LogoutProfileConfiguration,
+                    releasedAttributes
+                );
         }
 
-        private final TrustRelationship createCandidateTrustRelationship () {
+        private final TrustRelationship createCandidate () {
 
             return new TrustRelationship(
                 id,
@@ -590,6 +592,27 @@ public class TrustRelationship {
                 releasedAttributes
             );
 
+        }
+
+        private final TrustRelationship createCandidateWithNewStatus(TrustRelationship candidate, TrustStatus status) {
+
+            return new TrustRelationship(
+                candidate.id,
+                candidate.displayName,
+                candidate.description,
+                candidate.nature,
+                candidate.version,
+                status,
+                candidate.metadataSource,
+                candidate.discoveredEntityIds,
+                candidate.shibbolethSsoProfileConfiguration,
+                candidate.saml2ArtifactResolutionProfileConfiguration,
+                candidate.saml2AttributeQueryProfileConfiguration,
+                candidate.saml2EcpProfileConfiguration,
+                candidate.saml2SsoProfileConfiguration,
+                candidate.saml2LogoutProfileConfiguration,
+                candidate.releasedAttributes
+            );
         }
 
         private final boolean creatingNewInstance() {
@@ -620,6 +643,11 @@ public class TrustRelationship {
 
         private TrustRelationship applyStateTransitions(TrustRelationship candidate) {
 
+            TrustStatus newstatus = TrustTransitionRules.determineNewStatus(candidate);
+            if (newstatus!= null && newstatus != candidate.getStatus()) {
+
+                return createCandidateWithNewStatus(candidate,newstatus);
+            }
             return candidate;
         }
     }

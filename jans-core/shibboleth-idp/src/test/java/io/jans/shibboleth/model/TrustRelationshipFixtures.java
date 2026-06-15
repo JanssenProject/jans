@@ -45,6 +45,23 @@ public class TrustRelationshipFixtures {
         return TrustRelationship.create(displayName,description,TrustNature.AGGREGATE).getValue();
     }
 
+    public static final TrustRelationship sampleDraftIndividualTrustRelationshipWithActiveProfile() {
+
+        return TrustRelationship.from(sampleDraftIndividualTrustRelationship())
+            .withShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration())
+            .build()
+            .getValue();
+    }
+
+    
+    public static final TrustRelationship sampleDraftAggregateTrustRelationshipWithActiveProfile() {
+
+        return TrustRelationship.from(sampleDraftAggregateTrustRelationship())
+            .withSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration())
+            .build()
+            .getValue();
+    }
+
     public static final MetadataSource sampleFileMetadataSource() {
 
         return FileMetadataSource.of("/opt/gluu/metadata/sp_metadata.xml").getValue();
@@ -81,7 +98,7 @@ public class TrustRelationshipFixtures {
         return MdqMetadataSource.of(URI.create(mdq_base_url)).getValue();
     }
 
-    public static final ShibbolethSsoProfileConfiguration sampleShibbolethSsoProfileConfiguration() {
+    public static final ShibbolethSsoProfileConfiguration activeShibbolethSsoProfileConfiguration() {
 
         return ShibbolethSsoProfileConfiguration
             .from(SamlProfileConfigurationDefaults.shibbolethSso())
@@ -90,7 +107,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Saml2ArtifactResolutionProfileConfiguration sampleSaml2ArtifactResolutionProfileConfiguration() {
+    public static final Saml2ArtifactResolutionProfileConfiguration activeSaml2ArtifactResolutionProfileConfiguration() {
 
         return Saml2ArtifactResolutionProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
@@ -99,7 +116,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Saml2AttributeQueryProfileConfiguration sampleSaml2AttributeQueryProfileConfiguration() {
+    public static final Saml2AttributeQueryProfileConfiguration activeSaml2AttributeQueryProfileConfiguration() {
 
         return Saml2AttributeQueryProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2AttributeQuery())
@@ -108,7 +125,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Saml2EcpProfileConfiguration sampleSaml2EcpProfileConfiguration() {
+    public static final Saml2EcpProfileConfiguration activeSaml2EcpProfileConfiguration() {
 
         return Saml2EcpProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Ecp())
@@ -117,7 +134,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Saml2SsoProfileConfiguration sampleSaml2SsoProfileConfiguration() {
+    public static final Saml2SsoProfileConfiguration activeSaml2SsoProfileConfiguration() {
 
         return Saml2SsoProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Sso())
@@ -126,7 +143,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Saml2LogoutProfileConfiguration sampleSaml2LogoutProfileConfiguration() {
+    public static final Saml2LogoutProfileConfiguration activeSaml2LogoutProfileConfiguration() {
 
         return Saml2LogoutProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Logout())
