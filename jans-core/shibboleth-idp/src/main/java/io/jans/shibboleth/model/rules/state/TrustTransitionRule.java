@@ -23,7 +23,7 @@ public class TrustTransitionRule {
 
     public boolean matches(TrustRelationship candidate) {
 
-        if (candidate == null || from == null) {
+        if (from == null || to == null) {
 
             return false;
         }

@@ -266,7 +266,8 @@ public class TrustRelationship {
             && saml2AttributeQueryProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
             && saml2ArtifactResolutionProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
             && saml2EcpProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2SsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE;
+            && saml2SsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
+            && saml2LogoutProfileConfiguration.getStatus() == ProfileStatus.INACTIVE;
     }
 
     public boolean hasNoReleasedAttributes() {
@@ -545,9 +546,15 @@ public class TrustRelationship {
                 return TrustResult.success(original);
             }
 
+            TrustResult<TrustRelationship> updatedcandidate = applyStateTransitions(candidate);
+
+            if (updatedcandidate.isFailure()) {
+                TrustError error= DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class,updatedcandidate.getError());
+                return TrustResult.failure(error);
+            }
 
             return TrustResult.success(
-                applyStateTransitions(candidate).withIncrementedVersion()
+                updatedcandidate.getValue().withIncrementedVersion()
             );
         }
         
@@ -642,14 +649,19 @@ public class TrustRelationship {
                 && Objects.equals(original.releasedAttributes,candidate.releasedAttributes);
         }
 
-        private TrustRelationship applyStateTransitions(TrustRelationship candidate) {
+        private TrustResult<TrustRelationship> applyStateTransitions(TrustRelationship candidate) {
 
-            TrustStatus newstatus = TrustTransitionRules.determineNewStatus(candidate);
-            if (newstatus!= null && newstatus != candidate.getStatus()) {
+            TrustResult<TrustStatus> newstatus = TrustTransitionRules.determineNewStatus(candidate);
+            if (newstatus.isFailure()) {
 
-                return createCandidateWithNewStatus(candidate,newstatus);
+                return TrustResult.failure(newstatus.getError());
             }
-            return candidate;
+
+            if (newstatus.getValue() != candidate.getStatus()) {
+
+                return TrustResult.success(createCandidateWithNewStatus(candidate,newstatus.getValue()));
+            }
+            return TrustResult.success(candidate);
         }
     }
 }

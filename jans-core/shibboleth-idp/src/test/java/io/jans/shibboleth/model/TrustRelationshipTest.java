@@ -152,7 +152,6 @@ public class TrustRelationshipTest {
             Arguments.of(aggregate,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
         );
     }
-    
 
     private static final Stream<Arguments> draftTrustRelationshipsAndReleasedAttributes() {
 
@@ -218,6 +217,88 @@ public class TrustRelationshipTest {
                 TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),
                 TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),
                 ProfileType.SAML2_ECP
+            )
+        );
+    }
+
+    private static final Stream<Arguments> readyTrustRelationshipsOfAllNatures() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
+        
+        return Stream.of(
+
+            //Individual TrustRelationships
+
+            Arguments.of(
+                individual.updateShibbolethSsoProfileConfiguration(
+                    TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration()
+                ).getValue()
+            ),
+            Arguments.of(
+                individual.updateSaml2ArtifactResolutionProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration()
+                ).getValue()
+            ),
+            Arguments.of(
+                individual.updateSaml2AttributeQueryProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration()
+                ).getValue()
+            ),
+
+            Arguments.of(
+                individual.updateSaml2EcpProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration()
+                ).getValue()
+            ),
+
+            Arguments.of(
+                individual.updateSaml2SsoProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration()
+                ).getValue()
+            ),
+
+            Arguments.of(
+                individual.updateSaml2LogoutProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration()
+                ).getValue()
+            ),
+
+            //Aggregate TrustRelationships
+            Arguments.of(
+                aggregate.updateShibbolethSsoProfileConfiguration(
+                    TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration()
+                ).getValue()
+            ),
+            
+            Arguments.of(
+                aggregate.updateSaml2ArtifactResolutionProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration()
+                ).getValue()
+            ),
+            
+            Arguments.of(
+                aggregate.updateSaml2AttributeQueryProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration()
+                ).getValue()
+            ),
+            
+            Arguments.of(
+                aggregate.updateSaml2EcpProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration()
+                ).getValue()
+            ),
+            
+            Arguments.of(
+                aggregate.updateSaml2SsoProfileConfiguration(
+                    TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration()
+                ).getValue()
+            ),
+            
+            Arguments.of(
+                aggregate.updateSaml2LogoutProfileConfiguration(
+                     TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration()
+                ).getValue()
             )
         );
     }
@@ -659,6 +740,74 @@ public class TrustRelationshipTest {
             TrustRelationship updated = result.getValue();
             assertThat(updated).isInReadyStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
+        public void shouldTransitionToDraft_whenAllProfilesDisabled(TrustRelationship tr) {
+
+            assertThat(tr).isInReadyStatus();
+            assertThat(tr).hasRealMetadataSource();
+            assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
+
+            TrustRelationship updated = tr;
+            Version currentversion =  tr.getVersion();
+            if( updated.getShibbolethSsoProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateShibbolethSsoProfileConfiguration(
+                    ShibbolethSsoProfileConfiguration.from(updated.getShibbolethSsoProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            if ( updated.getSaml2ArtifactResolutionProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateSaml2ArtifactResolutionProfileConfiguration(
+                    Saml2ArtifactResolutionProfileConfiguration.from(updated.getSaml2ArtifactResolutionProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            if ( updated.getSaml2AttributeQueryProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateSaml2AttributeQueryProfileConfiguration(
+                    Saml2AttributeQueryProfileConfiguration.from(updated.getSaml2AttributeQueryProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            if ( updated.getSaml2EcpProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateSaml2EcpProfileConfiguration(
+                    Saml2EcpProfileConfiguration.from(updated.getSaml2EcpProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            if ( updated.getSaml2SsoProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateSaml2SsoProfileConfiguration(
+                    Saml2SsoProfileConfiguration.from(updated.getSaml2SsoProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            if ( updated.getSaml2LogoutProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ) {
+
+                updated = updated.updateSaml2LogoutProfileConfiguration(
+                    Saml2LogoutProfileConfiguration.from(updated.getSaml2LogoutProfileConfiguration())
+                        .status(ProfileStatus.INACTIVE).build().getValue()
+                ).getValue();
+                currentversion = currentversion.next();
+            }
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(currentversion);
         }
     }
 
