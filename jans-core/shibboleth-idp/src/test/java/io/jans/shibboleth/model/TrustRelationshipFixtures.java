@@ -62,6 +62,20 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final TrustRelationship sampleDraftIndividualTrustRelationshipWithRealMetadataSource() {
+
+        return sampleDraftIndividualTrustRelationship()
+            .updateMetadataSource(sampleFileMetadataSource())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleDraftAggregateTrustRelationshipWithRealMetadataSource() {
+
+        return sampleDraftAggregateTrustRelationship()
+            .updateMetadataSource(sampleUriMetadataSource())
+            .getValue();
+    }
+
     public static final MetadataSource sampleFileMetadataSource() {
 
         return FileMetadataSource.of("/opt/gluu/metadata/sp_metadata.xml").getValue();

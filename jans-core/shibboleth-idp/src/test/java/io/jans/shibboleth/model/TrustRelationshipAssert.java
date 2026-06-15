@@ -166,6 +166,17 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
+    public TrustRelationshipAssert hasRealMetadataSource() {
+
+        isNotNull();
+        if(actual.hasNoMetadataSource()) {
+
+            failWithMessage("TrustRelationship has no real metadata source (non-NONE).");
+        }
+        
+        return this;
+    }
+
     public TrustRelationshipAssert hasNoDiscoveredEntityIds() {
 
         isNotNull();

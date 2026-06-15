@@ -51,8 +51,20 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
         if (commonconfig.getStatus() != ProfileStatus.INACTIVE ) {
 
-            failWithMessage("Profile configuration is  <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.INACTIVE);
+            failWithMessage("Profile configuration status is  <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.INACTIVE);
         }
+        return this;
+    }
+
+    public ProfileConfigurationAssert isActive() {
+
+        isNotNull();
+        hasProfileConfigurationCapabilities(CommonConfigurationCapable.class);
+        CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
+        if (commonconfig.getStatus() != ProfileStatus.ACTIVE ) {
+            failWithMessage("Profile configuration status is <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.ACTIVE);
+        }
+
         return this;
     }
 

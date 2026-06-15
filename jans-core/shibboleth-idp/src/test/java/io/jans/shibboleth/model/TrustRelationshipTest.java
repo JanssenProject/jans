@@ -39,6 +39,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static io.jans.shibboleth.model.TrustRelationshipAssert.assertThat;
+import static io.jans.shibboleth.model.config.profiles.ProfileConfigurationAssert.assertThat;
 
 
 
@@ -185,6 +186,39 @@ public class TrustRelationshipTest {
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
             Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource())
+        );
+    }
+
+    private static final Stream<Arguments> draftTrustRelationshipsWithARealMetadataSource() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
+
+        return Stream.of(
+
+            //Individual TrustRelationship
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),
+                TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),
+                ProfileType.SHIBBOLETH_SSO
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),
+                TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),
+                ProfileType.SAML2_ARTIFACT_RESOLUTION
+            ),
+
+            //Aggregate TrustRelationship
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),
+                TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),
+                ProfileType.SAML2_SSO
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),
+                TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),
+                ProfileType.SAML2_ECP
+            )
         );
     }
 
@@ -568,7 +602,7 @@ public class TrustRelationshipTest {
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship  with at least one active profile " +
             "WHEN updateMetadataSource() is called with a no-NONE metadata source " +
-            "THEN the TrustRelationship should transition to READY state "
+            "THEN the TrustRelationship should transition to READY state AND increment version "
         )
         public void shouldTransitionToReady_whenMetadataSourceAddedWithActiveProfile(TrustRelationship tr,  MetadataSource source) {
 
@@ -580,6 +614,52 @@ public class TrustRelationshipTest {
             assertThat(result.isSuccess()).isTrue();
             TrustRelationship updated = result.getValue();
             assertThat(updated).isInReadyStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithARealMetadataSource")
+        @DisplayName(
+            "GIVEN a DRAFT TrustRelationship with a REAL(non-NONE) metadata source " +
+            "WHEN updateXXXProfileConfiguration is called with an ACTIVE profile configuration " +
+            "THEN the TrustRelationship should transition to READY status AND increment version "
+        )
+        public void shouldTransitionToReady_whenProfileConfigurationEnabledWithRealMetadataSource(TrustRelationship tr, Object profileconfig, ProfileType profiletype) {
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(tr).hasRealMetadataSource();
+            assertThat(profileconfig,profiletype).isActive();
+
+            TrustResult<TrustRelationship> result = null;
+            switch(profiletype) {
+                case SHIBBOLETH_SSO:
+                    result = tr.updateShibbolethSsoProfileConfiguration((ShibbolethSsoProfileConfiguration)profileconfig);
+                    break;
+                case SAML2_ATTRIBUTE_QUERY:
+                    result = tr.updateSaml2AttributeQueryProfileConfiguration((Saml2AttributeQueryProfileConfiguration)profileconfig);
+                    break;
+                case SAML2_ARTIFACT_RESOLUTION:
+                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration((Saml2ArtifactResolutionProfileConfiguration)profileconfig);
+                    break;
+                case SAML2_ECP:
+                    result = tr.updateSaml2EcpProfileConfiguration((Saml2EcpProfileConfiguration)profileconfig);
+                    break;
+                case SAML2_SSO:
+                    result = tr.updateSaml2SsoProfileConfiguration((Saml2SsoProfileConfiguration)profileconfig);
+                    break;
+                case SAML2_LOGOUT:
+                    result = tr.updateSaml2LogoutProfileConfiguration((Saml2LogoutProfileConfiguration)profileconfig);
+                    break;
+                default:
+                    fail("Profile type '%s' unsupported in tests",profiletype);
+                    break;
+            }
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(updated).isInReadyStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
         }
     }
+
 }
