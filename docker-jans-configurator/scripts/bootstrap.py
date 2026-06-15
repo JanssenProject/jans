@@ -212,7 +212,7 @@ class CtxGenerator:
         # default exp = 48 hours + token lifetime (in hour)
         exp = int(self.configmap_params["init_keys_exp"] + (3600 / 3600))
 
-        _, err, retcode = generate_openid_keys_hourly(
+        out, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),
             f"{CERTS_DIR}/auth-keys.jks",
             f"{CERTS_DIR}/auth-keys.json",
@@ -222,7 +222,8 @@ class CtxGenerator:
             enc_keys=self.configmap_params["auth_enc_keys"],
         )
         if retcode != 0:
-            logger.error("Unable to generate auth keys; reason=%s", err)
+            err = err or out
+            logger.error("Unable to generate auth keys; reason=%s", err.decode())
             raise click.Abort()
 
         self.set_secret(

@@ -68,7 +68,7 @@ public class JwtUtil {
         // 2. Validate Token
         // 3. Validate Issuer
         // 4. Retrieve Auth Server JSON Web Keys - jwks_uri"
-        // :"https://jenkins-config-api.gluu.org/jans-auth/restv1/jwks",
+        // :"https://localhost/jans-auth/restv1/jwks",
         // 5. Verify the signature used to sign the access token
         // 6. Verify the scopes
 
@@ -141,7 +141,7 @@ public class JwtUtil {
         // 2. Validate Token
         // 3. Validate Issuer
         // 4. Retrieve Auth Server JSON Web Keys - jwks_uri"
-        // :"https://jenkins-config-api.gluu.org/jans-auth/restv1/jwks",
+        // :"https://localhost/jans-auth/restv1/jwks",
         // 5. Verify the signature used to sign the access token
         // 6. Verify the scopes
 
