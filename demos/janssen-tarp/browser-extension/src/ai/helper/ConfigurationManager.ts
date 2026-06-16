@@ -32,6 +32,21 @@ export default class ConfigurationManager {
     return result.data!;
   }
 
+  static async getOllamaBaseUrl(): Promise<string> {
+    const result = await StorageHelper.get<string>(
+      STORAGE_KEYS.OLLAMA_BASE_URL,
+      DEFAULT_VALUES.OLLAMA_BASE_URL
+    );
+    return result.data ?? DEFAULT_VALUES.OLLAMA_BASE_URL;
+  }
+
+  static async updateOllamaBaseUrl(newUrl: string): Promise<void> {
+    const result = await StorageHelper.set(STORAGE_KEYS.OLLAMA_BASE_URL, newUrl);
+    if (!result.success) {
+      throw new Error(`Failed to update Ollama base URL: ${result.error}`);
+    }
+  }
+
   static async getCodeVerifier(): Promise<string> {
     const result = await StorageHelper.get<string>(STORAGE_KEYS.CODE_VERIFIER, "");
     return result.data!;
