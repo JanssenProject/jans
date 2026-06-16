@@ -1571,31 +1571,10 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationAvgDuration:
+        authenticationSuccessRate:
           type: number
           format: double
-        period:
-          type: string
-        registrationSuccessRate:
+        authenticationAvgDuration:
           type: number
           format: double
         metricsData:
@@ -1615,15 +1594,36 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        authenticationFailures:
+        registrationAttempts:
           type: integer
           format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationFailures:
+          type: integer
+          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         registrationAvgDuration:
           type: number
           format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        period:
+          type: string
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
