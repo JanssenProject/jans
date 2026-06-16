@@ -2,7 +2,7 @@ import { before, after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { spawn, ChildProcess } from "node:child_process";
 import http from "node:http";
-import { AddressInfo } from "node:net";
+import { AddressInfo, createServer } from "node:net";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -89,13 +89,24 @@ async function waitForHealth(url: string, attempts = 50): Promise<void> {
   throw new Error("Server did not become healthy in time");
 }
 
+async function getFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const s = createServer();
+    s.listen(0, "127.0.0.1", () => {
+      const port = (s.address() as AddressInfo).port;
+      s.close((err) => (err ? reject(err) : resolve(port)));
+    });
+    s.on("error", reject);
+  });
+}
+
 // --- Lifecycle --------------------------------------------------------------
 
 before(async () => {
   ({ server: mockOidc, issuer } = await startMockOidc());
 
   tmpDir = mkdtempSync(path.join(tmpdir(), "mcp-test-"));
-  const port = 3100 + Math.floor((mockOidc.address() as AddressInfo).port % 800);
+  const port = await getFreePort();
   baseUrl = `http://127.0.0.1:${port}`;
 
   serverProc = spawn("node", ["dist/server.js"], {
@@ -111,9 +122,14 @@ before(async () => {
   await waitForHealth(baseUrl);
 });
 
-after(() => {
-  serverProc?.kill();
-  mockOidc?.close();
+after(async () => {
+  if (serverProc && serverProc.exitCode === null) {
+    serverProc.kill();
+    await new Promise<void>((resolve) => serverProc.once("exit", () => resolve()));
+  }
+  if (mockOidc?.listening) {
+    await new Promise<void>((resolve) => mockOidc.close(() => resolve()));
+  }
   if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
 });
 
