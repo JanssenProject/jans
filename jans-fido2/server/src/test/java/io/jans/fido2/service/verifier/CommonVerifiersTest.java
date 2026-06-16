@@ -474,7 +474,7 @@ class CommonVerifiersTest {
 
     @Test
     void verifyClientJSONTypeIsGet_validValues_valid() {
-        JsonNode clientJsonNode = mapper.createObjectNode().put("webauthn.get", "TEST-webauthn.get");
+        JsonNode clientJsonNode = mapper.createObjectNode().put("type", "webauthn.get");
 
         commonVerifiers.verifyClientJSONTypeIsGet(clientJsonNode);
     }
@@ -493,12 +493,27 @@ class CommonVerifiersTest {
     }
 
     @Test
+    void verifyClientJSONTypeIsGet_ifTypeIsWebauthnCreate_rejected() {
+        // CONF-07: an assertion clientData.type other than "webauthn.get" must be rejected.
+        ObjectNode clientJsonNode = mapper.createObjectNode();
+        clientJsonNode.put("type", "webauthn.create");
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("wrong type").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONTypeIsGet(clientJsonNode));
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
     void verifyClientJSONTypeIsGet1_ifTypeNotFound_fido2RuntimeException() {
         JsonNode clientJsonNode = mock(JsonNode.class);
         String type = "TEST-type";
-        when(clientJsonNode.has("type")).thenReturn(false);
+        when(clientJsonNode.hasNonNull("type")).thenReturn(false);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        assertDoesNotThrow(() -> commonVerifiers.verifyClientJSONType(clientJsonNode, type));
+        // FIDO2 conformance (CONF-07): an absent clientData.type must be rejected, not ignored.
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONType(clientJsonNode, type));
+        assertNotNull(ex);
+        assertEquals(400, ex.getResponse().getStatus());
         verify(clientJsonNode, never()).get("type");
     }
 
@@ -506,7 +521,7 @@ class CommonVerifiersTest {
     void verifyClientJSONTypeIsGet1_ifClientJsonNodeHasTypeAndEquals_valid() {
         JsonNode clientJsonNode = mock(JsonNode.class);
         String type = "TEST-type";
-        when(clientJsonNode.has("type")).thenReturn(true);
+        when(clientJsonNode.hasNonNull("type")).thenReturn(true);
         when(clientJsonNode.get("type")).thenReturn(new TextNode(type));
 
         commonVerifiers.verifyClientJSONType(clientJsonNode, type);
@@ -518,6 +533,26 @@ class CommonVerifiersTest {
         clientJsonNode.put("type", "webauthn.create");
 
         commonVerifiers.verifyClientJSONTypeIsCreate(clientJsonNode);
+    }
+
+    @Test
+    void verifyClientJSONTypeIsCreate_ifTypeAbsent_throws() {
+        // CONF-07 (attestation mirror): registration clientData must carry type "webauthn.create".
+        ObjectNode clientJsonNode = mapper.createObjectNode();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("missing type").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONTypeIsCreate(clientJsonNode));
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSONTypeIsCreate_ifTypeIsNotCreate_throws() {
+        ObjectNode clientJsonNode = mapper.createObjectNode();
+        clientJsonNode.put("type", "webauthn.get");
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("wrong type").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONTypeIsCreate(clientJsonNode));
+        assertEquals(400, ex.getResponse().getStatus());
     }
 
     @Test

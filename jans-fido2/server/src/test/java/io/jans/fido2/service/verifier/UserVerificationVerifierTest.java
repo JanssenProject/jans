@@ -43,6 +43,34 @@ class UserVerificationVerifierTest {
     }
 
     @Test
+    void verifyUserPresent_ifUpBitNotSetButUvSet_rejected() {
+        // CONF-06: User-Present must be enforced independently of UV. flags 0x04 = UV set, UP clear.
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{4});
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyUserPresent(authData));
+        assertEquals("User not present", ex.getMessage());
+    }
+
+    @Test
+    void verifyUserVerified_ifUvBitSet_true() {
+        // CONF-08 regression guard: UV flag is 0x04. The old check (flags & 0x04) == 1 could never be
+        // true; the corrected check (flags & 0x04) != 0 must return true when the UV bit is set.
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{4});
+
+        assertTrue(userVerificationVerifier.verifyUserVerified(authData));
+    }
+
+    @Test
+    void verifyUserVerified_ifUvBitNotSet_false() {
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{0});
+
+        assertFalse(userVerificationVerifier.verifyUserVerified(authData));
+    }
+
+    @Test
     void verifyUserVerificationOption_ifUserVerificationIsRequired_valid() {
         AuthData authData = mock(AuthData.class);
         UserVerification userVerification = UserVerification.required;
