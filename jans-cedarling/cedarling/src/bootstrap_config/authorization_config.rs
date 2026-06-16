@@ -11,12 +11,19 @@ pub struct AuthorizationConfig {
     /// Claim name used for decision logging (e.g. which JWT claim identifies the token).
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in bootstrap properties documentation.
     pub decision_log_default_jwt_id: String,
+
+    /// Whether to enforce Cedar schema validation.
+    ///
+    /// When `true` (default), a schema is required and policies/entities are validated
+    /// against it. When `false`, Cedarling runs without schema-based validation.
+    pub strict_schema_validation: bool,
 }
 
 impl Default for AuthorizationConfig {
     fn default() -> Self {
         Self {
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
         }
     }
 }

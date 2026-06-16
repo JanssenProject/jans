@@ -135,8 +135,8 @@ pub(crate) fn load_policy_store_archive_bytes(
 pub(crate) struct LoadedPolicyStore {
     /// Policy store metadata
     pub metadata: PolicyStoreMetadata,
-    /// Raw schema content
-    pub schema: String,
+    /// Raw schema content (optional — absent when running without schema)
+    pub schema: Option<String>,
     /// Policy files content (filename -> content)
     pub policies: Vec<PolicyFile>,
     /// Template files content (filename -> content)
@@ -235,14 +235,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             .into());
         }
 
-        let schema_path = Self::join_path(dir, "schema.cedarschema");
-        if !self.vfs.exists(&schema_path) {
-            return Err(ValidationError::MissingRequiredFile {
-                file: "schema.cedarschema".to_string(),
-            }
-            .into());
-        }
-
         // Check for required directories
         let policies_dir = Self::join_path(dir, "policies");
         if !self.vfs.exists(&policies_dir) {
@@ -280,21 +272,22 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
     }
 
-    /// Load schema from schema.cedarschema file.
-    fn load_schema(&self, dir: &str) -> Result<String, PolicyStoreError> {
+    /// Load schema from schema.cedarschema file. Returns `None` if file does not exist.
+    fn load_schema(&self, dir: &str) -> Result<Option<String>, PolicyStoreError> {
         let schema_path = Self::join_path(dir, "schema.cedarschema");
-        let bytes =
-            self.vfs
-                .read_file(&schema_path)
-                .map_err(|source| PolicyStoreError::FileReadError {
+        match self.vfs.read_file(&schema_path) {
+            Ok(bytes) => String::from_utf8(bytes)
+                .map(Some)
+                .map_err(|e| PolicyStoreError::FileReadError {
                     path: schema_path.clone(),
-                    source,
-                })?;
-
-        String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
-            path: schema_path.clone(),
-            source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
-        })
+                    source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                }),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(source) => Err(PolicyStoreError::FileReadError {
+                path: schema_path.clone(),
+                source,
+            }),
+        }
     }
 
     /// Load all policy files from policies directory.
