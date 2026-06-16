@@ -1788,6 +1788,11 @@ paths:
                   description: Token Exchange script dns
                   items:
                     type: string
+                id_jag_script_dns:
+                  type: array
+                  description: Identity Assertion (ID-JAG) script dns
+                  items:
+                    type: string
                 consent_gathering_script_dns:
                   type: array
                   description: Consent Gathering script dns
@@ -2247,6 +2252,11 @@ paths:
                 token_exchange_script_dns:
                   type: array
                   description: Token Exchange script dns
+                  items:
+                    type: string
+                id_jag_script_dns:
+                  type: array
+                  description: Identity Assertion (ID-JAG) script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
