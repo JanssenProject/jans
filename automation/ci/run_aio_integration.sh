@@ -56,6 +56,7 @@ trap collect_diag EXIT
 echo "::group::build cedarling native lib"
 set +e
 export DEBIAN_FRONTEND=noninteractive
+command -v cc     >/dev/null 2>&1 || apt-get -o DPkg::Lock::Timeout=600 install -y -qq build-essential pkg-config libssl-dev
 command -v protoc >/dev/null 2>&1 || apt-get -o DPkg::Lock::Timeout=600 install -y -qq protobuf-compiler
 command -v cargo  >/dev/null 2>&1 || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >/dev/null
 export PATH="$HOME/.cargo/bin:$PATH"
