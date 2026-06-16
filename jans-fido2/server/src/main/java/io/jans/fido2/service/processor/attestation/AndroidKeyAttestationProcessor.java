@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -41,6 +40,7 @@ import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import javax.net.ssl.X509TrustManager;
 
 /**
@@ -204,9 +204,11 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
 
             // 4b. origin == GENERATED and purpose contains SIGN, in the TEE list (fall back to software).
             verifyOriginAndPurpose(teeEnforced, softwareEnforced);
-        } catch (Fido2RuntimeException e) {
+        } catch (WebApplicationException e) {
+            // Specific rejections above already carry the ANDROID_KEY_ERROR envelope — preserve them.
             throw e;
         } catch (RuntimeException e) {
+            // Genuine ASN.1/parse failures (ClassCastException, NPE, etc.) are reported as a parse error.
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_KEY_ERROR,
                     "Failed to parse the Android key-description extension: " + e.getMessage());
         }
