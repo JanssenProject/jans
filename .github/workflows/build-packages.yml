@@ -1766,7 +1766,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${TARGET_TAG}"
           else
-            VERSION="${GITHUB_REF_NAME}"
+            VERSION="${{ github.event.workflow_run.head_branch }}"
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
@@ -1821,7 +1821,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${TARGET_TAG}"
           else
-            VERSION="${GITHUB_REF_NAME}"
+            VERSION="${{ github.event.workflow_run.head_branch }}"
           fi
 
           BASE="${{ steps.stage.outputs.base }}"
@@ -1864,7 +1864,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
       - name: Download cedarling_pg digest artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
