@@ -76,12 +76,6 @@ export const LLM_PROVIDERS: LLMProvider[] = [
       "API key should start with 'sk-ant-' and be at least 40 characters",
     models: [
       {
-        value: "claude-fable-5",
-        label: "Claude Fable 5",
-        description:
-          "Most capable model for demanding reasoning and long-horizon agentic work",
-      },
-      {
         value: "claude-opus-4-8",
         label: "Claude Opus 4.8",
         description:

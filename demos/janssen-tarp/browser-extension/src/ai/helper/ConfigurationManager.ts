@@ -37,11 +37,14 @@ export default class ConfigurationManager {
       STORAGE_KEYS.OLLAMA_BASE_URL,
       DEFAULT_VALUES.OLLAMA_BASE_URL
     );
-    return result.data ?? DEFAULT_VALUES.OLLAMA_BASE_URL;
+    const saved = (result.data ?? '').trim();
+    return saved || DEFAULT_VALUES.OLLAMA_BASE_URL;
   }
 
   static async updateOllamaBaseUrl(newUrl: string): Promise<void> {
-    const result = await StorageHelper.set(STORAGE_KEYS.OLLAMA_BASE_URL, newUrl);
+    const normalized = newUrl.trim();
+    const valueToStore = normalized || DEFAULT_VALUES.OLLAMA_BASE_URL;
+    const result = await StorageHelper.set(STORAGE_KEYS.OLLAMA_BASE_URL, valueToStore);
     if (!result.success) {
       throw new Error(`Failed to update Ollama base URL: ${result.error}`);
     }

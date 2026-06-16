@@ -51,13 +51,23 @@ export class ClaudeClient implements LLMClient {
       input_schema: tool.function.parameters
     })) as Anthropic.Tool[] | undefined;
 
+    const anthropicTools =
+      params.tool_choice === 'none' ? undefined : tools;
+
+    const anthropicToolChoice =
+      !anthropicTools || anthropicTools.length === 0
+        ? undefined
+        : params.tool_choice === 'required'
+          ? { type: 'any' as const }
+          : { type: 'auto' as const };
+
     const response = await this.client.messages.create({
       model,
       max_tokens: 16000,
       system: systemPrompt || undefined,
       messages,
-      tools,
-      tool_choice: tools && tools.length > 0 ? { type: 'auto' } : undefined
+      tools: anthropicTools,
+      tool_choice: anthropicToolChoice
     });
 
     // Normalize the Anthropic response to the OpenAI-style shape the agent

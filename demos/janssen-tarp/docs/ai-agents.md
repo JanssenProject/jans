@@ -13,7 +13,7 @@ The AI Assistant in Tarp can perform following things:
 
 ### Prerequisite
 
-- Node.js (>= v18.15.0)
+- Node.js (>= v18.18.0)
 
 ### Build & Run
 
