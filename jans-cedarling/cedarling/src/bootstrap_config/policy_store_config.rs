@@ -121,7 +121,7 @@ pub enum PolicyStoreSource {
     Directory(PathBuf),
 
     /// An unresolved URI whose source type (archive vs lock server) is detected
-    /// at load time via HTTP content-type inspection and/or magic byte checking.
+    /// at load time via magic byte checking.
     ///
     /// During loading, [`load_policy_store`](crate::init::policy_store::load_policy_store)
     /// resolves this by making an HTTP request to determine whether the URI points

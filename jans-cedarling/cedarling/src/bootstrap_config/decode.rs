@@ -120,7 +120,7 @@ impl BootstrapConfig {
 
 /// Build [`PolicyStoreConfig`] from the three mutually-exclusive raw source
 /// fields (`CEDARLING_POLICY_STORE_LOCAL`, `_URI`, `_LOCAL_FN`).
-/// Returns an error if none or more than one are set, and also normalizes the
+/// Returns an error if none or more than one are set
 fn build_policy_store_config(
     raw: &BootstrapConfigRaw,
 ) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
