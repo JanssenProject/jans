@@ -1702,7 +1702,7 @@ jobs:
   build_cedarling_pg:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -1852,7 +1852,7 @@ jobs:
     needs: [build_cedarling_pg]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.merge.outputs.hashes }}
@@ -1883,7 +1883,7 @@ jobs:
     needs: [collect-cedarling-pg-digests]
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg)) &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg)) &&
       needs.collect-cedarling-pg-digests.outputs.hashes != ''
     permissions:
       actions: read
