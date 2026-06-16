@@ -5,6 +5,7 @@ import io.jans.shibboleth.model.core.DisplayName;
 import io.jans.shibboleth.model.core.Description;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.core.Version;
+import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.model.core.TrustStatus;
 import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.EntityIds;
@@ -36,6 +37,8 @@ public class BuildContext {
     
     private final ReleasedAttributes releasedAttributes;
 
+    private final ActivationDiagnostics activationDiagnostics;
+
     public BuildContext(TrustRelationship original,
         Id id, DisplayName displayName, Description description,
         TrustNature nature, Version version, TrustStatus status, MetadataSource metadataSource,
@@ -43,7 +46,8 @@ public class BuildContext {
         Saml2ArtifactResolutionProfileConfiguration saml2ArtifactResolutionProfileConfiguration, 
         Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration,
         Saml2EcpProfileConfiguration saml2EcpProfileConfiguration, Saml2SsoProfileConfiguration saml2SsoProfileConfiguration,
-        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration, ReleasedAttributes releasedAttributes ) {
+        Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration, 
+        ReleasedAttributes releasedAttributes, ActivationDiagnostics activationDiagnostics ) {
         
         this.original = original;
         this.id = id;
@@ -61,6 +65,7 @@ public class BuildContext {
         this.saml2SsoProfileConfiguration = saml2SsoProfileConfiguration;
         this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
         this.releasedAttributes = releasedAttributes;
+        this.activationDiagnostics = activationDiagnostics;
     }
 
     public TrustRelationship getOriginal() {
@@ -141,5 +146,10 @@ public class BuildContext {
     public ReleasedAttributes getReleasedAttributes() {
 
         return releasedAttributes;
+    }
+
+    public ActivationDiagnostics getActivationDiagnostics() {
+
+        return activationDiagnostics;
     }
 }

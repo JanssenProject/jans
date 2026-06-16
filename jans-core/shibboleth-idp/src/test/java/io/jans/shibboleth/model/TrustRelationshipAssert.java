@@ -4,7 +4,7 @@ import io.jans.shibboleth.model.core.Description;
 import io.jans.shibboleth.model.core.DisplayName;
 import io.jans.shibboleth.model.core.Id;
 import io.jans.shibboleth.model.core.Version;
-
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 
 import io.jans.shibboleth.model.core.TrustNature;
@@ -218,6 +218,17 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
             failWithMessage("TrustRelationship has at least one released attribute. Expected: none");
         }
 
+        return this;
+    }
+
+    public TrustRelationshipAssert hasNoActivationDiagnosticsData() {
+
+        isNotNull();
+        if (!actual.hasNoActivationDiagnosticsData()) {
+
+            failWithMessage("TrustRelationship has associated activation diagnostics data. Expected: No activation diagnostics data");
+        }
+        
         return this;
     }
 

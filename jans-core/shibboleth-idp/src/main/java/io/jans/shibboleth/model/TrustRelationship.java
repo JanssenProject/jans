@@ -26,6 +26,8 @@ import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.config.profiles.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.model.config.profiles.common.RequestSigningRequirement;
 import io.jans.shibboleth.model.core.*;
+import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
 import io.jans.shibboleth.model.rules.consistency.TrustConsistencyRules;
@@ -60,6 +62,8 @@ public class TrustRelationship {
 
     private final ReleasedAttributes releasedAttributes;
 
+    private final ActivationDiagnostics activationDiagnostics;
+
     private TrustRelationship(Id id, DisplayName displayName, Description description, 
         TrustNature nature, Version version, TrustStatus status, MetadataSource metadataSource, EntityIds discoveredEntityIds,
         ShibbolethSsoProfileConfiguration shibbolethSsoProfileConfiguration,
@@ -68,7 +72,8 @@ public class TrustRelationship {
         Saml2EcpProfileConfiguration saml2EcpProfileConfiguration,
         Saml2SsoProfileConfiguration saml2SsoProfileConfiguration,
         Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration,
-        ReleasedAttributes releasedAttributes ) {
+        ReleasedAttributes releasedAttributes,
+        ActivationDiagnostics activationDiagnostics) {
         
         
         this.id = id;
@@ -89,6 +94,8 @@ public class TrustRelationship {
         this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
 
         this.releasedAttributes = releasedAttributes;
+
+        this.activationDiagnostics = activationDiagnostics;
     }
 
     public Id getId() {
@@ -286,6 +293,24 @@ public class TrustRelationship {
 
         return releasedAttributes;
     }
+
+    public ActivationDiagnostics getActivationDiagnostics() {
+
+        return activationDiagnostics;
+    }
+
+    public boolean hasNoActivationDiagnosticsData() {
+
+        return activationDiagnostics.getStatus() == ActivationStatus.NO_DATA;
+    }
+
+    public TrustResult<TrustRelationship> activate() {
+
+        return from(this)
+            .withStatus(TrustStatus.ACTIVATING)
+            .withActivationDiagnostics(ActivationDiagnostics.none())
+            .build();
+    }
  
     @Override
     public boolean equals(Object o) {
@@ -308,7 +333,8 @@ public class TrustRelationship {
             && Objects.equals(saml2EcpProfileConfiguration,other.saml2EcpProfileConfiguration)
             && Objects.equals(saml2SsoProfileConfiguration,other.saml2SsoProfileConfiguration)
             && Objects.equals(saml2LogoutProfileConfiguration,other.saml2LogoutProfileConfiguration)
-            && Objects.equals(releasedAttributes,other.releasedAttributes);
+            && Objects.equals(releasedAttributes,other.releasedAttributes)
+            && Objects.equals(activationDiagnostics,other.activationDiagnostics);
     }
 
     @Override
@@ -323,7 +349,8 @@ public class TrustRelationship {
             saml2EcpProfileConfiguration,
             saml2SsoProfileConfiguration,
             saml2LogoutProfileConfiguration,
-            releasedAttributes
+            releasedAttributes,
+            activationDiagnostics
         );
     }
 
@@ -344,7 +371,8 @@ public class TrustRelationship {
             saml2EcpProfileConfiguration, 
             saml2SsoProfileConfiguration, 
             saml2LogoutProfileConfiguration,
-            releasedAttributes
+            releasedAttributes,
+            activationDiagnostics
         );
     }
 
@@ -366,6 +394,7 @@ public class TrustRelationship {
             .withSaml2SsoProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
             .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
             .withReleasedAttributes(ReleasedAttributes.empty())
+            .withActivationDiagnostics(ActivationDiagnostics.none())
             .build();
     }
 
@@ -399,7 +428,10 @@ public class TrustRelationship {
         private Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
         private Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
         private Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+
         private ReleasedAttributes releasedAttributes;
+
+        private ActivationDiagnostics activationDiagnostics;
 
         private Builder (TrustRelationship original) {
 
@@ -424,6 +456,8 @@ public class TrustRelationship {
                 saml2LogoutProfileConfiguration = original.saml2LogoutProfileConfiguration;
 
                 releasedAttributes = original.releasedAttributes;
+
+                activationDiagnostics = original.activationDiagnostics;
             }
         }
 
@@ -517,6 +551,11 @@ public class TrustRelationship {
             return this;
         }
 
+        public Builder withActivationDiagnostics(ActivationDiagnostics activationDiagnostics) {
+
+            this.activationDiagnostics = activationDiagnostics;
+            return this;
+        }
 
         public TrustResult<TrustRelationship> build() {
 
@@ -576,7 +615,8 @@ public class TrustRelationship {
                     saml2EcpProfileConfiguration,
                     saml2SsoProfileConfiguration,
                     saml2LogoutProfileConfiguration,
-                    releasedAttributes
+                    releasedAttributes,
+                    activationDiagnostics
                 );
         }
 
@@ -597,7 +637,8 @@ public class TrustRelationship {
                 saml2EcpProfileConfiguration,
                 saml2SsoProfileConfiguration,
                 saml2LogoutProfileConfiguration,
-                releasedAttributes
+                releasedAttributes,
+                activationDiagnostics
             );
 
         }
@@ -619,7 +660,8 @@ public class TrustRelationship {
                 candidate.saml2EcpProfileConfiguration,
                 candidate.saml2SsoProfileConfiguration,
                 candidate.saml2LogoutProfileConfiguration,
-                candidate.releasedAttributes
+                candidate.releasedAttributes,
+                candidate.activationDiagnostics
             );
         }
 
@@ -646,7 +688,8 @@ public class TrustRelationship {
                 && Objects.equals(original.saml2EcpProfileConfiguration,candidate.saml2EcpProfileConfiguration)
                 && Objects.equals(original.saml2SsoProfileConfiguration,candidate.saml2SsoProfileConfiguration)
                 && Objects.equals(original.saml2LogoutProfileConfiguration,candidate.saml2LogoutProfileConfiguration)
-                && Objects.equals(original.releasedAttributes,candidate.releasedAttributes);
+                && Objects.equals(original.releasedAttributes,candidate.releasedAttributes)
+                && Objects.equals(original.activationDiagnostics,candidate.activationDiagnostics);
         }
 
         private TrustResult<TrustRelationship> applyStateTransitions(TrustRelationship candidate) {

@@ -836,7 +836,33 @@ public class TrustRelationshipTest {
             assertThat(updated).isInDraftStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
-        
+    }
+
+
+    @Nested
+    @DisplayName("Activation and Deactivation")
+    public class ActivationAndDeactivationTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN a READY TrustRelationship " +
+            "WHEN activate() is called " +
+            "THEN should transition to ACTIVATING state , increment version and clear previous activation diagnostics "
+        )
+        public void shouldTransitionToActivating_whenActivateCalledFromReady(TrustRelationship tr) {
+
+            assertThat(tr).isInReadyStatus();
+
+            TrustResult<TrustRelationship> result = tr.activate();
+            
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            
+            assertThat(updated).isInActivatingStatus();
+            assertThat(updated).hasNoActivationDiagnosticsData();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
     }
 
 }
