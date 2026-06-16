@@ -250,9 +250,9 @@ Cedarling automatically merges entities from multiple sources during authorizati
 
 ### Merging Order and Precedence
 
-1. **Default Entities**: Loaded first from policy store configuration
-2. **Request Entities**: Resource, issuers, roles, tokens, and principal entities
-3. **Conflict Resolution**: Request entities override default entities when UID conflicts occur
+1. **Request Entities**: Resource, issuers, tokens, and principal entities
+2. **Default Entities**: Loaded from policy store configuration (take precedence on UID conflict)
+3. **Conflict Resolution**: Default entities override request entities when UID conflicts occur
 
 ### Example: Entity Override Scenario
 
@@ -288,4 +288,4 @@ When a resource entity has the same UID as a default entity:
 }
 ```
 
-Result: The request entity's attributes (`"Updated Organization"`, `is_active: false`) will be used, overriding the default entity's values.
+Result: Any attributes that differ between the default entity and the request entity will use the default entity's values. In this case, the default entity's values (`"Default Organization"`, `is_active: true`) take precedence, ensuring that policy-store entities cannot be overridden by request data.
