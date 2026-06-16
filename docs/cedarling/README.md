@@ -117,7 +117,7 @@ Or you could say more simply, *"Does this bundle of tokens authorize this capabi
 
 ## Cedarling and Zero Trust
 
-Zero Trust is a modern security model that assumes no implicit trust-every request must be
+Zero Trust is a modern security model that assumes no implicit trust. Every request must be
 explicitly authorized based on policies, identity, and context. The Cedarling enables
 end-to-end Zero Trust enforcement by embedding fine-grained authorization across the
 entire security stack, from client devices to backend services and databases.
@@ -165,10 +165,10 @@ hypothetical mobile application architecture:
 Traditional access control models assume network perimeters are secure, leading to
 excessive trust in internal components. The Cedarling aligns with Zero Trust by:
 
-- Eliminating implicit trust-each authorization decision is enforced based on real-time 
+- Eliminating implicit trust; each authorization decision is enforced based on real-time 
   policies.
 - Improving re-usability of policies across applications to enable multi-layer security
-- Ensuring consistent policies-from client devices to backend services and databases, 
+- Ensuring consistent policies from client devices to backend services and databases, 
   enforcing the same security rules everywhere.
 
 ### Cedarling and Threat Detection
@@ -193,7 +193,7 @@ explicitly authorized everywhere.
 !!! tip "Why is it "The Cedarling""
 
     In every system where it runs, the Cedarling becomes the guardian of policy, the 
-    gatekeeper of decisions. It’s lightweight, fast, and embedded close to the action-evaluating 
+    gatekeeper of decisions. It’s lightweight, fast, and embedded close to the action, evaluating 
     access at the speed of the web. Like the kernel, the compiler, or the 
     firewall, it earns the definite article because it does something definite. It stands in 
     your stack, quiet but crucial, deciding who gets through. The Cedarling isn’t a library. 
