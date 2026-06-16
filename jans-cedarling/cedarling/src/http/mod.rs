@@ -3,13 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+pub(crate) mod cache_headers;
 mod spawn_task;
 
 pub use spawn_task::*;
 
-use http_utils::{Backoff, HttpRequestError, Sender};
+use cache_headers::CacheHeadersState;
+use http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender, read_response_capped};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
+#[cfg(test)]
 use serde::Deserialize;
 use std::time::Duration;
 use thiserror::Error;
@@ -139,7 +142,11 @@ impl HttpClient {
         Sender::new(backoff).with_max_response_size(self.max_response_size_bytes)
     }
 
-    /// Sends a GET request to the specified URI with retry logic.
+    /// Sends a GET request to the specified URI with retry logic. Returns the
+    /// response body as a string wrapped in [`Response`], which the caller can
+    /// then deserialize. Test-only: production callers use [`Self::get_bytes`]
+    /// or [`Self::get_json`].
+    #[cfg(test)]
     pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.raw_client;
@@ -160,7 +167,9 @@ impl HttpClient {
     ///
     /// This method will attempt to fetch the resource up to the configured `max_retries`,
     /// with exponential backoff between each attempt. Useful for fetching binary content
-    /// like archive files.
+    /// like archive files. Test-only: production callers use [`Self::get_with_retry`]
+    /// so they can capture response headers alongside the body.
+    #[cfg(test)]
     pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.raw_client;
@@ -207,13 +216,166 @@ impl HttpClient {
         let mut sender = self.create_sender();
         sender.send_with_retry(|| f(self.raw_client.get(uri))).await
     }
+
+    /// Fetches `uri` as raw bytes, honoring any previously captured cache
+    /// validators (`If-None-Match`, `If-Modified-Since`). Used by the policy
+    /// store refresh worker.
+    ///
+    /// Returns:
+    /// - [`ConditionalFetch::NotModified`] with any updated cache headers from
+    ///   the `304` response (RFC 7234 §4.3.4 allows a 304 to carry refreshed
+    ///   `Cache-Control` / `Expires` / `ETag` / `Last-Modified` that the cache
+    ///   must adopt).
+    /// - [`ConditionalFetch::Modified`] with the new body and freshly parsed
+    ///   validators otherwise.
+    pub(crate) async fn get_bytes_conditional(
+        &self,
+        uri: &str,
+        validators: &CacheHeadersState,
+    ) -> Result<ConditionalFetch, HttpClientError> {
+        // Clone the small validator strings so the closure can be `Fn` (callable
+        // on each retry attempt).
+        let etag = validators.etag.clone();
+        let last_modified = validators.last_modified.clone();
+
+        let response = self
+            .get_with_retry_with(uri, |b| {
+                let mut b = b;
+                if let Some(e) = &etag {
+                    b = b.header(reqwest::header::IF_NONE_MATCH, e.as_str());
+                }
+                if let Some(lm) = &last_modified {
+                    b = b.header(reqwest::header::IF_MODIFIED_SINCE, lm.as_str());
+                }
+                b
+            })
+            .await?;
+
+        let status = response.status();
+        let headers = response.headers().clone();
+        let new_validators = CacheHeadersState::from_headers(&headers, chrono::Utc::now());
+
+        if status == reqwest::StatusCode::NOT_MODIFIED {
+            return Ok(ConditionalFetch::NotModified {
+                validators: new_validators,
+            });
+        }
+
+        // Enforce the configured body-size cap. Old prod path
+        // (get_bytes → send_bytes → read_response_capped) bounded this; raw
+        // `response.bytes()` here would let a hostile / misconfigured upstream
+        // buffer multi-GB bodies into the worker on every refresh tick.
+        let bytes = read_response_capped(response, self.max_response_size_bytes)
+            .await
+            .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
+
+        Ok(ConditionalFetch::Modified {
+            bytes,
+            validators: new_validators,
+        })
+    }
+
+    /// Read a [`reqwest::Response`] body into bytes while enforcing this
+    /// client's configured response-size cap (`max_response_size_bytes`).
+    /// Exposed so the policy-store loader and refresh worker — which need to
+    /// stream the response headers separately (to capture cache validators)
+    /// before reading the body — can still get the cap that the bulk helpers
+    /// (`get_bytes`, `get_json`, etc.) apply internally.
+    pub(crate) async fn read_response_capped(
+        &self,
+        response: reqwest::Response,
+    ) -> Result<Vec<u8>, HttpClientError> {
+        let status = response.status();
+        read_response_capped(response, self.max_response_size_bytes)
+            .await
+            .map_err(|reason| HttpRequestError::new(reason, Some(status)))
+    }
+
+    /// Sends a HEAD request and parses the response headers into a
+    /// [`CacheHeadersState`]. Used by the HEAD-then-GET fallback strategy when an
+    /// upstream emits `ETag` / `Last-Modified` but ignores `If-None-Match` /
+    /// `If-Modified-Since`. Servers that reject HEAD (`405` / `501`) return
+    /// [`HeadOutcome::NotSupported`] so the caller can downgrade to plain GET.
+    ///
+    /// Intentionally does **not** retry on failure: HEAD here is a probe, and
+    /// the surrounding refresh worker either downgrades to a plain GET on the
+    /// same tick or simply runs again on the next interval. Burning the retry
+    /// budget on a probe would only delay the downgrade.
+    pub(crate) async fn head_validators(&self, uri: &str) -> Result<HeadOutcome, HttpClientError> {
+        let response = self.raw_client.head(uri).send().await.map_err(|e| {
+            // No retry path — this is a single probe by design. We reuse
+            // `MaxRetriesExceeded` because the surrounding refresh-worker
+            // classifier (`HttpRequestError::is_max_retries_exceeded()`) uses
+            // it to route transport failures into the `NetworkError` metric
+            // bucket. `retry_count(0)` keeps `Display` from claiming we
+            // retried.
+            let msg = format!("HEAD probe send() failed: {e}");
+            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
+                .with_retry_count(0)
+                .with_last_error(msg)
+        })?;
+        let status = response.status();
+        if status == reqwest::StatusCode::METHOD_NOT_ALLOWED
+            || status == reqwest::StatusCode::NOT_IMPLEMENTED
+        {
+            return Ok(HeadOutcome::NotSupported);
+        }
+        if !status.is_success() {
+            // Any other 4xx/5xx — auth failure, missing resource, server
+            // error — is a real failure, not "HEAD returned no useful
+            // validators". Surface it as a typed `HttpStatusError` so the
+            // worker's `fetch_error` classifier routes it into the
+            // `HttpError` metric bucket rather than counting it toward
+            // `degraded_count` as a strategy ineffectiveness signal.
+            let msg = format!("HEAD probe rejected with status {status}");
+            return Err(HttpRequestError::new(
+                HttpRequestReasonError::HttpStatusError,
+                Some(status),
+            )
+            .with_retry_count(0)
+            .with_last_error(msg));
+        }
+        let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
+        Ok(HeadOutcome::Headers(validators))
+    }
 }
 
+/// Outcome of [`HttpClient::get_bytes_conditional`].
+#[derive(Debug)]
+pub(crate) enum ConditionalFetch {
+    /// Server responded `304 Not Modified` — body intentionally omitted.
+    /// `validators` carries any refreshed cache headers from the 304 response
+    /// (RFC 7234 §4.3.4): a server may update `Cache-Control` / `Expires` /
+    /// `ETag` / `Last-Modified` on a 304 and the cache is supposed to adopt
+    /// the new values rather than keep the old ones around.
+    NotModified { validators: CacheHeadersState },
+    /// Server returned a fresh body and (possibly) new cache validators.
+    Modified {
+        bytes: Vec<u8>,
+        validators: CacheHeadersState,
+    },
+}
+
+/// Outcome of [`HttpClient::head_validators`].
+#[derive(Debug)]
+pub(crate) enum HeadOutcome {
+    /// HEAD succeeded — captured headers (validators may be empty if the server
+    /// didn't set `ETag` / `Last-Modified`).
+    Headers(CacheHeadersState),
+    /// Server explicitly rejected HEAD (`405` / `501`).
+    NotSupported,
+}
+
+/// Wrapper around a text response body — lets callers defer JSON deserialization
+/// to a stage where they hold the response. Returned by [`HttpClient::get`].
+/// Test-only.
+#[cfg(test)]
 #[derive(Debug)]
 pub(crate) struct Response {
     text: String,
 }
 
+#[cfg(test)]
 impl Response {
     pub(crate) fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
     where
@@ -228,6 +390,7 @@ pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
+    use crate::http::cache_headers::CacheHeadersState;
     use crate::http::{HttpClient, HttpClientConfig};
 
     use mockito::Server;
@@ -411,5 +574,354 @@ mod test {
             elapsed < Duration::from_secs(2),
             "Expected to time out near {request_timeout:?}, took {elapsed:?}",
         );
+    }
+
+    #[tokio::test]
+    async fn conditional_get_returns_not_modified_on_304() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_header("if-none-match", "\"v1\"")
+            .with_status(304)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let validators = crate::http::cache_headers::CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            ..Default::default()
+        };
+        let url = format!("{}/store", server.url());
+
+        let result = client
+            .get_bytes_conditional(&url, &validators)
+            .await
+            .expect("request");
+
+        assert!(
+            matches!(result, super::ConditionalFetch::NotModified { .. }),
+            "expected ConditionalFetch::NotModified for a 304 reply to an `If-None-Match: \"v1\"` request, got {result:#?}",
+        );
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_captures_refreshed_validators_on_304() {
+        // RFC 7234 §4.3.4: a 304 response may carry updated Cache-Control /
+        // Expires / ETag / Last-Modified that the cache MUST adopt. The
+        // worker uses `fresh_for` to schedule the next tick, so dropping
+        // these would make us re-poll on the old (shorter) interval and
+        // ignore the server's "you can wait longer now" signal.
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_header("if-none-match", "\"v1\"")
+            .with_status(304)
+            .with_header("etag", "\"v1\"")
+            .with_header("cache-control", "max-age=120")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let validators = crate::http::cache_headers::CacheHeadersState {
+            etag: Some("\"v1\"".to_string()),
+            ..Default::default()
+        };
+        let url = format!("{}/store", server.url());
+
+        let result = client
+            .get_bytes_conditional(&url, &validators)
+            .await
+            .expect("request");
+
+        match result {
+            super::ConditionalFetch::NotModified { validators } => {
+                assert_eq!(
+                    validators.etag.as_deref(),
+                    Some("\"v1\""),
+                    "ETag must be preserved on the 304 path so the next conditional GET still has something to send",
+                );
+                assert_eq!(
+                    validators.fresh_for,
+                    Some(std::time::Duration::from_secs(120)),
+                    "304 with `Cache-Control: max-age=120` must update fresh_for so the worker honors the server's refreshed freshness window",
+                );
+            },
+            super::ConditionalFetch::Modified { bytes, validators } => {
+                panic!(
+                    "expected ConditionalFetch::NotModified with refreshed validators, got Modified (body={} bytes, validators={validators:?})",
+                    bytes.len(),
+                )
+            },
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_captures_validators_on_200() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .with_header("etag", "\"v2\"")
+            .with_header("cache-control", "max-age=120")
+            .with_body(b"new-body-bytes")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let result = client
+            .get_bytes_conditional(&url, &CacheHeadersState::default())
+            .await
+            .expect("request");
+
+        match result {
+            super::ConditionalFetch::Modified { bytes, validators } => {
+                assert_eq!(
+                    bytes,
+                    b"new-body-bytes",
+                    "200 body must match what the mock served, got {} bytes",
+                    bytes.len(),
+                );
+                assert_eq!(
+                    validators.etag.as_deref(),
+                    Some("\"v2\""),
+                    "ETag from the response headers must be captured for the next conditional GET",
+                );
+                assert_eq!(
+                    validators.fresh_for,
+                    Some(std::time::Duration::from_secs(120)),
+                    "max-age=120 from `Cache-Control` must populate fresh_for",
+                );
+            },
+            super::ConditionalFetch::NotModified { validators } => {
+                panic!(
+                    "expected ConditionalFetch::Modified for a 200 reply, got NotModified (validators={validators:?})",
+                )
+            },
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_sends_if_modified_since() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_header("if-modified-since", "Sun, 22 May 2026 12:00:00 GMT")
+            .with_status(200)
+            .with_body(b"x")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let validators = crate::http::cache_headers::CacheHeadersState {
+            last_modified: Some("Sun, 22 May 2026 12:00:00 GMT".to_string()),
+            ..Default::default()
+        };
+        let url = format!("{}/store", server.url());
+
+        let _ = client
+            .get_bytes_conditional(&url, &validators)
+            .await
+            .expect("request");
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_captures_etag_and_last_modified() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(200)
+            .with_header("etag", "\"v3\"")
+            .with_header("last-modified", "Sun, 22 May 2026 12:00:00 GMT")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        match outcome {
+            super::HeadOutcome::Headers(v) => {
+                assert_eq!(v.etag.as_deref(), Some("\"v3\""));
+                assert_eq!(
+                    v.last_modified.as_deref(),
+                    Some("Sun, 22 May 2026 12:00:00 GMT")
+                );
+                assert!(
+                    v.has_validator(),
+                    "captured validators must register as a validator pair — ETag={:?}, Last-Modified={:?}",
+                    v.etag,
+                    v.last_modified,
+                );
+            },
+            super::HeadOutcome::NotSupported => {
+                panic!(
+                    "expected HeadOutcome::Headers from a 200 response with validators, got NotSupported"
+                )
+            },
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_returns_empty_headers_when_no_validators() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        match outcome {
+            super::HeadOutcome::Headers(v) => {
+                assert!(
+                    !v.has_validator(),
+                    "no ETag, no Last-Modified → has_validator() false"
+                );
+            },
+            super::HeadOutcome::NotSupported => panic!("expected Headers, got NotSupported"),
+        }
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_405_maps_to_not_supported() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(405)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        assert!(
+            matches!(outcome, super::HeadOutcome::NotSupported),
+            "HEAD 405 must map to NotSupported so the strategy machine downgrades to PlainGet, got {outcome:#?}",
+        );
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_501_maps_to_not_supported() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(501)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let outcome = client.head_validators(&url).await.expect("request");
+        assert!(
+            matches!(outcome, super::HeadOutcome::NotSupported),
+            "HEAD 501 must map to NotSupported so the strategy machine downgrades to PlainGet, got {outcome:#?}",
+        );
+        mock.assert_async().await;
+    }
+
+    /// Any non-success status other than `405` / `501` must produce an error
+    /// — NOT `HeadOutcome::Headers(empty)`. Before this gate, a `401` /
+    /// `404` / `500` was silently treated as "HEAD returned no useful
+    /// validators" and counted toward the strategy `degraded_count`,
+    /// conflating server errors with strategy ineffectiveness.
+    async fn assert_head_status_propagates_as_error(status: u16) {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("HEAD", "/store")
+            .with_status(status.into())
+            .expect(1)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new(HTTP_CONF).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let err = client
+            .head_validators(&url)
+            .await
+            .expect_err("expected non-success status to yield an error");
+        assert!(
+            err.is_http_status_error(),
+            "expected HttpStatusError for {status}, got {err:?}"
+        );
+        assert!(
+            !err.is_max_retries_exceeded(),
+            "must not classify as network error for {status}",
+        );
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_401_propagates_as_error() {
+        assert_head_status_propagates_as_error(401).await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_404_propagates_as_error() {
+        assert_head_status_propagates_as_error(404).await;
+    }
+
+    #[tokio::test]
+    async fn head_validators_500_propagates_as_error() {
+        assert_head_status_propagates_as_error(500).await;
+    }
+
+    #[tokio::test]
+    async fn conditional_get_enforces_max_response_size_cap() {
+        // Regression test: prior to the cap-routing fix the conditional-GET
+        // path read `response.bytes().await` raw, dropping the
+        // CEDARLING_HTTP_MAX_RESPONSE_SIZE guard. A hostile upstream returning
+        // a multi-GB body could exhaust memory on every refresh tick.
+        let mut server = Server::new_async().await;
+        // Body larger than the cap we'll configure.
+        let big_body = vec![0u8; 4096];
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .with_body(big_body)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let conf = HttpClientConfig {
+            max_response_size_bytes: Some(1024),
+            ..HTTP_CONF
+        };
+        let client = HttpClient::new(conf).expect("client");
+        let url = format!("{}/store", server.url());
+
+        let err = client
+            .get_bytes_conditional(&url, &CacheHeadersState::default())
+            .await
+            .expect_err("body over the cap must surface as an error, not be silently buffered");
+        let msg = err.to_string();
+        assert!(
+            msg.contains("response body exceeds the configured limit")
+                || msg.contains("ResponseTooLarge"),
+            "cap-exceeded must surface as a ResponseTooLarge error, got: {msg}",
+        );
+        mock.assert_async().await;
     }
 }
