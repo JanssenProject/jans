@@ -3,32 +3,36 @@ tags:
   - administration
   - auth-server
   - cryptography
-  - key-generation
-  - key-rotation
+  - key generation
+  - key rotation
 ---
 
-# Regenerate Jans Auth cryptographic keys
+# Regenerating the cryptographic keys 
 
-This procedure regenerates the Jans Auth signing and encryption keys on a package-based Janssen Server installation and keeps the following three locations synchronized:
+Janssen server uses cryptographic keys for signing and encryption. This document describes the steps that help you regenerate and keep key related information in synch.
 
-1. The PKCS#12 keystore containing the private keys.
-2. The public JWKS file on the filesystem.
-3. The `jansConfWebKeys` value in persistence.
+The key related information and artifacts need to be in synchronization with each other at following places:
+
+1. The PKCS#12 keystore containing the private keys
+2. The public JWKS file on the filesystem
+3. The `jansConfWebKeys` value in persistence
 
 !!! danger
-    Replacing only the PKCS#12 file, or only `jansConfWebKeys`, breaks key resolution. Jans Auth may then fail to sign tokens and can report errors such as:
+    Replacing only the PKCS#12 file, or only `jansConfWebKeys`, breaks key resolution. Janssen server may fail to sign tokens and can report errors such as:
 
     ```text
     Failed to find private key by kid
     check whether web keys JSON in persistence corresponds to keystore file
     ```
 
-    Generate the keystore and JWKS as one pair, validate them, and update the filesystem and persistence in the same maintenance window.
+    Also, it is highly recommended to generate the keystore and JWKS as one pair, validate them, and update the filesystem and persistence in the same maintenance window.
 
 ## Scope
 
-The commands below apply to a Linux package installation with:
+Steps described in this document, assumes the following specifics about the installation. Specifics may  
+differ for your installed instance. Please update and run the commands as needed by your environment:
 
+- Janssen server installed on Ubuntu platform
 - Jans Auth installed under `/opt/jans`
 - the active keystore at `/etc/certs/jans-auth-keys.pkcs12`
 - PostgreSQL persistence
@@ -38,33 +42,35 @@ For LDAP or another persistence type, export and update the same `jansConfWebKey
 
 ## Prerequisites
 
-Run the procedure as `root`.
+- Run the procedure as `root`
 
-Confirm that the required files and utilities exist:
+- Confirm that the required files and utilities exist:
 
-```bash
-test -x /opt/jre/bin/java
-test -x /opt/jre/bin/keytool
-test -f /opt/dist/jans/jans-auth-client-jar-with-dependencies.jar
-command -v jq
-command -v psql
-```
+    ```bash
+    test -x /opt/jre/bin/java
+    test -x /opt/jre/bin/keytool
+    test -f /opt/dist/jans/jans-auth-client-jar-with-dependencies.jar
+    command -v jq
+    command -v psql
+    ```
 
-Set reusable paths:
+- Set reusable paths:
 
-```bash
-export JANS_AUTH_KEYSTORE=/etc/certs/jans-auth-keys.pkcs12
-export JANS_AUTH_JWKS=/etc/certs/jans-auth-keys.json
-export KEYGEN_JAR=/opt/dist/jans/jans-auth-client-jar-with-dependencies.jar
-export RECOVERY_DIR=/root/jans-auth-key-recovery-$(date +%F-%H%M%S)
+    ```bash
+    export JANS_AUTH_KEYSTORE=/etc/certs/jans-auth-keys.pkcs12
+    export JANS_AUTH_JWKS=/etc/certs/jans-auth-keys.json
+    export KEYGEN_JAR=/opt/dist/jans/jans-auth-client-jar-with-dependencies.jar
+    export RECOVERY_DIR=/root/jans-auth-key-recovery-$(date +%F-%H%M%S)
 
-mkdir -p "$RECOVERY_DIR"
-chmod 700 "$RECOVERY_DIR"
-```
+    mkdir -p "$RECOVERY_DIR"
+    chmod 700 "$RECOVERY_DIR"
+    ```
 
-## 1. Read the configured keystore location and secret
+## Steps
 
-Read the Jans Auth dynamic configuration from PostgreSQL:
+### 1. Read the configured keystore location and secret
+
+Read the dynamic configuration from PostgreSQL:
 
 ```bash
 sudo -u postgres psql -d jansdb -Atc \
@@ -96,7 +102,7 @@ echo
 export JANS_AUTH_KEYPASS
 ```
 
-## 2. Back up the current key material and persistence value
+### 2. Back up the current key material and persistence value
 
 ```bash
 export BACKUP_DIR=/root/jans-auth-key-backup-$(date +%F-%H%M%S)
@@ -125,12 +131,12 @@ find "$BACKUP_DIR" -maxdepth 1 -type f -size 0 -print
 
 The command must return no output.
 
-## 3. Generate a new keystore and JWKS pair
+### 3. Generate a new keystore and JWKS pair
 
 !!! warning
     Generate into a protected temporary directory. Do not write directly over the active files in `/etc/certs`.
 
-The following algorithm set creates Connect and SSA keys for common Jans Auth signing and encryption operations:
+The following algorithm set creates Connect and SSA keys for common signing and encryption operations by the Janssen server:
 
 ```bash
 /opt/jre/bin/java \
@@ -150,7 +156,7 @@ The following algorithm set creates Connect and SSA keys for common Jans Auth si
 `-expiration` is expressed in days for Connect keys. SSA key validity is handled separately by the generator and is normally much longer.
 
 !!! note
-    Supported algorithms can vary by Janssen version and Java security provider. Check the generator options on the installed server before changing the algorithm list:
+    Supported algorithms can vary by Janssen server version and Java security provider. Check the generator options on the installed server before changing the algorithm list:
 
     ```bash
     /opt/jre/bin/java \
@@ -160,7 +166,7 @@ The following algorithm set creates Connect and SSA keys for common Jans Auth si
 
     Preserve every algorithm required by the deployment's clients and dynamic configuration. Removing an algorithm that is actively configured can break token signing, encryption, decryption, or client authentication.
 
-## 4. Validate the generated pair
+### 4. Validate the generated pair
 
 Validate the JSON:
 
@@ -197,11 +203,11 @@ comm -3 \
   )
 ```
 
-Expected result: no output.
+Expected result: no output
 
 Do not continue if the command reports any difference.
 
-## 5. Stop Jans Auth
+### 5. Stop the jans-auth module
 
 ```bash
 systemctl stop jans-auth
@@ -214,9 +220,9 @@ systemctl status jans-auth --no-pager -l
 ss -ltnp | grep ':8081' || true
 ```
 
-There must be no Jans Auth listener on port `8081`.
+There must be no Jans-Auth listener on port `8081`.
 
-## 6. Install the new filesystem files
+### 6. Install the new filesystem files
 
 ```bash
 install -o jetty -g root -m 660 \
@@ -230,7 +236,7 @@ install -o jetty -g root -m 660 \
 ls -lh "$JANS_AUTH_KEYSTORE" "$JANS_AUTH_JWKS"
 ```
 
-## 7. Update `jansConfWebKeys` in PostgreSQL
+### 7. Update `jansConfWebKeys` in PostgreSQL
 
 Compact the generated JWKS and update the configuration in a transaction:
 
@@ -268,7 +274,7 @@ The reported `key_count` must equal:
 jq '.keys | length' "$RECOVERY_DIR/jans-auth-keys.json"
 ```
 
-## 8. Start Jans Auth
+### 8. Start the jans-auth module
 
 ```bash
 systemctl reset-failed jans-auth
@@ -279,9 +285,9 @@ systemctl status jans-auth --no-pager -l
 
 The service must be `active (running)`.
 
-## 9. Verify the published JWKS
+### 9. Verify the published JWKS
 
-Determine the public issuer hostname, then query the Jans Auth JWKS endpoint:
+Determine the public issuer hostname, then query the Janssen server JWKS endpoint exposed by `jans-auth` module:
 
 ```bash
 export JANS_FQDN=your-jans-host.example.org
@@ -290,7 +296,7 @@ curl -fsSk "https://${JANS_FQDN}/jans-auth/restv1/jwks" \
 | jq -r '"published_key_count=\(.keys | length)", (.keys[].kid)'
 ```
 
-The number of published keys can be lower than the number generated. Jans Auth publishes only algorithms enabled and supported by the running configuration and provider.
+The number of published keys can be lower than the number generated. `jans-auth` publishes only algorithms enabled and supported by the running configuration and provider.
 
 Confirm that every published `kid` exists in the generated JWKS:
 
@@ -316,9 +322,9 @@ curl -fsSk "https://${JANS_FQDN}/.well-known/openid-configuration" \
 | jq '{issuer, jwks_uri, token_endpoint, authorization_endpoint}'
 ```
 
-## 10. Restart dependent Jans services
+### 10. Restart dependent Jans services
 
-Applications can cache discovery metadata or JWKS values. After Jans Auth has started successfully, restart the remaining Jans services and Apache:
+Applications can cache discovery metadata or JWKS values. After `jans-auth` module has started successfully, restart the remaining Janssen server services and Apache2 service:
 
 ```bash
 systemctl restart 'jans-*' apache2
@@ -333,17 +339,17 @@ systemctl list-units --no-pager \
   apache2.service
 ```
 
-## 11. Functional validation
+### 11. Functional validation
 
 Use a new private/incognito browser session and test:
 
-1. Open the Admin UI.
-2. Authenticate.
-3. Complete the authorization-code redirect.
-4. Confirm that the Admin UI loads without an HTTP 500 response.
-5. Test any critical OIDC, OAuth, UMA, SSA, or encrypted-token workflows used by the deployment.
+1. Open the Admin UI
+2. Authenticate
+3. Complete the authorization-code redirect
+4. Confirm that the Admin UI loads without an HTTP 500 response
+5. Test any critical OIDC, OAuth, UMA, SSA, or encrypted-token workflows used by the deployment
 
-Monitor Jans Auth while testing:
+Monitor the `jans-auth` module while testing:
 
 ```bash
 tail -F \
@@ -355,9 +361,9 @@ tail -F \
 
 ## Rollback
 
-Use rollback when Jans Auth does not start or functional validation fails.
+Use rollback when the `jans-auth` module does not start or functional validation fails.
 
-Stop Jans Auth:
+Stop the `jans-auth` module:
 
 ```bash
 systemctl stop jans-auth
@@ -404,11 +410,11 @@ systemctl status jans-auth --no-pager -l
 
 ## Operational recommendations
 
-- Treat the PKCS#12 keystore and `jansConfWebKeys` as one atomic configuration unit.
-- Never overwrite the active keystore before creating and validating a backup.
-- Never use a short test validity such as two or ten days in production.
-- Keep the keystore password aligned with `keyStoreSecret` in `jansConfDyn`.
-- Restrict the keystore and JWKS files to the service account.
-- Schedule key rotation before expiration and test it in a non-production environment first.
-- Retain previous public keys for an overlap period when existing signed tokens must remain verifiable. A destructive replacement can invalidate tokens that were signed with the previous keys.
+- Treat the PKCS#12 keystore and `jansConfWebKeys` as one atomic configuration unit
+- Never overwrite the active keystore before creating and validating a backup
+- Never use a short test validity such as two or ten days in production
+- Keep the keystore password aligned with `keyStoreSecret` in `jansConfDyn`
+- Restrict the keystore and JWKS files to the service account
+- Schedule key rotation before expiration and test it in a non-production environment first
+- Retain previous public keys for an overlap period when existing signed tokens must remain verifiable. A destructive replacement can invalidate tokens that were signed with the previous keys
 - For clustered deployments, distribute the same keystore to every Jans Auth node and update shared persistence only once. Restart nodes in a controlled sequence.
