@@ -84,6 +84,29 @@ class AppleAttestationProcessorTest {
     }
 
     @Test
+    void process_ifNoX5c_rejected() {
+        // CONF-18: Apple attestation is always FULL; a statement without x5c must be hard-rejected,
+        // not silently accepted.
+        JsonNode attStmt = mock(JsonNode.class);
+        AuthData authData = mock(AuthData.class);
+        Fido2RegistrationData credential = mock(Fido2RegistrationData.class);
+        byte[] clientDataHash = "test_clientDataHash".getBytes();
+        CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
+
+        when(attStmt.asText()).thenReturn("test_att_stmt");
+        when(attStmt.hasNonNull("x5c")).thenReturn(false);
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
+
+        WebApplicationException res = assertThrows(WebApplicationException.class,
+                () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
+        assertNotNull(res);
+        assertEquals(400, res.getResponse().getStatus());
+        verify(errorResponseFactory).badRequestException(any(), eq("Apple attestation statement must contain x5c"));
+        verifyNoInteractions(certificateService, attestationCertificateService, certificateVerifier, coseService, base64Service);
+    }
+
+    @Test
     void process_ifCertificatesIsEmpty_badRequestException() {
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
