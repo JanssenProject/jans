@@ -1655,16 +1655,13 @@ fn test_load_schema_from_schemas_dir_invalid_extension() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".").expect("Should skip non-.cedarschema files");
 
-    let err = result.expect_err("Expected InvalidFileExtension error");
+    let content = result.schema.expect("Schema should be present");
     assert!(
-        matches!(
-            &err,
-            PolicyStoreError::Validation(ValidationError::InvalidFileExtension { file, expected, actual })
-            if expected.contains("cedarschema") && actual == "txt"
-        ),
-        "Expected InvalidFileExtension for .txt file in schemas/, got: {err:?}"
+        content.contains("entity User"),
+        "Should contain User entity from valid.cedarschema; got: {}",
+        content
     );
 }
 
@@ -1948,16 +1945,18 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".").expect("Should skip .txt files");
 
-    let err = result.expect_err("Expected InvalidFileExtension error for .txt file in schemas/");
+    let content = result.schema.expect("Schema should be present");
     assert!(
-        matches!(
-            &err,
-            PolicyStoreError::Validation(ValidationError::InvalidFileExtension { file, expected, actual })
-            if expected.contains("cedarschema") && actual == "txt"
-        ),
-        "Expected InvalidFileExtension for .txt in schemas/, got: {err:?}"
+        content.contains("entity User"),
+        "Should contain User entity from valid.cedarschema; got: {}",
+        content
+    );
+    assert!(
+        !content.contains("Admin"),
+        "Should NOT contain Admin from bad.txt; got: {}",
+        content
     );
 }
 

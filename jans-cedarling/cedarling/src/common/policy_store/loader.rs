@@ -360,16 +360,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                 continue;
             }
             if !entry.name.to_lowercase().ends_with(".cedarschema") {
-                return Err(ValidationError::InvalidFileExtension {
-                    file: entry.path.clone(),
-                    expected: ".cedarschema".to_string(),
-                    actual: Path::new(&entry.name)
-                        .extension()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("(none)")
-                        .to_string(),
-                }
-                .into());
+                continue;
             }
             let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
                 PolicyStoreError::FileReadError {
