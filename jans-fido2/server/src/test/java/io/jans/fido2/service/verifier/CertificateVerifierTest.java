@@ -63,8 +63,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.checkForTrustedCertsInAttestation(attestationCerts, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
         verify(base64Service, times(3)).encodeToString(any());
     }
 
@@ -102,9 +102,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-        //verifyNoInteractions(log);
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -184,8 +183,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
         verify(log).warn(contains("Cert verification problem"), any(), any());
         verifyNoMoreInteractions(certificateService);
     }
@@ -300,7 +299,7 @@ class CertificateVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
 
         verify(log).debug(eq("Authenticator AAGUID {} status {} effective date {}"), any(), any(), any());
     }
@@ -323,7 +322,7 @@ class CertificateVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
     }
 
     @Test
