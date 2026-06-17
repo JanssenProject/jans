@@ -11,7 +11,6 @@ use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
-use super::super::schema_parser::ParsedSchema;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
 use std::fs::{self, File};
@@ -2027,39 +2026,139 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
         }
     }"#,
     )
-    .unwrap();
+    .expect("Should create metadata.json");
 
     // Two files sharing the same namespace App — must survive full conversion
     vfs.create_file(
         "schemas/users.cedarschema",
         b"namespace App { entity User; }",
     )
-    .unwrap();
+    .expect("Should create users.cedarschema");
 
     vfs.create_file(
         "schemas/resources.cedarschema",
         b"namespace App { entity Resource; entity Admin; }",
     )
-    .unwrap();
+    .expect("Should create resources.cedarschema");
 
     vfs.create_file(
         "policies/test.cedar",
         b"permit(principal, action, resource);",
     )
-    .unwrap();
+    .expect("Should create test.cedar");
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let loaded = loader
         .load_directory(".")
-        .expect("Should load successfully");
+        .expect("Should load directory with shared namespace schemas");
 
-    // Full pipeline: convert to legacy format
     use super::super::manager::PolicyStoreManager;
     let policy_store = PolicyStoreManager::convert_to_legacy(loaded, false)
         .expect("convert_to_legacy should succeed with shared namespaces across files");
 
+    let cedar_schema = policy_store
+        .schema
+        .as_ref()
+        .expect("Schema should be present after conversion");
+    let type_names: Vec<_> = cedar_schema
+        .schema
+        .entity_types()
+        .map(|e| e.to_string())
+        .collect();
     assert!(
-        policy_store.schema.is_some(),
-        "Schema should be present after conversion"
+        type_names.contains(&"App::User".to_string()),
+        "Multi-file schema should produce App::User; got: {:?}",
+        type_names
+    );
+    assert!(
+        type_names.contains(&"App::Resource".to_string()),
+        "Multi-file schema should produce App::Resource; got: {:?}",
+        type_names
+    );
+    assert!(
+        type_names.contains(&"App::Admin".to_string()),
+        "Multi-file schema should produce App::Admin; got: {:?}",
+        type_names
+    );
+}
+
+#[test]
+fn test_archive_shared_namespace_full_pipeline() {
+    let mut archive_bytes = Vec::new();
+    {
+        let cursor = Cursor::new(&mut archive_bytes);
+        let mut zip = zip::ZipWriter::new(cursor);
+        let options = FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated);
+
+        zip.start_file("metadata.json", options.clone())
+            .expect("Should create metadata.json in archive");
+        zip.write_all(
+            br#"{
+            "cedar_version": "4.4.0",
+            "policy_store": {
+                "id": "abcd1234ef567890",
+                "name": "Archive Shared Namespace",
+                "version": "1.0.0"
+            }
+        }"#,
+        )
+        .expect("Should write metadata content");
+
+        zip.start_file("schemas/users.cedarschema", options.clone())
+            .expect("Should create users.cedarschema in archive");
+        zip.write_all(b"namespace App { entity User; }")
+            .expect("Should write User schema content");
+
+        zip.start_file("schemas/resources.cedarschema", options.clone())
+            .expect("Should create resources.cedarschema in archive");
+        zip.write_all(b"namespace App { entity Resource; entity Admin; }")
+            .expect("Should write Resource/Admin schema content");
+
+        zip.start_file("policies/test.cedar", options.clone())
+            .expect("Should create test.cedar in archive");
+        zip.write_all(b"permit(principal, action, resource);")
+            .expect("Should write policy content");
+
+        zip.finish()
+            .expect("Should finalize archive");
+    }
+
+    let archive_vfs =
+        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+
+    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+    let loaded = loader
+        .load_directory(".")
+        .expect("Should load archive with shared namespace schemas");
+
+    use super::super::manager::PolicyStoreManager;
+    let policy_store = PolicyStoreManager::convert_to_legacy(loaded, false)
+        .expect("convert_to_legacy should succeed for archive with shared namespaces");
+
+    let cedar_schema = policy_store
+        .schema
+        .as_ref()
+        .expect("Schema should be present after conversion from archive");
+
+    let type_names: Vec<_> = cedar_schema
+        .schema
+        .entity_types()
+        .map(|e| e.to_string())
+        .collect();
+    assert!(
+        type_names.contains(&"App::User".to_string()),
+        "Archive schema should contain App::User; got: {:?}",
+        type_names
+    );
+    assert!(
+        type_names.contains(&"App::Resource".to_string()),
+        "Archive schema should contain App::Resource; got: {:?}",
+        type_names
+    );
+    assert!(
+        type_names.contains(&"App::Admin".to_string()),
+        "Archive schema should contain App::Admin; got: {:?}",
+        type_names
     );
 }
