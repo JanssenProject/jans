@@ -225,6 +225,10 @@ public class AssertionService {
 			log.debug("Failed to record authentication attempt metrics: {}", e.getMessage());
 		}
 
+		// FIDO2 conformance requires the success envelope on the options response.
+		assertionOptionsResponse.setStatus("ok");
+		assertionOptionsResponse.setErrorMessage("");
+
 		log.debug("assertionOptionsResponse :" + assertionOptionsResponse);
 		return assertionOptionsResponse;
 	}
@@ -446,8 +450,11 @@ public class AssertionService {
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getRpId())).findAny();
 		String applicationId = null;
 
-		// applicationId should not be sent incase of pure fido2
-		applicationId = fidoRegistration.get().getRegistrationData().getRpId();
+		// applicationId should not be sent incase of pure fido2. Guard the Optional so an absent
+		// match yields a clean response instead of a NoSuchElementException surfaced as HTTP 500.
+		if (fidoRegistration.isPresent()) {
+			applicationId = fidoRegistration.get().getRegistrationData().getRpId();
+		}
 
 		return Pair.of(allowedFido2Keys, applicationId);
 	}
