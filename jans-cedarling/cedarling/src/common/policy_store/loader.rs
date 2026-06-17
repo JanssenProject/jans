@@ -377,10 +377,8 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(files)
     }
 
-    /// Combine multiple `.cedarschema` files into a single parsed schema.
-    ///
-    /// Delegates to [`ParsedSchema::parse_multiple`] for parsing, validation,
-    /// and JSON deep-merge (see [`combine_schema_fragments`]).
+    /// Combine multiple `.cedarschema` files into a single parsed schema via
+    /// [`ParsedSchema::parse_multiple`].
     fn combine_schema_files(raw_files: &[SchemaFile]) -> Result<ParsedSchema, PolicyStoreError> {
         ParsedSchema::parse_multiple(raw_files)
     }
