@@ -231,6 +231,7 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -242,6 +243,7 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
         },
         lock_config: None,
         max_default_entities: None,
@@ -809,8 +811,10 @@ permit(
     let loaded = crate::init::policy_store::load_policy_store(
         &crate::PolicyStoreConfig {
             source: crate::PolicyStoreSource::CjarFile(archive_path),
+            ..Default::default()
         },
         &http_client,
+        true,
     )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
@@ -1266,5 +1270,57 @@ async fn test_load_policy_store_archive_bytes_invalid() {
             crate::common::policy_store::errors::PolicyStoreError::Archive(_)
         ),
         "Expected Archive error for invalid bytes, got: {err:?}"
+    );
+}
+
+#[test]
+async fn test_load_from_uri_detects_archive() {
+    use mockito::Server;
+
+    let builder = create_authz_policy_store_builder();
+    let archive_bytes = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let mut server = Server::new_async().await;
+    let mock = server
+        .mock("GET", "/policy-store")
+        .with_status(200)
+        .with_header("content-type", "application/octet-stream")
+        .with_body(archive_bytes)
+        .create_async()
+        .await;
+
+    let uri = format!("{}/policy-store", server.url());
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Uri(uri), |_| {}).await;
+
+    mock.assert_async().await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
+            .expect("Failed to create principal"),
+        ),
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .expect("Failed to create resource"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed");
+
+    assert!(
+        result.decision,
+        "Read action should be allowed when loading archive via Uri"
     );
 }

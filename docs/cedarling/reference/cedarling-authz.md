@@ -291,7 +291,7 @@ All validated token entities are placed under the `context.tokens` namespace. Ea
 - Any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store
 - Any data pushed via the [Context Data API](../tutorials/cedarling-getting-started.md#context-data-api) under `context.data`
 
-**Entity merging automatically resolves conflicts**, ensuring that request entities take precedence over default entities when UIDs match.
+**Entity merging automatically resolves conflicts**, ensuring that default entities take precedence over request entities when UIDs match.
 
 ### Example Policy
 

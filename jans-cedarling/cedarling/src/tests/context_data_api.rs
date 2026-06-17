@@ -588,3 +588,41 @@ async fn test_get_data_entry_ctx_with_metadata() {
     assert!(entry.expires_at.is_some(), "Expiration time should be set");
     assert!(entry.access_count >= 1, "Access count should be at least 1");
 }
+
+// ── Context data without schema ─────────────────────────────────
+
+#[test]
+async fn test_context_data_without_schema_allows_access() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    cedarling
+        .push_data_ctx("user_level", json!("premium"), Some(Duration::from_secs(60)))
+        .expect("push_data_ctx should succeed");
+
+    let request = create_test_request("AccessPremiumContent");
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should succeed without schema");
+
+    assert!(result.decision, "should be allowed: pushed data satisfies policy without schema");
+
+    cedarling
+        .remove_data_ctx("user_level")
+        .expect("remove should succeed");
+
+    let request = create_test_request("AccessPremiumContent");
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should succeed");
+
+    assert!(!result.decision, "should be denied: no pushed data without schema");
+}

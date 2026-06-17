@@ -32,7 +32,7 @@ use pyo3::prelude::*;
 /// memory_alert_triggered : bool
 ///     Whether memory usage exceeds the alert threshold
 #[derive(Debug, Clone)]
-#[pyclass(get_all)]
+#[pyclass(get_all, from_py_object)]
 pub struct DataStoreStats {
     /// Number of entries currently stored
     entry_count: usize,

@@ -54,6 +54,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_pg:
+        description: 'Run "build_cedarling_pg" job?'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -1693,3 +1698,201 @@ jobs:
       upload-tag-name: "${{ needs.collect-demo-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: demo.intoto.jsonl
+
+  build_cedarling_pg:
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [pg13, pg14, pg15, pg16, pg17, pg18]
+    env:
+      PGRX_VERSION: "0.18.0"
+      EXT_NAME: cedarling_pg
+      EXT_DIR: jans-cedarling/cedarling_pg
+      TARGET_TAG: ${{ inputs.target_tag }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Install Postgres build dependencies
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
+            libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+        with:
+          toolchain: stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: jans-cedarling
+          key: cedarling-pg-${{ matrix.pg }}-x86_64
+
+      - name: Install cargo-pgrx
+        run: cargo install --locked cargo-pgrx --version "=${PGRX_VERSION}"
+
+      - name: Initialize pgrx (${{ matrix.pg }})
+        run: cargo pgrx init --${{ matrix.pg }} download
+
+      - name: Build extension package
+        working-directory: ${{ env.EXT_DIR }}
+        run: cargo pgrx package --features ${{ matrix.pg }}
+
+      - name: Stage tarball
+        id: stage
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${TARGET_TAG}"
+          else
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+          fi
+          TAG=$(echo "${VERSION}" | sed 's/^v//')
+          if [ "${TAG}" == "nightly" ]; then
+            TAG="0.0.0"
+          fi
+
+          PG="${{ matrix.pg }}"
+          pkg_root="target/release/${EXT_NAME}-${PG}"
+          test -d "${pkg_root}" || { echo "package output missing at ${pkg_root}"; exit 1; }
+
+          # pgrx emits a matched set per PG major: .so under usr/lib/postgresql/<NN>/lib
+          # and .control + .sql under usr/share/postgresql/<NN>/extension.
+          BASE="${EXT_NAME}-${TAG}-${PG}-linux-x86_64"
+          stage="$(mktemp -d)"
+          mkdir -p "${stage}/${BASE}"
+          cp -a "${pkg_root}/." "${stage}/${BASE}/"
+
+          tar -czf "${BASE}.tar.gz" -C "${stage}" "${BASE}"
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke-test tarball contents
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          set -euo pipefail
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          tmp="$(mktemp -d)"
+          tar -xzf "${FILE}" -C "${tmp}"
+          root="$(find "${tmp}" -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "${root}"
+          SO="$(find "${root}" -name '${{ env.EXT_NAME }}.so' | head -1)"
+          CONTROL="$(find "${root}" -name '${{ env.EXT_NAME }}.control' | head -1)"
+          SQL="$(find "${root}" -name '${{ env.EXT_NAME }}--*.sql' | head -1)"
+          if [ -z "${SO}" ] || [ -z "${CONTROL}" ] || [ -z "${SQL}" ]; then
+            echo "::error::Smoke-test failed: ${FILE} missing matched extension set (.so, .control, .sql)"
+            echo "## cedarling_pg Tarball Smoke-Test (${{ matrix.pg }})" >> "${GITHUB_STEP_SUMMARY}"
+            echo ":x: **FAILED** — \`${FILE}\` is missing one or more of .so / .control / .sql" >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+          echo "## cedarling_pg Tarball Smoke-Test (${{ matrix.pg }})" >> "${GITHUB_STEP_SUMMARY}"
+          echo ":white_check_mark: \`${FILE}\` contains matched extension files:" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${SO#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${CONTROL#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${SQL#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Sign and upload cedarling_pg tarball
+        working-directory: ${{ env.EXT_DIR }}
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${TARGET_TAG}"
+          else
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+          fi
+
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          cosign sign-blob --yes --bundle "${FILE}.bundle" "${FILE}"
+
+          gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber || {
+            echo "gh release upload failed (assets may already exist), continuing..."
+          }
+
+      - name: Compute SHA256 digest for SLSA provenance
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          SHA256=$(sha256sum "${FILE}" | awk '{print $1}')
+          echo "${SHA256}  ${FILE}" > "/tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256"
+
+      - name: Upload cedarling_pg digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cedarling-pg-digest-${{ matrix.pg }}
+          path: /tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256
+          retention-days: 1
+
+  collect-cedarling-pg-digests:
+    name: Collect Cedarling PostgreSQL extension digests
+    needs: [build_cedarling_pg]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download cedarling_pg digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-pg-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-pg-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-pg-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-pg:
+    name: SLSA provenance — Cedarling PostgreSQL extension
+    needs: [collect-cedarling-pg-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg)) &&
+      needs.collect-cedarling-pg-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-pg-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-pg-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-pg.intoto.jsonl

@@ -54,7 +54,7 @@ impl Cedarling {
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_unsigned(&request)
+        self.instance.authz.load().authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
@@ -64,7 +64,7 @@ impl Cedarling {
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_multi_issuer(&request)
+        self.instance.authz.load().authorize_multi_issuer(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -77,6 +77,7 @@ impl Cedarling {
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
+            .load()
             .get_matching_policies_unsigned(principal, actions, resources)
     }
 
@@ -90,6 +91,7 @@ impl Cedarling {
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
+            .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
