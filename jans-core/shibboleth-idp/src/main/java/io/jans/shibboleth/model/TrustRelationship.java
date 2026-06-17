@@ -311,6 +311,13 @@ public class TrustRelationship {
             .withActivationDiagnostics(ActivationDiagnostics.none())
             .build();
     }
+
+    public TrustResult<TrustRelationship> deactivate() {
+
+        return from(this)
+            .withStatus(TrustStatus.READY)
+            .build();
+    }
  
     @Override
     public boolean equals(Object o) {
@@ -679,6 +686,7 @@ public class TrustRelationship {
 
             return Objects.equals(original.displayName,candidate.displayName)
                 && Objects.equals(original.description,candidate.description)
+                && Objects.equals(original.status,candidate.status)
                 && Objects.equals(original.nature,candidate.nature)
                 && Objects.equals(original.metadataSource,candidate.metadataSource)
                 && Objects.equals(original.discoveredEntityIds,candidate.discoveredEntityIds)
@@ -694,6 +702,7 @@ public class TrustRelationship {
 
         private TrustResult<TrustRelationship> applyStateTransitions(TrustRelationship candidate) {
 
+           
             TrustResult<TrustStatus> newstatus = TrustTransitionRules.determineNewStatus(candidate);
             if (newstatus.isFailure()) {
 
@@ -704,6 +713,7 @@ public class TrustRelationship {
 
                 return TrustResult.success(createCandidateWithNewStatus(candidate,newstatus.getValue()));
             }
+
             return TrustResult.success(candidate);
         }
     }

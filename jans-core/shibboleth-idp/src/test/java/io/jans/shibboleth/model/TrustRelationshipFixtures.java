@@ -16,6 +16,8 @@ import io.jans.shibboleth.model.core.EntityId;
 import io.jans.shibboleth.model.core.Id;
 import io.jans.shibboleth.model.core.ReleasedAttribute;
 import io.jans.shibboleth.model.core.TrustNature;
+import io.jans.shibboleth.model.core.TrustStatus;
+import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
 import io.jans.shibboleth.model.metadata.MdqMetadataSource;
@@ -73,6 +75,39 @@ public class TrustRelationshipFixtures {
 
         return sampleDraftAggregateTrustRelationship()
             .updateMetadataSource(sampleUriMetadataSource())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleReadyIndividualTrustRelationship() {
+
+        return TrustRelationship.from(sampleDraftIndividualTrustRelationshipWithActiveProfile())
+            .withMetadataSource(sampleFileMetadataSource())
+            .build()
+            .getValue();
+    }
+
+
+    public static final TrustRelationship sampleReadyAggregateTrustRelationship() {
+
+        return TrustRelationship.from(sampleDraftAggregateTrustRelationshipWithActiveProfile())
+            .withMetadataSource(sampleMdqMetadataSource())
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActivatingIndividualTrustRelationship() {
+
+        return TrustRelationship.from(sampleReadyIndividualTrustRelationship())
+            .withStatus(TrustStatus.ACTIVATING)
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActivatingAggregateTrustRelationship() {
+
+        return TrustRelationship.from(sampleReadyAggregateTrustRelationship())
+            .withStatus(TrustStatus.ACTIVATING)
+            .build()
             .getValue();
     }
 

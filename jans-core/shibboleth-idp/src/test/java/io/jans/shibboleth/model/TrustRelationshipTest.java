@@ -188,7 +188,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsWithARealMetadataSource() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithRealMetadataSourcePairedWithActiveProfiles() {
 
         TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
         TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
@@ -223,83 +223,18 @@ public class TrustRelationshipTest {
 
     private static final Stream<Arguments> readyTrustRelationshipsOfAllNatures() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
-        
         return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship())
+        );
+    }
 
-            //Individual TrustRelationships
 
-            Arguments.of(
-                individual.updateShibbolethSsoProfileConfiguration(
-                    TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration()
-                ).getValue()
-            ),
-            Arguments.of(
-                individual.updateSaml2ArtifactResolutionProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration()
-                ).getValue()
-            ),
-            Arguments.of(
-                individual.updateSaml2AttributeQueryProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration()
-                ).getValue()
-            ),
-
-            Arguments.of(
-                individual.updateSaml2EcpProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration()
-                ).getValue()
-            ),
-
-            Arguments.of(
-                individual.updateSaml2SsoProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration()
-                ).getValue()
-            ),
-
-            Arguments.of(
-                individual.updateSaml2LogoutProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration()
-                ).getValue()
-            ),
-
-            //Aggregate TrustRelationships
-            Arguments.of(
-                aggregate.updateShibbolethSsoProfileConfiguration(
-                    TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration()
-                ).getValue()
-            ),
-            
-            Arguments.of(
-                aggregate.updateSaml2ArtifactResolutionProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration()
-                ).getValue()
-            ),
-            
-            Arguments.of(
-                aggregate.updateSaml2AttributeQueryProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration()
-                ).getValue()
-            ),
-            
-            Arguments.of(
-                aggregate.updateSaml2EcpProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration()
-                ).getValue()
-            ),
-            
-            Arguments.of(
-                aggregate.updateSaml2SsoProfileConfiguration(
-                    TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration()
-                ).getValue()
-            ),
-            
-            Arguments.of(
-                aggregate.updateSaml2LogoutProfileConfiguration(
-                     TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration()
-                ).getValue()
-            )
+    private static final Stream<Arguments> activatingTrustRelationshipsOfAllNatures() {
+ 
+        return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship())
         );
     }
 
@@ -699,7 +634,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithARealMetadataSource")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRealMetadataSourcePairedWithActiveProfiles")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with a REAL(non-NONE) metadata source " +
             "WHEN updateXXXProfileConfiguration is called with an ACTIVE profile configuration " +
@@ -861,6 +796,25 @@ public class TrustRelationshipTest {
             
             assertThat(updated).isInActivatingStatus();
             assertThat(updated).hasNoActivationDiagnosticsData();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN deactivate() is called " + 
+            "THEN should transition to READY state and increment version "
+        )
+        public void shouldTransitionToReady_whenDeactivateCalledFromActivating(TrustRelationship tr) {
+
+            assertThat(tr).isInActivatingStatus();
+            TrustResult<TrustRelationship> result = tr.deactivate();
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInReadyStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
     }

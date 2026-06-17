@@ -2,6 +2,7 @@ package io.jans.shibboleth.model.core.diagnostics;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.util.TrustResult;
@@ -53,10 +54,33 @@ public class ActivationDiagnostics {
         return completedAt;
     }
 
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ActivationDiagnostics diagnostics = (ActivationDiagnostics) o;
+        return Objects.equals(status,diagnostics.status)
+            && Objects.equals(origin,diagnostics.origin)
+            && Objects.equals(logEntries,diagnostics.logEntries)
+            && Objects.equals(startedAt,diagnostics.startedAt)
+            && Objects.equals(completedAt,diagnostics.completedAt);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(status,origin,logEntries,startedAt,completedAt);
+    }
+
     public static ActivationDiagnostics none() {
 
         return builder()
             .status(ActivationStatus.NO_DATA)
+            .origin(Origin.of(""))
+            .logEntries(List.of())
+            .startedAt(Instant.EPOCH)
+            .completedAt(Instant.EPOCH)
             .build()
             .getValue();
     }
@@ -142,14 +166,6 @@ public class ActivationDiagnostics {
         public TrustResult<ActivationDiagnostics> build() {
 
             
-
-            if (status == ActivationStatus.NO_DATA) {
-
-                origin = Origin.of("");
-                logEntries = List.of();
-                startedAt = Instant.EPOCH;
-                completedAt = Instant.EPOCH;
-            }
 
             if (status == null) {
 
