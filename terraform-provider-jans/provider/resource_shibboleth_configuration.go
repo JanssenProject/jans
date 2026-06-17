@@ -55,11 +55,16 @@ func resourceShibbolethConfiguration() *schema.Resource {
 func resourceShibbolethConfigurationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*jans.Client)
 
-	config := &jans.ShibbolethIdpConfiguration{
-		EntityId: d.Get("entity_id").(string),
-		Scope:    d.Get("scope").(string),
-		Enabled:  d.Get("enabled").(bool),
+	// Merge onto the current server config so fields managed elsewhere (trusted
+	// service providers, attribute mappings) are preserved on the PUT.
+	config, err := c.GetShibbolethConfiguration(ctx)
+	if err != nil {
+		return diag.FromErr(err)
 	}
+
+	config.EntityId = d.Get("entity_id").(string)
+	config.Scope = d.Get("scope").(string)
+	config.Enabled = d.Get("enabled").(bool)
 
 	if v, ok := d.GetOk("metadata_providers"); ok {
 		providers := make([]string, 0)
@@ -112,12 +117,16 @@ func resourceShibbolethConfigurationRead(ctx context.Context, d *schema.Resource
 func resourceShibbolethConfigurationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*jans.Client)
 
-	config := &jans.ShibbolethIdpConfiguration{
-		EntityId: d.Get("entity_id").(string),
-		Scope:    d.Get("scope").(string),
-		Enabled:  d.Get("enabled").(bool),
-		Revision: d.Get("revision").(int),
+	// Merge onto the current server config so fields managed elsewhere (trusted
+	// service providers, attribute mappings) are preserved on the PUT.
+	config, err := c.GetShibbolethConfiguration(ctx)
+	if err != nil {
+		return diag.FromErr(err)
 	}
+
+	config.EntityId = d.Get("entity_id").(string)
+	config.Scope = d.Get("scope").(string)
+	config.Enabled = d.Get("enabled").(bool)
 
 	if v, ok := d.GetOk("metadata_providers"); ok {
 		providers := make([]string, 0)
@@ -128,8 +137,7 @@ func resourceShibbolethConfigurationUpdate(ctx context.Context, d *schema.Resour
 	}
 
 	tflog.Debug(ctx, "Updating Shibboleth configuration")
-	_, err := c.UpdateShibbolethConfiguration(ctx, config)
-	if err != nil {
+	if _, err := c.UpdateShibbolethConfiguration(ctx, config); err != nil {
 		return diag.FromErr(err)
 	}
 
