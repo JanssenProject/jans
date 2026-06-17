@@ -281,72 +281,66 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// 3. `schemas/*.cedarschema` directory empty → returns `EmptySchemaDirectory` error.
     /// 4. Neither present → returns `MissingSchemaSource` error with both paths.
     fn load_schema(&self, dir: &str) -> Result<Option<String>, PolicyStoreError> {
-        match self.load_single_schema_file(dir) {
-            Ok(content) => Ok(Some(content)),
-            Err(PolicyStoreError::Validation(ValidationError::MissingSingleSchemaFile {
-                path: searched_file,
-            })) => match self.load_schema_from_directory(dir) {
-                Ok(content) => Ok(Some(content)),
-                Err(PolicyStoreError::Validation(ValidationError::MissingSchemaDirectory {
-                    path: searched_dir,
-                })) => Err(ValidationError::MissingSchemaSource {
-                    searched_file,
-                    searched_dir,
-                }
-                .into()),
-                Err(other) => Err(other),
-            },
-            Err(other) => Err(other),
+        let schema_path = Self::join_path(dir, "schema.cedarschema");
+        if let Some(content) = self.load_single_schema_file(&schema_path)? {
+            return Ok(Some(content));
+        }
+        let schemas_dir = Self::join_path(dir, "schemas");
+        match self.load_schema_from_directory(&schemas_dir)? {
+            Some(content) => Ok(Some(content)),
+            None => Err(ValidationError::MissingSchemaSource {
+                searched_file: schema_path,
+                searched_dir: schemas_dir,
+            }
+            .into()),
         }
     }
 
-    /// Try to load schema from the single schema.cedarschema file.
-    /// Returns `Err(MissingSingleSchemaFile)` if the file does not exist.
-    fn load_single_schema_file(&self, dir: &str) -> Result<String, PolicyStoreError> {
-        let schema_path = Self::join_path(dir, "schema.cedarschema");
-        match self.vfs.read_file(&schema_path) {
-            Ok(bytes) => String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
-                path: schema_path.clone(),
-                source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
-            }),
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                Err(ValidationError::MissingSingleSchemaFile { path: schema_path }.into())
-            },
+    /// Try to load schema from a single file.
+    /// Returns `None` if the file does not exist.
+    fn load_single_schema_file(&self, path: &str) -> Result<Option<String>, PolicyStoreError> {
+        match self.vfs.read_file(path) {
+            Ok(bytes) => String::from_utf8(bytes)
+                .map(Some)
+                .map_err(|e| PolicyStoreError::FileReadError {
+                    path: path.to_string(),
+                    source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                }),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
             Err(source) => Err(PolicyStoreError::FileReadError {
-                path: schema_path.clone(),
+                path: path.to_string(),
                 source,
             }),
         }
     }
 
     /// Load schema from the schemas/ directory, combining all `.cedarschema` files.
-    /// Returns `Err(MissingSchemaDirectory)` if the directory does not exist.
+    /// Returns `None` if the directory does not exist.
     /// Returns `Err(EmptySchemaDirectory)` if the directory exists but contains no `.cedarschema` files.
-    fn load_schema_from_directory(&self, dir: &str) -> Result<String, PolicyStoreError> {
-        let schemas_dir = Self::join_path(dir, "schemas");
-        if !self.vfs.exists(&schemas_dir) {
-            return Err(ValidationError::MissingSchemaDirectory { path: schemas_dir }.into());
+    fn load_schema_from_directory(&self, path: &str) -> Result<Option<String>, PolicyStoreError> {
+        if !self.vfs.exists(path) {
+            return Ok(None);
         }
-        if !self.vfs.is_dir(&schemas_dir) {
+        if !self.vfs.is_dir(path) {
             return Err(PolicyStoreError::NotADirectory {
-                path: schemas_dir.clone(),
+                path: path.to_string(),
             });
         }
 
-        let entries = self.vfs.read_dir(&schemas_dir).map_err(|source| {
+        let entries = self.vfs.read_dir(path).map_err(|source| {
             PolicyStoreError::DirectoryReadError {
-                path: schemas_dir.clone(),
+                path: path.to_string(),
                 source,
             }
         })?;
 
         let raw_files = self.read_schema_files(entries)?;
         if raw_files.is_empty() {
-            return Err(ValidationError::EmptySchemaDirectory { path: schemas_dir }.into());
+            return Err(ValidationError::EmptySchemaDirectory { path: path.to_string() }.into());
         }
 
         let combined = Self::combine_schema_files(&raw_files)?;
-        Ok(combined)
+        Ok(Some(combined))
     }
 
     /// Read and validate all `.cedarschema` files from directory entries.

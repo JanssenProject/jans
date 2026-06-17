@@ -300,14 +300,6 @@ pub(crate) enum ValidationError {
     )]
     InvalidTimestampOrdering,
 
-    /// Single schema.cedarschema file not found
-    #[error("Required schema file not found: '{path}'")]
-    MissingSingleSchemaFile { path: String },
-
-    /// Schema directory not found
-    #[error("Required schema directory not found: '{path}/'")]
-    MissingSchemaDirectory { path: String },
-
     /// Schema directory exists but is empty (no .cedarschema files)
     #[error("Schema directory '{path}/' exists but contains no .cedarschema files")]
     EmptySchemaDirectory { path: String },
