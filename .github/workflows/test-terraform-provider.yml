@@ -1,0 +1,224 @@
+name: terraform-provider
+
+# Runs the Terraform-provider acceptance tests against a live AIO (all-in-one)
+# Janssen instance. AIO is brought up the same way the integration workflow does
+# (the consul+vault+traefik+DB+AIO compose stack) but from the PREBUILT nightly
+# image -- no source build, no DigitalOcean droplet -- so it runs on a plain
+# GitHub runner. Results are uploaded the way test-integration.yml does them:
+# JUnit artifacts + a dorny PR check + a step-summary table + a gate.
+#
+# This replaces the old microk8s workflow, whose 12-leg helm matrix tested the
+# published charts (not the PR) and only dumped results to the step summary.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform-provider-jans/**"
+      - ".github/workflows/test-terraform-provider.yml"
+      - ".github/workflows/scripts/summarize_gotest.py"
+      - "automation/ci/run_aio_for_tf.sh"
+      - "automation/start_janssen_aio_demo.sh"
+      - "!**.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "terraform-provider-jans/**"
+      - ".github/workflows/test-terraform-provider.yml"
+      - ".github/workflows/scripts/summarize_gotest.py"
+      - "automation/ci/run_aio_for_tf.sh"
+      - "automation/start_janssen_aio_demo.sh"
+      - "!**.md"
+  workflow_dispatch:
+    inputs:
+      aio_image_tag:
+        description: 'AIO image to test against'
+        required: false
+        default: 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly'
+  schedule:
+    # nightly, after the nightly image is republished (build-nightly-build runs at 23:00 UTC)
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+  checks: write   # dorny/test-reporter posts the test report as a check run
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-provider:
+    if: github.repository == 'JanssenProject/jans'
+    strategy:
+      fail-fast: false
+      matrix:
+        persistence-backend: ["MYSQL", "PGSQL"]
+    runs-on: ubuntu-latest
+    env:
+      JANS_FQDN: tf-${{ github.run_id }}-${{ matrix.persistence-backend }}.jans.test
+      AIO_IMAGE_TAG: ${{ github.event.inputs.aio_image_tag || 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly' }}
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+      with:
+        go-version-file: terraform-provider-jans/go.mod
+        cache-dependency-path: terraform-provider-jans/go.sum
+
+    - name: Map FQDN to localhost (traefik publishes :443 on the runner)
+      run: echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
+
+    - name: Log in to ghcr.io
+      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Bring up AIO from the prebuilt image
+      env:
+        JANS_PERSISTENCE: ${{ matrix.persistence-backend }}
+      run: bash automation/ci/run_aio_for_tf.sh
+
+    - name: Extract config-api credentials and create test client
+      id: credentials
+      run: |
+        set -euo pipefail
+        CONFIG_API="https://${JANS_FQDN}/jans-config-api/api/v1"
+        TOKEN_ENDPOINT="https://${JANS_FQDN}/jans-auth/restv1/token"
+
+        # The config-api management client (jca) lives in the AIO's own config/secret
+        # stores; read it through the container's pycloudlib (adapter-agnostic).
+        JCA_CLIENT_ID=$(docker exec jans python3 -c "from jans.pycloudlib import get_manager; print(get_manager().config.get('jca_client_id') or '')")
+        JCA_CLIENT_PW=$(docker exec jans python3 -c "from jans.pycloudlib import get_manager; print(get_manager().secret.get('jca_client_pw') or '')")
+        if [[ -z "$JCA_CLIENT_ID" || -z "$JCA_CLIENT_PW" ]]; then
+          echo "ERROR: could not read jca_client_id/jca_client_pw from the AIO"
+          exit 1
+        fi
+        echo "::add-mask::${JCA_CLIENT_PW}"
+
+        echo "Obtaining access token from config-api client..."
+        TOKEN_RESPONSE=$(curl -sk -X POST "$TOKEN_ENDPOINT" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=client_credentials" \
+          -d "client_id=${JCA_CLIENT_ID}" \
+          -d "client_secret=${JCA_CLIENT_PW}" \
+          -d "scope=https://jans.io/oauth/config/openid/clients.write https://jans.io/oauth/config/scopes.readonly")
+        ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token // empty')
+        if [[ -n "$ACCESS_TOKEN" ]]; then
+          echo "::add-mask::${ACCESS_TOKEN}"
+        else
+          echo "ERROR: Failed to obtain access token"
+          echo "$TOKEN_RESPONSE" | jq . 2>/dev/null || echo "$TOKEN_RESPONSE"
+          exit 1
+        fi
+
+        echo "Fetching all available scopes..."
+        ALL_SCOPES=$(curl -sk -H "Authorization: Bearer $ACCESS_TOKEN" "${CONFIG_API}/scopes?limit=500" | jq -r '.[].dn')
+        SCOPE_ARRAY=$(echo "$ALL_SCOPES" | jq -R -s 'split("\n") | map(select(length > 0))')
+
+        TEST_CLIENT_PW=$(openssl rand -base64 12)
+        echo "::add-mask::${TEST_CLIENT_PW}"
+
+        echo "Creating test client with all scopes..."
+        RESPONSE=$(curl -sk -X POST "${CONFIG_API}/openid/clients" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"displayName\": \"CI Terraform Test Client\",
+            \"clientSecret\": \"${TEST_CLIENT_PW}\",
+            \"applicationType\": \"web\",
+            \"tokenEndpointAuthMethod\": \"client_secret_basic\",
+            \"grantTypes\": [\"client_credentials\"],
+            \"responseTypes\": [\"token\"],
+            \"scopes\": ${SCOPE_ARRAY},
+            \"trustedClient\": true,
+            \"accessTokenAsJwt\": false,
+            \"disabled\": false
+          }")
+        TEST_CLIENT_ID=$(echo "$RESPONSE" | jq -r '.inum // .clientId // empty')
+        if [[ -z "$TEST_CLIENT_ID" ]]; then
+          echo "ERROR: Failed to create test client"
+          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
+          exit 1
+        fi
+        echo "Test client created: ${TEST_CLIENT_ID}"
+        echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
+        echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
+
+    - name: Install gotestsum
+      run: go install gotest.tools/gotestsum@latest
+
+    - name: Run Terraform provider acceptance tests
+      id: tf_tests
+      continue-on-error: true
+      working-directory: terraform-provider-jans
+      env:
+        TF_ACC: "1"
+        JANS_CLIENT_ID: ${{ steps.credentials.outputs.test_client_id }}
+        JANS_CLIENT_SECRET: ${{ steps.credentials.outputs.test_client_pw }}
+        JANS_URL: https://${{ env.JANS_FQDN }}
+        JANS_INSECURE_CLIENT: "true"
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/test-reports"
+        gotestsum \
+          --junitfile "${GITHUB_WORKSPACE}/test-reports/TEST-terraform-${{ matrix.persistence-backend }}.xml" \
+          --format testname \
+          -- ./... -timeout 30m
+
+    - name: Collect AIO logs
+      if: always()
+      run: |
+        mkdir -p aio-logs
+        docker logs jans > aio-logs/aio-container.log 2>&1 || true
+        docker logs traefik > aio-logs/traefik.log 2>&1 || true
+        docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
+        docker compose -f automation/compose.yaml ps > aio-logs/compose-ps.txt 2>&1 || true
+
+    - name: Summarise results
+      if: always()
+      env:
+        MATRIX: ${{ matrix.persistence-backend }}
+      run: python3 .github/workflows/scripts/summarize_gotest.py >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: test-reports-${{ matrix.persistence-backend }}
+        path: test-reports/
+        if-no-files-found: warn
+        retention-days: 5
+
+    - name: Upload AIO logs
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: aio-logs-${{ matrix.persistence-backend }}
+        path: aio-logs/
+        if-no-files-found: warn
+        retention-days: 5
+
+    - name: Publish test report (PR check)
+      if: always()
+      continue-on-error: true
+      uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+      with:
+        name: terraform-provider (${{ matrix.persistence-backend }})
+        path: "test-reports/*.xml"
+        reporter: java-junit
+        fail-on-error: false
+
+    - name: Gate on test outcome
+      if: always()
+      run: python3 .github/workflows/scripts/summarize_gotest.py --gate
