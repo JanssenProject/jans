@@ -205,7 +205,7 @@ func extractResource(resource *Entity) (cedarling_go.EntityData, error) {
 	return output, err
 }
 
-func (p *CedarPlugin) Evaluate(subject *Entity, action string, resource *Entity, context map[string]any) (*cedarling_go.MultiIssuerAuthorizeResult, error) {
+func (p *CedarPlugin) evaluate(subject *Entity, action string, resource *Entity, context map[string]any) (*cedarling_go.MultiIssuerAuthorizeResult, error) {
 	tokens, err := extractTokens(subject)
 	if err != nil {
 		return nil, err
@@ -222,4 +222,22 @@ func (p *CedarPlugin) Evaluate(subject *Entity, action string, resource *Entity,
 	}
 	authorization_result, err := p.cedar.AuthorizeMultiIssuer(authorization_request)
 	return &authorization_result, err
+}
+
+func (p *CedarPlugin) buildEvaluationResponse(subject *Entity, action string, resource *Entity, context map[string]any) (*EvaluationResponse, error) {
+	result, err := p.evaluate(subject, action, resource, context)
+	response := EvaluationResponse{}
+	if err != nil {
+		if result == nil {
+			return nil, err
+		} else {
+			response.Decision = false
+			response.Context = map[string]any{
+				"error": err.Error(),
+			}
+		}
+	} else {
+		response.Decision = result.Decision
+	}
+	return &response, nil
 }

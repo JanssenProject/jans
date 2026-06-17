@@ -7,14 +7,18 @@ import (
 	"net/http"
 )
 
+func writeError(w http.ResponseWriter, status int, message string) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]any{"error": message})
+}
+
 func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 	request_id := r.Header.Get("X-Request-ID")
 	if request_id != "" {
 		w.Header().Add("X-Request-ID", request_id)
 	}
 	if r.Method != "GET" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
+		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -22,8 +26,7 @@ func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 	plugin := globalInstance
 	globalInstanceMu.RUnlock()
 	if plugin == nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Plugin not available"})
+		writeError(w, http.StatusServiceUnavailable, "Plugin unavailable")
 		return
 	}
 	metadata := PDPMetadata{
@@ -46,42 +49,26 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 	contentType := r.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if r.Method != "POST" || err != nil || mediaType != "application/json" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
+		writeError(w, http.StatusBadRequest, "Invalid Request")
 		p.logger.Info(err.Error())
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
 	var request EvaluationRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
+		writeError(w, http.StatusBadRequest, "Invalid Request")
 		p.logger.Info(err.Error())
 		return
 	}
-	result, err := p.Evaluate(&request.Subject, request.Action.Name, &request.Resource, request.Context)
 	w.WriteHeader(200)
-	response := EvaluationResponse{}
+	response, err := p.buildEvaluationResponse(&request.Subject, request.Action.Name, &request.Resource, request.Context)
 	if err != nil {
-		if result == nil {
-			// something else was wrong
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
-			p.logger.Info(err.Error())
-			return
-		} else {
-			// error during authorization
-			response.Decision = false
-			response.Context = map[string]any{
-				"error": err.Error(),
-			}
-		}
-	} else {
-		response.Decision = result.Decision
+		writeError(w, http.StatusInternalServerError, "Something went wrong")
+		p.logger.Info(err.Error())
+		return
 	}
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
+		writeError(w, http.StatusInternalServerError, "Something went wrong")
 		p.logger.Info(err.Error())
 		return
 	}
@@ -105,45 +92,28 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 	contentType := r.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if r.Method != "POST" || err != nil || mediaType != "application/json" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
+		writeError(w, http.StatusBadRequest, "Invalid Request")
 		p.logger.Info(err.Error())
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
 	var request MultipleEvaluationRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Invalid Request"})
+		writeError(w, http.StatusBadRequest, "Invalid Request")
 		p.logger.Info(err.Error())
 		return
 	}
 	if request.Evaluation == nil {
 		// handle same as single evaluation request
-		result, err := p.Evaluate(request.Subject, request.Action.Name, request.Resource, request.Context)
 		w.WriteHeader(200)
-		response := EvaluationResponse{}
+		response, err := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context)
 		if err != nil {
-			if result == nil {
-				// something else was wrong
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
-				p.logger.Info(err.Error())
-				return
-			} else {
-				// error during authorization
-				response.Decision = false
-				response.Context = map[string]any{
-					"error": err.Error(),
-				}
-			}
-		} else {
-			response.Decision = result.Decision
+			writeError(w, http.StatusInternalServerError, "Something went wrong")
+			p.logger.Info(err.Error())
+			return
 		}
-
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
+			writeError(w, http.StatusInternalServerError, "Something went wrong")
 			p.logger.Info(err.Error())
 			return
 		}
@@ -153,47 +123,43 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 	for _, eval := range request.Evaluation {
 		subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
+			writeError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		resource, err := mergeEntityHelper(eval.Resource, request.Resource, "resource")
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
+			writeError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		action := eval.Action
 		if action == nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]any{"error": "Invalid request: missing action"})
+			writeError(w, http.StatusBadRequest, "Invalid request: missing action")
 			return
 		}
 		context := eval.Context
-		response := EvaluationResponse{}
-		result, err := p.Evaluate(subject, action.Name, resource, context)
+		response, err := p.buildEvaluationResponse(subject, action.Name, resource, context)
 		if err != nil {
-			if result == nil {
-				// something else was wrong
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
+			writeError(w, http.StatusInternalServerError, "Something went wrong")
+			p.logger.Info(err.Error())
+			return
+		}
+		responseList = append(responseList, *response)
+		if request.Options.EvaluationSemantic == PermitOnFirstPermit && response.Decision {
+			if err := json.NewEncoder(w).Encode(responseList); err != nil {
+				writeError(w, http.StatusInternalServerError, "Something went wrong")
 				p.logger.Info(err.Error())
 				return
-			} else {
-				// error during authorization
-				response.Decision = false
-				response.Context = map[string]any{
-					"error": err.Error(),
-				}
 			}
-		} else {
-			response.Decision = result.Decision
+		} else if request.Options.EvaluationSemantic == DenyOnFirstDeny && !response.Decision {
+			if err := json.NewEncoder(w).Encode(responseList); err != nil {
+				writeError(w, http.StatusInternalServerError, "Something went wrong")
+				p.logger.Info(err.Error())
+				return
+			}
 		}
-		responseList = append(responseList, response)
 	}
 	if err := json.NewEncoder(w).Encode(responseList); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]any{"error": "Something went wrong"})
+		writeError(w, http.StatusInternalServerError, "Something went wrong")
 		p.logger.Info(err.Error())
 		return
 	}

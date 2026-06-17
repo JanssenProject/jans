@@ -2,7 +2,6 @@ package cedarlingopa
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type EvaluationsSemantic string
@@ -19,11 +18,12 @@ func (e *EvaluationsSemantic) UnMarshalJSON(data []byte) error {
 		return err
 	}
 	switch EvaluationsSemantic(s) {
-	case ExecuteAll, DenyOnFirstDeny, PermitOnFirstPermit:
+	case PermitOnFirstPermit, DenyOnFirstDeny:
 		*e = EvaluationsSemantic(s)
 		return nil
 	default:
-		return fmt.Errorf("Invalid evaluation semantic %s", s)
+		*e = ExecuteAll
+		return nil
 	}
 }
 
