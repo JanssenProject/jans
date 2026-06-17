@@ -336,6 +336,7 @@ jobs:
             -o -name "jans-fido2-model-${VERSION}.jar" \
             -o -name "casa-config-${VERSION}.jar" \
             -o -name "agama-inbound-${VERSION}.jar" \
+            -o -name "cedarling-java-${VERSION}.jar" \
           \) -exec cp -v {} "$OUT/" \;
         echo "Collected:"; ls -la "$OUT"
         echo "dir=${OUT}" >> "$GITHUB_OUTPUT"
