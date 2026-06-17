@@ -306,6 +306,27 @@ class CertificateVerifierTest {
     }
 
     @Test
+    void verifyStatusAcceptable_ifStatusIsRevoked_fido2RuntimeException() {
+        // CONF-19: a REVOKED MDS statusReport must be rejected (entry is dropped from the TOC, so the
+        // authenticator is not trusted; in enforced mode registration then fails — see CONF-22).
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(true);
+        String statusString = "REVOKED";
+        when(statusItem.get("status")).thenReturn(new TextNode(statusString));
+        when(statusItem.get("effectiveDate")).thenReturn(new TextNode("TEST_DATE"));
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+    }
+
+    @Test
     void verifyStatusAcceptable_validValues_valid() {
         String aaguid = "test_aaguid";
         JsonNode metadataEntry = mock(JsonNode.class);
