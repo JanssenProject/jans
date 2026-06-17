@@ -16,7 +16,7 @@ export interface LLMProvider {
     hasBaseUrl?: boolean;
   }
   
-  export interface Model {
+  interface Model {
     value: string;
     label: string;
     description: string;
@@ -27,7 +27,7 @@ export interface LLMProvider {
   }
   
   export type ConnectionStatus = "disconnected" | "connecting" | "connected";
-  export type AlertSeverity = "success" | "error" | "warning" | "info";
+  type AlertSeverity = "success" | "error" | "warning" | "info";
   
   export interface SnackbarState {
     open: boolean;

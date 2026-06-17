@@ -413,8 +413,3 @@ export async function handleUserPrompt(prompt: string) {
     };
   }
 }
-
-// ==================== EXPORTED FUNCTIONS ====================
-export const updateProvider = ConfigurationManager.updateProvider;
-export const updateApiKey = ConfigurationManager.updateApiKey;
-export const updateModel = ConfigurationManager.updateModel;

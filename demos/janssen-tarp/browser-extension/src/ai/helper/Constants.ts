@@ -17,7 +17,7 @@ export const STORAGE_KEYS = {
 
   // Providers that run locally / require no API key. The user configures only
   // the model (and, for Ollama, the server endpoint).
-  export const KEYLESS_PROVIDERS: readonly LLMProviderType[] = [LLMProviderType.OLLAMA];
+  const KEYLESS_PROVIDERS: readonly LLMProviderType[] = [LLMProviderType.OLLAMA];
 
   export function providerRequiresApiKey(provider: string): boolean {
     return !KEYLESS_PROVIDERS.includes(provider as LLMProviderType);

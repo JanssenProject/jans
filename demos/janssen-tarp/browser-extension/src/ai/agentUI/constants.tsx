@@ -8,7 +8,6 @@ import {
 import {
   LLMProvider,
   ConnectionStatus,
-  AlertSeverity,
 } from "./types";
 
 export const LLM_PROVIDERS: LLMProvider[] = [
@@ -156,10 +155,6 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   },
 ];
 
-export const PROVIDER_ICONS = Object.fromEntries(
-  LLM_PROVIDERS.map((p) => [p.value, p.icon])
-) as Record<string, React.ReactElement>;
-
 export const DEFAULT_MODEL = "gpt-4o-mini";
 export const DEFAULT_PROVIDER = "openai";
 export const DEFAULT_MCP_URL =
@@ -177,21 +172,6 @@ export function getProviderColor(
       return "#22c55e"; // green-500
     default:
       return "#9ca3af"; // gray-400
-  }
-}
-
-export function getConnectionStatusSeverity(
-  status: ConnectionStatus
-): AlertSeverity {
-  switch (status) {
-    case "connected":
-      return "success";
-    case "connecting":
-      return "warning";
-    case "disconnected":
-      return "error";
-    default:
-      return "info";
   }
 }
 

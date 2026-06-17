@@ -16,7 +16,7 @@ import { LabelWithTooltipLeft } from '../../../shared/components/Common';
 /* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export type OIDCClient = {
+type OIDCClient = {
   opHost: string;
   clientId: string;
   clientSecret: string;
