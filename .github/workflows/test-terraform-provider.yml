@@ -118,14 +118,53 @@ jobs:
         terraform version
         echo "TF_ACC_TERRAFORM_PATH=$(command -v terraform)" >> "$GITHUB_ENV"
 
+    - name: Resolve config-api credentials
+      # The test client secret's at-rest encoding is ambiguous (plaintext vs base64 vs
+      # salt-obscured), so resolve empirically: try each candidate against the token endpoint
+      # exactly as the provider does (HTTP Basic + client_credentials) and export the winner.
+      run: |
+        set -uo pipefail
+        TOKEN_URL="https://${JANS_FQDN}/jans-auth/restv1/token"
+        SCOPE="https://jans.io/oauth/config/scopes.readonly"
+        TCID=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().config.get("test_client_id") or "")' 2>/dev/null || true)
+        TC_RAW=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("test_client_pw") or "")' 2>/dev/null || true)
+        TC_ENC=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("test_client_encoded_pw") or "")' 2>/dev/null || true)
+        SALT=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("encoded_salt") or "")' 2>/dev/null || true)
+        TC_B64=$(printf '%s' "$TC_RAW" | base64 -d 2>/dev/null || true)
+        TC_SDEC=$(docker exec jans python3 -c "from jans.pycloudlib.utils import decode_text; print(decode_text('${TC_ENC}','${SALT}').decode())" 2>/dev/null || true)
+        try() {
+          [ -n "$1" ] && [ -n "$2" ] || return 1
+          local code
+          code=$(curl -sk -o /dev/null -w '%{http_code}' -u "$1:$2" \
+            --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=${SCOPE}" "$TOKEN_URL")
+          [ "$code" = "200" ]
+        }
+        CANDS=(
+          "${{ steps.credentials.outputs.test_client_id }}|${{ steps.credentials.outputs.test_client_pw }}|provisioned"
+          "${TCID}|${TC_RAW}|test_client_pw (raw)"
+          "${TCID}|${TC_B64}|test_client_pw (base64-decoded)"
+          "${TCID}|${TC_SDEC}|test_client_encoded_pw (salt-decoded)"
+        )
+        for c in "${CANDS[@]}"; do
+          IFS='|' read -r id sec label <<<"$c"
+          if try "$id" "$sec"; then
+            echo "config-api auth OK via: ${label}"
+            echo "::add-mask::${sec}"
+            echo "JANS_CLIENT_ID=${id}" >> "$GITHUB_ENV"
+            echo "JANS_CLIENT_SECRET=${sec}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "auth failed via: ${label}"
+        done
+        echo "::error::no working config-api credentials found"
+        exit 1
+
     - name: Run Terraform provider acceptance tests
       id: tf_tests
       continue-on-error: true
       working-directory: terraform-provider-jans
       env:
         TF_ACC: "1"
-        JANS_CLIENT_ID: ${{ steps.credentials.outputs.test_client_id }}
-        JANS_CLIENT_SECRET: ${{ steps.credentials.outputs.test_client_pw }}
         JANS_URL: https://${{ env.JANS_FQDN }}
         JANS_INSECURE_CLIENT: "true"
       run: |
