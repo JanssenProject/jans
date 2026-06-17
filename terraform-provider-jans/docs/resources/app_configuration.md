@@ -83,6 +83,15 @@ resource "jans_app_configuration" "global" {
 - `ciba_end_user_notification_config` (Block List, Max: 1) CIBA End User Notification Config. (see [below for nested schema](#nestedblock--ciba_end_user_notification_config))
 - `ciba_grant_life_extra_time_sec` (Number) Specifies the CIBA Grant life extra time in seconds.
 - `ciba_max_expiration_time_allowed_sec` (Number) Specifies the CIBA token expiration time in seconds.
+- `cimd_block_private_ip` (Boolean) Block CIMD fetches that resolve to private IP addresses.
+- `cimd_connect_timeout_ms` (Number) CIMD fetch connect timeout in milliseconds.
+- `cimd_domain_allowlist` (List of String) Allowlist of domains permitted for CIMD fetches.
+- `cimd_domain_blocklist` (List of String) Blocklist of domains forbidden for CIMD fetches.
+- `cimd_max_response_size` (Number) Maximum CIMD response size in bytes.
+- `cimd_max_ttl_minutes` (Number) CIMD cache maximum TTL in minutes.
+- `cimd_read_timeout_ms` (Number) CIMD fetch read timeout in milliseconds.
+- `cimd_scheme_allowlist` (List of String) Allowlist of URI schemes permitted for CIMD (client-initiated metadata document) fetches.
+- `cimd_ttl_minutes` (Number) CIMD cache TTL in minutes.
 - `claim_types_supported` (List of String) A list of the Claim Types that the OpenID Provider supports. One of 'normal'
 - `claims_locales_supported` (List of String) Languages and scripts supported for values in Claims being returned. One of 'en'.
 - `claims_parameter_supported` (Boolean) Specifies whether the OP supports use of the claim’s parameter.
