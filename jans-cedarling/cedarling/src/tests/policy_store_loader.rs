@@ -1272,3 +1272,55 @@ async fn test_load_policy_store_archive_bytes_invalid() {
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
 }
+
+#[test]
+async fn test_load_from_uri_detects_archive() {
+    use mockito::Server;
+
+    let builder = create_authz_policy_store_builder();
+    let archive_bytes = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let mut server = Server::new_async().await;
+    let mock = server
+        .mock("GET", "/policy-store")
+        .with_status(200)
+        .with_header("content-type", "application/octet-stream")
+        .with_body(archive_bytes)
+        .create_async()
+        .await;
+
+    let uri = format!("{}/policy-store", server.url());
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Uri(uri), |_| {}).await;
+
+    mock.assert_async().await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
+            .expect("Failed to create principal"),
+        ),
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .expect("Failed to create resource"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed");
+
+    assert!(
+        result.decision,
+        "Read action should be allowed when loading archive via Uri"
+    );
+}
