@@ -8,13 +8,10 @@ package io.jans.fido2.service.mds;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -94,6 +91,8 @@ public class TocService {
 	@Inject
 	private DBDocumentService dbDocumentService;
 
+	private static final String ADDED_TOC_ENTRY_LOG = "Added TOC entry: {} ";
+
 	private Map<String, JsonNode> tocEntries;
 
 	private LocalDate nextUpdate;
@@ -123,8 +122,8 @@ public class TocService {
 
 				if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
 					log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
-					MetadataServer metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration()
-							.getMetadataServers().get(0));
+					MetadataServer metaDataServer = appConfiguration.getFido2Configuration()
+							.getMetadataServers().get(0);
 
 					// as of now, we have only one metadata server, hence get(0), I cant envisage
 					// why there will be multiple metadata servers
@@ -139,7 +138,6 @@ public class TocService {
 
 		} catch (MalformedURLException e) {
 			log.error("Error while parsing the FIDO alliance URL :", e);
-			return;
 		}
 	}
 
@@ -150,7 +148,7 @@ public class TocService {
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
-			return new HashMap<String, JsonNode>();
+			return new HashMap<>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 
@@ -171,14 +169,6 @@ public class TocService {
 			throws IOException, ParseException {
 		String decodedString = new String(base64Service.decode(content));
 		return readEntriesFromTocJWT(decodedString, mdsTocRootCertsFolder, true);
-	}
-
-	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, Path path)
-			throws IOException, ParseException {
-		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			String tocJwt = reader.readLine();
-			return readEntriesFromTocJWT(tocJwt, mdsTocRootCertsFolder, true);
-		}
 	}
 
 	/**
@@ -487,7 +477,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaguid, metadataEntryNode);
-			log.info("Added TOC entry: {} ", aaguid);
+			log.info(ADDED_TOC_ENTRY_LOG, aaguid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -500,7 +490,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaid, metadataEntryNode);
-			log.info("Added TOC entry: {} ", aaid);
+			log.info(ADDED_TOC_ENTRY_LOG, aaid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -513,7 +503,7 @@ public class TocService {
 					List.class);
 			for (String keyIdentifier : keyIdentifiersList) {
 				entries.put(keyIdentifier, entriesNode);
-				log.info("Added TOC entry: {} ", keyIdentifier);
+				log.info(ADDED_TOC_ENTRY_LOG, keyIdentifier);
 			}
 		} catch (IOException e) {
 			log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: {}",
