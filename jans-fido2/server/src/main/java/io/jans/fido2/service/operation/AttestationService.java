@@ -225,6 +225,10 @@ public class AttestationService {
 			log.debug("Failed to record registration attempt metrics: {}", e.getMessage());
 		}
 
+		// FIDO2 conformance requires the success envelope on the options response.
+		credentialCreationOptions.setStatus("ok");
+		credentialCreationOptions.setErrorMessage("");
+
 		log.debug("Returning from options: "+credentialCreationOptions.toString());
 		return credentialCreationOptions;
 	}
