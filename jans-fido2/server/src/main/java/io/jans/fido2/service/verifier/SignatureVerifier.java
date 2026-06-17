@@ -59,30 +59,26 @@ public class SignatureVerifier {
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
-        log.debug("Signature checker : "+ signatureAlgorithm );
+        log.debug("Signature checker : {}", signatureAlgorithm);
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {
 
             switch (signatureAlgorithm) {
                 case -7: {
-                    Signature signatureChecker = Signature.getInstance("SHA256withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA256withECDSA", provider);
                 }
 
                 case -8: {
-                    Signature signatureChecker = Signature.getInstance("Ed25519", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("Ed25519", provider);
                 }
 
                 case -35: {
-                    Signature signatureChecker = Signature.getInstance("SHA384withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA384withECDSA", provider);
                 }
 
                 case -36: {
-                    Signature signatureChecker = Signature.getInstance("SHA512withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA512withECDSA", provider);
                 }
 
                 case -37: {
@@ -102,20 +98,16 @@ public class SignatureVerifier {
                     return signatureChecker;
                 }
                 case -257: {
-                    Signature signatureChecker = Signature.getInstance("SHA256withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA256withRSA", provider);
                 }
                 case -258: {
-                    Signature signatureChecker = Signature.getInstance("SHA384withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA384withRSA", provider);
                 }
                 case -259: {
-                    Signature signatureChecker = Signature.getInstance("SHA512withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA512withRSA", provider);
                 }
                 case -65535: {
-                    Signature signatureChecker = Signature.getInstance("SHA1withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA1withRSA", provider);
                 }
 
                 default: {
