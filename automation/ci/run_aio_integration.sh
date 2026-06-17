@@ -357,6 +357,10 @@ timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server 
 timeout -k 30 900 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn] agama units reported problems or timed out"
 timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn] cedarling-java units reported problems or timed out"
 timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn] jans-lock units reported problems or timed out"
+# fido2-server unit tests (verifiers/attestation/processors). Exclude the two *DeviceRegistration*
+# TestNG tests (need an embedded Weld+DB harness that does not exist) and the MDS test (hits
+# mds3.fido.tools over the network).
+timeout -k 30 900 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn] fido2-server units reported problems or timed out"
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -366,6 +370,7 @@ echo "::group::collect surefire reports"
 mkdir -p test-reports
 # Sweep every reactor so auth-client + unit reports are captured (path-prefixed names).
 find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
+     agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server \
   -path '*/target/surefire-reports/*.xml' 2>/dev/null | while read -r f; do
   mod=$(printf '%s' "$f" | sed -E 's#/target/surefire-reports/.*##; s#[/ ]+#_#g')
   cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
