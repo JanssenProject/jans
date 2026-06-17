@@ -113,6 +113,29 @@ type ConnectionServiceConfiguration struct {
 	ValidateAfterInactivity int `schema:"validate_after_inactivity" json:"validateAfterInactivity"`
 }
 
+// KeyExtractor identifies the request value a rate-limit rule keys on.
+type KeyExtractor struct {
+	Source         string   `schema:"source" json:"source,omitempty"`
+	ParameterNames []string `schema:"parameter_names" json:"parameterNames,omitempty"`
+	WellFormed     bool     `schema:"well_formed" json:"wellFormed,omitempty"`
+}
+
+// RateLimitRule is a single rule in the rate-limit configuration.
+type RateLimitRule struct {
+	Path            string         `schema:"path" json:"path,omitempty"`
+	Methods         []string       `schema:"methods" json:"methods,omitempty"`
+	RequestCount    int            `schema:"request_count" json:"requestCount,omitempty"`
+	PeriodInSeconds int            `schema:"period_in_seconds" json:"periodInSeconds,omitempty"`
+	KeyExtractors   []KeyExtractor `schema:"key_extractors" json:"keyExtractors,omitempty"`
+	WellFormed      bool           `schema:"well_formed" json:"wellFormed,omitempty"`
+}
+
+// RateLimitConfig is the authorization server rate-limiting configuration.
+type RateLimitConfig struct {
+	RateLimitRules     []RateLimitRule `schema:"rate_limit_rules" json:"rateLimitRules,omitempty"`
+	RateLoggingEnabled bool            `schema:"rate_logging_enabled" json:"rateLoggingEnabled,omitempty"`
+}
+
 // AppConfiguration represents the Janssen authorization server
 // configuration properties
 type AppConfiguration struct {
@@ -348,6 +371,7 @@ type AppConfiguration struct {
 	CimdReadTimeoutMs                                         int                                   `schema:"cimd_read_timeout_ms" json:"cimdReadTimeoutMs"`
 	CimdTtlMinutes                                            int                                   `schema:"cimd_ttl_minutes" json:"cimdTtlMinutes"`
 	CimdMaxTtlMinutes                                         int                                   `schema:"cimd_max_ttl_minutes" json:"cimdMaxTtlMinutes"`
+	RateLimitConfiguration                                    RateLimitConfig                       `schema:"rate_limit_configuration" json:"rateLimitConfiguration,omitempty"`
 	RateLimitRegistrationRequestCount                         int                                   `schema:"rate_limit_registration_request_count" json:"rateLimitRegistrationRequestCount"`
 	RateLimitRegistrationPeriodInSeconds                      int                                   `schema:"rate_limit_registration_period_in_seconds" json:"rateLimitRegistrationPeriodInSeconds"`
 	RotateDeviceSecret                                        bool                                  `schema:"rotate_device_secret" json:"rotateDeviceSecret"`

@@ -278,6 +278,7 @@ resource "jans_app_configuration" "global" {
 - `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
 - `public_subject_identifier_per_client_enabled` (Boolean) Specifies whether public subject identifier is allowed per client.
+- `rate_limit_configuration` (Block List, Max: 1) Authorization server rate-limiting configuration. (see [below for nested schema](#nestedblock--rate_limit_configuration))
 - `rate_limit_registration_period_in_seconds` (Number) The time period in seconds for the rate limit.
 - `rate_limit_registration_request_count` (Number) The number of registration requests allowed per interval.
 - `redirect_uris_regex_enabled` (Boolean) Enable/Disable redirect uris validation using regular expression.
@@ -531,6 +532,38 @@ Optional:
 
 - `enable_id_token_messages` (Boolean) Boolean value specifying whether to enable ID Token messages.
 - `id_token_messages_channel` (String) ID Token messages channel.
+
+
+<a id="nestedblock--rate_limit_configuration"></a>
+### Nested Schema for `rate_limit_configuration`
+
+Optional:
+
+- `rate_limit_rules` (Block List) Ordered list of rate-limit rules. (see [below for nested schema](#nestedblock--rate_limit_configuration--rate_limit_rules))
+- `rate_logging_enabled` (Boolean) Whether rate-limit logging is enabled.
+
+<a id="nestedblock--rate_limit_configuration--rate_limit_rules"></a>
+### Nested Schema for `rate_limit_configuration.rate_limit_rules`
+
+Optional:
+
+- `key_extractors` (Block List) How the rate-limit key is extracted from the request. (see [below for nested schema](#nestedblock--rate_limit_configuration--rate_limit_rules--key_extractors))
+- `methods` (List of String) HTTP methods the rule applies to.
+- `path` (String) Request path the rule applies to.
+- `period_in_seconds` (Number) Rate-limit window in seconds.
+- `request_count` (Number) Allowed request count per period.
+- `well_formed` (Boolean) Whether the rule is well formed.
+
+<a id="nestedblock--rate_limit_configuration--rate_limit_rules--key_extractors"></a>
+### Nested Schema for `rate_limit_configuration.rate_limit_rules.key_extractors`
+
+Optional:
+
+- `parameter_names` (List of String) Parameter names to read.
+- `source` (String) Where to read the key from (body, header, query, unknown).
+- `well_formed` (Boolean) Whether the extractor is well formed.
+
+
 
 
 <a id="nestedblock--ssa_configuration"></a>

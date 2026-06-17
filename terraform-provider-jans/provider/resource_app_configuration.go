@@ -1793,6 +1793,47 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "CIMD cache maximum TTL in minutes.",
 			},
+			"rate_limit_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Authorization server rate-limiting configuration.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"rate_limit_rules": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Ordered list of rate-limit rules.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"path":              {Type: schema.TypeString, Optional: true, Description: "Request path the rule applies to."},
+									"methods":           {Type: schema.TypeList, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}, Description: "HTTP methods the rule applies to."},
+									"request_count":     {Type: schema.TypeInt, Optional: true, Description: "Allowed request count per period."},
+									"period_in_seconds": {Type: schema.TypeInt, Optional: true, Description: "Rate-limit window in seconds."},
+									"well_formed":       {Type: schema.TypeBool, Optional: true, Description: "Whether the rule is well formed."},
+									"key_extractors": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "How the rate-limit key is extracted from the request.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"source":          {Type: schema.TypeString, Optional: true, Description: "Where to read the key from (body, header, query, unknown)."},
+												"parameter_names": {Type: schema.TypeList, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}, Description: "Parameter names to read."},
+												"well_formed":     {Type: schema.TypeBool, Optional: true, Description: "Whether the extractor is well formed."},
+											},
+										},
+									},
+								},
+							},
+						},
+						"rate_logging_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether rate-limit logging is enabled.",
+						},
+					},
+				},
+			},
 			"rotate_device_secret": {
 				Type:        schema.TypeBool,
 				Optional:    true,
