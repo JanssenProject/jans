@@ -98,9 +98,11 @@ jobs:
         TOKEN_ENDPOINT="https://${JANS_FQDN}/jans-auth/restv1/token"
 
         # The config-api management client (jca) lives in the AIO's own config/secret
-        # stores; read it through the container's pycloudlib (adapter-agnostic).
-        JCA_CLIENT_ID=$(docker exec jans python3 -c "from jans.pycloudlib import get_manager; print(get_manager().config.get('jca_client_id') or '')")
-        JCA_CLIENT_PW=$(docker exec jans python3 -c "from jans.pycloudlib import get_manager; print(get_manager().secret.get('jca_client_pw') or '')")
+        # stores. The persisted secret is the OBSCURED form (jca_client_encoded_pw), so
+        # decode it with the instance salt to recover the plaintext the token grant needs.
+        CREDS=$(docker exec jans python3 -c 'import json; from jans.pycloudlib import get_manager; from jans.pycloudlib.utils import decode_text; m=get_manager(); salt=m.secret.get("encoded_salt") or ""; enc=m.secret.get("jca_client_encoded_pw") or ""; pw=decode_text(enc, salt).decode() if (enc and salt) else (m.secret.get("jca_client_pw") or ""); print(json.dumps({"id": m.config.get("jca_client_id") or "", "pw": pw}))')
+        JCA_CLIENT_ID=$(echo "$CREDS" | jq -r .id)
+        JCA_CLIENT_PW=$(echo "$CREDS" | jq -r .pw)
         if [[ -z "$JCA_CLIENT_ID" || -z "$JCA_CLIENT_PW" ]]; then
           echo "ERROR: could not read jca_client_id/jca_client_pw from the AIO"
           exit 1
