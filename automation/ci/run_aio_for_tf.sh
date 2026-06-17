@@ -30,6 +30,8 @@ docker pull "$AIO_IMAGE_TAG"
   echo "FROM ${AIO_IMAGE_TAG}"
   echo "ENV CN_PERSISTENCE_LOAD_TEST_DATA=true"
   echo "ENV CN_SCIM_ENABLED=true"
+  # render server-side date values in UTC so tests that compare formatted dates are stable
+  echo "ENV TZ=UTC"
   if [ -n "${TF_TEST_CLIENT_ID:-}" ] && [ -n "${TF_TEST_CLIENT_SECRET:-}" ]; then
     echo "ENV CN_CONFIG_API_TEST_CLIENT_ID=${TF_TEST_CLIENT_ID}"
     echo "ENV CN_CONFIG_API_TEST_CLIENT_SECRET=${TF_TEST_CLIENT_SECRET}"
