@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
@@ -147,6 +148,17 @@ public class AttestationCertificateService {
 		}
 		return metaDataStatement.get("description").asText();
 	}
+	/**
+	 * CONF-19/22 gate: only the {@code enforced} attestation mode applies the stricter MDS trust rules
+	 * (reject on metadata-fetch failure / blocked status). {@code disabled} and {@code monitor} retain
+	 * the previous lenient behavior so existing deployments are unaffected.
+	 */
+	private boolean isAttestationEnforced() {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		return (fido2Configuration != null) && AttestationMode.ENFORCED.getValue()
+				.equalsIgnoreCase(fido2Configuration.getAttestationMode());
+	}
+
 	private JsonNode getMetadataForAuthenticator(AuthData authData) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
@@ -172,7 +184,11 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-
+				if (isAttestationEnforced()) {
+					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
+					// fall back to empty metadata (which would let attestation succeed unverified).
+					throw ex;
+				}
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}
@@ -204,7 +220,11 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-
+				if (isAttestationEnforced()) {
+					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
+					// fall back to empty metadata (which would let attestation succeed unverified).
+					throw ex;
+				}
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}
