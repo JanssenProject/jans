@@ -6,16 +6,19 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import org.json.JSONObject;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.token.JwtSigner;
+import io.jans.as.server.service.external.ExternalIdentityAssertionService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -63,6 +66,9 @@ public class IdJagService {
     @Inject
     private AuthorizationGrantList authorizationGrantList;
 
+    @Inject
+    private ExternalIdentityAssertionService externalIdentityAssertionService;
+
     /**
      * Issues a signed ID-JAG for the given execution context.
      */
@@ -99,6 +105,7 @@ public class IdJagService {
             final Jwt idJag = signer.newJwt();
             idJag.getHeader().setType(JwtType.OAUTH_ID_JAG);
             populateIdJagClaims(idJag, client, subjectJwt, audience, scope, resource, authorizationDetails);
+            applyModifyIdJagPayloadScript(idJag, executionContext);
             final Jwt signed = signer.sign();
             log.debug("Issued ID-JAG for client: {}, audience: {}", client.getClientId(), audience);
             return signed.toString();
@@ -161,6 +168,20 @@ public class IdJagService {
         final Object value = src.getClaims().getClaim(claimName);
         if (value != null) {
             dest.getClaims().setClaim(claimName, String.valueOf(value));
+        }
+    }
+
+    private void applyModifyIdJagPayloadScript(Jwt idJag, ExecutionContext executionContext) {
+        try {
+            final JSONObject claimsSnapshot = idJag.getClaims().toJsonObject();
+            if (externalIdentityAssertionService.externalModifyIdJagPayload(idJag, executionContext)) {
+                log.debug("Successfully ran identity-assertion script modifyIdJagPayload.");
+            } else {
+                idJag.getClaims().load(claimsSnapshot);
+                log.trace("Reverted ID-JAG claims: identity-assertion script modifyIdJagPayload returned false.");
+            }
+        } catch (InvalidJwtException e) {
+            log.error("Failed to snapshot ID-JAG claims for script revert", e);
         }
     }
 
