@@ -118,49 +118,60 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 		return
-	}
-	responseList := []EvaluationResponse{}
-	for _, eval := range request.Evaluation {
-		subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
-		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
+	} else {
+		responseList := []EvaluationResponse{}
+		for _, eval := range request.Evaluation {
+			subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
+			if err != nil {
+				writeError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			resource, err := mergeEntityHelper(eval.Resource, request.Resource, "resource")
+			if err != nil {
+				writeError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			action := eval.Action
+			if action == nil {
+				if request.Action == nil {
+					writeError(w, http.StatusBadRequest, "Invalid request: missing action")
+					return
+				} else {
+					action = request.Action
+				}
+			}
+			context := eval.Context
+			response, err := p.buildEvaluationResponse(subject, action.Name, resource, context)
+			if err != nil {
+				writeError(w, http.StatusInternalServerError, "Something went wrong")
+				p.logger.Info(err.Error())
+				return
+			}
+			responseList = append(responseList, *response)
+			if request.Options == nil {
+				request.Options = &Option{
+					EvaluationSemantic: ExecuteAll,
+				}
+			}
+			if request.Options.EvaluationSemantic == PermitOnFirstPermit && response.Decision {
+				if err := json.NewEncoder(w).Encode(responseList); err != nil {
+					writeError(w, http.StatusInternalServerError, "Something went wrong")
+					p.logger.Info(err.Error())
+					return
+				}
+			} else if request.Options.EvaluationSemantic == DenyOnFirstDeny && !response.Decision {
+				if err := json.NewEncoder(w).Encode(responseList); err != nil {
+					writeError(w, http.StatusInternalServerError, "Something went wrong")
+					p.logger.Info(err.Error())
+					return
+				}
+			}
 		}
-		resource, err := mergeEntityHelper(eval.Resource, request.Resource, "resource")
-		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		action := eval.Action
-		if action == nil {
-			writeError(w, http.StatusBadRequest, "Invalid request: missing action")
-			return
-		}
-		context := eval.Context
-		response, err := p.buildEvaluationResponse(subject, action.Name, resource, context)
-		if err != nil {
+		if err := json.NewEncoder(w).Encode(responseList); err != nil {
 			writeError(w, http.StatusInternalServerError, "Something went wrong")
 			p.logger.Info(err.Error())
 			return
 		}
-		responseList = append(responseList, *response)
-		if request.Options.EvaluationSemantic == PermitOnFirstPermit && response.Decision {
-			if err := json.NewEncoder(w).Encode(responseList); err != nil {
-				writeError(w, http.StatusInternalServerError, "Something went wrong")
-				p.logger.Info(err.Error())
-				return
-			}
-		} else if request.Options.EvaluationSemantic == DenyOnFirstDeny && !response.Decision {
-			if err := json.NewEncoder(w).Encode(responseList); err != nil {
-				writeError(w, http.StatusInternalServerError, "Something went wrong")
-				p.logger.Info(err.Error())
-				return
-			}
-		}
 	}
-	if err := json.NewEncoder(w).Encode(responseList); err != nil {
-		writeError(w, http.StatusInternalServerError, "Something went wrong")
-		p.logger.Info(err.Error())
-		return
-	}
+
 }

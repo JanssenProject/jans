@@ -2,6 +2,7 @@ package cedarlingopa
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type EvaluationsSemantic string
@@ -12,18 +13,18 @@ const (
 	PermitOnFirstPermit EvaluationsSemantic = "permit_on_first_permit"
 )
 
-func (e *EvaluationsSemantic) UnMarshalJSON(data []byte) error {
+func (e *EvaluationsSemantic) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
 	switch EvaluationsSemantic(s) {
-	case PermitOnFirstPermit, DenyOnFirstDeny:
+	case PermitOnFirstPermit, DenyOnFirstDeny, ExecuteAll:
 		*e = EvaluationsSemantic(s)
 		return nil
 	default:
-		*e = ExecuteAll
-		return nil
+		error := fmt.Errorf("Invalid semantic provided: %s", s)
+		return error
 	}
 }
 
@@ -90,6 +91,6 @@ type MultipleEvaluationRequest struct {
 	Resource   *Entity                  `json:"resource,omitempty"`
 	Action     *Action                  `json:"action,omitempty"`
 	Context    map[string]any           `json:"context,omitempty"`
-	Evaluation []MultipleEvaluationBase `json:"evaluation,omitempty"`
+	Evaluation []MultipleEvaluationBase `json:"evaluations,omitempty"`
 	Options    *Option                  `json:"options,omitempty"`
 }
