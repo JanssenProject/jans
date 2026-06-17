@@ -389,14 +389,14 @@ func resourceOidcClient() *schema.Resource {
 				Description: `Attribute which corresponds to the "Pre-Authorization" property. Default value is false.`,
 			},
 			"last_access_time": {
-				Type:        schema.TypeInt,
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.",
+				Description: "Date-time string (RFC3339) indicating the last access time.",
 			},
 			"last_logon_time": {
-				Type:        schema.TypeInt,
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.",
+				Description: "Date-time string (RFC3339) indicating the last login time.",
 			},
 			"persist_client_authorizations": {
 				Type:        schema.TypeBool,
