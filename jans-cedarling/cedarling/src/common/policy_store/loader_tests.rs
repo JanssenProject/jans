@@ -1380,39 +1380,49 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
         let cursor = Cursor::new(&mut archive_bytes);
         let mut zip = zip::ZipWriter::new(cursor);
 
-        let options = FileOptions::<ExtendedFileOptions>::default()
-            .compression_method(CompressionMethod::Deflated);
-        zip.start_file("metadata.json", options).unwrap();
-        zip.write_all(metadata_json).unwrap();
+        let options = || -> FileOptions<ExtendedFileOptions> {
+            FileOptions::<ExtendedFileOptions>::default()
+                .compression_method(CompressionMethod::Deflated)
+        };
+        zip.start_file("metadata.json", options())
+            .expect("Should create metadata.json in archive");
+        zip.write_all(metadata_json).expect("Should write metadata");
 
-        let options = FileOptions::<ExtendedFileOptions>::default()
-            .compression_method(CompressionMethod::Deflated);
-        zip.start_file("schema.cedarschema", options).unwrap();
-        zip.write_all(schema_content).unwrap();
+        zip.start_file("schema.cedarschema", options())
+            .expect("Should create schema.cedarschema in archive");
+        zip.write_all(schema_content).expect("Should write schema content");
 
-        let options = FileOptions::<ExtendedFileOptions>::default()
-            .compression_method(CompressionMethod::Deflated);
-        zip.start_file("policies/test.cedar", options).unwrap();
-        zip.write_all(policy_content).unwrap();
+        zip.start_file("policies/test.cedar", options())
+            .expect("Should create test.cedar in archive");
+        zip.write_all(policy_content).expect("Should write policy content");
 
-        zip.finish().unwrap();
+        zip.finish().expect("Should finalize archive");
     }
 
-    // Load using ArchiveVfs
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).unwrap();
+    let archive_vfs =
+        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader.load_directory(".").unwrap();
+    let loaded_directory = loader
+        .load_directory(".")
+        .expect("Should load directory from archive");
 
     // Verify results are identical regardless of VFS implementation
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
     assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
     assert_eq!(loaded_directory.policies.len(), 1);
-    let parsed_schema = loaded_directory.schema.as_ref().unwrap();
-    // Check that the schema was loaded and parsed (has entity types or is empty)
+    let parsed_schema = loaded_directory
+        .schema
+        .as_ref()
+        .expect("Schema should be loaded from archive");
+    let type_names: Vec<_> = parsed_schema
+        .get_schema()
+        .entity_types()
+        .map(|e| e.to_string())
+        .collect();
     assert!(
-        parsed_schema.get_schema().entity_types().count() == 0
-            || parsed_schema.get_schema().entity_types().count() > 0,
-        "Schema should be parseable"
+        type_names.contains(&"Equiv::User".to_string()),
+        "Archive schema should contain Equiv::User; got: {:?}",
+        type_names
     );
 }
 
