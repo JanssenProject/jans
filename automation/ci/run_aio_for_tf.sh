@@ -19,14 +19,23 @@ cd "$REPO_ROOT"
 : "${JANS_PERSISTENCE:?set JANS_PERSISTENCE}"
 AIO_IMAGE_TAG="${AIO_IMAGE_TAG:-ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly}"
 
-# start_janssen_aio_demo.sh hardcodes the demo image as :0.0.0-nightly, so retag
-# whatever we pulled to that name and let the compose file use it unchanged.
+# start_janssen_aio_demo.sh hardcodes the demo image as :0.0.0-nightly. Pull the chosen
+# image, then bake a thin layer (test data + a known, trusted, all-scopes config-api test
+# client) tagged as that name, so the provider authenticates with deterministic credentials
+# and the compose file uses it unchanged. Mirrors run_aio_integration.sh's Dockerfile.ci-aio.
 DEMO_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
 echo "[I] pulling $AIO_IMAGE_TAG"
 docker pull "$AIO_IMAGE_TAG"
-if [ "$AIO_IMAGE_TAG" != "$DEMO_TAG" ]; then
-  docker tag "$AIO_IMAGE_TAG" "$DEMO_TAG"
-fi
+{
+  echo "FROM ${AIO_IMAGE_TAG}"
+  echo "ENV CN_PERSISTENCE_LOAD_TEST_DATA=true"
+  echo "ENV CN_SCIM_ENABLED=true"
+  if [ -n "${TF_TEST_CLIENT_ID:-}" ] && [ -n "${TF_TEST_CLIENT_SECRET:-}" ]; then
+    echo "ENV CN_CONFIG_API_TEST_CLIENT_ID=${TF_TEST_CLIENT_ID}"
+    echo "ENV CN_CONFIG_API_TEST_CLIENT_SECRET=${TF_TEST_CLIENT_SECRET}"
+    echo "ENV CN_CONFIG_API_TEST_CLIENT_TRUSTED=true"
+  fi
+} | docker build -t "$DEMO_TAG" -
 
 # mysql OOMs at the demo default (768M) under the test-data load; the runner has headroom.
 export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"

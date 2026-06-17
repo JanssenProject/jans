@@ -85,35 +85,38 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Bring up AIO from the prebuilt image
-      env:
-        JANS_PERSISTENCE: ${{ matrix.persistence-backend }}
-      run: bash automation/ci/run_aio_for_tf.sh
-
-    - name: Read the AIO test client credentials
+    - name: Generate test client credentials
       id: credentials
       run: |
         set -euo pipefail
-        # config-api always provisions a "Jans Test Client with all scopes" (see
-        # docker-jans-config-api bootstrap.py): client_credentials grant, all config scopes,
-        # client_secret_basic. The provider authenticates with HTTP Basic, so use this client
-        # directly -- no token/mint dance needed. The secret store returns test_client_pw
-        # base64-encoded, so decode it (it is NOT salt-obscured).
-        RAW=$(docker exec jans python3 -c 'import json; from jans.pycloudlib import get_manager; m=get_manager(); print(json.dumps({"id": m.config.get("test_client_id") or "", "pw": m.secret.get("test_client_pw") or ""}))')
-        TEST_CLIENT_ID=$(echo "$RAW" | jq -r .id)
-        RAW_PW=$(echo "$RAW" | jq -r .pw)
-        TEST_CLIENT_PW=$(printf '%s' "$RAW_PW" | base64 -d 2>/dev/null || printf '%s' "$RAW_PW")
-        if [[ -z "$TEST_CLIENT_ID" || -z "$TEST_CLIENT_PW" ]]; then
-          echo "ERROR: could not read test_client_id/test_client_pw from the AIO"
-          docker exec jans python3 -c 'from jans.pycloudlib import get_manager; m=get_manager(); print("id set:", bool(m.config.get("test_client_id"))); print("pw set:", bool(m.secret.get("test_client_pw")))' || true
-          exit 1
-        fi
+        TEST_CLIENT_ID=$(uuidgen)
+        TEST_CLIENT_PW=$(openssl rand -hex 24)
         echo "::add-mask::${TEST_CLIENT_PW}"
         echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
         echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
 
+    - name: Bring up AIO from the prebuilt image
+      env:
+        JANS_PERSISTENCE: ${{ matrix.persistence-backend }}
+        # Provision a known, trusted, all-scopes config-api test client (+ test data) so the
+        # provider authenticates deterministically -- no secret extraction/decoding needed.
+        TF_TEST_CLIENT_ID: ${{ steps.credentials.outputs.test_client_id }}
+        TF_TEST_CLIENT_SECRET: ${{ steps.credentials.outputs.test_client_pw }}
+      run: bash automation/ci/run_aio_for_tf.sh
+
     - name: Install gotestsum
       run: go install gotest.tools/gotestsum@latest
+
+    - name: Install Terraform CLI
+      # The acceptance framework otherwise auto-downloads Terraform and verifies it against
+      # HashiCorp's release signing key, which has expired. Install a fixed version directly.
+      run: |
+        set -euo pipefail
+        TF_VERSION=1.9.8
+        curl -fsSL -o /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+        sudo unzip -o /tmp/terraform.zip -d /usr/local/bin
+        terraform version
+        echo "TF_ACC_TERRAFORM_PATH=$(command -v terraform)" >> "$GITHUB_ENV"
 
     - name: Run Terraform provider acceptance tests
       id: tf_tests

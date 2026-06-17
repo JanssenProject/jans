@@ -2,7 +2,7 @@
 resource "jans_oidc_client" "example" {
   client_name = "Example OIDC Client"
   client_id   = "example-client-id"
-  client_secret = "example-client-secret"
+  client_secret = var.client_secret
   
   application_type = "web"
   
