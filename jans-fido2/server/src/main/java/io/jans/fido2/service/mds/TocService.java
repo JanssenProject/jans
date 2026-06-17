@@ -181,10 +181,45 @@ public class TocService {
 		}
 	}
 
+	/**
+	 * CONF-21: add any configured per-endpoint {@code MetadataServer.rootCert} values to the set of
+	 * trust anchors used to verify the MDS TOC JWS. The {@code rootCert} is a base64-encoded DER X.509
+	 * certificate. This is additive — an empty/unset rootCert leaves the existing folder-based trust
+	 * unchanged, and a malformed value is logged and skipped rather than breaking TOC verification.
+	 * Package-private for unit testing.
+	 */
+	void addConfiguredMetadataServerRootCerts(List<X509Certificate> trustedCertificates) {
+		List<MetadataServer> metadataServers = appConfiguration.getFido2Configuration().getMetadataServers();
+		if (metadataServers == null || metadataServers.isEmpty()) {
+			return;
+		}
+		for (MetadataServer metadataServer : metadataServers) {
+			String rootCert = metadataServer.getRootCert();
+			if (StringHelper.isEmpty(rootCert)) {
+				continue;
+			}
+			try {
+				X509Certificate cert = certificateService.getCertificate(rootCert);
+				if (cert != null) {
+					trustedCertificates.add(cert);
+					log.info("Added per-endpoint MetadataServer rootCert as an additional MDS TOC trust anchor");
+				}
+			} catch (RuntimeException e) {
+				log.warn("Failed to load configured MetadataServer.rootCert; using mdsCertsFolder trust only: {}",
+						e.getMessage());
+			}
+		}
+	}
+
 	private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder,
 			List<String> certificateChain) {
 		List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
-		List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
+		List<X509Certificate> x509TrustedCertificates = new ArrayList<>(
+				certificateService.getCertificates(mdsTocRootCertsFolder));
+		// CONF-21: honor a per-endpoint MetadataServer.rootCert as an ADDITIONAL TOC trust anchor, so a
+		// conformance/test root can be trusted without modifying the shared production mdsCertsFolder.
+		// Additive only: deployments that don't set rootCert are unaffected.
+		addConfiguredMetadataServerRootCerts(x509TrustedCertificates);
 		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
 		X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(x509CertificateChain,
