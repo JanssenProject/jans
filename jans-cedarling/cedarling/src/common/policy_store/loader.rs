@@ -301,12 +301,14 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Returns `None` if the file does not exist.
     fn load_single_schema_file(&self, path: &str) -> Result<Option<String>, PolicyStoreError> {
         match self.vfs.read_file(path) {
-            Ok(bytes) => String::from_utf8(bytes)
-                .map(Some)
-                .map_err(|e| PolicyStoreError::FileReadError {
-                    path: path.to_string(),
-                    source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
-                }),
+            Ok(bytes) => {
+                String::from_utf8(bytes)
+                    .map(Some)
+                    .map_err(|e| PolicyStoreError::FileReadError {
+                        path: path.to_string(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })
+            },
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
             Err(source) => Err(PolicyStoreError::FileReadError {
                 path: path.to_string(),
@@ -316,9 +318,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     }
 
     /// Load schema from the schemas/ directory, combining all `.cedarschema` files.
-    /// Returns `None` if the directory does not exist.
-    /// Returns `Err(EmptySchemaDirectory)` if the directory exists but contains no `.cedarschema` files.
-    fn load_schema_from_directory(&self, path: &str) -> Result<Option<ParsedSchema>, PolicyStoreError> {
+    fn load_schema_from_directory(
+        &self,
+        path: &str,
+    ) -> Result<Option<ParsedSchema>, PolicyStoreError> {
         if !self.vfs.exists(path) {
             return Ok(None);
         }
@@ -328,16 +331,20 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             });
         }
 
-        let entries = self.vfs.read_dir(path).map_err(|source| {
-            PolicyStoreError::DirectoryReadError {
-                path: path.to_string(),
-                source,
-            }
-        })?;
+        let entries =
+            self.vfs
+                .read_dir(path)
+                .map_err(|source| PolicyStoreError::DirectoryReadError {
+                    path: path.to_string(),
+                    source,
+                })?;
 
         let raw_files = self.read_schema_files(entries)?;
         if raw_files.is_empty() {
-            return Err(ValidationError::EmptySchemaDirectory { path: path.to_string() }.into());
+            return Err(ValidationError::EmptySchemaDirectory {
+                path: path.to_string(),
+            }
+            .into());
         }
 
         let parsed = Self::combine_schema_files(&raw_files)?;
