@@ -54,6 +54,7 @@ func resourceShibbolethTrustedSP() *schema.Resource {
 			"released_attributes": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "List of attribute names to release to this SP",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

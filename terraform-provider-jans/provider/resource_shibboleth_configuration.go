@@ -38,6 +38,7 @@ func resourceShibbolethConfiguration() *schema.Resource {
 			"metadata_providers": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "List of metadata provider URLs",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -75,13 +76,11 @@ func resourceShibbolethConfigurationCreate(ctx context.Context, d *schema.Resour
 	}
 
 	tflog.Debug(ctx, "Creating Shibboleth configuration")
-	result, err := c.UpdateShibbolethConfiguration(ctx, config)
-	if err != nil {
+	if _, err := c.UpdateShibbolethConfiguration(ctx, config); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId("shibboleth-idp-config")
-	d.Set("revision", result.Revision)
 
 	return resourceShibbolethConfigurationRead(ctx, d, meta)
 }
