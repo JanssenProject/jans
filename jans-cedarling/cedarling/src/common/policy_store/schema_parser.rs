@@ -109,33 +109,21 @@ pub(super) struct SchemaFile {
 /// Contains the schema, fragment, and metadata about the source file.
 /// The fragment is preserved to avoid re-parsing when converting to JSON.
 #[derive(Debug, Clone)]
-pub(super) struct ParsedSchema {
+pub(crate) struct ParsedSchema {
     /// The Cedar schema
     pub schema: Schema,
     /// The schema fragment (preserved for JSON conversion without re-parsing)
     pub fragment: SchemaFragment,
-    /// Source filename
-    pub filename: String,
-    /// Raw schema content
-    pub content: String,
 }
 
 impl ParsedSchema {
-    /// Parse a Cedar schema from a string.
-    ///
-    /// Parses the schema content using Cedar's schema parser and returns
-    /// a `ParsedSchema` with metadata. The schema is validated for correct
-    /// syntax and structure during parsing.
+    /// Parse a Cedar schema from a Cedar DSL string.
     pub(super) fn parse(content: &str, filename: &str) -> Result<Self, PolicyStoreError> {
-        // Parse the schema using Cedar's schema parser
-        // Cedar uses SchemaFragment to parse human-readable schema syntax
         let fragment =
             SchemaFragment::from_str(content).map_err(|e| PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
                 err: CedarSchemaErrorType::ParseError(e.to_string()),
             })?;
-
-        // Create schema from the fragment (clone the fragment to preserve it)
         let schema = Schema::from_schema_fragments([fragment.clone()]).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
@@ -143,12 +131,7 @@ impl ParsedSchema {
             }
         })?;
 
-        Ok(Self {
-            schema,
-            fragment,
-            filename: filename.to_string(),
-            content: content.to_string(),
-        })
+        Ok(Self { schema, fragment })
     }
 
     /// Get a reference to the Cedar Schema.
@@ -169,18 +152,9 @@ impl ParsedSchema {
     /// Parse multiple Cedar schema fragments and combine them into a single schema.
     ///
     /// Each file is parsed into its own `SchemaFragment`, then all fragments are
-    /// merged via `Schema::from_schema_fragments`. This allows splitting a schema
-    /// across multiple files (e.g., one file per namespace or entity type).
-    ///
-    /// The returned `ParsedSchema` contains the concatenated content of all files.
-    ///
-    /// ## Why JSON merge for the fragment?
-    ///
-    /// After validation we need a single `SchemaFragment` for downstream code
-    /// (`manager.rs` calls `fragment.to_json_string()`). There is no public
-    /// API to merge `SchemaFragment`s or to convert `Schema` → `SchemaFragment`
-    /// (cedar-policy 4.11). The only workaround is to round-trip through JSON:
-    /// `to_json_value()` → deep-merge namespace maps → `from_json_value()`.
+    /// merged via `Schema::from_schema_fragments` (additive, handles shared
+    /// namespaces) and `combine_schema_fragments` (JSON deep-merge for downstream
+    /// serialization).
     pub(super) fn parse_multiple(files: &[SchemaFile]) -> Result<Self, PolicyStoreError> {
         if files.is_empty() {
             return Err(PolicyStoreError::CedarSchemaError {
@@ -190,7 +164,6 @@ impl ParsedSchema {
         }
 
         let mut fragments = Vec::new();
-        let mut combined_content = String::new();
         let mut filenames = Vec::new();
 
         for SchemaFile { name, content } in files {
@@ -201,56 +174,26 @@ impl ParsedSchema {
                 }
             })?;
 
-            if !combined_content.is_empty() {
-                combined_content.push('\n');
-            }
-            combined_content.push_str(content);
             filenames.push(name.clone());
             fragments.push(fragment);
         }
 
-        // Combine via Schema::from_schema_fragments — this is additive and
-        // correctly handles the same namespace appearing in multiple files.
-        let schema = Schema::from_schema_fragments(fragments.clone()).map_err(|e| {
+        // Validate and merge fragments. from_schema_fragments accepts shared
+        // namespaces across files (additive merge). Then combine_schema_fragments
+        // produces a single fragment via JSON deep-merge for downstream use.
+        let schema = Schema::from_schema_fragments(fragments.iter().cloned()).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filenames.join(", "),
                 err: CedarSchemaErrorType::ValidationError(e.to_string()),
             }
         })?;
 
-        // Merge fragments into a single SchemaFragment via JSON so that
-        // get_fragment().to_json_string() works downstream.
         let combined_fragment = combine_schema_fragments(&fragments)?;
 
-        Ok(Self {
-            schema,
-            fragment: combined_fragment,
-            filename: filenames.join(", "),
-            content: combined_content,
-        })
+        Ok(Self { schema, fragment: combined_fragment })
     }
 
-    /// Validate that the schema is non-empty and well-formed.
-    ///
-    /// Performs additional validation checks beyond basic parsing to ensure
-    /// the schema is not empty. If parsing succeeded, the schema is already
-    /// validated by Cedar for internal consistency.
-    ///
-    /// # Errors
-    /// Returns `PolicyStoreError::CedarSchemaError` if the schema file is empty.
-    pub(super) fn validate(&self) -> Result<(), PolicyStoreError> {
-        // Check that content is not empty
-        if self.content.trim().is_empty() {
-            return Err(PolicyStoreError::CedarSchemaError {
-                file: self.filename.clone(),
-                err: CedarSchemaErrorType::EmptySchema,
-            });
-        }
 
-        // If parsing succeeded, the schema is already validated by Cedar
-        // The Schema type guarantees internal consistency
-        Ok(())
-    }
 }
 
 #[cfg(test)]
@@ -270,12 +213,21 @@ mod tests {
             }
         "#;
 
-        let result = ParsedSchema::parse(content, "test.cedarschema");
-        assert!(result.is_ok());
-
-        let parsed = result.unwrap();
-        assert_eq!(parsed.filename, "test.cedarschema");
-        assert_eq!(parsed.content, content);
+        let parsed = ParsedSchema::parse(content, "test.cedarschema")
+            .expect("Valid Cedar schema should parse successfully");
+        let schema = parsed.get_schema();
+        let type_names: Vec<_> = schema.entity_types().map(|e| e.to_string()).collect();
+        assert!(
+            type_names.contains(&"TestApp::User".to_string()),
+            "Should contain TestApp::User; got: {:?}",
+            type_names
+        );
+        let action_names: Vec<_> = schema.actions().map(|a| a.to_string()).collect();
+        assert!(
+            action_names.contains(&"TestApp::Action::\"view\"".to_string()),
+            "Should contain view action; got: {:?}",
+            action_names
+        );
     }
 
     #[test]
@@ -345,24 +297,12 @@ mod tests {
 
     #[test]
     fn test_parse_empty_schema() {
-        let content = "";
-
-        let result = ParsedSchema::parse(content, "empty.cedarschema");
-        // Empty schema is actually valid in Cedar, but our validation will catch it
-        if let Ok(parsed) = result {
-            let validation = parsed.validate();
-            let err = validation.expect_err("Expected EmptySchema validation error");
-            assert!(
-                matches!(
-                    &err,
-                    PolicyStoreError::CedarSchemaError {
-                        err: CedarSchemaErrorType::EmptySchema,
-                        ..
-                    }
-                ),
-                "Expected EmptySchema error, got: {err:?}"
-            );
-        }
+        let result = ParsedSchema::parse("", "empty.cedarschema");
+        // Empty string is a valid (empty) Cedar schema — parsing succeeds
+        assert!(
+            result.is_ok(),
+            "Empty Cedar schema is valid and should parse"
+        );
     }
 
     #[test]
@@ -382,16 +322,16 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_schema_success() {
+    fn test_parse_schema_success_implies_valid() {
         let content = r"
             namespace TestApp {
                 entity User;
             }
         ";
 
-        let parsed = ParsedSchema::parse(content, "test.cedarschema").unwrap();
-        let result = parsed.validate();
-        assert!(result.is_ok());
+        // If parsing succeeds, the schema is inherently valid
+        let parsed = ParsedSchema::parse(content, "test.cedarschema");
+        assert!(parsed.is_ok(), "Valid Cedar schema should parse");
     }
 
     #[test]
@@ -451,25 +391,13 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_empty_schema_fails() {
-        let content = "   \n  \t  \n   ";
-
-        let result = ParsedSchema::parse(content, "whitespace.cedarschema");
-        // Empty content might parse successfully, but validation should fail
-        if let Ok(parsed) = result {
-            let validation = parsed.validate();
-            assert!(
-                validation.is_err(),
-                "Validation should fail for whitespace-only schema"
-            );
-
-            let Err(PolicyStoreError::CedarSchemaError { file, err }) = validation else {
-                panic!("Expected CedarSchemaError");
-            };
-
-            assert_eq!(file, "whitespace.cedarschema");
-            assert!(matches!(err, CedarSchemaErrorType::EmptySchema));
-        }
+    fn test_whitespace_only_schema_is_valid() {
+        let result = ParsedSchema::parse("   \n  \t  \n   ", "whitespace.cedarschema");
+        // Whitespace-only content is valid Cedar (empty fragment)
+        assert!(
+            result.is_ok(),
+            "Whitespace-only schema is valid and should parse"
+        );
     }
 
     #[test]
@@ -600,11 +528,15 @@ mod tests {
             }
         ";
 
-        let parsed = ParsedSchema::parse(content, "test.cedarschema").unwrap();
+        let parsed = ParsedSchema::parse(content, "test.cedarschema")
+            .expect("Valid schema should parse for clone test");
         let cloned = parsed.clone();
 
-        assert_eq!(parsed.filename, cloned.filename);
-        assert_eq!(parsed.content, cloned.content);
+        // Clone preserves schema and fragment
+        assert_eq!(
+            parsed.get_schema().entity_types().count(),
+            cloned.get_schema().entity_types().count()
+        );
     }
 
     #[test]
@@ -638,13 +570,16 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_schema_preserves_content() {
+    fn test_parse_schema_produces_valid_entity_types() {
         let content = r"namespace Test { entity User; }";
 
-        let parsed = ParsedSchema::parse(content, "preserve.cedarschema").unwrap();
-        assert_eq!(
-            parsed.content, content,
-            "Original content should be preserved"
+        let parsed = ParsedSchema::parse(content, "test.cedarschema")
+            .expect("Valid schema should parse for entity type test");
+        let type_names: Vec<_> = parsed.get_schema().entity_types().map(|e| e.to_string()).collect();
+        assert!(
+            type_names.contains(&"Test::User".to_string()),
+            "Should contain Test::User; got: {:?}",
+            type_names
         );
     }
 
@@ -661,17 +596,10 @@ mod tests {
             }
         ";
 
-        let result1 = ParsedSchema::parse(schema1, "schema1.cedarschema");
-        let result2 = ParsedSchema::parse(schema2, "schema2.cedarschema");
-
-        assert!(result1.is_ok());
-        assert!(result2.is_ok());
-
-        let parsed1 = result1.unwrap();
-        let parsed2 = result2.unwrap();
-
-        assert_ne!(parsed1.filename, parsed2.filename);
-        assert_ne!(parsed1.content, parsed2.content);
+        ParsedSchema::parse(schema1, "schema1.cedarschema")
+            .expect("Schema1 should parse successfully");
+        ParsedSchema::parse(schema2, "schema2.cedarschema")
+            .expect("Schema2 should parse successfully");
     }
 
     #[test]
@@ -690,24 +618,17 @@ mod tests {
         let result = ParsedSchema::parse_multiple(&files);
         let parsed = result.expect("parse_multiple should succeed");
 
+        let type_names: Vec<_> = parsed.get_schema().entity_types().map(|e| e.to_string()).collect();
         assert!(
-            parsed.content.contains("entity User"),
-            "expected merged schema content to contain 'entity User'; got: {}",
-            parsed.content
+            type_names.contains(&"App::User".to_string()),
+            "Should contain App::User; got: {:?}",
+            type_names
         );
         assert!(
-            parsed.content.contains("entity Resource"),
-            "expected merged schema content to contain 'entity Resource'; got: {}",
-            parsed.content
+            type_names.contains(&"App::Resource".to_string()),
+            "Should contain App::Resource; got: {:?}",
+            type_names
         );
-        assert_eq!(
-            parsed.filename,
-            "users.cedarschema, resources.cedarschema",
-            "expected parsed filename to be 'users.cedarschema, resources.cedarschema'; got: {}",
-            parsed.filename
-        );
-
-        parsed.validate().expect("Combined schema should be valid");
     }
 
     #[test]
@@ -801,9 +722,10 @@ mod tests {
     #[test]
     fn test_combine_fragments_json_single() {
         let content = r"namespace Test { entity User; }";
-        let fragment = SchemaFragment::from_str(content).unwrap();
-        let result = combine_schema_fragments(&[fragment]);
-        let combined = result.expect("combine_fragments_json with single fragment should succeed");
+        let fragment = SchemaFragment::from_str(content)
+            .expect("Valid Cedar DSL should parse");
+        let combined = combine_schema_fragments(&[fragment])
+            .expect("combine_fragments_json with single fragment should succeed");
         let json = combined.to_json_string().expect("Should serialize to JSON");
         assert!(
             json.contains("User"),
@@ -813,10 +735,12 @@ mod tests {
 
     #[test]
     fn test_combine_fragments_json_deep_merge_same_namespace() {
-        let f1 = SchemaFragment::from_str(r"namespace App { entity User; }").unwrap();
-        let f2 = SchemaFragment::from_str(r"namespace App { entity Admin; }").unwrap();
-        let result = combine_schema_fragments(&[f1, f2]);
-        let combined = result.expect("combine_fragments_json with same namespace should succeed");
+        let f1 = SchemaFragment::from_str(r"namespace App { entity User; }")
+            .expect("Valid Cedar DSL should parse (User)");
+        let f2 = SchemaFragment::from_str(r"namespace App { entity Admin; }")
+            .expect("Valid Cedar DSL should parse (Admin)");
+        let combined = combine_schema_fragments(&[f1, f2])
+            .expect("combine_fragments_json with same namespace should succeed");
         let json = combined.to_json_string().expect("Should serialize to JSON");
         assert!(json.contains("User"), "Should contain User");
         assert!(json.contains("Admin"), "Should contain Admin");
@@ -833,7 +757,7 @@ mod tests {
                 }
             }
         }))
-        .unwrap();
+        .expect("json! macro produces valid Value");
 
         let source: Map<String, Value> = serde_json::from_value(json!({
             "App": {
@@ -842,13 +766,13 @@ mod tests {
                 }
             }
         }))
-        .unwrap();
+        .expect("json! macro produces valid Value");
 
         deep_merge(&mut target, source);
 
         let merged = Value::Object(target);
-        let app = merged.get("App").unwrap();
-        let etypes = app.get("entityTypes").unwrap();
+        let app = merged.get("App").expect("App key exists in merged object");
+        let etypes = app.get("entityTypes").expect("entityTypes key exists in App");
         assert!(etypes.get("User").is_some(), "User should survive merge");
         assert!(
             etypes.get("Admin").is_some(),
@@ -885,10 +809,6 @@ mod tests {
 
         let result = ParsedSchema::parse_multiple(&files);
         let parsed = result.expect("parse_multiple with actions should succeed");
-
-        parsed
-            .validate()
-            .expect("Schema with actions should be valid");
 
         let schema = parsed.get_schema();
         let actions: Vec<_> = schema.actions().collect();

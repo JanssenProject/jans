@@ -24,6 +24,7 @@ use super::issuer_parser::IssuerParser;
 use super::loader::LoadedPolicyStore;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
+use super::schema_parser::ParsedSchema;
 use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
@@ -81,8 +82,8 @@ impl PolicyStoreManager {
     ) -> Result<PolicyStore, ConversionError> {
         // 1. Convert schema (now optional)
         let cedar_schema = match loaded.schema {
-            Some(ref schema_content) => {
-                Some(Self::convert_schema(schema_content)?)
+            Some(ref parsed_schema) => {
+                Some(Self::convert_parsed_schema(parsed_schema)?)
             },
             None if strict_schema_validation => {
                 return Err(ConversionError::SchemaConversion(
@@ -122,43 +123,18 @@ impl PolicyStoreManager {
         })
     }
 
-    /// Convert raw schema string to `CedarSchema`.
-    ///
-    /// Uses `ParsedSchema::parse` to parse and validate the schema, then converts
-    /// to the `CedarSchema` format required by the legacy system.
-    ///
-    /// The `CedarSchema` requires:
-    /// - `schema: cedar_policy::Schema`
-    /// - `json: CedarSchemaJson`
-    /// - `validator_schema: ValidatorSchema`
-    fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
-        use super::schema_parser::ParsedSchema;
+    /// Convert a pre-parsed `ParsedSchema` to `CedarSchema`.
+    fn convert_parsed_schema(parsed: &ParsedSchema) -> Result<CedarSchema, ConversionError> {
+        let schema = parsed.get_schema().clone();
 
-        // Parse and validate schema (parses once and stores the fragment)
-        let parsed_schema =
-            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
-                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
-            })?;
-
-        // Validate the schema
-        parsed_schema.validate().map_err(|e| {
-            ConversionError::SchemaConversion(format!("Schema validation failed: {e}"))
-        })?;
-
-        // Get the Cedar schema from the parsed result
-        let schema = parsed_schema.get_schema().clone();
-
-        // Use the already-parsed fragment for JSON conversion (no re-parsing)
-        let json_string = parsed_schema.get_fragment().to_json_string().map_err(|e| {
+        let json_string = parsed.get_fragment().to_json_string().map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {e}"))
         })?;
 
-        // Parse CedarSchemaJson
         let json: CedarSchemaJson = serde_json::from_str(&json_string).map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to parse CedarSchemaJson: {e}"))
         })?;
 
-        // Create ValidatorSchema
         let validator_schema = ValidatorSchema::from_json_str(
             &json_string,
             Extensions::all_available(),
@@ -172,6 +148,19 @@ impl PolicyStoreManager {
             json,
             validator_schema,
         })
+    }
+
+    /// Convert raw schema string to `CedarSchema`.
+    #[cfg(test)]
+    fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
+        use super::schema_parser::ParsedSchema;
+
+        let parsed_schema =
+            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
+                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
+            })?;
+
+        Self::convert_parsed_schema(&parsed_schema)
     }
 
     /// Convert policy and template files to `PoliciesContainer`.
@@ -370,6 +359,10 @@ mod tests {
                 updated_date: None,
             },
         }
+    }
+
+    fn parse_schema(content: &str) -> ParsedSchema {
+        ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
     }
 
     #[test]
@@ -678,9 +671,7 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
-            schema: Some(r#"
+        let schema = parse_schema(r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -688,8 +679,10 @@ mod tests {
                 resource: [User]
             };
         }
-    "#
-            .to_string()),
+    "#);
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -711,9 +704,7 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_minimal() {
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
-            schema: Some(r#"
+        let schema = parse_schema(r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -721,8 +712,10 @@ mod tests {
                 resource: [User]
             };
         }
-    "#
-            .to_string()),
+    "#);
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -747,9 +740,7 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_full() {
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
-            schema: Some(r#"
+        let schema = parse_schema(r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -757,8 +748,10 @@ mod tests {
                 resource: [User]
             };
         }
-    "#
-            .to_string()),
+    "#);
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),

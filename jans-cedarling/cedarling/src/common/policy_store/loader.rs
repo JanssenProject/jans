@@ -136,8 +136,8 @@ pub(crate) fn load_policy_store_archive_bytes(
 pub(crate) struct LoadedPolicyStore {
     /// Policy store metadata
     pub metadata: PolicyStoreMetadata,
-    /// Raw schema content (optional — absent when running without schema)
-    pub schema: Option<String>,
+    /// Parsed schema (optional — absent when running without schema)
+    pub schema: Option<ParsedSchema>,
     /// Policy files content (filename -> content)
     pub policies: Vec<PolicyFile>,
     /// Template files content (filename -> content)
@@ -280,14 +280,15 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// 2. `schemas/*.cedarschema` (directory) — used only when the single file is absent.
     /// 3. `schemas/*.cedarschema` directory empty → returns `EmptySchemaDirectory` error.
     /// 4. Neither present → returns `MissingSchemaSource` error with both paths.
-    fn load_schema(&self, dir: &str) -> Result<Option<String>, PolicyStoreError> {
+    fn load_schema(&self, dir: &str) -> Result<Option<ParsedSchema>, PolicyStoreError> {
         let schema_path = Self::join_path(dir, "schema.cedarschema");
         if let Some(content) = self.load_single_schema_file(&schema_path)? {
-            return Ok(Some(content));
+            let parsed = ParsedSchema::parse(&content, "schema.cedarschema")?;
+            return Ok(Some(parsed));
         }
         let schemas_dir = Self::join_path(dir, "schemas");
         match self.load_schema_from_directory(&schemas_dir)? {
-            Some(content) => Ok(Some(content)),
+            Some(parsed) => Ok(Some(parsed)),
             None => Err(ValidationError::MissingSchemaSource {
                 searched_file: schema_path,
                 searched_dir: schemas_dir,
@@ -317,7 +318,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Load schema from the schemas/ directory, combining all `.cedarschema` files.
     /// Returns `None` if the directory does not exist.
     /// Returns `Err(EmptySchemaDirectory)` if the directory exists but contains no `.cedarschema` files.
-    fn load_schema_from_directory(&self, path: &str) -> Result<Option<String>, PolicyStoreError> {
+    fn load_schema_from_directory(&self, path: &str) -> Result<Option<ParsedSchema>, PolicyStoreError> {
         if !self.vfs.exists(path) {
             return Ok(None);
         }
@@ -339,8 +340,8 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             return Err(ValidationError::EmptySchemaDirectory { path: path.to_string() }.into());
         }
 
-        let combined = Self::combine_schema_files(&raw_files)?;
-        Ok(Some(combined))
+        let parsed = Self::combine_schema_files(&raw_files)?;
+        Ok(Some(parsed))
     }
 
     /// Read and validate all `.cedarschema` files from directory entries.
@@ -376,12 +377,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(files)
     }
 
-    /// Combine multiple `.cedarschema` files into a single schema text.
+    /// Combine multiple `.cedarschema` files into a single parsed schema.
     ///
     /// Delegates to [`ParsedSchema::parse_multiple`] for parsing, validation,
-    /// and JSON-round-trip merging (see [`combine_schema_fragments`]).
-    fn combine_schema_files(raw_files: &[SchemaFile]) -> Result<String, PolicyStoreError> {
-        ParsedSchema::parse_multiple(raw_files).map(|parsed| parsed.content)
+    /// and JSON deep-merge (see [`combine_schema_fragments`]).
+    fn combine_schema_files(raw_files: &[SchemaFile]) -> Result<ParsedSchema, PolicyStoreError> {
+        ParsedSchema::parse_multiple(raw_files)
     }
 
     /// Load all policy files from policies directory.
