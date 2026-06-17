@@ -1,14 +1,15 @@
 import OpenAI from 'openai';
 import { LLMClient } from './LLMClient';
 
-export class DeepSeekClient implements LLMClient {
+export class OllamaClient implements LLMClient {
   private client: OpenAI | null = null;
 
-  async initialize(apiKey: string): Promise<void> {
-    // DeepSeek uses OpenAI-compatible API
+  async initialize(apiKey: string, baseURL?: string): Promise<void> {
+    // Ollama exposes an OpenAI-compatible API. A key is not required for a
+    // local server, so fall back to a placeholder when none is provided.
     this.client = new OpenAI({
-      apiKey,
-      baseURL: 'https://api.deepseek.com/v1', // DeepSeek API endpoint
+      apiKey: apiKey || 'ollama',
+      baseURL: baseURL || 'http://localhost:11434/v1', // Ollama API endpoint
       dangerouslyAllowBrowser: true
     });
   }
@@ -20,10 +21,10 @@ export class DeepSeekClient implements LLMClient {
     tool_choice?: string;
   }): Promise<any> {
     if (!this.client) {
-      throw new Error("DeepSeek client not initialized. Call initialize() first.");
+      throw new Error("Ollama client not initialized. Call initialize() first.");
     }
 
-    const model = params.model || 'deepseek-chat';
+    const model = params.model || 'llama3.1';
 
     const response = await this.client.chat.completions.create({
       model,
