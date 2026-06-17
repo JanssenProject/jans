@@ -70,6 +70,28 @@ func (c *Client) GetUMAResource(ctx context.Context, id string) (*UMAResource, e
 	return ret, nil
 }
 
+// GetUMAResourcesByClient returns all UMA resources associated with the given client id.
+func (c *Client) GetUMAResourcesByClient(ctx context.Context, clientId string) ([]UMAResource, error) {
+
+	if clientId == "" {
+		return nil, fmt.Errorf("clientId is empty")
+	}
+
+	scope := "https://jans.io/oauth/config/uma.readonly"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	ret := []UMAResource{}
+
+	if err := c.get(ctx, "/jans-config-api/api/v1/uma/resources/clientId/"+clientId, token, scope, &ret); err != nil {
+		return nil, fmt.Errorf("get request failed: %w", err)
+	}
+
+	return ret, nil
+}
+
 // CreateUMAResource creates a new UMA resource.
 func (c *Client) CreateUMAResource(ctx context.Context, resource *UMAResource) (*UMAResource, error) {
 
