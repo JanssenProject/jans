@@ -57,6 +57,10 @@ public class SignatureVerifier {
         }
     }
 
+    // SHA1withRSA (COSE alg -65535 / RS1) is required to VERIFY legacy U2F attestation signatures —
+    // it is never used to generate signatures. SHA-1 verification of legacy data is an accepted risk
+    // for backward compatibility, so the weak-hash security findings are suppressed here intentionally.
+    @SuppressWarnings({"java:S2070", "java:S4790"})
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
         log.debug("Signature checker : {}", signatureAlgorithm);
@@ -107,6 +111,7 @@ public class SignatureVerifier {
                     return Signature.getInstance("SHA512withRSA", provider);
                 }
                 case -65535: {
+                    // Legacy U2F (RS1): SHA-1 used only for verifying existing attestation signatures.
                     return Signature.getInstance("SHA1withRSA", provider);
                 }
 
