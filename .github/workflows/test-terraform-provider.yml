@@ -182,6 +182,10 @@ jobs:
         docker logs traefik > aio-logs/traefik.log 2>&1 || true
         docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
         docker compose -f automation/compose.yaml ps > aio-logs/compose-ps.txt 2>&1 || true
+        # per-service jetty logs (FILE/TRACE output, where config-api request errors land)
+        for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
+          docker cp "jans:/opt/jans/jetty/$s/logs" "aio-logs/$s" 2>/dev/null || true
+        done
 
     - name: Summarise results
       if: always()
