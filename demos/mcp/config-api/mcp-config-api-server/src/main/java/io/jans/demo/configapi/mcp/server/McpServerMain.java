@@ -10,6 +10,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 
 import tools.jackson.databind.json.JsonMapper;
@@ -125,7 +126,7 @@ public class McpServerMain {
                                 toolHandler::handleListClients));
         }
 
-        private static McpServerFeatures.SyncToolRegistration createTool(
+        private static McpServerFeatures.SyncToolSpecification createTool(
                         String name,
                         String description,
                         Map<String, Object> inputSchema,
@@ -140,15 +141,10 @@ public class McpServerMain {
                                 .inputSchema(schema)
                                 .build();
 
-                /*
-                 * return new McpServerFeatures.SyncToolRegistration ( tool, (exchange,
-                 * arguments) -> executor.execute(arguments));
-                 */
-                
-                return  McpServerFeatures.SyncToolRegistration registration = new McpServerFeatures.SyncToolRegistration(
+  
+                return new McpServerFeatures.SyncToolSpecification(
                         tool,
-                        (exchange, arguments) -> executor.execute(arguments));
-                       
+                        (exchange, arguments) -> executor.execute(inputSchema));
                   
         }
 
