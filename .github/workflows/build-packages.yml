@@ -1757,11 +1757,6 @@ jobs:
       - name: Build extension package
         working-directory: ${{ env.EXT_DIR }}
         run: |
-          # ubuntu-22.04 ships PostgreSQL 14 at /usr/bin/pg_config. Without an
-          # explicit --pg-config, `cargo pgrx package` picks that up and silently
-          # appends pg14 to the feature set, colliding with the matrix's pg${NN}.
-          # Force the pgrx-managed pg_config that `cargo pgrx init` set up so the
-          # matrix value is the only pg$VERSION feature in scope.
           PG_CONFIG="$(cargo pgrx info pg-config ${{ matrix.pg }})"
           cargo pgrx package \
             --features ${{ matrix.pg }} \
@@ -1787,8 +1782,6 @@ jobs:
           pkg_root="../target/release/${EXT_NAME}-${PG}"
           test -d "${pkg_root}" || { echo "package output missing at ${pkg_root}"; exit 1; }
 
-          # pgrx emits a matched set per PG major: .so under usr/lib/postgresql/<NN>/lib
-          # and .control + .sql under usr/share/postgresql/<NN>/extension.
           BASE="${EXT_NAME}-${TAG}-${PG}-linux-x86_64"
           stage="$(mktemp -d)"
           mkdir -p "${stage}/${BASE}"
