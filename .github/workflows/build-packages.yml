@@ -1756,7 +1756,12 @@ jobs:
 
       - name: Build extension package
         working-directory: ${{ env.EXT_DIR }}
-        run: cargo pgrx package --features ${{ matrix.pg }}
+        run: |
+          PG_CONFIG="$(cargo pgrx info pg-config ${{ matrix.pg }})"
+          cargo pgrx package \
+            --features ${{ matrix.pg }} \
+            --no-default-features \
+            --pg-config "${PG_CONFIG}"
 
       - name: Stage tarball
         id: stage
@@ -1774,11 +1779,9 @@ jobs:
           fi
 
           PG="${{ matrix.pg }}"
-          pkg_root="target/release/${EXT_NAME}-${PG}"
+          pkg_root="../target/release/${EXT_NAME}-${PG}"
           test -d "${pkg_root}" || { echo "package output missing at ${pkg_root}"; exit 1; }
 
-          # pgrx emits a matched set per PG major: .so under usr/lib/postgresql/<NN>/lib
-          # and .control + .sql under usr/share/postgresql/<NN>/extension.
           BASE="${EXT_NAME}-${TAG}-${PG}-linux-x86_64"
           stage="$(mktemp -d)"
           mkdir -p "${stage}/${BASE}"

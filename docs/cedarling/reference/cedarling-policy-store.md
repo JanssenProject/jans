@@ -23,12 +23,12 @@ For a comprehensive JSON schema defining the structure of the policy store, see:
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:
+Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
 
 | Configuration | Detection |
 |---------------|-----------|
-| `CEDARLING_POLICY_STORE_URI` ending in `.cjar` | Cedar Archive from URL |
-| `CEDARLING_POLICY_STORE_URI` (other) | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL |
+| `CEDARLING_POLICY_STORE_URI`, response body is JSON | Legacy JSON from Lock Server |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
@@ -865,7 +865,7 @@ type TokensContext = {
 
 #### Key Requirements
 
-1. **Required Attributes**: Add `token_type`, `jti`, `issuer`, `exp`, `validated_at` to all token entities
+1. **Required Attributes**: Add `token_type`, `jti`, `iss`, `exp`, `validated_at` to all token entities
 2. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
 3. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
 4. **Context Update**: Add `tokens?: TokensContext` field to your Context type
