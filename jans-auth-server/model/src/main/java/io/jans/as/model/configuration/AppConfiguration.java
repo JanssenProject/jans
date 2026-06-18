@@ -46,6 +46,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
+    public static final int DEFAULT_ID_JAG_LIFETIME = 300;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -3992,11 +3993,12 @@ public class AppConfiguration implements Configuration {
     }
 
     public int getIdJagLifetime() {
+        if (idJagLifetime <= 0) idJagLifetime = DEFAULT_ID_JAG_LIFETIME;
         return idJagLifetime;
     }
 
     public void setIdJagLifetime(int idJagLifetime) {
-        this.idJagLifetime = idJagLifetime;
+        this.idJagLifetime = idJagLifetime > 0 ? idJagLifetime : DEFAULT_ID_JAG_LIFETIME;
     }
 
     public Boolean getIdJagIssueRefreshToken() {

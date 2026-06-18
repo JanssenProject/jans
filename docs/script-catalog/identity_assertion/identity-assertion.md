@@ -17,7 +17,7 @@ server code.
 The script applies to **Step 1** of the ID-JAG flow — the token exchange request where a client
 presents an existing token (`id_token` or `refresh_token`) and receives a signed ID-JAG:
 
-```
+```http
 POST /jans-auth/restv1/token
   grant_type=urn:ietf:params:oauth:grant-type:token-exchange
   subject_token=<id_token>

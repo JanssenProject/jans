@@ -4,6 +4,8 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.TrustedIssuerConfig;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
@@ -11,6 +13,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -32,6 +35,8 @@ import org.slf4j.Logger;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static io.jans.as.model.config.Constants.*;
@@ -68,6 +73,9 @@ public class IdJagService {
 
     @Inject
     private ExternalIdentityAssertionService externalIdentityAssertionService;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     /**
      * Issues a signed ID-JAG for the given execution context.
@@ -140,7 +148,7 @@ public class IdJagService {
             idJag.getClaims().setClaim(JwtClaimName.RESOURCE, resource);
         }
         if (StringUtils.isNotBlank(authorizationDetails)) {
-            idJag.getClaims().setClaim(JwtClaimName.AUTHORIZATION_DETAILS, authorizationDetails);
+            idJag.getClaims().setClaim(JwtClaimName.AUTHORIZATION_DETAILS, new JSONArray(authorizationDetails));
         }
 
         propagateOptionalClaims(idJag, subjectJwt);
@@ -167,7 +175,7 @@ public class IdJagService {
     private void copyClaimIfPresent(Jwt dest, Jwt src, String claimName) {
         final Object value = src.getClaims().getClaim(claimName);
         if (value != null) {
-            dest.getClaims().setClaim(claimName, String.valueOf(value));
+            dest.getClaims().setClaimObject(claimName, value, true);
         }
     }
 
@@ -219,6 +227,9 @@ public class IdJagService {
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
         }
 
+        verifySubjectTokenSignature(jwt, executionContext);
+        verifySubjectTokenIssuer(jwt, executionContext);
+        verifySubjectTokenAudience(jwt, executionContext.getClient(), executionContext);
         verifySubjectTokenExpiry(jwt, executionContext);
         return jwt;
     }
@@ -235,10 +246,63 @@ public class IdJagService {
         return null;
     }
 
+    private void verifySubjectTokenSignature(Jwt jwt, ExecutionContext executionContext) {
+        try {
+            final boolean valid = cryptoProvider.verifySignature(
+                    jwt.getSigningInput(),
+                    jwt.getEncodedSignature(),
+                    jwt.getHeader().getKeyId(),
+                    null,
+                    null,
+                    jwt.getHeader().getSignatureAlgorithm());
+            if (!valid) {
+                final String msg = "subject_token signature verification failed.";
+                log.debug(msg);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
+            }
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("subject_token signature verification error", e);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "subject_token signature verification failed."), executionContext.getAuditLog()));
+        }
+    }
+
+    private void verifySubjectTokenIssuer(Jwt jwt, ExecutionContext executionContext) {
+        final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+        if (StringUtils.isBlank(issuer)) {
+            final String msg = "subject_token 'iss' claim is absent.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
+        }
+        final Map<String, TrustedIssuerConfig> trustedIssuers = appConfiguration.getIdJagTrustedIdpIssuers();
+        final String serverIssuer = appConfiguration.getIssuer();
+        if (!trustedIssuers.isEmpty() && !trustedIssuers.containsKey(issuer) && !issuer.equals(serverIssuer)) {
+            final String msg = "subject_token issuer '" + issuer + "' is not in idJagTrustedIdpIssuers.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), executionContext.getAuditLog()));
+        }
+    }
+
+    private void verifySubjectTokenAudience(Jwt jwt, Client client, ExecutionContext executionContext) {
+        final List<String> audience = jwt.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
+        if (audience.isEmpty()) {
+            final String msg = "subject_token 'aud' claim is absent.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
+        }
+        final String clientId = client.getClientId();
+        if (audience.stream().noneMatch(aud -> aud.equals(clientId))) {
+            final String msg = "subject_token 'aud' does not contain the requesting client_id.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), executionContext.getAuditLog()));
+        }
+    }
+
     private void verifySubjectTokenExpiry(Jwt jwt, ExecutionContext executionContext) {
         final Date exp = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-        if (exp != null && exp.before(new Date())) {
-            final String msg = "subject_token is expired.";
+        if (exp == null || exp.before(new Date())) {
+            final String msg = exp == null ? "subject_token 'exp' claim is absent." : "subject_token is expired.";
             log.debug(msg);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
         }

@@ -85,7 +85,7 @@ public class ExternalIdentityAssertionService extends ExternalScriptService {
 
     public boolean externalModifyResponse(JSONObject response, CustomScriptConfiguration script, ExecutionContext context) {
         final Client client = context.getClient();
-        log.debug("Executing external 'modifyResponse', script name: {}, clientId: {}, response: {}", script.getName(), client.getClientId(), response);
+        log.debug("Executing external 'modifyResponse', script name: {}, clientId: {}, responseKeys: {}", script.getName(), client.getClientId(), response.keySet());
 
         boolean result = false;
         try {
@@ -104,7 +104,7 @@ public class ExternalIdentityAssertionService extends ExternalScriptService {
             saveScriptError(script.getCustomScript(), ex);
         }
 
-        log.debug("Finished 'modifyResponse', script name: {}, clientId: {}, result: {}, response: {}", script.getName(), client.getClientId(), result, response);
+        log.debug("Finished 'modifyResponse', script name: {}, clientId: {}, result: {}, responseKeys: {}", script.getName(), client.getClientId(), result, response.keySet());
         return result;
     }
 }
