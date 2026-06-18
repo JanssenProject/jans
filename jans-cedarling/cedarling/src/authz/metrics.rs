@@ -273,7 +273,9 @@ struct PolicyStoreRefreshMetrics {
     conditional_to_head_transitions: AtomicI64,
     /// Cumulative count of `HeadThenGet → PlainGet` transitions.
     head_to_plain_transitions: AtomicI64,
-    /// Cumulative count of probes that successfully upgraded back to `Conditional`.
+    /// Cumulative count of probes that upgraded `PlainGet → HeadThenGet`.
+    upgrade_to_head_transitions: AtomicI64,
+    /// Cumulative count of probes that upgraded back to `Conditional`.
     upgrade_to_conditional_transitions: AtomicI64,
     outcome_success: AtomicI64,
     outcome_not_modified: AtomicI64,
@@ -316,12 +318,12 @@ impl PolicyStoreRefreshMetrics {
         }
     }
 
-    /// Records the current strategy and cumulative transition counts after a tick.
     fn set_strategy_state(
         &self,
         current_strategy: i64,
         conditional_to_head_transitions: u32,
         head_to_plain_transitions: u32,
+        upgrade_to_head_transitions: u32,
         upgrade_to_conditional_transitions: u32,
     ) {
         self.strategy_current
@@ -332,6 +334,10 @@ impl PolicyStoreRefreshMetrics {
         );
         self.head_to_plain_transitions
             .store(i64::from(head_to_plain_transitions), Ordering::Relaxed);
+        self.upgrade_to_head_transitions.store(
+            i64::from(upgrade_to_head_transitions),
+            Ordering::Relaxed,
+        );
         self.upgrade_to_conditional_transitions.store(
             i64::from(upgrade_to_conditional_transitions),
             Ordering::Relaxed,
@@ -370,6 +376,11 @@ impl PolicyStoreRefreshMetrics {
             ops,
             "policy_store_refresh.head_to_plain_transitions",
             &self.head_to_plain_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.upgrade_to_head_transitions",
+            &self.upgrade_to_head_transitions,
         );
         insert_if_nonzero(
             ops,
@@ -473,12 +484,14 @@ impl MetricsCollector {
         current_strategy: i64,
         conditional_to_head_transitions: u32,
         head_to_plain_transitions: u32,
+        upgrade_to_head_transitions: u32,
         upgrade_to_conditional_transitions: u32,
     ) {
         self.refresh.set_strategy_state(
             current_strategy,
             conditional_to_head_transitions,
             head_to_plain_transitions,
+            upgrade_to_head_transitions,
             upgrade_to_conditional_transitions,
         );
     }
@@ -1189,7 +1202,7 @@ mod tests {
     #[test]
     fn policy_store_refresh_strategy_keys_track_transitions() {
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(2, 1, 0, 0);
+        collector.record_policy_store_refresh_strategy(2, 1, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
@@ -1346,8 +1359,8 @@ mod tests {
     #[test]
     fn policy_store_refresh_strategy_current_overwrites_on_each_call() {
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(1, 0, 0, 0);
-        collector.record_policy_store_refresh_strategy(2, 5, 1, 2);
+        collector.record_policy_store_refresh_strategy(1, 0, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(2, 5, 1, 0, 2);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
@@ -1369,7 +1382,7 @@ mod tests {
         // MUST be visible — distinguishing "not running" from "running and
         // healthy" is the whole point of the sparse encoding.
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(1, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(1, 0, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
