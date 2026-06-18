@@ -539,12 +539,14 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
 
 impl From<LegacyPolicyStore> for super::PolicyStore {
     fn from(v: LegacyPolicyStore) -> Self {
+        let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
         super::PolicyStore {
             version: v.version,
             name: v.name,
             description: v.description,
             cedar_version: v.cedar_version,
-            schema: v.schema.map(std::convert::Into::into),
+            schema_source_exists: schema.is_some(),
+            schema,
             policies: v.policies.into(),
             trusted_issuers: v
                 .trusted_issuers
