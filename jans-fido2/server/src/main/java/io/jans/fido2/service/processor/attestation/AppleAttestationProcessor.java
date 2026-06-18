@@ -81,8 +81,6 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
 			CredAndCounterData credIdAndCounters) {
 
-		log.info("AttStmt: {}", attStmt.asText());
-
 		// Apple attestation is always a FULL attestation. A missing x5c means the statement
 		// cannot be verified, so it must be rejected rather than silently accepted.
 		if (!attStmt.hasNonNull("x5c")) {
@@ -118,7 +116,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 			log.info("Step 1 completed");
 		} catch (Fido2RuntimeException e) {
-			String issuerDN = credCert.getIssuerDN().getName();
+			String issuerDN = credCert.getIssuerX500Principal().getName();
 			log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
 					"Failed to find attestation validation signature public certificate with DN: " + issuerDN);

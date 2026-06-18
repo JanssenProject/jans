@@ -18,8 +18,8 @@ import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.auth.BasicUserPrincipal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -93,7 +93,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(false);
         when(errorResponseFactory.badRequestException(any(), anyString()))
                 .thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
@@ -114,7 +113,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -127,7 +125,6 @@ class AppleAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verifyNoInteractions(certificateService, appConfiguration, attestationCertificateService, certificateVerifier, coseService, base64Service);
         verifyNoMoreInteractions(log, errorResponseFactory);
     }
@@ -140,7 +137,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -148,7 +144,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         when(attestationCertificateService.getAppleRootCertificates()).thenThrow(new Fido2RuntimeException("test exception"));
-        when(credCert.getIssuerDN()).thenReturn(new BasicUserPrincipal("test issuer dn"));
+        when(credCert.getIssuerX500Principal()).thenReturn(new X500Principal("CN=test issuer dn"));
         when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
@@ -157,11 +153,10 @@ class AppleAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "test issuer dn");
-        verify(errorResponseFactory).badRequestException(any(), eq("Failed to find attestation validation signature public certificate with DN: test issuer dn"));
+        verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "CN=test issuer dn");
+        verify(errorResponseFactory).badRequestException(any(), eq("Failed to find attestation validation signature public certificate with DN: CN=test issuer dn"));
         verifyNoMoreInteractions(log, errorResponseFactory);
         verifyNoInteractions(certificateVerifier, coseService, base64Service);
     }
@@ -174,7 +169,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -194,7 +188,6 @@ class AppleAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
         verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
@@ -214,7 +207,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -237,7 +229,6 @@ class AppleAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
         verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
@@ -260,7 +251,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -285,7 +275,6 @@ class AppleAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
         verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
@@ -310,7 +299,6 @@ class AppleAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.asText()).thenReturn("test_att_stmt");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         JsonNode x5cNode = mock(JsonNode.class);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
@@ -338,7 +326,6 @@ class AppleAttestationProcessorTest {
 
         appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
-        verify(log).info("AttStmt: {}", "test_att_stmt");
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
         verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
