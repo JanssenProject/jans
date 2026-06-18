@@ -228,7 +228,9 @@ public class TokenRestWebServiceValidator {
                 || SUBJECT_TOKEN_TYPE_REFRESH_TOKEN.equalsIgnoreCase(subjectTokenType)) {
             return;
         }
-        String msg = String.format("Unsupported subject_token_type for ID-JAG exchange: %s. Supported: id_token, saml2, refresh_token.", subjectTokenType);
+
+        String msg = String.format("Unsupported subject_token_type for ID-JAG exchange: %s. Supported: %s, %s, %s.",
+                subjectTokenType, SUBJECT_TOKEN_TYPE_ID_TOKEN, SUBJECT_TOKEN_TYPE_SAML2, SUBJECT_TOKEN_TYPE_REFRESH_TOKEN);
         log.trace(msg);
         throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
     }

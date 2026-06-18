@@ -159,7 +159,7 @@ public class IdJagValidatorService {
         }
 
         final String serverIssuer = appConfiguration.getIssuer();
-        if (audience.stream().noneMatch(aud -> aud.equals(serverIssuer) || aud.startsWith(serverIssuer))) {
+        if (audience.stream().noneMatch(serverIssuer::equals)) {
             final String msg = "ID-JAG 'aud' does not match this AS issuer. Expected: " + serverIssuer;
             log.debug(msg);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), executionContext.getAuditLog()));
@@ -218,7 +218,7 @@ public class IdJagValidatorService {
         if (StringUtils.isNotBlank(sub)) {
             final User user = userService.getUser(sub);
             if (user != null) {
-                log.debug("Resolved user by 'sub': {}", sub);
+                log.debug("Resolved user by 'sub', user: {}", user.getUserId());
                 return user;
             }
         }
@@ -228,7 +228,7 @@ public class IdJagValidatorService {
         if (StringUtils.isNotBlank(email)) {
             final User user = userService.getUserByAttribute("mail", email);
             if (user != null) {
-                log.debug("Resolved user by 'email': {}", email);
+                log.debug("Resolved user by 'email', user: {}", user.getUserId());
                 return user;
             }
         }
@@ -238,7 +238,7 @@ public class IdJagValidatorService {
         if (StringUtils.isNotBlank(audSub)) {
             final User user = userService.getUser(audSub);
             if (user != null) {
-                log.debug("Resolved user by 'aud_sub': {}", audSub);
+                log.debug("Resolved user by 'aud_sub', user: {}", user.getUserId());
                 return user;
             }
         }

@@ -266,7 +266,7 @@ public class TokenExchangeService {
                 new org.json.JSONArray(authzDetailsParam);
             } catch (JSONException e) {
                 final String msg = "'authorization_details' must be a JSON array.";
-                log.debug(msg);
+                log.debug(msg, e);
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
             }
         }
