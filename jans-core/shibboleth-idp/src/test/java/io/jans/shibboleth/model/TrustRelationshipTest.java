@@ -866,6 +866,31 @@ public class TrustRelationshipTest {
             TrustRelationship updated = result.getValue();
 
             assertThat(updated).isInActiveStatus();
+            assertThat(updated.getActivationDiagnostics()).isEqualTo(diagnostics);
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN finalizeActivation() is called with a failed ActivationDiagnostics " + 
+            "THEN should transition to READY and increment version "
+        )
+        public void shouldTransitionToReady_whenFinalizeActivationFails(TrustRelationship tr) {
+
+            ActivationDiagnostics diagnostics = TrustRelationshipFixtures.sampleActivationDiagnosticsForFailedActivation();
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.FAILED);
+
+            TrustResult<TrustRelationship> result =tr.finalizeActivation(diagnostics);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInReadyStatus();
+            assertThat(updated.getActivationDiagnostics()).isEqualTo(diagnostics);
             assertThat(updated).isVersion(tr.getVersion().next());
         }
 

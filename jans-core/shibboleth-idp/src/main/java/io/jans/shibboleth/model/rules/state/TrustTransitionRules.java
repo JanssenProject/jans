@@ -35,8 +35,14 @@ public final class TrustTransitionRules {
 
             new TrustTransitionRule(
                 TrustStatus.ACTIVATING,TrustStatus.ACTIVE,
-                (candidate) -> activationDiagnosticsReportSuccessfulActivation(candidate),
+                (candidate) -> hasSuccessfulActivationDiagnosticsData(candidate),
                 "ACTIVATING -> ACTIVE: Activation diagnostics report activation was successful"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVATING,TrustStatus.READY,
+                (candidate) -> hasFailedActivationDiagnosticsData(candidate),
+                "ACTIVATING -> READY: Activation diagnostics report activation failed"
             )
         );
     }
@@ -97,8 +103,13 @@ public final class TrustTransitionRules {
         return candidate.hasNoActiveProfileConfiguration();
     }
 
-    private static boolean activationDiagnosticsReportSuccessfulActivation(TrustRelationship candidate) {
+    private static boolean hasSuccessfulActivationDiagnosticsData(TrustRelationship candidate) {
 
-        return candidate.getActivationDiagnostics().getStatus() == ActivationStatus.SUCCEEDED;
+        return candidate.hasSuccessfulActivationDiagnosticsData();
+    }
+
+    private static boolean hasFailedActivationDiagnosticsData(TrustRelationship candidate) {
+
+        return candidate.hasFailedActivationDiagnosticsData();
     }
 }
