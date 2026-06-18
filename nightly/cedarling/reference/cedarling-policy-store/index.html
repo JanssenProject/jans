@@ -2497,7 +2497,7 @@
 <p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
 <p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code> and <code>CEDARLING_POLICY_STORE_URI</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
 <h2 id="policy-store-formats">Policy Store Formats<a class="headerlink" href="#policy-store-formats" title="Permanent link">#</a></h2>
-<p>Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:</p>
+<p>Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):</p>
 <table>
 <thead>
 <tr>
@@ -2507,11 +2507,11 @@
 </thead>
 <tbody>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code> ending in <code>.cjar</code></td>
+<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is a cjar or zip archive</td>
 <td>Cedar Archive from URL</td>
 </tr>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code> (other)</td>
+<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is JSON</td>
 <td>Legacy JSON from Lock Server</td>
 </tr>
 <tr>
@@ -3459,7 +3459,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 15, 2026 13:38:15 UTC"><span class="timeago" datetime="2026-06-15T13:38:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 15, 2026 13:38:15 UTC">2026-06-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 17, 2026 13:14:23 UTC"><span class="timeago" datetime="2026-06-17T13:14:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 17, 2026 13:14:23 UTC">2026-06-17</span>
   </span>
 
     
