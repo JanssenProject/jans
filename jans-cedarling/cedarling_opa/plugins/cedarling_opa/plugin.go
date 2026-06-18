@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"os"
 	"sync"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
@@ -47,7 +46,7 @@ type CedarPlugin struct {
 	manager *plugins.Manager
 	mtx     sync.RWMutex
 	config  Config
-	cedar   *cedarling_go.Cedarling
+	cedar   Cedarling
 	logger  logging.Logger
 }
 
@@ -68,7 +67,7 @@ func clearGlobalInstance(p *CedarPlugin) {
 	}
 }
 
-func WithCedarlingInstance(fn func(*cedarling_go.Cedarling) error) error {
+func WithCedarlingInstance(fn func(Cedarling) error) error {
 	globalInstanceMu.RLock()
 	p := globalInstance
 	globalInstanceMu.RUnlock()
@@ -103,7 +102,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
-	p.cedar = instance
+	p.cedar = Cedarling(instance)
 	p.manager.ExtraRoute("/.well-known/authzen-configuration", "metadata", p.MetaDataHandler)
 	p.manager.ExtraRoute("/access/v1/evaluation", "evaluation", p.AccessEvaluationHandler)
 	p.manager.ExtraRoute("/access/v1/evaluations", "evaluations", p.AccessEvaluationsHandler)
@@ -128,14 +127,14 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config any) {
 	cfg := config.(Config)
 	new_config, err := buildBootstrapConfig(cfg)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		p.logger.Info(err.Error())
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
 	p.logger.Info("Initializing Cedarling")
 	new_instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		p.logger.Info(err.Error())
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
@@ -221,7 +220,10 @@ func (p *CedarPlugin) evaluate(subject *Entity, action string, resource *Entity,
 		Context:  context,
 	}
 	authorization_result, err := p.cedar.AuthorizeMultiIssuer(authorization_request)
-	return &authorization_result, err
+	if err != nil {
+		return nil, err
+	}
+	return &authorization_result, nil
 }
 
 func (p *CedarPlugin) buildEvaluationResponse(subject *Entity, action string, resource *Entity, context map[string]any) (*EvaluationResponse, error) {

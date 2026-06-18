@@ -3,9 +3,17 @@ package cedarlingopa
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 )
 
 type EvaluationsSemantic string
+
+type Cedarling interface {
+	AuthorizeMultiIssuer(request cedarling_go.AuthorizeMultiIssuerRequest) (cedarling_go.MultiIssuerAuthorizeResult, error)
+	AuthorizeUnsigned(request cedarling_go.RequestUnsigned) (cedarling_go.AuthorizeResult, error)
+	ShutDown()
+}
 
 const (
 	ExecuteAll          EvaluationsSemantic = "execute_all"
