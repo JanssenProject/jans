@@ -108,7 +108,18 @@ jobs:
       run: bash automation/ci/run_aio_for_tf.sh
 
     - name: Install gotestsum
-      run: go install gotest.tools/gotestsum@v1.12.0
+      # Use the prebuilt binary: `go install` builds gotestsum from source, which pulls an
+      # older golang.org/x/tools that fails to compile under the runner's Go toolchain.
+      run: |
+        set -euo pipefail
+        GTS_VERSION=1.12.0
+        base="https://github.com/gotestyourself/gotestsum/releases/download/v${GTS_VERSION}"
+        tgz="gotestsum_${GTS_VERSION}_linux_amd64.tar.gz"
+        curl -fsSL -o "/tmp/${tgz}" "${base}/${tgz}"
+        curl -fsSL -o /tmp/gotestsum_checksums.txt "${base}/gotestsum-${GTS_VERSION}-checksums.txt"
+        ( cd /tmp && awk -v f="$tgz" '$2==f' gotestsum_checksums.txt | sha256sum -c - )
+        sudo tar -xzf "/tmp/${tgz}" -C /usr/local/bin gotestsum
+        gotestsum --version
 
     - name: Install Terraform CLI
       # The acceptance framework otherwise auto-downloads Terraform and verifies it against
