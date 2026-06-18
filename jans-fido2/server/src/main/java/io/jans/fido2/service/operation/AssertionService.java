@@ -114,7 +114,9 @@ public class AssertionService {
 	 * userVerification, origin, extensions, timeout
 	 */
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
-		log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
+		if (log.isDebugEnabled()) {
+			log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
+		}
 
 		// Start timing for metrics collection
 		long startTime = System.currentTimeMillis();
@@ -122,7 +124,7 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionOptions), httpRequest, httpResponse);
-		boolean externalInterceptContext = externalFido2InterceptionService.authenticateAssertionStart(
+		externalFido2InterceptionService.authenticateAssertionStart(
 				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
 
 		// Verify request parameters
@@ -159,13 +161,13 @@ public class AssertionService {
 					metricService.recordPasskeyFallback(username, Fido2MetricsConstants.FALLBACK_METHOD_PASSWORD, 
 							"No registered passkeys found for user");
 				} catch (Exception e) {
-					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND: {}", e.getMessage());
+					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND", e);
 				}
 				throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND,
 						"Can't find associated key(s). Username: " + username);
 			}
 			assertionOptionsResponse.setAllowCredentials(allowedCredentials);
-			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele.toString()));
+			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele));
 			log.debug("Put allowedCredentials {}", allowedCredentials);
 
 		} else
@@ -181,13 +183,12 @@ public class AssertionService {
 			assertionOptionsResponse.setTimeout(timeout);
 			log.debug("Put timeout {}", timeout);
 		}
-		/*
-		 * else { assertionOptionsResponse.setTimeout(60000l); }
-		 */
 		// Copy extensions
 		if (assertionOptions.getExtensions() != null) {
 			assertionOptionsResponse.setExtensions(assertionOptions.getExtensions());
-			log.debug("Put extensions {}", assertionOptions.getExtensions());
+			if (log.isDebugEnabled()) {
+				log.debug("Put extensions {}", assertionOptions.getExtensions());
+			}
 		}
 
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
@@ -222,16 +223,18 @@ public class AssertionService {
 		try {
 			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime);
 		} catch (Exception e) {
-			log.debug("Failed to record authentication attempt metrics: {}", e.getMessage());
+			log.debug("Failed to record authentication attempt metrics", e);
 		}
 
-		log.debug("assertionOptionsResponse :" + assertionOptionsResponse);
+		log.debug("assertionOptionsResponse :{}", assertionOptionsResponse);
 		return assertionOptionsResponse;
 	}
 
 	public AsserOptGenerateResponse generateOptions(AssertionOptionsGenerate assertionOptionsGenerate)
 			throws JsonProcessingException {
-		log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
+		if (log.isDebugEnabled()) {
+			log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
+		}
 
 		// Create result object
 		AsserOptGenerateResponse asserOptGenerateResponse = new AsserOptGenerateResponse();
@@ -292,7 +295,9 @@ public class AssertionService {
 	}
 
 	public AttestationOrAssertionResponse verify(AssertionResult assertionResult) {
-		log.debug("authenticateResponse verify {}", CommonUtilService.toJsonNode(assertionResult));
+		if (log.isDebugEnabled()) {
+			log.debug("authenticateResponse verify {}", CommonUtilService.toJsonNode(assertionResult));
+		}
 
 		// Start timing for metrics collection
 		long startTime = System.currentTimeMillis();
@@ -303,7 +308,7 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
-		boolean externalInterceptContext = externalFido2InterceptionService
+		externalFido2InterceptionService
 				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
@@ -339,7 +344,7 @@ public class AssertionService {
 			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
 		}
 
-		log.debug("Fido2AuthenticationData: " + authenticationData.toString());
+		log.debug("Fido2AuthenticationData: {}", authenticationData);
 		// Verify domain
 		domainVerifier.verifyDomain(authenticationData.getOrigin(), clientJsonNode);
 
@@ -348,8 +353,8 @@ public class AssertionService {
 				.findByPublicKeyId(keyId, authenticationEntity.getRpId()).orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-		log.debug("Fido2RegistrationEntry" + registrationEntry);
-		log.debug("registrationData" + registrationData);
+		log.debug("Fido2RegistrationEntry {}", registrationEntry);
+		log.debug("registrationData {}", registrationData);
 
 		// Set username and authenticator type for metrics
 		username = registrationData.getUsername();
@@ -377,7 +382,9 @@ public class AssertionService {
 		registrationEntry.setCounter(registrationData.getCounter());
 		registrationPersistenceService.update(registrationEntry);
 
-		log.debug("registrationEntry.getUserInum() : " + registrationEntry.getUserInum());
+		if (log.isDebugEnabled()) {
+			log.debug("registrationEntry.getUserInum() : {}", registrationEntry.getUserInum());
+		}
 		// If SessionStateId is not empty update session
 		String sessionStateId = authenticationEntity.getSessionStateId();
 		if (StringHelper.isNotEmpty(sessionStateId)) {
@@ -441,8 +448,10 @@ public class AssertionService {
 				.collect(Collectors.toList());
 
 		List<PublicKeyCredentialDescriptor> allowedFido2Keys = new ArrayList<>(allowedFido2Registrations.size());
-		allowedFido2Registrations.forEach((f) -> {
-			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
+		allowedFido2Registrations.forEach(f -> {
+			if (log.isDebugEnabled()) {
+				log.debug("attestation request:{}", f.getRegistrationData().getAttestationRequest());
+			}
 
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor();
 			descriptor.setTransports(f.getRegistrationData().getTransports());
@@ -470,7 +479,7 @@ public class AssertionService {
 		try {
 			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
 		} catch (Exception e) {
-			log.debug("Failed to record authentication success metrics: {}", e.getMessage());
+			log.debug("Failed to record authentication success metrics", e);
 		}
 	}
 	
@@ -483,7 +492,7 @@ public class AssertionService {
 			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
 			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
 		} catch (Exception metricsException) {
-			log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
+			log.debug("Failed to record authentication failure metrics", metricsException);
 		}
 	}
 	
@@ -524,7 +533,7 @@ public class AssertionService {
 				log.debug("Recorded fallback event for user {}: {} - {}", username, fallbackMethod, reason);
 			}
 		} catch (Exception e) {
-			log.debug("Failed to record fallback metrics: {}", e.getMessage());
+			log.debug("Failed to record fallback metrics", e);
 		}
 	}
 

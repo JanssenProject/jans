@@ -46,11 +46,11 @@ import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -62,6 +62,8 @@ import java.util.stream.Collectors;
  */
 @ApplicationScoped
 public class AttestationService {
+
+	private static final SecureRandom RANDOM = new SecureRandom();
 
 	@Inject
 	private Logger log;
@@ -117,14 +119,16 @@ public class AttestationService {
      */
     public PublicKeyCredentialCreationOptions options(AttestationOptions attestationOptions) {
 
-        log.debug("Attestation options {}", CommonUtilService.toJsonNode(attestationOptions).toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Attestation options {}", CommonUtilService.toJsonNode(attestationOptions));
+        }
 
         // Start timing for metrics collection
         long startTime = System.currentTimeMillis();
 
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationOptions), httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.registerAttestationStart(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
+        externalFido2InterceptionService.registerAttestationStart(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
 
         // Verify request parameters
         commonVerifiers.verifyAttestationOptions(attestationOptions);
@@ -141,37 +145,37 @@ public class AttestationService {
 		// Put pubKeyCredParams
 		Set<PublicKeyCredentialParameters> pubKeyCredParams = preparePublicKeyCredentialSelection();
 		credentialCreationOptions.setPubKeyCredParams(pubKeyCredParams);
-		pubKeyCredParams.stream().forEach(ele -> log.debug("Put pubKeyCredParam {}", ele.toString()));
+		pubKeyCredParams.stream().forEach(ele -> log.debug("Put pubKeyCredParam {}", ele));
 
 		// Put RP
 		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer(), appConfiguration.getFido2Configuration().getRequestedParties());
 		RelyingParty relyingParty = createRpDomain(origin);
-		log.debug("Relying Party: "+relyingParty);
-		
+		log.debug("Relying Party: {}", relyingParty);
+
 		if (relyingParty != null) {
 			credentialCreationOptions.setRp(relyingParty);
-			log.debug("Put rp {}", relyingParty.toString());
+			log.debug("Put rp {}", relyingParty);
 		}
 
 		// Put user
 		String userId = generateUserId();
 		User user = User.createUser(userId, attestationOptions.getUsername(), attestationOptions.getDisplayName());
 		credentialCreationOptions.setUser(user);
-		log.debug("Put user {}", user.toString());
+		log.debug("Put user {}", user);
 
 		// Put excludeCredentials
 		
 		Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(origin, attestationOptions.getUsername());
 		credentialCreationOptions.setExcludeCredentials(excludedCredentials);
-		excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
+		excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele));
 		
 		
 		//set hints - client-device, security key, hybrid
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		
-		credentialCreationOptions.setHints(new HashSet<String>(hints));
-		
-		//TODO: check if authenticatorSelection can be set in attestation options as well specially incase of platform
+		credentialCreationOptions.setHints(new HashSet<>(hints));
+
+		// authenticatorSelection may also be set in attestation options, especially for platform authenticators
 		prepareAuthenticatorSelection( credentialCreationOptions,attestationOptions) ;
 		
 		prepareAttestation(credentialCreationOptions);
@@ -181,7 +185,9 @@ public class AttestationService {
 		if (attestationOptions.getExtensions() != null) {
 			credentialCreationOptions.setExtensions(attestationOptions.getExtensions());
 
-			log.debug("Put extensions {}", attestationOptions.getExtensions());
+			if (log.isDebugEnabled()) {
+				log.debug("Put extensions {}", attestationOptions.getExtensions());
+			}
 		}
 		
 		// Store request in DB
@@ -202,7 +208,6 @@ public class AttestationService {
 		entity.setAttestationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
 
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity);
-		//if (params.hasNonNull("session_id")) {
 		if (attestationOptions.getSessionId() != null) {
 			registrationEntry.setSessionStateId(attestationOptions.getSessionId());
 		}
@@ -222,15 +227,17 @@ public class AttestationService {
 		try {
 			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime);
 		} catch (Exception e) {
-			log.debug("Failed to record registration attempt metrics: {}", e.getMessage());
+			log.debug("Failed to record registration attempt metrics", e);
 		}
 
-		log.debug("Returning from options: "+credentialCreationOptions.toString());
+		log.debug("Returning from options: {}", credentialCreationOptions);
 		return credentialCreationOptions;
 	}
 
 	public AttestationOrAssertionResponse verify(AttestationResult attestationResult) {
-		log.debug("Attestation verify {}", CommonUtilService.toJsonNode(attestationResult));
+		if (log.isDebugEnabled()) {
+			log.debug("Attestation verify {}", CommonUtilService.toJsonNode(attestationResult));
+		}
 
 		// Start timing for metrics collection
 		long startTime = System.currentTimeMillis();
@@ -240,7 +247,7 @@ public class AttestationService {
 		try {
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationResult), httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
+        externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
 
        
 		// Verify if there are mandatory request parameters
@@ -284,7 +291,7 @@ public class AttestationService {
 		
 		
 		// ----- testing
-		HashSet<String> tempTransports = new HashSet<String>(
+		HashSet<String> tempTransports = new HashSet<>(
 				Arrays.asList(attestationResult.getResponse().getTransports()));
 		// in somecases only USB is shows up in transport
 		if (tempTransports.contains(Transports.USB.getValue()) || tempTransports.contains(Transports.NFC.getValue())
@@ -294,7 +301,7 @@ public class AttestationService {
 			tempTransports.add(Transports.BLE.getValue());
 		}
 
-		String[] transports = (String[]) tempTransports.toArray(new String[tempTransports.size()]);
+		String[] transports = tempTransports.toArray(new String[0]);
 
 		registrationData.setTransports(transports);
 		// --------- testing
@@ -311,7 +318,9 @@ public class AttestationService {
 		if(attestationResult.getAuthentictatorAttachment() == null)
 		{
 			
-			log.debug("Transports : "+ attestationResult.getResponse().getTransports().toString());
+			if (log.isDebugEnabled()) {
+				log.debug("Transports : {}", Arrays.toString(attestationResult.getResponse().getTransports()));
+			}
 			// look inside transports
 			
 			if(tempTransports.contains(Transports.INTERNAL.getValue()))
@@ -395,10 +404,10 @@ public class AttestationService {
 
 		// set hints - client-device, security key, hybrid
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
-		log.debug("hints"+hints+":"+hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) );
-		
-		//credentialCreationOptions.setHints(new HashSet<String>(hints));
-		
+		if (log.isDebugEnabled()) {
+			log.debug("hints {} : {}", hints, hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()));
+		}
+
 		if (attestationOptions.getAuthenticatorSelection() != null)
 		{
 			credentialCreationOptions.setAuthenticatorSelection(attestationOptions.getAuthenticatorSelection());
@@ -419,7 +428,7 @@ public class AttestationService {
 
 			} 
 			// only cross platform
-			else if (hints.size() > 0 && (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) == false))
+			else if (!hints.isEmpty() && !hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()))
 			{
 				log.debug("cross platform ");
 				credentialCreationOptions.getAuthenticatorSelection()
@@ -438,9 +447,11 @@ public class AttestationService {
 				credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
 
 			}
-			log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
+			if (log.isDebugEnabled()) {
+				log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
+			}
 		}
-		
+
 	}
 
 	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
@@ -468,14 +479,16 @@ public class AttestationService {
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
 				}
-				//TODO: this else does not make sense
+				// default: request direct attestation
 				else
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
 				}
 				
-				log.debug("Put attestation {}", credentialCreationOptions.getAttestation());
-		
+				if (log.isDebugEnabled()) {
+					log.debug("Put attestation {}", credentialCreationOptions.getAttestation());
+				}
+
 	}
 	
 	
@@ -484,55 +497,56 @@ public class AttestationService {
 
 		Set<PublicKeyCredentialParameters> credentialParametersSets = new HashSet<>();
 		if ((enabledFidoAlgorithms == null) || enabledFidoAlgorithms.isEmpty()) {
-			// Add default requested credential types
-			// FIDO2 RS256
+			// Add default requested credential types: RS256, ES256, Ed25519
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
-			// FIDO2 ES256
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
-			// FIDO2 Ed25519
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.Ed25519.getNumericValue()));
 		} else {
-			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
-				CoseRSAAlgorithm coseRSAAlgorithm = null;
-				try {
-					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(enabledFidoAlgorithm);
-				} catch (IllegalArgumentException ex) {
-				}
-
-				if (coseRSAAlgorithm != null) {
-					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseRSAAlgorithm.getNumericValue()));
-					break;
-				}
-			}
-
-			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
-				CoseEC2Algorithm coseEC2Algorithm = null;
-				try {
-					coseEC2Algorithm = CoseEC2Algorithm.valueOf(enabledFidoAlgorithm);
-				} catch (IllegalArgumentException ex) {
-				}
-
-				if (coseEC2Algorithm != null) {
-					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEC2Algorithm.getNumericValue()));
-					break;
-				}
-			}
-
-			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
-				CoseEdDSAAlgorithm coseEdDSAAlgorithm = null;
-				try {
-					coseEdDSAAlgorithm = CoseEdDSAAlgorithm.valueOf(enabledFidoAlgorithm);
-				} catch (IllegalArgumentException ex) {
-				}
-
-				if (coseEdDSAAlgorithm != null) {
-					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEdDSAAlgorithm.getNumericValue()));
-					break;
-				}
-			}
+			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveRsaNumericValue);
+			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEc2NumericValue);
+			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEdDsaNumericValue);
 		}
 
 		return credentialParametersSets;
+	}
+
+	/**
+	 * Add the credential parameter for the first enabled algorithm name that resolves to a known
+	 * numeric COSE value via the given resolver.
+	 */
+	private void addFirstSupportedAlgorithm(Set<PublicKeyCredentialParameters> credentialParametersSets,
+			List<String> enabledFidoAlgorithms, Function<String, Integer> numericValueResolver) {
+		for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
+			Integer numericValue = numericValueResolver.apply(enabledFidoAlgorithm);
+			if (numericValue != null) {
+				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
+				break;
+			}
+		}
+	}
+
+	private static Integer resolveRsaNumericValue(String enabledFidoAlgorithm) {
+		try {
+			return CoseRSAAlgorithm.valueOf(enabledFidoAlgorithm).getNumericValue();
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
+	private static Integer resolveEc2NumericValue(String enabledFidoAlgorithm) {
+		try {
+			return CoseEC2Algorithm.valueOf(enabledFidoAlgorithm).getNumericValue();
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
+	private static Integer resolveEdDsaNumericValue(String enabledFidoAlgorithm) {
+		try {
+			return CoseEdDSAAlgorithm.valueOf(enabledFidoAlgorithm).getNumericValue();
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
 	}
 
 	public RelyingParty createRpDomain(String origin) {
@@ -559,7 +573,7 @@ public class AttestationService {
 
 	public String generateUserId() {
 		byte[] buffer = new byte[32];
-		new SecureRandom().nextBytes(buffer);
+		RANDOM.nextBytes(buffer);
 
 		return base64Service.urlEncodeToString(buffer);
 	}
@@ -586,7 +600,7 @@ public class AttestationService {
 		try {
 			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
 		} catch (Exception e) {
-			log.debug("Failed to record registration success metrics: {}", e.getMessage());
+			log.debug("Failed to record registration success metrics", e);
 		}
 	}
 	
@@ -599,7 +613,7 @@ public class AttestationService {
 			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
 		} catch (Exception metricsException) {
-			log.debug("Failed to record registration failure metrics: {}", metricsException.getMessage());
+			log.debug("Failed to record registration failure metrics", metricsException);
 		}
 	}
 	

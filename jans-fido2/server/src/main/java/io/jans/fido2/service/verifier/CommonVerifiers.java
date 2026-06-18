@@ -87,7 +87,7 @@ public class CommonVerifiers {
             origin = "https://" + origin;
         }
         origin = networkService.getHost(origin);
-        log.debug("Resolved origin to RP ID: " + origin);
+        log.debug("Resolved origin to RP ID: {}", origin);
 
         // Check if requestedParties is null or empty
         if (requestedParties == null || requestedParties.isEmpty()) {
@@ -299,7 +299,7 @@ public class CommonVerifiers {
     }
 
     public JsonNode verifyClientJSON(String clientDataJSON) {
-    	log.debug("clientDataJSON : "+ clientDataJSON);
+    	log.debug("clientDataJSON : {}", clientDataJSON);
         JsonNode clientJsonNode = null;
         try {
             if (Strings.isNullOrEmpty(clientDataJSON)) {
@@ -313,7 +313,7 @@ public class CommonVerifiers {
                 throw errorResponseFactory.invalidRequest("Client data JSON is empty");
             }
         } catch (IOException e) {
-        	log.error(e.getMessage());
+        	log.error("Can't parse client data JSON", e);
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
 

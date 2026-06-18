@@ -77,7 +77,7 @@ class CommonVerifiersTest {
         String domain = "https://test.domain";
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyRpIdHash(authData, domain));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Hashes don't match");
+        assertEquals("Hashes don't match", ex.getMessage());
         verify(log, times(2)).debug(anyString(), anyString());
         verify(log).warn("hash from domain doesn't match hash from assertion HEX");
     }
@@ -100,7 +100,7 @@ class CommonVerifiersTest {
         String response = commonVerifiers.verifyRpDomain(originsValue, null, requestedParties);
 
         assertNotNull(response);
-        assertEquals(response, "test.domain");
+        assertEquals("test.domain", response);
         verify(appConfiguration, never()).getIssuer();
     }
 
@@ -112,7 +112,7 @@ class CommonVerifiersTest {
         String response = commonVerifiers.verifyRpDomain(null, issuer, requestedParties);
 
         assertNotNull(response);
-        assertEquals(response, "test.domain");
+        assertEquals("test.domain", response);
     }
 
 
@@ -147,9 +147,8 @@ class CommonVerifiersTest {
         when(errorResponseFactory.badRequestException(any(), anyString()))
                 .thenThrow(new BadRequestException("The origin " + origin + " is not listed in the allowed origins."));
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            commonVerifiers.verifyRpDomain(origin, rpId, requestedParties);
-        });
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> commonVerifiers.verifyRpDomain(origin, rpId, requestedParties));
 
         assertEquals("The origin " + origin + " is not listed in the allowed origins.", exception.getMessage());
     }
@@ -171,7 +170,7 @@ class CommonVerifiersTest {
 
         Fido2CompromisedDevice ex = assertThrows(Fido2CompromisedDevice.class, () -> commonVerifiers.verifyCounter(oldCounter, newCounter));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Counter did not increase");
+        assertEquals("Counter did not increase", ex.getMessage());
         verify(log).debug("old counter {} new counter {} ", oldCounter, newCounter);
     }
 
@@ -181,7 +180,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyCounter(counter));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid field : counter");
+        assertEquals("Invalid field : counter", ex.getMessage());
     }
 
     @Test
@@ -193,9 +192,10 @@ class CommonVerifiersTest {
 
     @Test
     void verifyAttestationOptions_paramsEmpty_fido2RuntimeException() {
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAttestationOptions(mock(AttestationOptions.class)));
+        AttestationOptions attestationOptions = mock(AttestationOptions.class);
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAttestationOptions(attestationOptions));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Username is a mandatory parameter");
+        assertEquals("Username is a mandatory parameter", ex.getMessage());
     }
 
     @Test
@@ -212,11 +212,12 @@ class CommonVerifiersTest {
     void verifyAssertionOptions_paramsEmpty_fido2RuntimeException() {
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAssertionOptions(mock(AssertionOptions.class)));
+        AssertionOptions assertionOptions = mock(AssertionOptions.class);
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAssertionOptions(assertionOptions));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -232,11 +233,12 @@ class CommonVerifiersTest {
     void verifyBasicPayload_paramsEmpty_fido2RuntimeException() {
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyBasicPayload(mock(AssertionResult.class)));
+        AssertionResult assertionResult = mock(AssertionResult.class);
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyBasicPayload(assertionResult));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -255,7 +257,7 @@ class CommonVerifiersTest {
         node.put(fieldName, "TEST-fieldNameValue");
 
         String response = commonVerifiers.verifyBase64UrlString(node, fieldName);
-        assertEquals(response, "TEST-fieldNameValue");
+        assertEquals("TEST-fieldNameValue", response);
         verify(base64Service).urlDecode("TEST-fieldNameValue");
     }
 
@@ -268,7 +270,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyBase64UrlString(node, fieldName));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid \"" + fieldName + "\"");
+        assertEquals("Invalid \"" + fieldName + "\"", ex.getMessage());
     }
 
     @Test
@@ -279,7 +281,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyBase64String(node));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid data");
+        assertEquals("Invalid data", ex.getMessage());
     }
 
     @Test
@@ -291,7 +293,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyBase64String(node));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid data");
+        assertEquals("Invalid data", ex.getMessage());
     }
 
     @Test
@@ -312,7 +314,7 @@ class CommonVerifiersTest {
 
         String response = commonVerifiers.verifyThatFieldString(node, fieldName);
         assertNotNull(response);
-        assertEquals(response, fieldValue);
+        assertEquals(fieldValue, response);
     }
 
     @Test
@@ -326,8 +328,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyThatNonEmptyString(node, fieldName));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -339,7 +341,7 @@ class CommonVerifiersTest {
 
         String response = commonVerifiers.verifyThatNonEmptyString(node, fieldName);
         assertNotNull(response);
-        assertEquals(response, fieldValue);
+        assertEquals(fieldValue, response);
     }
 
     @Test
@@ -350,8 +352,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyThatBinary(node));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -361,7 +363,7 @@ class CommonVerifiersTest {
 
         String response = commonVerifiers.verifyThatBinary(node);
         assertNotNull(response);
-        assertEquals(response, "VEVTVC12YWx1ZQ==");
+        assertEquals("VEVTVC12YWx1ZQ==", response);
     }
 
     @Test
@@ -372,8 +374,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAuthData(node));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -382,7 +384,7 @@ class CommonVerifiersTest {
 
         String response = commonVerifiers.verifyAuthData(node);
         assertNotNull(response);
-        assertEquals(response, "VEVTVC12YWx1ZQ==");
+        assertEquals("VEVTVC12YWx1ZQ==", response);
     }
 
     @Test
@@ -391,7 +393,7 @@ class CommonVerifiersTest {
 
         JsonNode response = commonVerifiers.verifyAuthStatement(node);
         assertNotNull(response);
-        assertEquals(response, node);
+        assertEquals(node, response);
     }
 
     @Test
@@ -403,8 +405,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAlgorithm(alg, registeredAlgorithmType));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -413,7 +415,7 @@ class CommonVerifiersTest {
         int registeredAlgorithmType = -257;
 
         int response = commonVerifiers.verifyAlgorithm(alg, registeredAlgorithmType);
-        assertEquals(response, -257);
+        assertEquals(-257, response);
     }
 
     @Test
@@ -427,8 +429,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyFmt(fmtNode, fieldName));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -440,7 +442,7 @@ class CommonVerifiersTest {
 
         String response = commonVerifiers.verifyFmt(fmtNode, fieldName);
         assertNotNull(response);
-        assertEquals(response, fmt);
+        assertEquals(fmt, response);
     }
 
     @Test
@@ -452,8 +454,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAAGUIDZeroed(authData));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -488,8 +490,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONType(clientJsonNode, type));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -556,7 +558,7 @@ class CommonVerifiersTest {
     }
 
     @Test
-    void verifyClientJSON_ifClientJsonNodeChallengeIsNull_fido2RuntimeException() throws IOException {
+    void verifyClientJSON_ifClientJsonNodeChallengeIsNull_fido2RuntimeException() {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
         ObjectNode clientJsonNode = mapper.createObjectNode();
@@ -565,15 +567,16 @@ class CommonVerifiersTest {
 
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
+        String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(encodedClientDataJSON));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
-    void verifyClientJSON_ifClientJsonNodeOriginIsNull_fido2RuntimeException() throws IOException {
+    void verifyClientJSON_ifClientJsonNodeOriginIsNull_fido2RuntimeException() {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
         ObjectNode clientJsonNode = mapper.createObjectNode();
@@ -581,15 +584,16 @@ class CommonVerifiersTest {
         clientJsonNode.put("type", "TEST-type");
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
+        String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(encodedClientDataJSON));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
-    void verifyClientJSON_ifClientJsonNodeTypeIsNull_fido2RuntimeException() throws IOException {
+    void verifyClientJSON_ifClientJsonNodeTypeIsNull_fido2RuntimeException() {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
         ObjectNode clientJsonNode = mapper.createObjectNode();
@@ -597,15 +601,16 @@ class CommonVerifiersTest {
         clientJsonNode.put("origin", "TEST-origin");
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
+        String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(encodedClientDataJSON));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
-    void verifyClientJSON_ifTokenBindingIsNotNull_fido2RuntimeException() throws IOException {
+    void verifyClientJSON_ifTokenBindingIsNotNull_fido2RuntimeException() {
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
@@ -616,13 +621,13 @@ class CommonVerifiersTest {
 
         String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> {commonVerifiers.verifyClientJSON(encodedClientDataJSON);});
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(encodedClientDataJSON));
 
         // Assertions for the expected exception
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -653,13 +658,13 @@ class CommonVerifiersTest {
         assertTrue(response.has("challenge"));
         assertTrue(response.has("origin"));
         assertTrue(response.has("type"));
-        assertEquals(response.get("challenge").asText(), "TEST-challenge");
-        assertEquals(response.get("origin").asText(), "TEST-origin");
-        assertEquals(response.get("type").asText(), "TEST-type");
+        assertEquals("TEST-challenge", response.get("challenge").asText());
+        assertEquals("TEST-origin", response.get("origin").asText());
+        assertEquals("TEST-type", response.get("type").asText());
     }
 
     @Test
-    void verifyClientJSON_ifOriginIsEmpty_fido2RuntimeException() throws IOException {
+    void verifyClientJSON_ifOriginIsEmpty_fido2RuntimeException() {
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "");
@@ -668,14 +673,14 @@ class CommonVerifiersTest {
         when(errorResponseFactory.invalidRequest(any()))
                 .thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () ->
-                commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes()))
-        );
+        String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encodedClientDataJSON));
 
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -704,9 +709,9 @@ class CommonVerifiersTest {
         assertTrue(response.has("challenge"));
         assertTrue(response.has("origin"));
         assertTrue(response.has("type"));
-        assertEquals(response.get("challenge").asText(), "TEST-challenge");
-        assertEquals(response.get("origin").asText(), "TEST-origin");
-        assertEquals(response.get("type").asText(), "TEST-type");
+        assertEquals("TEST-challenge", response.get("challenge").asText());
+        assertEquals("TEST-origin", response.get("origin").asText());
+        assertEquals("TEST-type", response.get("type").asText());
     }
 
     @Test
@@ -715,7 +720,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientRaw(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Client data RAW is missing");
+        assertEquals("Client data RAW is missing", ex.getMessage());
     }
 
     @Test
@@ -725,7 +730,7 @@ class CommonVerifiersTest {
 
         JsonNode response = commonVerifiers.verifyClientRaw(responseNode);
         assertNotNull(response);
-        assertEquals(response.asText(), "TEST-clientDataRaw");
+        assertEquals("TEST-clientDataRaw", response.asText());
     }
 
     @Test
@@ -734,7 +739,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyTPMVersion(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid TPM Attestation version");
+        assertEquals("Invalid TPM Attestation version", ex.getMessage());
     }
 
     @Test
@@ -758,8 +763,8 @@ class CommonVerifiersTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyTokenBindingSupport(status));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -768,7 +773,7 @@ class CommonVerifiersTest {
 
         TokenBindingSupport response = commonVerifiers.verifyTokenBindingSupport(status);
         assertNotNull(response);
-        assertEquals(response.getStatus(), "supported");
+        assertEquals("supported", response.getStatus());
     }
 
     @Test
@@ -779,7 +784,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatMetadataIsValid(metadata));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Unable to process metadataStatement:");
+        assertEquals("Unable to process metadataStatement:", ex.getMessage());
     }
 
     @Test
@@ -793,7 +798,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatMetadataIsValid(metadata));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters in metadata");
+        assertEquals("Invalid parameters in metadata", ex.getMessage());
     }
 
     @Test
@@ -807,7 +812,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatMetadataIsValid(metadata));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters in metadata");
+        assertEquals("Invalid parameters in metadata", ex.getMessage());
     }
 
     @Test
@@ -821,7 +826,7 @@ class CommonVerifiersTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatMetadataIsValid(metadata));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters in metadata");
+        assertEquals("Invalid parameters in metadata", ex.getMessage());
     }
 
     @Test

@@ -3,6 +3,7 @@ package io.jans.fido2.service.verifier;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.orm.model.fido2.UserVerification;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,11 @@ class UserVerificationVerifierTest {
     @Mock
     private Logger log;
 
+    @BeforeEach
+    void enableDebugLogging() {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+    }
+
     @Test
     void verifyUserPresent_ifAuthDataFlagsIsEqual1_true() {
         AuthData authData = mock(AuthData.class);
@@ -39,7 +45,7 @@ class UserVerificationVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyUserPresent(authData));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "User not present");
+        assertEquals("User not present", ex.getMessage());
     }
 
     @Test
@@ -107,7 +113,7 @@ class UserVerificationVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyRequiredUserPresent(authData));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "User required is not present");
+        assertEquals("User required is not present", ex.getMessage());
     }
 
     @Test
