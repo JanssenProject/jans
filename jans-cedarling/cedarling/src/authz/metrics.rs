@@ -23,7 +23,9 @@ use std::{
 };
 
 use crate::{
-    authz::error_metrics::ErrorMetricKey, init::policy_store_refresh::RefreshOutcome, log::Decision,
+    authz::error_metrics::ErrorMetricKey,
+    init::policy_store_refresh::{RefreshOutcome, RefreshStrategy},
+    log::Decision,
 };
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
@@ -290,7 +292,8 @@ impl PolicyStoreRefreshMetrics {
     fn record(&self, outcome: RefreshOutcome) {
         let now_secs = Utc::now().timestamp();
         self.last_attempt_secs.store(now_secs, Ordering::Relaxed);
-        self.last_outcome.store(outcome as i64, Ordering::Relaxed);
+        self.last_outcome
+            .store(outcome.metric_value(), Ordering::Relaxed);
 
         let per_outcome = match outcome {
             RefreshOutcome::Success => &self.outcome_success,
@@ -320,24 +323,22 @@ impl PolicyStoreRefreshMetrics {
 
     fn set_strategy_state(
         &self,
-        current_strategy: i64,
+        current_strategy: RefreshStrategy,
         conditional_to_head_transitions: u32,
         head_to_plain_transitions: u32,
         upgrade_to_head_transitions: u32,
         upgrade_to_conditional_transitions: u32,
     ) {
         self.strategy_current
-            .store(current_strategy, Ordering::Relaxed);
+            .store(current_strategy.metric_value(), Ordering::Relaxed);
         self.conditional_to_head_transitions.store(
             i64::from(conditional_to_head_transitions),
             Ordering::Relaxed,
         );
         self.head_to_plain_transitions
             .store(i64::from(head_to_plain_transitions), Ordering::Relaxed);
-        self.upgrade_to_head_transitions.store(
-            i64::from(upgrade_to_head_transitions),
-            Ordering::Relaxed,
-        );
+        self.upgrade_to_head_transitions
+            .store(i64::from(upgrade_to_head_transitions), Ordering::Relaxed);
         self.upgrade_to_conditional_transitions.store(
             i64::from(upgrade_to_conditional_transitions),
             Ordering::Relaxed,
@@ -481,7 +482,7 @@ impl MetricsCollector {
     /// [`Self::record_policy_store_refresh`].
     pub(crate) fn record_policy_store_refresh_strategy(
         &self,
-        current_strategy: i64,
+        current_strategy: RefreshStrategy,
         conditional_to_head_transitions: u32,
         head_to_plain_transitions: u32,
         upgrade_to_head_transitions: u32,
@@ -1179,7 +1180,7 @@ mod tests {
         assert_eq!(
             snap.operational_stats
                 .get("policy_store_refresh.last_outcome"),
-            Some(&(RefreshOutcome::NotModified as i64))
+            Some(&(RefreshOutcome::NotModified.metric_value()))
         );
         assert_eq!(
             snap.operational_stats
@@ -1202,7 +1203,7 @@ mod tests {
     #[test]
     fn policy_store_refresh_strategy_keys_track_transitions() {
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(2, 1, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 1, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
@@ -1293,7 +1294,7 @@ mod tests {
         assert_eq!(
             snap.operational_stats
                 .get("policy_store_refresh.last_outcome"),
-            Some(&(RefreshOutcome::RebuildError as i64)),
+            Some(&(RefreshOutcome::RebuildError.metric_value())),
         );
     }
 
@@ -1359,8 +1360,8 @@ mod tests {
     #[test]
     fn policy_store_refresh_strategy_current_overwrites_on_each_call() {
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(1, 0, 0, 0, 0);
-        collector.record_policy_store_refresh_strategy(2, 5, 1, 0, 2);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 5, 1, 0, 2);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats
@@ -1382,7 +1383,7 @@ mod tests {
         // MUST be visible — distinguishing "not running" from "running and
         // healthy" is the whole point of the sparse encoding.
         let collector = MetricsCollector::new(0);
-        collector.record_policy_store_refresh_strategy(1, 0, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
             snap.operational_stats

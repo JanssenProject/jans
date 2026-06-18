@@ -72,6 +72,12 @@ pub(crate) enum RefreshOutcome {
     DecodeError = 7,
 }
 
+impl RefreshOutcome {
+    pub(crate) fn metric_value(self) -> i64 {
+        self as i64
+    }
+}
+
 /// Refresh strategy ladder: `Conditional → HeadThenGet → PlainGet`.
 /// Degrades when the upstream doesn't honor the current mode; periodic probes
 /// attempt to upgrade back. Encoded as `i64` for the `strategy_current` metric.
@@ -84,6 +90,12 @@ pub(crate) enum RefreshStrategy {
     HeadThenGet = 2,
     /// Plain GET every tick; falls back to body-hash comparison.
     PlainGet = 3,
+}
+
+impl RefreshStrategy {
+    pub(crate) fn metric_value(self) -> i64 {
+        self as i64
+    }
 }
 
 /// Per-source strategy tracking and transition counters.
@@ -484,7 +496,7 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
                 let outcome = tick(&ctx, &mut state).await;
                 ctx.metrics.record_policy_store_refresh(outcome);
                 ctx.metrics.record_policy_store_refresh_strategy(
-                    state.strategy.current as i64,
+                    state.strategy.current,
                     state.strategy.conditional_to_head_transitions,
                     state.strategy.head_to_plain_transitions,
                     state.strategy.upgrade_to_head_transitions,
