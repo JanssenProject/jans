@@ -74,7 +74,7 @@ pub(crate) enum RefreshOutcome {
 
 /// Refresh strategy ladder: `Conditional → HeadThenGet → PlainGet`.
 /// Degrades when the upstream doesn't honor the current mode; periodic probes
-/// attempt to upgrade back. Encoded as `i64` for the strategy_current metric.
+/// attempt to upgrade back. Encoded as `i64` for the `strategy_current` metric.
 #[repr(i64)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum RefreshStrategy {
@@ -225,12 +225,14 @@ impl AuthzRebuilder {
         policy_store: PolicyStoreWithID,
         prior_authz: &Authz,
     ) -> Result<Authz, RebuildError> {
-        let prior_jwt =
-            if issuers_unchanged(prior_authz.trusted_issuers(), &policy_store.trusted_issuers) {
-                Some(prior_authz.clone_jwt_service())
-            } else {
-                None
-            };
+        let prior_jwt = if issuers_unchanged(
+            prior_authz.trusted_issuers(),
+            policy_store.trusted_issuers.as_ref(),
+        ) {
+            Some(prior_authz.clone_jwt_service())
+        } else {
+            None
+        };
 
         build_authz(
             policy_store,
@@ -248,8 +250,8 @@ impl AuthzRebuilder {
 
 /// `true` when both issuer maps are equal; `false` triggers a [`JwtService`] rebuild.
 fn issuers_unchanged(
-    prior: &Option<std::collections::HashMap<String, TrustedIssuer>>,
-    new: &Option<std::collections::HashMap<String, TrustedIssuer>>,
+    prior: Option<&std::collections::HashMap<String, TrustedIssuer>>,
+    new: Option<&std::collections::HashMap<String, TrustedIssuer>>,
 ) -> bool {
     prior == new
 }
@@ -848,10 +850,10 @@ mod tests {
         assert_eq!(state.upgrade_to_head_transitions, 0);
     }
 
-    fn one_issuer() -> Option<HashMap<String, TrustedIssuer>> {
+    fn one_issuer() -> HashMap<String, TrustedIssuer> {
         let mut m = HashMap::new();
         m.insert("issuer_a".to_string(), TrustedIssuer::default());
-        Some(m)
+        m
     }
 
     #[test]
@@ -859,19 +861,20 @@ mod tests {
         let a = one_issuer();
         let b = one_issuer();
         assert!(
-            issuers_unchanged(&a, &b),
+            issuers_unchanged(Some(&a), Some(&b)),
             "identical issuer maps must signal reuse so JwtService is not rebuilt",
         );
     }
 
     #[test]
     fn empty_vs_some_issuer_signals_rebuild() {
+        let o = one_issuer();
         assert!(
-            !issuers_unchanged(&None, &one_issuer()),
+            !issuers_unchanged(None, Some(&o)),
             "going from no issuers to some issuers must signal a JwtService rebuild",
         );
         assert!(
-            !issuers_unchanged(&one_issuer(), &None),
+            !issuers_unchanged(Some(&o), None),
             "removing all issuers must signal a JwtService rebuild",
         );
     }
@@ -879,20 +882,21 @@ mod tests {
     #[test]
     fn added_issuer_signals_rebuild() {
         let base = one_issuer();
-        let mut expanded = one_issuer().unwrap();
+        let mut expanded = one_issuer();
         expanded.insert("issuer_b".to_string(), TrustedIssuer::default());
         assert!(
-            !issuers_unchanged(&base, &Some(expanded)),
+            !issuers_unchanged(Some(&base), Some(&expanded)),
             "adding a new issuer must signal a JwtService rebuild",
         );
     }
 
     #[test]
     fn removed_issuer_signals_rebuild() {
-        let mut two = one_issuer().unwrap();
+        let mut two = one_issuer();
         two.insert("issuer_b".to_string(), TrustedIssuer::default());
+        let one = one_issuer();
         assert!(
-            !issuers_unchanged(&Some(two), &one_issuer()),
+            !issuers_unchanged(Some(&two), Some(&one)),
             "removing an issuer must signal a JwtService rebuild",
         );
     }
@@ -1194,7 +1198,7 @@ mod tests {
             "choose_for_tick must return the current strategy when already at Conditional",
         );
         assert!(
-            !choice.is_probe,
+            choice.probe_target.is_none(),
             "is_probe must be false when not probing — we're already at the most efficient strategy",
         );
     }
@@ -1212,7 +1216,7 @@ mod tests {
             "a first choose_for_tick after a degrade must run a Conditional probe to test for upstream recovery",
         );
         assert!(
-            choice.is_probe,
+            choice.probe_target.is_some(),
             "is_probe must be true so tick logic interprets 304 as an upgrade signal rather than a steady-state result",
         );
         assert!(
@@ -1235,7 +1239,7 @@ mod tests {
             "while inside the reprobe interval window, choose_for_tick must return the current strategy unchanged",
         );
         assert!(
-            !choice.is_probe,
+            choice.probe_target.is_none(),
             "no probe is scheduled inside the reprobe window — is_probe must be false",
         );
     }

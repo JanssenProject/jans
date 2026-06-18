@@ -82,10 +82,8 @@ impl Authz {
         }
     }
 
-    /// Trusted-issuer map from the currently loaded policy store.
-    /// Used by the refresh worker to decide whether to reuse the existing [`jwt::JwtService`].
-    pub(crate) fn trusted_issuers(&self) -> &Option<HashMap<String, TrustedIssuer>> {
-        &self.config.policy_store.trusted_issuers
+    pub(crate) fn trusted_issuers(&self) -> Option<&HashMap<String, TrustedIssuer>> {
+        self.config.policy_store.trusted_issuers.as_ref()
     }
 
     /// Clone the [`Arc`] wrapping the current [`jwt::JwtService`] for reuse across a refresh.

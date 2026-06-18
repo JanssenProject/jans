@@ -35,6 +35,7 @@ pub(crate) enum BuildAuthzError {
 /// Pass `prior_jwt_service = Some(existing)` to reuse a [`JwtService`] when
 /// `trusted_issuers` is unchanged (refresh path). Pass `None` to always build
 /// fresh (bootstrap path). Bootstrap-specific logging stays in the caller.
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn build_authz(
     policy_store: PolicyStoreWithID,
     jwt_config: &JwtConfig,
