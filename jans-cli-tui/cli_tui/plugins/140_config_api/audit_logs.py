@@ -129,7 +129,7 @@ class ConfigApiAuditLogs(DialogUtils):
             search_arg_lists.append(f'end_date:{date_before}')
 
         if search_arg_lists:
-            endpoint_args += ',' + '\\,'.join(search_arg_lists)
+            endpoint_args += ',' + ','.join(search_arg_lists)
 
         async def search_auditlog_coroutine():
             cli_args = {'operation_id': 'get-audit-data'}

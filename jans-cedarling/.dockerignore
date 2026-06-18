@@ -1,0 +1,43 @@
+# Keep the cedarling_pg Docker build context minimal. The Dockerfile only
+# COPYs the workspace files it needs, but BuildKit still scans the rest of
+# the build context to compute the context-hash for cache invalidation.
+
+# Cargo build outputs
+target/
+**/target/
+
+# Local IDE / VCS / OS junk.
+.git/
+.gitignore
+.dockerignore
+.vscode/
+.idea/
+.cursor/
+.DS_Store
+
+# Sibling subprojects that are not part of cedarling_pg's compile closure
+# (the Dockerfile doesn't COPY them, but excluding here speeds context hash).
+bindings/
+cedarling_pg_codegen/
+cedarling_opa/
+cedarling-krakend/
+flask-sidecar/
+lock-server-script/
+custom-lints/
+schema/
+sql/
+
+# Built native artifacts that may sit alongside source.
+**/*.so
+**/*.dylib
+**/*.dll
+**/.venv/
+**/venv/
+**/__pycache__/
+**/node_modules/
+**/dist/
+**/build/
+**/.tox/
+
+# The existing Dockerfile lives inside the context; not needed inside the build.
+**/Dockerfile
