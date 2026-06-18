@@ -1,6 +1,8 @@
 package io.jans.shibboleth.model;
 
 import io.jans.shibboleth.model.core.*;
+import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
@@ -842,6 +844,32 @@ public class TrustRelationshipTest {
             assertThat(cause).isNotNull();
             assertThat(cause.getFieldName()).isEqualTo("activationDiagnostics");
         }
+
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN finalizeActivation() is called with a successful ActivationDiagnostics " +
+            "THEN should transition to ACTIVE state and increment version " 
+        )
+        public void shouldTransitionToActive_whenFinalizeActivationSucceeds(TrustRelationship tr) {
+
+            ActivationDiagnostics diagnostics = TrustRelationshipFixtures.sampleActivationDiagnosticsForSuccessfulActivation();
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.SUCCEEDED);
+
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInActiveStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+
     }
 
 }

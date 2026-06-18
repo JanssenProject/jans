@@ -304,6 +304,15 @@ public class TrustRelationship {
         return activationDiagnostics.getStatus() == ActivationStatus.NO_DATA;
     }
 
+    public boolean hasSuccessfulActivationDiagnosticsData() {
+
+        return activationDiagnostics.getStatus() == ActivationStatus.SUCCEEDED;
+    }
+
+    public boolean hasFailedActivationDiagnosticsData() {
+
+        return activationDiagnostics.getStatus() == ActivationStatus.FAILED;
+    }
     public TrustResult<TrustRelationship> activate() {
 
         return from(this)
@@ -325,6 +334,7 @@ public class TrustRelationship {
             .withActivationDiagnostics(activationDiagnostics)
             .build();
     }
+
  
     @Override
     public boolean equals(Object o) {

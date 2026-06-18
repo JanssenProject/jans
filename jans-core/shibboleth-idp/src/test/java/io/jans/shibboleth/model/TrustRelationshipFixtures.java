@@ -1,6 +1,8 @@
 package io.jans.shibboleth.model;
 
 import java.net.URI;
+import java.time.Instant;
+import java.util.List;
 
 import io.jans.shibboleth.model.config.profiles.Saml2ArtifactResolutionProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfiguration;
@@ -18,6 +20,10 @@ import io.jans.shibboleth.model.core.ReleasedAttribute;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.core.TrustStatus;
 import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.model.core.diagnostics.ActivationLogEntry;
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
+import io.jans.shibboleth.model.core.diagnostics.LogLevel;
+import io.jans.shibboleth.model.core.diagnostics.Origin;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
 import io.jans.shibboleth.model.metadata.MdqMetadataSource;
@@ -208,6 +214,34 @@ public class TrustRelationshipFixtures {
             .builder()
             .add(ReleasedAttribute.of(Id.generate(),"foo").getValue())
             .add(ReleasedAttribute.of(Id.generate(),"bar").getValue())
+            .build()
+            .getValue();
+    }
+
+    public static final ActivationDiagnostics sampleActivationDiagnosticsForSuccessfulActivation() {
+
+        ActivationLogEntry entry = ActivationLogEntry.of(Instant.now(),LogLevel.INFO,"Process completed").getValue();
+
+        return ActivationDiagnostics.builder()
+            .startedAt(Instant.now())
+            .completedAt(Instant.now().plusSeconds(60))
+            .origin(Origin.of("someinstance@some-host"))
+            .logEntries(List.of(entry))
+            .status(ActivationStatus.SUCCEEDED)
+            .build()
+            .getValue();
+    }
+
+    public static final ActivationDiagnostics sampleActivationDiagnosticsForFailedActivation() {
+
+        ActivationLogEntry entry = ActivationLogEntry.of(Instant.now(),LogLevel.ERROR,"Process failed").getValue();
+
+        return ActivationDiagnostics.builder()
+            .startedAt(Instant.now())
+            .completedAt(Instant.now().plusSeconds(60))
+            .origin(Origin.of("troubledidpinstance@some-host"))
+            .logEntries(List.of(entry))
+            .status(ActivationStatus.FAILED)
             .build()
             .getValue();
     }

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import io.jans.shibboleth.model.BuildContext;
 import io.jans.shibboleth.model.TrustRelationship;
 import io.jans.shibboleth.model.core.TrustStatus;
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.error.TrustTransitionError;
 import io.jans.shibboleth.model.util.TrustResult;
@@ -30,6 +31,12 @@ public final class TrustTransitionRules {
                 TrustStatus.READY,TrustStatus.DRAFT,
                 (candidate) -> hasNoRealMetadataSource(candidate) || hasNoActiveProfileConfiguration(candidate),
                 "READY -> DRAFT : No real metadatasource or no active profile configuration"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVATING,TrustStatus.ACTIVE,
+                (candidate) -> activationDiagnosticsReportSuccessfulActivation(candidate),
+                "ACTIVATING -> ACTIVE: Activation diagnostics report activation was successful"
             )
         );
     }
@@ -88,5 +95,10 @@ public final class TrustTransitionRules {
     private static boolean hasNoActiveProfileConfiguration(TrustRelationship candidate) {
 
         return candidate.hasNoActiveProfileConfiguration();
+    }
+
+    private static boolean activationDiagnosticsReportSuccessfulActivation(TrustRelationship candidate) {
+
+        return candidate.getActivationDiagnostics().getStatus() == ActivationStatus.SUCCEEDED;
     }
 }

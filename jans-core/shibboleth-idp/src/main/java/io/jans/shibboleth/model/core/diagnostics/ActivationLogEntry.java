@@ -3,6 +3,7 @@ package io.jans.shibboleth.model.core.diagnostics;
 import java.time.Instant;
 import java.util.Objects;
 
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.util.TrustResult;
 
 public class ActivationLogEntry {
@@ -11,9 +12,9 @@ public class ActivationLogEntry {
     private final LogLevel level;
     private final String message;
 
-    public ActivationLogEntry(Instant timestamp, LogLevel level, String message) {
+    private ActivationLogEntry(Instant timestamp, LogLevel level, String message) {
 
-        this.timestamp = timestamp != null ? timestamp : Instant.now();
+        this.timestamp = timestamp;
         this.level = level;
         this.message = message;
     }
@@ -31,6 +32,26 @@ public class ActivationLogEntry {
     public String getMessage() {
 
         return message;
+    }
+
+    public static TrustResult<ActivationLogEntry> of(Instant timestamp, LogLevel level, String message) {
+
+        if (timestamp == null) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("timestamp"));
+        }
+
+        if (level == null ) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("level"));
+        }
+
+        if (message == null) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("message"));
+        }
+
+        return TrustResult.success(new ActivationLogEntry(timestamp, level, message));
     }
 
     @Override
