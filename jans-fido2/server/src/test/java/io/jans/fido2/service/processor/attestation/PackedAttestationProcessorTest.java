@@ -21,6 +21,13 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,8 +36,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import javax.net.ssl.X509TrustManager;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static io.jans.util.TestUtil.instanceMapper;
@@ -204,8 +216,22 @@ class PackedAttestationProcessorTest {
         verifyNoInteractions(coseService, base64Service);
     }
 
+    private X509Certificate compliantAttestationCertificate() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"));
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        X500Name subject = new X500Name("C=US,O=Acme,OU=Authenticator Attestation,CN=Acme Packed Attestation");
+        Date notBefore = new Date(System.currentTimeMillis() - 3600_000L);
+        Date notAfter = new Date(System.currentTimeMillis() + 3600_000L);
+        JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
+                subject, BigInteger.ONE, notBefore, notAfter, subject, keyPair.getPublic());
+        builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withECDSA").build(keyPair.getPrivate());
+        return new JcaX509CertificateConverter().getCertificate(builder.build(signer));
+    }
+
     @Test
-    void process_ifAttStmtHasX5cAndTrustManagerAndIsSelfSignedTrue_success() throws DecoderException {
+    void process_ifAttStmtHasX5cAndTrustManagerAndIsSelfSignedTrue_success() throws Exception {
         ObjectNode attStmt = instanceMapper().createObjectNode();
         ArrayNode x5cArray = instanceMapper().createArrayNode();
         x5cArray.add("certPath1");
@@ -224,7 +250,7 @@ class PackedAttestationProcessorTest {
         String signature = "test-signature";
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
-        List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
+        List<X509Certificate> certificates = Collections.singletonList(compliantAttestationCertificate());
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, certificates)).thenReturn(tm);
