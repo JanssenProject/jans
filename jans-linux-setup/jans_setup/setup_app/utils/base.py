@@ -139,6 +139,26 @@ current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 10
 class current_app:
     pass
 
+
+def determine_jans_artifact_url(maven_path):
+    """Return the GitHub release download URL for a Jans artifact.
+
+    Jans artifacts are published as flat GitHub release assets named by
+    their Maven coordinate, so only the basename of the (legacy
+    maven-layout) path is used. The release tag is 'nightly' for nightly
+    builds and 'v<version>' for tagged releases.
+    """
+    app_info = current_app.app_info
+    if app_info.get('JANS_BUILD') == '-nightly':
+        tag = 'nightly'
+    else:
+        tag = 'v' + app_info['JANS_APP_VERSION']
+    return os.path.join(
+        'https://github.com/JanssenProject/jans/releases/download',
+        tag,
+        os.path.basename(maven_path),
+    )
+
 def check_resources():
 
     if '--shell' in sys.argv or '-x' in sys.argv:

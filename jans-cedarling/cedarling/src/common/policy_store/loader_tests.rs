@@ -12,14 +12,62 @@ use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
 use super::super::schema_parser::ParsedSchema;
-use super::super::vfs_adapter::{MemoryVfs, PhysicalVfs};
+use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
 use std::fs::{self, File};
-use std::io::{Cursor, Write};
+use std::io::{Cursor, Read, Write};
 use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 use zip::CompressionMethod;
 use zip::write::{ExtendedFileOptions, FileOptions};
+
+/// Wraps `MemoryVfs` to inject configurable IO errors for specific paths.
+struct ErrorInjectorVfs {
+    inner: MemoryVfs,
+    /// If a path contains any of these substrings, `read_file` returns `PermissionDenied`.
+    deny_read_patterns: Vec<String>,
+}
+
+impl ErrorInjectorVfs {
+    fn new(deny_read_patterns: Vec<String>) -> Self {
+        Self {
+            inner: MemoryVfs::new(),
+            deny_read_patterns,
+        }
+    }
+
+    fn create_file(&self, path: &str, content: &[u8]) -> std::io::Result<()> {
+        self.inner.create_file(path, content)
+    }
+
+    fn create_dir_all(&self, path: &str) -> std::io::Result<()> {
+        self.inner.create_dir_all(path)
+    }
+}
+
+impl VfsFileSystem for ErrorInjectorVfs {
+    fn open_file(&self, path: &str) -> std::io::Result<Box<dyn Read + Send>> {
+        if self.deny_read_patterns.iter().any(|p| path.contains(p)) {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                format!("injected error for path: {path}"),
+            ));
+        }
+        self.inner.open_file(path)
+    }
+
+    fn read_dir(&self, path: &str) -> std::io::Result<Vec<DirEntry>> {
+        self.inner.read_dir(path)
+    }
+
+    fn exists(&self, path: &str) -> bool {
+        self.inner.exists(path)
+    }
+
+    fn is_dir(&self, path: &str) -> bool {
+        self.inner.is_dir(path)
+    }
+}
 
 type PhysicalLoader = DefaultPolicyStoreLoader<PhysicalVfs>;
 
@@ -154,26 +202,18 @@ fn test_validate_directory_missing_metadata() {
 }
 
 #[test]
-fn test_validate_directory_missing_schema() {
+fn test_validate_directory_missing_schema_is_optional() {
     let temp_dir = TempDir::new().unwrap();
     let dir = temp_dir.path();
 
-    // Create metadata but no schema
+    // Create metadata and policies dir but no schema — should pass since schema is optional
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
     let loader = DefaultPolicyStoreLoader::new_physical();
     let result = loader.validate_directory_structure(dir.to_str().unwrap());
 
-    let err = result.expect_err("Expected error for missing schema.cedarschema");
-    assert!(
-        matches!(
-            &err,
-            PolicyStoreError::Validation(ValidationError::MissingRequiredFile { file })
-            if file.contains("schema")
-        ),
-        "Expected MissingRequiredFile error for schema.cedarschema, got: {err:?}"
-    );
+    result.expect("Expected success: schema.cedarschema is now optional");
 }
 
 #[test]
@@ -232,7 +272,10 @@ fn test_load_directory_success() {
         loaded_directory.metadata.policy_store.name,
         "Test Policy Store"
     );
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "test-policy.cedar");
 }
@@ -537,13 +580,16 @@ fn test_load_and_parse_schema_end_to_end() {
 
     // Schema should be loaded
     assert!(
-        !loaded_directory.schema.is_empty(),
+        loaded_directory.schema.is_some(),
         "Schema should not be empty"
     );
 
     // Parse the schema
-    let parsed = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed = ParsedSchema::parse(
+        loaded_directory.schema.as_deref().unwrap(),
+        "schema.cedarschema",
+    )
+    .expect("Should parse schema");
     assert_eq!(parsed.filename, "schema.cedarschema");
     assert_eq!(parsed.content, schema_content);
 
@@ -1080,7 +1126,10 @@ fn test_complete_policy_store_with_issuers() {
 
     // Verify all components are loaded
     assert_eq!(loaded_directory.metadata.name(), "Test Policy Store");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert!(!loaded_directory.policies.is_empty());
     assert!(!loaded_directory.entities.is_empty());
     assert!(!loaded_directory.trusted_issuers.is_empty());
@@ -1088,8 +1137,11 @@ fn test_complete_policy_store_with_issuers() {
     // Parse and validate all components
 
     // Schema
-    let parsed_schema = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed_schema = ParsedSchema::parse(
+        loaded_directory.schema.as_deref().unwrap(),
+        "schema.cedarschema",
+    )
+    .expect("Should parse schema");
     parsed_schema.validate().expect("Schema should be valid");
 
     // Policies
@@ -1200,7 +1252,10 @@ fn test_archive_vfs_end_to_end_from_file() {
     // Step 4: Verify all components loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "Archive Test Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "abcdef123456");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     assert_eq!(loaded_directory.policies[0].name, "allow.cedar");
     assert_eq!(loaded_directory.entities.len(), 1);
@@ -1208,7 +1263,12 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 5: Verify components can be parsed
 
-    let parsed_schema = ParsedSchema::parse(&loaded_directory.schema, "schema.cedarschema")
+    let schema_str = loaded_directory
+        .schema
+        .as_deref()
+        .expect("Should have schema content for parsing");
+
+    let parsed_schema = ParsedSchema::parse(schema_str, "schema.cedarschema")
         .expect("Should parse schema from archive");
 
     let parsed_entities = EntityParser::parse_entities(
@@ -1239,7 +1299,10 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     // Verify loaded correctly
     assert_eq!(loaded_directory.metadata.name(), "WASM Archive Store");
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
-    assert!(!loaded_directory.schema.is_empty());
+    assert!(
+        loaded_directory.schema.is_some(),
+        "expected loaded_directory.schema to be Some but was None"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
 }
 
@@ -1362,5 +1425,52 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
     assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
     assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
     assert_eq!(loaded_directory.policies.len(), 1);
-    assert!(loaded_directory.schema.contains("Equiv"));
+    assert!(
+        loaded_directory
+            .schema
+            .as_deref()
+            .unwrap()
+            .contains("Equiv"),
+        "expected loaded_directory.schema to contain 'Equiv' but got {:?}",
+        loaded_directory.schema.as_deref()
+    );
+}
+
+#[test]
+fn test_load_directory_schema_read_error_propagated() {
+    let vfs = ErrorInjectorVfs::new(vec!["schema".to_string()]);
+
+    vfs.create_file(
+        "metadata.json",
+        br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "abcdef123456",
+            "name": "Error Test",
+            "version": "1.0.0"
+        }
+    }"#,
+    )
+    .unwrap();
+
+    vfs.create_file(
+        "schema.cedarschema",
+        b"namespace Test { entity User; }",
+    )
+    .unwrap();
+
+    vfs.create_dir_all("policies").unwrap();
+    vfs.create_file("policies/test.cedar", b"permit(principal, action, resource);")
+        .unwrap();
+
+    let loader = DefaultPolicyStoreLoader::new(vfs);
+    let result = loader.load_directory(".");
+
+    let err = result.expect_err(
+        "Expected FileReadError when schema file read returns non-NotFound IO error",
+    );
+    assert!(
+        matches!(&err, PolicyStoreError::FileReadError { path, .. } if path.contains("schema")),
+        "Expected FileReadError for schema file, got: {err:?}"
+    );
 }

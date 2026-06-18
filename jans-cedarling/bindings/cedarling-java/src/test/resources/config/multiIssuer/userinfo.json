@@ -1,0 +1,25 @@
+{
+  "sub": "55S2wwoQWBmp3hPQ7EfysnJIOCFvOaNt34oKBMXFDgw",
+  "role": [
+    "CasaAdmin",
+    "admin",
+    "auditor"
+  ],
+  "iss": "https://op-provider.gluu.org",
+  "given_name": "Admin",
+  "middle_name": "Admins",
+  "inum": "40213524-b15b-4286-b90a-fd7a9aa712e6",
+  "client_id": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",
+  "aud": "fcd12ec8-2ce9-41ee-bb75-efd4e3e9bd8a",
+  "nbf": 1774096211,
+  "updated_at": 1774095936,
+  "name": "Default Admin User",
+  "nickname": "Admin",
+  "exp": 1774099811,
+  "iat": 1774096211,
+  "family_name": "User",
+  "jti": "FoIl9dfCSLqDE17hlF78fg",
+  "jansAdminUIRole": [
+    "admin"
+  ]
+}

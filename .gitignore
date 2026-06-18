@@ -168,3 +168,9 @@ data-sources.json
 trivy.json
 grype.json
 /.vscode/
+/graphify-out
+/jans-cedarling/graphify-out/*
+/jans-cedarling/cedarling_pg/*.md
+# !/jans-cedarling/cedarling_pg/README.md
+/jans-cedarling/cedarling_pg/scripts/verification/*
+/jans-cedarling/cedarling_pg/scripts/install-binary.sh

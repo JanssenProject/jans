@@ -1,0 +1,130 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-validate:
+    name: Lint and Validate
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate workflow files
+        run: |
+          pip install --quiet yamllint==1.38.0
+          changed=$(git diff origin/main...HEAD --name-only --diff-filter=ACMR \
+            | grep -E '^\.github/workflows/.*\.(yml|yaml)$' || true)
+          if [ -z "$changed" ]; then
+            echo "No workflow files changed."
+            exit 0
+          fi
+          echo "$changed" | xargs yamllint -d relaxed
+
+      - name: Check for secrets in changed files
+        run: |
+          git fetch --no-tags --depth=1 origin main
+          changed=$(git diff origin/main...HEAD --name-only --diff-filter=ACMR)
+          if [ -z "$changed" ]; then
+            echo "No changed files to scan."
+            exit 0
+          fi
+          matches=""
+          while IFS= read -r file; do
+            [ -f "$file" ] || continue
+            result=$(grep -nE "(password|secret|token|key)\s*=\s*['\"][^'\"]{8,}" "$file" 2>/dev/null || true)
+            if [ -n "$result" ]; then
+              matches="$matches\n--- $file ---\n$result"
+            fi
+          done <<< "$changed"
+          if [ -n "$matches" ]; then
+            echo "WARNING: Possible hardcoded credentials detected:"
+            printf "%b\n" "$matches"
+            exit 1
+          fi
+          echo "No hardcoded credentials found."
+
+  gradle-wrapper-validation:
+    name: Validate Gradle Wrapper
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            services.gradle.org:443
+            checks.gradle.org:443
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+
+  go-vet:
+    name: Go Vet
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        module:
+          - terraform-provider-jans
+          - jans-cedarling/cedarling_opa
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            storage.googleapis.com:443
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+
+      - name: Go vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...

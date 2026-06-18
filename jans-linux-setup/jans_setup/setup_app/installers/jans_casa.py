@@ -25,11 +25,11 @@ class CasaInstaller(JettyInstaller):
     client_id_prefix = '3000.'
     casa_dist_dir = os.path.join(Config.dist_jans_dir, 'jans_casa')
     source_files = [
-            (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['jans_version'])),
-            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(casa_dist_dir, 'jans-casa.war'), base.determine_jans_artifact_url('maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), base.determine_jans_artifact_url('maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['jans_version'])),
             (os.path.join(casa_dist_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
-            (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
-            (os.path.join(casa_dist_dir, 'casa-agama-project.zip'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-agama/{0}/casa-agama-{0}-project.zip'.format(base.current_app.app_info['jans_version'])))),
+            (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (base.determine_jans_artifact_url('maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
+            (os.path.join(casa_dist_dir, 'casa-agama-project.zip'), (base.determine_jans_artifact_url('maven/io/jans/casa-agama/{0}/casa-agama-{0}-project.zip'.format(base.current_app.app_info['jans_version'])))),
             ]
 
     def __init__(self):

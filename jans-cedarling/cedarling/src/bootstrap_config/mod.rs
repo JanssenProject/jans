@@ -83,6 +83,7 @@ impl Default for BootstrapConfig {
                 source: PolicyStoreSource::Yaml(
                     "cedar_version: v4.0.0\npolicy_stores: {}\n".to_string(),
                 ),
+                ..Default::default()
             },
             jwt_config: JwtConfig::new_without_validation(),
             authorization_config: AuthorizationConfig::default(),

@@ -73,12 +73,14 @@ fn create_string_set_array(values: &[String]) -> RestrictedExpression {
     )
 }
 
+const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
+
 /// Filter out reserved JWT claims that shouldn't be used as entity tags
 /// Reserved claims: iss (issuer), jti (JWT ID), exp (expiration)
 fn filter_reserved_claims(claims: &HashMap<String, Value>) -> HashMap<String, Value> {
     claims
         .iter()
-        .filter(|(key, _)| key.as_str() != "iss" && key.as_str() != "jti" && key.as_str() != "exp")
+        .filter(|(key, _)| !RESERVED_CLAIMS.contains(&key.as_str()))
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect()
 }
@@ -331,8 +333,6 @@ impl EntityBuilder {
         Ok(AuthorizeEntitiesData {
             issuers,
             tokens: token_entities,
-            workload: None,
-            user: None,
             resource,
             default_entities: self.default_entities.clone(),
         })
@@ -355,7 +355,7 @@ impl EntityBuilder {
             .and_then(|iss| iss.token_metadata.get(&token.name))
             .map_or(DEFAULT_TKN_ID, |m| m.token_id.as_str());
 
-        let entity_id_srcs = vec![EntityIdSrc::Token {
+        let entity_id_srcs = [EntityIdSrc::Token {
             token,
             claim: token_id_claim,
         }];
@@ -369,9 +369,9 @@ impl EntityBuilder {
             .as_ref()
             .and_then(|schema| schema.get_entity_shape(&entity_type));
 
-        // Build claims map with all JWT claims plus synthetic reserved claims
-        // (token_type, validated_at) that are expected by the schema but not present in the JWT
-        let mut all_claims = token.claims_value().clone();
+        let claims = token.claims_value();
+        let mut all_claims = HashMap::with_capacity(claims.len() + 2);
+        all_claims.extend(claims.iter().map(|(k, v)| (k.clone(), v.clone())));
         all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
         all_claims.insert(
             "validated_at".to_string(),

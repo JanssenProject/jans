@@ -26,7 +26,7 @@ impl EntityBuilder {
         &self,
         type_name: &str,
         id_srcs: &[EntityIdSrc],
-        attrs_srcs: Vec<AttrSrc>,
+        attrs_srcs: &[AttrSrc],
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
         parents: HashSet<EntityUid>,
@@ -67,12 +67,12 @@ impl EntityBuilder {
 }
 
 fn extract_attrs_from_sources(
-    srcs: Vec<AttrSrc<'_>>,
+    srcs: &[AttrSrc<'_>],
     built_entities: &BuiltEntities,
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> ExtractedAttrsResult {
     let (attrs, errs) = srcs
-        .into_iter()
+        .iter()
         .map(|src| match src {
             AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape),
         })
