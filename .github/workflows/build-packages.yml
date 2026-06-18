@@ -1,10 +1,13 @@
 name: Publish packages
 
 on:
-  push:
-    tags:
-    - 'v**'
-    - 'nightly'
+  # Chained after the publish workflow so the service WARs/jars exist on the
+  # release before install.py downloads them. build-nightly-build recreates the
+  # nightly tag -> "Janssen Build & Publish" publishes -> this runs.
+  workflow_run:
+    workflows: ["Janssen Build & Publish"]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       target_tag:
@@ -51,6 +54,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_pg:
+        description: 'Run "build_cedarling_pg" job?'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -59,7 +67,7 @@ jobs:
   publish_binary_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -120,6 +128,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
         path: temp-jans
 
     - name: Getting build dependencies
@@ -142,7 +151,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -206,10 +215,27 @@ jobs:
           --repo ${{ github.repository }} \
           --clobber
 
+    - name: Compute SHA256 digest for SLSA provenance
+      id: compute_binary_digest
+      run: |
+        OS="${{ matrix.name }}"
+        VERSION="${{ steps.previoustag.outputs.version }}"
+        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VERSION}${{ matrix.asset_suffix }}"
+        FILENAME="jans${{ matrix.asset_prefix }}${VERSION}${{ matrix.asset_suffix }}"
+        SHA256=$(sha256sum "${ARTIFACT}" | awk '{print $1}')
+        echo "${SHA256}  ${FILENAME}" > "/tmp/binary-digest-${OS}.sha256"
+
+    - name: Upload binary digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: binary-digest-${{ matrix.name }}
+        path: /tmp/binary-digest-${{ matrix.name }}.sha256
+        retention-days: 1
+
   build_and_upload_python_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -235,6 +261,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -290,7 +318,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -322,10 +350,38 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
 
+    - name: Compute SHA256 digests for SLSA provenance
+      id: compute_python_digest
+      shell: bash
+      run: |
+        PLAT="${{ matrix.name }}"
+        SETUP_FILE="${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz"
+        TUI_FILE="${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz"
+        sha256_of() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'; else shasum -a 256 "$1" | awk '{print $1}'; fi; }
+        DIGEST_FILE="/tmp/python-digest-${PLAT}.sha256"
+        rm -f "${DIGEST_FILE}"
+        for F in "${SETUP_FILE}" "${TUI_FILE}"; do
+          if [ ! -f "${F}" ]; then
+            echo "ERROR: expected artifact not found: ${F}" >&2
+            exit 1
+          fi
+          SHA256=$(sha256_of "${F}")
+          FNAME=$(basename "${F}")
+          printf '%s  %s\n' "${SHA256}" "${FNAME}" >> "${DIGEST_FILE}"
+        done
+        touch "${DIGEST_FILE}"
+
+    - name: Upload python digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: python-digest-${{ matrix.name }}
+        path: /tmp/python-digest-${{ matrix.name }}.sha256
+        retention-days: 1
+
   build_cedarling_wasm:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -337,6 +393,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -372,7 +430,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
         
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
@@ -437,7 +495,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
@@ -452,10 +510,34 @@ jobs:
           echo "gh release upload failed (assets may already exist), continuing..."
         }
 
+    - name: Compute SHA256 digest for SLSA provenance
+      id: compute_wasm_digest
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ inputs.target_tag }}"
+        else
+          VERSION=${{ github.event.workflow_run.head_branch }}
+        fi
+        TAG=$(echo "${VERSION}" | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        TARBALL="cedarling_wasm_${TAG}_pkg.tar.gz"
+        SHA256=$(sha256sum "${TARBALL}" | awk '{print $1}')
+        echo "${SHA256}  ${TARBALL}" > /tmp/wasm-digest.sha256
+
+    - name: Upload WASM digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: wasm-digest
+        path: /tmp/wasm-digest.sha256
+        retention-days: 1
+
   build_demo_packages:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
     needs: build_cedarling_wasm
     runs-on: ubuntu-latest
     steps:
@@ -466,6 +548,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Build with Ubuntu
       continue-on-error: true
       env:
@@ -478,7 +562,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VER="${{ inputs.target_tag }}"
         else
-          VER=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VER=${{ github.event.workflow_run.head_branch }}
         fi
 
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
@@ -520,10 +604,35 @@ jobs:
         gh release upload $VER *.zip --clobber
         gh release upload $VER *.xpi --clobber || echo "Sign your extension for self-distribution to mozilla failed"
 
+    - name: Compute SHA256 digests for SLSA provenance
+      id: compute_demo_digest
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VER="${{ inputs.target_tag }}"
+        else
+          VER=${{ github.event.workflow_run.head_branch }}
+        fi
+        DIGEST_FILE="/tmp/demo-digest.sha256"
+        rm -f "${DIGEST_FILE}"
+        for F in demos/demo-*-${VER}-source.zip demos/demo-janssen-tarp-chrome-${VER}.zip; do
+          [ -f "${F}" ] || continue
+          SHA256=$(sha256sum "${F}" | awk '{print $1}')
+          FNAME=$(basename "${F}")
+          echo "${SHA256}  ${FNAME}" >> "${DIGEST_FILE}"
+        done
+        touch "${DIGEST_FILE}"
+
+    - name: Upload demo digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: demo-digest
+        path: /tmp/demo-digest.sha256
+        retention-days: 1
+
   build_cedarling_python:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -561,6 +670,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -600,7 +711,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
 
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
@@ -697,7 +808,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
 
         TAG=$(echo "${VERSION}" | sed 's/^v//')
@@ -727,10 +838,35 @@ jobs:
         packages-dir: ${{ github.workspace }}/jans-cedarling/target/wheels/
         skip-existing: true
 
+    - name: Compute SHA256 digests for SLSA provenance
+      id: compute_cedarling_python_digest
+      shell: bash
+      run: |
+        sha256_of() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'; else shasum -a 256 "$1" | awk '{print $1}'; fi; }
+        PLAT="${{ matrix.name }}"
+        WHEELS_DIR="${{ github.workspace }}/jans-cedarling/target/wheels"
+        DIGEST_FILE="/tmp/cedarling-python-digest-${PLAT}.sha256"
+        rm -f "${DIGEST_FILE}"
+        shopt -s nullglob
+        for WHL in "${WHEELS_DIR}"/*.whl; do
+          SHA256=$(sha256_of "${WHL}")
+          FNAME=$(basename "${WHL}")
+          echo "${SHA256}  ${FNAME}" >> "${DIGEST_FILE}"
+        done
+        shopt -u nullglob
+        touch "${DIGEST_FILE}"
+
+    - name: Upload Cedarling Python digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-python-digest-${{ matrix.name }}
+        path: /tmp/cedarling-python-digest-${{ matrix.name }}.sha256
+        retention-days: 1
+
   build_cedarling_go:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -753,6 +889,8 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -788,7 +926,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+            VERSION=${{ github.event.workflow_run.head_branch }}
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
@@ -849,7 +987,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+            VERSION=${{ github.event.workflow_run.head_branch }}
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
@@ -883,10 +1021,33 @@ jobs:
             gh release upload "${VERSION}" "${FILE_LIB}" "${FILE_LIB}.bundle" --clobber
           fi
 
+      - name: Compute SHA256 digests for SLSA provenance
+        id: compute_cedarling_go_digest
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        shell: bash
+        run: |
+          sha256_of() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'; else shasum -a 256 "$1" | awk '{print $1}'; fi; }
+          PLAT="${{ matrix.name }}"
+          DIGEST_FILE="/tmp/cedarling-go-digest-${PLAT}.sha256"
+          rm -f "${DIGEST_FILE}"
+          for F in libcedarling_go-*.so libcedarling_go-*.dylib cedarling_go-*.dll cedarling_go-*.lib; do
+            [ -f "${F}" ] || continue
+            SHA256=$(sha256_of "${F}")
+            echo "${SHA256}  ${F}" >> "${DIGEST_FILE}"
+          done
+          touch "${DIGEST_FILE}"
+
+      - name: Upload Cedarling Go digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cedarling-go-digest-${{ matrix.name }}
+          path: /tmp/cedarling-go-digest-${{ matrix.name }}.sha256
+          retention-days: 1
+
   build_cedarling_krakend:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
     needs: build_cedarling_go
     runs-on: ubuntu-22.04
     permissions:
@@ -902,6 +1063,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -909,7 +1072,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -950,10 +1113,31 @@ jobs:
         cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}"
         gh release upload "${{ env.VERSION }}" *.so *.bundle --clobber
 
+    - name: Compute SHA256 digests for SLSA provenance
+      id: compute_krakend_digest
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        IMGCLEAN="${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}"
+        DIGEST_FILE="/tmp/cedarling-krakend-digest-${IMGCLEAN}.sha256"
+        rm -f "${DIGEST_FILE}"
+        for F in cedarling-krakend-*-${IMGCLEAN}-*.so; do
+          [ -f "${F}" ] || continue
+          SHA256=$(sha256sum "${F}" | awk '{print $1}')
+          echo "${SHA256}  ${F}" >> "${DIGEST_FILE}"
+        done
+        touch "${DIGEST_FILE}"
+
+    - name: Upload KrakenD digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-krakend-digest-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}
+        path: /tmp/cedarling-krakend-digest-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}.sha256
+        retention-days: 1
+
   build_cedarling_uniffi:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -965,6 +1149,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -984,7 +1170,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1027,7 +1213,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1076,7 +1262,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          VERSION=${{ github.event.workflow_run.head_branch }}
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -1086,3 +1272,630 @@ jobs:
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
 
         gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
+
+    - name: Compute SHA256 digests for SLSA provenance
+      id: compute_uniffi_digest
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ inputs.target_tag }}"
+        else
+          VERSION=${{ github.event.workflow_run.head_branch }}
+        fi
+        TAG=$(echo "${VERSION}" | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        DIGEST_FILE="/tmp/cedarling-uniffi-digest.sha256"
+        rm -f "${DIGEST_FILE}"
+        for F in libcedarling_uniffi-${TAG}.so cedarling_uniffi-kotlin-${TAG}.zip; do
+          [ -f "${F}" ] || continue
+          SHA256=$(sha256sum "${F}" | awk '{print $1}')
+          echo "${SHA256}  ${F}" >> "${DIGEST_FILE}"
+        done
+        touch "${DIGEST_FILE}"
+
+    - name: Upload UniFFI digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-uniffi-digest
+        path: /tmp/cedarling-uniffi-digest.sha256
+        retention-days: 1
+
+  collect-binary-digests:
+    name: Collect binary package digests
+    needs: [publish_binary_packages]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download binary digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: binary-digest-*
+          merge-multiple: true
+          path: /tmp/binary-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/binary-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-binary:
+    name: SLSA provenance — binary packages
+    needs: [collect-binary-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_binary_packages)) &&
+      needs.collect-binary-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-binary-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-binary-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: binary.intoto.jsonl
+
+  collect-python-digests:
+    name: Collect Python zipapp digests
+    needs: [build_and_upload_python_packages]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download python digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: python-digest-*
+          merge-multiple: true
+          path: /tmp/python-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/python-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-python:
+    name: SLSA provenance — Python zipapps
+    needs: [collect-python-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_python_packages)) &&
+      needs.collect-python-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-python-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-python-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: python.intoto.jsonl
+
+  collect-wasm-digests:
+    name: Collect Cedarling WASM digests
+    needs: [build_cedarling_wasm]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download WASM digest artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: wasm-digest
+          path: /tmp/wasm-digests
+      - name: Encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/wasm-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-wasm:
+    name: SLSA provenance — Cedarling WASM
+    needs: [collect-wasm-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm)) &&
+      needs.collect-wasm-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-wasm-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-wasm-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: wasm.intoto.jsonl
+
+  collect-cedarling-python-digests:
+    name: Collect Cedarling Python wheel digests
+    needs: [build_cedarling_python]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download Cedarling Python digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-python-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-python-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-python-digests/*.sha256 | grep -v '^$' | sort -u || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-python:
+    name: SLSA provenance — Cedarling Python wheels
+    needs: [collect-cedarling-python-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python)) &&
+      needs.collect-cedarling-python-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-python-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-python-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-python.intoto.jsonl
+
+  collect-cedarling-go-digests:
+    name: Collect Cedarling Go library digests
+    needs: [build_cedarling_go]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download Cedarling Go digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-go-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-go-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-go-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-go:
+    name: SLSA provenance — Cedarling Go libraries
+    needs: [collect-cedarling-go-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go)) &&
+      needs.collect-cedarling-go-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-go-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-go-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-go.intoto.jsonl
+
+  collect-cedarling-krakend-digests:
+    name: Collect Cedarling KrakenD plugin digests
+    needs: [build_cedarling_krakend]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download KrakenD digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-krakend-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-krakend-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-krakend-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-krakend:
+    name: SLSA provenance — Cedarling KrakenD plugin
+    needs: [collect-cedarling-krakend-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend)) &&
+      needs.collect-cedarling-krakend-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-krakend-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-krakend-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-krakend.intoto.jsonl
+
+  collect-cedarling-uniffi-digests:
+    name: Collect Cedarling UniFFI digests
+    needs: [build_cedarling_uniffi]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download UniFFI digest artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: cedarling-uniffi-digest
+          path: /tmp/cedarling-uniffi-digests
+      - name: Encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-uniffi-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-uniffi:
+    name: SLSA provenance — Cedarling UniFFI
+    needs: [collect-cedarling-uniffi-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi)) &&
+      needs.collect-cedarling-uniffi-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-uniffi-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-uniffi-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-uniffi.intoto.jsonl
+
+  collect-demo-digests:
+    name: Collect demo package digests
+    needs: [build_demo_packages]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download demo digest artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: demo-digest
+          path: /tmp/demo-digests
+      - name: Encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/demo-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-demo:
+    name: SLSA provenance — demo packages
+    needs: [collect-demo-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_demo_packages)) &&
+      needs.collect-demo-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-demo-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-demo-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: demo.intoto.jsonl
+
+  build_cedarling_pg:
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [pg13, pg14, pg15, pg16, pg17, pg18]
+    env:
+      PGRX_VERSION: "0.18.0"
+      EXT_NAME: cedarling_pg
+      EXT_DIR: jans-cedarling/cedarling_pg
+      TARGET_TAG: ${{ inputs.target_tag }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Install Postgres build dependencies
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
+            libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+        with:
+          toolchain: stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: jans-cedarling
+          key: cedarling-pg-${{ matrix.pg }}-x86_64
+
+      - name: Install cargo-pgrx
+        run: cargo install --locked cargo-pgrx --version "=${PGRX_VERSION}"
+
+      - name: Initialize pgrx (${{ matrix.pg }})
+        run: cargo pgrx init --${{ matrix.pg }} download
+
+      - name: Build extension package
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          PG_CONFIG="$(cargo pgrx info pg-config ${{ matrix.pg }})"
+          cargo pgrx package \
+            --features ${{ matrix.pg }} \
+            --no-default-features \
+            --pg-config "${PG_CONFIG}"
+
+      - name: Stage tarball
+        id: stage
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${TARGET_TAG}"
+          else
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+          fi
+          TAG=$(echo "${VERSION}" | sed 's/^v//')
+          if [ "${TAG}" == "nightly" ]; then
+            TAG="0.0.0"
+          fi
+
+          PG="${{ matrix.pg }}"
+          pkg_root="../target/release/${EXT_NAME}-${PG}"
+          test -d "${pkg_root}" || { echo "package output missing at ${pkg_root}"; exit 1; }
+
+          BASE="${EXT_NAME}-${TAG}-${PG}-linux-x86_64"
+          stage="$(mktemp -d)"
+          mkdir -p "${stage}/${BASE}"
+          cp -a "${pkg_root}/." "${stage}/${BASE}/"
+
+          tar -czf "${BASE}.tar.gz" -C "${stage}" "${BASE}"
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke-test tarball contents
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          set -euo pipefail
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          tmp="$(mktemp -d)"
+          tar -xzf "${FILE}" -C "${tmp}"
+          root="$(find "${tmp}" -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "${root}"
+          SO="$(find "${root}" -name '${{ env.EXT_NAME }}.so' | head -1)"
+          CONTROL="$(find "${root}" -name '${{ env.EXT_NAME }}.control' | head -1)"
+          SQL="$(find "${root}" -name '${{ env.EXT_NAME }}--*.sql' | head -1)"
+          if [ -z "${SO}" ] || [ -z "${CONTROL}" ] || [ -z "${SQL}" ]; then
+            echo "::error::Smoke-test failed: ${FILE} missing matched extension set (.so, .control, .sql)"
+            echo "## cedarling_pg Tarball Smoke-Test (${{ matrix.pg }})" >> "${GITHUB_STEP_SUMMARY}"
+            echo ":x: **FAILED** — \`${FILE}\` is missing one or more of .so / .control / .sql" >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+          echo "## cedarling_pg Tarball Smoke-Test (${{ matrix.pg }})" >> "${GITHUB_STEP_SUMMARY}"
+          echo ":white_check_mark: \`${FILE}\` contains matched extension files:" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${SO#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${CONTROL#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- \`${SQL#${root}/}\`" >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Sign and upload cedarling_pg tarball
+        working-directory: ${{ env.EXT_DIR }}
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${TARGET_TAG}"
+          else
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+          fi
+
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          cosign sign-blob --yes --bundle "${FILE}.bundle" "${FILE}"
+
+          gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber || {
+            echo "gh release upload failed (assets may already exist), continuing..."
+          }
+
+      - name: Compute SHA256 digest for SLSA provenance
+        working-directory: ${{ env.EXT_DIR }}
+        run: |
+          BASE="${{ steps.stage.outputs.base }}"
+          FILE="${BASE}.tar.gz"
+          SHA256=$(sha256sum "${FILE}" | awk '{print $1}')
+          echo "${SHA256}  ${FILE}" > "/tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256"
+
+      - name: Upload cedarling_pg digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cedarling-pg-digest-${{ matrix.pg }}
+          path: /tmp/cedarling-pg-digest-${{ matrix.pg }}.sha256
+          retention-days: 1
+
+  collect-cedarling-pg-digests:
+    name: Collect Cedarling PostgreSQL extension digests
+    needs: [build_cedarling_pg]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download cedarling_pg digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: cedarling-pg-digest-*
+          merge-multiple: true
+          path: /tmp/cedarling-pg-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-pg-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-pg:
+    name: SLSA provenance — Cedarling PostgreSQL extension
+    needs: [collect-cedarling-pg-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_pg)) &&
+      needs.collect-cedarling-pg-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-pg-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-pg-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-pg.intoto.jsonl

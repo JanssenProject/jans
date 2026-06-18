@@ -45,7 +45,7 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 public class CedarlingProtectionService implements CedarlingProtection {
 
-    @Inject
+	@Inject
     private Logger log;
 
     @Inject
@@ -122,7 +122,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	            boolean authorized = true;
 	            Map<String, String> tokens = getCedarlingTokens(bearerToken);
 	            for (CedarlingPermission requestedPermission : requestedPermissions) {
-	            	authorized &= authorizationService.authorize(/*tokens*/null, requestedPermission.getAction(),
+	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
 	            			getCedarlingResource(requestedPermission), getCedarlingContext());
 	            	if (!authorized) {
 	            		log.error("Insufficient permissions to access '{}'", requestedPermission);
@@ -158,7 +158,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     }
 
 	private Map<String, String> getCedarlingTokens(String accessToken) {
-		return Map.of("access_token", accessToken);
+		return Map.of(CedarlingAuthorizationService.CEDARLING_JANS_ACCESS_TOKEN, accessToken);
 	}
 
 	private Map<String, Object> getCedarlingResource(CedarlingPermission requestedPermission) {
@@ -167,7 +167,8 @@ public class CedarlingProtectionService implements CedarlingProtection {
 		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", requestedPermission.getResource(), "id", id)
+						Map.of("entity_type", requestedPermission.getResource(),
+								"id", id)
 					)
 		);
 		map.putAll(

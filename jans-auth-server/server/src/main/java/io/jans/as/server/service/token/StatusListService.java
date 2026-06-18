@@ -7,6 +7,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -140,6 +141,10 @@ public class StatusListService {
     }
 
     public void addStatusClaimWithIndex(JsonWebResponse jwr, ExecutionContext executionContext) {
+        addStatusClaimWithIndex(jwr.getClaims(), executionContext);
+    }
+
+    public void addStatusClaimWithIndex(JwtClaims jwr, ExecutionContext executionContext) {
         if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
             log.trace("Skipped status claim addition because {} feature flag is disabled.", FeatureFlagType.STATUS_LIST.getValue());
             return;
@@ -157,7 +162,7 @@ public class StatusListService {
         final JSONObject statusList = new JSONObject();
         statusList.put("status_list", indexAndUri);
 
-        jwr.getClaims().setClaim("status", statusList);
+        jwr.setClaim("status", statusList);
     }
 
     /**

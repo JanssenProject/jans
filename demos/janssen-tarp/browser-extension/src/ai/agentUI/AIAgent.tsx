@@ -18,6 +18,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
     model,
     customModel,
     mcpServerUrl,
+    ollamaBaseUrl,
     modelError,
     mcpUrlError,
     connectionStatus,
@@ -27,6 +28,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
     handleModelChange,
     handleCustomModelChange,
     handleMcpUrlChange,
+    handleOllamaBaseUrlChange,
     getCurrentProviderConfig,
     saveSettings,
     clearSettings,
@@ -268,6 +270,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
         model={model}
         customModel={customModel}
         mcpServerUrl={mcpServerUrl}
+        ollamaBaseUrl={ollamaBaseUrl}
         connectionStatus={connectionStatus}
         apiKeyError={apiKeyError}
         modelError={modelError}
@@ -278,6 +281,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ notifyOnDataChange }) => {
         onModelChange={handleModelChange}
         onCustomModelChange={handleCustomModelChange}
         onMcpUrlChange={handleMcpUrlChange}
+        onOllamaBaseUrlChange={handleOllamaBaseUrlChange}
         onTestConnection={testConnection}
         onSaveSettings={handleSaveSettings}
         onClearSettings={clearSettings}

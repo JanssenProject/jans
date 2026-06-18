@@ -88,7 +88,7 @@ public class AuthenticationPersistenceService {
                 user = userService.addDefaultUser(userName);
             } else {
                 log.debug("Building fido authentication entry");
-            	//throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
+            	//throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "User auto enrollment is disabled. User does not exist!");
             }
         }
         else
