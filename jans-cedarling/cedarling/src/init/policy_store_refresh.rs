@@ -30,17 +30,17 @@ use crate::PolicyStoreConfig;
 use crate::PolicyStoreSource;
 use crate::async_sleep::sleep;
 use crate::authz::metrics::MetricsCollector;
-use crate::authz::{Authz, AuthzConfig};
+use crate::authz::Authz;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
-use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex};
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
 use crate::http::{JoinHandle, spawn_task};
-use crate::jwt::JwtService;
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
+
+use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{
     PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes, parse_lock_master_bytes,
@@ -255,71 +255,27 @@ pub(crate) struct AuthzRebuilder {
 impl AuthzRebuilder {
     /// Build a brand-new [`Authz`] from a fresh policy store. Rebuilds the JWT
     /// service and entity builder so trusted-issuer and schema changes take
-    /// effect
     pub(crate) async fn rebuild(
         &self,
         policy_store: PolicyStoreWithID,
     ) -> Result<Authz, RebuildError> {
-        policy_store
-            .validate_trusted_issuers()
-            .map_err(|e| RebuildError::TrustedIssuers(e.to_string()))?;
-
-        let trusted_issuers = policy_store.trusted_issuers.clone();
-        let jwt_service = JwtService::new(
+        build_authz(
+            policy_store,
             &self.jwt_config,
-            trusted_issuers.clone(),
-            Some(self.log.clone()),
-            self.metrics.clone(),
+            &self.authorization_config,
             self.http_client.clone(),
+            &self.log,
+            self.data_store.clone(),
+            self.metrics.clone(),
         )
         .await
-        .map_err(|e| RebuildError::JwtService(e.to_string()))?;
-        let jwt_service = Arc::new(jwt_service);
-
-        let issuers_map = trusted_issuers.unwrap_or_default();
-        let issuers_index = TrustedIssuerIndex::new(&issuers_map, Some(&self.log));
-        // Mirror the bootstrap path (see `ServiceFactory::authz_service`):
-        // `policy_store.schema` is now `Option<CedarSchema>` and we only feed
-        // the validator schema into `EntityBuilder` when strict validation
-        // is enabled — otherwise we pass `None` so the builder doesn't
-        // enforce attribute typing.
-        let schema = policy_store.schema.as_ref().map(|s| &s.validator_schema);
-        let default_entities = policy_store.default_entities.entities().to_owned();
-        let entity_builder = EntityBuilder::new(
-            issuers_index,
-            if self.authorization_config.strict_schema_validation {
-                schema
-            } else {
-                None
-            },
-            default_entities,
-        )
-        .map_err(|e| RebuildError::EntityBuilder(e.to_string()))?;
-        let entity_builder = Arc::new(entity_builder);
-
-        let config = AuthzConfig {
-            log_service: self.log.clone(),
-            policy_store,
-            jwt_service,
-            entity_builder,
-            authorization: self.authorization_config.clone(),
-            data_store: self.data_store.clone(),
-            metrics: self.metrics.clone(),
-        };
-
-        Ok(Authz::new(config))
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum RebuildError {
-    #[error("trusted issuers validation failed: {0}")]
-    TrustedIssuers(String),
-    #[error("failed to initialize JWT service: {0}")]
-    JwtService(String),
-    #[error("failed to initialize entity builder: {0}")]
-    EntityBuilder(String),
-}
+/// Errors from [`AuthzRebuilder::rebuild`].
+///
+/// Type alias for [`BuildAuthzError`] so the refresh-worker error surface
+pub(crate) type RebuildError = BuildAuthzError;
 
 /// Mutable per-source state — what we learned from the previous response.
 #[derive(Default)]
