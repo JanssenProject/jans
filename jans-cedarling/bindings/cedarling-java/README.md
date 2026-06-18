@@ -57,7 +57,7 @@ To use Cedarling Java bindings in Java Maven Project add following `repository` 
         <repository>
             <id>jans</id>
             <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
+            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
         </repository>
     </repositories>
 ```
@@ -151,7 +151,7 @@ namespace Jans {
 #### Steps:
 
 1. Upload [bootstrap.json](./docs/bootstrap.json) and [update_token_script.cjar](./docs/update_token_script.cjar)  at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server.
-2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server. Rather than building the `cedarling-java-{version}.jar` from source code, you can directly download the latest version of the jar from the [Maven repository](https://maven.jans.io/maven/io/jans/cedarling-java/).
+2. Upload the generated `cedarling-java-{version}-distribution.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server. Rather than building the `cedarling-java-{version}.jar` from source code, you can directly download the latest version of the jar from the [Maven repository](https://github.com/JanssenProject/jans/releases).
 3. The following java [Update Token](./docs/sample_cedarling_update_token.java) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
 
     | Key                  | Values                          |

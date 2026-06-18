@@ -8,12 +8,14 @@ package io.jans.fido2.service.exception;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.error.Fido2ErrorResponse;
 import org.slf4j.Logger;
 
 /**
@@ -32,7 +34,10 @@ public class Fido2ExceptionHandler implements ExceptionMapper<Fido2RuntimeExcept
     public Response toResponse(Fido2RuntimeException ex) {
         log.error("Handled Fido2 RP exception", ex);
 
-        return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        return Response.status(Status.BAD_REQUEST)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(Fido2ErrorResponse.failed(ex.getMessage()).toJson())
+                .build();
     }
 
 }

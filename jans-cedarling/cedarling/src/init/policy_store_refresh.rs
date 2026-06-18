@@ -42,7 +42,9 @@ use crate::jwt::JwtService;
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 
-use super::policy_store::{PolicyStoreLoadError, parse_cjar_bytes, parse_lock_master_bytes};
+use super::policy_store::{
+    PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes, parse_lock_master_bytes,
+};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -403,6 +405,7 @@ fn should_short_circuit(new_hash: u64, state: &RefreshState) -> bool {
 pub(crate) enum RefreshSource {
     LockServer { url: String },
     CjarUrl { url: String },
+    Uri { url: String },
 }
 
 impl RefreshSource {
@@ -410,13 +413,14 @@ impl RefreshSource {
         match src {
             PolicyStoreSource::LockServer(u) => Some(Self::LockServer { url: u.clone() }),
             PolicyStoreSource::CjarUrl(u) => Some(Self::CjarUrl { url: u.clone() }),
+            PolicyStoreSource::Uri(u) => Some(Self::Uri { url: u.clone() }),
             _ => None,
         }
     }
 
     fn url(&self) -> &str {
         match self {
-            Self::LockServer { url } | Self::CjarUrl { url } => url,
+            Self::LockServer { url } | Self::CjarUrl { url } | Self::Uri { url } => url,
         }
     }
 
@@ -430,11 +434,13 @@ impl RefreshSource {
         // Future-proofs the Lock Server path: if Lock Server starts serving
         // `.cjar` archives at a URL whose suffix doesn't end in `.cjar`, we
         // route to the archive parser instead of failing with a JSON error.
-        if bytes.starts_with(b"PK\x03\x04") {
+        if bytes.starts_with(&ZIP_MAGIC) {
             return parse_cjar_bytes(bytes, strict_schema_validation).await;
         }
         match self {
-            Self::LockServer { .. } => parse_lock_master_bytes(bytes, strict_schema_validation),
+            Self::LockServer { .. } | Self::Uri { .. } => {
+                parse_lock_master_bytes(bytes, strict_schema_validation)
+            },
             Self::CjarUrl { .. } => parse_cjar_bytes(bytes, strict_schema_validation).await,
         }
     }
@@ -1042,6 +1048,12 @@ mod tests {
         assert!(
             matches!(s, Some(RefreshSource::LockServer { .. })),
             "PolicyStoreSource::LockServer must map to RefreshSource::LockServer, got {s:?}",
+        );
+
+        let s = RefreshSource::from_policy_store_source(&PolicyStoreSource::Uri("http://z".into()));
+        assert!(
+            matches!(s, Some(RefreshSource::Uri { .. })),
+            "PolicyStoreSource::Uri must map to RefreshSource::Uri, got {s:?}",
         );
 
         let s = RefreshSource::from_policy_store_source(&PolicyStoreSource::Yaml("..".into()));
