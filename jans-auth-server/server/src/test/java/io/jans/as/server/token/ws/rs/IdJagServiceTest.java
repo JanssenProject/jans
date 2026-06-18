@@ -4,6 +4,9 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.TrustedIssuerConfig;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -12,6 +15,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.service.external.ExternalIdentityAssertionService;
 import jakarta.ws.rs.WebApplicationException;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
@@ -23,8 +27,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import static io.jans.as.model.config.Constants.TOKEN_TYPE_ID_JAG;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
@@ -55,11 +61,17 @@ public class IdJagServiceTest {
     @Mock
     private AuthorizationGrantList authorizationGrantList;
 
+    @Mock
+    private ExternalIdentityAssertionService externalIdentityAssertionService;
+
+    @Mock
+    private AbstractCryptoProvider cryptoProvider;
+
     private ExecutionContext executionContext;
     private Client client;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws Exception {
         client = new Client();
         client.setClientId("test-client");
 
@@ -70,7 +82,28 @@ public class IdJagServiceTest {
         lenient().when(appConfiguration.getIssuer()).thenReturn("https://idp.example.com");
         lenient().when(appConfiguration.getDefaultSignatureAlgorithm()).thenReturn("RS256");
         lenient().when(appConfiguration.getIdJagLifetime()).thenReturn(300);
+        lenient().when(appConfiguration.getIdJagTrustedIdpIssuers()).thenReturn(new HashMap<>());
+        lenient().when(externalIdentityAssertionService.externalModifyIdJagPayload(any(), any())).thenReturn(true);
+        lenient().when(cryptoProvider.verifySignature(any(), any(), any(), any(), any(), any(SignatureAlgorithm.class))).thenReturn(true);
     }
+
+    /** Minimal valid subject token for client "test-client" issued by this AS. */
+    private Jwt buildValidSubjectJwt() {
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getClaims().setClaim(JwtClaimName.ISSUER, "https://idp.example.com");
+        jwt.getClaims().setAudience("test-client");
+        jwt.getClaims().setSubjectIdentifier("alice");
+        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() + 60_000));
+        return jwt;
+    }
+
+    private void mockSignatureValid(boolean valid) throws Exception {
+        when(cryptoProvider.verifySignature(any(), any(), any(), any(), any(), any(SignatureAlgorithm.class)))
+                .thenReturn(valid);
+    }
+
+    // ---- issueIdJag ----
 
     @Test(expectedExceptions = WebApplicationException.class)
     public void issueIdJag_whenFeatureFlagDisabled_shouldThrow() {
@@ -89,6 +122,28 @@ public class IdJagServiceTest {
     public void issueIdJag_whenAudienceIsNull_shouldThrow() {
         idJagService.issueIdJag(executionContext, null, null, "openid");
     }
+
+    @Test
+    public void issueIdJag_whenResourcePresent_shouldEmbedResourceInIdJag() {
+        try {
+            idJagService.issueIdJag(executionContext, null, "https://resource.example.com",
+                    "openid", "https://api.example.com/", null);
+        } catch (WebApplicationException e) {
+            // Signing fails in unit tests (no real key material) — validates pre-signing path only
+        }
+    }
+
+    @Test
+    public void issueIdJag_whenAuthorizationDetailsPresent_shouldEmbedInIdJag() {
+        try {
+            idJagService.issueIdJag(executionContext, null, "https://resource.example.com",
+                    "openid", null, "[{\"type\":\"payment\"}]");
+        } catch (WebApplicationException e) {
+            // Signing fails in unit tests — validates pre-signing path only
+        }
+    }
+
+    // ---- validateSubjectToken — blank / non-JWT ----
 
     @Test
     public void validateSubjectToken_whenNullToken_shouldThrow() {
@@ -120,9 +175,10 @@ public class IdJagServiceTest {
         }
     }
 
+    // ---- validateSubjectToken — SAML2 short-circuit ----
+
     @Test
     public void validateSubjectToken_whenSaml2Type_shouldReturnNull() {
-        // SAML2 subject_token is accepted opaquely; no JWT parsing attempted
         Jwt result = idJagService.validateSubjectToken(
                 "saml-blob-here", "urn:ietf:params:oauth:token-type:saml2", executionContext);
         assertNull(result);
@@ -130,7 +186,6 @@ public class IdJagServiceTest {
 
     @Test
     public void validateSubjectToken_whenSaml2TypeAndBlankToken_shouldThrow() {
-        // Blank check fires before the SAML2 branch — blank is always invalid regardless of type
         try {
             idJagService.validateSubjectToken("", "urn:ietf:params:oauth:token-type:saml2", executionContext);
             fail("Expected WebApplicationException for blank SAML2 token");
@@ -139,30 +194,133 @@ public class IdJagServiceTest {
         }
     }
 
-    @Test
-    public void validateSubjectToken_whenIdTokenWithNoExp_shouldPass() throws Exception {
-        // An ID token without an exp claim is not considered expired; validation must succeed
-        Jwt jwt = new Jwt();
-        // exp intentionally not set
-        jwt.getClaims().setSubjectIdentifier("alice");
-        jwt.getClaims().setIssuer("https://idp.example.com");
-        final String encoded = jwt.toString();
+    // ---- validateSubjectToken — signature ----
 
-        Jwt result = idJagService.validateSubjectToken(encoded, "urn:ietf:params:oauth:token-type:id_token", executionContext);
-        assertNotNull(result);
+    @Test
+    public void validateSubjectToken_whenSignatureInvalid_shouldThrow() throws Exception {
+        mockSignatureValid(false);
+        Jwt jwt = buildValidSubjectJwt();
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for invalid signature");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    // ---- validateSubjectToken — issuer ----
+
+    @Test
+    public void validateSubjectToken_whenIssuerAbsent_shouldThrow() {
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getClaims().setAudience("test-client");
+        jwt.getClaims().setSubjectIdentifier("alice");
+        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() + 60_000));
+        // iss intentionally not set
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for absent iss");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
     }
 
     @Test
-    public void validateSubjectToken_whenExpiredJwt_shouldThrow() throws Exception {
-        Jwt jwt = new Jwt();
-        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() - 10_000)); // 10s ago
-        jwt.getClaims().setSubjectIdentifier("alice");
-        jwt.getClaims().setIssuer("https://idp.example.com");
-        // encode as unsigned JWT for testing
-        final String encoded = jwt.toString();
+    public void validateSubjectToken_whenIssuerNotInTrustedList_shouldThrow() {
+        HashMap<String, TrustedIssuerConfig> trustedIssuers = new HashMap<>();
+        trustedIssuers.put("https://trusted.example.com", new TrustedIssuerConfig());
+        when(appConfiguration.getIdJagTrustedIdpIssuers()).thenReturn(trustedIssuers);
+
+        Jwt jwt = buildValidSubjectJwt();
+        jwt.getClaims().setClaim(JwtClaimName.ISSUER, "https://unknown.example.com"); // not trusted and not server issuer
 
         try {
-            idJagService.validateSubjectToken(encoded, "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for untrusted issuer");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void validateSubjectToken_whenIssuerMatchesServerIssuerButNotInTrustedList_shouldPass() {
+        HashMap<String, TrustedIssuerConfig> trustedIssuers = new HashMap<>();
+        trustedIssuers.put("https://trusted.example.com", new TrustedIssuerConfig());
+        when(appConfiguration.getIdJagTrustedIdpIssuers()).thenReturn(trustedIssuers);
+
+        // iss == appConfiguration.getIssuer() — MUST pass even when not in explicit trusted list
+        Jwt jwt = buildValidSubjectJwt(); // iss = "https://idp.example.com"
+
+        Jwt result = idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+        assertNotNull(result);
+    }
+
+    // ---- validateSubjectToken — audience / client binding (§4.3.3) ----
+
+    @Test
+    public void validateSubjectToken_whenAudienceAbsent_shouldThrow() {
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getClaims().setClaim(JwtClaimName.ISSUER, "https://idp.example.com");
+        jwt.getClaims().setSubjectIdentifier("alice");
+        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() + 60_000));
+        // aud intentionally not set
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for absent aud");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void validateSubjectToken_whenAudienceDoesNotMatchClientId_shouldThrow() {
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getClaims().setClaim(JwtClaimName.ISSUER, "https://idp.example.com");
+        jwt.getClaims().setAudience("other-client"); // not "test-client"
+        jwt.getClaims().setSubjectIdentifier("alice");
+        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() + 60_000));
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for audience mismatch");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    // ---- validateSubjectToken — expiry ----
+
+    @Test
+    public void validateSubjectToken_whenMissingExp_shouldThrow() {
+        // exp is now required — a missing exp claim is rejected (aligns with RFC 7519 ID token rules)
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getClaims().setClaim(JwtClaimName.ISSUER, "https://idp.example.com");
+        jwt.getClaims().setAudience("test-client");
+        jwt.getClaims().setSubjectIdentifier("alice");
+        // exp intentionally not set
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
+            fail("Expected WebApplicationException for missing exp");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void validateSubjectToken_whenExpiredJwt_shouldThrow() {
+        Jwt jwt = buildValidSubjectJwt();
+        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() - 10_000)); // 10s ago
+
+        try {
+            idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
             fail("Expected WebApplicationException for expired token");
         } catch (WebApplicationException e) {
             assertEquals(400, e.getResponse().getStatus());
@@ -170,19 +328,15 @@ public class IdJagServiceTest {
     }
 
     @Test
-    public void validateSubjectToken_whenValidNotExpiredJwt_shouldReturnJwt() throws Exception {
-        Jwt jwt = new Jwt();
-        jwt.getClaims().setExpirationTime(new Date(System.currentTimeMillis() + 60_000)); // 60s ahead
-        jwt.getClaims().setSubjectIdentifier("alice");
-        jwt.getClaims().setIssuer("https://idp.example.com");
-        final String encoded = jwt.toString();
+    public void validateSubjectToken_whenValidJwt_shouldReturnJwt() {
+        Jwt jwt = buildValidSubjectJwt();
 
-        Jwt result = idJagService.validateSubjectToken(encoded, "urn:ietf:params:oauth:token-type:id_token", executionContext);
+        Jwt result = idJagService.validateSubjectToken(jwt.toString(), "urn:ietf:params:oauth:token-type:id_token", executionContext);
         assertNotNull(result);
         assertEquals("alice", result.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
     }
 
-    // ---- §4.3.3: refresh_token subject_token validation ----
+    // ---- validateSubjectToken — refresh_token (§4.3.3) ----
 
     @Test
     public void validateSubjectToken_whenRefreshTokenValid_shouldReturnNull() {
@@ -208,31 +362,7 @@ public class IdJagServiceTest {
         }
     }
 
-    // ---- §4.3.3: resource and authorization_details in issued ID-JAG ----
-
-    @Test
-    public void issueIdJag_whenResourcePresent_shouldEmbedResourceInIdJag() throws Exception {
-        // The token won't actually sign without real keys, but we can verify that
-        // a non-null resource is passed into populateIdJagClaims without error
-        // (further claim content is covered by IdJagValidatorServiceTest)
-        try {
-            idJagService.issueIdJag(executionContext, null, "https://resource.example.com",
-                    "openid", "https://api.example.com/", null);
-        } catch (WebApplicationException e) {
-            // Signing will fail in unit tests (no real key material); that's expected.
-            // The test validates that no NPE or wrong-path exception is thrown before signing.
-        }
-    }
-
-    @Test
-    public void issueIdJag_whenAuthorizationDetailsPresent_shouldEmbedInIdJag() throws Exception {
-        try {
-            idJagService.issueIdJag(executionContext, null, "https://resource.example.com",
-                    "openid", null, "[{\"type\":\"payment\"}]");
-        } catch (WebApplicationException e) {
-            // Signing failure expected in unit tests — validates pre-signing path is correct
-        }
-    }
+    // ---- buildTokenExchangeResponse ----
 
     @Test
     public void buildTokenExchangeResponse_shouldContainIdJagFields() {
