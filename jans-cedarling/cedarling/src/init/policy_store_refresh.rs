@@ -7,8 +7,8 @@
 //!
 //! On each tick the worker sends a conditional GET to the configured URL,
 //! handling `304 Not Modified` cheaply. When the upstream returns a new body
-//! and it parses successfully, the worker builds a fresh [`Authz`] (including a
-//! freshly built [`JwtService`] and [`EntityBuilder`]) and publishes it via
+//! and it parses successfully, the worker builds a new [`Authz`] (reusing the
+//! existing [`JwtService`] when `trusted_issuers` is unchanged) and publishes it via
 //! [`ArcSwap`] so in-flight authorizations are unaffected. Any failure leaves
 //! the previously loaded [`Authz`] in place.
 //!
@@ -29,10 +29,10 @@ use std::time::Duration;
 use crate::PolicyStoreConfig;
 use crate::PolicyStoreSource;
 use crate::async_sleep::sleep;
-use crate::authz::metrics::MetricsCollector;
 use crate::authz::Authz;
+use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
@@ -253,12 +253,21 @@ pub(crate) struct AuthzRebuilder {
 }
 
 impl AuthzRebuilder {
-    /// Build a brand-new [`Authz`] from a fresh policy store. Rebuilds the JWT
-    /// service and entity builder so trusted-issuer and schema changes take
+    /// Build a new [`Authz`] from `policy_store`, reusing `prior_authz`'s
+    /// [`JwtService`] when `trusted_issuers` is unchanged (avoids OIDC/JWKS
+    /// refetch on policy-only updates). [`EntityBuilder`] is always rebuilt.
     pub(crate) async fn rebuild(
         &self,
         policy_store: PolicyStoreWithID,
+        prior_authz: &Authz,
     ) -> Result<Authz, RebuildError> {
+        let prior_jwt =
+            if issuers_unchanged(prior_authz.trusted_issuers(), &policy_store.trusted_issuers) {
+                Some(prior_authz.clone_jwt_service())
+            } else {
+                None
+            };
+
         build_authz(
             policy_store,
             &self.jwt_config,
@@ -267,14 +276,20 @@ impl AuthzRebuilder {
             &self.log,
             self.data_store.clone(),
             self.metrics.clone(),
+            prior_jwt,
         )
         .await
     }
 }
 
-/// Errors from [`AuthzRebuilder::rebuild`].
-///
-/// Type alias for [`BuildAuthzError`] so the refresh-worker error surface
+/// `true` when both issuer maps are equal; `false` triggers a [`JwtService`] rebuild.
+fn issuers_unchanged(
+    prior: &Option<std::collections::HashMap<String, TrustedIssuer>>,
+    new: &Option<std::collections::HashMap<String, TrustedIssuer>>,
+) -> bool {
+    prior == new
+}
+
 pub(crate) type RebuildError = BuildAuthzError;
 
 /// Mutable per-source state — what we learned from the previous response.
@@ -712,7 +727,8 @@ async fn parse_swap_and_record(
     // forever even though authorization decisions use the new set.
     let new_policy_count = parsed.policies.get_set().num_of_policies();
 
-    let new_authz = match ctx.rebuilder.rebuild(parsed).await {
+    let prior_authz = ctx.authz_swap.load_full();
+    let new_authz = match ctx.rebuilder.rebuild(parsed, &prior_authz).await {
         Ok(a) => a,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
@@ -828,6 +844,56 @@ fn etag_opaque_tag(etag: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
+
+    fn one_issuer() -> Option<HashMap<String, TrustedIssuer>> {
+        let mut m = HashMap::new();
+        m.insert("issuer_a".to_string(), TrustedIssuer::default());
+        Some(m)
+    }
+
+    #[test]
+    fn identical_issuer_maps_signal_reuse() {
+        let a = one_issuer();
+        let b = one_issuer();
+        assert!(
+            issuers_unchanged(&a, &b),
+            "identical issuer maps must signal reuse so JwtService is not rebuilt",
+        );
+    }
+
+    #[test]
+    fn empty_vs_some_issuer_signals_rebuild() {
+        assert!(
+            !issuers_unchanged(&None, &one_issuer()),
+            "going from no issuers to some issuers must signal a JwtService rebuild",
+        );
+        assert!(
+            !issuers_unchanged(&one_issuer(), &None),
+            "removing all issuers must signal a JwtService rebuild",
+        );
+    }
+
+    #[test]
+    fn added_issuer_signals_rebuild() {
+        let base = one_issuer();
+        let mut expanded = one_issuer().unwrap();
+        expanded.insert("issuer_b".to_string(), TrustedIssuer::default());
+        assert!(
+            !issuers_unchanged(&base, &Some(expanded)),
+            "adding a new issuer must signal a JwtService rebuild",
+        );
+    }
+
+    #[test]
+    fn removed_issuer_signals_rebuild() {
+        let mut two = one_issuer().unwrap();
+        two.insert("issuer_b".to_string(), TrustedIssuer::default());
+        assert!(
+            !issuers_unchanged(&Some(two), &one_issuer()),
+            "removing an issuer must signal a JwtService rebuild",
+        );
+    }
 
     #[test]
     fn next_delay_uses_base_when_no_server_hint() {

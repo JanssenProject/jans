@@ -10,8 +10,8 @@
 use super::authz_builder::{BuildAuthzError, build_authz};
 use super::service_config::ServiceConfig;
 use crate::LogLevel;
-use crate::authz::metrics::MetricsCollector;
 use crate::authz::Authz;
+use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::PolicyStoreMetadata;
 use crate::context_data_api::DataStore;
@@ -77,12 +77,6 @@ impl<'a> ServiceFactory<'a> {
         self.log_service.clone()
     }
 
-    /// Build and cache the [`Authz`] service.
-    ///
-    /// The construction is delegated to the shared [`build_authz`] path which
-    /// also runs on every refresh-worker rebuild. Bootstrap-specific logging
-    /// (configuration warnings, policy-count summary) is emitted here, before
-    /// `build_authz` is called, so it only appears at startup.
     pub(crate) async fn authz_service(&mut self) -> Result<Arc<Authz>, ServiceInitError> {
         if let Some(authz) = &self.container.authz_service {
             return Ok(authz.clone());
@@ -91,31 +85,41 @@ impl<'a> ServiceFactory<'a> {
         let logger = self.log_service();
         let policy_store = &self.service_config.policy_store;
 
-        // Bootstrap-only: warn once when strict schema validation is disabled.
-        if !self.bootstrap_config.authorization_config.strict_schema_validation {
+        // warn once at startup when strict schema validation is disabled
+        if !self
+            .bootstrap_config
+            .authorization_config
+            .strict_schema_validation
+        {
             let msg = if policy_store.schema.is_some() {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — schema present but not enforced"
             } else {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — no schema loaded; policies run without attribute validation"
             };
             logger.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                    .set_message(msg.to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(msg.to_string()),
             );
         }
 
-        // Bootstrap-only: log a one-time summary of what was loaded.
+        // one-time startup summary
         logger.log_any(
-            LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, None))
-                .set_message(format!(
-                    "Policy store loaded: {} policies, {} issuers, {} entities",
-                    policy_store.policies.get_set().policies().count(),
-                    policy_store
-                        .trusted_issuers
-                        .as_ref()
-                        .map_or(0, HashMap::len),
-                    policy_store.default_entities.entities().len(),
-                )),
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message(format!(
+                "Policy store loaded: {} policies, {} issuers, {} entities",
+                policy_store.policies.get_set().policies().count(),
+                policy_store
+                    .trusted_issuers
+                    .as_ref()
+                    .map_or(0, HashMap::len),
+                policy_store.default_entities.entities().len(),
+            )),
         );
 
         let authz = build_authz(
@@ -126,6 +130,7 @@ impl<'a> ServiceFactory<'a> {
             &logger,
             self.data_store.clone(),
             self.metrics.clone(),
+            None,
         )
         .await?;
 

@@ -3,13 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Shared [`Authz`] construction path used by both bootstrap initialisation
-//! ([`super::service_factory::ServiceFactory`]) and the refresh worker
-//! ([`super::policy_store_refresh::AuthzRebuilder`]).
-//!
-//! Centralising here guarantees both paths behave identically: any change to
-//! trusted-issuer validation, default-entity warning logging, entity-builder
-//! construction, or `AuthzConfig` assembly only needs to be made once.
+//! Shared [`Authz`] construction path used by both bootstrap
+//! ([`super::service_factory`]) and the refresh worker
+//! ([`super::policy_store_refresh`]).
 
 use std::sync::Arc;
 
@@ -24,7 +20,6 @@ use crate::jwt::JwtService;
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 
-/// Errors that can occur while building an [`Authz`] from a loaded policy store.
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum BuildAuthzError {
     #[error("trusted issuers validation failed: {0}")]
@@ -35,22 +30,11 @@ pub(crate) enum BuildAuthzError {
     EntityBuilder(String),
 }
 
-/// Build a complete [`Authz`] service from a freshly loaded [`PolicyStoreWithID`].
+/// Build an [`Authz`] from a loaded policy store.
 ///
-/// This is the single shared construction path for both the bootstrap load
-/// (`ServiceFactory::authz_service`) and the refresh-worker rebuild
-/// (`AuthzRebuilder::rebuild`). The shared path owns:
-///
-/// - trusted-issuer validation
-/// - default-entity `warns()` logging (so refresh doesn't silently drop them)
-/// - [`JwtService`] initialisation
-/// - [`TrustedIssuerIndex`] + [`EntityBuilder`] construction with
-///   `strict_schema_validation` gating
-/// - [`AuthzConfig`] assembly and [`Authz::new`]
-///
-/// **Bootstrap-only** concerns (configuration warnings, "Policy store loaded"
-/// info log) stay in `ServiceFactory::authz_service` and are emitted before
-/// this function is called.
+/// Pass `prior_jwt_service = Some(existing)` to reuse a [`JwtService`] when
+/// `trusted_issuers` is unchanged (refresh path). Pass `None` to always build
+/// fresh (bootstrap path). Bootstrap-specific logging stays in the caller.
 pub(crate) async fn build_authz(
     policy_store: PolicyStoreWithID,
     jwt_config: &JwtConfig,
@@ -59,14 +43,12 @@ pub(crate) async fn build_authz(
     log: &Logger,
     data_store: Arc<DataStore>,
     metrics: Arc<MetricsCollector>,
+    prior_jwt_service: Option<Arc<JwtService>>,
 ) -> Result<Authz, BuildAuthzError> {
     policy_store
         .validate_trusted_issuers()
         .map_err(|e| BuildAuthzError::TrustedIssuers(e.to_string()))?;
 
-    // Log any load warnings for default entities — applies equally to bootstrap
-    // and refresh; before this function existed, the refresh path silently
-    // dropped them.
     for warn in policy_store.default_entities.warns() {
         log.log_any(
             LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
@@ -75,17 +57,20 @@ pub(crate) async fn build_authz(
     }
 
     let trusted_issuers = policy_store.trusted_issuers.clone();
-    let jwt_service = Arc::new(
-        JwtService::new(
-            jwt_config,
-            trusted_issuers.clone(),
-            Some(log.clone()),
-            metrics.clone(),
-            http_client,
-        )
-        .await
-        .map_err(|e| BuildAuthzError::JwtService(e.to_string()))?,
-    );
+    let jwt_service = match prior_jwt_service {
+        Some(existing) => existing,
+        None => Arc::new(
+            JwtService::new(
+                jwt_config,
+                trusted_issuers.clone(),
+                Some(log.clone()),
+                metrics.clone(),
+                http_client,
+            )
+            .await
+            .map_err(|e| BuildAuthzError::JwtService(e.to_string()))?,
+        ),
+    };
 
     let issuers_map = trusted_issuers.unwrap_or_default();
     let issuers_index = TrustedIssuerIndex::new(&issuers_map, Some(log));
@@ -114,4 +99,3 @@ pub(crate) async fn build_authz(
     };
     Ok(Authz::new(config))
 }
-

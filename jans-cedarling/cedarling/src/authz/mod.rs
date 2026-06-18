@@ -11,7 +11,7 @@
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
@@ -80,6 +80,17 @@ impl Authz {
             config,
             authorizer: cedar_policy::Authorizer::new(),
         }
+    }
+
+    /// Trusted-issuer map from the currently loaded policy store.
+    /// Used by the refresh worker to decide whether to reuse the existing [`jwt::JwtService`].
+    pub(crate) fn trusted_issuers(&self) -> &Option<HashMap<String, TrustedIssuer>> {
+        &self.config.policy_store.trusted_issuers
+    }
+
+    /// Clone the [`Arc`] wrapping the current [`jwt::JwtService`] for reuse across a refresh.
+    pub(crate) fn clone_jwt_service(&self) -> Arc<jwt::JwtService> {
+        Arc::clone(&self.config.jwt_service)
     }
 
     /// Get pushed data and build `PushedDataInfo` for logging.
