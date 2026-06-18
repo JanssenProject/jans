@@ -359,12 +359,12 @@ async fn load_policy_store_from_cjar_file(
 #[cfg(target_arch = "wasm32")]
 fn load_policy_store_from_cjar_file(
     path: &Path,
-    _strict_schema_validation: bool,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_archive(path, _strict_schema_validation) {
+    match loader::load_policy_store_archive(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Archive(format!(
             "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {e}",
         ))),
@@ -471,12 +471,12 @@ async fn load_policy_store_from_directory(
 #[cfg(target_arch = "wasm32")]
 fn load_policy_store_from_directory(
     path: &Path,
-    _strict_schema_validation: bool,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_directory(path, _strict_schema_validation) {
+    match loader::load_policy_store_directory(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Directory(format!(
             "Loading from directory is not supported in WASM. Original error: {e}",
         ))),
