@@ -216,17 +216,15 @@ mod tests {
         let parsed = ParsedSchema::parse(content, "test.cedarschema")
             .expect("Valid Cedar schema should parse successfully");
         let schema = parsed.get_schema();
-        let type_names: Vec<_> = schema.entity_types().map(|e| e.to_string()).collect();
+        let type_names: Vec<_> = schema.entity_types().map(std::string::ToString::to_string).collect();
         assert!(
             type_names.contains(&"TestApp::User".to_string()),
-            "Should contain TestApp::User; got: {:?}",
-            type_names
+            "Should contain TestApp::User; got: {type_names:?}"
         );
-        let action_names: Vec<_> = schema.actions().map(|a| a.to_string()).collect();
+        let action_names: Vec<_> = schema.actions().map(std::string::ToString::to_string).collect();
         assert!(
             action_names.contains(&"TestApp::Action::\"view\"".to_string()),
-            "Should contain view action; got: {:?}",
-            action_names
+            "Should contain view action; got: {action_names:?}"
         );
     }
 
@@ -575,11 +573,10 @@ mod tests {
 
         let parsed = ParsedSchema::parse(content, "test.cedarschema")
             .expect("Valid schema should parse for entity type test");
-        let type_names: Vec<_> = parsed.get_schema().entity_types().map(|e| e.to_string()).collect();
+        let type_names: Vec<_> = parsed.get_schema().entity_types().map(std::string::ToString::to_string).collect();
         assert!(
             type_names.contains(&"Test::User".to_string()),
-            "Should contain Test::User; got: {:?}",
-            type_names
+            "Should contain Test::User; got: {type_names:?}"
         );
     }
 
@@ -618,16 +615,14 @@ mod tests {
         let result = ParsedSchema::parse_multiple(&files);
         let parsed = result.expect("parse_multiple should succeed");
 
-        let type_names: Vec<_> = parsed.get_schema().entity_types().map(|e| e.to_string()).collect();
+        let type_names: Vec<_> = parsed.get_schema().entity_types().map(std::string::ToString::to_string).collect();
         assert!(
             type_names.contains(&"App::User".to_string()),
-            "Should contain App::User; got: {:?}",
-            type_names
+            "Should contain App::User; got: {type_names:?}"
         );
         assert!(
             type_names.contains(&"App::Resource".to_string()),
-            "Should contain App::Resource; got: {:?}",
-            type_names
+            "Should contain App::Resource; got: {type_names:?}"
         );
     }
 
@@ -709,13 +704,11 @@ mod tests {
         let json = fragment.to_json_string().expect("Should serialize to JSON");
         assert!(
             json.contains("Users::User") || json.contains("Users"),
-            "expected JSON to contain Users namespace; got: {}",
-            json
+            "expected JSON to contain Users namespace; got: {json}"
         );
         assert!(
             json.contains("Docs::Document") || json.contains("Docs"),
-            "expected JSON to contain Docs namespace; got: {}",
-            json
+            "expected JSON to contain Docs namespace; got: {json}"
         );
     }
 

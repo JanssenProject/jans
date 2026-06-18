@@ -11,6 +11,7 @@ use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
+use super::super::manager::PolicyStoreManager;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
 use std::fs::{self, File};
@@ -1417,12 +1418,11 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
     let type_names: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         type_names.contains(&"Equiv::User".to_string()),
-        "Archive schema should contain Equiv::User; got: {:?}",
-        type_names
+        "Archive schema should contain Equiv::User; got: {type_names:?}"
     );
 }
 
@@ -1470,17 +1470,15 @@ fn test_load_schema_from_schemas_directory() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"App::User".to_string()),
-        "Should contain App::User; got: {:?}",
-        entity_types
+        "Should contain App::User; got: {entity_types:?}"
     );
     assert!(
         entity_types.contains(&"App::Resource".to_string()),
-        "Should contain App::Resource; got: {:?}",
-        entity_types
+        "Should contain App::Resource; got: {entity_types:?}"
     );
 }
 
@@ -1581,12 +1579,11 @@ fn test_load_schema_single_file_takes_precedence_over_schemas_dir() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"Single::FromSingleFile".to_string()),
-        "Should use single file content; got: {:?}",
-        entity_types
+        "Should use single file content; got: {entity_types:?}"
     );
     assert!(
         !entity_types.contains(&"Ignored::ShouldNotAppear".to_string()),
@@ -1673,12 +1670,11 @@ fn test_load_schema_from_schemas_dir_invalid_extension() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"App::User".to_string()),
-        "Should contain App::User; got: {:?}",
-        entity_types
+        "Should contain App::User; got: {entity_types:?}"
     );
 }
 
@@ -1726,17 +1722,15 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"Users::User".to_string()),
-        "Should contain Users::User; got: {:?}",
-        entity_types
+        "Should contain Users::User; got: {entity_types:?}"
     );
     assert!(
         entity_types.contains(&"Docs::Document".to_string()),
-        "Should contain Docs::Document; got: {:?}",
-        entity_types
+        "Should contain Docs::Document; got: {entity_types:?}"
     );
 }
 
@@ -1801,17 +1795,15 @@ fn test_load_schema_from_schemas_dir_in_archive() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"Part1::A".to_string()),
-        "Should contain Part1::A; got: {:?}",
-        entity_types
+        "Should contain Part1::A; got: {entity_types:?}"
     );
     assert!(
         entity_types.contains(&"Part2::B".to_string()),
-        "Should contain Part2::B; got: {:?}",
-        entity_types
+        "Should contain Part2::B; got: {entity_types:?}"
     );
 }
 
@@ -1969,17 +1961,15 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         entity_types.contains(&"App::User".to_string()),
-        "Should contain App::User; got: {:?}",
-        entity_types
+        "Should contain App::User; got: {entity_types:?}"
     );
     assert!(
         !entity_types.contains(&"App::Admin".to_string()),
-        "Should NOT contain App::Admin from bad.txt; got: {:?}",
-        entity_types
+        "Should NOT contain App::Admin from bad.txt; got: {entity_types:?}"
     );
 }
 
@@ -2058,12 +2048,11 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     .expect("Should create test.cedar");
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let loaded = loader
+    let result = loader
         .load_directory(".", true)
         .expect("Should load directory with shared namespace schemas");
 
-    use super::super::manager::PolicyStoreManager;
-    let policy_store = PolicyStoreManager::convert_to_legacy(loaded, false)
+    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
         .expect("convert_to_legacy should succeed with shared namespaces across files");
 
     let cedar_schema = policy_store
@@ -2073,22 +2062,19 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     let type_names: Vec<_> = cedar_schema
         .schema
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         type_names.contains(&"App::User".to_string()),
-        "Multi-file schema should produce App::User; got: {:?}",
-        type_names
+        "Multi-file schema should produce App::User; got: {type_names:?}"
     );
     assert!(
         type_names.contains(&"App::Resource".to_string()),
-        "Multi-file schema should produce App::Resource; got: {:?}",
-        type_names
+        "Multi-file schema should produce App::Resource; got: {type_names:?}"
     );
     assert!(
         type_names.contains(&"App::Admin".to_string()),
-        "Multi-file schema should produce App::Admin; got: {:?}",
-        type_names
+        "Multi-file schema should produce App::Admin; got: {type_names:?}"
     );
 }
 
@@ -2138,12 +2124,11 @@ fn test_archive_shared_namespace_full_pipeline() {
         ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded = loader
+    let result = loader
         .load_directory(".", true)
         .expect("Should load archive with shared namespace schemas");
 
-    use super::super::manager::PolicyStoreManager;
-    let policy_store = PolicyStoreManager::convert_to_legacy(loaded, false)
+    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
         .expect("convert_to_legacy should succeed for archive with shared namespaces");
 
     let cedar_schema = policy_store
@@ -2154,21 +2139,18 @@ fn test_archive_shared_namespace_full_pipeline() {
     let type_names: Vec<_> = cedar_schema
         .schema
         .entity_types()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     assert!(
         type_names.contains(&"App::User".to_string()),
-        "Archive schema should contain App::User; got: {:?}",
-        type_names
+        "Archive schema should contain App::User; got: {type_names:?}"
     );
     assert!(
         type_names.contains(&"App::Resource".to_string()),
-        "Archive schema should contain App::Resource; got: {:?}",
-        type_names
+        "Archive schema should contain App::Resource; got: {type_names:?}"
     );
     assert!(
         type_names.contains(&"App::Admin".to_string()),
-        "Archive schema should contain App::Admin; got: {:?}",
-        type_names
+        "Archive schema should contain App::Admin; got: {type_names:?}"
     );
 }

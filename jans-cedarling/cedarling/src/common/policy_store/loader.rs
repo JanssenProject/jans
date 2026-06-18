@@ -146,7 +146,7 @@ pub(crate) struct LoadedPolicyStore {
     /// Whether a schema source (schema.cedarschema or schemas/ dir) was present
     /// in the store, regardless of whether it was loaded/parsed.
     /// Used to distinguish "explicitly no schema" from "schema skipped by
-    /// strict_schema_validation=false" in log messages.
+    /// `strict_schema_validation=false`" in log messages.
     pub schema_source_exists: bool,
     /// Policy files content (filename -> content)
     pub policies: Vec<PolicyFile>,
@@ -188,7 +188,7 @@ pub(crate) struct IssuerFile {
 /// Describes where a schema source was found in the policy store.
 enum SchemaSource {
     /// `schema.cedarschema` exists at this path.
-    SingleFile { path: String, schemas_dir: String },
+    SingleFile { path: String },
     /// `schemas/` directory exists at this path.
     Directory(String),
     /// No schema source found.
@@ -307,10 +307,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     fn resolve_schema_source(&self, dir: &str) -> SchemaSource {
         let schema_path = Self::join_path(dir, "schema.cedarschema");
         if self.vfs.exists(&schema_path) {
-            return SchemaSource::SingleFile {
-                path: schema_path,
-                schemas_dir: Self::join_path(dir, "schemas"),
-            };
+            return SchemaSource::SingleFile { path: schema_path };
         }
         let schemas_dir = Self::join_path(dir, "schemas");
         if self.vfs.exists(&schemas_dir) {

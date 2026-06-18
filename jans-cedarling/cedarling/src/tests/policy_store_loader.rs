@@ -25,6 +25,7 @@
 use std::fs;
 #[cfg(not(target_arch = "wasm32"))]
 use std::io::Read;
+use std::io::Write;
 
 use serde_json::json;
 #[cfg(not(target_arch = "wasm32"))]
@@ -1336,15 +1337,12 @@ fn build_archive_without_schema(id: &str, name: &str) -> Vec<u8> {
         id.len() >= 8 && id.len() <= 64 && id.chars().all(|c| c.is_ascii_hexdigit()),
         "test archive id must be hex 8-64 chars, got: {id}"
     );
-    use std::io::{Cursor, Write};
-    use zip::write::{ExtendedFileOptions, FileOptions};
-    use zip::CompressionMethod;
     let mut buf = Vec::new();
     {
-        let cursor = Cursor::new(&mut buf);
+        let cursor = std::io::Cursor::new(&mut buf);
         let mut zip = zip::ZipWriter::new(cursor);
-        let opts = FileOptions::<ExtendedFileOptions>::default()
-            .compression_method(CompressionMethod::Deflated);
+        let opts = <zip::write::FileOptions<zip::write::ExtendedFileOptions>>::default()
+            .compression_method(zip::CompressionMethod::Deflated);
 
         zip.start_file("metadata.json", opts.clone()).unwrap();
         write!(
