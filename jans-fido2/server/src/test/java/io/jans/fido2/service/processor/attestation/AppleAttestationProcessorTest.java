@@ -80,7 +80,7 @@ class AppleAttestationProcessorTest {
     void getAttestationFormat_valid_apple() {
         String fmt = appleAttestationProcessor.getAttestationFormat().getFmt();
         assertNotNull(fmt);
-        assertEquals(fmt, "apple");
+        assertEquals("apple", fmt);
     }
 
     @Test
@@ -124,10 +124,10 @@ class AppleAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
         verifyNoInteractions(certificateService, appConfiguration, attestationCertificateService, certificateVerifier, coseService, base64Service);
         verifyNoMoreInteractions(log, errorResponseFactory);
     }
@@ -154,13 +154,13 @@ class AppleAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
-        verify(certificateService).getCertificate(eq("x5c item"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
+        verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).warn(eq("Failed to find attestation validation signature public certificate with DN: '{}'"), eq("test issuer dn"));
+        verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "test issuer dn");
         verify(errorResponseFactory).badRequestException(any(), eq("Failed to find attestation validation signature public certificate with DN: test issuer dn"));
         verifyNoMoreInteractions(log, errorResponseFactory);
         verifyNoInteractions(certificateVerifier, coseService, base64Service);
@@ -191,15 +191,15 @@ class AppleAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
-        verify(certificateService).getCertificate(eq("x5c item"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
+        verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
+        verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
-        verify(log).info(eq("Step 1 completed"));
+        verify(log).info("Step 1 completed");
         verify(commonUtilService).writeOutputStreamByteList(anyList());
         verify(errorResponseFactory).badRequestException(any(), eq("Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : test ioexception"));
         verifyNoMoreInteractions(log, errorResponseFactory);
@@ -234,18 +234,18 @@ class AppleAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
-        verify(certificateService).getCertificate(eq("x5c item"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
+        verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
+        verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
-        verify(log).info(eq("Step 1 completed"));
+        verify(log).info("Step 1 completed");
         verify(commonUtilService).writeOutputStreamByteList(anyList());
-        verify(log).info(eq("Step 2 completed"));
-        verify(log).info(eq("Step 3 completed"));
+        verify(log).info("Step 2 completed");
+        verify(log).info("Step 3 completed");
         verify(appleUtilService).getExtension(any());
         verify(errorResponseFactory).badRequestException(any(), eq("Certificate 1.2.840.113635.100.8.2 extension does not match nonce"));
         verifyNoMoreInteractions(log, errorResponseFactory);
@@ -282,19 +282,19 @@ class AppleAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
-        verify(certificateService).getCertificate(eq("x5c item"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
+        verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
+        verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
-        verify(log).info(eq("Step 1 completed"));
+        verify(log).info("Step 1 completed");
         verify(commonUtilService).writeOutputStreamByteList(anyList());
-        verify(log).info(eq("Step 2 completed"));
-        verify(log).info(eq("Step 3 completed"));
-        verify(log).info(eq("Step 4 completed"));
+        verify(log).info("Step 2 completed");
+        verify(log).info("Step 3 completed");
+        verify(log).info("Step 4 completed");
         verify(appleUtilService).getExtension(any());
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(errorResponseFactory).badRequestException(any(), eq("The public key in the first certificate in x5c doesn't matches the credentialPublicKey in the attestedCredentialData in authenticatorData."));
@@ -338,17 +338,17 @@ class AppleAttestationProcessorTest {
 
         appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
-        verify(log).info(eq("AttStmt: test_att_stmt"));
-        verify(certificateService).getCertificate(eq("x5c item"));
+        verify(log).info("AttStmt: {}", "test_att_stmt");
+        verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
+        verify(log).debug("APPLE_WEBAUTHN_ROOT_CA root certificate: {}", 1);
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
-        verify(log).info(eq("Step 1 completed"));
+        verify(log).info("Step 1 completed");
         verify(commonUtilService).writeOutputStreamByteList(anyList());
-        verify(log).info(eq("Step 2 completed"));
-        verify(log).info(eq("Step 3 completed"));
-        verify(log).info(eq("Step 4 completed"));
-        verify(log).info(eq("Step 5 completed"));
+        verify(log).info("Step 2 completed");
+        verify(log).info("Step 3 completed");
+        verify(log).info("Step 4 completed");
+        verify(log).info("Step 5 completed");
         verify(appleUtilService).getExtension(any());
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(base64Service, times(2)).urlEncodeToString(any());
