@@ -3,6 +3,7 @@ package jans
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 // UMAResource represents an UMA resources.
@@ -85,7 +86,7 @@ func (c *Client) GetUMAResourcesByClient(ctx context.Context, clientId string) (
 
 	ret := []UMAResource{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/uma/resources/clientId/"+clientId, token, scope, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/uma/resources/clientId/"+url.PathEscape(clientId), token, scope, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

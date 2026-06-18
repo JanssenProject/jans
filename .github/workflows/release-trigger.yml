@@ -49,10 +49,14 @@ jobs:
         egress-policy: audit
 
     - name: Validate version input
+      # Pass the input via env (not inline ${{ }}) so a value containing quotes can't break
+      # out of the shell command -- this step runs before any validation.
+      env:
+        VERSION_INPUT: ${{ github.event.inputs.version }}
       run: |
-        V='${{ github.event.inputs.version }}'
+        V="$VERSION_INPUT"
         if [[ ! "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
-          echo "::error::version must be X.Y.Z (optionally -suffix); got '$V'"
+          echo "::error::version must be X.Y.Z (optionally -suffix)"
           exit 1
         fi
 

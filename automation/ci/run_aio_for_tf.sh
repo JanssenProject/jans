@@ -10,10 +10,10 @@
 #   JANS_PERSISTENCE   required, MYSQL | PGSQL
 #   AIO_IMAGE_TAG      optional, default ghcr nightly all-in-one
 
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || exit 1
 
 : "${JANS_FQDN:?set JANS_FQDN}"
 : "${JANS_PERSISTENCE:?set JANS_PERSISTENCE}"
@@ -41,12 +41,11 @@ docker pull "$AIO_IMAGE_TAG"
 
 # mysql OOMs at the demo default (768M) under the test-data load; the runner has headroom.
 export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
-# JANS_CI_CD_RUN switches the demo to FILE/TRACE logging so per-service logs land in the container.
-export JANS_CI_CD_RUN=true
-
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) can read ca.key/web_https.key on its first run.
-bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 &
+# The demo reads JANS_CI_CD_RUN as its 5th positional arg (which overrides any exported value);
+# pass "true" to enable FILE/TRACE logging so per-service jetty logs capture request errors.
+bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 true &
 demo_pid=$!
 for _ in $(seq 1 120); do
   [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true

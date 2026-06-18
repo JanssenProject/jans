@@ -68,6 +68,9 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        # this job runs repository code (provider tests); don't leave the token on disk
+        persist-credentials: false
 
     - name: Set up Go
       uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -105,7 +108,7 @@ jobs:
       run: bash automation/ci/run_aio_for_tf.sh
 
     - name: Install gotestsum
-      run: go install gotest.tools/gotestsum@latest
+      run: go install gotest.tools/gotestsum@v1.12.0
 
     - name: Install Terraform CLI
       # The acceptance framework otherwise auto-downloads Terraform and verifies it against
@@ -113,8 +116,13 @@ jobs:
       run: |
         set -euo pipefail
         TF_VERSION=1.9.8
-        curl -fsSL -o /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
-        sudo unzip -o /tmp/terraform.zip -d /usr/local/bin
+        base="https://releases.hashicorp.com/terraform/${TF_VERSION}"
+        zip="terraform_${TF_VERSION}_linux_amd64.zip"
+        curl -fsSL -o "/tmp/${zip}" "${base}/${zip}"
+        curl -fsSL -o /tmp/terraform_SHA256SUMS "${base}/terraform_${TF_VERSION}_SHA256SUMS"
+        # verify the download against HashiCorp's published checksum before installing to a privileged path
+        ( cd /tmp && awk -v f="$zip" '$2==f' terraform_SHA256SUMS | sha256sum -c - )
+        sudo unzip -o "/tmp/${zip}" -d /usr/local/bin
         terraform version
         echo "TF_ACC_TERRAFORM_PATH=$(command -v terraform)" >> "$GITHUB_ENV"
 

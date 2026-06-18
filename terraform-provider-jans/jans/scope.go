@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 type ScopeAttribute struct {
@@ -98,7 +99,7 @@ func (c *Client) GetScopesByCreator(ctx context.Context, creatorId string) ([]Sc
 
 	ret := []Scope{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/scopes/creator/"+creatorId, token, scope, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/scopes/creator/"+url.PathEscape(creatorId), token, scope, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -120,7 +121,7 @@ func (c *Client) GetScopesByType(ctx context.Context, scopeType string) ([]Scope
 
 	ret := []Scope{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/scopes/type/"+scopeType, token, scope, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/scopes/type/"+url.PathEscape(scopeType), token, scope, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

@@ -45,6 +45,10 @@ SHA_RE = re.compile(r"\b[0-9a-f]{40}\b")
 ROOT = Path.cwd()
 DRY = False
 
+# This script's own repo-relative path. It carries the sentinel strings as source
+# (NIGHTLY, "CN_RELEASE_TAG=nightly", ...), so every grep-driven pass must skip it.
+SELF_REL = "automation/release/version_bump.py"
+
 
 # --------------------------------------------------------------------------- #
 # git helpers (tree is a clean checkout in CI, so tracked files == the world)
@@ -58,7 +62,9 @@ def _git(*args):
 
 
 def grep_files(token):
-    return _git("grep", "-lF", token)
+    # exclude this script: it carries the sentinel literals as source, which the
+    # bump/verify passes must never rewrite or flag.
+    return [f for f in _git("grep", "-lF", token) if f != SELF_REL]
 
 
 def ls_files(*globs):
