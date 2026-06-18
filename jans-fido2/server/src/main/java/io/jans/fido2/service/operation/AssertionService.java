@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 
@@ -128,10 +127,9 @@ public class AssertionService {
 				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
 
 		// Verify request parameters
-		String username = assertionOptions.getUsername();// commonVerifiers.verifyThatFieldString(params, "username");
+		String username = assertionOptions.getUsername();
 
 		// Create result object
-		// ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
 		AssertionOptionsResponse assertionOptionsResponse = new AssertionOptionsResponse();
 
 		// Put userVerification
@@ -151,7 +149,7 @@ public class AssertionService {
 		log.debug("Put rpId {}", origin);
 
 		// Put allowCredentials
-		if (username != null && StringHelper.isNotEmpty(username)) {
+		if (StringHelper.isNotEmpty(username)) {
 			Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(origin,
 					username);
 			List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
@@ -177,7 +175,7 @@ public class AssertionService {
 		}
 
 		// in case of conditional UI, timeout has to be large.
-		if (username != null && StringHelper.isNotEmpty(username)) {
+		if (StringHelper.isNotEmpty(username)) {
 			// Put timeout
 			long timeout = commonVerifiers.verifyTimeout(assertionOptions.getTimeout());
 			assertionOptionsResponse.setTimeout(timeout);
@@ -234,8 +232,7 @@ public class AssertionService {
 		return assertionOptionsResponse;
 	}
 
-	public AsserOptGenerateResponse generateOptions(AssertionOptionsGenerate assertionOptionsGenerate)
-			throws JsonProcessingException {
+	public AsserOptGenerateResponse generateOptions(AssertionOptionsGenerate assertionOptionsGenerate) {
 		if (log.isDebugEnabled()) {
 			log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
 		}

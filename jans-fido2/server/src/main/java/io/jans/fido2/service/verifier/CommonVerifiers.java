@@ -69,11 +69,16 @@ public class CommonVerifiers {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    private static final String CHALLENGE = "challenge";
+    private static final String INVALID_FIELD = "Invalid field ";
+
     public void verifyRpIdHash(AuthData authData, String domain) {
         byte[] retrievedRpIdHash = authData.getRpIdHash();
         byte[] calculatedRpIdHash = DigestUtils.getSha256Digest().digest(domain.getBytes(StandardCharsets.UTF_8));
-        log.debug("rpIDHash from Domain    HEX {}", Hex.encodeHexString(calculatedRpIdHash));
-        log.debug("rpIDHash from Assertion HEX {}", Hex.encodeHexString(retrievedRpIdHash));
+        if (log.isDebugEnabled()) {
+            log.debug("rpIDHash from Domain    HEX {}", Hex.encodeHexString(calculatedRpIdHash));
+            log.debug("rpIDHash from Assertion HEX {}", Hex.encodeHexString(retrievedRpIdHash));
+        }
         if (!Arrays.equals(retrievedRpIdHash, calculatedRpIdHash)) {
             log.warn("hash from domain doesn't match hash from assertion HEX");
             throw new Fido2RuntimeException("Hashes don't match");
@@ -127,12 +132,6 @@ public class CommonVerifiers {
     	{
     		throw new Fido2RuntimeException("Username is a mandatory parameter");
     	}
-		/*
-		 * long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
-		 * !Strings.isNullOrEmpty(params.getDisplayName()), params.getAttestation() !=
-		 * null) .parallelStream().filter(f -> !f).count(); if (count != 0) { throw new
-		 * Fido2RuntimeException("Invalid parameters"); }
-		 */
     }
 
     public void verifyAssertionOptions(AssertionOptions assertionOptions) {
@@ -192,7 +191,7 @@ public class CommonVerifiers {
     protected String verifyThatString(JsonNode node, String fieldName) {
         if (!node.isTextual()) {
             if (node.fieldNames().hasNext()) {
-                throw errorResponseFactory.invalidRequest("Invalid field " + node.fieldNames().next() + ". There is no filed " + fieldName);
+                throw errorResponseFactory.invalidRequest(INVALID_FIELD + node.fieldNames().next() + ". There is no filed " + fieldName);
             } else {
                 throw errorResponseFactory.invalidRequest("Field hasn't sub field " + fieldName);
             }
@@ -214,7 +213,7 @@ public class CommonVerifiers {
 
         String value = verifyThatString(fieldNode, fieldName);
         if (StringUtils.isEmpty(value)) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         } else {
             return value;
         }
@@ -222,7 +221,7 @@ public class CommonVerifiers {
 
     public String verifyThatBinary(JsonNode node) {
         if (!node.isBinary()) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         }
         return node.asText();
     }
@@ -232,7 +231,7 @@ public class CommonVerifiers {
 
         String data = verifyThatBinary(node);
         if (data.isEmpty()) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         }
         return data;
     }
@@ -273,8 +272,7 @@ public class CommonVerifiers {
             throw errorResponseFactory.invalidRequest("Invalid clientDataJson Null or Empty");
         }
         try {
-            JsonNode clientJsonNode = dataMapperService.readTree(clientDataJson);
-            return clientJsonNode;
+            return dataMapperService.readTree(clientDataJson);
         } catch (IOException e) {
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
@@ -317,12 +315,12 @@ public class CommonVerifiers {
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
 
-        long count = Arrays.asList(clientJsonNode.hasNonNull("challenge"), clientJsonNode.hasNonNull("origin"), clientJsonNode.hasNonNull("type")
+        long count = Arrays.asList(clientJsonNode.hasNonNull(CHALLENGE), clientJsonNode.hasNonNull("origin"), clientJsonNode.hasNonNull("type")
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid client json parameters");
         }
-        verifyBase64UrlString(clientJsonNode, "challenge");
+        verifyBase64UrlString(clientJsonNode, CHALLENGE);
 
         if (clientJsonNode.hasNonNull("tokenBinding")) {
             JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
@@ -415,10 +413,8 @@ public class CommonVerifiers {
 
     public String getChallenge(JsonNode clientJsonNode) {
         try {
-            String clientDataChallenge = base64Service
-                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get("challenge").asText()));
-
-            return clientDataChallenge;
+            return base64Service
+                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get(CHALLENGE).asText()));
         } catch (Exception ex) {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, "Can't get challenge from clientData");
         }

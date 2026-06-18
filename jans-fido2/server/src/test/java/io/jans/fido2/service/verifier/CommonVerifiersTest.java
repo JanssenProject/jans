@@ -25,6 +25,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,6 +70,11 @@ class CommonVerifiersTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @BeforeEach
+    void enableDebugLogging() {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+    }
 
     @Test
     void verifyRpIdHash_retrieveRpIdHashAndCalculatedRpIdHashNotEqual_fido2RuntimeException() {
@@ -615,7 +621,7 @@ class CommonVerifiersTest {
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
         clientJsonNode.put("type", "TEST-type");
-        clientJsonNode.put("tokenBinding", mapper.createObjectNode());
+        clientJsonNode.set("tokenBinding", mapper.createObjectNode());
 
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
@@ -638,7 +644,7 @@ class CommonVerifiersTest {
         clientJsonNode.put("type", "TEST-type");
         ObjectNode tokenBinding = mapper.createObjectNode();
         tokenBinding.put("status", "supported");
-        clientJsonNode.put("tokenBinding", tokenBinding);
+        clientJsonNode.set("tokenBinding", tokenBinding);
 
         byte[] jsonBytes = clientJsonNode.toString().getBytes(StandardCharsets.UTF_8);
 

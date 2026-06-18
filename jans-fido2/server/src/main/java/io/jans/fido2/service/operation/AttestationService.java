@@ -7,8 +7,6 @@
 package io.jans.fido2.service.operation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Strings;
 import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.entry.Transports;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
@@ -44,13 +42,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Context;
 import org.slf4j.Logger;
 
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -378,9 +374,9 @@ public class AttestationService {
 		// Create result object
         AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse(
 				credentialDescriptor, "ok", "", registrationData.getUsername(),
-				registrationData.getAuthentictatorAttachment().toString() , String.valueOf(registrationData.isUserPresentFlag()), true,
+				registrationData.getAuthentictatorAttachment(), String.valueOf(registrationData.isUserPresentFlag()), true,
 				registrationData.getBackupStateFlag(), registrationData.getBackupEligibilityFlag(),
-				registrationData.getType().toString(), true, "level", "aaguid", "authenticatorName", registrationData.getOrigin(),
+				registrationData.getType(), true, "level", "aaguid", "authenticatorName", registrationData.getOrigin(),
 				"hint", registrationData.getChallenge(), registrationData.getRpId(), null, Long.valueOf(9000), null);
         
 
@@ -516,13 +512,22 @@ public class AttestationService {
 	}
 
 	/**
+	 * Resolves an algorithm name to its numeric COSE value, or {@code null} when the name is not a
+	 * member of the targeted COSE algorithm family.
+	 */
+	@FunctionalInterface
+	private interface AlgorithmNumericResolver {
+		Integer resolve(String algorithmName);
+	}
+
+	/**
 	 * Add the credential parameter for the first enabled algorithm name that resolves to a known
 	 * numeric COSE value via the given resolver.
 	 */
 	private void addFirstSupportedAlgorithm(Set<PublicKeyCredentialParameters> credentialParametersSets,
-			List<String> enabledFidoAlgorithms, Function<String, Integer> numericValueResolver) {
+			List<String> enabledFidoAlgorithms, AlgorithmNumericResolver numericValueResolver) {
 		for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
-			Integer numericValue = numericValueResolver.apply(enabledFidoAlgorithm);
+			Integer numericValue = numericValueResolver.resolve(enabledFidoAlgorithm);
 			if (numericValue != null) {
 				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
 				break;
@@ -587,14 +592,12 @@ public class AttestationService {
 	private Set<PublicKeyCredentialDescriptor> prepareExcludeCredentials(String origin, String username) {
 		List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService
 				.findByRpRegisteredUserDevices(username, origin);
-		Set<PublicKeyCredentialDescriptor> excludedKeys = existingRegistrations.parallelStream()
+		return existingRegistrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
 				.map(f -> new PublicKeyCredentialDescriptor("public-key",
 						new String[] { Transports.USB.getValue(),Transports.BLE.getValue() ,Transports.NFC.getValue() ,Transports.INTERNAL.getValue(), Transports.HYBRID.getValue() },
 						f.getRegistrationData().getPublicKeyId()))
 				.collect(Collectors.toSet());
-
-		return excludedKeys;
 	}
 	
 	/**
