@@ -78,7 +78,6 @@ import tss.tpm.TPM_GENERATED;
 @ApplicationScoped
 public class TPMProcessor implements AttestationFormatProcessor {
 	 private static final byte UNCOMPRESSED_POINT_INDICATOR = 0x04;
-	 private static final String TPM_ATTESTATION_PROBLEM = "Problem with TPM attestation";
     
 	@Inject
 	private Logger log;
@@ -121,14 +120,14 @@ public class TPMProcessor implements AttestationFormatProcessor {
 	@Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
 			CredAndCounterData credIdAndCounters) {
-		log.debug("attStmt : {}", attStmt);
+		log.debug("attStmt : "+attStmt.toString());
 		String pubArea = attStmt.get("pubArea").asText();
 		String certInfo = attStmt.get("certInfo").asText();
 		
 		JsonNode cborPublicKey;
 		try {
 			cborPublicKey = dataMapperService.cborReadTree(authData.getCosePublicKey());
-			log.debug("cborPublicKey {}", cborPublicKey);
+			log.debug("cborPublicKey"+ cborPublicKey);
 		} catch (IOException e) {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
 					"Problem with TPM attestation: " + e.getMessage());
@@ -140,15 +139,15 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		byte[] hashedBuffer = getHashedBuffer(alg, authData.getAttestationBuffer(), clientDataHash);
 
 		// if attestation mode is enabled in the global config
-		if (!appConfiguration.getFido2Configuration().getAttestationMode()
-				.equalsIgnoreCase(AttestationMode.DISABLED.getValue())) {
+		if (appConfiguration.getFido2Configuration().getAttestationMode()
+				.equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false) {
 			Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
 			
 			if (i.hasNext()) {
-				ArrayList<String> aikCertificatePath = new ArrayList<>();
+				ArrayList<String> aikCertificatePath = new ArrayList<String>();
 				aikCertificatePath.add(i.next().asText());
-				ArrayList<String> certificatePath = new ArrayList<>();
+				ArrayList<String> certificatePath = new ArrayList<String>();
 
 				while (i.hasNext()) {
 					certificatePath.add(i.next().asText());
@@ -220,15 +219,15 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		// algorithm used for attestation
 		CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
 
-		log.debug("keyToUse {}", keyToUse);
-		log.debug("algorithmToUse : {}", algorithmToUse);
-		log.debug("keyType {}", keyType);
+		log.debug("keyToUse" + keyToUse);
+		log.debug("algorithmToUse : " + algorithmToUse);
+		log.debug("keyType" + keyType);
 
 		byte[] tpm = tpmtPublic.unique.toTpm();
-		log.debug("tpmtPublic.nameAlg : {}", tpmtPublic.nameAlg);
-		log.debug("tpmtPublic.parameters.toString() : {}", tpmtPublic.parameters);
+		log.debug("tpmtPublic.nameAlg : " + tpmtPublic.nameAlg.toString());
+		log.debug("tpmtPublic.parameters.toString() : " + tpmtPublic.parameters.toString());
 
-		log.debug("tpmtPublic.unique.toTpm()- keyBufferFromTPM: {}", tpm);
+		log.debug("tpmtPublic.unique.toTpm()- keyBufferFromTPM: " + tpm);
 
 		switch (keyType) {
 		case RSA: {
@@ -243,9 +242,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				byte[] rsaKey_n = base64Service.decode(uncompressedECPointNode.get("-1").asText());
 				byte[] rsaKey_e = base64Service.decode(uncompressedECPointNode.get("-2").asText());
 				if (!Arrays.equals(keyBufferFromTPM, rsaKey_n)) {
-					log.error("verifyThatKeysAreSame RSA{}:{}", keyBufferFromTPM, rsaKey_n);
+					log.error("verifyThatKeysAreSame RSA" + keyBufferFromTPM + ":" + rsaKey_n);
 					throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-							TPM_ATTESTATION_PROBLEM + ".");
+							"Problem with TPM attestation.");
 				}
 			 }
 			 else {
@@ -263,11 +262,11 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
 				byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)
 						.put(y).array();
-				log.debug("pubArea.unique : {}:{}", tpm, buffer);
+				log.debug("pubArea.unique : " + tpm + ":" + buffer);
 				if (!Arrays.equals(tpm, buffer)) {
-					log.error("verifyThatKeysAreSame EC{}:{}", tpm, buffer);
+					log.error("verifyThatKeysAreSame EC" + tpm + ":" + buffer);
 					throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-							TPM_ATTESTATION_PROBLEM + ".");
+							"Problem with TPM attestation.");
 				}
 			}
 			 else {
@@ -300,17 +299,17 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		byte[] keyBufferFromTPM = Arrays.copyOfRange(tmp, 2, tmp.length);
 
 		if (!Arrays.equals(keyBufferFromTPM, keyBufferFromAuthData)) {
-			log.error("verifyThatKeysAreSame{}:{}", tpmtPublic.unique.toTpm(), keyBufferFromTPM);
+			log.error("verifyThatKeysAreSame"+tpmtPublic.unique.toTpm()+":"+keyBufferFromTPM);
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM + ".");
+					"Problem with TPM attestation.");
 		}
 	}
 
 	private void verifyTPMSExtraData(byte[] hashedBuffer, byte[] extraData) {
 		if (!Arrays.equals(hashedBuffer, extraData)) {
-			log.error("verifyTPMSExtraData{}:{}", hashedBuffer, extraData);
+			log.error("verifyTPMSExtraData"+hashedBuffer+":"+extraData);
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM + ".");
+					"Problem with TPM attestation.");
 		}
 	}
 
@@ -324,9 +323,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		}
 			break;
 		default:
-			log.error("verifyTPMSCertificateName:{}", tpmtPublic.nameAlg.asEnum());
+			log.error("verifyTPMSCertificateName"+":"+tpmtPublic.nameAlg.asEnum());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM);
+					"Problem with TPM attestation");
 		}
 		// this is not really certificate info but nameAlgID + hex.encode(pubAreaDigest)
 		// reverse engineered from FIDO Certification tool
@@ -334,17 +333,17 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		TPMS_CERTIFY_INFO certifyInfo = (TPMS_CERTIFY_INFO) tpmsAttest.attested;
 		byte[] certificateName = Arrays.copyOfRange(certifyInfo.name, 2, certifyInfo.name.length);
 		if (!Arrays.equals(certificateName, pubAreaDigest)) {
-			log.error("{}:{}", certificateName, pubAreaDigest);
+			log.error(certificateName+":"+pubAreaDigest);
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM + ".");
+					"Problem with TPM attestation.");
 		}
 	}
 
 	private void verifyMagicInTpms(TPMS_ATTEST tpmsAttest) {
 		if (tpmsAttest.magic.toInt() != TPM_GENERATED.VALUE.toInt()) {
-			log.error("{}:{}", tpmsAttest.magic.toInt(), TPM_GENERATED.VALUE.toInt());
+			log.error(tpmsAttest.magic.toInt() +":"+ TPM_GENERATED.VALUE.toInt());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM);
+					"Problem with TPM attestation");
 		}
 	}
 
@@ -385,7 +384,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				| SignatureException e) {
 			log.error("Problem with AIK certificate {}", e.getMessage());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM);
+					"Problem with TPM attestation");
 		}
 	}
 
