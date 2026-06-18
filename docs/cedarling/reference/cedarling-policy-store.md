@@ -289,6 +289,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
+| `policy_store_refresh.upgrade_to_head_transitions` | Cumulative count of probes that upgraded `PlainGet → HeadThenGet` |
 | `policy_store_refresh.upgrade_to_conditional_transitions` | Cumulative count of probes that upgraded back to `Conditional` |
 | `policy_store_refresh.outcome_success` | Cumulative count of `Success` outcomes |
 | `policy_store_refresh.outcome_not_modified` | Cumulative count of `NotModified` outcomes |
