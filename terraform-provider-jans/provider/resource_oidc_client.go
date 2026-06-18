@@ -12,7 +12,7 @@ import (
 
 func resourceOidcClient() *schema.Resource {
 
-	return &schema.Resource{
+	r := &schema.Resource{
 		CreateContext: resourceOidcClientCreate,
 		ReadContext:   resourceOidcClientRead,
 		UpdateContext: resourceOidcClientUpdate,
@@ -881,6 +881,14 @@ func resourceOidcClient() *schema.Resource {
 			},
 		},
 	}
+
+	// last_access_time/last_logon_time moved from epoch int to RFC3339 string;
+	// migrate prior (1.x/2.x) state so existing users don't hit a type mismatch.
+	r.SchemaVersion = 1
+	r.StateUpgraders = []schema.StateUpgrader{
+		{Version: 0, Type: oidcClientV0Type(r.Schema), Upgrade: upgradeOidcClientTimestampsV0},
+	}
+	return r
 }
 
 func resourceOidcClientCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
