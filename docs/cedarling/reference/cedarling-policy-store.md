@@ -875,7 +875,7 @@ type TokensContext = {
 
 #### Key Requirements
 
-1. **Required Attributes**: Add `token_type`, `jti`, `issuer`, `exp`, `validated_at` to all token entities
+1. **Required Attributes**: Add `token_type`, `jti`, `iss`, `exp`, `validated_at` to all token entities
 2. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
 3. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
 4. **Context Update**: Add `tokens?: TokensContext` field to your Context type
