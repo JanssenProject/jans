@@ -262,7 +262,7 @@ fn test_load_directory_success() {
 
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Verify loaded data
@@ -303,7 +303,7 @@ fn test_load_directory_with_optional_components() {
 
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load with optional components to succeed");
 
     assert_eq!(loaded_directory.templates.len(), 1);
@@ -322,7 +322,7 @@ fn test_load_directory_invalid_policy_extension() {
     fs::write(dir.join("policies/bad.txt"), "invalid").unwrap();
 
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load_directory(dir.to_str().unwrap());
+    let result = loader.load_directory(dir.to_str().unwrap(), true);
 
     let err = result.expect_err("Expected error for invalid policy file extension");
     assert!(
@@ -345,7 +345,7 @@ fn test_load_directory_invalid_json() {
     fs::create_dir(dir.join("policies")).unwrap();
 
     let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load_directory(dir.to_str().unwrap());
+    let result = loader.load_directory(dir.to_str().unwrap(), true);
 
     let err = result.expect_err("Expected error for invalid JSON in metadata.json");
     assert!(
@@ -501,7 +501,7 @@ fn test_load_and_parse_policies_end_to_end() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse the policies
@@ -574,7 +574,7 @@ fn test_load_and_parse_schema_end_to_end() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Schema should be loaded
@@ -645,7 +645,7 @@ fn test_load_and_parse_entities_end_to_end() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Entities should be loaded
@@ -718,7 +718,7 @@ fn test_entity_with_complex_attributes() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse entities
@@ -797,7 +797,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Issuers should be loaded
@@ -876,7 +876,7 @@ fn test_parse_issuer_with_token_metadata() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse issuers
@@ -980,7 +980,7 @@ action "read" appliesTo {
     // Load the policy store using the in-memory filesystem
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let loaded_directory = loader
-        .load_directory("/")
+        .load_directory("/", true)
         .expect("Expected in-memory directory load to succeed");
 
     // Parse issuers
@@ -1051,7 +1051,7 @@ fn test_issuer_missing_required_field() {
     // Load the policy store using in-memory filesystem
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let loaded_directory = loader
-        .load_directory("/")
+        .load_directory("/", true)
         .expect("Expected in-memory directory load to succeed");
 
     // Parse issuers - should fail
@@ -1112,7 +1112,7 @@ fn test_complete_policy_store_with_issuers() {
     // Load the policy store
     let loader = DefaultPolicyStoreLoader::new_physical();
     let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap())
+        .load_directory(dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Verify all components are loaded
@@ -1234,7 +1234,7 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 3: Load policy store from archive root
     let loaded_directory = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should load policy store from archive");
 
     // Step 4: Verify all components loaded correctly
@@ -1275,7 +1275,7 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     // Create loader and load policy store
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should load policy store from archive bytes");
 
     // Verify loaded correctly
@@ -1346,7 +1346,7 @@ fn test_archive_vfs_with_multiple_policies() {
     let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader.load_directory(".").expect("Should load policies");
+    let loaded_directory = loader.load_directory(".", true).expect("Should load policies");
 
     // Verify all policies loaded recursively from subdirectories
     assert_eq!(loaded_directory.policies.len(), 3);
@@ -1403,7 +1403,7 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
         ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should load directory from archive");
 
     // Verify results are identical regardless of VFS implementation
@@ -1462,7 +1462,7 @@ fn test_load_schema_from_schemas_directory() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Should succeed");
+    let result = loader.load_directory(".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
@@ -1521,7 +1521,7 @@ fn test_load_schema_from_schemas_directory_deterministic_order() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Should succeed");
+    let result = loader.load_directory(".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
@@ -1573,7 +1573,7 @@ fn test_load_schema_single_file_takes_precedence_over_schemas_dir() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Should succeed");
+    let result = loader.load_directory(".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
@@ -1620,7 +1620,7 @@ fn test_load_schema_from_schemas_dir_empty_directory_returns_none() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".", true);
 
     let err = result.expect_err("Expected EmptySchemaDirectory error for empty schemas/ dir");
     assert!(
@@ -1666,7 +1666,7 @@ fn test_load_schema_from_schemas_dir_invalid_extension() {
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should skip non-.cedarschema files");
 
     let parsed_schema = result.schema.expect("Schema should be present");
@@ -1718,7 +1718,7 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Should succeed");
+    let result = loader.load_directory(".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
@@ -1792,7 +1792,7 @@ fn test_load_schema_from_schemas_dir_in_archive() {
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Archive load should succeed");
 
     let parsed_schema = result
@@ -1841,7 +1841,7 @@ fn test_load_schema_from_schemas_dir_not_a_directory() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".", true);
 
     let err = result.expect_err("Expected NotADirectory error");
     assert!(
@@ -1880,7 +1880,7 @@ fn test_load_schema_from_schemas_dir_io_error() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".", true);
 
     let err = result.expect_err("Expected error when IO fails on schemas/ dir");
     assert!(
@@ -1916,7 +1916,7 @@ fn test_load_schema_from_schemas_dir_empty_file() {
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Empty file is valid Cedar schema fragment");
 
     let parsed_schema = result
@@ -1963,7 +1963,7 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".").expect("Should skip .txt files");
+    let result = loader.load_directory(".", true).expect("Should skip .txt files");
 
     let parsed_schema = result.schema.expect("Schema should be present");
     let entity_types: Vec<_> = parsed_schema
@@ -2011,7 +2011,7 @@ fn test_load_directory_schema_read_error_propagated() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".");
+    let result = loader.load_directory(".", true);
 
     let err = result
         .expect_err("Expected FileReadError when schema file read returns non-NotFound IO error");
@@ -2059,7 +2059,7 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let loaded = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should load directory with shared namespace schemas");
 
     use super::super::manager::PolicyStoreManager;
@@ -2139,7 +2139,7 @@ fn test_archive_shared_namespace_full_pipeline() {
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded = loader
-        .load_directory(".")
+        .load_directory(".", true)
         .expect("Should load archive with shared namespace schemas");
 
     use super::super::manager::PolicyStoreManager;

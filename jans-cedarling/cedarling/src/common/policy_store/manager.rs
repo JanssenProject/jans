@@ -117,6 +117,7 @@ impl PolicyStoreManager {
             description: loaded.metadata.policy_store.description,
             cedar_version: Some(cedar_version),
             schema: cedar_schema,
+            schema_source_exists: loaded.schema_source_exists,
             policies: policies_container,
             trusted_issuers,
             default_entities,
@@ -626,6 +627,7 @@ mod tests {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: None,
+            schema_source_exists: false,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -650,6 +652,7 @@ mod tests {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: None,
+            schema_source_exists: false,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -683,6 +686,7 @@ mod tests {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),
+            schema_source_exists: true,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -716,6 +720,7 @@ mod tests {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),
+            schema_source_exists: true,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -752,6 +757,7 @@ mod tests {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),
+            schema_source_exists: true,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
