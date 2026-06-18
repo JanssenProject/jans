@@ -19,11 +19,13 @@
 package io.jans.fido2.service.processor.attestation;
 
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -32,6 +34,12 @@ import jakarta.inject.Inject;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -115,7 +123,8 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
                     throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
                 }
 
-                
+                // WebAuthn packed full-attestation certificate requirements (v3, CA:false, subject fields).
+                verifyPackedAttestationCertRequirements(attestationCertificates.get(0));
 
             } else if (attStmt.hasNonNull("ecdaaKeyId")) {
                 String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
@@ -136,6 +145,64 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         //TODO: this should be set from authenticator data and not mds
         // credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
+
+	/**
+	 * Enforces the WebAuthn packed full-attestation certificate requirements: X.509 version 3,
+	 * BasicConstraints CA component false, Subject-OU exactly "Authenticator Attestation", non-empty
+	 * Subject-O and Subject-CN, and a valid ISO 3166 Subject-C. Package-private for unit testing.
+	 */
+	void verifyPackedAttestationCertRequirements(X509Certificate attestationCertificate) {
+		if (attestationCertificate.getVersion() != 3) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate must be version 3");
+		}
+		// getBasicConstraints() returns -1 when the certificate is not a CA (CA component false/absent).
+		if (attestationCertificate.getBasicConstraints() != -1) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate BasicConstraints CA component must be false");
+		}
+		X500Name subject;
+		try {
+			subject = new JcaX509CertificateHolder(attestationCertificate).getSubject();
+		} catch (CertificateEncodingException e) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Unable to read packed attestation certificate subject");
+		}
+		String organisation = subjectField(subject, BCStyle.O);
+		String commonName = subjectField(subject, BCStyle.CN);
+		String organisationUnit = subjectField(subject, BCStyle.OU);
+		String country = subjectField(subject, BCStyle.C);
+
+		if (organisation == null || organisation.isEmpty()) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate Subject-O must be present");
+		}
+		if (commonName == null || commonName.isEmpty()) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate Subject-CN must be present");
+		}
+		if (!"Authenticator Attestation".equals(organisationUnit)) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate Subject-OU must be 'Authenticator Attestation'");
+		}
+		if (!isValidCountryCode(country)) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+					"Packed attestation certificate Subject-C must be a valid ISO 3166 country code");
+		}
+	}
+
+	private String subjectField(X500Name subject, ASN1ObjectIdentifier oid) {
+		RDN[] rdns = subject.getRDNs(oid);
+		if (rdns == null || rdns.length == 0) {
+			return null;
+		}
+		return IETFUtils.valueToString(rdns[0].getFirst().getValue());
+	}
+
+	private boolean isValidCountryCode(String country) {
+		return (country != null) && (country.length() == 2)
+				&& Arrays.asList(Locale.getISOCountries()).contains(country.toUpperCase());
+	}
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {
 		Iterator<JsonNode> i = attStmt.get("x5c").elements();
