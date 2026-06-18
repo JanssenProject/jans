@@ -80,6 +80,11 @@ public class RequiredFieldsRule {
             return TrustResult.failure(CannotBeNullOrBlank.forField("releasedAttributes"));
         }
 
+        if (context.getActivationDiagnostics() == null) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("activationDiagnostics"));
+        }
+
         return TrustResult.success(null);
     }
 }

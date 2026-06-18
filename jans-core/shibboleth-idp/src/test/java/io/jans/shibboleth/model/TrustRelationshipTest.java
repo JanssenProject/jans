@@ -817,6 +817,31 @@ public class TrustRelationshipTest {
             assertThat(updated).isInReadyStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
+
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN finalizeActivation() is called with null ActivationDiagnostics " +
+            "THEN should fail with the appropriate error"
+        )
+        public void shouldFailWhenFinalizeActivationIsCalledWithNullActivationContext(TrustRelationship tr) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(null);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause).isNotNull();
+            assertThat(cause.getFieldName()).isEqualTo("activationDiagnostics");
+        }
     }
 
 }

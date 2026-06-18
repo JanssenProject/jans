@@ -318,6 +318,13 @@ public class TrustRelationship {
             .withStatus(TrustStatus.READY)
             .build();
     }
+
+    public TrustResult<TrustRelationship> finalizeActivation(ActivationDiagnostics activationDiagnostics) {
+
+        return from(this)
+            .withActivationDiagnostics(activationDiagnostics)
+            .build();
+    }
  
     @Override
     public boolean equals(Object o) {
