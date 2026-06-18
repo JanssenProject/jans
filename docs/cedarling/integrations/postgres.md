@@ -155,20 +155,20 @@ tar -xzf "${ARCHIVE}"
 The script uses `sudo install` automatically when `pg_config` directories are
 not writable by the current user.
 
+`install.sh binary` works by querying your runtime `pg_config` for
+the destination.
+
 ### Manual install (without the script)
 
-If you prefer not to use the helper, the tarball unpacks to:
+If you'd rather install by hand, extract the tarball and copy the matched
+set into the directories reported by `pg_config`:
 
-```text
-cedarling_pg-{version}-pg{NN}-linux-x86_64/
-  usr/lib/postgresql/{NN}/lib/cedarling_pg.so
-  usr/share/postgresql/{NN}/extension/cedarling_pg.control
-  usr/share/postgresql/{NN}/extension/cedarling_pg--*.sql
-```
+- `cedarling_pg.so` → `$(pg_config --pkglibdir)`
+- `cedarling_pg.control` → `$(pg_config --sharedir)/extension`
+- `cedarling_pg--*.sql` → `$(pg_config --sharedir)/extension`
 
-Copy those files into `pg_config --pkglibdir` and
-`pg_config --sharedir`/extension yourself. Do not mix files from different
-`pgNN` directories.
+Do not mix files from different `pgNN` tarballs; the `.so` is linked
+against a specific PostgreSQL major.
 
 ## Building from source
 

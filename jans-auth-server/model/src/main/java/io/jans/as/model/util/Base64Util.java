@@ -67,6 +67,11 @@ public class Base64Util {
         return Base64Util.base64urlencode(bigIntegerToUnsignedByteArray(bigInteger));
     }
 
+    // Function used for EC keys
+    public static String base64urlencodeUnsignedBigInt(final BigInteger bigInteger, final int targetLength) {
+        return Base64Util.base64urlencode(bigIntegerToUnsignedByteArray(bigInteger, targetLength));
+    }
+
     public static byte[] unsignedToBytes(int[] plaintextUnsignedBytes) {
         byte[] bytes = new byte[plaintextUnsignedBytes.length];
 
@@ -94,4 +99,18 @@ public class Base64Util {
         }
         return array; 
     }
+
+    // Function used for EC keys
+    public static byte[] bigIntegerToUnsignedByteArray(final BigInteger bigInteger, final int targetLength) {
+        byte[] array = bigInteger.toByteArray();
+        int srcOffset = (array[0] == 0) ? 1 : 0;
+        int length = array.length - srcOffset;
+        if (length > targetLength) {
+            throw new IllegalArgumentException("BigInteger length (" + length + ") exceeds target length (" + targetLength + ")");
+        }
+        byte[] result = new byte[targetLength];
+        System.arraycopy(array, srcOffset, result, targetLength - length, length);
+        return result;
+    }
+    
 }

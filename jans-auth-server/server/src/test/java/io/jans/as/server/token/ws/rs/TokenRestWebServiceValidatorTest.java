@@ -402,4 +402,29 @@ public class TokenRestWebServiceValidatorTest {
         }
         fail("Error for valid user is raised.");
     }
+
+    @Test
+    public void validateIdJagSubjectTokenType_whenIdToken_shouldPass() {
+        validator.validateIdJagSubjectTokenType("urn:ietf:params:oauth:token-type:id_token", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateIdJagSubjectTokenType_whenSaml2_shouldPass() {
+        validator.validateIdJagSubjectTokenType("urn:ietf:params:oauth:token-type:saml2", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateIdJagSubjectTokenType_whenRefreshToken_shouldPass() {
+        validator.validateIdJagSubjectTokenType("urn:ietf:params:oauth:token-type:refresh_token", AUDIT_LOG);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateIdJagSubjectTokenType_whenUnknownType_shouldThrow() {
+        validator.validateIdJagSubjectTokenType("urn:unknown:type", AUDIT_LOG);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateIdJagSubjectTokenType_whenDeviceSecret_shouldThrow() {
+        validator.validateIdJagSubjectTokenType("urn:x-oath:params:oauth:token-type:device-secret", AUDIT_LOG);
+    }
 }

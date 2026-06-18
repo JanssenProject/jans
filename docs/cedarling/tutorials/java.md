@@ -26,7 +26,7 @@ To use Cedarling Java bindings in Java Maven Project add following
     <repository>
         <id>jans</id>
         <name>Janssen project repository</name>
-        <url>https://maven.jans.io/maven</url>
+        <url>https://maven.pkg.github.com/JanssenProject/jans</url>
     </repository>
 </repositories>
 ```

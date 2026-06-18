@@ -130,7 +130,7 @@ namespace Jans {
 
 !!! note
     Rather than building the cedarling-java-{version}.jar from source code, you can directly download
-    the latest version of the jar from the [Maven repository](https://maven.jans.io/maven/io/jans/cedarling-java/).
+    the latest version of the jar from the [Maven repository](https://github.com/JanssenProject/jans/releases).
 
 - The following java [Update Token](../uniffi/cedarling-sample-inputs.md/#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
    
