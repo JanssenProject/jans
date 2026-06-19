@@ -74,6 +74,12 @@ name: Test tf-authz JWT self-hosted OPA path
 
 on:
   push:
+    # Branch pushes only. A release tag push bumps the demo compose to
+    # cedarling-opa:<version> before that image is published; the workflow_run
+    # trigger below runs the tests once the image exists. Excluding tags here
+    # (a branch filter never matches a tag ref) stops the premature tag-push run.
+    branches:
+      - '**'
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
       - '.github/workflows/test-tf-authz-jwt-selfhosted.yml'
@@ -81,6 +87,11 @@ on:
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
       - '.github/workflows/test-tf-authz-jwt-selfhosted.yml'
+  # A tagged release builds cedarling-opa:<version> via "Build and Publish Releases
+  # to Hub"; run the demo tests only after that image is published, not on the tag push.
+  workflow_run:
+    workflows: ["Build and Publish Releases to Hub"]
+    types: [completed]
 
 permissions: {}
 
@@ -88,6 +99,12 @@ jobs:
   test-selfhosted-opa:
     name: Self-hosted OPA (docker-compose.prod.yml) — health + authorize
     runs-on: ubuntu-latest
+    # push/PR events always run. On workflow_run, only proceed for a SUCCESSFUL
+    # release-tag build (head_branch is the vX.Y.Z tag, never main/nightly).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
 
     permissions:
       id-token: write   # Required to request a GitHub OIDC token
@@ -96,6 +113,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          # On workflow_run (release) check out the tag tree that was just built --
+          # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Start OPA (self-hosted, production mode)
         working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
@@ -373,11 +394,21 @@ jobs:
   test-deny-path-assertions:
     name: Self-hosted OPA (demo mode) — Deny-path assertions (wrong repository, branch & issuer) — prod + non-prod
     runs-on: ubuntu-latest
+    # push/PR events always run. On workflow_run, only proceed for a SUCCESSFUL
+    # release-tag build (head_branch is the vX.Y.Z tag, never main/nightly).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
     # This job does not need id-token: write because it uses a synthetic JWT
     # crafted in-step; no real GitHub OIDC token is requested.
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          # On workflow_run (release) check out the tag tree that was just built --
+          # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Start OPA (demo mode — JWT signature validation disabled)
         # The base docker-compose.yml (without the prod overlay) starts OPA with
