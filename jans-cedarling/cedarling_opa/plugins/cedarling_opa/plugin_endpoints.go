@@ -5,11 +5,30 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
+	"strings"
 )
 
 func writeError(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]any{"error": message})
+}
+
+func validateInput(subject *Entity, action *Action, resource *Entity) error {
+	var missing []string
+	if subject == nil {
+		missing = append(missing, "subject")
+	}
+	if action == nil {
+		missing = append(missing, "action")
+	}
+	if resource == nil {
+		missing = append(missing, "resource")
+	}
+	if len(missing) > 0 {
+		missing_fields := strings.Join(missing, ", ")
+		return fmt.Errorf("Invalid input: missing %s", missing_fields)
+	}
+	return nil
 }
 
 func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +49,9 @@ func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	metadata := PDPMetadata{
-		PolicyDecisionPoint:      p.config.Host,
-		AccessEvaluationEndpoint: fmt.Sprintf("%s/access/v1/evaluation", p.config.Host),
+		PolicyDecisionPoint:       p.config.Host,
+		AccessEvaluationEndpoint:  fmt.Sprintf("%s/access/v1/evaluation", p.config.Host),
+		AccessEvaluationsEndpoint: fmt.Sprintf("%s/access/v1/evaluations", p.config.Host),
 	}
 	w.WriteHeader(200)
 	if err := json.NewEncoder(w).Encode(metadata); err != nil {
@@ -50,7 +70,9 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if r.Method != "POST" || err != nil || mediaType != "application/json" {
 		writeError(w, http.StatusBadRequest, "Invalid Request")
-		p.logger.Info(err.Error())
+		if err != nil {
+			p.logger.Info(err.Error())
+		}
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -60,13 +82,12 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 		p.logger.Info(err.Error())
 		return
 	}
-	w.WriteHeader(200)
-	response, err := p.buildEvaluationResponse(&request.Subject, request.Action.Name, &request.Resource, request.Context)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Something went wrong")
-		p.logger.Info(err.Error())
+	if err = validateInput(request.Subject, request.Action, request.Resource); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	w.WriteHeader(200)
+	response := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context, p.config.Evaluation_Logic)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		writeError(w, http.StatusInternalServerError, "Something went wrong")
 		p.logger.Info(err.Error())
@@ -106,12 +127,7 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 	if request.Evaluation == nil {
 		// handle same as single evaluation request
 		w.WriteHeader(200)
-		response, err := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context)
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, "Something went wrong")
-			p.logger.Info(err.Error())
-			return
-		}
+		response := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context, p.config.Evaluation_Logic)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			writeError(w, http.StatusInternalServerError, "Something went wrong")
 			p.logger.Info(err.Error())
@@ -141,12 +157,7 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 				}
 			}
 			context := eval.Context
-			response, err := p.buildEvaluationResponse(subject, action.Name, resource, context)
-			if err != nil {
-				writeError(w, http.StatusInternalServerError, "Something went wrong")
-				p.logger.Info(err.Error())
-				return
-			}
+			response := p.buildEvaluationResponse(subject, action.Name, resource, context, p.config.Evaluation_Logic)
 			responseList = append(responseList, *response)
 			if request.Options == nil {
 				request.Options = &Option{
