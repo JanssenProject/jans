@@ -38,43 +38,38 @@ To enable this, follow the steps below. This will to configure
 appropriate access token in maven settings.
 
 - Install [GitHub CLI](https://cli.github.com/)
-
 - Sign-in to GitHub from command-line
-  
-  ```
-  gh auth login
-  ```
+    ```bash
+    gh auth login
+    ```
 - Add `read:packages` scope to your access token using the command below
-
-  ```
-  gh auth refresh -s read:packages
-  ```
+    ```bash
+    gh auth refresh -s read:packages
+    ```
 - Extract the token
-
-  ```
-  gh auth token
-  ```
+    ```bash
+    gh auth token
+    ```
 - Add the configuration below to your maven settings file. Create the file if it does not exist.
-
-  ```
-  <settings>
-    <servers>
-      <server>
-        <id>github</id>
-        <username>YOUR_GITHUB_USERNAME</username>
-        <password>PASTE_YOUR_GH_AUTH_TOKEN_HERE</password>
-      </server>
-    </servers>
-  </settings>
-  ```
+    ```xml
+    <settings>
+      <servers>
+        <server>
+          <id>github</id>
+          <username>YOUR_GITHUB_USERNAME</username>
+          <password>PASTE_YOUR_GH_AUTH_TOKEN_HERE</password>
+        </server>
+      </servers>
+    </settings>
+    ```
 
 ### Build Java modules 
 
 Use the command below to build each module. 
 
-```
-mvn clean install -Dmaven.test.skip=true -f <path-to-module-pom-file> 
-``` 
+  ```
+  mvn clean install -Dmaven.test.skip=true -f <path-to-module-pom-file> 
+  ``` 
 
 !!! note
 
