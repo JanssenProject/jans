@@ -313,6 +313,9 @@ public class AttestationService {
 		registrationData.setAttestedCredentialDataFlag(attestationData.isAttestedCredentialDataFlag());
 		registrationData.setUserPresentFlag(attestationData.isUserPresentFlag());
 		registrationData.setUserVerifiedFlag(attestationData.isUserVerifiedFlag());
+		// Record whether the attestation's provenance was trusted. In "monitor" mode a tolerated
+		// trust failure leaves this false while the credential still registers cleanly.
+		registrationData.setAttestationTrusted(attestationData.isAttestationTrusted());
 
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
 		
