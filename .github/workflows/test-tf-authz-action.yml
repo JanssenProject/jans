@@ -68,6 +68,8 @@ jobs:
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 2
+          # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Check PERMISSIONS.md is in sync with Cedar policy IDs
         run: |

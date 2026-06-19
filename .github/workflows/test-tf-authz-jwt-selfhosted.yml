@@ -117,6 +117,8 @@ jobs:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Start OPA (self-hosted, production mode)
         working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
@@ -409,6 +411,8 @@ jobs:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Start OPA (demo mode — JWT signature validation disabled)
         # The base docker-compose.yml (without the prod overlay) starts OPA with
@@ -1015,6 +1019,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Start OPA (self-hosted, production mode)
         working-directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
