@@ -138,7 +138,7 @@ impl<'a> ServiceFactory<'a> {
 
         // Warn when strict schema validation is disabled
         if !self.bootstrap_config.authorization_config.strict_schema_validation {
-            let msg = if policy_store.schema.is_some() {
+            let msg = if policy_store.schema_source_exists {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — schema present but not enforced"
             } else {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — no schema loaded; policies run without attribute validation"
