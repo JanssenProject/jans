@@ -1,0 +1,299 @@
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/register HTTP/1.1
+Host: yuriyz-internal-jaguar.gluu.info
+Content-Type: application/json
+Accept: application/json
+
+{
+  "access_token_as_jwt" : "true",
+  "subject_type" : "public",
+  "application_type" : "web",
+  "scope" : "openid profile address email phone user_name revoke_any_token global_token_revocation",
+  "minimum_acr_priority_list" : [ ],
+  "redirect_uris" : [ "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2" ],
+  "client_name" : "jans test app",
+  "additional_audience" : [ ],
+  "response_types" : [ "code" ]
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 201
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1633
+Content-Type: application/json
+Date: Fri, 06 Jun 2025 15:50:38 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=25e3d5dd-a695-4f17-adc4-f776316b12d6; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "require_pkce": false,
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/register?client_id=2b76c8b2-5383-4a5a-85e3-8725fecb3330",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "adf00df7-5bb6-4d05-9c17-64f1f179611a",
+    "client_id": "2b76c8b2-5383-4a5a-85e3-8725fecb3330",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid revoke_any_token global_token_revocation",
+    "client_secret": "6f24d65e-7c69-48ac-bd52-bf4b95e5327b",
+    "client_id_issued_at": 1749225038,
+    "backchannel_logout_session_required": false,
+    "client_name": "jans test app",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": true,
+    "grant_types": ["authorization_code"],
+    "subject_type": "public",
+    "authorization_details_types": [],
+    "additional_token_endpoint_auth_methods": [],
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": [
+        "https://client.example.com/cb2",
+        "https://client.example.com/cb1",
+        "https://client.example.com/cb",
+        "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm"
+    ],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 0,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+
+authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=2b76c8b2-5383-4a5a-85e3-8725fecb3330&scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=3f6a6858-62e9-454c-9e82-0eceb79c6bd7&nonce=f2d86a22-c98d-44fc-887e-aff475d399d7&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&logout_status_jwt=true
+
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/register HTTP/1.1
+Host: yuriyz-internal-jaguar.gluu.info
+Content-Type: application/json
+Accept: application/json
+
+{
+  "access_token_as_jwt" : "true",
+  "subject_type" : "public",
+  "application_type" : "web",
+  "scope" : "openid profile address email phone user_name revoke_any_token global_token_revocation",
+  "minimum_acr_priority_list" : [ ],
+  "redirect_uris" : [ "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2" ],
+  "client_name" : "jans test app",
+  "additional_audience" : [ ],
+  "response_types" : [ "code" ]
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 201
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1633
+Content-Type: application/json
+Date: Fri, 06 Jun 2025 15:50:38 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=8f820826-997d-4621-a0a5-f51d11a3e99b; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "require_pkce": false,
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/register?client_id=e170733f-4f3f-43eb-8ecb-f07392d5013c",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "58265f1e-7c81-461f-82bf-9c2984be70b7",
+    "client_id": "e170733f-4f3f-43eb-8ecb-f07392d5013c",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid revoke_any_token global_token_revocation",
+    "client_secret": "4a306545-a483-4d1b-a208-500a93d726dc",
+    "client_id_issued_at": 1749225038,
+    "backchannel_logout_session_required": false,
+    "client_name": "jans test app",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": true,
+    "grant_types": ["authorization_code"],
+    "subject_type": "public",
+    "authorization_details_types": [],
+    "additional_token_endpoint_auth_methods": [],
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": [
+        "https://client.example.com/cb2",
+        "https://client.example.com/cb1",
+        "https://client.example.com/cb",
+        "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm"
+    ],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 0,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+
+authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=e170733f-4f3f-43eb-8ecb-f07392d5013c&scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=7b2090ce-7e29-40a7-85e4-c962d209ff5d&nonce=bc8feb41-947f-4141-a8a5-f83c4b331bac&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&logout_status_jwt=true
+authenticateResourceOwnerAndGrantAccess: sessionState:f71764d3f7f2280ecbfe170a5c0dd51b3e20769c7deadaee1bda8eb8d2df0f8f.3281229a-0118-4037-895b-43aed75ad2f8
+authenticateResourceOwnerAndGrantAccess: sessionId:59c94d9a-d89b-4d05-b44a-9b5bba5ed368
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=435636e1-c8cf-4b27-8ee3-d6121286f3dc&scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=172645ff-4887-4e97-9152-197efb1591d0&nonce=85b2161e-7502-4619-8eaf-1caa4cf7bec0&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&logout_status_jwt=true
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 302 Found
+Location: https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm?code=03cb499b-a6fb-4ac1-b406-051baf7278cc&scope=openid+revoke_any_token+global_token_revocation&logout_status_jwt=eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0MzU2MzZlMS1jOGNmLTRiMjctOGVlMy1kNjEyMTI4NmYzZGMiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODEsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImZmOWFkMzEyLWRmODgtNGJkOS04ODhlLWJhNTk1NDNlNmE4MCJ9.eIHpiFoc7tp4Yin52cje7u8vNsnojcpurKWel2pGOKcWkjZw2f3Ioyhpe0nacNiA8tJDV11B6i_S49q4X4TTFjoY-oR7bfbXMhKe64L1Km71qP240rfsppcxbpVccRjvwFpX3ZSrvq1yWaxY4E8UoiRS168JtXGBlvZ1Hr89GoUVEdsTmowITRbSCQK2s7ENsD53P9M0--mag3YFAA9LTvQqfWtD1fhqoqpC9Hm4rEnO6VgTbI0tCuKIB1ncnMU30gH_PrKY53Z_n3NEYF_BdwkejcHE6mGybAtlTEXGqVSt5FQFUKIvsJM8kW6mK_XGsIhFNu49T70oPEs5ZSD2Zg&state=172645ff-4887-4e97-9152-197efb1591d0&session_state=f71764d3f7f2280ecbfe170a5c0dd51b3e20769c7deadaee1bda8eb8d2df0f8f.3281229a-0118-4037-895b-43aed75ad2f8
+
+statusList - logout_status_jwt
+eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0MzU2MzZlMS1jOGNmLTRiMjctOGVlMy1kNjEyMTI4NmYzZGMiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODEsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImZmOWFkMzEyLWRmODgtNGJkOS04ODhlLWJhNTk1NDNlNmE4MCJ9.eIHpiFoc7tp4Yin52cje7u8vNsnojcpurKWel2pGOKcWkjZw2f3Ioyhpe0nacNiA8tJDV11B6i_S49q4X4TTFjoY-oR7bfbXMhKe64L1Km71qP240rfsppcxbpVccRjvwFpX3ZSrvq1yWaxY4E8UoiRS168JtXGBlvZ1Hr89GoUVEdsTmowITRbSCQK2s7ENsD53P9M0--mag3YFAA9LTvQqfWtD1fhqoqpC9Hm4rEnO6VgTbI0tCuKIB1ncnMU30gH_PrKY53Z_n3NEYF_BdwkejcHE6mGybAtlTEXGqVSt5FQFUKIvsJM8kW6mK_XGsIhFNu49T70oPEs5ZSD2Zg
+statusList - LOGOUT_STATUS_JWT idx: 81
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/register HTTP/1.1
+Host: yuriyz-internal-jaguar.gluu.info
+Content-Type: application/json
+Accept: application/json
+
+{
+  "access_token_as_jwt" : "true",
+  "subject_type" : "public",
+  "application_type" : "web",
+  "scope" : "openid profile address email phone user_name revoke_any_token global_token_revocation",
+  "minimum_acr_priority_list" : [ ],
+  "redirect_uris" : [ "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2" ],
+  "client_name" : "jans test app",
+  "additional_audience" : [ ],
+  "response_types" : [ "code" ]
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 201
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1633
+Content-Type: application/json
+Date: Fri, 06 Jun 2025 15:50:38 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=c61068e2-5aaa-464b-9476-ba513d7bff7d; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "require_pkce": false,
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/register?client_id=74b5bb72-1223-4a4a-b84b-3ca745d30595",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "91688665-959b-406b-b4b2-0726624c7f58",
+    "client_id": "74b5bb72-1223-4a4a-b84b-3ca745d30595",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid revoke_any_token global_token_revocation",
+    "client_secret": "e673b71a-efc4-466b-97ec-ab00916804a0",
+    "client_id_issued_at": 1749225038,
+    "backchannel_logout_session_required": false,
+    "client_name": "jans test app",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": true,
+    "grant_types": ["authorization_code"],
+    "subject_type": "public",
+    "authorization_details_types": [],
+    "additional_token_endpoint_auth_methods": [],
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": [
+        "https://client.example.com/cb2",
+        "https://client.example.com/cb1",
+        "https://client.example.com/cb",
+        "https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm"
+    ],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 0,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+
+authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=74b5bb72-1223-4a4a-b84b-3ca745d30595&scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=142d9b43-90a2-40d0-84be-a636f429d74c&nonce=17e25aeb-efc6-4969-aa9d-b7e9d320c36c&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&logout_status_jwt=true
+authenticateResourceOwnerAndGrantAccess: sessionState:8239b3229b16d582700223983831b2c6220a7699efc655b6b09bacb421f84e2f.d08317a9-f73b-4503-9f28-ede2f829ae3b
+authenticateResourceOwnerAndGrantAccess: sessionId:6181df6b-eef7-454b-ab07-beca87447db5
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+https://yuriyz-internal-jaguar.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=9a8967bc-d504-465c-b08a-106f5b7efddb&scope=openid+profile+address+email+phone+user_name+revoke_any_token+global_token_revocation&redirect_uri=https%3A%2F%2Fyuriyz-internal-jaguar.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=4b47b710-d709-45b5-94e4-4ebfa5356e47&nonce=83d8d4dd-dcd7-40db-a308-c7bfdf95c58e&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&logout_status_jwt=true
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 302 Found
+Location: https://yuriyz-internal-jaguar.gluu.info/jans-auth-rp/home.htm?code=e33c60d6-d261-4275-af95-aeaaea010bbc&scope=openid+revoke_any_token+global_token_revocation&logout_status_jwt=eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5YTg5NjdiYy1kNTA0LTQ2NWMtYjA4YS0xMDZmNWI3ZWZkZGIiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODIsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImUyNDk4YWE0LWViOTctNDU3OS1iMTE3LTE1MGM2ZmYxNzk4OSJ9.N1ts4Ms1Uh-qmydWdHGRhgjDS7sI6dZ5fXCIJhXxstHuTbN83x6pEStPfO8usluonETMzYSjlEpJsMYF7t5k_Ru3e0v8XTUE2llrGKBKKNp_Zf5n3Eyfz6jQ2Dt1kBPCketMgZnxWjDiVE1aC8xT4nyOISOXEclnJ2H0y-X5vAGmoHqcuk9gWyr5hYLCg_Oq6qQ3luHIvF6pei3DldxAKg3XMyrBi7Tb8ZMMhD6EdGzId_AHQ2QVD06hDQGQlKWaq90xR2EndBYKD_UKH0g1jLxryA8FZyWHTUm_n_uDJilRBFWb6b3zIx2Cy9c41DJY0cVWxTHYZW8mwOE_ioYxdQ&state=4b47b710-d709-45b5-94e4-4ebfa5356e47&session_state=8239b3229b16d582700223983831b2c6220a7699efc655b6b09bacb421f84e2f.d08317a9-f73b-4503-9f28-ede2f829ae3b
+
+statusList - logout_status_jwt
+eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5YTg5NjdiYy1kNTA0LTQ2NWMtYjA4YS0xMDZmNWI3ZWZkZGIiLCJuYmYiOjE3NDkyMjUwMzgsInN0YXR1c19saXN0Ijp7ImlkeCI6ODIsInVyaSI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9LCJpc3MiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvIiwiZXhwIjoxNzQ5MzExNDM4LCJpYXQiOjE3NDkyMjUwMzgsImp0aSI6ImUyNDk4YWE0LWViOTctNDU3OS1iMTE3LTE1MGM2ZmYxNzk4OSJ9.N1ts4Ms1Uh-qmydWdHGRhgjDS7sI6dZ5fXCIJhXxstHuTbN83x6pEStPfO8usluonETMzYSjlEpJsMYF7t5k_Ru3e0v8XTUE2llrGKBKKNp_Zf5n3Eyfz6jQ2Dt1kBPCketMgZnxWjDiVE1aC8xT4nyOISOXEclnJ2H0y-X5vAGmoHqcuk9gWyr5hYLCg_Oq6qQ3luHIvF6pei3DldxAKg3XMyrBi7Tb8ZMMhD6EdGzId_AHQ2QVD06hDQGQlKWaq90xR2EndBYKD_UKH0g1jLxryA8FZyWHTUm_n_uDJilRBFWb6b3zIx2Cy9c41DJY0cVWxTHYZW8mwOE_ioYxdQ
+statusList - LOGOUT_STATUS_JWT idx: 82
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/status_list HTTP/1.1
+Host: yuriyz-internal-jaguar.gluu.info
+Content-Type: application/statuslist+json
+
+null
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Connection: Keep-Alive
+Content-Length: 795
+Content-Type: application/statuslist+jwt
+Date: Fri, 06 Jun 2025 15:50:39 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=b613fcb2-60d8-468e-b713-c02681bb9454; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+eyJraWQiOiJjb25uZWN0XzA3ZjQ3ZmRkLTg0NTYtNDMzOC1iYTRmLWNhNmU0NDBmYjljOV9zaWdfcnMyNTYiLCJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJodHRwczovL3l1cml5ei1pbnRlcm5hbC1qYWd1YXIuZ2x1dS5pbmZvL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QiLCJuYmYiOjE3NDkyMjUwMzksInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOb0xaUVFBQUswQVZ3In0sImlzcyI6Imh0dHBzOi8veXVyaXl6LWludGVybmFsLWphZ3Vhci5nbHV1LmluZm8iLCJleHAiOjE3NDkyMjU2MzksImlhdCI6MTc0OTIyNTAzOSwidHRsIjo2MDB9.VZ1BJoO2od4obysLkCILZJE8beygcU0OTD0hchVlXAMReRFRvhbGsxEm10UFdq7TR5nbZQQzaZbH177mB2GTiqdjjnE5mYjGZeKippnvvlD-DBGblS6ZeclXuxiAp8U4H2TXv0eJDH64RTA02Koeb3IwFNnh8ido-ClzXSNU0Pxijt_mXwmeWQ3kpEyryIHWFQp6WHa_Kf9Cg92rdYYBHQ22bsEXv3EHnSK2BkpwEHgNpA27F8WM6nVMcsHYdIEHtHWRWRZRzfpUrHMMFFbb7bQtrN4LrFd2oi2XxvILWO6PohcCvchHWiJeNGTWPwBSe7dzHQ0l62HU1Xre9K_gqw
+
+bits: 2, lst: eNoLZQQAAK0AVw
+statusList - LOGOUT_STATUS_JWT idx: 81, status: VALID

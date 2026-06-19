@@ -1,0 +1,2387 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/v2.2.0/cedarling/integrations/terraform-authz/">
+      
+      
+        <link rel="prev" href="../terraform-authz-overview/">
+      
+      
+        <link rel="next" href="../terraform-authz-jwt/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Unsigned Flow - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gating-terraform-with-cedarling-opa" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Unsigned Flow
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cedarling
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedar Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/cedarling-authz/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-krakend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    KrakenD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-opa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OPA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opensearch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenSearch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../postgres/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PostgreSQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_5" id="__nav_3_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Authorization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Terraform Authorization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unsigned Flow
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unsigned Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-a-flow-unsigned-vs-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a Flow: Unsigned vs JWT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-rego-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Rego Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OPA Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-trusted-issuer-file-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No trusted issuer file needed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-authorization-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Authorization Wrapper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Authorization Wrapper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-opa-query-and-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example OPA Query and Response
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Demo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapting-to-your-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapting to Your Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adapting to Your Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with CI/CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-jwt-tokens-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using JWT tokens instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auditing-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auditing decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-authz-jwt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-a-flow-unsigned-vs-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a Flow: Unsigned vs JWT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-rego-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Rego Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opa-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OPA Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OPA Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-trusted-issuer-file-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No trusted issuer file needed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-authorization-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Authorization Wrapper
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Authorization Wrapper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-opa-query-and-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example OPA Query and Response
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Demo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapting-to-your-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapting to Your Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adapting to Your Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with CI/CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-jwt-tokens-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using JWT tokens instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auditing-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auditing decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../cedarling-krakend/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Integrations
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../terraform-authz-overview/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Terraform Authorization
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Infrastructure</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">OPA</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Terraform</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="gating-terraform-with-cedarling-opa">Gating Terraform with Cedarling-OPA<a class="headerlink" href="#gating-terraform-with-cedarling-opa" title="Permanent link">#</a></h1>
+<div class="admonition tip">
+<p class="admonition-title">Not sure which flow to use?</p>
+<p>See the <a href="../terraform-authz-overview/">Terraform authorization overview</a> for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.</p>
+</div>
+<p>This guide walks through a concrete use case for the <a href="../cedarling-opa/">Cedarling-OPA plugin</a>: enforcing role-based access control on Terraform operations before any infrastructure change is made.</p>
+<h2 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">#</a></h2>
+<p>Infrastructure teams often need to answer questions like:</p>
+<ul>
+<li>Can this engineer run <code>terraform apply</code> against the production environment?</li>
+<li>Should a CI job be allowed to destroy a staging workspace?</li>
+<li>How do we audit <em>who</em> approved an infrastructure change and <em>why</em>?</li>
+</ul>
+<p>Traditional solutions rely on cloud-provider IAM policies, custom CI guards, or honor-system conventions. The Cedarling-OPA integration lets you express these rules as <strong>Cedar policies</strong> — auditable, version-controlled, and evaluated in milliseconds before <code>terraform</code> ever runs.</p>
+<h2 id="choosing-a-flow-unsigned-vs-jwt">Choosing a Flow: Unsigned vs JWT<a class="headerlink" href="#choosing-a-flow-unsigned-vs-jwt" title="Permanent link">#</a></h2>
+<p>Two Terraform authorization demos are available. Use this table to decide which fits your situation before diving into the implementation details.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Unsigned (this guide)</strong></th>
+<th><strong><a href="../terraform-authz-jwt/">JWT guide</a></strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity source</strong></td>
+<td>Environment variables asserted by the caller</td>
+<td>Signed GitHub Actions OIDC token</td>
+</tr>
+<tr>
+<td><strong>Signature validation</strong></td>
+<td>None — <code>CEDARLING_JWT_SIG_VALIDATION: "disabled"</code></td>
+<td>Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token</td>
+</tr>
+<tr>
+<td><strong>Trusted issuer config</strong></td>
+<td>Not required — no <code>trusted-issuers/</code> directory needed</td>
+<td>Required — <code>policy-store/trusted-issuers/github-actions.json</code> must declare the issuer endpoint</td>
+</tr>
+<tr>
+<td><strong>Principal model</strong></td>
+<td><code>Infra::User</code> with asserted <code>role</code> attribute</td>
+<td><code>CI::GitHubWorkflow</code> with verified JWT claims (<code>repository</code>, <code>ref</code>, <code>environment</code>)</td>
+</tr>
+<tr>
+<td><strong>Cedarling built-in</strong></td>
+<td><code>authorize_unsigned</code></td>
+<td><code>authorize_multi_issuer</code></td>
+</tr>
+<tr>
+<td><strong>Secret management</strong></td>
+<td>Requires <code>TF_USER_ID</code> / <code>TF_USER_ROLES</code> set by the operator</td>
+<td>No secrets — GitHub issues the OIDC token automatically</td>
+</tr>
+<tr>
+<td><strong>Production approval gate</strong></td>
+<td>Role-based policy only</td>
+<td><code>environment</code> JWT claim proves GitHub Environment approval by a human reviewer</td>
+</tr>
+<tr>
+<td><strong>Best suited for</strong></td>
+<td>Local development, human operators, simple setups</td>
+<td>CI/CD pipelines (GitHub Actions), automated deployments requiring cryptographic identity</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Choose the unsigned flow</strong> if you are running Terraform locally or in a simple script where the caller's identity is trusted by convention and you do not need cryptographic proof of origin.</p>
+<p><strong>Choose the JWT flow</strong> if you are deploying from a CI/CD pipeline and want Cedarling to verify the pipeline's identity cryptographically — eliminating the need for shared secrets and enabling enforceable production approval gates.</p>
+<h2 id="authorization-model">Authorization Model<a class="headerlink" href="#authorization-model" title="Permanent link">#</a></h2>
+<p>The demo uses three roles and three workspaces:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th style="text-align: center;"><code>terraform plan</code></th>
+<th style="text-align: center;"><code>terraform apply</code></th>
+<th style="text-align: center;"><code>terraform destroy</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Developer</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Ops</td>
+<td style="text-align: center;">✓ (non-prod only)</td>
+<td style="text-align: center;">✓ (non-prod only)</td>
+<td style="text-align: center;">✗</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<p>Workspaces: <code>dev</code>, <code>staging</code>, <code>production</code>.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Eng as Engineer / CI
+    participant Wrapper as tf_authz.sh
+    participant OPA
+    participant Rego
+    participant Cedarling
+    participant Cedar as Cedar Policies
+
+    Eng-&gt;&gt;Wrapper: terraform apply
+    Wrapper-&gt;&gt;OPA: POST /v1/data/infra/terraform
+    OPA-&gt;&gt;Rego: evaluate infra.terraform
+    Rego-&gt;&gt;Cedarling: cedarling.opa.authorize_unsigned(input)
+    Cedarling-&gt;&gt;Cedar: check principal / action / resource
+    Cedar--&gt;&gt;Cedarling: decision + matching policy IDs
+    Cedarling--&gt;&gt;Rego: { decision, reasons, errors }
+    Rego--&gt;&gt;OPA: { allow, reasons }
+    OPA--&gt;&gt;Wrapper: HTTP 200 { result: { allow: true|false } }
+    alt ALLOWED
+        Wrapper-&gt;&gt;Eng: terraform apply proceeds
+    else DENIED
+        Wrapper-&gt;&gt;Eng: exit 1 + deny message
+    end</code></pre>
+<h2 id="cedar-schema">Cedar Schema<a class="headerlink" href="#cedar-schema" title="Permanent link">#</a></h2>
+<p>The schema defines three entity types and three actions:</p>
+<div class="highlight"><pre><span></span><code>namespace Infra {
+    // Role entity kept for schema validity; role membership is enforced via
+    // principal.role.contains(&quot;RoleName&quot;) in Cedar policies.
+    entity Role;
+
+    entity User in [Role] {
+        sub: String,
+        role: Set&lt;String&gt;,
+    };
+
+    entity TerraformWorkspace;
+
+    action Plan, Apply, Destroy
+        appliesTo {
+            principal: [User],
+            resource:  [TerraformWorkspace],
+            context: {
+                current_time: Long,
+            }
+        };
+}
+</code></pre></div>
+<p>The <code>role: Set&lt;String&gt;</code> attribute is the key: when the wrapper asserts <code>role: ["Ops"]</code>, Cedarling sets the <code>role</code> attribute on the <code>User</code> entity, and Cedar policies check <code>principal.role.contains("Ops")</code> to match.</p>
+<h2 id="cedar-policies">Cedar Policies<a class="headerlink" href="#cedar-policies" title="Permanent link">#</a></h2>
+<p>Three policy files cover all the rules.</p>
+<p><strong>Admin — unrestricted access:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;admin-permit-all&quot;)
+permit (
+    principal,
+    action in [
+        Infra::Action::&quot;Plan&quot;,
+        Infra::Action::&quot;Apply&quot;,
+        Infra::Action::&quot;Destroy&quot;
+    ],
+    resource
+) when {
+    principal.role.contains(&quot;Admin&quot;)
+};
+</code></pre></div></p>
+<p><strong>Ops — plan and apply, but not production:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;ops-permit-plan-apply-non-prod&quot;)
+permit (
+    principal,
+    action in [
+        Infra::Action::&quot;Plan&quot;,
+        Infra::Action::&quot;Apply&quot;
+    ],
+    resource
+) when {
+    principal.role.contains(&quot;Ops&quot;) &amp;&amp;
+    resource != Infra::TerraformWorkspace::&quot;production&quot;
+};
+</code></pre></div></p>
+<p><strong>Developer — plan only, any workspace:</strong>
+<div class="highlight"><pre><span></span><code>@id(&quot;developer-permit-plan&quot;)
+permit (
+    principal,
+    action == Infra::Action::&quot;Plan&quot;,
+    resource
+) when {
+    principal.role.contains(&quot;Developer&quot;)
+};
+</code></pre></div></p>
+<p>Cedar's default-deny posture means any combination not covered by a <code>permit</code> is automatically rejected — no <code>forbid</code> rules needed for the common case.</p>
+<h2 id="opa-rego-policy">OPA Rego Policy<a class="headerlink" href="#opa-rego-policy" title="Permanent link">#</a></h2>
+<p>The Rego policy is a thin adapter. It passes the entire <code>input</code> to Cedarling and exposes two rules for consumers:</p>
+<div class="highlight"><pre><span></span><code><span class="k">package</span><span class="w"> </span><span class="n">infra</span><span class="p">.</span><span class="n">terraform</span>
+
+<span class="k">default</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">false</span>
+
+<span class="n">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">opa</span><span class="p">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+<span class="n">allow</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">true</span>
+<span class="p">}</span>
+
+<span class="c1"># decision mirrors result.decision for per-rule access via</span>
+<span class="c1"># /v1/data/infra/terraform/decision</span>
+<span class="n">decision</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span>
+
+<span class="c1"># reasons contains the IDs of Cedar policies that granted the request.</span>
+<span class="n">reasons</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">reasons</span>
+</code></pre></div>
+<p>The <code>cedarling.opa.authorize_unsigned</code> built-in is the right choice here because Terraform operations are service-initiated — the operator's identity is known by the calling system and asserted directly, rather than arriving via a JWT from an IDP.</p>
+<h2 id="opa-configuration">OPA Configuration<a class="headerlink" href="#opa-configuration" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedarling_opa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;stderr&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bootstrap_config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TerraformAuthz&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./policy-store&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> points to a directory containing <code>metadata.json</code>, <code>schema.cedarschema</code>, and a <code>policies/</code> subdirectory — the <a href="../../reference/cedarling-policy-store/#2-new-directory-based-format">directory-based policy store format</a>.</p>
+<h3 id="no-trusted-issuer-file-needed">No trusted issuer file needed<a class="headerlink" href="#no-trusted-issuer-file-needed" title="Permanent link">#</a></h3>
+<p>The JWT-based demo (<a href="../terraform-authz-jwt/"><code>terraform-authz-jwt.md</code></a>) requires a <code>policy-store/trusted-issuers/</code> directory so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that directory because:</p>
+<ul>
+<li><code>CEDARLING_JWT_SIG_VALIDATION: "disabled"</code> — no signature is checked.</li>
+<li>Identity is asserted directly in the <code>authorize_unsigned</code> payload (via the <code>principal</code> object in the OPA <code>input</code>) rather than carried inside a signed JWT.</li>
+</ul>
+<p>The policy-store directory for this demo therefore contains only <code>metadata.json</code>, <code>schema.cedarschema</code>, and <code>policies/</code>. If you later switch to signed tokens, add a <code>trusted-issuers/</code> subdirectory with one JSON file per issuer — see the <a href="../terraform-authz-jwt/#trusted-issuer-file-format">trusted issuer file format</a> in the JWT guide for the exact schema and field reference.</p>
+<h2 id="the-authorization-wrapper">The Authorization Wrapper<a class="headerlink" href="#the-authorization-wrapper" title="Permanent link">#</a></h2>
+<p><code>tf_authz.sh</code> is a drop-in shim around the <code>terraform</code> binary. It:</p>
+<ol>
+<li>Maps the Terraform sub-command (<code>plan</code> / <code>apply</code> / <code>destroy</code>) to the corresponding Cedar action.</li>
+<li>Builds the <code>authorize_unsigned</code> payload from environment variables.</li>
+<li>POSTs to OPA and inspects the <code>allow</code> field.</li>
+<li>Either calls <code>terraform</code> or exits with a denial message.</li>
+</ol>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th style="text-align: center;">Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TF_WORKSPACE</code></td>
+<td style="text-align: center;">yes</td>
+<td><code>dev</code></td>
+<td>Target workspace (<code>dev</code>, <code>staging</code>, <code>production</code>)</td>
+</tr>
+<tr>
+<td><code>TF_USER_ID</code></td>
+<td style="text-align: center;">yes</td>
+<td><code>$USER</code></td>
+<td>Operator identity (username or service account)</td>
+</tr>
+<tr>
+<td><code>TF_USER_ROLES</code></td>
+<td style="text-align: center;">yes</td>
+<td><code>Developer</code></td>
+<td>Comma-separated Cedar role names</td>
+</tr>
+<tr>
+<td><code>OPA_URL</code></td>
+<td style="text-align: center;">no</td>
+<td><code>http://localhost:8181</code></td>
+<td>OPA server base URL</td>
+</tr>
+<tr>
+<td><code>TERRAFORM_BIN</code></td>
+<td style="text-align: center;">no</td>
+<td><code>terraform</code></td>
+<td>Path to the terraform binary</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_WORKSPACE</span><span class="o">=</span>staging
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_USER_ID</span><span class="o">=</span>alice
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_USER_ROLES</span><span class="o">=</span>Developer
+
+<span class="c1"># Plan is allowed for Developers on any workspace.</span>
+<span class="c1"># Terraform global flags (e.g. -chdir=) may appear before the sub-command:</span>
+./demo/terraform/tf_authz.sh<span class="w"> </span>-chdir<span class="o">=</span>./environments/staging<span class="w"> </span>plan
+<span class="c1"># Or after it:</span>
+./demo/terraform/tf_authz.sh<span class="w"> </span>plan<span class="w"> </span>-chdir<span class="o">=</span>./environments/staging
+
+<span class="c1"># Apply is denied for Developers:</span>
+./demo/terraform/tf_authz.sh<span class="w"> </span>apply<span class="w"> </span>-auto-approve
+</code></pre></div>
+<p>The wrapper scans all arguments for the <strong>first non-flag token</strong> to determine the sub-command, so <code>terraform</code> global flags (like <code>-chdir=</code>, <code>-version</code>, <code>-help</code>) placed before the sub-command are handled correctly and do not bypass the authorization check.</p>
+<p>Commands other than <code>plan</code>, <code>apply</code>, and <code>destroy</code> (e.g. <code>init</code>, <code>fmt</code>, <code>validate</code>) bypass the authorization check and are passed directly to <code>terraform</code>.</p>
+<h2 id="example-opa-query-and-response">Example OPA Query and Response<a class="headerlink" href="#example-opa-query-and-response" title="Permanent link">#</a></h2>
+<p>The wrapper queries <code>/v1/data/infra/terraform</code> — the full package endpoint — rather than the narrower <code>/v1/data/infra/terraform/allow</code>. This returns the complete Rego package result in a single round-trip, making <code>allow</code>, <code>decision</code>, <code>reasons</code>, and the full Cedarling result object all available for inspection or logging. If you only need the boolean decision, you can query <code>/v1/data/infra/terraform/allow</code> instead.</p>
+<p>The wrapper sends:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8181/v1/data/infra/terraform<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">      &quot;input&quot;: {</span>
+<span class="s1">        &quot;principal&quot;: {</span>
+<span class="s1">          &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s1">            &quot;entity_type&quot;: &quot;Infra::User&quot;,</span>
+<span class="s1">            &quot;id&quot;: &quot;alice&quot;</span>
+<span class="s1">          },</span>
+<span class="s1">          &quot;sub&quot;: &quot;alice&quot;,</span>
+<span class="s1">          &quot;role&quot;: [&quot;Developer&quot;]</span>
+<span class="s1">        },</span>
+<span class="s1">        &quot;action&quot;: &quot;Infra::Action::\&quot;Apply\&quot;&quot;,</span>
+<span class="s1">        &quot;resource&quot;: {</span>
+<span class="s1">          &quot;cedar_entity_mapping&quot;: {</span>
+<span class="s1">            &quot;entity_type&quot;: &quot;Infra::TerraformWorkspace&quot;,</span>
+<span class="s1">            &quot;id&quot;: &quot;production&quot;</span>
+<span class="s1">          }</span>
+<span class="s1">        },</span>
+<span class="s1">        &quot;context&quot;: {</span>
+<span class="s1">          &quot;current_time&quot;: 1776826458</span>
+<span class="s1">        }</span>
+<span class="s1">      }</span>
+<span class="s1">    }&#39;</span>
+</code></pre></div>
+<p>Response (denied — no matching Cedar policy):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;allow&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reasons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;reasons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019dadff-3a21-7e0d-a4fc-cce7e05ef2c1&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Now with an Ops user applying to staging:</p>
+<div class="highlight"><pre><span></span><code>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;input&quot;: {</span>
+<span class="s1">    &quot;principal&quot;: {</span>
+<span class="s1">      &quot;cedar_entity_mapping&quot;: { &quot;entity_type&quot;: &quot;Infra::User&quot;, &quot;id&quot;: &quot;bob&quot; },</span>
+<span class="s1">      &quot;sub&quot;: &quot;bob&quot;,</span>
+<span class="s1">      &quot;role&quot;: [&quot;Ops&quot;]</span>
+<span class="s1">    },</span>
+<span class="s1">    &quot;action&quot;: &quot;Infra::Action::\&quot;Apply\&quot;&quot;,</span>
+<span class="s1">    &quot;resource&quot;: {</span>
+<span class="s1">      &quot;cedar_entity_mapping&quot;: { &quot;entity_type&quot;: &quot;Infra::TerraformWorkspace&quot;, &quot;id&quot;: &quot;staging&quot; }</span>
+<span class="s1">    },</span>
+<span class="s1">    &quot;context&quot;: { &quot;current_time&quot;: 1776826458 }</span>
+<span class="s1">  }</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>Response (allowed — matched <code>ops-permit-plan-apply-non-prod</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;allow&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reasons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ops-permit-plan-apply-non-prod&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;reasons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ops-permit-plan-apply-non-prod&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019dae00-1c32-7a1d-b5fc-dde8f06ef3d2&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>reasons</code> array tells you exactly which Cedar policy granted access — useful for audit logs.</p>
+<h2 id="running-the-demo">Running the Demo<a class="headerlink" href="#running-the-demo" title="Permanent link">#</a></h2>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/cedarling_opa/demo/terraform/README.md">demo README</a> for complete step-by-step instructions including:</p>
+<ul>
+<li>Starting the Cedarling-OPA server</li>
+<li>Running all authorization scenarios</li>
+<li>Querying OPA directly with <code>curl</code></li>
+<li>Adding custom policies</li>
+</ul>
+<h2 id="adapting-to-your-environment">Adapting to Your Environment<a class="headerlink" href="#adapting-to-your-environment" title="Permanent link">#</a></h2>
+<h3 id="integration-with-cicd">Integration with CI/CD<a class="headerlink" href="#integration-with-cicd" title="Permanent link">#</a></h3>
+<p>In a CI pipeline (GitHub Actions, GitLab CI, Jenkins), set the environment variables from your pipeline secrets and replace the <code>terraform</code> call with <code>./tf_authz.sh</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Terraform apply</span>
+<span class="w">  </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">TF_WORKSPACE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ vars.TF_WORKSPACE }}</span>
+<span class="w">    </span><span class="nt">TF_USER_ID</span><span class="p">:</span><span class="w">   </span><span class="l l-Scalar l-Scalar-Plain">${{ github.actor }}</span>
+<span class="w">    </span><span class="nt">TF_USER_ROLES</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ vars.CI_TERRAFORM_ROLES }}</span>
+<span class="w">    </span><span class="nt">OPA_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://opa-service:8181</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./tf_authz.sh apply -auto-approve</span>
+</code></pre></div>
+<p>For a more secure CI/CD integration that eliminates service-account secrets entirely, see the <a href="../terraform-authz-jwt/">JWT-based Terraform authorization demo</a>. That variant authenticates the pipeline with a signed GitHub Actions OIDC token, and Cedar policies check JWT claims such as <code>repository</code>, <code>ref</code>, and <code>environment</code> to gate access — including a production approval gate backed by GitHub Environments.</p>
+<h3 id="using-jwt-tokens-instead">Using JWT tokens instead<a class="headerlink" href="#using-jwt-tokens-instead" title="Permanent link">#</a></h3>
+<p>If your operators authenticate via an OIDC provider, switch from <code>cedarling.opa.authorize_unsigned</code> to <code>cedarling.opa.authorize_multi_issuer</code> and pass the access token in the payload. Update the Rego to match:</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">opa</span><span class="p">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+</code></pre></div>
+<p>See the <a href="../terraform-authz-jwt/">JWT-based Terraform authorization guide</a> for a complete working example with GitHub Actions OIDC, Cedar schemas, and a wrapper script. For the full list of bootstrap properties see the <a href="../cedarling-opa/">Cedarling-OPA plugin reference</a>.</p>
+<h3 id="auditing-decisions">Auditing decisions<a class="headerlink" href="#auditing-decisions" title="Permanent link">#</a></h3>
+<p>Cedarling emits structured logs for every authorization decision. Set <code>CEDARLING_LOG_LEVEL</code> to <code>INFO</code> or <code>DEBUG</code> to capture the principal, action, resource, decision, and matching policy IDs in your log pipeline.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 15, 2026 18:02:03 UTC"><span class="timeago" datetime="2026-05-15T18:02:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 15, 2026 18:02:03 UTC">2026-05-15</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 8, 2026 08:00:33 UTC"><span class="timeago" datetime="2026-05-08T08:00:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 8, 2026 08:00:33 UTC">2026-05-08</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>
