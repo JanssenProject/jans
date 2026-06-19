@@ -13,13 +13,9 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/install/vm-install/dynamic-download/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/identity-assertion-authz-grant/">
       
       
-        <link rel="prev" href="../suse/">
-      
-      
-        <link rel="next" href="../../setup/">
       
       
         
@@ -30,7 +26,7 @@
     
     
       
-        <title>Dynamic Download - Janssen Documentation</title>
+        <title>Identity Assertion Authorization Grant (Cross-App Access) - Janssen Documentation</title>
       
     
     
@@ -91,7 +87,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-janssen-server-using-dynamic-download" class="md-skip">
+        <a href="#identity-assertion-authorization-grant-cross-app-access" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +138,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Dynamic Download
+              Identity Assertion Authorization Grant (Cross-App Access)
             
           </span>
         </div>
@@ -262,8 +258,6 @@
   
   
   
-    
-  
   
     
     
@@ -271,12 +265,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../../../../getting-started/" class="md-tabs__link">
           
   
@@ -392,86 +384,13 @@
       
   
   
-    
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-        
-        
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Janssen Server
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Janssen Server
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
   
   
     
     
       
         
-          
+      
         
       
         
@@ -499,6 +418,10 @@
     <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
       
         
+  
+  
+  
+    
   
   
   
@@ -509,7 +432,7 @@
   <span class="md-ellipsis">
     
   
-    Get Started
+    Janssen Server
   
 
     
@@ -523,1480 +446,8 @@
     </a>
   
 
-      
-    </li>
   
 
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../architecture/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architecture & Concepts
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../auth-server/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integrate & Authenticate
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../config-guide/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Configure Identity
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../test-debug/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Test & Debug
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Deploy & Operate
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Deploy & Operate
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../planning/overview/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Planning
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6_3" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6_3" id="__nav_1_6_3_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_6_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Installation
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6_3_2" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    VM Installation
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_6_3_2" id="__nav_1_6_3_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_6_3_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_6_3_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    VM Installation
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vm-requirements/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    VM Requirements
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../ubuntu/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Ubuntu
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../debian/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Debian
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../rhel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    RHEL
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../suse/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Suse
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Dynamic Download
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Dynamic Download
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        System Requirements
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uninstall" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Uninstall
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../setup/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Setup Instructions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../helm-install/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Helm Deployments
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../docker-install/quick-start/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Docker
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../kubernetes-ops/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Kubernetes Operations
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../vm-ops/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    VM Operations
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../reference/database/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Database
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../terraform/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Terraform & IaC
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../lock/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Lock
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../CHANGELOG/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Product & Releases
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
       
     </li>
   
@@ -2177,10 +628,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        Overview
       
     </span>
   </a>
@@ -2188,10 +639,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#protocol-flow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Protocol Flow
       
     </span>
   </a>
@@ -2199,10 +650,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
+  <a href="#enabling-the-feature" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install
+        Enabling the Feature
       
     </span>
   </a>
@@ -2210,10 +661,93 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#uninstall" class="md-nav__link">
+  <a href="#configuration-fields" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Uninstall
+        Configuration Fields
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restricting-trusted-idp-issuers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restricting trusted IdP issuers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-token-exchange-request-idp-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Token Exchange Request (IdP Role)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id-jag-jwt-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ID-JAG JWT Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-jwt-bearer-request-resource-as-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: JWT Bearer Request (Resource AS Role)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discovery-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discovery Metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
       
     </span>
   </a>
@@ -2236,93 +770,6 @@
 
 
 
-  <nav class="md-path" aria-label="Navigation" >
-    <ol class="md-path__list">
-      
-      
-        
-  
-  
-    
-    
-      
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../../../../getting-started/" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Janssen Server
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../../../" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Deploy & Operate
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../../" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Installation
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    VM Installation
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ol>
-  </nav>
-
               
               <article class="md-content__inner md-typeset">
                 
@@ -2342,21 +789,35 @@
       
       
       
-        <span class="md-tag">dynamic</span>
+        <span class="md-tag">auth-server</span>
       
     
       
       
       
       
-        <span class="md-tag">installation</span>
+        <span class="md-tag">cross-app-access</span>
       
     
       
       
       
       
-        <span class="md-tag">vm</span>
+        <span class="md-tag">id-jag</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">oauth</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">token-exchange</span>
       
     
   </nav>
@@ -2366,54 +827,228 @@
   
 
 
-<h1 id="install-janssen-server-using-dynamic-download">Install Janssen Server using Dynamic Download<a class="headerlink" href="#install-janssen-server-using-dynamic-download" title="Permanent link">#</a></h1>
-<p>The dynamic download installs the latest development version of the Janssen Server.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This method of installation is suitable only for testing, development, or feature exploration purposes. Not for production deployments.</p>
-</div>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<h1 id="identity-assertion-authorization-grant-cross-app-access">Identity Assertion Authorization Grant (Cross-App Access)<a class="headerlink" href="#identity-assertion-authorization-grant-cross-app-access" title="Permanent link">#</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The Janssen Authorization Server implements the
+<a href="https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html">Identity Assertion Authorization Grant (draft-ietf-oauth-identity-assertion-authz-grant-04)</a>,
+also known as <strong>Cross-App Access (XAA)</strong>.</p>
+<p>This mechanism enables a client already authenticated with one Identity Provider (IdP) to obtain
+access tokens from a <em>different</em> Resource Authorization Server (Resource AS) that trusts the same IdP,
+<strong>without launching a new browser-based SSO flow</strong>.  It combines:</p>
 <ul>
-<li><code>curl</code> should be installed</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8693">OAuth 2.0 Token Exchange (RFC 8693)</a> to issue an Identity Assertion JWT (ID-JAG), and</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7523">JWT Bearer Token Grant (RFC 7523)</a> to exchange the ID-JAG for an access token.</li>
 </ul>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
-<ol>
-<li>
-<p>Download the installer
-<div class="highlight"><pre><span></span><code>curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py &gt; install.py
+<h2 id="protocol-flow">Protocol Flow<a class="headerlink" href="#protocol-flow" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>Client                     IdP Janssen-AS              Resource Janssen-AS
+  |                             |                            |
+  |-- 1. OIDC login -----------&gt;|                            |
+  |&lt;-- ID token / RT -----------|                            |
+  |                             |                            |
+  |-- 2. Token Exchange -------&gt;|                            |
+  |   grant_type=token-exchange |                            |
+  |   requested_token_type=     |                            |
+  |     oauth:token-type:id-jag |                            |
+  |   subject_token=&lt;ID token&gt;  |                            |
+  |   audience=&lt;Resource AS&gt;    |                            |
+  |&lt;-- 3. ID-JAG JWT -----------|                            |
+  |   typ: &quot;oauth-id-jag+jwt&quot;   |                            |
+  |                             |                            |
+  |-- 4. JWT Bearer grant ------------------------------&gt;   |
+  |   grant_type=jwt-bearer                                  |
+  |   assertion=&lt;ID-JAG&gt;                                     |
+  |&lt;-- access_token -----------------------------------------|
+</code></pre></div>
+<p>Janssen AS can play <strong>two roles</strong> simultaneously:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>What Janssen AS does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IdP AS</strong></td>
+<td>Receives token exchange requests and issues ID-JAG JWTs</td>
+</tr>
+<tr>
+<td><strong>Resource AS</strong></td>
+<td>Validates ID-JAG bearer assertions and issues access tokens</td>
+</tr>
+</tbody>
+</table>
+<h2 id="enabling-the-feature">Enabling the Feature<a class="headerlink" href="#enabling-the-feature" title="Permanent link">#</a></h2>
+<p>The entire feature is controlled by the <code>identity_assertion_authz_grant</code> feature flag.</p>
+<p>Add it to <code>featureFlags</code> in the Janssen authorization server configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;featureFlags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;identity_assertion_authz_grant&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>When the flag is present, both roles are activated and the discovery document is updated automatically.</p>
+<h2 id="configuration-fields">Configuration Fields<a class="headerlink" href="#configuration-fields" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>idJagTrustedIdpIssuers</code></td>
+<td><code>Map&lt;String, TrustedIssuerConfig&gt;</code></td>
+<td><code>{}</code></td>
+<td><strong>(Resource AS role)</strong> Trusted IdP issuers whose ID-JAGs this AS will accept. Empty map means any issuer is accepted.</td>
+</tr>
+<tr>
+<td><code>idJagLifetime</code></td>
+<td><code>int</code> (seconds)</td>
+<td><code>300</code></td>
+<td><strong>(IdP role)</strong> Lifetime for issued ID-JAGs.</td>
+</tr>
+<tr>
+<td><code>idJagIssueRefreshToken</code></td>
+<td><code>Boolean</code></td>
+<td><code>false</code></td>
+<td><strong>(Resource AS role)</strong> Whether to issue refresh tokens after accepting an ID-JAG. The spec recommends <code>false</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="restricting-trusted-idp-issuers">Restricting trusted IdP issuers<a class="headerlink" href="#restricting-trusted-idp-issuers" title="Permanent link">#</a></h3>
+<p>To restrict which IdPs can issue ID-JAGs accepted by this AS (Resource AS role):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;idJagTrustedIdpIssuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;https://idp.example.com&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;automaticallyGrantedScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;openid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;profile&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="step-2-token-exchange-request-idp-role">Step 2: Token Exchange Request (IdP Role)<a class="headerlink" href="#step-2-token-exchange-request-idp-role" title="Permanent link">#</a></h2>
+<p>The client sends a token exchange request to the IdP's <code>/token</code> endpoint:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/jans-auth/restv1/token</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Basic &lt;client_credentials&gt;</span>
+
+<span class="nt">grant_type</span><span class="o">=</span><span class="s">urn:ietf:params:oauth:grant-type:token-exchange</span>
+<span class="p">&amp;</span><span class="nt">requested_token_type</span><span class="o">=</span><span class="s">urn:ietf:params:oauth:token-type:id-jag</span>
+<span class="p">&amp;</span><span class="nt">subject_token</span><span class="o">=</span><span class="s">&lt;ID_TOKEN&gt;</span>
+<span class="p">&amp;</span><span class="nt">subject_token_type</span><span class="o">=</span><span class="s">urn:ietf:params:oauth:token-type:id_token</span>
+<span class="p">&amp;</span><span class="nt">audience</span><span class="o">=</span><span class="s">https://resource-as.example.com</span>
+<span class="p">&amp;</span><span class="nt">scope</span><span class="o">=</span><span class="s">openid profile</span>
+</code></pre></div>
+<p><strong>Supported <code>subject_token_type</code> values:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>urn:ietf:params:oauth:token-type:id_token</code></td>
+<td>OIDC ID token (most common)</td>
+</tr>
+<tr>
+<td><code>urn:ietf:params:oauth:token-type:saml2</code></td>
+<td>SAML 2.0 assertion</td>
+</tr>
+<tr>
+<td><code>urn:ietf:params:oauth:token-type:refresh_token</code></td>
+<td>Refresh token (for SAML-first deployments)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;signed_ID-JAG_JWT&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;issued_token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:ietf:params:oauth:token-type:id-jag&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N_A&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="id-jag-jwt-structure">ID-JAG JWT Structure<a class="headerlink" href="#id-jag-jwt-structure" title="Permanent link">#</a></h2>
+<p>The issued ID-JAG is a signed JWT with:</p>
+<p><strong>Header:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;typ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oauth-id-jag+jwt&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;key_id&gt;&quot;</span>
+<span class="p">}</span>
 </code></pre></div></p>
-</li>
-<li>
-<p>Execute Installer</p>
-</li>
+<p><strong>Claims:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://resource-as.example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-app&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;550e8400-e29b-41d4-a716-446655440000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1716648300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1716648000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@example.com&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>Optional claims propagated from the subject token: <code>email</code>, <code>auth_time</code>, <code>acr</code>, <code>amr</code>.</p>
+<h2 id="step-4-jwt-bearer-request-resource-as-role">Step 4: JWT Bearer Request (Resource AS Role)<a class="headerlink" href="#step-4-jwt-bearer-request-resource-as-role" title="Permanent link">#</a></h2>
+<p>The client presents the ID-JAG to the Resource AS <code>/token</code> endpoint:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/jans-auth/restv1/token</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Basic &lt;client_credentials&gt;</span>
+
+<span class="nt">grant_type</span><span class="o">=</span><span class="s">urn:ietf:params:oauth:grant-type:jwt-bearer</span>
+<span class="p">&amp;</span><span class="nt">assertion</span><span class="o">=</span><span class="s">&lt;ID-JAG_JWT&gt;</span>
+<span class="p">&amp;</span><span class="nt">scope</span><span class="o">=</span><span class="s">read write</span>
+</code></pre></div>
+<p><strong>Validation performed by Resource AS:</strong></p>
+<ol>
+<li>JWT <code>typ</code> header = <code>"oauth-id-jag+jwt"</code></li>
+<li>Signature verification</li>
+<li><code>aud</code> matches this AS's issuer</li>
+<li><code>client_id</code> matches the authenticated client</li>
+<li><code>exp</code> has not passed</li>
+<li><code>iss</code> is in <code>idJagTrustedIdpIssuers</code> (if configured)</li>
 </ol>
-<p>To execute installer, run the command below:</p>
-<div class="highlight"><pre><span></span><code>python3 install.py
+<p><strong>Subject resolution order:</strong> <code>sub</code> → <code>email</code> → <code>aud_sub</code> → empty user</p>
+<p><strong>Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;issued_token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:ietf:params:oauth:token-type:access_token&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>The installer can be invoked using various options to tailor the 
-   installation process. Invoke the commands below to know about all the 
-   available options.</p>
-<div class="highlight"><pre><span></span><code>python3 install.py --help
+<p>Note: no <code>refresh_token</code> is issued by default (controlled by <code>idJagIssueRefreshToken</code>).</p>
+<h2 id="discovery-metadata">Discovery Metadata<a class="headerlink" href="#discovery-metadata" title="Permanent link">#</a></h2>
+<p>When the feature flag is enabled, the following fields appear in the
+<a href="../configuration/">OpenID Configuration</a> (<code>/.well-known/openid-configuration</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;identity_chaining_requested_token_types_supported&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:oauth:token-type:id-jag&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;authorization_grant_profiles_supported&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:oauth:grant-profile:id-jag&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>One particularly useful option for development environments is the one 
-   below which installs the Janssen Server with test data loaded.</p>
-<div class="highlight"><pre><span></span><code>python3 install.py --args=&quot;-t&quot;
-</code></pre></div>
-<p>Installer can be run with all the arguments provided via command-line
-   at the time of invocking the install script. This enables prompt-less
-   installation. For example, see the command below:</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>install.py<span class="w"> </span>--args<span class="o">=</span><span class="s2">&quot;-n -ip-address 10.229.38.28 -host-name jans-opensuse -city ah -state gj -country in -org-name gluu -email dhaval@gluu.org -jans-max-mem 26349 -admin-password admin --with-casa --install-jans-keycloak-link -t&quot;</span>
-</code></pre></div>
-<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
-<p>Use the command below to uninstall the Janssen Server</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-</div>
-<p>For removal of the attached persistence store, please refer to <a href="../../install-faq/#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well">this note</a>.</p>
-<div class="highlight"><pre><span></span><code>python3 install.py -uninstall
-</code></pre></div>
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Confidential clients only.</strong> Public clients should use the authorization code flow. The IdP AS should reject token exchange requests from non-confidential clients.</li>
+<li><strong>No refresh tokens.</strong> The Resource AS should not issue refresh tokens for ID-JAG exchanges. When the access token expires, the client should re-present the ID-JAG or obtain a new one.</li>
+<li><strong>Audience binding.</strong> The ID-JAG <code>aud</code> must exactly match the Resource AS issuer URI. This prevents replay across different Resource Servers.</li>
+<li><strong>Client ID binding.</strong> The <code>client_id</code> in the ID-JAG must match the authenticated client at the Resource AS. This prevents impersonation.</li>
+<li><strong>Trusted issuer list.</strong> Configure <code>idJagTrustedIdpIssuers</code> to restrict which IdPs can issue ID-JAGs your Resource AS accepts.</li>
+<li><strong>Short lifetime.</strong> Keep <code>idJagLifetime</code> short (default 5 minutes). ID-JAGs are single-use delegation tokens.</li>
+</ul>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../token/">Token endpoint</a></li>
+<li><a href="../oauth-features/feature-flags.md">Feature flags</a></li>
+<li><a href="../../tokens/oauth-tx-tokens/">OAuth transaction tokens</a></li>
+</ul>
 
 
 
@@ -2436,7 +1071,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 3, 2025 10:41:47 UTC"><span class="timeago" datetime="2025-06-03T10:41:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 3, 2025 10:41:47 UTC">2025-06-03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 18, 2026 11:21:44 UTC"><span class="timeago" datetime="2026-06-18T11:21:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 18, 2026 11:21:44 UTC">2026-06-18</span>
   </span>
 
     
@@ -2446,7 +1081,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 18, 2022 19:22:10 UTC"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 18, 2022 19:22:10 UTC">2022-05-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 18, 2026 11:21:44 UTC"><span class="timeago" datetime="2026-06-18T11:21:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 18, 2026 11:21:44 UTC">2026-06-18</span>
   </span>
 
     

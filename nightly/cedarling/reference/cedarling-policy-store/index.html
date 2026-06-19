@@ -2538,7 +2538,10 @@
 <p>The new directory-based format uses human-readable Cedar files organized in a structured directory:</p>
 <div class="highlight"><pre><span></span><code>policy-store/
 ├── metadata.json           # Required: Store identification and versioning
-├── schema.cedarschema      # Required: Cedar schema in human-readable format
+├── schema.cedarschema      # Option A: Single schema file (takes precedence)
+├── schemas/                # Option B: Split schema directory (fallback)
+│   ├── users.cedarschema
+│   └── resources.cedarschema
 ├── policies/               # Required: Directory containing .cedar policy files
 │   ├── allow-read.cedar
 │   └── deny-guest.cedar
@@ -2546,6 +2549,12 @@
 ├── entities/               # Optional: Directory containing .json entity files
 └── trusted-issuers/        # Optional: Directory containing .json issuer configs
 </code></pre></div>
+<p>The schema can be provided in one of two ways (but not both):</p>
+<ul>
+<li><strong>Option A — single file</strong>: <code>schema.cedarschema</code> at the store root. This is the original format.</li>
+<li><strong>Option B — split across multiple files</strong>: <code>schemas/*.cedarschema</code> directory. Each file is parsed as an independent <code>SchemaFragment</code>, then merged via <code>Schema::from_schema_fragments</code>. This is useful for large schemas with multiple namespaces.</li>
+</ul>
+<p>If both exist, the single file <code>schema.cedarschema</code> takes precedence and the <code>schemas/</code> directory is ignored. If neither exists, loading fails with a <code>MissingSchemaSource</code> error.</p>
 <h4 id="metadatajson">metadata.json<a class="headerlink" href="#metadatajson" title="Permanent link">#</a></h4>
 <p>Contains policy store identification and versioning:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -3299,7 +3308,7 @@ type TokensContext = {
 </code></pre></div>
 <h4 id="key-requirements">Key Requirements<a class="headerlink" href="#key-requirements" title="Permanent link">#</a></h4>
 <ol>
-<li><strong>Required Attributes</strong>: Add <code>token_type</code>, <code>jti</code>, <code>issuer</code>, <code>exp</code>, <code>validated_at</code> to all token entities</li>
+<li><strong>Required Attributes</strong>: Add <code>token_type</code>, <code>jti</code>, <code>iss</code>, <code>exp</code>, <code>validated_at</code> to all token entities</li>
 <li><strong>Optional Modifier</strong>: All attributes must be optional (<code>?</code>) to support varying token structures</li>
 <li><strong>Tags Declaration</strong>: All token entities must declare <code>tags Set&lt;String&gt;</code> for dynamic JWT claims</li>
 <li><strong>Context Update</strong>: Add <code>tokens?: TokensContext</code> field to your Context type</li>
@@ -3459,7 +3468,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 17, 2026 13:14:23 UTC"><span class="timeago" datetime="2026-06-17T13:14:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 17, 2026 13:14:23 UTC">2026-06-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 18, 2026 19:26:40 UTC"><span class="timeago" datetime="2026-06-18T19:26:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 18, 2026 19:26:40 UTC">2026-06-18</span>
   </span>
 
     
