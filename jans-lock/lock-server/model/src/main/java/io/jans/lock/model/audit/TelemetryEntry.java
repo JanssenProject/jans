@@ -103,10 +103,27 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 	private Long evaluationRequestsCount;
 
 	@JsonProperty("policyStats")
-	@Schema(description = "Additional policy statistics as key-value pairs")
+	@Schema(description = "Per-policy evaluation counters as key-value pairs")
 	@JsonObject
 	@AttributeName(name = "policyStats")
 	private Map<String, Long> policyStats;
+
+	@JsonProperty("errorCounters")
+	@Schema(description = "Error counters broken down by error type")
+	@JsonObject
+	@AttributeName(name = "errorCounters")
+	private Map<String, Long> errorCounters;
+
+	@JsonProperty("operationalStats")
+	@Schema(description = "Operational statistics (requests, decisions, eval times) as key-value pairs")
+	@JsonObject
+	@AttributeName(name = "operationalStats")
+	private Map<String, Long> operationalStats;
+
+	@JsonProperty("intervalSecs")
+	@Schema(description = "Telemetry collection interval in seconds", example = "60")
+	@AttributeName(name = "intervalSecs")
+	private Long intervalSecs;
 
 	public String getInum() {
 		return inum;
@@ -218,6 +235,30 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	public void setPolicyStats(Map<String, Long> policyStats) {
 		this.policyStats = policyStats;
+	}
+
+	public Map<String, Long> getErrorCounters() {
+		return errorCounters;
+	}
+
+	public void setErrorCounters(Map<String, Long> errorCounters) {
+		this.errorCounters = errorCounters;
+	}
+
+	public Map<String, Long> getOperationalStats() {
+		return operationalStats;
+	}
+
+	public void setOperationalStats(Map<String, Long> operationalStats) {
+		this.operationalStats = operationalStats;
+	}
+
+	public Long getIntervalSecs() {
+		return intervalSecs;
+	}
+
+	public void setIntervalSecs(Long intervalSecs) {
+		this.intervalSecs = intervalSecs;
 	}
 
 	@Override

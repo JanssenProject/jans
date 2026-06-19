@@ -406,7 +406,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	private void verifyHealthBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
-		if (payloads.isEmpty()) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No bulk-health payloads received – skipping field checks", label);
 			return;
 		}
@@ -474,7 +474,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	private void verifyLogBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
-		if (payloads.isEmpty()) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No bulk-log payloads received – skipping field checks", label);
 			return;
 		}
@@ -544,7 +544,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
-		if (payloads.isEmpty()) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No telemetry payloads received – skipping field checks", label);
 			return;
 		}
