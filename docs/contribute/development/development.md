@@ -114,17 +114,28 @@ before running Maven in that directory.
 
 ### Build jans-linux-setup
 
+ 1. Clone the repository and change to setup directory
 
-!!! note
+```shell
+git clone https://github.com/JanssenProject/jans.git
+cd jans/jans-linux-setup
+```
+ 2. Use the following instructions to build setup package
 
-    This content is a work in progress. 
+[Setup package binding guide](../../../jans-linux-setup#installation)
 
 ### Build jans-cli-tui
 
 
-!!! note
+ 1. Clone the repository and change to TUI directory
 
-    This content is a work in progress. 
+```shell
+git clone https://github.com/JanssenProject/jans.git
+cd jans/jans-cli-tui
+```
+ 2. Use the following instructions to build TUI package
+
+[Jans-cli-tui package binding guide](../../../jans-cli-tui#installation)
 
 ## Next steps:
 
