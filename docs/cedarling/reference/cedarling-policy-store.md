@@ -62,7 +62,7 @@ The schema can be provided in one of two ways (but not both):
 - **Option A — single file**: `schema.cedarschema` at the store root. This is the original format.
 - **Option B — split across multiple files**: `schemas/*.cedarschema` directory. Each file is parsed as an independent `SchemaFragment`, then merged via `Schema::from_schema_fragments`. This is useful for large schemas with multiple namespaces.
 
-If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, loading fails with a `MissingSchemaSource` error.
+If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, behavior depends on `CEDARLING_STRICT_SCHEMA_VALIDATION`: with strict mode enabled (the default), loading fails with a `MissingSchemaSource` error; with strict mode disabled, the store loads successfully and policies run without schema-based attribute validation.
 
 #### metadata.json
 
