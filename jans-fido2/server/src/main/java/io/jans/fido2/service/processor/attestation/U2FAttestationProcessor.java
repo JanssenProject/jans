@@ -18,7 +18,9 @@
 
 package io.jans.fido2.service.processor.attestation;
 
+import java.io.IOException;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
@@ -126,7 +128,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    } else if (attStmt.hasNonNull("ecdaaKeyId")) {
 	        processEcdaaKeyIdAttestation(attStmt);
 	    } else {
-	        processPackedSurrogateAttestation(authData, clientDataHash, signature, credIdAndCounters, alg);
+	        processPackedSurrogateAttestation(authData, clientDataHash, signature, alg);
 	    }
 	}
 
@@ -183,7 +185,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	private void handleAttestationCertException(List<X509Certificate> certificates, Fido2MissingAttestationCertException ex) {
 	    if (!certificates.isEmpty()) {
 	        X509Certificate certificate = certificates.get(0);
-	        String issuerDN = certificate.getIssuerDN().getName();
+	        String issuerDN = certificate.getIssuerX500Principal().getName();
 	        log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
 	    }
 	    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
@@ -211,7 +213,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	}
 
 	private void processPackedSurrogateAttestation(AuthData authData, byte[] clientDataHash, String signature,
-	        CredAndCounterData credIdAndCounters, int alg) {
+	        int alg) {
 	    PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
 	    authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(),
 	            clientDataHash, signature, publicKey, alg);
@@ -221,13 +223,11 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
 	    credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
 	    credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
-	    // Uncomment if needed
-	    // credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 	}
 
 
 	// Convert X509Certificate to X509CertificateHolder
-	public static X509CertificateHolder convertToX509CertificateHolder(X509Certificate certificate) throws Exception {
+	public static X509CertificateHolder convertToX509CertificateHolder(X509Certificate certificate) throws CertificateEncodingException, IOException {
 		byte[] encoded = certificate.getEncoded();
 	    if (encoded == null) {
 	        throw new IllegalArgumentException("Certificate encoding is null");

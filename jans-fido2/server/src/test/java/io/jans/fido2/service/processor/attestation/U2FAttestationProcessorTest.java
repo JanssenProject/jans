@@ -80,7 +80,7 @@ class U2FAttestationProcessorTest {
 	void getAttestationFormat_valid_fidoU2f() {
 		String fmt = u2FAttestationProcessor.getAttestationFormat().getFmt();
 		assertNotNull(fmt);
-		assertEquals(fmt, "fido-u2f");
+		assertEquals("fido-u2f", fmt);
 	}
 
 	@Test
@@ -141,8 +141,8 @@ class U2FAttestationProcessorTest {
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
@@ -215,8 +215,8 @@ class U2FAttestationProcessorTest {
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(appConfiguration).getFido2Configuration();
 		verify(fido2Configuration).getAttestationMode();
