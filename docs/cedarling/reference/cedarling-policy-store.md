@@ -23,12 +23,12 @@ For a comprehensive JSON schema defining the structure of the policy store, see:
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:
+Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
 
 | Configuration | Detection |
 |---------------|-----------|
-| `CEDARLING_POLICY_STORE_URI` ending in `.cjar` | Cedar Archive from URL |
-| `CEDARLING_POLICY_STORE_URI` (other) | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL |
+| `CEDARLING_POLICY_STORE_URI`, response body is JSON | Legacy JSON from Lock Server |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
@@ -405,9 +405,9 @@ Notes:
 
 ### Entity Conflict Resolution
 
-When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving **request entities precedence** over default entities. This ensures that runtime data can override static configurations while maintaining consistency.
+When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving **default entities precedence** over request entities. This ensures that policy-store entities — representing change-controlled, trusted shared state — cannot be overwritten by attacker-controlled request data.
 
-Example: If a resource entity with UID `"org1"` is passed in an authorization request, and a default entity with the same UID exists, the resource entity's attributes will be used instead of the default entity's attributes.
+Example: If a resource entity with UID `"org1"` is passed in an authorization request and a default entity with the same UID exists, the default entity's attributes will be used instead of the resource entity's attributes.
 
 ## Cedar Policies Schema
 
@@ -865,7 +865,7 @@ type TokensContext = {
 
 #### Key Requirements
 
-1. **Required Attributes**: Add `token_type`, `jti`, `issuer`, `exp`, `validated_at` to all token entities
+1. **Required Attributes**: Add `token_type`, `jti`, `iss`, `exp`, `validated_at` to all token entities
 2. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
 3. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
 4. **Context Update**: Add `tokens?: TokensContext` field to your Context type

@@ -2,7 +2,7 @@ name: Janssen Build & Publish
 
 # Builds the Janssen Java projects and publishes their artifacts to GitHub.
 #
-# Two destinations (see plan: offboard jenkins.jans.io -> GitHub):
+# Two destinations (see plan: offboard Jenkins -> GitHub):
 #   1. GitHub Packages Maven (maven.pkg.github.com/JanssenProject/jans) via `mvn deploy`
 #      - canonical home for io.jans:* dependency resolution (authenticated).
 #   2. GitHub Release assets (nightly / vX.Y.Z) for the service WARs + plugin
@@ -13,7 +13,7 @@ name: Janssen Build & Publish
 # (slsa-github-generator), matching build-packages.yml.
 #
 # This replaces the artifact build+publish role previously performed by the
-# jenkins.jans.io "Full rebuild" job. The module list and order mirror that
+# Jenkins "Full rebuild" job. The module list and order mirror that
 # job. GitHub Packages Maven rejects re-publishing an existing version, so the
 # `cleanup` job deletes the prior `0.0.0-nightly` versions before deploy.
 #
@@ -92,7 +92,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Authoritative build/deploy order, mirroring the jenkins.jans.io "Full rebuild" job.
+  # Authoritative build/deploy order, mirroring the Jenkins "Full rebuild" job.
   # NOTE: jans-shibboleth-idp is intentionally excluded until it is ready to publish.
   # NOTE: jans-keycloak / jans-keycloak-link were commented out in the jenkins job too.
   DEFAULT_MODULES: 'jans-bom jans-orm jans-core agama jans-auth-server jans-cedarling/bindings/cedarling-java jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
@@ -336,6 +336,7 @@ jobs:
             -o -name "jans-fido2-model-${VERSION}.jar" \
             -o -name "casa-config-${VERSION}.jar" \
             -o -name "agama-inbound-${VERSION}.jar" \
+            -o -name "cedarling-java-${VERSION}.jar" \
           \) -exec cp -v {} "$OUT/" \;
         echo "Collected:"; ls -la "$OUT"
         echo "dir=${OUT}" >> "$GITHUB_OUTPUT"

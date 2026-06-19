@@ -53,10 +53,6 @@ on:
         description: 'SCIM'
         type: boolean
         default: false
-      monolith:
-        description: 'Monolith'
-        type: boolean
-        default: false
       loadtesting_jmeter:
         description: 'Load Testing JMeter'
         type: boolean
@@ -120,7 +116,7 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
+        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -146,7 +142,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
-          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa cedarling-flask-sidecar cedarling-opa"
+          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa cedarling-flask-sidecar cedarling-opa"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -159,7 +155,6 @@ jobs:
               [[ "${{ inputs.fido2 }}" == "true" ]] && SELECTED="$SELECTED fido2"
               [[ "${{ inputs.persistence_loader }}" == "true" ]] && SELECTED="$SELECTED persistence-loader"
               [[ "${{ inputs.scim }}" == "true" ]] && SELECTED="$SELECTED scim"
-              [[ "${{ inputs.monolith }}" == "true" ]] && SELECTED="$SELECTED monolith"
               [[ "${{ inputs.loadtesting_jmeter }}" == "true" ]] && SELECTED="$SELECTED loadtesting-jmeter"
               [[ "${{ inputs.link }}" == "true" ]] && SELECTED="$SELECTED link"
               [[ "${{ inputs.casa }}" == "true" ]] && SELECTED="$SELECTED casa"
@@ -385,6 +380,8 @@ jobs:
           # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
+          build-args: |
+            JANS_SOURCE_VERSION=${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
           platforms: ${{ steps.prep.outputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}

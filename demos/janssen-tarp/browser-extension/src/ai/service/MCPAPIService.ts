@@ -1,7 +1,7 @@
 // services/mcpApi.ts
 import { MCP_API_BASE_URL, MCP_KEYS_ENDPOINT } from '../agentUI/types';
 
-export interface ApiKeyData {
+interface ApiKeyData {
   id?: string;
   provider: string;
   model: string;
