@@ -3,6 +3,7 @@ package io.jans.fido2.service.processor.attestation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -85,7 +86,7 @@ class AppleAttestationProcessorTest {
 
     @Test
     void process_ifNoX5c_rejected() {
-        // CONF-18: Apple attestation is always FULL; a statement without x5c must be hard-rejected,
+        // Apple attestation is always FULL; a statement without x5c must be hard-rejected,
         // not silently accepted.
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
@@ -94,14 +95,16 @@ class AppleAttestationProcessorTest {
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
         when(attStmt.hasNonNull("x5c")).thenReturn(false);
-        when(errorResponseFactory.badRequestException(any(), anyString()))
+        when(errorResponseFactory.badRequestException(eq(AttestationErrorResponseType.APPLE_ERROR), anyString()))
                 .thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class,
                 () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertEquals(400, res.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("Apple attestation statement must contain x5c"));
+        verify(errorResponseFactory).badRequestException(
+                eq(AttestationErrorResponseType.APPLE_ERROR),
+                eq("Apple attestation statement must contain x5c"));
         verifyNoInteractions(certificateService, attestationCertificateService, certificateVerifier, coseService, base64Service);
     }
 
@@ -145,7 +148,7 @@ class AppleAttestationProcessorTest {
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         when(attestationCertificateService.getAppleRootCertificates()).thenThrow(new Fido2RuntimeException("test exception"));
         when(credCert.getIssuerX500Principal()).thenReturn(new X500Principal("CN=test issuer dn"));
-        when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(errorResponseFactory.badRequestException(any(), anyString(), any())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -155,8 +158,8 @@ class AppleAttestationProcessorTest {
 
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "CN=test issuer dn");
-        verify(errorResponseFactory).badRequestException(any(), eq("Failed to find attestation validation signature public certificate with DN: CN=test issuer dn"));
+        verify(log).warn(eq("Failed to find attestation validation signature public certificate with DN: '{}'"), eq("CN=test issuer dn"), any(Fido2RuntimeException.class));
+        verify(errorResponseFactory).badRequestException(eq(AttestationErrorResponseType.APPLE_ERROR), eq("Failed to find attestation validation signature public certificate with DN: CN=test issuer dn"), any(Fido2RuntimeException.class));
         verifyNoMoreInteractions(log, errorResponseFactory);
         verifyNoInteractions(certificateVerifier, coseService, base64Service);
     }
@@ -180,7 +183,7 @@ class AppleAttestationProcessorTest {
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(mock(X509Certificate.class));
         when(authData.getAuthDataDecoded()).thenReturn("test decoded".getBytes());
         when(commonUtilService.writeOutputStreamByteList(anyList())).thenThrow(new IOException("test ioexception"));
-        when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(errorResponseFactory.badRequestException(any(), anyString(), any())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -194,7 +197,7 @@ class AppleAttestationProcessorTest {
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(log).info("Step 1 completed");
         verify(commonUtilService).writeOutputStreamByteList(anyList());
-        verify(errorResponseFactory).badRequestException(any(), eq("Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : test ioexception"));
+        verify(errorResponseFactory).badRequestException(eq(AttestationErrorResponseType.APPLE_ERROR), eq("Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : test ioexception"), any(IOException.class));
         verifyNoMoreInteractions(log, errorResponseFactory);
         verifyNoInteractions(coseService, base64Service);
     }

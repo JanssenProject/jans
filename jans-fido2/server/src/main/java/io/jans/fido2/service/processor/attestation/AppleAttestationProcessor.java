@@ -117,9 +117,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			log.info("Step 1 completed");
 		} catch (Fido2RuntimeException e) {
 			String issuerDN = credCert.getIssuerX500Principal().getName();
-			log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
+			log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN, e);
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
-					"Failed to find attestation validation signature public certificate with DN: " + issuerDN);
+					"Failed to find attestation validation signature public certificate with DN: " + issuerDN, e);
 		}
 
 		// 2. Concatenate |authenticatorData| and |clientDataHash| to form
@@ -132,7 +132,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			baos = commonUtilService.writeOutputStreamByteList(Arrays.asList(authDataInBytes, clientDataHash));
 		} catch (IOException e) {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
-					"Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : " + e.getMessage());
+					"Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : " + e.getMessage(), e);
 		}
 
 		byte[] nonceToHash = baos.toByteArray();
