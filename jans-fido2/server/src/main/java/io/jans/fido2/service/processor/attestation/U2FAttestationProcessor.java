@@ -20,6 +20,7 @@ package io.jans.fido2.service.processor.attestation;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -138,7 +139,15 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	        certificatePath.add(certificatesIterator.next().asText());
 	    }
 
+	    // FIDO U2F attestation must convey exactly one attestation certificate in x5c.
+	    if (certificatePath.size() != 1) {
+	        throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
+	                "fido-u2f attestation statement must contain exactly one certificate in x5c");
+	    }
+
 	    List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
+	    // The attestation certificate public key must be an EC key over the P-256 curve.
+	    verifyU2fAttestationCertKey(certificates.get(0));
 	    credIdAndCounters.setSignatureAlgorithm(alg);
 	    
 	    try {
@@ -179,6 +188,19 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    }
 	    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
 	            "Error on verify attestation mds: " + ex.getMessage());
+	}
+
+	void verifyU2fAttestationCertKey(X509Certificate attestationCertificate) {
+	    PublicKey publicKey = attestationCertificate.getPublicKey();
+	    if (!(publicKey instanceof ECPublicKey)) {
+	        throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
+	                "fido-u2f attestation certificate public key must be an Elliptic Curve public key");
+	    }
+	    int fieldSize = ((ECPublicKey) publicKey).getParams().getCurve().getField().getFieldSize();
+	    if (fieldSize != 256) {
+	        throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
+	                "fido-u2f attestation certificate public key must be over the P-256 curve");
+	    }
 	}
 
 	private void processEcdaaKeyIdAttestation(JsonNode attStmt) {
