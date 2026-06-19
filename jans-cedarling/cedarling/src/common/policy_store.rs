@@ -66,6 +66,10 @@ pub struct PolicyStore {
     /// Cedar schema (optional — `None` when strict schema validation is disabled)
     pub schema: Option<CedarSchema>,
 
+    /// Whether a schema source was present in the policy store source,
+    /// regardless of whether it was loaded (used for log messages).
+    pub schema_source_exists: bool,
+
     /// Cedar policy set
     pub policies: PoliciesContainer,
 

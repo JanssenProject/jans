@@ -271,6 +271,9 @@ public class RegisterService {
         if (requestObject.getTokenExchangeScriptDns() != null) {
             client.getAttributes().setTokenExchangeScripts(requestObject.getTokenExchangeScriptDns());
         }
+        if (requestObject.getIdJagScriptDns() != null) {
+            client.getAttributes().setIdJagScripts(requestObject.getIdJagScriptDns());
+        }
         if (requestObject.getConsentGatheringScriptDns() != null) {
             client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());
         }

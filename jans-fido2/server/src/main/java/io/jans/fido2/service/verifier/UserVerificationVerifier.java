@@ -29,7 +29,7 @@ public class UserVerificationVerifier {
     private Logger log;
 
     public boolean verifyUserPresent(AuthData authData) {
-        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_PRESENT) == 1) {
+        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_PRESENT) != 0) {
             return true;
         } else {
             throw new Fido2RuntimeException("User not present");
@@ -37,11 +37,7 @@ public class UserVerificationVerifier {
     }
 
     public boolean verifyUserVerified(AuthData authData) {
-        if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_VERIFIED) == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return (authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_VERIFIED) != 0;
     }
 
 	public void verifyUserVerificationOption(UserVerification userVerification, AuthData authData) {
@@ -57,7 +53,9 @@ public class UserVerificationVerifier {
 	}
 
     public void verifyRequiredUserPresent(AuthData authData) {
-        log.debug("Required user present {}", Hex.encodeHexString(authData.getFlags()));
+        if (log.isDebugEnabled()) {
+            log.debug("Required user present {}", Hex.encodeHexString(authData.getFlags()));
+        }
         byte flags = authData.getFlags()[0];
 
         if (!isUserVerified(flags)) {
@@ -66,19 +64,15 @@ public class UserVerificationVerifier {
     }
 
     public void verifyPreferredUserPresent(AuthData authData) {
-        log.debug("Preferred user present {}", Hex.encodeHexString(authData.getFlags()));
-//        byte flags = authData.getFlags()[0];
-//        if (!(isUserVerified(flags) || isUserPresent(flags) || true)) {
-//            throw new Fido2RPRuntimeException("User preferred is not present");
-//        }
+        if (log.isDebugEnabled()) {
+            log.debug("Preferred user present {}", Hex.encodeHexString(authData.getFlags()));
+        }
     }
 
     public void verifyDiscouragedUserPresent(AuthData authData) {
-        log.debug("Discouraged user present {}", Hex.encodeHexString(authData.getFlags()));
-//        byte flags = authData.getFlags()[0];
-//        if (isUserPresent(flags) && isUserVerified(flags)) {
-//            throw new Fido2RPRuntimeException("User discouraged is not present");
-//        }
+        if (log.isDebugEnabled()) {
+            log.debug("Discouraged user present {}", Hex.encodeHexString(authData.getFlags()));
+        }
     }
 
     private boolean isUserVerified(byte flags) {
@@ -86,13 +80,6 @@ public class UserVerificationVerifier {
         log.debug("UV = {}", uv);
 
         return uv;
-    }
-
-    private boolean isUserPresent(byte flags) {
-        boolean up = (flags & AuthenticatorDataParser.FLAG_USER_PRESENT) != 0;
-        log.debug("UP = {}", up);
-
-        return up;
     }
 
 }

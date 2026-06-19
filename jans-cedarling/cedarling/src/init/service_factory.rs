@@ -85,13 +85,21 @@ impl<'a> ServiceFactory<'a> {
         let logger = self.log_service();
         let policy_store = &self.service_config.policy_store;
 
+        // Log warns that some default entities loaded not correctly — once at startup.
+        for warn in policy_store.default_entities.warns() {
+            logger.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
+                    .set_message(warn.to_string()),
+            );
+        }
+
         // warn once at startup when strict schema validation is disabled
         if !self
             .bootstrap_config
             .authorization_config
             .strict_schema_validation
         {
-            let msg = if policy_store.schema.is_some() {
+            let msg = if policy_store.schema_source_exists {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — schema present but not enforced"
             } else {
                 "CEDARLING_STRICT_SCHEMA_VALIDATION is disabled — no schema loaded; policies run without attribute validation"
@@ -121,13 +129,6 @@ impl<'a> ServiceFactory<'a> {
                 policy_store.default_entities.entities().len(),
             )),
         );
-
-        for warn in policy_store.default_entities.warns() {
-            logger.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                    .set_message(warn.to_string()),
-            );
-        }
 
         let authz = build_authz(
             self.service_config.policy_store.clone(),
