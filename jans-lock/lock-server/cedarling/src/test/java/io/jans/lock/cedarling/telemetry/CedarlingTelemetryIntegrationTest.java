@@ -290,11 +290,11 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 
 			// Structural and value verification
 			verifyHealthPayloads(r1Health, "Round 1");
-			verifyHealthBulkPayloads(r1BulkHealth, "Round 1 (bulk)", -1);
+			verifyHealthBulkPayloads(r1BulkHealth, "Round 1 (bulk)", 1);
 			verifyLogPayloads(r1Log, "Round 1");
 			verifyLogBulkPayloads(r1BulkLog, "Round 1 (bulk)", round1AuthCalls);
 			verifyTelemetryPayloads(r1Telemetry, "Round 1");
-			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", -1);
+			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", 1);
 
 			// Capture round 1's latest evaluationRequestsCount for comparison
 			long r1EvalCount = latestLong(r1Telemetry, "evaluationRequestsCount");
@@ -326,11 +326,11 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 					r2BulkTelemetry.size(), r2BulkHealth.size(), r2BulkLog.size());
 
 			verifyHealthPayloads(r2Health, "Round 2");
-			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", -1);
+			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", 1);
 			verifyLogPayloads(r2Log, "Round 2");
 			verifyLogBulkPayloads(r2BulkLog, "Round 2 (bulk)", round2AuthCalls);
 			verifyTelemetryPayloads(r2Telemetry, "Round 2");
-			verifyTelemetryBulkPayloads(r2BulkTelemetry, "Round 2", -1);
+			verifyTelemetryBulkPayloads(r2BulkTelemetry, "Round 2", 1);
 
 			// ════════════════════════ CROSS-ROUND COMPARISON ═════════════════
 			compareTelemetryAcrossRounds(r1EvalCount, r1Telemetry, r2Telemetry);
@@ -405,7 +405,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		log.info("[{}] {} health payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyHealthBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
+	private void verifyHealthBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
 		if (payloads.isEmpty()) {
 			log.warn("⚠️ [{}] No bulk-health payloads received – skipping field checks", label);
 			return;
@@ -425,8 +425,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " health entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " health entries but got " + count);
 		}
 		log.info("[{}] ✅ {} health payloads verified", label, count);
 	}
@@ -436,13 +436,19 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		assertTrue(node.hasNonNull("service"), ctx + ": missing 'service'");
 		assertTrue(node.hasNonNull("status"), ctx + ": missing 'status'");
 		assertTrue(node.hasNonNull("node_name"), ctx + ": missing 'node_name'");
+		assertTrue(node.hasNonNull("creation_date"), ctx + ": missing 'creation_date'");
+		assertTrue(node.hasNonNull("event_time"), ctx + ": missing 'event_time'");
+		assertTrue(node.hasNonNull("engine_status"), ctx + ": missing 'engine_status'");
 
 		// ── Value assertions ──
 		assertEquals("Lock Server - Test Edition", node.get("service").asText(), ctx + ": service must be 'Lock Server - Test Edition'");
 		assertEquals("running", node.get("status").asText(), ctx + ": status must be 'running'");
-
-		// node_name must be present and non-blank
 		assertFalse(node.get("node_name").asText("").isBlank(), ctx + ": node_name must not be blank");
+
+		// engine_status must report both subsystems healthy
+		JsonNode engineStatus = node.get("engine_status");
+		assertEquals("success", engineStatus.path("core").asText(), ctx + ": engine_status.core must be 'success'");
+		assertEquals("success", engineStatus.path("policy_load").asText(), ctx + ": engine_status.policy_load must be 'success'");
 	}
 
 	/**
@@ -467,7 +473,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		log.info("[{}] {} log payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyLogBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
+	private void verifyLogBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
 		if (payloads.isEmpty()) {
 			log.warn("⚠️ [{}] No bulk-log payloads received – skipping field checks", label);
 			return;
@@ -487,29 +493,33 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " log entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " log entries but got " + count);
 		}
 		log.info("[{}] ✅ {} log payload(s) verified", label, count);
 	}
 
 	private void verifyLogPayload(String ctx, JsonNode node) {
 		// ── Required fields ──
-		assertTrue(node.hasNonNull("clientId"), ctx + ": missing 'clientId'");
-		assertTrue(node.hasNonNull("principalId"), ctx + ": missing 'principalId'");
-		assertTrue(node.hasNonNull("decisionResult"), ctx + ": missing 'decisionResult'");
+		assertTrue(node.hasNonNull("service"), ctx + ": missing 'service'");
+		assertTrue(node.hasNonNull("decision_result"), ctx + ": missing 'decision_result'");
 		assertTrue(node.hasNonNull("action"), ctx + ": missing 'action'");
+		assertTrue(node.hasNonNull("requested_resource"), ctx + ": missing 'requested_resource'");
+		assertTrue(node.hasNonNull("node_name"), ctx + ": missing 'node_name'");
+		assertTrue(node.hasNonNull("event_type"), ctx + ": missing 'event_type'");
+		assertTrue(node.hasNonNull("creation_date"), ctx + ": missing 'creation_date'");
 
 		// ── Value assertions ──
-		String decision = node.get("decisionResult").asText();
-		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decisionResult must be 'ALLOW' or 'DENY', got: " + decision);
+		String decision = node.get("decision_result").asText();
+		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decision_result must be 'ALLOW' or 'DENY', got: " + decision);
 
 		// action must follow the Cedar action URI format: Namespace::Action::"name"
 		String action = node.get("action").asText();
 		assertTrue(action.matches(".+::Action::\"[^\"]+\""), ctx + ": action must match Cedar format '<Namespace>::Action::\"<name>\"', got: " + action);
 
-		// clientId must be present and non-blank
-		assertFalse(node.get("clientId").asText("").isBlank(), ctx + ": clientId must not be blank");
+		assertFalse(node.get("service").asText("").isBlank(), ctx + ": service must not be blank");
+		assertFalse(node.get("node_name").asText("").isBlank(), ctx + ": node_name must not be blank");
+		assertEquals("Decision", node.get("event_type").asText(), ctx + ": event_type must be 'Decision'");
 	}
 
 	/**
@@ -533,7 +543,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		log.info("[{}] {} telemetry payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
+	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
 		if (payloads.isEmpty()) {
 			log.warn("⚠️ [{}] No telemetry payloads received – skipping field checks", label);
 			return;
@@ -553,8 +563,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " telemetry entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " telemetry entries but got " + count);
 		}
 		log.info("[{}] ✅ {} telemetry payloads verified", label, count);
 	}
@@ -795,8 +805,9 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 						.policyStoreLocalFn(System.getProperty("user.dir") + "/target/test-classes/test-policy-store").jwtStatusValidation(false).jwtSigValidation(false).logType(LogType.STD_OUT)
 						.logLevel(LogLevel.TRACE)
 						// Lock / telemetry
-						.lock(true).lockAcceptInvalidCerts(true).lockServerConfigurationUri(lockServerUri).lockDynamicConfiguration(true).lockHealthInterval(TELEMETRY_INTERVAL_SEC)
-						.lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessTokenJwt).build();
+						.lock(true).lockDynamicConfiguration(true).lockAcceptInvalidCerts(true).lockServerConfigurationUri(lockServerUri)
+						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockLogInterval(TELEMETRY_INTERVAL_SEC)
+						.lockListenSse(false).lockAccessTokenJwt(lockAccessTokenJwt).build();
 
 				log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
 				return bootstrapConfig;
