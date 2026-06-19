@@ -126,17 +126,21 @@ jobs:
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
     - name: Delete the deploy target's package versions (so a re-release overwrites)
+      # TAG is passed via env (not inline ${{ }}) so a crafted tag name cannot inject
+      # shell into this step, which runs destructive package deletions.
+      env:
+        TAG: ${{ steps.tag.outputs.tag }}
       run: |
-        TAG="${{ steps.tag.outputs.tag }}"
-        # Mirror the version the build-and-publish deploy step uses: nightly stays
-        # 0.0.0-nightly; a release tag drops the leading 'v' (v2.2.0 -> 2.2.0).
+        # Only the nightly tag or a semver release tag (vX.Y.Z[-suffix]) is a valid
+        # deploy target; mirror the version the deploy step uses (nightly ->
+        # 0.0.0-nightly, vX.Y.Z -> X.Y.Z). Any other tag is a no-op so we never
+        # delete an unintended package version.
         if [ "$TAG" = "nightly" ]; then
           TARGET="0.0.0-nightly"
-        else
+        elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
           TARGET="${TAG#v}"
-        fi
-        if [ -z "$TARGET" ]; then
-          echo "No target version resolved from tag '$TAG'; nothing to purge."
+        else
+          echo "Tag '$TAG' is not a deploy target (expected 'nightly' or vX.Y.Z); nothing to purge."
           exit 0
         fi
         echo "Purging Maven package version '$TARGET' so the deploy can re-publish it."
