@@ -104,17 +104,35 @@ def sub(rel, pattern, repl, flags=0):
     return n
 
 
-def bump(version):
+def bump(version, docker_suffix="1"):
+    docker_tag = f"{version}-{docker_suffix}"
     changed = []
 
-    # 1. The unambiguous "0.0.0-nightly" sentinel -- whole-file text replace.
-    #    Covers ~120 poms, all charts (Chart.yaml/values.yaml/README.md), every
-    #    service Dockerfile (CN_VERSION, OCI label, BASE_VERSION), Agama
-    #    project.json, demo manifests, docs, and the shell/automation scripts.
+    # Image-tag references take the docker suffix (e.g. 2.2.0-1); everything else
+    # (artifact / chart / package versions) takes the bare version. Both appear as
+    # "0.0.0-nightly" in the tree, so they are distinguished by context below.
+    image_tag_subs = [
+        (r'(\btag:\s*["\']?)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                       # helm values.yaml image tag
+        (r'(ghcr\.io/[^\s:"\']+:)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                  # any ghcr image reference
+        (r'(org\.opencontainers\.image\.version=")0\.0\.0-nightly', rf"\g<1>{docker_tag}"),  # Dockerfile OCI label
+        (r'(ARG\s+BASE_VERSION=)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                   # all-in-one base image tag
+        (r'(JANS_VERSION=["\']?)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                   # demo scripts call an image tag
+    ]
+
+    # 1. The unambiguous "0.0.0-nightly" sentinel. Apply the image-tag rules first
+    #    (-> suffixed docker tag), then replace whatever remains with the bare version.
+    #    Covers ~120 poms, all charts, every Dockerfile (CN_VERSION stays bare = the
+    #    WAR version), Agama project.json, demos, docs, and the automation scripts.
     for rel in sorted(set(grep_files(NIGHTLY) + grep_files(NIGHTLY_BADGE))):
         if rel in EXCLUDE_NIGHTLY:
             continue
-        if replace_text(rel, [(NIGHTLY, version), (NIGHTLY_BADGE, version)]):
+        text = read(rel)
+        new = text
+        for pat, repl in image_tag_subs:
+            new = re.sub(pat, repl, new)
+        new = new.replace(NIGHTLY, version).replace(NIGHTLY_BADGE, version)
+        if new != text:
+            write(rel, new)
             changed.append(rel)
 
     # 2. Bare "nightly" release-tag pointers (download URLs resolve against these).
@@ -134,6 +152,12 @@ def bump(version):
     for rel in ls_files("*Cargo.toml"):
         if sub(rel, r'(?m)^version\s*=\s*"0\.0\.0"', f'version = "{version}"'):
             changed.append(rel)
+    # Cargo.lock: keep the workspace crates' lock entries in step with their
+    # Cargo.toml, or `cargo build --locked` fails on the stale lock.
+    cargo_lock = "jans-cedarling/Cargo.lock"
+    if (ROOT / cargo_lock).exists():
+        if sub(cargo_lock, r'(?m)^version = "0\.0\.0"$', f'version = "{version}"'):
+            changed.append(cargo_lock)
     # Python __version__ (jans-pycloudlib, jans-cli-tui, jans-linux-setup)
     for rel in ls_files("*version.py"):
         if sub(rel, r'(__version__\s*=\s*")0\.0\.0(")', rf"\g<1>{version}\g<2>"):
@@ -207,6 +231,9 @@ def verify():
     for rel in ls_files("*Cargo.toml") + ls_files("*pyproject.toml"):
         if re.search(r'(?m)^version\s*=\s*"0\.0\.0"', read(rel)):
             problems.append(f"{rel}: package version still '0.0.0'")
+    cargo_lock = "jans-cedarling/Cargo.lock"
+    if (ROOT / cargo_lock).exists() and re.search(r'(?m)^version = "0\.0\.0"$', read(cargo_lock)):
+        problems.append(f"{cargo_lock}: workspace crate version still '0.0.0'")
     for rel in ls_files("*version.py"):
         if re.search(r'__version__\s*=\s*"0\.0\.0"', read(rel)):
             problems.append(f"{rel}: __version__ still '0.0.0'")
@@ -242,6 +269,8 @@ def main():
     ap.add_argument("--root", type=Path, default=Path.cwd(), help="repo root (default: cwd)")
     ap.add_argument("--pin-source-sha", metavar="SHA",
                     help="also pin Dockerfile JANS_SOURCE_VERSION to this commit")
+    ap.add_argument("--docker-suffix", default="1",
+                    help="suffix for image tags: '1' -> X.Y.Z-1 (default: 1)")
     args = ap.parse_args()
 
     if not VERSION_RE.match(args.version):
@@ -253,7 +282,7 @@ def main():
     if args.verify:
         sys.exit(0 if verify() else 1)
 
-    changed = bump(args.version)
+    changed = bump(args.version, args.docker_suffix)
     if args.pin_source_sha:
         changed += pin_source_sha(args.pin_source_sha)
     changed = sorted(set(changed))

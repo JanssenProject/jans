@@ -30,6 +30,10 @@ on:
         description: 'Pin Dockerfile JANS_SOURCE_VERSION to the released base commit'
         type: boolean
         default: false
+      docker_suffix:
+        description: 'Image-tag suffix (image tags become X.Y.Z-<suffix>)'
+        required: false
+        default: '1'
 
 permissions:
   contents: read   # the tag push + release use MOAUTO_WORKFLOW_TOKEN, not GITHUB_TOKEN
@@ -53,10 +57,15 @@ jobs:
       # out of the shell command -- this step runs before any validation.
       env:
         VERSION_INPUT: ${{ github.event.inputs.version }}
+        SUFFIX_INPUT: ${{ github.event.inputs.docker_suffix }}
       run: |
         V="$VERSION_INPUT"
         if [[ ! "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
           echo "::error::version must be X.Y.Z (optionally -suffix)"
+          exit 1
+        fi
+        if [[ ! "$SUFFIX_INPUT" =~ ^[0-9A-Za-z.]+$ ]]; then
+          echo "::error::docker_suffix must be alphanumeric (got '$SUFFIX_INPUT')"
           exit 1
         fi
 
@@ -86,7 +95,8 @@ jobs:
         if [[ "${{ github.event.inputs.pin_source_sha }}" == "true" ]]; then
           EXTRA="--pin-source-sha $(git rev-parse HEAD)"
         fi
-        python3 automation/release/version_bump.py "${{ github.event.inputs.version }}" $EXTRA
+        python3 automation/release/version_bump.py "${{ github.event.inputs.version }}" \
+          --docker-suffix "${{ github.event.inputs.docker_suffix }}" $EXTRA
 
     # Safety net: abort BEFORE committing/pushing if any owned version was missed.
     - name: Verify the tree is fully bumped
