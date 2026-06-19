@@ -1464,13 +1464,13 @@
 <tbody>
 <tr>
 <td>Docker</td>
-<td><code>amd64-builder-2.9.0-0.0.0.so</code></td>
-<td><code>arm64-builder-2.9.0-0.0.0.so</code></td>
+<td><code>amd64-builder-2.9.0-2.2.0.so</code></td>
+<td><code>arm64-builder-2.9.0-2.2.0.so</code></td>
 </tr>
 <tr>
 <td>On-premise</td>
-<td><code>amd64-builder-2.9.0-linux-generic-0.0.0.so</code></td>
-<td><code>arm64-builder-2.9.0-linux-generic-0.0.0.so</code></td>
+<td><code>amd64-builder-2.9.0-linux-generic-2.2.0.so</code></td>
+<td><code>arm64-builder-2.9.0-linux-generic-2.2.0.so</code></td>
 </tr>
 </tbody>
 </table>
@@ -1487,12 +1487,12 @@ cd cedarling-krakend
 </code></pre></div></li>
 <li>Download the dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform:</li>
 <li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
+<li><a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.dll">cedarling_go.dll</a></li>
+<li><a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.lib">cedarling_go.lib</a></li>
 </ul>
 </li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
+<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.dylib">cedarling_go.dylib</a></li>
+<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.so">libcedarling_go.so</a></li>
 <li>
 <p>Build the plugin, replacing <code>&lt;x.y.z&gt;</code> with the KrakenD version you want to build against:</p>
 </li>
@@ -1552,12 +1552,12 @@ when {
 <li>The plugin <code>.so</code> file for your architecture. For Mac OS hosts, ARM64 is required.</li>
 <li>The dynamic shared object file(s) for the <code>cedarling_go</code> binding, compiled for your platform:</li>
 <li>Windows:<ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll">cedarling_go.dll</a></li>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib">cedarling_go.lib</a></li>
+<li><a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.dll">cedarling_go.dll</a></li>
+<li><a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.lib">cedarling_go.lib</a></li>
 </ul>
 </li>
-<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib">cedarling_go.dylib</a></li>
-<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so">libcedarling_go.so</a></li>
+<li>Mac OS: <a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.dylib">cedarling_go.dylib</a></li>
+<li>Linux: <a href="https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.so">libcedarling_go.so</a></li>
 <li>A configuration file. Sample configuration is provided in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json">krakend.json</a>.</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
@@ -1649,7 +1649,7 @@ curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </sp
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 19, 2026 12:50:13 UTC"><span class="timeago" datetime="2026-06-19T12:50:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 19, 2026 12:50:13 UTC">2026-06-19</span>
   </span>
 
     
