@@ -25,6 +25,7 @@
 use std::fs;
 #[cfg(not(target_arch = "wasm32"))]
 use std::io::Read;
+use std::io::Write;
 
 use serde_json::json;
 #[cfg(not(target_arch = "wasm32"))]
@@ -35,7 +36,7 @@ use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
-use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
     BootstrapConfig, Cedarling, DataStoreConfig, EntityData, PolicyStoreConfig, PolicyStoreSource,
@@ -1223,7 +1224,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -1260,7 +1261,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes)
+    let err = load_policy_store_archive_bytes(&invalid_bytes, true)
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
@@ -1323,4 +1324,117 @@ async fn test_load_from_uri_detects_archive() {
         result.decision,
         "Read action should be allowed when loading archive via Uri"
     );
+}
+
+// ============================================================================
+// No-Schema / Strict Validation Tests
+// ============================================================================
+
+/// Helper: build a `.cjar` archive without a schema file (only metadata + policies).
+fn build_archive_without_schema(id: &str, name: &str) -> Vec<u8> {
+    // ID must be valid hex 8-64 chars
+    assert!(
+        id.len() >= 8 && id.len() <= 64 && id.chars().all(|c| c.is_ascii_hexdigit()),
+        "test archive id must be hex 8-64 chars, got: {id}"
+    );
+    let mut buf = Vec::new();
+    {
+        let cursor = std::io::Cursor::new(&mut buf);
+        let mut zip = zip::ZipWriter::new(cursor);
+        let opts = <zip::write::FileOptions<zip::write::ExtendedFileOptions>>::default()
+            .compression_method(zip::CompressionMethod::Deflated);
+
+        zip.start_file("metadata.json", opts.clone()).unwrap();
+        write!(
+            zip,
+            r#"{{"cedar_version":"4.4.0","policy_store":{{"id":"{id}","name":"{name}","version":"1.0.0"}}}}"#
+        )
+        .unwrap();
+
+        zip.start_file("policies/allow.cedar", opts).unwrap();
+        zip.write_all(b"@id(\"allow-all\")\npermit(principal, action, resource);")
+            .unwrap();
+
+        zip.finish().unwrap();
+    }
+    buf
+}
+
+/// Directory without a schema + strict=false should succeed (schemaless mode).
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_false_succeeds() {
+    let archive = build_archive_without_schema("deadbeef12345678", "No Schema Dir");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
+}
+
+/// Directory without a schema + strict=true should fail init.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_true_fails() {
+    let archive = build_archive_without_schema("deadbeef87654321", "No Schema Dir Strict");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let mut config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    config.authorization_config.strict_schema_validation = true;
+
+    let result = Cedarling::new(&config).await;
+    assert!(
+        result.is_err(),
+        "Expected init to fail: strict_schema_validation=true but policy store has no schema (directory)"
+    );
+}
+
+/// Archive without a schema + strict=false should succeed (schemaless mode).
+#[test]
+async fn test_archive_without_schema_strict_false_succeeds() {
+    let archive_bytes = build_archive_without_schema("deadbeefaaaabbbb", "No Schema Archive");
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::ArchiveBytes(archive_bytes),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
 }
