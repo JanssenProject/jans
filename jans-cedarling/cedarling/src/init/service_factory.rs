@@ -122,6 +122,13 @@ impl<'a> ServiceFactory<'a> {
             )),
         );
 
+        for warn in policy_store.default_entities.warns() {
+            logger.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
+                    .set_message(warn.to_string()),
+            );
+        }
+
         let authz = build_authz(
             self.service_config.policy_store.clone(),
             &self.bootstrap_config.jwt_config,
