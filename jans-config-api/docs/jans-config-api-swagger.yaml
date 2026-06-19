@@ -5181,6 +5181,7 @@ paths:
                   - access_evaluation
                   - access_evaluation_discovery
                   - token_exchange
+                  - identity_assertion
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -15689,19 +15690,19 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         selected:
           type: boolean
@@ -16395,6 +16396,15 @@ components:
           format: int32
         rotateDeviceSecret:
           type: boolean
+        idJagTrustedIdpIssuers:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/TrustedIssuerConfig"
+        idJagLifetime:
+          type: integer
+          format: int32
+        idJagIssueRefreshToken:
+          type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrForbidExpirationTimeInRequest:
@@ -16583,6 +16593,7 @@ components:
             - rate_limit
             - ssa
             - client_id_metadata_document
+            - identity_assertion_authz_grant
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -16649,6 +16660,8 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16658,8 +16671,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17435,6 +17446,10 @@ components:
           type: array
           items:
             type: string
+        idJagScripts:
+          type: array
+          items:
+            type: string
         consentGatheringScripts:
           type: array
           items:
@@ -17538,10 +17553,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17880,6 +17895,7 @@ components:
           - access_evaluation
           - access_evaluation_discovery
           - token_exchange
+          - identity_assertion
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -18556,8 +18572,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18568,6 +18582,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
