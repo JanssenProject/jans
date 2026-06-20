@@ -281,10 +281,8 @@ jobs:
               echo "Waiting for docker ($img) to complete..."
               CONCLUSION=""
               for attempt in $(seq 1 60); do
-                # ?filter=all + max_by(.run_attempt): when only all-in-one is re-run, the
-                # siblings that already succeeded live in an earlier run attempt, which the
-                # default filter=latest hides -- so the poll would never see them and would
-                # time out. Look across all attempts and take the latest one's conclusion.
+                # filter=all (not the default latest): on a re-run of all-in-one alone, a
+                # sibling that succeeded in an earlier attempt is otherwise invisible.
                 CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?filter=all&per_page=100" \
                   --jq "[.jobs[] | select(.name == \"docker ($img)\")] | max_by(.run_attempt) | .conclusion" 2>/dev/null || echo "")
                 if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
