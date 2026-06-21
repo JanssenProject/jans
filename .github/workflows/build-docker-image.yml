@@ -180,8 +180,9 @@ jobs:
               # PR: get changed files via GitHub API
               DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
             elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-              # Chained: the nightly/release publish completed -> build all images
-              DIRECTORIES_CHANGED="$ALL_SERVICES"
+              # Chained nightly/release publish -> build all images. all-in-one is matrix-
+              # only (absent from ALL_SERVICES), so add it or the chain silently skips it.
+              DIRECTORIES_CHANGED="$ALL_SERVICES docker-jans-all-in-one"
             else
               # Direct branch push: use git diff to find which docker dirs changed.
               # Falls back to ALL_SERVICES if before-SHA is unavailable (initial push).
