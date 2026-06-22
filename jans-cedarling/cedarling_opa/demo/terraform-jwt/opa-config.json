@@ -1,7 +1,6 @@
 {
   "plugins": {
     "cedarling_opa": {
-      "stderr": false,
       "bootstrap_config": {
         "CEDARLING_APPLICATION_NAME": "TerraformJwtAuthz",
 

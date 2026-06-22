@@ -1,6 +1,6 @@
 # OPA Cedarling Plugin
 
-A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows.
+A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin also provides the [AuthZen](https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api) access evaluation functionality.
 
 ## Building
 
@@ -52,14 +52,14 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
 {
     "plugins": {
         "cedarling_opa": {
-            "stderr": false,
-            "bootstrap_config": {}
+            "bootstrap_config": {},
+            "evaluation_logic": "MULTI_ISSUER"
         }
     }
 }
 ```
-- `stderr`: Whether or not the **plugin** emits errors to stdout or stderr
 - `bootstrap_config`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
+- `evaluation_logic`: One of `MULTI_ISSUER` or `UNSIGNED`, corresponding to the Cedarling's [authorization modes](https://docs.jans.io/stable/cedarling/reference/cedarling-authz/#which-authorization-method-should-i-use) for the access evaluation API. Defaults to `MULTI_ISSUER`.
 
 3. Finally, run the binary with the plugin and provided rego examples:
 
