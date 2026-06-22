@@ -128,86 +128,35 @@ class AndroidKeyAttestationProcessorTest {
 
     @Test
     void process_ifKeyDescriptionExtensionMissing_rejected() {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        X509Certificate credCert = mock(X509Certificate.class);
-        stubPathToExtension(attStmt, authData, credCert);
-        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID)).thenReturn(null);
-        when(errorResponseFactory.badRequestException(any(), anyString()))
-                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class,
-                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
-        assertEquals(400, ex.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("Missing Android key-description extension " + KEY_DESCRIPTION_OID));
+        assertRejectedWithExtension(null, "Missing Android key-description extension " + KEY_DESCRIPTION_OID);
     }
 
     @Test
     void process_ifAttestationChallengeMismatch_rejected() throws IOException {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        X509Certificate credCert = mock(X509Certificate.class);
-        stubPathToExtension(attStmt, authData, credCert);
-        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID))
-                .thenReturn(keyDescriptionExtension("WRONG-challenge".getBytes(), KM_ORIGIN_GENERATED, KM_PURPOSE_SIGN, false));
-        when(errorResponseFactory.badRequestException(any(), anyString()))
-                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class,
-                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
-        assertEquals(400, ex.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("Attestation challenge in key-description extension does not match clientDataHash"));
+        assertRejectedWithExtension(
+                keyDescriptionExtension("WRONG-challenge".getBytes(), KM_ORIGIN_GENERATED, KM_PURPOSE_SIGN, false),
+                "Attestation challenge in key-description extension does not match clientDataHash");
     }
 
     @Test
     void process_ifAllApplicationsPresent_rejected() throws IOException {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        X509Certificate credCert = mock(X509Certificate.class);
-        stubPathToExtension(attStmt, authData, credCert);
-        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID))
-                .thenReturn(keyDescriptionExtension(CLIENT_DATA_HASH, KM_ORIGIN_GENERATED, KM_PURPOSE_SIGN, true));
-        when(errorResponseFactory.badRequestException(any(), anyString()))
-                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class,
-                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
-        assertEquals(400, ex.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("allApplications must not be present in the attested key authorization list"));
+        assertRejectedWithExtension(
+                keyDescriptionExtension(CLIENT_DATA_HASH, KM_ORIGIN_GENERATED, KM_PURPOSE_SIGN, true),
+                "allApplications must not be present in the attested key authorization list");
     }
 
     @Test
     void process_ifOriginNotGenerated_rejected() throws IOException {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        X509Certificate credCert = mock(X509Certificate.class);
-        stubPathToExtension(attStmt, authData, credCert);
-        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID))
-                .thenReturn(keyDescriptionExtension(CLIENT_DATA_HASH, 1 /* not GENERATED */, KM_PURPOSE_SIGN, false));
-        when(errorResponseFactory.badRequestException(any(), anyString()))
-                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class,
-                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
-        assertEquals(400, ex.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("Attested key origin is not KM_ORIGIN_GENERATED"));
+        assertRejectedWithExtension(
+                keyDescriptionExtension(CLIENT_DATA_HASH, 1 /* not GENERATED */, KM_PURPOSE_SIGN, false),
+                "Attested key origin is not KM_ORIGIN_GENERATED");
     }
 
     @Test
     void process_ifPurposeMissingSign_rejected() throws IOException {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        X509Certificate credCert = mock(X509Certificate.class);
-        stubPathToExtension(attStmt, authData, credCert);
-        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID))
-                .thenReturn(keyDescriptionExtension(CLIENT_DATA_HASH, KM_ORIGIN_GENERATED, 0 /* not SIGN */, false));
-        when(errorResponseFactory.badRequestException(any(), anyString()))
-                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class,
-                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
-        assertEquals(400, ex.getResponse().getStatus());
-        verify(errorResponseFactory).badRequestException(any(), eq("Attested key purpose does not include KM_PURPOSE_SIGN"));
+        assertRejectedWithExtension(
+                keyDescriptionExtension(CLIENT_DATA_HASH, KM_ORIGIN_GENERATED, 0 /* not SIGN */, false),
+                "Attested key purpose does not include KM_PURPOSE_SIGN");
     }
 
     @Test
@@ -231,6 +180,28 @@ class AndroidKeyAttestationProcessorTest {
 
         verify(credIdAndCounters).setAttestationType("android-key");
         verify(credIdAndCounters).setSignatureAlgorithm(1);
+    }
+
+    /**
+     * Drives process() to the key-description step with the supplied extension value and asserts the
+     * registration is rejected with a 400 carrying the expected message.
+     *
+     * @param extension       the value returned by {@code credCert.getExtensionValue}; null simulates an absent extension
+     * @param expectedMessage the rejection message passed to {@code badRequestException}
+     */
+    private void assertRejectedWithExtension(byte[] extension, String expectedMessage) {
+        JsonNode attStmt = mock(JsonNode.class);
+        AuthData authData = mock(AuthData.class);
+        X509Certificate credCert = mock(X509Certificate.class);
+        stubPathToExtension(attStmt, authData, credCert);
+        when(credCert.getExtensionValue(KEY_DESCRIPTION_OID)).thenReturn(extension);
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("android_key_error").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> processor.process(attStmt, authData, mock(Fido2RegistrationData.class), CLIENT_DATA_HASH, mock(CredAndCounterData.class)));
+        assertEquals(400, ex.getResponse().getStatus());
+        verify(errorResponseFactory).badRequestException(any(), eq(expectedMessage));
     }
 
     /** Wires the collaborators so process() reaches verifyKeyDescription with a matching public key. */
