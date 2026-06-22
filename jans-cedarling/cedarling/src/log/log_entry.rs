@@ -49,6 +49,12 @@ pub struct LogEntry {
     /// cedar-policy sdk  version
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cedar_sdk_version: Option<semver::Version>,
+    /// Git commit hash at build time
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_commit: Option<String>,
+    /// Build timestamp in RFC 3339 format
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_timestamp: Option<String>,
 }
 
 impl LogEntry {
@@ -60,6 +66,8 @@ impl LogEntry {
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
+            build_commit: None,
+            build_timestamp: None,
         }
     }
 
@@ -81,6 +89,16 @@ impl LogEntry {
     pub(crate) fn set_cedar_version(mut self) -> Self {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
+        self
+    }
+
+    pub(crate) fn set_build_info(
+        mut self,
+        build_commit: Option<&str>,
+        build_timestamp: Option<&str>,
+    ) -> Self {
+        self.build_commit = build_commit.map(ToString::to_string);
+        self.build_timestamp = build_timestamp.map(ToString::to_string);
         self
     }
 }
