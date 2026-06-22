@@ -46,6 +46,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
+    public static final int DEFAULT_ID_JAG_LIFETIME = 300;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -753,6 +754,16 @@ public class AppConfiguration implements Configuration {
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
+
+    // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
+    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.", defaultValue = "empty")
+    private Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers = new HashMap<>();
+
+    @DocProperty(description = "Lifetime in seconds for ID-JAGs issued by this AS (IdP role).", defaultValue = "300")
+    private int idJagLifetime = 300;
+
+    @DocProperty(description = "Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false.", defaultValue = "false")
+    private Boolean idJagIssueRefreshToken = false;
 
     @DocProperty(description = "", defaultValue = "false")
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
@@ -3970,6 +3981,33 @@ public class AppConfiguration implements Configuration {
 
     public void setCimdMaxTtlMinutes(Integer cimdMaxTtlMinutes) {
         this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
+    }
+
+    public Map<String, TrustedIssuerConfig> getIdJagTrustedIdpIssuers() {
+        if (idJagTrustedIdpIssuers == null) idJagTrustedIdpIssuers = new HashMap<>();
+        return idJagTrustedIdpIssuers;
+    }
+
+    public void setIdJagTrustedIdpIssuers(Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers) {
+        this.idJagTrustedIdpIssuers = idJagTrustedIdpIssuers;
+    }
+
+    public int getIdJagLifetime() {
+        if (idJagLifetime <= 0) idJagLifetime = DEFAULT_ID_JAG_LIFETIME;
+        return idJagLifetime;
+    }
+
+    public void setIdJagLifetime(int idJagLifetime) {
+        this.idJagLifetime = idJagLifetime > 0 ? idJagLifetime : DEFAULT_ID_JAG_LIFETIME;
+    }
+
+    public Boolean getIdJagIssueRefreshToken() {
+        if (idJagIssueRefreshToken == null) idJagIssueRefreshToken = false;
+        return idJagIssueRefreshToken;
+    }
+
+    public void setIdJagIssueRefreshToken(Boolean idJagIssueRefreshToken) {
+        this.idJagIssueRefreshToken = idJagIssueRefreshToken;
     }
 
 }
