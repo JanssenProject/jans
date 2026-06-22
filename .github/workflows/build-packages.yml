@@ -128,7 +128,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
         path: temp-jans
 
     - name: Getting build dependencies
@@ -170,7 +170,10 @@ jobs:
       id: run_build
       run: |
          cd jans/
-         sudo python${{ matrix.python_version }} install.py -download-exit -yes --keep-downloads --keep-setup -force-download
+         # install.py re-downloads the setup source from --setup-branch (default 'main' =
+         # nightly) and bakes its app_info.json in, so a release package embeds the wrong
+         # version unless we point it at the tag.
+         sudo python${{ matrix.python_version }} install.py --setup-branch "${{ steps.previoustag.outputs.tag }}" -download-exit -yes --keep-downloads --keep-setup -force-download
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
@@ -262,7 +265,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -394,7 +397,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -549,7 +552,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Build with Ubuntu
       continue-on-error: true
       env:
@@ -671,7 +674,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -890,7 +893,7 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -1064,7 +1067,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -1150,7 +1153,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -1756,7 +1759,12 @@ jobs:
 
       - name: Build extension package
         working-directory: ${{ env.EXT_DIR }}
-        run: cargo pgrx package --features ${{ matrix.pg }}
+        run: |
+          PG_CONFIG="$(cargo pgrx info pg-config ${{ matrix.pg }})"
+          cargo pgrx package \
+            --features ${{ matrix.pg }} \
+            --no-default-features \
+            --pg-config "${PG_CONFIG}"
 
       - name: Stage tarball
         id: stage
@@ -1774,11 +1782,9 @@ jobs:
           fi
 
           PG="${{ matrix.pg }}"
-          pkg_root="target/release/${EXT_NAME}-${PG}"
+          pkg_root="../target/release/${EXT_NAME}-${PG}"
           test -d "${pkg_root}" || { echo "package output missing at ${pkg_root}"; exit 1; }
 
-          # pgrx emits a matched set per PG major: .so under usr/lib/postgresql/<NN>/lib
-          # and .control + .sql under usr/share/postgresql/<NN>/extension.
           BASE="${EXT_NAME}-${TAG}-${PG}-linux-x86_64"
           stage="$(mktemp -d)"
           mkdir -p "${stage}/${BASE}"

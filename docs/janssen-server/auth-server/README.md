@@ -60,6 +60,7 @@ FAPI-CIBA OpenID Providers for the latest results.
 * [Draft - JWT Response for OAuth Token Introspection](https://www.ietf.org/archive/id/draft-ietf-oauth-jwt-introspection-response-12.html)
 * [OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396)
 * [Token Status List (TSL)](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-status-list-13)
+* [Identity Assertion JWT Authorization Grant](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html)
 
 **User Managed Access (UMA)**
 

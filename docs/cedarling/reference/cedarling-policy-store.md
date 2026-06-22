@@ -23,12 +23,12 @@ For a comprehensive JSON schema defining the structure of the policy store, see:
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:
+Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
 
 | Configuration | Detection |
 |---------------|-----------|
-| `CEDARLING_POLICY_STORE_URI` ending in `.cjar` | Cedar Archive from URL |
-| `CEDARLING_POLICY_STORE_URI` (other) | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL |
+| `CEDARLING_POLICY_STORE_URI`, response body is JSON | Legacy JSON from Lock Server |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
@@ -45,7 +45,10 @@ The new directory-based format uses human-readable Cedar files organized in a st
 ```text
 policy-store/
 ├── metadata.json           # Required: Store identification and versioning
-├── schema.cedarschema      # Required: Cedar schema in human-readable format
+├── schema.cedarschema      # Option A: Single schema file (takes precedence)
+├── schemas/                # Option B: Split schema directory (fallback)
+│   ├── users.cedarschema
+│   └── resources.cedarschema
 ├── policies/               # Required: Directory containing .cedar policy files
 │   ├── allow-read.cedar
 │   └── deny-guest.cedar
@@ -53,6 +56,13 @@ policy-store/
 ├── entities/               # Optional: Directory containing .json entity files
 └── trusted-issuers/        # Optional: Directory containing .json issuer configs
 ```
+
+The schema can be provided in one of two ways (but not both):
+
+- **Option A — single file**: `schema.cedarschema` at the store root. This is the original format.
+- **Option B — split across multiple files**: `schemas/*.cedarschema` directory. Each file is parsed as an independent `SchemaFragment`, then merged via `Schema::from_schema_fragments`. This is useful for large schemas with multiple namespaces.
+
+If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, behavior depends on `CEDARLING_STRICT_SCHEMA_VALIDATION`: with strict mode enabled (the default), loading fails with a `MissingSchemaSource` error; with strict mode disabled, the store loads successfully and policies run without schema-based attribute validation.
 
 #### metadata.json
 
@@ -289,6 +299,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
+| `policy_store_refresh.upgrade_to_head_transitions` | Cumulative count of probes that upgraded `PlainGet → HeadThenGet` |
 | `policy_store_refresh.upgrade_to_conditional_transitions` | Cumulative count of probes that upgraded back to `Conditional` |
 | `policy_store_refresh.outcome_success` | Cumulative count of `Success` outcomes |
 | `policy_store_refresh.outcome_not_modified` | Cumulative count of `NotModified` outcomes |
@@ -865,7 +876,7 @@ type TokensContext = {
 
 #### Key Requirements
 
-1. **Required Attributes**: Add `token_type`, `jti`, `issuer`, `exp`, `validated_at` to all token entities
+1. **Required Attributes**: Add `token_type`, `jti`, `iss`, `exp`, `validated_at` to all token entities
 2. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
 3. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
 4. **Context Update**: Add `tokens?: TokensContext` field to your Context type

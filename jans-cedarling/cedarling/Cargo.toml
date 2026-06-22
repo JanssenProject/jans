@@ -31,8 +31,8 @@ uuid7 = { version = "1.6.0", features = [
     "uuid",
     "rand010",
 ], default-features = false }
-cedar-policy = { version = "4.10.0", features = ["partial-eval"] }
-cedar-policy-core = "4.9.0"
+cedar-policy = { version = "4.11.1", features = ["partial-eval"] }
+cedar-policy-core = "4.11.1"
 base64 = "0.22.1"
 url = "2.5.2"
 http_utils = { workspace = true }
