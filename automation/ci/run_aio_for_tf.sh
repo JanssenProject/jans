@@ -17,13 +17,13 @@ cd "$REPO_ROOT" || exit 1
 
 : "${JANS_FQDN:?set JANS_FQDN}"
 : "${JANS_PERSISTENCE:?set JANS_PERSISTENCE}"
-AIO_IMAGE_TAG="${AIO_IMAGE_TAG:-ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly}"
+AIO_IMAGE_TAG="${AIO_IMAGE_TAG:-ghcr.io/janssenproject/jans/all-in-one:2.2.0-1}"
 
-# start_janssen_aio_demo.sh hardcodes the demo image as :0.0.0-nightly. Pull the chosen
+# start_janssen_aio_demo.sh hardcodes the demo image as :2.2.0. Pull the chosen
 # image, then bake a thin layer (test data + a known, trusted, all-scopes config-api test
 # client) tagged as that name, so the provider authenticates with deterministic credentials
 # and the compose file uses it unchanged. Mirrors run_aio_integration.sh's Dockerfile.ci-aio.
-DEMO_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
+DEMO_TAG="ghcr.io/janssenproject/jans/all-in-one:2.2.0-1"
 echo "[I] pulling $AIO_IMAGE_TAG"
 docker pull "$AIO_IMAGE_TAG"
 {

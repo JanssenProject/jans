@@ -142,7 +142,7 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
 Pull the Docker image:
 
 ```bash
-docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.2.0-1
 ```
 
 Run the Docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
@@ -154,7 +154,7 @@ docker run -d \
   -e SIDECAR_DEBUG_RESPONSE=True \
   --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
   -p 5000:5000\
-  ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+  ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.2.0-1
 ```
 
 The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000). Keep track of the output of the previous command,

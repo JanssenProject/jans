@@ -49,8 +49,8 @@ RUN wget -q https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOL
 # Janssen modules
 # ===============
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_RELEASE_TAG=nightly
+ENV CN_VERSION=2.2.0
+ENV CN_RELEASE_TAG=v2.2.0
 ENV CN_BUILD_DATE='2025-02-02 00:00'
 
 # Download Janssen Shibboleth IDP WAR
@@ -166,7 +166,7 @@ LABEL maintainer="Janssen Project <jans@googlegroups.com>" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.vendor="Janssen Project" \
       org.opencontainers.image.url="ghcr.io/janssenproject/jans/shibboleth" \
-      org.opencontainers.image.version="0.0.0-nightly"
+      org.opencontainers.image.version="2.2.0-1"
 
 USER shibboleth
 

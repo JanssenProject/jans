@@ -50,7 +50,7 @@ Not yet implemented
 - Modify the file to your specifications. Refer to the [Cedarling properties documentation](../../docs/cedarling/reference/cedarling-properties.md) for configuration values.
 - Pull the docker image:
   ```
-  docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+  docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.2.0-1
   ```
 - Run the docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
 
@@ -61,7 +61,7 @@ Not yet implemented
     -e SIDECAR_DEBUG_RESPONSE=False \
     --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
     -p 5000:5000 \
-    ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.2.0-1
   ```
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 

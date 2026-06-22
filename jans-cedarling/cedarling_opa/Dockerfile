@@ -5,7 +5,7 @@ ARG BASEIMAGE="gcr.io/distroless/cc-debian12:nonroot@sha256:bd2899c12b335c827750
 
 # Stage 1: Rust build
 FROM rust:1.95-slim-bookworm@sha256:d7482085ff5b415f84dba5647ae71606650bdef00db7aeb69f4b3d170c3e4082 AS rust-builder
-ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+ARG JANS_SOURCE_VERSION=e0571e40361954214a99b09dd6a67eae3949a59c
 RUN apt-get update \
     && apt-get install -y git protobuf-compiler \
     && rm -rf /var/cache/apt
@@ -35,7 +35,7 @@ EXPOSE 8181
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-opa" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.2.0-1" \
     org.opencontainers.image.title="Cedarling OPA" \
     org.opencontainers.image.description="Janssen Cedarling OPA"
 ENTRYPOINT ["/app/opa-cedarling"]

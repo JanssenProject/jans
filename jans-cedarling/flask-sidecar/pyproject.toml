@@ -1,6 +1,6 @@
 [project]
 name = "flask-sidecar"
-version = "0.0.0"
+version = "2.2.0"
 description = "Sidecar for cedarling"
 authors = [{ name = "SafinWasi", email = "6601566+SafinWasi@users.noreply.github.com" }]
 requires-python = ">=3.11,<3.12"

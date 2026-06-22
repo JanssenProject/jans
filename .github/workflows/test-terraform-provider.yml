@@ -36,7 +36,7 @@ on:
       aio_image_tag:
         description: 'AIO image to test against'
         required: false
-        default: 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly'
+        default: 'ghcr.io/janssenproject/jans/all-in-one:2.2.0-1'
   schedule:
     # nightly, after the nightly image is republished (build-nightly-build runs at 23:00 UTC)
     - cron: "0 4 * * *"
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JANS_FQDN: tf-${{ github.run_id }}-${{ matrix.persistence-backend }}.jans.test
-      AIO_IMAGE_TAG: ${{ github.event.inputs.aio_image_tag || 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly' }}
+      AIO_IMAGE_TAG: ${{ github.event.inputs.aio_image_tag || 'ghcr.io/janssenproject/jans/all-in-one:2.2.0-1' }}
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0

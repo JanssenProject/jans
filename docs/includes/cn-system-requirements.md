@@ -21,4 +21,4 @@ Use the listing below for a detailed estimation of minimum required resources. T
 | link              | 0.5      | 1GB   | N/A        | 64 Bit         | No                                 |
 | saml              | 0.5      | 1GB   | N/A        | 64 Bit         | No                                 |
 
-Releases of images are in style 0.0.0-nightly or x.y-z-1
+Releases of images are in style 2.2.0 or x.y-z-1

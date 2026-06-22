@@ -29,8 +29,8 @@ Use the following table to find which build you need:
 
 |            | amd64                                        | arm64                                        |
 | ---------- | -------------------------------------------- | -------------------------------------------- |
-| Docker     | `amd64-builder-2.9.0-0.0.0.so`               | `arm64-builder-2.9.0-0.0.0.so`               |
-| On-premise | `amd64-builder-2.9.0-linux-generic-0.0.0.so` | `arm64-builder-2.9.0-linux-generic-0.0.0.so` |
+| Docker     | `amd64-builder-2.9.0-2.2.0.so`               | `arm64-builder-2.9.0-2.2.0.so`               |
+| On-premise | `amd64-builder-2.9.0-linux-generic-2.2.0.so` | `arm64-builder-2.9.0-linux-generic-2.2.0.so` |
 
 If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.
 
@@ -47,10 +47,10 @@ If you are running a different version of KrakenD, you can use the following ste
   ```
 - Download the dynamic shared object file(s) for the `cedarling_go` binding, compiled for your platform:
   - Windows:
-    - [cedarling_go.dll](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll)
-    - [cedarling_go.lib](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib)
-  - Mac OS: [cedarling_go.dylib](https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib)
-  - Linux: [libcedarling_go.so](https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so)
+    - [cedarling_go.dll](https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.dll)
+    - [cedarling_go.lib](https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.lib)
+  - Mac OS: [cedarling_go.dylib](https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.dylib)
+  - Linux: [libcedarling_go.so](https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.so)
 - Build the plugin, replacing `<x.y.z>` with the KrakenD version you want to build against:
 
   - For Docker targets:
@@ -114,10 +114,10 @@ To test the plugin, you will need:
 - The plugin `.so` file for your architecture. For Mac OS hosts, ARM64 is required.
 - The dynamic shared object file(s) for the `cedarling_go` binding, compiled for your platform:
   - Windows:
-    - [cedarling_go.dll](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.dll)
-    - [cedarling_go.lib](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_go-0.0.0.lib)
-  - Mac OS: [cedarling_go.dylib](https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.dylib)
-  - Linux: [libcedarling_go.so](https://github.com/JanssenProject/jans/releases/download/nightly/libcedarling_go-0.0.0.so)
+    - [cedarling_go.dll](https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.dll)
+    - [cedarling_go.lib](https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_go-2.2.0.lib)
+  - Mac OS: [cedarling_go.dylib](https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.dylib)
+  - Linux: [libcedarling_go.so](https://github.com/JanssenProject/jans/releases/download/v2.2.0/libcedarling_go-2.2.0.so)
 - A configuration file. Sample configuration is provided in [krakend.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json).
 
 ## Configuration

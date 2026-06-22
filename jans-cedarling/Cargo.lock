@@ -698,7 +698,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling"
-version = "0.0.0"
+version = "2.2.0"
 dependencies = [
  "ahash",
  "arc-swap",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_go"
-version = "0.0.0"
+version = "2.2.0"
 dependencies = [
  "cedarling",
  "rust2go",
@@ -806,7 +806,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_python"
-version = "0.0.0"
+version = "2.2.0"
 dependencies = [
  "cedarling",
  "pyo3",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_wasm"
-version = "0.0.0"
+version = "2.2.0"
 dependencies = [
  "cedarling",
  "serde",
@@ -5138,7 +5138,7 @@ dependencies = [
 
 [[package]]
 name = "test_utils"
-version = "0.0.0"
+version = "2.2.0"
 dependencies = [
  "jsonwebkey",
  "jsonwebtoken",

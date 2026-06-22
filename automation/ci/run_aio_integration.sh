@@ -15,7 +15,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 MVN_SETTINGS="$REPO_ROOT/.github/maven-settings.xml"
-AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
+AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:2.2.0-1"
 
 # Resolve DB parameters from the persistence backend (mirrors the workflow's "Resolve DB
 # parameters" step). RDBM_PORT/RDBM_SCHEMA feed render_test_profiles.py.
@@ -62,7 +62,7 @@ done
 if [ -z "${AIO_IMAGE:-}" ]; then
   LOCAL_RELEASE="$REPO_ROOT/local-release"
   mkdir -p "$LOCAL_RELEASE"
-  find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
+  find "$HOME/.m2/repository/io/jans" -type f -path "*/2.2.0/*" \
     \( -name '*.war' -o -name '*-distribution.jar' \) -exec cp -f {} "$LOCAL_RELEASE/" \;
   echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
   ( cd "$LOCAL_RELEASE" && exec python3 -m http.server 8088 >/dev/null 2>&1 ) &
