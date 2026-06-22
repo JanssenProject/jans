@@ -63,8 +63,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.checkForTrustedCertsInAttestation(attestationCerts, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
         verify(base64Service, times(3)).encodeToString(any());
     }
 
@@ -102,9 +102,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-        //verifyNoInteractions(log);
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -184,8 +183,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
         verify(log).warn(contains("Cert verification problem"), any(), any());
         verifyNoMoreInteractions(certificateService);
     }
@@ -300,9 +299,30 @@ class CertificateVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
 
         verify(log).debug(eq("Authenticator AAGUID {} status {} effective date {}"), any(), any(), any());
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifStatusIsRevoked_fido2RuntimeException() {
+        // CONF-19: a REVOKED MDS statusReport must be rejected (entry is dropped from the TOC, so the
+        // authenticator is not trusted; in enforced mode registration then fails — see CONF-22).
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(true);
+        String statusString = "REVOKED";
+        when(statusItem.get("status")).thenReturn(new TextNode(statusString));
+        when(statusItem.get("effectiveDate")).thenReturn(new TextNode("TEST_DATE"));
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
     }
 
     @Test
