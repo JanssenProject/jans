@@ -192,11 +192,12 @@ public class TocService {
 				X509Certificate cert = certificateService.getCertificate(rootCert);
 				if (cert != null) {
 					trustedCertificates.add(cert);
-					log.info("Added per-endpoint MetadataServer rootCert as an additional MDS TOC trust anchor");
+					log.info("Added per-endpoint MetadataServer rootCert as an additional MDS TOC trust anchor for {}",
+							metadataServer.getUrl());
 				}
 			} catch (RuntimeException e) {
-				log.warn("Failed to load configured MetadataServer.rootCert; using mdsCertsFolder trust only: {}",
-						e.getMessage());
+				log.warn("Failed to load configured MetadataServer.rootCert for {}; using mdsCertsFolder trust only: {}",
+						metadataServer.getUrl(), e.getMessage());
 			}
 		}
 	}

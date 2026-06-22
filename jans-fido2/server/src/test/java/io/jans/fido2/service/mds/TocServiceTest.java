@@ -82,6 +82,29 @@ class TocServiceTest {
     }
 
     @Test
+    void addConfiguredMetadataServerRootCerts_ifMetadataServersNull_noChange() {
+        configureMetadataServers(null);
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifCertificateNull_noChange() {
+        MetadataServer server = new MetadataServer();
+        server.setRootCert("BASE64-DER-CERT");
+        configureMetadataServers(Collections.singletonList(server));
+        when(certificateService.getCertificate("BASE64-DER-CERT")).thenReturn(null);
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
     void addConfiguredMetadataServerRootCerts_ifRootCertMalformed_skipsWithoutThrowing() {
         MetadataServer server = new MetadataServer();
         server.setRootCert("BAD-CERT");
