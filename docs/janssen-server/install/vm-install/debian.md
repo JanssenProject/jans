@@ -57,8 +57,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb.sha256sum -P /tmp
-    sha256sum -c jans_replace-janssen-version~debian13_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version~debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version~debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version~debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
