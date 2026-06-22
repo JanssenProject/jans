@@ -43,10 +43,7 @@ fn emit_build_metadata() {
 /// Uses `--git-dir` / `--git-common-dir` so the lookup works correctly in
 /// linked worktrees, submodules, and nested workspaces.
 fn git_rerun_if_changed() {
-    let manifest_dir = match std::env::var("CARGO_MANIFEST_DIR") {
-        Ok(d) => d,
-        Err(_) => return,
-    };
+    let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") else { return };
 
     let git_dir_output = std::process::Command::new("git")
         .args(["-C", &manifest_dir, "rev-parse", "--git-dir"])
@@ -98,8 +95,8 @@ fn git_rerun_if_changed() {
     if head.exists() {
         println!("cargo:rerun-if-changed={}", head.display());
 
-        if let Ok(content) = std::fs::read_to_string(&head) {
-            if let Some(ref_path) = content.strip_prefix("ref: ") {
+        if let Ok(content) = std::fs::read_to_string(&head)
+            && let Some(ref_path) = content.strip_prefix("ref: ") {
                 let ref_file = git_dir.join(ref_path.trim());
                 let candidate = ref_file.exists().then_some(ref_file)
                     .or_else(|| {
@@ -109,7 +106,6 @@ fn git_rerun_if_changed() {
                 if let Some(f) = candidate {
                     println!("cargo:rerun-if-changed={}", f.display());
                 }
-            }
         }
     }
 
