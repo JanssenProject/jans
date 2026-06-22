@@ -285,8 +285,10 @@ jobs:
               for attempt in $(seq 1 60); do
                 # filter=all spans run attempts; proceed if the image built in ANY attempt
                 # (a re-running newer attempt must not block what an earlier one published).
+                # No 2>/dev/null: a failed query (e.g. missing perm) must show in the log,
+                # not masquerade as a stuck poll. `|| echo ""` still tolerates and retries.
                 CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?filter=all&per_page=100" \
-                  --jq "[.jobs[] | select(.name == \"docker ($img)\")] | if (map(.conclusion) | any(. == \"success\")) then \"success\" elif (map(.conclusion) | any(. == \"skipped\")) then \"skipped\" else (max_by(.run_attempt).conclusion // \"\") end" 2>/dev/null || echo "")
+                  --jq "[.jobs[] | select(.name == \"docker ($img)\")] | if (map(.conclusion) | any(. == \"success\")) then \"success\" elif (map(.conclusion) | any(. == \"skipped\")) then \"skipped\" else (max_by(.run_attempt).conclusion // \"\") end" || echo "")
                 if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
                   echo "  docker ($img): $CONCLUSION"; break
                 elif [[ "$CONCLUSION" == "failure" || "$CONCLUSION" == "cancelled" || "$CONCLUSION" == "timed_out" ]]; then
