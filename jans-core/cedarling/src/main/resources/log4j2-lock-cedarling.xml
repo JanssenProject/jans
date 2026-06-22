@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="jans-lock-cedarling">
+    <Appenders>
+		<RollingFile name="JANS_LOCK_CEDARLING_FILE" fileName="${sys:log.base}/logs/jans-lock-cedarling.log" filePattern="${sys:log.base}/logs/jans-lock-cedarling-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+			<Policies>
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<RollingFile name="JANS_LOCK_CEDARLING_APP_AUDIT_FILE" fileName="${sys:log.base}/logs/jans-lock-cedarling_audit.log" filePattern="${sys:log.base}/logs/jans-lock-cedarling_audit-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+    </Appenders>
+
+    <Loggers>
+		<Logger name="io.jans.lock.cedarling" level="${log4j.default.log.level}">
+			<AppenderRef ref="JANS_LOCK_CEDARLING_FILE" />
+		</Logger>
+
+		<Logger name="io.jans.lock.cedarling.service.app.audit" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="JANS_LOCK_CEDARLING_APP_AUDIT_FILE" />
+		</Logger>
+    </Loggers>
+
+</Configuration>

@@ -1,0 +1,163 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2025, Janssen Project
+ */
+
+package io.jans.lock.cedarling.service;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
+import io.jans.lock.cedarling.config.BootstrapConfig;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
+import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import uniffi.cedarling_uniffi.CedarlingException;
+import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
+
+/**
+ * @author Yuriy Movchan Date: 10/08/2022
+ */
+@ApplicationScoped
+public class CedarlingAuthorizationService {
+
+	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_token";
+	public static final String CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME = "lock-policy-store";
+
+	@Inject
+	private Logger log;
+
+	@Inject
+	private AppConfiguration appConfiguration;
+
+	@Inject
+	private CedarlingPolicyConfiguration policyConfiguration;	
+
+	private String policyStoreLocalFn = CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME;
+	private CedarlingAdapter cedarlingAdapter;
+	private boolean initialized = false;
+
+	@PostConstruct
+	public void init() {
+		log.info("Initialising Cedarling service");
+
+		CedarlingConfiguration cedarConf = appConfiguration.getCedarlingConfiguration();
+		if (cedarConf.isEnabled()) {
+			this.cedarlingAdapter = initAdapter(cedarConf);
+			initialized = true;
+		} else {
+			log.info("Cedarling is disabled");
+		}
+	}
+
+	@PreDestroy
+	public void destroy() {
+		log.info("Destroying Cedarling service");
+		
+		if (initialized) {
+			this.cedarlingAdapter.close();
+		}
+
+		log.info("Cedarling is destroyed");
+	}
+
+	private CedarlingAdapter initAdapter(CedarlingConfiguration cedarConf) {
+	    BootstrapConfig config = prepareBootstrapConfig(cedarConf);
+
+	    CedarlingAdapter initCedarlingAdapter = null;
+	    try {
+	        initCedarlingAdapter = new CedarlingAdapter();
+	        
+	        String jsonConfig = config.toJsonConfig();
+	        if (log.isTraceEnabled()) {
+	            log.trace("Cedarling JSON configuration: {}", jsonConfig);
+	        }
+	        initCedarlingAdapter.loadFromJson(jsonConfig);
+	        log.info("Cedarling initialized successfully with trusted issuers count: {}", initCedarlingAdapter.loadedTrustedIssuersCount());
+	        return initCedarlingAdapter;
+	    } catch (CedarlingException ex) {
+	        log.error("Failed to initialize Cedarling!", ex);
+	        log.trace("Configuration: {}", config.toJsonConfig());
+	        
+	        // Close adapter if initialization failed
+	        if (initCedarlingAdapter != null) {
+	            try {
+	                initCedarlingAdapter.close();
+	            } catch (Exception closeEx) {
+	                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
+	            }
+	        }
+	    }
+
+	    return null;
+	}
+
+	protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
+		BootstrapConfig config = BootstrapConfig.builder()
+	        .applicationName("Lock Server")
+	        .policyStoreLocalFn(policyStoreLocalFn)
+	        .jwtStatusValidation(false)
+	        .jwtSigValidation(false)
+	        .logType(cedarConf.getLogType())
+	        .logLevel(cedarConf.getLogLevel())
+	        .build();
+		return config;
+	}
+
+	public boolean authorize(Map<String, String> tokens, String action, Map<String, Object> resource, Map<String, Object> context) {
+		JSONObject resourceObject = new JSONObject(Optional.ofNullable(
+				resource).map(Map.class::cast).orElse(Collections.emptyMap()));
+
+		JSONObject contextObject = new JSONObject(Optional.ofNullable(
+				context).map(Map.class::cast).orElse(Collections.emptyMap()));
+
+		return authorize(tokens, action, resourceObject, contextObject);
+	}
+	
+	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
+						tokens, action, resource, context);
+			}
+
+			if (!tokens.containsKey(CEDARLING_JANS_ACCESS_TOKEN)) {
+				log.error("Missing token '{}' in tokens map. Failed to execute Cedarling authorize", CEDARLING_JANS_ACCESS_TOKEN);
+				return false;
+			}
+
+			MultiIssuerAuthorizeResult res = cedarlingAdapter.authorizeMultiIssuer(tokens, action, resource, context);
+			if (res == null) {
+				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
+						tokens, action, resource, context);
+				return false;
+			}
+
+			String requestId = res.getRequestId();
+			if (res.getDecision()) {
+				log.info("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+						requestId, tokens, action, resource, context);
+			} else {
+				log.info("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+						requestId, tokens, action, resource, context);
+			}
+
+			return res.getDecision();
+		} catch (Exception ex) {
+			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
+		}
+		
+		return false;
+	}
+
+}
