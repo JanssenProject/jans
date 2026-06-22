@@ -76,35 +76,36 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     private static final int KM_ORIGIN_GENERATED = 0;
     private static final int KM_PURPOSE_SIGN = 2;
 
-    @Inject
-    private Logger log;
-
-    @Inject
-    private AppConfiguration appConfiguration;
-
+    // Collaborators are declared in their order of first use within process().
     @Inject
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AuthenticatorDataVerifier authenticatorDataVerifier;
-
-    @Inject
-    private CertificateVerifier certificateVerifier;
-
-    @Inject
-    private CoseService coseService;
-
-    @Inject
-    private Base64Service base64Service;
+    private ErrorResponseFactory errorResponseFactory;
 
     @Inject
     private CertificateService certificateService;
 
     @Inject
+    private AuthenticatorDataVerifier authenticatorDataVerifier;
+
+    @Inject
+    private CoseService coseService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private AttestationCertificateService attestationCertificateService;
 
     @Inject
-    private ErrorResponseFactory errorResponseFactory;
+    private CertificateVerifier certificateVerifier;
+
+    @Inject
+    private Logger log;
+
+    @Inject
+    private Base64Service base64Service;
 
     @Override
     public AttestationFormat getAttestationFormat() {
