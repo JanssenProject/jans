@@ -108,34 +108,24 @@ before running Maven in that directory.
 
 ### Build jans-cedarling
 
-!!! note
-
-    This content is a work in progress. 
+Please refer to the instructions [here](../../cedarling/tutorials/rust.md#building-from-source).
 
 ### Build jans-linux-setup
 
- 1. Clone the repository and change to setup directory
-
-```shell
-git clone https://github.com/JanssenProject/jans.git
-cd jans/jans-linux-setup
-```
- 2. Use the following instructions to build setup package
-
-[Setup package binding guide](../../../jans-linux-setup#installation)
+ 1. From the root of the cloned `jans` repository, change to the setup directory
+      ```shell
+      cd jans-linux-setup
+      ```
+ 2. Use the [setup package binding](../../../jans-linux-setup#installation) instructions to build setup package
 
 ### Build jans-cli-tui
 
 
- 1. Clone the repository and change to TUI directory
-
-```shell
-git clone https://github.com/JanssenProject/jans.git
-cd jans/jans-cli-tui
-```
- 2. Use the following instructions to build TUI package
-
-[Jans-cli-tui package binding guide](../../../jans-cli-tui#installation)
+ 1. From the root of the cloned `jans` repository, change to TUI directory
+      ```shell
+      cd jans-cli-tui
+      ```
+ 2. Use the [jans-cli-tui package binding guide](../../../jans-cli-tui#installation) to build TUI package
 
 ## Next steps:
 
