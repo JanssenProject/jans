@@ -31,7 +31,7 @@ To load the policy store, one of the following properties must be set.
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
 - **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
-      - URLs ending in `.cjar` → loads as Cedar Archive
+      - URL points to an archive → loads as Cedar Archive (`.cjar`)
       - Other URLs → loads as legacy JSON from Lock Server
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
@@ -46,7 +46,7 @@ To load the policy store, one of the following properties must be set.
 
 ### Refreshing the policy store
 
-- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a Cedar Archive URL. When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
 
 ### Optional properties
 
