@@ -106,10 +106,10 @@ type Option struct {
 }
 
 type MultipleEvaluationRequest struct {
-	Subject    *Entity             `json:"subject"`
-	Resource   *Entity             `json:"resource"`
-	Action     *Action             `json:"action"`
-	Context    map[string]any      `json:"context"`
-	Evaluation []EvaluationRequest `json:"evaluation"`
-	Options    *Option             `json:"options"`
+	Subject     *Entity             `json:"subject"`
+	Resource    *Entity             `json:"resource"`
+	Action      *Action             `json:"action"`
+	Context     map[string]any      `json:"context"`
+	Evaluations []EvaluationRequest `json:"evaluations"`
+	Options     *Option             `json:"options"`
 }

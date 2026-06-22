@@ -236,10 +236,13 @@ func extractResource(resource *Entity) (cedarling_go.EntityData, error) {
 	return output, err
 }
 
-func (p *CedarPlugin) evaluate(subject *Entity, action string, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
+func (p *CedarPlugin) evaluate(subject *Entity, action *Action, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
 	tokens, err := extractTokens(subject)
 	if err != nil {
 		return nil, err
+	}
+	if action == nil {
+		return nil, fmt.Errorf("Action empty")
 	}
 	resourceEntity, err := extractResource(resource)
 	if err != nil {
@@ -247,7 +250,7 @@ func (p *CedarPlugin) evaluate(subject *Entity, action string, resource *Entity,
 	}
 	authorization_request := cedarling_go.AuthorizeMultiIssuerRequest{
 		Tokens:   tokens,
-		Action:   action,
+		Action:   action.Name,
 		Resource: resourceEntity,
 		Context:  context,
 	}
@@ -262,9 +265,12 @@ func (p *CedarPlugin) evaluate(subject *Entity, action string, resource *Entity,
 	}, nil
 }
 
-func (p *CedarPlugin) evaluateUnsigned(subject *Entity, action string, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
+func (p *CedarPlugin) evaluateUnsigned(subject *Entity, action *Action, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
 	if subject == nil {
 		return nil, fmt.Errorf("Subject empty")
+	}
+	if action == nil {
+		return nil, fmt.Errorf("Action empty")
 	}
 	if resource == nil {
 		return nil, fmt.Errorf("Resource empty")
@@ -287,7 +293,7 @@ func (p *CedarPlugin) evaluateUnsigned(subject *Entity, action string, resource 
 	}
 	authorization_request := cedarling_go.RequestUnsigned{
 		Principal: &subject_entity,
-		Action:    action,
+		Action:    action.Name,
 		Resource:  resource_entity,
 		Context:   context,
 	}
@@ -302,7 +308,7 @@ func (p *CedarPlugin) evaluateUnsigned(subject *Entity, action string, resource 
 	}, nil
 }
 
-func (p *CedarPlugin) buildEvaluationResponse(subject *Entity, action string, resource *Entity, context map[string]any, evaluation_mode EvaluationMode) *EvaluationResponse {
+func (p *CedarPlugin) buildEvaluationResponse(subject *Entity, action *Action, resource *Entity, context map[string]any, evaluation_mode EvaluationMode) *EvaluationResponse {
 	var result *AuthorizeResult
 	var err error
 	if evaluation_mode == MultiIssuer {

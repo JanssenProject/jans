@@ -87,7 +87,7 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 	w.WriteHeader(200)
-	response := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context, p.config.Evaluation_Logic)
+	response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		writeError(w, http.StatusInternalServerError, "Something went wrong")
 		p.logger.Info(err.Error())
@@ -124,10 +124,14 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 		p.logger.Info(err.Error())
 		return
 	}
-	if request.Evaluation == nil {
+	if request.Evaluations == nil {
 		// handle same as single evaluation request
+		if err = validateInput(request.Subject, request.Action, request.Resource); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		w.WriteHeader(200)
-		response := p.buildEvaluationResponse(request.Subject, request.Action.Name, request.Resource, request.Context, p.config.Evaluation_Logic)
+		response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			writeError(w, http.StatusInternalServerError, "Something went wrong")
 			p.logger.Info(err.Error())
@@ -136,7 +140,12 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 		return
 	} else {
 		responseList := []EvaluationResponse{}
-		for _, eval := range request.Evaluation {
+		if request.Options == nil {
+			request.Options = &Option{
+				EvaluationSemantic: ExecuteAll,
+			}
+		}
+		for _, eval := range request.Evaluations {
 			subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
 			if err != nil {
 				writeError(w, http.StatusBadRequest, err.Error())
@@ -157,24 +166,15 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 				}
 			}
 			context := eval.Context
-			response := p.buildEvaluationResponse(subject, action.Name, resource, context, p.config.Evaluation_Logic)
+			response := p.buildEvaluationResponse(subject, action, resource, context, p.config.Evaluation_Logic)
 			responseList = append(responseList, *response)
-			if request.Options == nil {
-				request.Options = &Option{
-					EvaluationSemantic: ExecuteAll,
+			if request.Options.EvaluationSemantic == DenyOnFirstDeny {
+				if !response.Decision {
+					break
 				}
-			}
-			if request.Options.EvaluationSemantic == PermitOnFirstPermit && response.Decision {
-				if err := json.NewEncoder(w).Encode(responseList); err != nil {
-					writeError(w, http.StatusInternalServerError, "Something went wrong")
-					p.logger.Info(err.Error())
-					return
-				}
-			} else if request.Options.EvaluationSemantic == DenyOnFirstDeny && !response.Decision {
-				if err := json.NewEncoder(w).Encode(responseList); err != nil {
-					writeError(w, http.StatusInternalServerError, "Something went wrong")
-					p.logger.Info(err.Error())
-					return
+			} else if request.Options.EvaluationSemantic == PermitOnFirstPermit {
+				if response.Decision {
+					break
 				}
 			}
 		}
@@ -184,5 +184,4 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-
 }
