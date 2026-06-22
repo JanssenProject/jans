@@ -18,7 +18,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ```
 sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 ```
 
 - Download the release package from the GitHub Janssen Project
