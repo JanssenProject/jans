@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,7 +22,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +47,8 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class CertificateService {
 
+    private static final String X509_CERTIFICATE_TYPE = "X.509";
+
     @Inject
     private Logger log;
 
@@ -67,7 +67,7 @@ public class CertificateService {
 
     public X509Certificate getCertificate(InputStream is) {
         try {
-        	X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        	X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance(X509_CERTIFICATE_TYPE).generateCertificate(is);
         	certificate.checkValidity();
         	
         	return certificate;
@@ -80,7 +80,7 @@ public class CertificateService {
     public List<X509Certificate> getCertificates(List<String> certificatePath, boolean checkValidaty) {
         final CertificateFactory cf;
         try {
-            cf = CertificateFactory.getInstance("X.509");
+            cf = CertificateFactory.getInstance(X509_CERTIFICATE_TYPE);
         } catch (CertificateException e) {
             throw new Fido2RuntimeException(e.getMessage(), e);
         }
@@ -97,7 +97,7 @@ public class CertificateService {
 	                c.checkValidity();
 	                return true;
 	            } catch (CertificateException e) {
-	                log.warn("Certificate not valid {}", c.getIssuerDN().getName());
+	                log.warn("Certificate not valid {}", c.getIssuerX500Principal().getName());
 	                throw new Fido2RuntimeException("Certificate not valid", e);
 	            }
         	}
@@ -113,7 +113,7 @@ public class CertificateService {
     public Map<String, X509Certificate> getCertificatesMap(String rootCertificatePath) {
     	List<X509Certificate> certificates = getCertificates(rootCertificatePath);
     	
-    	Map<String, X509Certificate> certificatesMap = new HashMap<String, X509Certificate>(certificates.size());
+    	Map<String, X509Certificate> certificatesMap = new HashMap<>(certificates.size());
     	for (X509Certificate certificate : certificates) {
             String subjectDn = certificate.getSubjectX500Principal().getName().toLowerCase();
     		
@@ -124,7 +124,7 @@ public class CertificateService {
     }
 
     public List<X509Certificate> getCertificates(String rootCertificatePath) {
-        ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
+        ArrayList<X509Certificate> certificates = new ArrayList<>();
         List<Document> tocCertificatesDocuments = dbDocumentService.getDocumentsByFilePath(rootCertificatePath);
         for (Document certDB : tocCertificatesDocuments)
             certificates.add(getCertificate(certDB.getDocument()));
@@ -159,9 +159,9 @@ public class CertificateService {
 	public List<X509Certificate> selectRootCertificates(Map<String, X509Certificate> trustChainCertificatesMap,
 			List<X509Certificate> certificates) {
 
-		List<X509Certificate> selecedCertificates = new ArrayList<X509Certificate>();
+		List<X509Certificate> selecedCertificates = new ArrayList<>();
 		for (X509Certificate certificate : certificates) {
-            String issuerDn = certificate.getIssuerDN().getName().toLowerCase();
+            String issuerDn = certificate.getIssuerX500Principal().getName().toLowerCase();
             if (trustChainCertificatesMap.containsKey(issuerDn)) {
             	X509Certificate rootCert = trustChainCertificatesMap.get(issuerDn);
             	selecedCertificates.add(rootCert);
@@ -192,9 +192,9 @@ public class CertificateService {
 
     public CertificateFactory instanceCertificateFactoryX509() {
         try {
-            return instanceCertificateFactory("X.509");
+            return instanceCertificateFactory(X509_CERTIFICATE_TYPE);
         } catch (CertificateException e) {
-            throw new RuntimeException("Failed to instance CertificateFactory X.509");
+            throw new Fido2RuntimeException("Failed to instance CertificateFactory X.509", e);
         }
     }
 
@@ -206,7 +206,7 @@ public class CertificateService {
         try {
             return instanceCertPathValidator("PKIX");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Failed to instance CertPathValidator using PKIX");
+            throw new Fido2RuntimeException("Failed to instance CertPathValidator using PKIX", e);
         }
     }
 }
