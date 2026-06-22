@@ -33,7 +33,7 @@ use http_utils::Backoff;
 use crate::http::spawn_task;
 
 #[derive(Error, Debug)]
-pub enum TrustedIssuerLoaderError {
+pub(crate) enum TrustedIssuerLoaderError {
     #[error(
         "failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion"
     )]

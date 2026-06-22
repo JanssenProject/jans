@@ -64,7 +64,7 @@ impl TryFrom<&ValidatorSchema> for MappingSchema {
 }
 
 #[derive(Debug, Error)]
-pub struct BuildMappingSchemaError(Vec<BuildAttrSrcError>);
+pub(crate) struct BuildMappingSchemaError(Vec<BuildAttrSrcError>);
 
 impl Display for BuildMappingSchemaError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -177,7 +177,7 @@ pub(crate) async fn load_policy_store(
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
-            store: load_policy_store_from_cjar_file(path)?,
+            store: load_policy_store_from_cjar_file(path, strict_schema_validation)?,
             body_hash: None,
             validators: CacheHeadersState::default(),
         },
@@ -192,7 +192,7 @@ pub(crate) async fn load_policy_store(
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::Directory(path) => LoadedPolicyStore {
-            store: load_policy_store_from_directory(path)?,
+            store: load_policy_store_from_directory(path, strict_schema_validation)?,
             body_hash: None,
             validators: CacheHeadersState::default(),
         },
@@ -287,7 +287,7 @@ pub(crate) async fn parse_cjar_bytes(
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
-    let loaded = loader::load_policy_store_archive_bytes(bytes)
+    let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation)
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
     let store_id = loaded.metadata.policy_store.id.clone();
@@ -332,7 +332,7 @@ async fn load_policy_store_from_cjar_file(
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
-    let loaded = loader::load_policy_store_archive(path)
+    let loaded = loader::load_policy_store_archive(path, strict_schema_validation)
         .await
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
@@ -359,11 +359,12 @@ async fn load_policy_store_from_cjar_file(
 #[cfg(target_arch = "wasm32")]
 fn load_policy_store_from_cjar_file(
     path: &Path,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_archive(path) {
+    match loader::load_policy_store_archive(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Archive(format!(
             "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {e}",
         ))),
@@ -404,7 +405,7 @@ async fn load_policy_store_from_cjar_url(
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
-    let loaded = loader::load_policy_store_archive_bytes(&bytes)
+    let loaded = loader::load_policy_store_archive_bytes(&bytes, strict_schema_validation)
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
     let store_id = loaded.metadata.policy_store.id.clone();
@@ -441,7 +442,7 @@ async fn load_policy_store_from_directory(
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
-    let loaded = loader::load_policy_store_directory(path)
+    let loaded = loader::load_policy_store_directory(path, strict_schema_validation)
         .await
         .map_err(|e| {
             PolicyStoreLoadError::Directory(format!("Failed to load from directory: {e}"))
@@ -470,11 +471,12 @@ async fn load_policy_store_from_directory(
 #[cfg(target_arch = "wasm32")]
 fn load_policy_store_from_directory(
     path: &Path,
+    strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_directory(path) {
+    match loader::load_policy_store_directory(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Directory(format!(
             "Loading from directory is not supported in WASM. Original error: {e}",
         ))),
@@ -497,7 +499,7 @@ fn load_policy_store_from_archive_bytes(
     use crate::common::policy_store::loader;
 
     // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes).map_err(|e| {
+    let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation).map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
     })?;
 
