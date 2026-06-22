@@ -7,8 +7,8 @@
 //!
 //! On each tick the worker sends a conditional GET to the configured URL,
 //! handling `304 Not Modified` cheaply. When the upstream returns a new body
-//! and it parses successfully, the worker builds a fresh [`Authz`] (including a
-//! freshly built [`JwtService`] and [`EntityBuilder`]) and publishes it via
+//! and it parses successfully, the worker builds a new [`Authz`] (reusing the
+//! existing [`JwtService`] when `trusted_issuers` is unchanged) and publishes it via
 //! [`ArcSwap`] so in-flight authorizations are unaffected. Any failure leaves
 //! the previously loaded [`Authz`] in place.
 //!
@@ -29,18 +29,18 @@ use std::time::Duration;
 use crate::PolicyStoreConfig;
 use crate::PolicyStoreSource;
 use crate::async_sleep::sleep;
+use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
-use crate::authz::{Authz, AuthzConfig};
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
-use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex};
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
 use crate::http::{JoinHandle, spawn_task};
-use crate::jwt::JwtService;
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
+
+use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{
     PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes, parse_lock_master_bytes,
@@ -49,21 +49,14 @@ use super::policy_store::{
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
 
-/// Consecutive ticks where the current strategy fails to add value before we
-/// degrade to a less-efficient one (`Conditional` → `HeadThenGet` →
-/// `PlainGet`).
+/// Consecutive unhelpful ticks before degrading to a less-efficient strategy.
 const STRATEGY_DEGRADE_THRESHOLD: u32 = 3;
 
-/// Minimum elapsed time between attempts to upgrade back to a more efficient
-/// strategy after a degrade. Keeps a flaky upstream from churning the worker.
+/// Minimum seconds between upgrade-probe attempts after a degrade.
 const STRATEGY_REPROBE_INTERVAL_SECS: i64 = 1800;
 
-/// Outcome of a single refresh tick — encoded as `i64` for emission via the
-/// integer-enum `policy_store_refresh.last_outcome` metric.
-///
-/// Note: `0` is intentionally **not** assigned to any outcome so that the
-/// metrics snapshot's default value (also `0`) means "no refresh attempt
-/// observed yet" rather than aliasing with `Success`.
+/// Outcome of a single refresh tick. Encoded as `i64`; `0` is reserved
+/// for "no attempt yet" so it doesn't alias with `Success`.
 #[repr(i64)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum RefreshOutcome {
@@ -71,41 +64,38 @@ pub(crate) enum RefreshOutcome {
     NotModified = 2,
     HttpError = 3,
     NetworkError = 4,
-    /// Body was fetched but couldn't be parsed into a `PolicyStoreWithID`
-    /// (malformed JSON, broken `.cjar` archive, etc.).
+    /// Body fetched but failed to parse (malformed JSON, broken archive, etc.).
     ParseError = 5,
-    /// Body parsed cleanly but rebuilding the dependent services failed
-    /// (trusted-issuer validation, JWT service init / JWKS refetch, entity
-    /// builder). The bytes are well-formed; the rebuild side is broken.
+    /// Body parsed but service rebuild failed (issuer validation, JWT init, etc.).
     RebuildError = 6,
-    /// The HTTP transaction completed with a success status but reading the
-    /// response body failed (TCP drop mid-stream, malformed transfer encoding,
-    /// content-decoding failure, etc.).
+    /// Response received but body read failed (TCP drop, decode error, etc.).
     DecodeError = 7,
 }
 
-/// Per-source refresh strategy. The worker starts at
-/// [`RefreshStrategy::Conditional`] and degrades automatically when the
-/// upstream proves it doesn't honor the more efficient mode (degrade order:
-/// `Conditional` → `HeadThenGet` → `PlainGet`). A periodic probe attempts
-/// to upgrade back so a transiently misconfigured server doesn't permanently
-/// lock us into a heavier path.
-///
-/// Encoded as `i64` for the `policy_store_refresh.strategy_current` metric.
+impl RefreshOutcome {
+    pub(crate) fn metric_value(self) -> i64 {
+        self as i64
+    }
+}
+
+/// Refresh strategy ladder: `Conditional → HeadThenGet → PlainGet`.
+/// Degrades when the upstream doesn't honor the current mode; periodic probes
+/// attempt to upgrade back. Encoded as `i64` for the `strategy_current` metric.
 #[repr(i64)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum RefreshStrategy {
-    /// Send a conditional GET (`If-None-Match` / `If-Modified-Since`); a
-    /// well-behaved server replies `304` when unchanged.
+    /// Conditional GET (`If-None-Match` / `If-Modified-Since`); expects `304`.
     Conditional = 1,
-    /// Send a HEAD first, compare cache validators, only do a plain GET when
-    /// they differ. Used when the upstream emits `ETag` / `Last-Modified` but
-    /// ignores conditional request headers.
+    /// HEAD to compare validators; full GET only when they differ.
     HeadThenGet = 2,
-    /// Last resort — just GET the body every tick and rely on the body hash to
-    /// detect no-op reloads. Used when HEAD doesn't return useful validators
-    /// either, or rejects the request.
+    /// Plain GET every tick; falls back to body-hash comparison.
     PlainGet = 3,
+}
+
+impl RefreshStrategy {
+    pub(crate) fn metric_value(self) -> i64 {
+        self as i64
+    }
 }
 
 /// Per-source strategy tracking and transition counters.
@@ -113,15 +103,10 @@ struct StrategyState {
     current: RefreshStrategy,
     /// Consecutive ticks where the current strategy didn't help.
     degraded_count: u32,
-    /// When we last attempted to upgrade strategy via a Conditional probe.
-    /// Only relevant when `current != Conditional`.
     last_probe_at: Option<DateTime<Utc>>,
-    /// Cumulative count of `Conditional → HeadThenGet` transitions.
     conditional_to_head_transitions: u32,
-    /// Cumulative count of `HeadThenGet → PlainGet` transitions.
     head_to_plain_transitions: u32,
-    /// Cumulative count of probes that successfully upgraded back to
-    /// [`RefreshStrategy::Conditional`].
+    upgrade_to_head_transitions: u32,
     upgrade_to_conditional_transitions: u32,
 }
 
@@ -133,30 +118,26 @@ impl Default for StrategyState {
             last_probe_at: None,
             conditional_to_head_transitions: 0,
             head_to_plain_transitions: 0,
+            upgrade_to_head_transitions: 0,
             upgrade_to_conditional_transitions: 0,
         }
     }
 }
 
-/// Selection emitted by [`StrategyState::choose_for_tick`]: which strategy the
-/// tick should run, and whether running it is an upgrade-probe attempt
-/// (i.e. differs from `current` because we're testing whether the upstream
-/// has recovered).
 struct StrategyChoice {
     strategy: RefreshStrategy,
-    /// `true` when the chosen strategy is *not* the current one — the tick
-    /// logic interprets outcomes (especially `304`) as upgrade signals
-    /// rather than steady-state results.
-    is_probe: bool,
+    /// `Some(target)` when this is an upgrade probe; `None` for steady-state.
+    probe_target: Option<RefreshStrategy>,
 }
 
 impl StrategyState {
-    /// Decide which strategy to run for this tick.
+    /// Choose the strategy for this tick. Probes climb one rung at a time:
+    /// `PlainGet` → `HeadThenGet`, `HeadThenGet` → `Conditional`.
     fn choose_for_tick(&mut self) -> StrategyChoice {
         if self.current == RefreshStrategy::Conditional {
             return StrategyChoice {
                 strategy: RefreshStrategy::Conditional,
-                is_probe: false,
+                probe_target: None,
             };
         }
         let now = Utc::now();
@@ -165,21 +146,24 @@ impl StrategyState {
         });
         if due {
             self.last_probe_at = Some(now);
+            let target = match self.current {
+                RefreshStrategy::HeadThenGet => RefreshStrategy::Conditional,
+                RefreshStrategy::PlainGet => RefreshStrategy::HeadThenGet,
+                RefreshStrategy::Conditional => unreachable!(),
+            };
             StrategyChoice {
-                strategy: RefreshStrategy::Conditional,
-                is_probe: true,
+                strategy: target,
+                probe_target: Some(target),
             }
         } else {
             StrategyChoice {
                 strategy: self.current,
-                is_probe: false,
+                probe_target: None,
             }
         }
     }
 
-    /// Record that the current strategy didn't help this tick (server returned
-    /// identical body despite conditional headers, or HEAD returned no useful
-    /// validators). Degrades the strategy when the threshold is reached.
+    /// Current strategy didn't help; degrade when the threshold is reached.
     fn record_degraded(&mut self) {
         self.degraded_count = self.degraded_count.saturating_add(1);
         if self.degraded_count < STRATEGY_DEGRADE_THRESHOLD {
@@ -189,28 +173,16 @@ impl StrategyState {
         self.degrade_one_step();
     }
 
-    /// Reset the degrade counter — current strategy worked.
     fn record_helped(&mut self) {
         self.degraded_count = 0;
     }
 
-    /// Hard-downgrade after an immediate signal (e.g. HEAD `405`). Skips the
-    /// degrade threshold since the upstream definitively refused the method.
+    /// Immediate downgrade, bypassing the threshold (e.g. HEAD `405`).
     fn force_degrade(&mut self) {
         self.degraded_count = 0;
         self.degrade_one_step();
     }
 
-    /// Move `current` one step down the `Conditional → HeadThenGet → PlainGet`
-    /// ladder, bump the matching transition counter, and stamp the reprobe
-    /// cooldown so `choose_for_tick` waits `STRATEGY_REPROBE_INTERVAL_SECS`
-    /// before testing the more efficient strategy again — without that stamp,
-    /// the next tick would immediately re-probe `Conditional` and we'd never
-    /// actually use the degraded strategy to serve refreshes. No-op when
-    /// already at the `PlainGet` floor. Single source of truth shared by
-    /// [`Self::record_degraded`] and [`Self::force_degrade`] so a future
-    /// strategy level (or extra per-transition side effect) only needs to
-    /// be added here.
     fn degrade_one_step(&mut self) {
         match self.current {
             RefreshStrategy::Conditional => {
@@ -224,19 +196,23 @@ impl StrategyState {
                 self.head_to_plain_transitions = self.head_to_plain_transitions.saturating_add(1);
                 self.last_probe_at = Some(Utc::now());
             },
-            // Already at the least efficient strategy — nothing to degrade to.
             RefreshStrategy::PlainGet => {},
         }
     }
 
-    /// A Conditional probe just confirmed the upstream supports `304` — upgrade
-    /// back to the efficient path. No-op if already there.
     fn record_probe_success(&mut self) {
         if self.current != RefreshStrategy::Conditional {
             self.current = RefreshStrategy::Conditional;
             self.degraded_count = 0;
             self.upgrade_to_conditional_transitions =
                 self.upgrade_to_conditional_transitions.saturating_add(1);
+        }
+    }
+
+    fn record_head_probe_success(&mut self) {
+        if self.current == RefreshStrategy::PlainGet {
+            self.current = RefreshStrategy::HeadThenGet;
+            self.upgrade_to_head_transitions = self.upgrade_to_head_transitions.saturating_add(1);
         }
     }
 }
@@ -253,73 +229,46 @@ pub(crate) struct AuthzRebuilder {
 }
 
 impl AuthzRebuilder {
-    /// Build a brand-new [`Authz`] from a fresh policy store. Rebuilds the JWT
-    /// service and entity builder so trusted-issuer and schema changes take
-    /// effect
+    /// Build a new [`Authz`] from `policy_store`, reusing `prior_authz`'s
+    /// [`JwtService`] when `trusted_issuers` is unchanged (avoids OIDC/JWKS
+    /// refetch on policy-only updates). [`EntityBuilder`] is always rebuilt.
     pub(crate) async fn rebuild(
         &self,
         policy_store: PolicyStoreWithID,
+        prior_authz: &Authz,
     ) -> Result<Authz, RebuildError> {
-        policy_store
-            .validate_trusted_issuers()
-            .map_err(|e| RebuildError::TrustedIssuers(e.to_string()))?;
-
-        let trusted_issuers = policy_store.trusted_issuers.clone();
-        let jwt_service = JwtService::new(
-            &self.jwt_config,
-            trusted_issuers.clone(),
-            Some(self.log.clone()),
-            self.metrics.clone(),
-            self.http_client.clone(),
-        )
-        .await
-        .map_err(|e| RebuildError::JwtService(e.to_string()))?;
-        let jwt_service = Arc::new(jwt_service);
-
-        let issuers_map = trusted_issuers.unwrap_or_default();
-        let issuers_index = TrustedIssuerIndex::new(&issuers_map, Some(&self.log));
-        // Mirror the bootstrap path (see `ServiceFactory::authz_service`):
-        // `policy_store.schema` is now `Option<CedarSchema>` and we only feed
-        // the validator schema into `EntityBuilder` when strict validation
-        // is enabled — otherwise we pass `None` so the builder doesn't
-        // enforce attribute typing.
-        let schema = policy_store.schema.as_ref().map(|s| &s.validator_schema);
-        let default_entities = policy_store.default_entities.entities().to_owned();
-        let entity_builder = EntityBuilder::new(
-            issuers_index,
-            if self.authorization_config.strict_schema_validation {
-                schema
-            } else {
-                None
-            },
-            default_entities,
-        )
-        .map_err(|e| RebuildError::EntityBuilder(e.to_string()))?;
-        let entity_builder = Arc::new(entity_builder);
-
-        let config = AuthzConfig {
-            log_service: self.log.clone(),
-            policy_store,
-            jwt_service,
-            entity_builder,
-            authorization: self.authorization_config.clone(),
-            data_store: self.data_store.clone(),
-            metrics: self.metrics.clone(),
+        let prior_jwt = if issuers_unchanged(
+            prior_authz.trusted_issuers(),
+            policy_store.trusted_issuers.as_ref(),
+        ) {
+            Some(prior_authz.clone_jwt_service())
+        } else {
+            None
         };
 
-        Ok(Authz::new(config))
+        build_authz(
+            policy_store,
+            &self.jwt_config,
+            &self.authorization_config,
+            self.http_client.clone(),
+            &self.log,
+            self.data_store.clone(),
+            self.metrics.clone(),
+            prior_jwt,
+        )
+        .await
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum RebuildError {
-    #[error("trusted issuers validation failed: {0}")]
-    TrustedIssuers(String),
-    #[error("failed to initialize JWT service: {0}")]
-    JwtService(String),
-    #[error("failed to initialize entity builder: {0}")]
-    EntityBuilder(String),
+/// `true` when both issuer maps are equal; `false` triggers a [`JwtService`] rebuild.
+fn issuers_unchanged(
+    prior: Option<&std::collections::HashMap<String, TrustedIssuer>>,
+    new: Option<&std::collections::HashMap<String, TrustedIssuer>>,
+) -> bool {
+    prior == new
 }
+
+pub(crate) type RebuildError = BuildAuthzError;
 
 /// Mutable per-source state — what we learned from the previous response.
 #[derive(Default)]
@@ -547,9 +496,10 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
                 let outcome = tick(&ctx, &mut state).await;
                 ctx.metrics.record_policy_store_refresh(outcome);
                 ctx.metrics.record_policy_store_refresh_strategy(
-                    state.strategy.current as i64,
+                    state.strategy.current,
                     state.strategy.conditional_to_head_transitions,
                     state.strategy.head_to_plain_transitions,
+                    state.strategy.upgrade_to_head_transitions,
                     state.strategy.upgrade_to_conditional_transitions,
                 );
             },
@@ -569,9 +519,10 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
 
 async fn tick(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
     let choice = state.strategy.choose_for_tick();
+    let is_probe = choice.probe_target.is_some();
     match choice.strategy {
-        RefreshStrategy::Conditional => tick_conditional(ctx, state, choice.is_probe).await,
-        RefreshStrategy::HeadThenGet => tick_head_then_get(ctx, state).await,
+        RefreshStrategy::Conditional => tick_conditional(ctx, state, is_probe).await,
+        RefreshStrategy::HeadThenGet => tick_head_then_get(ctx, state, is_probe).await,
         RefreshStrategy::PlainGet => tick_plain_get(ctx, state).await,
     }
 }
@@ -590,12 +541,6 @@ async fn tick_conditional(
     match fetch_result {
         Err(e) => fetch_error(ctx, state, &e),
         Ok(ConditionalFetch::NotModified { validators }) => {
-            // 304 is the only definitive proof the upstream honors our
-            // conditional headers. Reset degrade counter; upgrade if we were
-            // probing from a degraded strategy. Adopt any cache headers the
-            // server refreshed on the 304 (RFC 9110 §15.4.5) — e.g. an
-            // extended `max-age` — but merge them so that **omitted** fields
-            // don't erase previously-known `ETag` / `Last-Modified`.
             state.validators.merge_from(validators);
             state.consecutive_failures = 0;
             if is_probe {
@@ -608,11 +553,6 @@ async fn tick_conditional(
         Ok(ConditionalFetch::Modified { bytes, validators }) => {
             let new_hash = body_hash(&bytes);
             if should_short_circuit(new_hash, state) {
-                // Same body despite conditional headers — server ignored them.
-                // Body is unchanged so this is the same resource version;
-                // merge so a response that omits ETag (e.g. a reverse proxy
-                // stripping it) doesn't erase our cached validators and force
-                // the next conditional GET to fetch the body unconditionally.
                 state.validators.merge_from(validators);
                 state.consecutive_failures = 0;
                 if !is_probe {
@@ -620,16 +560,16 @@ async fn tick_conditional(
                 }
                 return RefreshOutcome::NotModified;
             }
-            // New body. Whether conditionals are honored is unproven (we can't
-            // distinguish a 304-capable server returning a real change from one
-            // that ignores conditionals and the body happened to change), so
-            // don't change strategy on this path.
             parse_swap_and_record(ctx, state, bytes, new_hash, validators).await
         },
     }
 }
 
-async fn tick_head_then_get(ctx: &WorkerContext, state: &mut RefreshState) -> RefreshOutcome {
+async fn tick_head_then_get(
+    ctx: &WorkerContext,
+    state: &mut RefreshState,
+    is_probe: bool,
+) -> RefreshOutcome {
     let url = ctx.source.url();
     let head = match ctx.http_client.head_validators(url).await {
         Ok(h) => h,
@@ -637,42 +577,39 @@ async fn tick_head_then_get(ctx: &WorkerContext, state: &mut RefreshState) -> Re
     };
     match head {
         HeadOutcome::NotSupported => {
-            // Server explicitly rejected HEAD. Downgrade immediately and fall
-            // through to a plain GET this tick so we still make progress.
-            state.strategy.force_degrade();
+            if !is_probe {
+                state.strategy.force_degrade();
+            }
             tick_plain_get(ctx, state).await
         },
         HeadOutcome::Headers(new_validators) => {
             if !new_validators.has_validator() {
-                // No ETag, no Last-Modified — HEAD added nothing. Count
-                // toward degrade and fall through to GET so we still get
-                // hash-based detection.
-                state.strategy.record_degraded();
+                if !is_probe {
+                    state.strategy.record_degraded();
+                }
                 return tick_plain_get(ctx, state).await;
             }
             if validators_match(&new_validators, &state.validators) {
-                // No-op vs cache — adopt any refreshed metadata (sticky
-                // merge so HEAD-omitted fields don't erase prior ones)
-                // and commit success.
                 state.validators.merge_from(new_validators);
                 state.consecutive_failures = 0;
-                state.strategy.record_helped();
+                if is_probe {
+                    state.strategy.record_head_probe_success();
+                } else {
+                    state.strategy.record_helped();
+                }
                 return RefreshOutcome::NotModified;
             }
-            // Validators differ — fall through to GET. Do **not** commit
-            // `new_validators` or `record_helped()` yet: if the GET fails
-            // we'd be left with HEAD-derived validators that don't match
-            // the body we still hold, and a future HEAD that happens to
-            // match those stale validators would short-circuit incorrectly.
-            // `tick_plain_get` writes its own validators on success
-            // (`parse_swap_and_record` or the short-circuit path), and
-            // `record_helped()` happens there too — see below.
+            // Validators differ — GET first; commit success only if GET succeeds.
             let outcome = tick_plain_get(ctx, state).await;
             if matches!(
                 outcome,
-                RefreshOutcome::Success | RefreshOutcome::NotModified,
+                RefreshOutcome::Success | RefreshOutcome::NotModified
             ) {
-                state.strategy.record_helped();
+                if is_probe {
+                    state.strategy.record_head_probe_success();
+                } else {
+                    state.strategy.record_helped();
+                }
             }
             outcome
         },
@@ -687,10 +624,6 @@ async fn tick_plain_get(ctx: &WorkerContext, state: &mut RefreshState) -> Refres
     };
     let status = response.status();
     let new_validators = CacheHeadersState::from_headers(response.headers(), Utc::now());
-    // Route through the client's `read_response_capped` helper so
-    // `CEDARLING_HTTP_MAX_RESPONSE_SIZE` bounds the refresh-tick body the same
-    // way it bounds bootstrap loads — a hostile/oversized upstream can't
-    // exhaust memory on every periodic tick.
     let bytes = match ctx.http_client.read_response_capped(response).await {
         Ok(b) => b,
         Err(e) => {
@@ -756,7 +689,8 @@ async fn parse_swap_and_record(
     // forever even though authorization decisions use the new set.
     let new_policy_count = parsed.policies.get_set().num_of_policies();
 
-    let new_authz = match ctx.rebuilder.rebuild(parsed).await {
+    let prior_authz = ctx.authz_swap.load_full();
+    let new_authz = match ctx.rebuilder.rebuild(parsed, &prior_authz).await {
         Ok(a) => a,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
@@ -860,11 +794,7 @@ fn validators_match(a: &CacheHeadersState, b: &CacheHeadersState) -> bool {
     false
 }
 
-/// Strip the optional `W/` weak-validator prefix from an `ETag`, returning the
-/// opaque quoted-string portion used for weak comparison. Per RFC 7232 §2.3.1
-/// the prefix is exactly the two ASCII characters `W/`; anything else (e.g.
-/// surrounding whitespace, an uppercase scheme indicator) is part of the
-/// opaque tag and stays.
+/// Strip the `W/` weak-validator prefix (RFC 7232 §2.3.1) for weak comparison.
 fn etag_opaque_tag(etag: &str) -> &str {
     etag.strip_prefix("W/").unwrap_or(etag)
 }
@@ -872,6 +802,116 @@ fn etag_opaque_tag(etag: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
+
+    #[test]
+    fn choose_for_tick_from_plain_get_probes_head_then_get() {
+        let mut state = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            last_probe_at: None,
+            ..StrategyState::default()
+        };
+        let choice = state.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::HeadThenGet);
+        assert!(choice.probe_target.is_some());
+    }
+
+    #[test]
+    fn choose_for_tick_from_head_then_get_probes_conditional() {
+        let mut state = StrategyState {
+            current: RefreshStrategy::HeadThenGet,
+            last_probe_at: None,
+            ..StrategyState::default()
+        };
+        let choice = state.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::Conditional);
+        assert!(choice.probe_target.is_some());
+    }
+
+    #[test]
+    fn choose_for_tick_no_probe_when_cooldown_active() {
+        let mut state = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            last_probe_at: Some(Utc::now()),
+            ..StrategyState::default()
+        };
+        let choice = state.choose_for_tick();
+        assert_eq!(choice.strategy, RefreshStrategy::PlainGet);
+        assert!(choice.probe_target.is_none());
+    }
+
+    #[test]
+    fn record_head_probe_success_upgrades_plain_get_to_head_then_get() {
+        let mut state = StrategyState {
+            current: RefreshStrategy::PlainGet,
+            ..StrategyState::default()
+        };
+        state.record_head_probe_success();
+        assert_eq!(state.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(state.upgrade_to_head_transitions, 1);
+    }
+
+    #[test]
+    fn record_head_probe_success_is_noop_from_head_then_get() {
+        let mut state = StrategyState {
+            current: RefreshStrategy::HeadThenGet,
+            ..StrategyState::default()
+        };
+        state.record_head_probe_success();
+        assert_eq!(state.current, RefreshStrategy::HeadThenGet);
+        assert_eq!(state.upgrade_to_head_transitions, 0);
+    }
+
+    fn one_issuer() -> HashMap<String, TrustedIssuer> {
+        let mut m = HashMap::new();
+        m.insert("issuer_a".to_string(), TrustedIssuer::default());
+        m
+    }
+
+    #[test]
+    fn identical_issuer_maps_signal_reuse() {
+        let a = one_issuer();
+        let b = one_issuer();
+        assert!(
+            issuers_unchanged(Some(&a), Some(&b)),
+            "identical issuer maps must signal reuse so JwtService is not rebuilt",
+        );
+    }
+
+    #[test]
+    fn empty_vs_some_issuer_signals_rebuild() {
+        let o = one_issuer();
+        assert!(
+            !issuers_unchanged(None, Some(&o)),
+            "going from no issuers to some issuers must signal a JwtService rebuild",
+        );
+        assert!(
+            !issuers_unchanged(Some(&o), None),
+            "removing all issuers must signal a JwtService rebuild",
+        );
+    }
+
+    #[test]
+    fn added_issuer_signals_rebuild() {
+        let base = one_issuer();
+        let mut expanded = one_issuer();
+        expanded.insert("issuer_b".to_string(), TrustedIssuer::default());
+        assert!(
+            !issuers_unchanged(Some(&base), Some(&expanded)),
+            "adding a new issuer must signal a JwtService rebuild",
+        );
+    }
+
+    #[test]
+    fn removed_issuer_signals_rebuild() {
+        let mut two = one_issuer();
+        two.insert("issuer_b".to_string(), TrustedIssuer::default());
+        let one = one_issuer();
+        assert!(
+            !issuers_unchanged(Some(&two), Some(&one)),
+            "removing an issuer must signal a JwtService rebuild",
+        );
+    }
 
     #[test]
     fn next_delay_uses_base_when_no_server_hint() {
@@ -1170,7 +1210,7 @@ mod tests {
             "choose_for_tick must return the current strategy when already at Conditional",
         );
         assert!(
-            !choice.is_probe,
+            choice.probe_target.is_none(),
             "is_probe must be false when not probing — we're already at the most efficient strategy",
         );
     }
@@ -1188,7 +1228,7 @@ mod tests {
             "a first choose_for_tick after a degrade must run a Conditional probe to test for upstream recovery",
         );
         assert!(
-            choice.is_probe,
+            choice.probe_target.is_some(),
             "is_probe must be true so tick logic interprets 304 as an upgrade signal rather than a steady-state result",
         );
         assert!(
@@ -1211,12 +1251,10 @@ mod tests {
             "while inside the reprobe interval window, choose_for_tick must return the current strategy unchanged",
         );
         assert!(
-            !choice.is_probe,
+            choice.probe_target.is_none(),
             "no probe is scheduled inside the reprobe window — is_probe must be false",
         );
     }
-
-    // ---- validators_match ----
 
     #[test]
     fn validators_match_etag_takes_precedence() {
@@ -1277,7 +1315,6 @@ mod tests {
 
     #[test]
     fn validators_match_falls_back_to_last_modified_when_etag_only_on_one_side() {
-        // ETag must be on BOTH sides to be considered; otherwise fall back.
         let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Mon".to_string()),
@@ -1296,7 +1333,6 @@ mod tests {
 
     #[test]
     fn validators_match_returns_false_when_etag_differs_even_if_lm_matches() {
-        // ETag mismatch is decisive — we do not "rescue" the match via Last-Modified.
         let a = CacheHeadersState {
             etag: Some("\"v1\"".to_string()),
             last_modified: Some("Mon".to_string()),
@@ -1331,11 +1367,6 @@ mod tests {
 
     #[test]
     fn validators_match_weak_etag_equals_strong_for_same_tag() {
-        // RFC 7232 §2.3.2: `If-None-Match` uses weak comparison, so
-        // W/"v1" and "v1" must compare equal even though the strings differ.
-        // Without this the HEAD probe would force an unnecessary full GET
-        // every tick when the upstream uses weak ETags (CDN-rewritten,
-        // proxy-stripped W/ prefix, etc.).
         let weak = CacheHeadersState {
             etag: Some("W/\"v1\"".to_string()),
             ..CacheHeadersState::default()
@@ -1373,9 +1404,6 @@ mod tests {
 
     #[test]
     fn validators_match_weak_etag_still_distinguishes_different_tags() {
-        // Weak comparison strips the prefix but the opaque tag itself must
-        // still differ — otherwise the short-circuit would conflate different
-        // resource versions.
         let a = CacheHeadersState {
             etag: Some("W/\"v1\"".to_string()),
             ..CacheHeadersState::default()
@@ -1402,8 +1430,6 @@ mod tests {
             "Last-Modified on only one side cannot match — asymmetric presence must not be treated as agreement",
         );
     }
-
-    // ---- Strategy state machine edge cases ----
 
     #[test]
     fn strategy_plain_get_does_not_degrade_further() {
@@ -1488,8 +1514,6 @@ mod tests {
 
     #[test]
     fn strategy_cumulative_transitions_accumulate() {
-        // Walk down then probe-back several times to verify the counters
-        // accumulate across cycles instead of being overwritten.
         let mut s = StrategyState::default();
         for _ in 0..3 {
             for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
@@ -1514,7 +1538,6 @@ mod tests {
 
     #[test]
     fn strategy_full_walk_down() {
-        // Conditional → HeadThenGet → PlainGet, threshold at each step.
         let mut s = StrategyState::default();
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
@@ -1544,8 +1567,6 @@ mod tests {
 
     #[test]
     fn strategy_degrade_counter_resets_on_transition() {
-        // After degrading, the counter starts from zero for the next level —
-        // we don't immediately fall off the cliff to PlainGet.
         let mut s = StrategyState::default();
         for _ in 0..STRATEGY_DEGRADE_THRESHOLD {
             s.record_degraded();
@@ -1566,8 +1587,6 @@ mod tests {
 
     #[test]
     fn strategy_choose_does_not_advance_probe_clock_when_conditional() {
-        // Calling choose_for_tick while at Conditional must not stamp
-        // last_probe_at — there's no probe to schedule.
         let mut s = StrategyState::default();
         let _ = s.choose_for_tick();
         assert!(
@@ -1640,20 +1659,16 @@ mod tests {
 
     #[test]
     fn next_delay_saturates_under_maximum_failures() {
-        // u32::MAX consecutive failures must not panic; backoff cap absorbs it.
         let s = RefreshState {
             consecutive_failures: u32::MAX,
             ..RefreshState::default()
         };
         let d = s.next_delay(60).as_secs();
-        // Capped at REFRESH_FAILURE_BACKOFF_MAX_SECS (=600) plus ±10% jitter.
         assert!(d <= 660, "got {d}");
     }
 
     #[test]
     fn next_delay_huge_base_is_bounded_by_no_failure_path() {
-        // Without failures there's no upper bound on base — confirm we still
-        // return a reasonable duration without arithmetic overflow.
         let s = RefreshState::default();
         let d = s.next_delay(u64::MAX / 1024).as_secs();
         assert!(d > 0, "got {d}");
@@ -1663,7 +1678,6 @@ mod tests {
 
     #[test]
     fn classify_max_retries_exceeded_without_status_routes_to_network_error() {
-        // Pure transport failure: DNS / TCP / TLS — no response, no status.
         use http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
         let (kind, outcome) = classify_fetch_error(&err);
@@ -1680,10 +1694,6 @@ mod tests {
 
     #[test]
     fn classify_max_retries_exceeded_with_status_routes_to_http_error() {
-        // The retry layer collapses 4xx/5xx exhaustion into MaxRetriesExceeded
-        // with `status_code = Some(...)`. Without this routing, every GET-path
-        // HTTP error would silently land in NetworkError — the regression the
-        // reviewer flagged.
         use http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(
             HttpRequestReasonError::MaxRetriesExceeded,
@@ -1703,9 +1713,6 @@ mod tests {
 
     #[test]
     fn classify_http_status_error_routes_to_http_error() {
-        // The typed `HttpStatusError` variant (from `head_validators` when a
-        // non-success status arrives outside the retry path) routes the same
-        // way — explicit status error → HttpError.
         use http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(
             HttpRequestReasonError::HttpStatusError,
