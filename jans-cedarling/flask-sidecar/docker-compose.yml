@@ -1,0 +1,13 @@
+services:
+  sidecar:
+    image: flask-sidecar
+    build: ./
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=main.core:app
+      - APP_MODE=${APP_MODE:-development}
+      - CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json
+    volumes:
+      - ./demo/bootstrap.json:/bootstrap.json:ro

@@ -10,10 +10,13 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::entity_data::EntityData;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
+use crate::authorize::policy_metadata::PolicyMetadata;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
+use crate::authorize::token_input::TokenInput;
 use crate::config::bootstrap_config::BootstrapConfig;
 use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
@@ -158,7 +161,7 @@ use std::time::Duration;
 ///     :returns: A DataStoreStats object
 ///     :raises DataErrorCtx: If the operation fails
 #[derive(Clone)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct Cedarling {
     inner: cedarling::blocking::Cedarling,
 }
@@ -195,6 +198,61 @@ impl Cedarling {
             .authorize_multi_issuer(request.borrow().to_cedarling()?)
             .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principal, actions, and resources.
+    ///
+    /// This performs scope-level filtering only (principal/action/resource constraints).
+    /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
+    ///
+    /// :param principal: Optional EntityData representing the principal entity. When
+    ///     `None`, policies are filtered assuming an unknown principal.
+    /// :param actions: List of action strings (e.g., 'Jans::Action::"Read"').
+    /// :param resources: List of EntityData representing resource entities.
+    /// :returns: A list of PolicyMetadata objects for matching policies.
+    /// :raises AuthorizeError: If policy matching fails.
+    #[pyo3(signature = (principal, actions, resources))]
+    fn get_matching_policies_unsigned(
+        &self,
+        principal: Option<EntityData>,
+        actions: Vec<String>,
+        resources: Vec<EntityData>,
+    ) -> Result<Vec<PolicyMetadata>, PyErr> {
+        let principal: Option<cedarling::EntityData> = principal.map(|p| p.into());
+        let resources: Vec<cedarling::EntityData> =
+            resources.into_iter().map(|r| r.into()).collect();
+        let result = self
+            .inner
+            .get_matching_policies_unsigned(principal.as_ref(), &actions, &resources)
+            .map_err(authorize_error_to_py)?;
+        Ok(result.into_iter().map(|pm| pm.into()).collect())
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given token-derived principals, actions, and resources.
+    ///
+    /// Tokens are validated and their mapping types used as principal entity types.
+    ///
+    /// :param tokens: List of TokenInput representing JWT tokens with mapping types.
+    /// :param actions: List of action strings (e.g., 'Jans::Action::"Read"').
+    /// :param resources: List of EntityData representing resource entities.
+    /// :returns: A list of PolicyMetadata objects for matching policies.
+    /// :raises AuthorizeError: If token validation or policy matching fails.
+    fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: Vec<TokenInput>,
+        actions: Vec<String>,
+        resources: Vec<EntityData>,
+    ) -> Result<Vec<PolicyMetadata>, PyErr> {
+        let tokens: Vec<cedarling::TokenInput> = tokens.into_iter().map(|t| t.into()).collect();
+        let resources: Vec<cedarling::EntityData> =
+            resources.into_iter().map(|r| r.into()).collect();
+        let result = self
+            .inner
+            .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
+            .map_err(authorize_error_to_py)?;
+        Ok(result.into_iter().map(|pm| pm.into()).collect())
     }
 
     /// Return logs and remove them from the storage

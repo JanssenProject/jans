@@ -49,14 +49,20 @@ from view_uma_dialog import ViewUMADialog
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
-ATTRIBUTE_ALG_PROPERTIES = (
+ATTRIBUTE_ALG_PROPERTIES = [
     'introspectionSignedResponseAlg',
     'introspectionEncryptedResponseAlg',
     'introspectionEncryptedResponseEnc',
     'txTokenSignedResponseAlg',
     'txTokenEncryptedResponseAlg',
     'txTokenEncryptedResponseEnc',
-    )
+    ]
+JARM_SIGNING_ATTRIBUTES = [
+    'jansAuthSignedRespAlg',
+    'jansAuthEncRespAlg',
+    'jansAuthEncRespEnc'
+]
+
 APP = get_app()
 
 
@@ -194,6 +200,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
         exp_date = self.data.pop('expirationDate', None)
         if exp_date:
             self.data['expirationDate'] = exp_date.strftime(ISOFORMAT)
+
+        for jarm_widget in self.jarm_signing_widgets:
+            if hasattr(jarm_widget, 'me'):
+                me = jarm_widget.me
+                prop_name = me.window.jans_name
+                if isinstance(me, DropDownWidget):
+                    value = me.value
+                    if value:
+                        self.data['attributes'][prop_name] = value
 
         if self.save_handler:
             self.save_handler(self)
@@ -350,8 +365,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.getTitledCheckBoxList(
                 _("Grant"),
                 name='grantTypes',
-                values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket',
-                                                                                                           'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')],
+                values=[
+                    ('authorization_code', 'Authorization Code'),
+                    ('refresh_token', 'Refresh Token'),
+                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
+                    ('client_credentials', 'Client Credentials'),
+                    ('password', 'Password'),
+                    ('implicit', 'Implicit'),
+                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
+                    ],
                 current_values=self.data.get('grantTypes', []),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'grantTypes'),
@@ -762,7 +784,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 style=cli_style.check_box),
         ]
 
+
+        self.jarm_signing_widgets = []
         self.drop_down_select_first = []
+
+        fall_back_open_id_dict = {}
+        for alg_prefix in ('authorization', ):
+            for alg_type in ('_signing_alg_values_supported', '_encryption_alg_values_supported', '_encryption_enc_values_supported'):
+                alg_name = alg_prefix + alg_type
+                if alg_name in self.myparent.cli_object.openid_configuration:
+                    fall_back_open_id_dict[alg_name] = alg_name
+                else:
+                    fall_back_open_id_dict[alg_name] = 'id_token' + alg_type
 
         for title, swagger_key, openid_key in (
 
@@ -803,6 +836,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
                  'tx_token_encryption_enc_values_supported'),
 
+                (_("JWS alg for Signing"), 'jansAuthSignedRespAlg',
+                  fall_back_open_id_dict['authorization_signing_alg_values_supported']),
+                (_("JWS alg for Encryption"), 'jansAuthEncRespAlg',
+                  fall_back_open_id_dict['authorization_encryption_alg_values_supported']),
+                (_("JWS enc for Encryption"), 'jansAuthEncRespEnc',
+                  fall_back_open_id_dict['authorization_encryption_enc_values_supported']),
 
         ):
 
@@ -811,9 +850,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
             values = [(alg, alg) for alg in self.myparent.cli_object.openid_configuration.get(
                 openid_key, [])]
 
-            value = self.data.get('attributes', {}).get(swagger_key) if swagger_key in ATTRIBUTE_ALG_PROPERTIES else self.data.get(swagger_key)
+            if swagger_key in ATTRIBUTE_ALG_PROPERTIES + JARM_SIGNING_ATTRIBUTES:
+                value = (self.data.get('attributes') or {}).get(swagger_key)
+            else:
+                value = self.data.get(swagger_key)
 
-            encryption_signing.append(self.myparent.getTitledWidget(
+            enc_widget = self.myparent.getTitledWidget(
                 title,
                 name=swagger_key,
                 widget=DropDownWidget(
@@ -822,31 +864,21 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 ),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, swagger_key),
-                style='class:outh-client-dropdown'))
+                style='class:outh-client-dropdown')
+
+            if swagger_key in JARM_SIGNING_ATTRIBUTES:
+                self.jarm_signing_widgets.append(enc_widget)
+            else:
+                encryption_signing.append(enc_widget)
+
+        jarm_frame = Frame(
+            title=_("JARM"),
+            body=HSplit(children=self.jarm_signing_widgets),
+        )
+
+        encryption_signing.append(jarm_frame)
 
         self.tabs['Encryption/Signing'] = HSplit(encryption_signing)
-
-        def allow_spontaneous_changed(cb):
-            self.spontaneous_scopes.me.window.style = 'underline ' + \
-                (self.myparent.styles['textarea']
-                 if cb.checked else self.myparent.styles['textarea-readonly'])
-            self.spontaneous_scopes.me.text = ''
-            self.spontaneous_scopes.me.read_only = not cb.checked
-
-        self.spontaneous_scopes = self.myparent.getTitledText(
-            _("Spontaneos scopes validation regex"),
-            name='spontaneousScopeScriptDns',
-            value='\n'.join(self.data.get('attributes', {}).get(
-                'spontaneousScopeScriptDns', [])),
-            read_only=False if 'allowSpontaneousScopes' in self.data and self.data.get(
-                'attributes', {}).get('allowSpontaneousScopes') else True,
-            focusable=True,
-            jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'spontaneousScopeScriptDns'),
-            height=3,
-            style=cli_style.check_box)
 
         self.tabs['Advanced Client Prop.'] = HSplit([
 
@@ -876,16 +908,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 name='allowSpontaneousScopes',
                 checked=self.data.get('attributes', {}).get(
                     'allowSpontaneousScopes'),
-                on_selection_changed=allow_spontaneous_changed,
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference(
                         '', ATTRIBUTE_SCHEMA_PATH),
                     'allowSpontaneousScopes'),
                 style=cli_style.check_box
             ),
-
-            self.spontaneous_scopes,
-
 
             VSplit([
                 Label(text=_("Spontaneous scopes"), style=cli_style.label,
@@ -960,14 +988,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.scripts_widget_dict = OrderedDict()
 
-
         list_of_scripts = (
                 ("Spontaneous Scopes", 'spontaneousScopes', ['spontaneous_scope', 'uma_claims_gathering', 'uma_rpt_policy']),
                 ("Update Token", 'updateTokenScriptDns', ['update_token']),
                 ("Post Authn", 'postAuthnScripts', ['post_authn']),
                 ("Introspection", 'introspectionScripts', ['introspection', 'persistence_extension', 'person_authentication']),
                 ("Password Grant", 'ropcScripts', ['resource_owner_password_credentials', 'scim']),
-                ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp'])
+                ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp']),
+                ("Spontaneous Scope", 'spontaneousScopeScriptDns', ['spontaneous_scope']),
+                ("Logout Status Jwt", 'logoutStatusJwtScriptDns', ['logout_status_jwt']),
+                ("Par", 'parScriptDns', ['par']),
+                ("TX Token", 'txTokenScriptDns', ['tx_token']),
                 )
 
         for title, script_var, script_types in list_of_scripts:

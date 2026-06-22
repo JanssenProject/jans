@@ -20,20 +20,13 @@ mod schema;
 mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
+use crate::RequestUnsigned;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 #[cfg(test)]
 use crate::common::policy_store::TrustedIssuer;
-use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
-use crate::{
-    RequestUnsigned,
-    entity_builder_config::{
-        DEFAULT_ACCESS_TKN_ENTITY_NAME, DEFAULT_ENTITY_TYPE_NAME, DEFAULT_ID_TKN_ENTITY_NAME,
-        DEFAULT_USERINFO_TKN_ENTITY_NAME, EntityBuilderConfig,
-    },
-};
 use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -52,8 +45,12 @@ pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
 
+pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
+pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
+pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
+pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
+
 pub(crate) struct EntityBuilder {
-    config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
@@ -62,7 +59,6 @@ pub(crate) struct EntityBuilder {
 
 impl EntityBuilder {
     pub(super) fn new(
-        config: EntityBuilderConfig,
         issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
@@ -91,7 +87,6 @@ impl EntityBuilder {
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
         Ok(Self {
-            config,
             iss_entities,
             schema,
             default_entities,
@@ -106,19 +101,11 @@ impl EntityBuilder {
     ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
         let mut built_entities = BuiltEntities::default();
 
-        let mut principals = Vec::with_capacity(request.principals.len());
-        let mut roles = Vec::<Entity>::new();
-        for principal in &request.principals {
-            let BuiltPrincipalUnsigned { principal, parents } =
-                self.build_principal_unsigned(principal, &built_entities)?;
-
+        let mut principal_entity: Option<Entity> = None;
+        if let Some(principal) = request.principal.as_ref() {
+            let principal = self.build_principal_unsigned(principal, &built_entities)?;
             built_entities.insert(&principal.uid());
-            for role in &roles {
-                built_entities.insert(&role.uid());
-            }
-
-            principals.push(principal);
-            roles.extend(parents);
+            principal_entity = Some(principal);
         }
 
         let resource = self
@@ -126,8 +113,7 @@ impl EntityBuilder {
             .map_err(Box::new)?;
 
         Ok(BuiltEntitiesUnsigned {
-            principals,
-            roles,
+            principal: principal_entity,
             resource,
             built_entities,
         })
@@ -147,13 +133,12 @@ impl EntityBuilder {
     #[cfg(test)]
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        self.issuers_index.find(issuer).cloned()
+        self.issuers_index.find(&IssClaim::new(issuer)).cloned()
     }
 }
 
 pub(super) struct BuiltEntitiesUnsigned {
-    pub principals: Vec<Entity>,
-    pub roles: Vec<Entity>,
+    pub principal: Option<Entity>,
     pub resource: Entity,
     pub built_entities: BuiltEntities,
 }
@@ -194,28 +179,6 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
 
 #[derive(Default)]
 pub(super) struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
-
-impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
-    fn from(value: Vec<TokenPrincipalMapping>) -> Self {
-        Self(value.into_iter().fold(HashMap::new(), |mut acc, mapping| {
-            acc.entry(mapping.principal.clone())
-                .or_default()
-                .push((mapping.attr_name.clone(), mapping.expr.clone()));
-            acc
-        }))
-    }
-}
-
-/// Represents a token and it's UID
-#[derive(Clone)]
-pub(super) struct TokenPrincipalMapping {
-    /// The principal where token will be inserted
-    principal: String,
-    /// The name of the attribute of the token
-    attr_name: String,
-    /// An `EntityUID` reference to the token
-    expr: RestrictedExpression,
-}
 
 impl TokenPrincipalMappings {
     fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {

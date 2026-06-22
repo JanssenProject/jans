@@ -25,6 +25,7 @@
 use std::fs;
 #[cfg(not(target_arch = "wasm32"))]
 use std::io::Read;
+use std::io::Write;
 
 use serde_json::json;
 #[cfg(not(target_arch = "wasm32"))]
@@ -35,10 +36,10 @@ use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
-use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
-    BootstrapConfig, Cedarling, DataStoreConfig, PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, DataStoreConfig, EntityData, PolicyStoreConfig, PolicyStoreSource,
     TrustedIssuerLoadingInfo,
 };
 
@@ -125,39 +126,77 @@ fn extract_archive_to_temp_dir(archive_bytes: &[u8]) -> TempDir {
 }
 
 /// Creates a Cedarling instance from a directory path.
-///
-/// Disables default entity building (user, workload, roles) since we're using
-/// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
-    use crate::JsonRule;
-
-    get_cedarling_with_callback(PolicyStoreSource::Directory(path), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await
+    get_cedarling_with_callback(PolicyStoreSource::Directory(path), |_| {}).await
 }
 
 /// Creates a Cedarling instance from an archive file path.
-///
-/// Disables default entity building (user, workload, roles) since we're using
-/// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
-    use crate::JsonRule;
+    get_cedarling_with_callback(PolicyStoreSource::CjarFile(path), |_| {}).await
+}
 
-    get_cedarling_with_callback(PolicyStoreSource::CjarFile(path), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await
+/// Cedar schema for [`test_load_from_cjar_with_multi_policy_file`] (`TestApp` read/write).
+#[cfg(not(target_arch = "wasm32"))]
+const MULTI_POLICY_CJAR_TEST_SCHEMA: &str = r#"namespace TestApp {
+    entity User {
+        name: String,
+        user_type: String,
+    };
+    entity Resource {
+        name: String,
+    };
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+    action "write" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+"#;
+
+/// Combined policies: read permit, general write permit, guest-only write forbid.
+#[cfg(not(target_arch = "wasm32"))]
+const MULTI_POLICY_COMBINED_CEDAR: &str = r#"@id("allow-read")
+permit(
+    principal,
+    action == TestApp::Action::"read",
+    resource
+);
+
+@id("allow-write-all")
+permit(
+    principal,
+    action == TestApp::Action::"write",
+    resource
+);
+
+@id("deny-write-guest")
+forbid(
+    principal,
+    action == TestApp::Action::"write",
+    resource
+) when { principal.user_type == "guest" };"#;
+
+#[cfg(not(target_arch = "wasm32"))]
+async fn multi_policy_cjar_unsigned_decision(
+    cedarling: &Cedarling,
+    action: &str,
+    user: EntityData,
+) -> bool {
+    let resource = create_test_principal(
+        "TestApp::Resource",
+        "resource1",
+        json!({"name": "Test Resource"}),
+    )
+    .expect("Failed to create resource");
+    let request = create_test_unsigned_request(action, Some(user), resource);
+    cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed")
+        .decision
 }
 
 fn create_jwt_cedarling_config(
@@ -173,10 +212,7 @@ fn create_jwt_cedarling_config_with_loader(
     async_loading: bool,
 ) -> BootstrapConfig {
     use crate::jwt_config::{JwtConfig, TrustedIssuerLoaderConfig, WorkersCount};
-    use crate::{
-        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, LogConfig,
-        LogTypeConfig,
-    };
+    use crate::{AuthorizationConfig, BootstrapConfig, LogConfig, LogTypeConfig};
 
     let trusted_issuer_loader = if async_loading {
         TrustedIssuerLoaderConfig::Async {
@@ -196,6 +232,7 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -207,17 +244,13 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
-
-            principal_bool_operator: JsonRule::new(json!({
-                "===": [{"var": "Jans::Workload"}, "ALLOW"]
-            }))
-            .expect("Failed to create principal bool operator"),
+            strict_schema_validation: true,
         },
-        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: crate::HttpClientConfig::default(),
     }
 }
 
@@ -230,16 +263,13 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
@@ -256,16 +286,13 @@ fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) 
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
@@ -351,14 +378,14 @@ async fn test_load_from_directory_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -574,14 +601,14 @@ async fn test_load_from_directory_deny_write_for_guest() {
     // Create an authorization request for write action with guest user_type
     let request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "guest_user",
                 json!({"name": "Guest User", "user_type": "guest"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -628,14 +655,14 @@ async fn test_load_from_cjar_file_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -654,6 +681,156 @@ async fn test_load_from_cjar_file_and_authorize_success() {
     assert!(
         result.decision,
         "Read action should be allowed by the allow-read policy"
+    );
+}
+
+/// Test that a single `.cedar` file containing multiple `@id(...)` policies inside a
+/// `.cjar` archive loads end-to-end and those policies apply during authorization.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_from_cjar_with_multi_policy_file() {
+    // General write permit plus guest-only forbid: without `deny-write-guest`, guests
+    // would incorrectly be allowed to write.
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("Multi-policy cjar test")
+        .with_schema(MULTI_POLICY_CJAR_TEST_SCHEMA)
+        .with_policy("combined", MULTI_POLICY_COMBINED_CEDAR);
+
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+    let archive_path = temp_dir.path().join("multi_policy.cjar");
+    fs::write(&archive_path, &archive).expect("Failed to write archive file");
+
+    let cedarling = get_cedarling_from_cjar_file(archive_path).await;
+
+    let admin = |id, name| {
+        create_test_principal(
+            "TestApp::User",
+            id,
+            json!({"name": name, "user_type": "admin"}),
+        )
+        .expect("Failed to create principal")
+    };
+    let guest = |id, name| {
+        create_test_principal(
+            "TestApp::User",
+            id,
+            json!({"name": name, "user_type": "guest"}),
+        )
+        .expect("Failed to create principal")
+    };
+
+    assert!(
+        multi_policy_cjar_unsigned_decision(
+            &cedarling,
+            "TestApp::Action::\"read\"",
+            admin("user1", "Test User")
+        )
+        .await,
+        "Read should be allowed by the allow-read policy from the multi-policy file"
+    );
+    assert!(
+        multi_policy_cjar_unsigned_decision(
+            &cedarling,
+            "TestApp::Action::\"write\"",
+            admin("admin_user", "Admin"),
+        )
+        .await,
+        "Write by admin should be explicitly permitted by allow-write-all from the multi-policy file"
+    );
+    assert!(
+        !multi_policy_cjar_unsigned_decision(
+            &cedarling,
+            "TestApp::Action::\"write\"",
+            guest("guest_user", "Guest"),
+        )
+        .await,
+        "Write by guest should be denied by deny-write-guest from the same multi-policy file"
+    );
+}
+
+/// End-to-end: a `.cjar` archive whose `templates/` contains a single file with
+/// two `@id`-annotated Cedar templates must fully round-trip (unpack -> loader
+/// -> `PolicySet`) with both templates present in the resulting `PolicySet`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_from_cjar_with_multi_template_file() {
+    let builder = PolicyStoreTestBuilder::new("b1b2b3b4b5b6b7b8")
+        .with_name("Multi-template cjar test")
+        .with_schema(
+            r#"namespace TestApp {
+    entity User {
+        name: String,
+    };
+    entity Resource {
+        name: String,
+    };
+    action "view" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+"#,
+        )
+        // At least one concrete policy so the store is non-trivial.
+        .with_policy(
+            "noop",
+            r#"@id("noop")
+permit(principal, action, resource);"#,
+        )
+        // One template file with two templates — symmetric to the multi-policy case.
+        .with_template(
+            "tpls",
+            r#"@id("principal-view")
+permit(
+    principal == ?principal,
+    action == TestApp::Action::"view",
+    resource
+);
+
+@id("resource-view")
+permit(
+    principal,
+    action == TestApp::Action::"view",
+    resource == ?resource
+);"#,
+        );
+
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+    let archive_path = temp_dir.path().join("multi_template.cjar");
+    fs::write(&archive_path, &archive).expect("Failed to write archive file");
+
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+    let loaded = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: crate::PolicyStoreSource::CjarFile(archive_path),
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
+    .await
+    .expect("Loading .cjar with a multi-template file should succeed");
+
+    let template_ids: Vec<String> = loaded
+        .store
+        .policies
+        .get_set()
+        .templates()
+        .map(|t| t.id().to_string())
+        .collect();
+    assert!(
+        template_ids.contains(&"principal-view".to_string())
+            && template_ids.contains(&"resource-view".to_string()),
+        "expected both template ids in loaded PolicySet, got {template_ids:?}"
     );
 }
 
@@ -735,14 +912,14 @@ permit(
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"access\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "alice",
                 json!({"name": "Alice", "department": "engineering"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "doc1",
@@ -840,10 +1017,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 1: Read should be allowed for any user
     let read_request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -858,10 +1035,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 2: Write should be allowed only for admin
     let write_admin_request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -879,10 +1056,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 3: Write should be denied for non-admin
     let write_viewer_request = create_test_unsigned_request(
         "TestApp::Action::\"write\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -900,10 +1077,10 @@ async fn test_load_directory_with_multiple_policies() {
     // Test 4: Delete should be denied for everyone
     let delete_request = create_test_unsigned_request(
         "TestApp::Action::\"delete\"",
-        vec![
+        Some(
             create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
                 .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal("TestApp::Resource", "resource1", json!({}))
             .expect("Failed to create resource"),
     );
@@ -929,7 +1106,6 @@ async fn test_load_directory_with_multiple_policies() {
 /// which works in both native and WASM environments.
 #[test]
 async fn test_load_from_cjar_url_and_authorize_success() {
-    use crate::JsonRule;
     use mockito::Server;
 
     // Build archive bytes
@@ -951,14 +1127,7 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     let cjar_url = format!("{}/policy-store.cjar", server.url());
 
     // Create Cedarling from CjarUrl
-    let cedarling = get_cedarling_with_callback(PolicyStoreSource::CjarUrl(cjar_url), |config| {
-        // Use a custom operator that checks for our TestApp::User principal
-        config.authorization_config.principal_bool_operator = JsonRule::new(json!({
-            "===": [{"var": "TestApp::User"}, "ALLOW"]
-        }))
-        .expect("Failed to create principal bool operator");
-    })
-    .await;
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::CjarUrl(cjar_url), |_| {}).await;
 
     // Verify the mock was called
     mock.assert_async().await;
@@ -966,14 +1135,14 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     // Create an authorization request
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",
-        vec![
+        Some(
             create_test_principal(
                 "TestApp::User",
                 "user1",
                 json!({"name": "Test User", "user_type": "admin"}),
             )
             .expect("Failed to create principal"),
-        ],
+        ),
         create_test_principal(
             "TestApp::Resource",
             "resource1",
@@ -1055,7 +1224,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -1092,7 +1261,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes)
+    let err = load_policy_store_archive_bytes(&invalid_bytes, true)
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
@@ -1103,4 +1272,169 @@ async fn test_load_policy_store_archive_bytes_invalid() {
         ),
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
+}
+
+#[test]
+async fn test_load_from_uri_detects_archive() {
+    use mockito::Server;
+
+    let builder = create_authz_policy_store_builder();
+    let archive_bytes = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let mut server = Server::new_async().await;
+    let mock = server
+        .mock("GET", "/policy-store")
+        .with_status(200)
+        .with_header("content-type", "application/octet-stream")
+        .with_body(archive_bytes)
+        .create_async()
+        .await;
+
+    let uri = format!("{}/policy-store", server.url());
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Uri(uri), |_| {}).await;
+
+    mock.assert_async().await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
+            .expect("Failed to create principal"),
+        ),
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .expect("Failed to create resource"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed");
+
+    assert!(
+        result.decision,
+        "Read action should be allowed when loading archive via Uri"
+    );
+}
+
+// ============================================================================
+// No-Schema / Strict Validation Tests
+// ============================================================================
+
+/// Helper: build a `.cjar` archive without a schema file (only metadata + policies).
+fn build_archive_without_schema(id: &str, name: &str) -> Vec<u8> {
+    // ID must be valid hex 8-64 chars
+    assert!(
+        id.len() >= 8 && id.len() <= 64 && id.chars().all(|c| c.is_ascii_hexdigit()),
+        "test archive id must be hex 8-64 chars, got: {id}"
+    );
+    let mut buf = Vec::new();
+    {
+        let cursor = std::io::Cursor::new(&mut buf);
+        let mut zip = zip::ZipWriter::new(cursor);
+        let opts = <zip::write::FileOptions<zip::write::ExtendedFileOptions>>::default()
+            .compression_method(zip::CompressionMethod::Deflated);
+
+        zip.start_file("metadata.json", opts.clone()).unwrap();
+        write!(
+            zip,
+            r#"{{"cedar_version":"4.4.0","policy_store":{{"id":"{id}","name":"{name}","version":"1.0.0"}}}}"#
+        )
+        .unwrap();
+
+        zip.start_file("policies/allow.cedar", opts).unwrap();
+        zip.write_all(b"@id(\"allow-all\")\npermit(principal, action, resource);")
+            .unwrap();
+
+        zip.finish().unwrap();
+    }
+    buf
+}
+
+/// Directory without a schema + strict=false should succeed (schemaless mode).
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_false_succeeds() {
+    let archive = build_archive_without_schema("deadbeef12345678", "No Schema Dir");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
+}
+
+/// Directory without a schema + strict=true should fail init.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_true_fails() {
+    let archive = build_archive_without_schema("deadbeef87654321", "No Schema Dir Strict");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let mut config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    config.authorization_config.strict_schema_validation = true;
+
+    let result = Cedarling::new(&config).await;
+    assert!(
+        result.is_err(),
+        "Expected init to fail: strict_schema_validation=true but policy store has no schema (directory)"
+    );
+}
+
+/// Archive without a schema + strict=false should succeed (schemaless mode).
+#[test]
+async fn test_archive_without_schema_strict_false_succeeds() {
+    let archive_bytes = build_archive_without_schema("deadbeefaaaabbbb", "No Schema Archive");
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::ArchiveBytes(archive_bytes),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
 }

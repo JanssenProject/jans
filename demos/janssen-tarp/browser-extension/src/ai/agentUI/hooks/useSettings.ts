@@ -2,12 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   LLM_MODEL_STORAGE_KEY,
   LLM_PROVIDER_STORAGE_KEY,
+  OLLAMA_BASE_URL_STORAGE_KEY,
+  DEFAULT_OLLAMA_BASE_URL,
   MCP_SERVER_URL,
   ConnectionStatus,
   SnackbarState
 } from '../types';
 import { LLM_PROVIDERS, DEFAULT_MODEL, DEFAULT_PROVIDER, DEFAULT_MCP_URL } from '../constants';
 import { mcpApiService } from '../../service/MCPAPIService';
+
+// Local providers (e.g. Ollama) need no API key — only model/endpoint config.
+const providerRequiresApiKey = (providerName: string): boolean =>
+  LLM_PROVIDERS.find(p => p.value === providerName)?.requiresApiKey !== false;
 
 export const useSettings = () => {
   const [apiKey, setApiKey] = useState("");
@@ -17,6 +23,7 @@ export const useSettings = () => {
   const [provider, setProvider] = useState(DEFAULT_PROVIDER);
   const [model, setModel] = useState(DEFAULT_MODEL);
   const [mcpServerUrl, setMcpServerUrl] = useState(DEFAULT_MCP_URL);
+  const [ollamaBaseUrl, setOllamaBaseUrl] = useState(DEFAULT_OLLAMA_BASE_URL);
   const [customModel, setCustomModel] = useState("");
   const [modelError, setModelError] = useState("");
   const [mcpUrlError, setMcpUrlError] = useState("");
@@ -28,7 +35,23 @@ export const useSettings = () => {
   });
   const [loadingApiKey, setLoadingApiKey] = useState(false);
 
+  // Auto-dismiss the snackbar a few seconds after it opens.
+  useEffect(() => {
+    if (!snackbar.open) return;
+    const timer = setTimeout(() => {
+      setSnackbar(prev => ({ ...prev, open: false }));
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [snackbar.open, snackbar.message]);
+
   const loadApiKeyFromMCP = useCallback(async (providerName: string, modelName: string, skipConnectionCheck = false) => {
+    // Keyless providers (e.g. Ollama) store no API key on the MCP server.
+    if (!providerRequiresApiKey(providerName)) {
+      setApiKey("");
+      mcpApiService.setCurrentApiKeyId(null);
+      setApiKeyValid(true);
+      return;
+    }
     if (!mcpServerUrl) return;
     if (!skipConnectionCheck && connectionStatus !== "connected") return;
 
@@ -63,13 +86,17 @@ export const useSettings = () => {
         chrome.storage.local.get([
           LLM_MODEL_STORAGE_KEY,
           LLM_PROVIDER_STORAGE_KEY,
+          OLLAMA_BASE_URL_STORAGE_KEY,
           MCP_SERVER_URL
         ], resolve);
       });
 
       const savedModel = results[LLM_MODEL_STORAGE_KEY];
       const savedProvider = results[LLM_PROVIDER_STORAGE_KEY];
+      const savedOllamaBaseUrl = results[OLLAMA_BASE_URL_STORAGE_KEY] || DEFAULT_OLLAMA_BASE_URL;
       const savedMcpUrl = results[MCP_SERVER_URL] || DEFAULT_MCP_URL;
+
+      setOllamaBaseUrl(savedOllamaBaseUrl);
 
       // Determine which MCP URL to use
       const mcpUrlToUse = savedMcpUrl;
@@ -142,6 +169,13 @@ export const useSettings = () => {
     const providerConfig = LLM_PROVIDERS.find(p => p.value === currentProvider);
     if (!providerConfig) return false;
 
+    // Keyless providers (e.g. Ollama) require no API key.
+    if (!providerRequiresApiKey(currentProvider)) {
+      setApiKeyValid(true);
+      setApiKeyError("");
+      return true;
+    }
+
     const isValid = providerConfig.apiKeyValidation(key);
     setApiKeyValid(isValid);
 
@@ -208,9 +242,21 @@ export const useSettings = () => {
       setModel(providerConfig.models[0].value);
     }
 
+    // Keyless providers (e.g. Ollama) need no API key — clear and mark valid.
+    if (!providerRequiresApiKey(newProvider)) {
+      setApiKey("");
+      setApiKeyError("");
+      setApiKeyValid(true);
+      mcpApiService.setCurrentApiKeyId(null);
+      return;
+    }
+
     // Load API key for new provider from MCP server
     if (mcpServerUrl && connectionStatus === "connected") {
-      await loadApiKeyFromMCP(newProvider, providerConfig.models[0].value);
+      const firstModel = providerConfig?.models?.[0]?.value;
+      if (firstModel) {
+        await loadApiKeyFromMCP(newProvider, firstModel);
+      }
     }
   }, [mcpServerUrl, connectionStatus, loadApiKeyFromMCP]);
 
@@ -223,9 +269,9 @@ export const useSettings = () => {
     }
     // Load API key for new provider from MCP server
     if (mcpServerUrl && connectionStatus === "connected") {
-      await loadApiKeyFromMCP(null, newModel);
+      await loadApiKeyFromMCP(provider, newModel);
     }
-  }, [model]);
+  }, [model, provider, mcpServerUrl, connectionStatus, loadApiKeyFromMCP]);
 
   const handleMcpUrlChange = useCallback(async (newUrl: string) => {
     setMcpServerUrl(newUrl);
@@ -236,6 +282,10 @@ export const useSettings = () => {
       await testMCPConnection(newUrl);
     }
   }, [validateMcpUrl, testMCPConnection]);
+
+  const handleOllamaBaseUrlChange = useCallback((newUrl: string) => {
+    setOllamaBaseUrl(newUrl);
+  }, []);
 
   const handleCustomModelChange = useCallback((value: string) => {
     setCustomModel(value);
@@ -265,7 +315,7 @@ export const useSettings = () => {
   }, [model, customModel]);
 
   const validateSettings = useCallback(() => {
-    const isApiKeyValid = validateApiKey(apiKey);
+    const isApiKeyValid = providerRequiresApiKey(provider) ? validateApiKey(apiKey) : true;
     const mcpUrlValid = validateMcpUrl(mcpServerUrl);
 
     let modelValid = true;
@@ -275,10 +325,12 @@ export const useSettings = () => {
     }
 
     return isApiKeyValid && modelValid && mcpUrlValid;
-  }, [apiKey, validateApiKey, mcpServerUrl, validateMcpUrl, model, customModel]);
+  }, [apiKey, provider, validateApiKey, mcpServerUrl, validateMcpUrl, model, customModel]);
 
   const saveSettings = useCallback(async () => {
-    if (!apiKey.trim()) {
+    const needsApiKey = providerRequiresApiKey(provider);
+
+    if (needsApiKey && !apiKey.trim()) {
       setSnackbar({
         open: true,
         message: "Please enter an API key",
@@ -297,22 +349,28 @@ export const useSettings = () => {
     }
 
     try {
-      // Save API key to MCP server
-      const currentApiKeyId = mcpApiService.getCurrentApiKeyId();
+      if (needsApiKey) {
+        // Save API key to MCP server (providers that authenticate with a key)
+        const currentApiKeyId = mcpApiService.getCurrentApiKeyId();
 
-      if (currentApiKeyId) {
-        // Update existing API key
-        await mcpApiService.updateApiKey(currentApiKeyId, apiKey);
+        if (currentApiKeyId) {
+          // Update existing API key
+          await mcpApiService.updateApiKey(currentApiKeyId, apiKey);
+        } else {
+          // Create new API key
+          const newApiKey = await mcpApiService.createApiKey(provider, model, apiKey);
+          mcpApiService.setCurrentApiKeyId(newApiKey.id || null);
+        }
       } else {
-        // Create new API key
-        const newApiKey = await mcpApiService.createApiKey(provider, model, apiKey);
-        mcpApiService.setCurrentApiKeyId(newApiKey.id || null);
+        // Keyless provider (e.g. Ollama): no server-stored key.
+        mcpApiService.setCurrentApiKeyId(null);
       }
 
       // Save other settings to chrome storage
       await chrome.storage.local.set({
         [LLM_MODEL_STORAGE_KEY]: getFinalModelName(),
         [LLM_PROVIDER_STORAGE_KEY]: provider,
+        [OLLAMA_BASE_URL_STORAGE_KEY]: ollamaBaseUrl,
         [MCP_SERVER_URL]: mcpServerUrl
       });
 
@@ -335,7 +393,7 @@ export const useSettings = () => {
       });
       return false;
     }
-  }, [apiKey, validateSettings, getFinalModelName, provider, mcpServerUrl, testMCPConnection]);
+  }, [apiKey, validateSettings, getFinalModelName, provider, mcpServerUrl, ollamaBaseUrl, testMCPConnection]);
 
   const clearSettings = useCallback(async () => {
     try {
@@ -349,6 +407,7 @@ export const useSettings = () => {
       await chrome.storage.local.remove([
         LLM_MODEL_STORAGE_KEY,
         LLM_PROVIDER_STORAGE_KEY,
+        OLLAMA_BASE_URL_STORAGE_KEY,
         MCP_SERVER_URL
       ]);
 
@@ -359,6 +418,7 @@ export const useSettings = () => {
       setModel(DEFAULT_MODEL);
       setCustomModel("");
       setModelError("");
+      setOllamaBaseUrl(DEFAULT_OLLAMA_BASE_URL);
       setMcpServerUrl(DEFAULT_MCP_URL);
       setMcpUrlError("");
       setConnectionStatus("disconnected");
@@ -411,6 +471,7 @@ export const useSettings = () => {
     model,
     customModel,
     mcpServerUrl,
+    ollamaBaseUrl,
     modelError,
     mcpUrlError,
     connectionStatus,
@@ -424,6 +485,7 @@ export const useSettings = () => {
     handleModelChange,
     handleCustomModelChange,
     handleMcpUrlChange,
+    handleOllamaBaseUrlChange,
     getCurrentProviderConfig,
     getAvailableModels,
     getFinalModelName,

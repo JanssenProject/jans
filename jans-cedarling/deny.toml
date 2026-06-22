@@ -1,0 +1,53 @@
+# cargo-deny policy
+# Layered on top of the cargo-audit job in test-cedarling.yml: This basically
+# extends coverage to license compliance, duplicate-crate drift, source-origin
+# pinning, and advisories.
+
+[graph]
+all-features = true
+
+[advisories]
+ignore = [
+    # See rationale in jans-cedarling/.cargo/audit.toml
+    "RUSTSEC-2023-0071",
+    # serde_cbor is unmaintained, pulled in transitively by pgrx 0.18 (cedarling_pg).
+    # No upstream fix yet; pgrx has not migrated to ciborium/minicbor.
+    "RUSTSEC-2021-0127",
+]
+
+[licenses]
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-1-Clause",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "CDLA-Permissive-2.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+]
+confidence-threshold = 0.93
+
+# Per-crate exceptions
+exceptions = [{ allow = ["bzip2-1.0.6"], crate = "libbz2-rs-sys" }]
+
+[bans]
+# `multiple-versions` stays at "warn" while 3x rand drift exists in Cargo.lock; revisit
+# once that's resolved upstream. `wildcards = "deny"` is safe because all internal path
+# deps live in crates marked `publish = false`, which `allow-wildcard-paths` exempts.
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

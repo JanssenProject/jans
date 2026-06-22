@@ -9,8 +9,8 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, RequestUnsigned,
-    TrustedIssuerLoadingInfo,
+    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
+    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -54,7 +54,7 @@ impl Cedarling {
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_unsigned(&request)
+        self.instance.authz.load().authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
@@ -64,7 +64,35 @@ impl Cedarling {
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_multi_issuer(&request)
+        self.instance.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given principals, actions, and resources.
+    pub fn get_matching_policies_unsigned(
+        &self,
+        principal: Option<&EntityData>,
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.instance
+            .authz
+            .load()
+            .get_matching_policies_unsigned(principal, actions, resources)
+    }
+
+    /// Returns metadata for all policies whose scope constraints are compatible
+    /// with the given token-derived principals, actions, and resources.
+    pub fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[TokenInput],
+        actions: &[String],
+        resources: &[EntityData],
+    ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        self.instance
+            .authz
+            .load()
+            .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.

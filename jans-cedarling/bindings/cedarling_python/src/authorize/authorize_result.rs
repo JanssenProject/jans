@@ -30,13 +30,10 @@ impl AuthorizeResult {
         self.inner.decision
     }
 
-    /// Get the decision value for a specific principal
-    fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
-        self.inner
-            .principals
-            .get(principal)
-            .cloned()
-            .map(|v| v.into())
+    /// Returns the underlying cedar_policy `Response` for this request.
+    #[getter]
+    fn response(&self) -> AuthorizeResultResponse {
+        self.inner.response.clone().into()
     }
 
     /// Get the request ID associated with this result

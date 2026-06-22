@@ -31,7 +31,7 @@ LockAdapter = _t.Union[SqlLock]
 
 Currently supports the following classes:
 
-* [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
+* `jans.pycloudlib.lock.sql_lock.SqlLock`
 """
 
 
@@ -86,23 +86,22 @@ class LockConnectionError(RuntimeError):
 class LockRecord:
     """This class manage the locking process.
 
-    Common example:
+    Examples:
+        ```py
+        from jans.pycloudlib import get_manager
 
-    ```py
-    from jans.pycloudlib import get_manager
+        manager = get_manager()
 
-    manager = get_manager()
+        lock = LockRecord("lock-1", owner="container-1", ttl=30)
+        lock.init_adapter(manager)
 
-    lock = LockRecord("lock-1", owner="container-1", ttl=30)
-    lock.init_adapter(manager)
+        # try to acquire the lock
+        if lock.acquire():
+            # do operation which requires coordination
 
-    # try to acquire the lock
-    if lock.acquire():
-        # do operation which requires coordination
-
-        # release the lock
-        lock.release()
-    ```
+            # release the lock
+            lock.release()
+        ```
     """
 
     def __init__(

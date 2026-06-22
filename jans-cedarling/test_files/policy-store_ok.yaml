@@ -16,18 +16,10 @@ policy_stores:
         token_metadata:
           access_token:
             entity_type_name: "Jans::Access_token"
-            workload_id: "client_id"
-            principal_mapping:
-              - "Jans::Workload"
           id_token:
             entity_type_name: "Jans::Id_token"
-            principal_mapping:
-              - "Jans::User"
           userinfo_token:
             entity_type_name: "Jans::Userinfo_token"
-            user_id: "sub"
-            principal_mapping:
-              - "Jans::User"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
@@ -42,10 +34,9 @@ policy_stores:
                 resource is Jans::Issue
             )when{
                 principal.access_token.org_id == resource.org_id &&
-                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039"
             };
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
-        cedar_version: v4.0.0
         description: simple policy example for principal user
         creation_date: '2024-09-20T17:22:39.996050'
         policy_content:
@@ -58,10 +49,9 @@ policy_stores:
                 resource is Jans::Issue
             )when{
                 principal.country == resource.country &&
-                principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039") 
+                principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039")
             };
       555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
-        cedar_version: v4.0.0
         description: Superuser that can do anything
         creation_date: '2024-09-20T17:22:39.996050'
         policy_content:

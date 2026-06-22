@@ -15,36 +15,19 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2025-12-18 08:20'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
-
-# ============
-# KC scheduler
-# ============
-
-ENV SCHEDULER_HOME=/opt/kc-scheduler
-
-RUN mkdir -p ${SCHEDULER_HOME}/bin \
-    ${SCHEDULER_HOME}/conf \
-    ${SCHEDULER_HOME}/lib \
-    ${SCHEDULER_HOME}/logs
-
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
-    && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
-    && rm -rf /tmp/kc-scheduler.zip \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
-
-RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
-    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
 
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
+ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -54,8 +37,7 @@ WORKDIR /tmp/jans
 RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
     && git sparse-checkout add jans-pycloudlib \
-    && git checkout ${JANS_SOURCE_VERSION} \
-    && mkdir -p /app/templates/kc-scheduler \
+    && git checkout ${JANS_SOURCE_VERSION}
 
 WORKDIR /
 
@@ -160,7 +142,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cloudtools" \
 RUN mkdir -p /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
-COPY templates /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
@@ -171,9 +152,7 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 # adjust ownership and permission
 RUN chown -R 1000:0 /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 /opt/kc-scheduler \
-    && chown -R 1000:0 /app/templates
+    && chmod 664 /opt/java/lib/security/cacerts
 
 USER 1000
 

@@ -78,7 +78,7 @@ public class MTLSService {
 
         final String clientCertAsPem = CoreCertUtil.getClientCert(httpRequest).getCert();
         if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header, client_id: {}.", client.getClientId());
+            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert`, `X-Forwarded-Tls-Client-Cert` and `X-ClientCert` headers, client_id: {}.", client.getClientId());
             return false;
         }
 
@@ -185,7 +185,7 @@ public class MTLSService {
 
         final String clientCertAsPem = CoreCertUtil.getClientCert(httpRequest).getCert();
         if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
+            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert`, `X-Forwarded-Tls-Client-Cert` and `X-ClientCert` headers");
             return false;
         }
 

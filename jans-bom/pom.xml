@@ -56,7 +56,7 @@
 		<jackson.databind.version>2.18.6</jackson.databind.version>
 		<json.version>20231013</json.version>
 
-		<log4j.version>2.25.3</log4j.version>
+		<log4j.version>2.25.4</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
@@ -65,8 +65,9 @@
 		<jackrabbit.version>2.22.2</jackrabbit.version>
 
 		<bc.version>1.79</bc.version>
-		<junit.jupiter.version>5.9.2</junit.jupiter.version>
-		<mockito.version>5.1.1</mockito.version>
+		<junit.version>5.11.4</junit.version>
+		<mockito.version>5.23.0</mockito.version>
+		<wiremock.version>4.0.0-beta.34</wiremock.version>
 
 		<jetty.version>11.0.24</jetty.version>
 	</properties>
@@ -87,16 +88,6 @@
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
 			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
-		<repository>
-			<id>gluu</id>
-			<name>Gluu repository</name>
-			<url>https://maven.gluu.org/maven</url>
 		</repository>
 		<repository>
 			<id>mulesoft</id>
@@ -317,7 +308,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-fips</artifactId>
-				<version>1.0.6</version>
+				<version>1.0.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -507,7 +498,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<version>1.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -655,7 +646,7 @@
 
 			<!-- Jython -->
 			<dependency>
-				<groupId>io.jans</groupId>
+				<groupId>org.python</groupId>
 				<artifactId>jython-standalone</artifactId>
 				<version>2.7.4</version>
 			</dependency>
@@ -786,7 +777,7 @@
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.4.11</version>
+				<version>3.11.1</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -923,26 +914,22 @@
 				<version>4.0.0.Final</version>
 				<scope>test</scope>
 			</dependency>
-			<!-- JUnit Jupiter -->
+
+			<!-- Test dependecies -->
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-bom</artifactId>
+				<version>${mockito.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit.jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- Mockito -->
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
@@ -950,15 +937,33 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-inline</artifactId>
-				<version>${mockito.version}</version>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>6.0.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>${mockito.version}</version>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-junit5</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-jetty</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-httpclient-apache5</artifactId>
+				<version>${wiremock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-grpc-extension</artifactId>
+				<version>1.0.0-beta.5</version>
 				<scope>test</scope>
 			</dependency>
 

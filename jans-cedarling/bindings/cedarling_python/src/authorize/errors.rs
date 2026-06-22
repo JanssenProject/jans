@@ -74,13 +74,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    ExecuteRuleError,
-    AuthorizeError,
-    "Error encountered while executing the rule for principals"
-);
-
-create_exception!(
-    authorize_errors,
     BuildUnsignedRoleEntityError,
     AuthorizeError,
     "Error building Role entity for unsigned request"
@@ -105,6 +98,13 @@ create_exception!(
     RequestValidationError,
     AuthorizeError,
     "Error encountered while validating the request"
+);
+
+create_exception!(
+    authorize_errors,
+    IdentifierParsingError,
+    AuthorizeError,
+    "Error encountered while parsing an entity type name or action identifier"
 );
 
 #[pyclass]
@@ -152,11 +152,11 @@ errors_functions! {
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     BuildEntity => BuildEntityError,
-    ExecuteRule => ExecuteRuleError,
     BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
     MultiIssuerValidation => MultiIssuerValidationError,
     MultiIssuerEntity => MultiIssuerEntityError,
-    RequestValidation => RequestValidationError
+    RequestValidation => RequestValidationError,
+    IdentifierParsing => IdentifierParsingError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

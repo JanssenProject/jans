@@ -135,6 +135,17 @@ public class DiscoveryService {
         for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
             listGrantTypesSupported.add(grantType.getValue());
         }
+
+        // Identity Assertion Authorization Grant (ID-JAG) metadata
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.IDENTITY_ASSERTION_AUTHZ_GRANT)) {
+            Util.putArray(jsonObj,
+                    Collections.singletonList(io.jans.as.model.config.Constants.TOKEN_TYPE_ID_JAG),
+                    IDENTITY_CHAINING_REQUESTED_TOKEN_TYPES_SUPPORTED);
+            Util.putArray(jsonObj,
+                    Collections.singletonList(io.jans.as.model.config.Constants.GRANT_PROFILE_ID_JAG),
+                    AUTHORIZATION_GRANT_PROFILES_SUPPORTED);
+        }
+
         if (!listGrantTypesSupported.isEmpty()) {
             Util.putArray(jsonObj, listGrantTypesSupported, GRANT_TYPES_SUPPORTED);
         }
@@ -224,6 +235,11 @@ public class DiscoveryService {
         // SSA
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.SSA) && appConfiguration.getSsaConfiguration() != null) {
             jsonObj.put(SSA_ENDPOINT, appConfiguration.getSsaConfiguration().getSsaEndpoint());
+        }
+
+        // Client ID Metadata Document (CIMD)
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)) {
+            jsonObj.put(CLIENT_ID_METADATA_DOCUMENT_SUPPORTED, true);
         }
 
         final Map<String, String> acrMappings = appConfiguration.getAcrMappings();

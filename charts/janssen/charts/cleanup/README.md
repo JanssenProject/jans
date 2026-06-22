@@ -14,7 +14,7 @@ Cleanup expired entries in persistence
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans/docker-jans-cloudtools>
+* <https://github.com/JanssenProject/jans/tree/main/docker-jans-cloudtools>
 
 ## Requirements
 

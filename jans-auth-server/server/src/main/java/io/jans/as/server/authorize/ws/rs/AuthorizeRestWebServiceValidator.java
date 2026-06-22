@@ -76,6 +76,9 @@ public class AuthorizeRestWebServiceValidator {
     @Inject
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     public Client validateClient(String clientId, String state) {
         return validateClient(clientId, state, false);
     }
@@ -97,7 +100,17 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         try {
-            final Client client = clientService.getClient(clientId);
+            final Client client;
+
+            // Check if client_id is a CIMD URL (Client ID Metadata Document)
+            if (clientIdMetadataService.isCimdClientId(clientId)) {
+                log.debug("Processing CIMD client_id: {}", clientId);
+                client = clientIdMetadataService.getClient(clientId);
+            } else {
+                // Traditional client lookup from database
+                client = clientService.getClient(clientId);
+            }
+
             if (client == null) {
                 log.debug("Unable to find client by id {}.", clientId);
                 throw new WebApplicationException(Response
@@ -173,12 +186,14 @@ public class AuthorizeRestWebServiceValidator {
     public void validate(AuthzRequest authzRequest, List<io.jans.as.model.common.ResponseType> responseTypes, Client client) {
         final ResponseMode responseMode = authzRequest.getResponseModeEnum();
         final String redirectUri = authzRequest.getRedirectUri();
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, authzRequest.getPromptList(), authzRequest.getNonce(), appConfiguration.isFapi(), responseMode)) {
+        final String reason = AuthorizeParamsValidator.validateParamsWithReason(responseTypes, authzRequest.getPromptList(), authzRequest.getNonce(), appConfiguration.isFapi(), responseMode);
 
+        if (reason != null) {
+            log.debug("Failed to validate request parameters. Reason: {}", reason);
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                        AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState()));
+                        AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), reason));
                 throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest()).build());
             } else {
                 throw new WebApplicationException(Response
@@ -384,7 +399,7 @@ public class AuthorizeRestWebServiceValidator {
         final boolean requirePkce = isTrue(appConfiguration.getRequirePkce()) || client.getAttributes().getRequirePkce();
         if (requirePkce && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "PKCE is required but code_challenge is missing");
         }
     }
 

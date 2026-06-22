@@ -1,105 +1,73 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import Typography from '@mui/material/Typography';
+import * as React from "react";
+import { X } from "lucide-react";
 
-export default function HelpDrawer({ isOpen, handleDrawer }) {
-  const [open, setOpen] = React.useState(isOpen);
-  const [width, setWidth] = React.useState((window.innerWidth * 2)/3 )
-  React.useEffect(() => {
-    handleDrawer(isOpen)
-    setOpen(isOpen);
-  }, [isOpen])
+interface HelpDrawerProps {
+  isOpen: boolean;
+  handleDrawer: (open: boolean) => void;
+}
 
-  const toggleDrawer = (newOpen: boolean) => () => {
-    handleDrawer(newOpen)
-    setOpen(newOpen);
-  };
+export default function HelpDrawer({
+  isOpen,
+  handleDrawer,
+}: HelpDrawerProps) {
+  const images = [
+    "tarpDocs1.png",
+    "tarpDocs2.png",
+    "tarpDocs3.png",
+    "tarpDocs4.png",
+    "tarpDocs5.png",
+    "tarpDocs6.png",
+    "tarpDocs7.png",
+  ];
 
-  const DrawerList = (
-
-    <Box sx={{ width: width }} role="presentation">
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 1
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Click on 'Add Client' button for Dynamic Client Registration on authentication server.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs1.png'} />
-      </div>
-
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 2
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          On registration form enter details and register.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs2.png'} />
-      </div>
-
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 3 (Optional: For Cedarlig authorization testing)
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Add Cedarling bootstrap configuration on <b>Cedarling</b> tab.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs3.png'} />
-      </div>
-
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 4
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Start Authentication code flow.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs4.png'} />
-      </div>
-
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 5
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Enter required details before starting Authentication Code flow.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs5.png'} />
-      </div>
-
-      <div style={{ padding: "20px" }}>
-        <Typography gutterBottom variant="h5" component="div">
-          Step 6 (Optional: For Cedarlig authorization testing)
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          After authentication, test Cedarling Authorization decision using following request form.
-        </Typography>
-      </div>
-      <div className="image-container">
-        <img id="dynamic-image" src={'tarpDocs6.png'} />
-      </div>
-    </Box>
-
-  );
+  if (!isOpen) return null;
 
   return (
-    <div>
-      {/*<Button onClick={toggleDrawer(true)}>Open drawer</Button>*/}
-      <Drawer open={open} onClose={toggleDrawer(false)}>
-        {DrawerList}
-      </Drawer>
+    <div className="fixed inset-0 z-50 flex">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={() => handleDrawer(false)}
+      />
+
+      {/* Drawer */}
+      <div className="relative ml-auto h-full w-full bg-white shadow-xl sm:w-[70vw] md:w-[50vw] max-w-full overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-6 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Janssen-Tarp — Quick Start Guide
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                7 steps to register a client and test Cedarling authorization
+              </p>
+            </div>
+
+            <button
+              onClick={() => handleDrawer(false)}
+              className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+              aria-label="Close drawer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Images */}
+        <div className="divide-y divide-gray-100">
+          {images.map((src, index) => (
+            <div key={index} className="w-full">
+              <img
+                src={src}
+                alt={`Guide step ${index + 1}`}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // services/mcpApi.ts
 import { MCP_API_BASE_URL, MCP_KEYS_ENDPOINT } from '../agentUI/types';
 
-export interface ApiKeyData {
+interface ApiKeyData {
   id?: string;
   provider: string;
   model: string;
@@ -79,7 +79,7 @@ class MCPApiService {
     const provider = await this.getProviderFromId(id);
     const model = await this.getModelFromId(id);
 
-    if (!provider?.trim() && !model?.trim() || !key?.trim()) {
+    if (!provider?.trim() || !model?.trim() || !key?.trim()) {
       throw new Error('Provider or model and key are required');
     }
     if (key.length < 10) {

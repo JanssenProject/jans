@@ -8,9 +8,9 @@ mod unsigned;
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::schema::AttrsShape;
 use super::{
-    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
-    BuiltEntities, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
-    RestrictedExpression, TokenPrincipalMappings, Value, build_cedar_entity, build_entity_attrs,
+    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuiltEntities, EntityBuilder,
+    EntityData, EntityUid, HashMap, PartitionResult, RestrictedExpression, TokenPrincipalMappings,
+    Value, build_cedar_entity, build_entity_attrs,
 };
 use cedar_policy::Entity;
 use smol_str::SmolStr;
@@ -26,7 +26,7 @@ impl EntityBuilder {
         &self,
         type_name: &str,
         id_srcs: &[EntityIdSrc],
-        attrs_srcs: Vec<AttrSrc>,
+        attrs_srcs: &[AttrSrc],
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
         parents: HashSet<EntityUid>,
@@ -67,12 +67,12 @@ impl EntityBuilder {
 }
 
 fn extract_attrs_from_sources(
-    srcs: Vec<AttrSrc<'_>>,
+    srcs: &[AttrSrc<'_>],
     built_entities: &BuiltEntities,
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> ExtractedAttrsResult {
     let (attrs, errs) = srcs
-        .into_iter()
+        .iter()
         .map(|src| match src {
             AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape),
         })
@@ -83,9 +83,4 @@ fn extract_attrs_from_sources(
 struct ExtractedAttrsResult {
     attrs: Vec<HashMap<String, RestrictedExpression>>,
     errs: Vec<BuildAttrsErrorVec>,
-}
-
-pub(crate) struct BuiltPrincipalUnsigned {
-    pub principal: Entity,
-    pub parents: Vec<Entity>,
 }

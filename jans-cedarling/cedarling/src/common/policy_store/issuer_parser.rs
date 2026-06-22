@@ -80,15 +80,15 @@ impl IssuerParser {
             .and_then(|v| v.as_str())
             .unwrap_or("");
 
-        // RFC uses "configuration_endpoint"
         let oidc_endpoint_str = obj
-            .get("configuration_endpoint")
+            .get("openid_configuration_endpoint") // canonical and more readable key
+            .or_else(|| obj.get("configuration_endpoint")) // key that was used in RFC
             .and_then(|v| v.as_str())
             .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
                 err: TrustedIssuerErrorType::MissingRequiredField {
                     issuer_id: issuer_id.clone(),
-                    field: "configuration_endpoint".to_string(),
+                    field: "openid_configuration_endpoint".to_string(),
                 },
             })?;
 
@@ -290,14 +290,11 @@ mod tests {
             "token_metadata": {
                 "access_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::access_token",
-                    "user_id": "sub",
-                    "role_mapping": "role"
+                    "entity_type_name": "Jans::access_token"
                 },
                 "id_token": {
                     "trusted": true,
-                    "entity_type_name": "Jans::id_token",
-                    "user_id": "sub"
+                    "entity_type_name": "Jans::id_token"
                 }
             }
         }"#;
@@ -352,9 +349,30 @@ mod tests {
                 PolicyStoreError::TrustedIssuerError {
                     file,
                     err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
-                } if file == "bad.json" && issuer_id == "bad" && field == "configuration_endpoint"
+                } if file == "bad.json" && issuer_id == "bad" && field == "openid_configuration_endpoint"
             ),
             "Expected MissingRequiredField error for endpoint, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_with_openid_configuration_endpoint() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Using canonical field name",
+            "openid_configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
+        }"#;
+
+        let result = IssuerParser::parse_issuer(content, "issuer2.json");
+        assert!(
+            result.is_ok(),
+            "Should parse with openid_configuration_endpoint"
+        );
+
+        let parsed = result.unwrap();
+        assert_eq!(
+            parsed[0].issuer.oidc_endpoint.as_str(),
+            "https://accounts.test.com/.well-known/openid-configuration"
         );
     }
 

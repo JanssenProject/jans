@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -46,8 +47,25 @@ const commonConfig = {
         ]
     },
     resolve: {
-        extensions: ['.tsx', '.js', '.ts']
+        extensions: ['.tsx', '.js', '.ts'],
+        // The Anthropic SDK references Node built-ins (node:fs / node:path) for
+        // credential-file loading, which is unused in the browser code path.
+        // Stub them out so the bundle builds for the extension.
+        fallback: {
+            fs: false,
+            path: false,
+            os: false,
+            crypto: false,
+            stream: false,
+        }
     },
+    plugins: [
+        // Rewrite `node:`-scheme imports to bare module names so the fallbacks
+        // above can resolve them.
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+            resource.request = resource.request.replace(/^node:/, '');
+        }),
+    ],
     optimization: {
         splitChunks: {
             chunks: 'all',
@@ -77,6 +95,9 @@ const assetArr = [{
 },
 {
     from: path.resolve('src/static/tarpDocs6.png')
+},
+{
+    from: path.resolve('src/static/tarpDocs7.png')
 }];
 
 const chromeConfig = merge(commonConfig, {

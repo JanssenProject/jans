@@ -8,7 +8,7 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityBuilderConfig, EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel,
+    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
     LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use serde_json::json;
@@ -79,7 +79,7 @@ async fn init_cedarling_multi_issuer(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store = serde_yml::from_str::<serde_yml::Value>(POLICY_STORE_RAW)
+    let mut policy_store = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(POLICY_STORE_RAW)
         .expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
@@ -97,8 +97,9 @@ async fn init_cedarling_multi_issuer(
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(
-                serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
+                serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -107,15 +108,12 @@ async fn init_cedarling_multi_issuer(
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
             ..Default::default()
         },
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::default(),
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default(),
+        authorization_config: AuthorizationConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

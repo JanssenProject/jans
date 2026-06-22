@@ -3,26 +3,27 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::json_rules::JsonRule;
-
 use serde::{Deserialize, Serialize};
 
 /// Configuration to specify authorization workflow.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuthorizationConfig {
-    /// Specifies what boolean operation to use for principals when making authz decisions.
-    pub principal_bool_operator: JsonRule,
-
     /// Claim name used for decision logging (e.g. which JWT claim identifies the token).
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in bootstrap properties documentation.
     pub decision_log_default_jwt_id: String,
+
+    /// Whether to enforce Cedar schema validation.
+    ///
+    /// When `true` (default), a schema is required and policies/entities are validated
+    /// against it. When `false`, Cedarling runs without schema-based validation.
+    pub strict_schema_validation: bool,
 }
 
 impl Default for AuthorizationConfig {
     fn default() -> Self {
         Self {
-            principal_bool_operator: JsonRule::default(),
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
         }
     }
 }

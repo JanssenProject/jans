@@ -1,76 +1,51 @@
-FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
-# ===============
-# Debian packages
-# ===============
+### Stage 1: Dependencies
+FROM ghcr.io/astral-sh/uv:0.11.7-python3.11-trixie-slim AS deps
 
-RUN apt-get update \
-    && apt-get install -y bash unzip wget git curl
-
-
-# ========================
-# Install Python3 & Poetry
-# ========================
-ENV PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  # poetry:
-  POETRY_VERSION=1.4.1 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_CREATE=false \
-  POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  PATH="$PATH:/root/.poetry/bin"
-
-
-RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
-    && rm -rf /var/cache/apk/* /root/.cache /tmp/*
-
-# ===============
-# Project setup
-# ===============
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
-
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
-# create non-root user
-RUN adduser --shell /bin/sh --uid 1000 web \
-    && usermod -aG sudo web
+ENV PATH="/opt/venv/bin:${PATH}" \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_NO_CACHE=1
 
 WORKDIR /api
 
-COPY --chown=1000:1000 ./secrets/bootstrap.json /api/
+# Just dependencies
+COPY pyproject.toml uv.lock /api/
+RUN uv sync --locked --no-install-project --no-editable --no-group test
 
-RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
-        && cd /tmp/jans \
-        && git sparse-checkout init --cone \
-        && git checkout ${JANS_SOURCE_VERSION} \
-        && git sparse-checkout set jans-cedarling \
-        && cd jans-cedarling/bindings/cedarling_python \
-        && cp -r ../../flask-sidecar/* /api \
-        && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
-        && echo "${version}" > /api/cedarling_version \
-        && release_version="v${version}" \
-        && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl \
-        && rm -rf /tmp/jans
+# Rest of the app
+COPY . /api/
+# Sync the project
+RUN uv sync --locked --no-editable --no-group test
 
-# Setting up proper permissions:
-RUN chmod -R g=u /api \
-    && chown -R 1000:1000 /api
+# Clean up
+RUN find /opt/venv -name "__pycache__" -type d -exec rm -rf {} + && \
+    find /opt/venv -name "*.pyc" -delete && \
+    find /opt/venv -name "*.pyo" -delete
 
-# Project initialization:
-RUN poetry add /api/cedarling_python-"$(cat /api/cedarling_version)"-cp311-cp311-manylinux_2_34_x86_64.whl \
-    && poetry install --no-dev --no-root --no-interaction --no-ansi \
-    # Cleaning poetry installation's cache for production:
-    && rm -rf "$POETRY_CACHE_DIR"
+### Stage 2: Final runtime
+FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
 
-ENV FLASK_APP=main.core:app \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m --home /home/web --shell /bin/sh --uid 1000 web
+
+WORKDIR /api
+COPY --from=deps --chown=1000:1000 /opt/venv /opt/venv
+COPY --from=deps --chown=1000:1000 /api /api
+COPY --chown=1000:1000 docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
     CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-None} \
-    SIDECAR_DEBUG_RESPONSE=${SIDECAR_DEBUG_RESPONSE:-False}
+    SIDECAR_DEBUG_RESPONSE=${SIDECAR_DEBUG_RESPONSE:-False} \
+    HOME=/home/web \
+    APP_MODE=${APP_MODE:-production}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
@@ -83,15 +58,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-
 # Running as non-root user:
 USER 1000
 
-# Set env with user being web created above
-ENV HOME=/home/web
+ENTRYPOINT ["/usr/bin/tini", "-e", "143", "-g", "--"]
 
-ENV APP_MODE=${APP_MODE:-production}
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
-
-CMD "exec" "gunicorn" "main.core:app" "-b" ":5000" "--log-level" \
-$GUNICORN_LOG_LEVEL "--workers" "1" "--threads" "8" \
-"--worker-tmp-dir" "/dev/shm" "--worker-class" "gthread" \
-"--access-logfile" "-"  "--error-logfile" "-" "--preload" \
-"--log-config" "gunicorn_logging.conf"
+CMD ["/docker-entrypoint.sh"]

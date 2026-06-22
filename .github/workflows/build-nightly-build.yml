@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
 
@@ -37,6 +37,14 @@ jobs:
         TARGET_BRANCH: ${{ github.event.inputs.branch }}
       run: |
         NIGHTLY_VERSION="nightly"
+        # Delete EVERY release pointing at the nightly tag, including leftover DRAFT
+        # releases (the SLSA provenance `upload-assets` step creates draft releases
+        # that `gh release delete <tag>` leaves behind, so they pile up over time).
+        for rid in $(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq ".[] | select(.tag_name==\"${NIGHTLY_VERSION}\") | .id"); do
+          echo "Deleting nightly release id=${rid}"
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${rid}" || true
+        done
         gh release delete "${NIGHTLY_VERSION}" --cleanup-tag --yes || echo "${NIGHTLY_VERSION} does not exist"
         git push --delete origin "${NIGHTLY_VERSION}" || echo "${NIGHTLY_VERSION} tag does not exist"
         if [ -z "$TARGET_BRANCH" ]; then

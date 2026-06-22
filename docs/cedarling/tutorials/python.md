@@ -12,11 +12,11 @@ tags:
 
 ## Installation
 
-At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a pre-compiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases/latest) or [build it from the source](#building-from-source).
+The Cedarling Python bindings are available via package managers using PyPI. To use them, you can either install the [cedarling-python](https://pypi.org/project/cedarling-python/) package or [build it from the source](#building-from-source).
 
 ### Building from source
 
-The recommended approach is to compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
+You can compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
 
 **1. Set up a virtual environment**
 
@@ -64,13 +64,13 @@ maturin develop
 
 If you're using a dependency manager like [Poetry](https://python-poetry.org/), you can:
 
-**Option 1: Add the wheel via CLI**
+**Option 1: Add the package from PyPI**
 
 ```
-poetry add path/to/wheel.whl
+poetry add cedarling-python
 ```
 
-**Option 2: Install it manually into Poetry's virtual environment**
+**Option 2: Install the wheel manually into Poetry's virtual environment**
 
 ```
 poetry run pip install path/to/wheel.whl
@@ -195,27 +195,18 @@ See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for mor
 
 #### Unsigned Authorization
 
-In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to run the request with partial evaluation. If partial evaluation leaves unresolved residuals (i.e. the decision cannot be fully determined without a concrete principal), the request is **denied** (fail-closed). The unresolved residuals are surfaced in the diagnostics of the authorization result, so you can inspect which policies could not be evaluated to understand why the request was denied.
 
-**1. Define the Principals**
+**1. Define the Principal**
 
 ```py
-principals = [
-  EntityData(
-    cedar_entity_mapping=CedarEntityMapping(
-      entity_type="Jans::Workload",
-      id="some_workload_id"
-    ),
-    client_id="some_client_id",
+principal = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::User",
+    id="random_user_id"
   ),
-  EntityData(
-    cedar_entity_mapping=CedarEntityMapping(
-      entity_type="Jans::User",
-      id="random_user_id"
-    ),
-    role=["admin", "manager"]
-  ),
-]
+  role=["admin", "manager"]
+)
 ```
 
 **2. Define the Resource**
@@ -261,11 +252,11 @@ context = {
 
 **5. Build the Request**
 
-Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
+Now you'll construct the **_request_** by including the _principal_, _action_, and _context_.
 
 ```py
 request = RequestUnsigned(
-  principals=principals,
+  principal=principal,
   action=action,
   resource=resource,
   context=context
@@ -274,7 +265,7 @@ request = RequestUnsigned(
 
 **6. Perform Authorization**
 
-Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
 
 ```py
 result = cedarling.authorize_unsigned(request)
@@ -366,7 +357,7 @@ else:
 | Principal Model | Directly provided entities                      | Token-derived (from `token_metadata`)     |
 | Token Sources   | No tokens required                              | Multiple issuers supported                |
 | Result Type     | `AuthorizeResult`                               | `MultiIssuerAuthorizeResult`              |
-| Decision Access | `result.decision`, `result.principals` map      | `result.decision` (boolean)               |
+| Decision Access | `result.decision`, `result.response`            | `result.decision` (boolean)               |
 | Use Case        | Internal data, custom principals                | Federation, OIDC, multi-org access        |
 
 ### Logging

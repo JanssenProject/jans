@@ -1,0 +1,11 @@
+{
+    "cedar_version": "4.9.0",
+    "policy_store": {
+        "id": "6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327",
+        "name": "tarpUnsignedDemo",
+        "description": "",
+        "version": "0.1.0",
+        "created_date": "2026-03-13T02:28:08.461238+00:00",
+        "updated_date": "2026-03-13T02:28:08.461238+00:00"
+    }
+}

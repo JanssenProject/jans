@@ -7,9 +7,8 @@ use cedar_policy::{ContextJsonError, ParseErrors, RequestValidationError};
 use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
-use crate::common::json_rules::ApplyRuleError;
 use crate::entity_builder::MultiIssuerEntityError;
-use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
+use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError};
 use crate::jwt::JwtProcessingError;
 use cedar_policy::entities_errors::EntitiesError;
 
@@ -30,6 +29,9 @@ pub enum MultiIssuerValidationError {
 
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
+
+    #[error("JWT claims are not a JSON object: {0}")]
+    InvalidClaims(&'static str),
 }
 
 /// Error type for token input validation
@@ -42,13 +44,6 @@ pub enum TokenInputError {
     EmptyPayload,
 }
 
-/// Error type for Authorization Service initialization
-#[derive(Debug, thiserror::Error)]
-pub enum AuthzServiceInitError {
-    #[error(transparent)]
-    InitEntityBuilder(#[from] InitEntityBuilderError),
-}
-
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
@@ -58,6 +53,9 @@ pub enum AuthorizeError {
     /// Error encountered while parsing Action to `EntityUid`
     #[error("could not parse action: {0}")]
     Action(Box<ParseErrors>),
+    /// Error encountered while parsing an entity type name or action identifier
+    #[error("could not parse identifier: {0}")]
+    IdentifierParsing(Box<ParseErrors>),
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] Box<ContextJsonError>),
@@ -79,9 +77,6 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildEntityError),
-    /// Error encountered while executing the rule for principals
-    #[error(transparent)]
-    ExecuteRule(#[from] ApplyRuleError),
     #[error("failed to build role entities for unsigned request: {0}")]
     /// Error encountered while building Role entity in an unsigned request
     BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),

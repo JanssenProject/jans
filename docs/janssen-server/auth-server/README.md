@@ -36,7 +36,7 @@ FAPI-CIBA OpenID Providers for the latest results.
 * [Initiating User Registration via OpenID Connect 1.0](https://openid.net/specs/openid-connect-prompt-create-1_0.html)
 * [The AuthZEN Authorization API 1.0](https://openid.github.io/authzen/)
 
-** OAuth **
+**OAuth**
 
 * [RFC 6749 The OAuth 2.0 Authorization Framework](https://www.rfc-editor.org/rfc/rfc6749.html)
 * [OAuth 2.0 Multiple Response Type Encoding Practices](https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html)
@@ -56,14 +56,16 @@ FAPI-CIBA OpenID Providers for the latest results.
 * [RFC 9068 JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens](https://www.rfc-editor.org/rfc/rfc9068.html)
 * [RFC 9126 OAuth 2.0 Pushed Authorization Requests](https://www.rfc-editor.org/rfc/rfc9126.html)
 * [Draft - OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer (DPoP)](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-11.html)
+* [Draft - OAuth 2.0 Client ID Metadata Document](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html)
 * [Draft - JWT Response for OAuth Token Introspection](https://www.ietf.org/archive/id/draft-ietf-oauth-jwt-introspection-response-12.html)
 * [OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396)
-* [Token Status List (TSL)] (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-status-list-13)
+* [Token Status List (TSL)](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-status-list-13)
+* [Identity Assertion JWT Authorization Grant](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html)
 
-** User Managed Access (UMA) **
+**User Managed Access (UMA)**
 
 * [Federated Authorization for User-Managed Access (UMA) 2.0](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-federated-authz-2.0.html)
-* [User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.htmlFederated Authorization for User-Managed Access (UMA) 2.0)
+* [User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html)
 
 For the above specifications, Auth Server implements many features--all of the
 MUST's, but also many of the SHOULD's and MAY's. If you find any discrepancies,

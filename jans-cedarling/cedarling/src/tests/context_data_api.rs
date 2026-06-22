@@ -11,7 +11,6 @@
 //! - Multiple Cedarling instances (isolation)
 //! - Data lifecycle management
 
-use std::sync::LazyLock;
 use std::time::Duration;
 
 use serde_json::json;
@@ -21,15 +20,7 @@ use tokio::test;
 use super::utils::*;
 use crate::authz::request::EntityData;
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
-use crate::{DataApi, JsonRule, RequestUnsigned};
-
-// Custom principal operator that matches our test principal
-static TEST_PRINCIPAL_OPERATOR: LazyLock<JsonRule> = LazyLock::new(|| {
-    JsonRule::new(json!({
-        "===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]
-    }))
-    .unwrap()
-});
+use crate::{DataApi, RequestUnsigned};
 
 // Policy store that includes policies checking context.data
 static POLICY_STORE_WITH_DATA_ACCESS: &str = r#"
@@ -133,7 +124,7 @@ fn create_test_request(action: &str) -> RequestUnsigned {
     RequestUnsigned {
         action: format!("Jans::Action::\"{action}\""),
         context: json!({}),
-        principals: vec![
+        principal: Some(
             EntityData::deserialize(json!({
                 "cedar_entity_mapping": {
                     "entity_type": "Jans::TestPrincipal1",
@@ -141,7 +132,7 @@ fn create_test_request(action: &str) -> RequestUnsigned {
                 }
             }))
             .unwrap(),
-        ],
+        ),
         resource: EntityData::deserialize(json!({
             "cedar_entity_mapping": {
                 "entity_type": "Jans::Document",
@@ -160,9 +151,7 @@ fn create_test_request(action: &str) -> RequestUnsigned {
 async fn test_authorization_with_pushed_data_allows_access() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -199,9 +188,7 @@ async fn test_authorization_with_pushed_data_allows_access() {
 async fn test_authorization_without_pushed_data_denies_access() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -222,9 +209,7 @@ async fn test_authorization_without_pushed_data_denies_access() {
 async fn test_authorization_with_wrong_data_value_denies_access() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -249,9 +234,7 @@ async fn test_authorization_with_wrong_data_value_denies_access() {
 async fn test_authorization_with_boolean_flag() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -280,9 +263,7 @@ async fn test_authorization_with_boolean_flag() {
 async fn test_authorization_with_nested_data() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -311,9 +292,7 @@ async fn test_authorization_with_nested_data() {
 async fn test_basic_access_without_data_requirement() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -338,16 +317,12 @@ async fn test_basic_access_without_data_requirement() {
 async fn test_multiple_instances_have_isolated_data() {
     let cedarling1 = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
     let cedarling2 = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -404,9 +379,7 @@ async fn test_multiple_instances_have_isolated_data() {
 async fn test_data_removal_affects_authorization() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -446,9 +419,7 @@ async fn test_data_removal_affects_authorization() {
 async fn test_data_clear_affects_authorization() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -499,9 +470,7 @@ async fn test_data_clear_affects_authorization() {
 async fn test_data_update_affects_authorization() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -543,9 +512,7 @@ async fn test_data_update_affects_authorization() {
 async fn test_data_list_and_stats() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -592,9 +559,7 @@ async fn test_data_list_and_stats() {
 async fn test_get_data_entry_ctx_with_metadata() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
-        |config| {
-            config.authorization_config.principal_bool_operator = TEST_PRINCIPAL_OPERATOR.clone();
-        },
+        |_| {},
     )
     .await;
 
@@ -622,4 +587,42 @@ async fn test_get_data_entry_ctx_with_metadata() {
     );
     assert!(entry.expires_at.is_some(), "Expiration time should be set");
     assert!(entry.access_count >= 1, "Access count should be at least 1");
+}
+
+// ── Context data without schema ─────────────────────────────────
+
+#[test]
+async fn test_context_data_without_schema_allows_access() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    cedarling
+        .push_data_ctx("user_level", json!("premium"), Some(Duration::from_secs(60)))
+        .expect("push_data_ctx should succeed");
+
+    let request = create_test_request("AccessPremiumContent");
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should succeed without schema");
+
+    assert!(result.decision, "should be allowed: pushed data satisfies policy without schema");
+
+    cedarling
+        .remove_data_ctx("user_level")
+        .expect("remove should succeed");
+
+    let request = create_test_request("AccessPremiumContent");
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should succeed");
+
+    assert!(!result.decision, "should be denied: no pushed data without schema");
 }

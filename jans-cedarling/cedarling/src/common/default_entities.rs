@@ -10,12 +10,12 @@ use cedar_policy::EntityTypeName;
 use cedar_policy::EntityUid;
 use cedar_policy::ExpressionConstructionError;
 use cedar_policy::RestrictedExpression;
-use serde::de::{Deserialize, Deserializer, Error};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::str::FromStr;
 use std::string::FromUtf8Error;
+use std::sync::Arc;
 
 use crate::common::default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError};
 use crate::entity_builder::BuildEntityError;
@@ -34,7 +34,7 @@ const DANGEROUS_PATTERNS: [&str; 6] = [
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DefaultEntities {
-    pub inner: HashMap<EntityUid, Entity>,
+    pub inner: Arc<HashMap<EntityUid, Entity>>,
 }
 
 impl DefaultEntities {
@@ -73,7 +73,7 @@ impl DefaultEntities {
         }
 
         Self {
-            inner: default_entities,
+            inner: Arc::new(default_entities),
         }
     }
 }
@@ -123,7 +123,9 @@ pub struct DefaultEntitiesWithWarns {
 impl DefaultEntitiesWithWarns {
     fn new(entities: HashMap<EntityUid, Entity>, warns: Vec<DefaultEntityWarning>) -> Self {
         Self {
-            inner: DefaultEntities { inner: entities },
+            inner: DefaultEntities {
+                inner: Arc::new(entities),
+            },
             warns,
         }
     }
@@ -186,19 +188,6 @@ pub(super) fn parse_default_entities_with_warns(
     } else {
         // If none, return default value
         Ok(DefaultEntitiesWithWarns::default())
-    }
-}
-
-impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let option_raw_data: Option<HashMap<String, Value>> =
-            Deserialize::deserialize(deserializer)
-                .map_err(|err| D::Error::custom(format!("expect to be JSON object: {err}")))?;
-
-        parse_default_entities_with_warns(option_raw_data).map_err(D::Error::custom)
     }
 }
 

@@ -3,22 +3,31 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
-use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_log_channel_capacity, default_log_max_retries,
-    default_token_cache_capacity, default_true,
+    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval,
+    default_log_channel_capacity, default_log_max_retries,
+    default_status_list_refresh_interval_max,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
-use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::default_values::{
+    default_http_client_request_timeout, default_stdout_buffer_limit, default_stdout_timeout_millis,
+};
 use super::feature_types::{FeatureToggle, LoggerType};
-use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
-use crate::JwtConfig;
-use crate::common::json_rules::JsonRule;
+use super::json_util::{
+    deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
+    deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
+    parse_option_string,
+};
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
-use crate::{LockTransport, UnsignedRoleIdSrc};
+use crate::JwtConfig;
+use crate::LockTransport;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -107,39 +116,6 @@ pub struct BootstrapConfigRaw {
     )]
     pub decision_log_default_jwt_id: String,
 
-    /// Specifies what boolean operation to use when combining per-principal
-    /// authorization decisions in `authorize_unsigned`.
-    ///
-    /// This setting only applies to [`authorize_unsigned`] — the
-    /// `authorize_multi_issuer` method does not use principals and ignores
-    /// this configuration entirely.
-    ///
-    /// Use [JsonLogic](https://jsonlogic.com/).
-    /// Variable names must match the full Cedar principal type identifier
-    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
-    /// against the strings `"ALLOW"` or `"DENY"`.
-    ///
-    /// Default value:
-    /// ```json
-    /// {
-    ///     "and" : [
-    ///         {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-    ///         {"===": [{"var": "Jans::User"}, "ALLOW"]}
-    ///     ]
-    /// }
-    /// ```
-    #[serde(rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub principal_bool_operation: JsonRule,
-
-    /// Mapping name of cedar schema Role entity.
-    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
-    pub mapping_role: Option<String>,
-
-    /// Source attribute for unsigned role entity ID.
-    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
-    pub unsigned_role_id_src: UnsignedRoleIdSrc,
-
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
@@ -179,7 +155,10 @@ pub struct BootstrapConfigRaw {
     ///
     /// When enabled, this requires the `iss` (Issuer) claim to be present in
     /// all tokens and the issuer URL must use the `https` scheme.
-    #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIG_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
 
@@ -190,9 +169,22 @@ pub struct BootstrapConfigRaw {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
+
+    /// When enabled, Cedar schema is required and all policies and entities are validated
+    /// against it. When disabled, Cedarling runs without schema-based validation,
+    /// allowing quick-start and prototyping without a schema.
+    #[serde(
+        rename = "CEDARLING_STRICT_SCHEMA_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub strict_schema_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
@@ -227,6 +219,28 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub lock_ssa_jwt: Option<String>,
+
+    /// Pre-issued access token to use for Lock Server authentication, bypassing
+    /// the SSA → DCR → `access_token` flow entirely.
+    ///
+    /// When this property is set, Cedarling will skip Dynamic Client Registration
+    /// and use this access token directly to authenticate with Lock Server endpoints
+    /// (log, health, telemetry). Primarily intended for testing and local development
+    /// to simplify the bootstrap flow; may also be used in environments where the
+    /// DCR flow is not available or access tokens are provisioned externally.
+    ///
+    /// If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are
+    /// set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and the SSA flow is
+    /// skipped.
+    ///
+    /// Not available on WASM targets.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_LOCK_ACCESS_TOKEN_JWT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub lock_access_token_jwt: Option<String>,
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
@@ -281,10 +295,21 @@ pub struct BootstrapConfigRaw {
     pub lock_log_max_retries: u32,
 
     /// Maximum token cache TTL in seconds.
-    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
-    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
-    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
-    #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
+    ///
+    /// Caps how long a validated token may stay in the cache. The effective
+    /// TTL for an entry is `min(time-until-exp, max_ttl)` when both apply.
+    ///
+    /// - `> 0`: cap each entry's TTL at this value. Also used as the TTL for
+    ///   tokens that do not carry an `exp` claim.
+    /// - `0`: disables the token cache entirely.
+    ///
+    /// Default: `5` seconds — small enough to pick up revocation / status-list
+    /// changes quickly, large enough to amortise repeated requests for the
+    /// same token.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_MAX_TTL",
+        default = "default_token_cache_max_ttl"
+    )]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
     /// Default value is 100.
@@ -369,6 +394,89 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_workers: WorkersCount,
+    // =========================================================================
+    // HTTP CLIENT CONFIGURATION
+    // =========================================================================
+    /// Per-request timeout in seconds.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_TIMEOUT",
+        default = "default_http_client_request_timeout",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_timeout: u64,
+    /// Maximum number of retry attempts per request.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
+        default = "default_http_client_max_retries",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_max_retries: u32,
+
+    /// Base delay between retries in seconds.
+    #[serde(
+        rename = "CEDARLING_HTTP_REQUEST_RETRY_DELAY",
+        default = "default_http_client_retry_delay_secs",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_request_retry_delay: u64,
+
+    /// Maximum HTTP response body size, in bytes. Rejects oversized responses
+    /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
+    /// before they're fully buffered into memory. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
+        default = "default_http_client_max_response_size_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub http_client_max_response_size_bytes: u64,
+
+    /// Optional override for JWKS periodic refresh interval in seconds.
+    /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
+    /// If omitted, the server-driven interval or a 1-hour fallback is used.
+    /// Values below 5 seconds are clamped to 5.
+    #[serde(rename = "CEDARLING_JWKS_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_jwks_refresh_interval")]
+    pub jwks_refresh_interval: Option<u64>,
+
+    /// Minimum interval in seconds between on-demand JWKS re-fetches per issuer.
+    /// Prevents abuse from invalid JWT floods triggering excessive re-fetches.
+    /// Default: 30 seconds. Values below 5 seconds are clamped to 5.
+    #[serde(
+        rename = "CEDARLING_JWKS_REFRESH_MIN_INTERVAL",
+        default = "default_jwks_refresh_min_interval"
+    )]
+    #[serde(deserialize_with = "deserialize_jwks_refresh_min_interval")]
+    pub jwks_refresh_min_interval: u64,
+
+    /// Upper bound on the Status List JWT refresh interval, in seconds.
+    ///
+    /// Caps how long Cedarling waits between Status List refreshes. When the Status
+    /// List JWT carries a `ttl` claim, the effective refresh interval is
+    /// `min(jwt_ttl, status_list_refresh_interval_max)`, so the issuer can request a
+    /// *more frequent* refresh but never a less frequent one. When the JWT omits
+    /// `ttl`, this value is used directly. A value of `0` or an unset variable is
+    /// treated as "use the default" (300 seconds) so the status list cannot silently
+    /// go stale forever. Non-zero values below `5` are clamped to `5`.
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
+        default = "default_status_list_refresh_interval_max"
+    )]
+    #[serde(deserialize_with = "deserialize_status_list_refresh_interval_max")]
+    pub status_list_refresh_interval_max: u64,
+
+    /// Base refresh interval, in seconds, for periodic background refresh of
+    /// remote policy stores (`CjarUrl` / `LockServer`). `0` disables refresh and
+    /// preserves the load-once-at-startup behavior. Non-zero values below the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor are clamped at service-init time (with
+    /// a `WARN` log emitted) so the worker never busy-polls the upstream — see
+    /// [`PolicyStoreConfig::effective_refresh_interval`]. A server
+    /// `Cache-Control: max-age` / `Expires` hint can *shorten* the next
+    /// interval but never extends it.
+    #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub policy_store_refresh_interval_secs: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -416,6 +524,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
     use std::{
         env,
         sync::{LazyLock, Mutex},
@@ -493,11 +602,6 @@ mod tests {
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"
-            );
-            assert_eq!(
-                config.principal_bool_operation,
-                JsonRule::default(),
-                "Default user-workload boolean operator should default"
             );
             assert_eq!(
                 config.lock_transport,
@@ -698,6 +802,130 @@ mod tests {
                     WorkersCount::MAX,
                     "Default worker count should be {}",
                     WorkersCount::MAX.get()
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_from_env_var() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "30"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "60"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(30),
+                    "JWKS refresh interval should match environment value"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, 60,
+                    "JWKS refresh min interval should match environment value"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_clamps_min() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "0"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "0"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(MIN_JWKS_REFRESH_SECS),
+                    "JWKS refresh interval should be clamped to minimum"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, MIN_JWKS_REFRESH_SECS,
+                    "JWKS refresh min interval should be clamped to minimum"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_jwks_refresh_interval_clamps_below_min() {
+        with_env_vars(
+            &[
+                ("CEDARLING_JWKS_REFRESH_INTERVAL", "3"),
+                ("CEDARLING_JWKS_REFRESH_MIN_INTERVAL", "3"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.jwks_refresh_interval,
+                    Some(MIN_JWKS_REFRESH_SECS),
+                    "JWKS refresh interval should be clamped to minimum"
+                );
+                assert_eq!(
+                    config.jwks_refresh_min_interval, MIN_JWKS_REFRESH_SECS,
+                    "JWKS refresh min interval should be clamped to minimum"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.status_list_refresh_interval_max,
+                JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+                "missing env var should resolve to the JwtConfig default"
+            );
+        });
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_from_env() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "120")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max, 120,
+                    "status list refresh max should match the value supplied via env var"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_zero_uses_default() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "0")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max,
+                    JwtConfig::DEFAULT_STATUS_LIST_REFRESH_INTERVAL_MAX_SECS,
+                    "0 should be treated as 'use the default'"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn test_status_list_refresh_interval_max_clamps_below_min() {
+        with_env_vars(
+            &[("CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX", "2")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.status_list_refresh_interval_max, MIN_STATUS_LIST_REFRESH_SECS,
+                    "non-zero values below the minimum should be clamped"
                 );
             },
         );

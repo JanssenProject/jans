@@ -11,30 +11,32 @@
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
+    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, Decision, DecisionLogEntry, Diagnostics,
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
+use metrics::MetricsCollector;
 use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
 use serde_json::json;
 use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
-use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod error_metrics;
 mod errors;
+pub(crate) mod metrics;
 
 pub(crate) mod request;
 
@@ -50,6 +52,8 @@ pub(crate) struct AuthzConfig {
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
+    /// Shared metrics collector for telemetry
+    pub metrics: Arc<MetricsCollector>,
 }
 
 /// Authorization Service
@@ -76,6 +80,15 @@ impl Authz {
             config,
             authorizer: cedar_policy::Authorizer::new(),
         }
+    }
+
+    pub(crate) fn trusted_issuers(&self) -> Option<&HashMap<String, TrustedIssuer>> {
+        self.config.policy_store.trusted_issuers.as_ref()
+    }
+
+    /// Clone the [`Arc`] wrapping the current [`jwt::JwtService`] for reuse across a refresh.
+    pub(crate) fn clone_jwt_service(&self) -> Arc<jwt::JwtService> {
+        Arc::clone(&self.config.jwt_service)
     }
 
     /// Get pushed data and build `PushedDataInfo` for logging.
@@ -113,14 +126,21 @@ impl Authz {
         let request_id = gen_uuid7();
 
         // Validate the request structure
-        request.validate()?;
+        request.validate().inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let schema = &self.config.policy_store.schema;
 
         let validated_tokens = self
             .config
             .jwt_service
-            .validate_multi_issuer_tokens(&request.tokens)?;
+            .validate_multi_issuer_tokens(&request.tokens)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let entities_data = self
             .config
@@ -130,34 +150,61 @@ impl Authz {
                 &request.resource,
                 self.config.log_service.as_ref(),
             )
-            .map_err(AuthorizeError::MultiIssuerEntity)?;
+            .map_err(|e| {
+                self.config.metrics.record_error(&e);
+                self.config.metrics.record_authz_error();
+                AuthorizeError::MultiIssuerEntity(e)
+            })?;
 
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         // Capture pushed data info for logging before context is built
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
 
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
+
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
             &entities_data.tokens,
-            &schema.schema,
+            schema_ref,
             &action,
-            &pushed_data,
-        )?;
+            pushed_data,
+        )
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
         let resource_uid = entities_data.resource.uid();
 
-        let entities = entities_data.entities(Some(&schema.schema))?;
+        let entities = entities_data
+            .entities(schema_ref)
+            .map_err(AuthorizeError::ValidateEntities)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         // Multi-issuer authorization does not use a principal
         // Authorization is based solely on the context (tokens)
-        let authz_result = self.execute_authorize(ExecuteAuthorizeParameters {
-            entities: &entities,
-            principal: None,
-            action: action.clone(),
-            resource: resource_uid.clone(),
-            context,
-        })?;
+        let authz_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: None,
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let authz_info = AuthorizeInfo {
             principal: "None (multi-issuer)".to_string(),
@@ -234,6 +281,20 @@ impl Authz {
         });
         self.config.log_service.log_fn(debug_log_fn);
 
+        // Record metrics
+        let decision = Decision::from(result.decision);
+        let policy_decisions = multi_diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        self.config.metrics.record_evaluation(
+            decision_time_micro_sec,
+            decision,
+            false,
+            policy_decisions,
+        );
+
         Ok(result)
     }
 
@@ -254,22 +315,28 @@ impl Authz {
         let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
         // Parse action UID.
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
         let BuiltEntitiesUnsigned {
-            principals,
-            roles,
+            principal,
             resource,
             built_entities,
         } = self
             .config
             .entity_builder
-            .build_entities_unsigned(request)?;
-        let principal_uids = principals
-            .iter()
-            .map(cedar_policy::Entity::uid)
-            .collect::<Vec<EntityUid>>();
+            .build_entities_unsigned(request)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
+        let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
 
         // Capture pushed data info for logging before context is built
@@ -279,64 +346,66 @@ impl Authz {
             &self.config,
             request.context.clone(),
             &built_entities,
-            &schema.schema,
             &action,
-            &pushed_data,
-        )?;
-
-        let entities = Entities::from_entities(
-            principals.into_iter().chain(roles).chain([resource]),
-            Some(&schema.schema),
+            pushed_data,
         )
-        .map_err(Box::new)?;
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
 
-        let mut principal_responses = HashMap::new();
-
-        for principal_uid in &principal_uids {
-            let auth_result = self.execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: Some(principal_uid.clone()),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
+        let entities = Entities::from_entities(principal.into_iter().chain([resource]), schema_ref)
+            .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
             })?;
 
-            principal_responses.insert(principal_uid.clone(), auth_result);
-        }
+        let response = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
 
-        let result = AuthorizeResult::new_for_many_principals(
-            &self.config.authorization.principal_bool_operator,
-            principal_responses,
-            request_id,
-        )?;
+        let result = AuthorizeResult::new(response.clone(), request_id);
 
         // measure time how long request executes
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
-        let debug_authorize_info = result
-            .principals
-            .iter()
-            .map(|(principal, response)| AuthorizeInfo {
-                principal: principal.to_string(),
-                diagnostics: Diagnostics::new(
-                    response.diagnostics(),
-                    &self.config.policy_store.policies,
-                ),
-                decision: response.decision().into(),
-            })
-            .collect::<Vec<_>>();
+        let principal_label = principal_uid
+            .as_ref()
+            .map_or_else(|| "None".to_string(), ToString::to_string);
 
-        let diagnostics = debug_authorize_info
-            .iter()
-            .map(|info| info.diagnostics.clone())
-            .collect::<Vec<_>>();
+        let authz_info = AuthorizeInfo {
+            principal: principal_label,
+            diagnostics: Diagnostics::new(
+                response.diagnostics(),
+                &self.config.policy_store.policies,
+            ),
+            decision: response.decision().into(),
+        };
+
+        let debug_authorize_info = vec![authz_info.clone()];
+        let diagnostics = vec![authz_info.diagnostics.clone()];
 
         // Log policy evaluation errors if any exist
-        for info in &debug_authorize_info {
-            self.log_policy_evaluation_errors(&info.diagnostics, &info.principal, request_id);
-        }
+        self.log_policy_evaluation_errors(
+            &authz_info.diagnostics,
+            &authz_info.principal,
+            request_id,
+        );
+
+        let logged_principals = principal_uid.as_slice();
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
@@ -349,7 +418,7 @@ impl Authz {
                 tokens_logging_info: LogTokensInfo::empty(),
                 decision_time: decision_time_micro_sec,
                 decision_diagnostics: &diagnostics,
-                principal: DecisionLogEntry::all_principals(&principal_uids),
+                principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
             },
         );
@@ -373,6 +442,20 @@ impl Authz {
             self.log_failed_diagnostics(&diagnostics, request_id);
         }
 
+        // Record metrics
+        let decision = Decision::from(result.decision);
+        let policy_decisions = diagnostics
+            .iter()
+            .flat_map(|d| d.reason.iter())
+            .map(|policy| (policy.id.as_str(), decision));
+
+        self.config.metrics.record_evaluation(
+            decision_time_micro_sec,
+            decision,
+            true,
+            policy_decisions,
+        );
+
         Ok(result)
     }
 
@@ -382,25 +465,73 @@ impl Authz {
         &self,
         parameters: ExecuteAuthorizeParameters,
     ) -> Result<cedar_policy::Response, Box<cedar_policy::RequestValidationError>> {
-        let mut request_builder = cedar_policy::Request::builder()
+        let has_principal = parameters.principal.is_some();
+
+        let request_builder_base = cedar_policy::Request::builder()
             .action(parameters.action)
             .resource(parameters.resource)
-            .context(parameters.context)
-            .schema(&self.config.policy_store.schema.schema);
+            .context(parameters.context);
 
-        if let Some(principal) = parameters.principal {
-            request_builder = request_builder.principal(principal);
+        let request = if let Some(schema) = &self.config.policy_store.schema {
+            let request_builder = request_builder_base.schema(&schema.schema);
+            match parameters.principal {
+                Some(principal) => request_builder.principal(principal).build()?,
+                None => request_builder.build()?,
+            }
+        } else {
+            match parameters.principal {
+                Some(principal) => request_builder_base.principal(principal).build(),
+                None => request_builder_base.build(),
+            }
+        };
+        if has_principal {
+            Ok(self.authorizer.is_authorized(
+                &request,
+                self.config.policy_store.policies.get_set(),
+                parameters.entities,
+            ))
+        } else {
+            Ok(self.is_authorized_partial(&request, parameters.entities))
         }
+    }
 
-        let request = request_builder.build().map_err(Box::new)?;
-
-        let response = self.authorizer.is_authorized(
-            &request,
+    /// Run a partial Cedar authorization and convert the result to a concrete [`cedar_policy::Response`].
+    ///
+    /// When the partial evaluation already yields a concrete decision the original diagnostics are
+    /// preserved via [`cedar_policy::PartialResponse::concretize`].  When residuals remain (no
+    /// concrete decision), a fail-closed Deny is synthesized: the nontrivial-residual policy IDs
+    /// become the `reason` set and evaluation errors are extracted through `concretize()` — the
+    /// only public API in cedar-policy 4.9 that surfaces `AuthorizationError` objects from a
+    /// `PartialResponse`.
+    fn is_authorized_partial(
+        &self,
+        request: &cedar_policy::Request,
+        entities: &cedar_policy::Entities,
+    ) -> cedar_policy::Response {
+        let partial = self.authorizer.is_authorized_partial(
+            request,
             self.config.policy_store.policies.get_set(),
-            parameters.entities,
+            entities,
         );
 
-        Ok(response)
+        // `decision()` is preferred over `concretize()`: it returns `Some` iff the partial
+        // response already has a concrete decision, letting us preserve the original
+        // diagnostics; only residual-dependent requests fall through to a synthesized Deny.
+        if partial.decision().is_some() {
+            partial.concretize()
+        } else {
+            let residual_ids: HashSet<cedar_policy::PolicyId> = partial
+                .nontrivial_residuals()
+                .map(|p| p.id().clone())
+                .collect();
+            let errors: Vec<cedar_policy::AuthorizationError> = partial
+                .concretize()
+                .diagnostics()
+                .errors()
+                .cloned()
+                .collect();
+            cedar_policy::Response::new(cedar_policy::Decision::Deny, residual_ids, errors)
+        }
     }
 
     /// Log policy evaluation errors for diagnostics
@@ -484,6 +615,84 @@ impl Authz {
         });
         self.config.log_service.log_fn(debug_log_fn);
     }
+
+    /// Returns metadata for policies matching the given unsigned request parameters.
+    ///
+    /// Builds entity type names from `EntityData` principals/resources and parses
+    /// action strings, then delegates to `PoliciesContainer::get_matching_policies`.
+    pub(super) fn get_matching_policies_unsigned(
+        &self,
+        principal: Option<&crate::EntityData>,
+        actions: &[String],
+        resources: &[crate::EntityData],
+    ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
+        let principal_types = match principal {
+            Some(p) => entity_data_to_type_names(std::slice::from_ref(p))?,
+            None => HashSet::new(),
+        };
+        let action_uids = parse_action_uids(actions)?;
+        let resource_types = entity_data_to_type_names(resources)?;
+
+        Ok(self.config.policy_store.policies.get_matching_policies(
+            &principal_types,
+            &action_uids,
+            &resource_types,
+        ))
+    }
+
+    /// Returns metadata for policies matching the given multi-issuer request parameters.
+    ///
+    /// Validates tokens and extracts principal entity types from them, then
+    /// delegates to `PoliciesContainer::get_matching_policies`.
+    pub(super) fn get_matching_policies_multi_issuer(
+        &self,
+        tokens: &[crate::TokenInput],
+        actions: &[String],
+        resources: &[crate::EntityData],
+    ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
+        let validated_tokens = self
+            .config
+            .jwt_service
+            .validate_multi_issuer_tokens(tokens)?;
+
+        let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
+            .keys()
+            .map(|mapping| {
+                cedar_policy::EntityTypeName::from_str(mapping)
+                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
+            })
+            .collect::<Result<_, _>>()?;
+
+        let action_uids = parse_action_uids(actions)?;
+        let resource_types = entity_data_to_type_names(resources)?;
+
+        Ok(self.config.policy_store.policies.get_matching_policies(
+            &principal_types,
+            &action_uids,
+            &resource_types,
+        ))
+    }
+}
+
+/// Parse entity type names from `EntityData` slices.
+fn entity_data_to_type_names(
+    entities: &[crate::EntityData],
+) -> Result<HashSet<cedar_policy::EntityTypeName>, AuthorizeError> {
+    entities
+        .iter()
+        .map(|e| {
+            cedar_policy::EntityTypeName::from_str(&e.cedar_mapping.entity_type)
+                .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
+        })
+        .collect()
+}
+
+/// Parse action strings into `EntityUid` set.
+fn parse_action_uids(actions: &[String]) -> Result<HashSet<EntityUid>, AuthorizeError> {
+    actions
+        .iter()
+        .map(|a| EntityUid::from_str(a).map_err(Into::into))
+        .collect()
 }
 
 impl TrustedIssuerLoadingInfo for Authz {
@@ -525,13 +734,7 @@ fn calculate_elapsed_time(start_time: chrono::DateTime<Utc>) -> i64 {
 }
 
 fn serialize_entities(entities: &Entities) -> serde_json::Value {
-    let mut buf = Vec::new();
-    let cursor = Cursor::new(&mut buf);
-    entities
-        .write_to_json(cursor)
-        .ok()
-        .and_then(|()| serde_json::from_slice(buf.as_slice()).ok())
-        .unwrap_or(serde_json::Value::Null)
+    entities.to_json_value().unwrap_or(serde_json::Value::Null)
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_decision`] method.
@@ -570,9 +773,6 @@ struct ExecuteAuthorizeParameters<'a> {
 pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
-    pub workload: Option<Entity>,
-    pub user: Option<Entity>,
-    pub roles: Vec<Entity>,
     pub resource: Entity,
     pub default_entities: DefaultEntities,
 }
@@ -580,28 +780,28 @@ pub(super) struct AuthorizeEntitiesData {
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     ///
-    /// This method merges request entities with default entities, where request entities
-    /// take precedence over default entities in case of UID conflicts.
+    /// This method merges request entities with default entities, where default entities
+    /// (from the policy store) take precedence over request-supplied entities in case of
+    /// UID conflicts. This ensures that policy-store entities — which represent
+    /// change-controlled, trusted shared state — cannot be overwritten by attacker-controlled
+    /// request data.
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
+        let capacity = 1usize // resource
+            .saturating_add(self.issuers.len())
+            .saturating_add(self.tokens.len())
+            .saturating_add(self.default_entities.inner.len());
+        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::with_capacity(capacity);
 
-        // Add default entities first
-        merged_entities.extend(
-            self.default_entities
-                .inner
-                .into_values()
-                .map(|e| (e.uid(), e)),
-        );
-
-        // Add request entities (these will override default entities if conflicts exist)
-        merged_entities.extend(vec![self.resource].into_iter().map(|e| (e.uid(), e)));
+        // Add request entities first (these may be overwritten by default entities)
+        merged_entities.insert(self.resource.uid(), self.resource);
         merged_entities.extend(self.issuers.into_iter().map(|e| (e.uid(), e)));
-        merged_entities.extend(self.roles.into_iter().map(|e| (e.uid(), e)));
         merged_entities.extend(self.tokens.into_values().map(|e| (e.uid(), e)));
+
+        // Add default entities last (these take precedence over request entities if UID conflicts exist)
         merged_entities.extend(
-            vec![self.user, self.workload]
-                .into_iter()
-                .flatten()
+            Arc::try_unwrap(self.default_entities.inner)
+                .unwrap_or_else(|arc| (*arc).clone())
+                .into_values()
                 .map(|e| (e.uid(), e)),
         );
 
@@ -614,5 +814,219 @@ impl AuthorizeEntitiesData {
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, Box<cedar_policy::entities_errors::EntitiesError>> {
         Entities::from_entities(self.into_iter(), schema).map_err(Box::new)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use std::collections::HashMap;
+    use std::sync::Arc;
+
+    fn to_entity(json: serde_json::Value) -> Entity {
+        Entity::from_json_value(json, None).expect("entity from json")
+    }
+
+    fn default_entities(jsons: &[serde_json::Value]) -> DefaultEntities {
+        let inner: HashMap<EntityUid, Entity> = jsons
+            .iter()
+            .map(|j| {
+                let entity = to_entity(j.clone());
+                (entity.uid().clone(), entity)
+            })
+            .collect();
+        DefaultEntities {
+            inner: Arc::new(inner),
+        }
+    }
+
+    #[test]
+    fn default_takes_precedence_over_resource_on_uid_collision() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "evil", "is_admin": false}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "trusted", "is_admin": true}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::Org::\"org1\"".parse().unwrap();
+        let entity = ents.get(&uid).expect("org1 entity");
+        let json = entity.to_json_value().expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/name").and_then(|v| v.as_str()),
+            Some("trusted"),
+            "default org name should override request value"
+        );
+        assert_eq!(
+            json.pointer("/attrs/is_admin")
+                .and_then(serde_json::Value::as_bool),
+            Some(true),
+            "default is_admin should override request false"
+        );
+    }
+
+    #[test]
+    fn default_takes_precedence_over_issuer_on_uid_collision() {
+        let mut issuers = HashSet::new();
+        issuers.insert(to_entity(json!({"uid": {"type": "Jans::Issuer", "id": "iss1"}, "attrs": {"trusted": false}, "parents": []})));
+        let data = AuthorizeEntitiesData {
+            issuers,
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Issuer", "id": "iss1"}, "attrs": {"trusted": true}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::Issuer::\"iss1\"".parse().unwrap();
+        let json = ents
+            .get(&uid)
+            .expect("issuer entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/trusted")
+                .and_then(serde_json::Value::as_bool),
+            Some(true),
+            "default issuer trusted=true should override request false"
+        );
+    }
+
+    #[test]
+    fn default_takes_precedence_over_token_on_uid_collision() {
+        let mut tokens = HashMap::new();
+        tokens.insert(
+            "tok1".to_string(),
+            to_entity(json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "evil"}, "parents": []})),
+        );
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens,
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "read"}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        let uid: EntityUid = "Jans::access_token::\"tok1\"".parse().unwrap();
+        let json = ents
+            .get(&uid)
+            .expect("token entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            json.pointer("/attrs/scope").and_then(|v| v.as_str()),
+            Some("read"),
+            "default token scope should override request value"
+        );
+    }
+
+    #[test]
+    fn unique_uids_all_present() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        assert!(
+            ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
+                .is_some(),
+            "resource entity should be present when no UID collision"
+        );
+        assert!(
+            ents.get(&"Jans::Org::\"org1\"".parse().unwrap()).is_some(),
+            "default entity should be present when no UID collision"
+        );
+        assert_eq!(
+            ents.iter().count(),
+            2,
+            "both entities should be present with unique UIDs"
+        );
+    }
+
+    #[test]
+    fn empty_defaults_produces_only_request_entities() {
+        let data = AuthorizeEntitiesData {
+            issuers: HashSet::new(),
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Resource", "id": "res1"}, "attrs": {}, "parents": []}),
+            ),
+            default_entities: DefaultEntities::default(),
+        };
+
+        let ents = data.entities(None).expect("entities");
+        assert!(
+            ents.get(&"Jans::Resource::\"res1\"".parse().unwrap())
+                .is_some(),
+            "resource entity should be present with empty defaults"
+        );
+        assert_eq!(
+            ents.iter().count(),
+            1,
+            "only resource entity expected with empty defaults"
+        );
+    }
+
+    #[test]
+    fn defaults_win_when_both_resource_and_issuer_collide() {
+        let mut issuers = HashSet::new();
+        issuers.insert(to_entity(json!({"uid": {"type": "Jans::Group", "id": "admin"}, "attrs": {"role": "user"}, "parents": []})));
+        let data = AuthorizeEntitiesData {
+            issuers,
+            tokens: HashMap::new(),
+            resource: to_entity(
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "evil"}, "parents": []}),
+            ),
+            default_entities: default_entities(&[
+                json!({"uid": {"type": "Jans::Org", "id": "org1"}, "attrs": {"name": "trusted"}, "parents": []}),
+                json!({"uid": {"type": "Jans::Group", "id": "admin"}, "attrs": {"role": "admin"}, "parents": []}),
+            ]),
+        };
+
+        let ents = data.entities(None).expect("entities");
+
+        let org_uid: EntityUid = "Jans::Org::\"org1\"".parse().unwrap();
+        let org_json = ents
+            .get(&org_uid)
+            .expect("org entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            org_json.pointer("/attrs/name").and_then(|v| v.as_str()),
+            Some("trusted"),
+            "default org name should override request value in multi-collision test"
+        );
+
+        let group_uid: EntityUid = "Jans::Group::\"admin\"".parse().unwrap();
+        let group_json = ents
+            .get(&group_uid)
+            .expect("group entity")
+            .to_json_value()
+            .expect("to_json");
+        assert_eq!(
+            group_json.pointer("/attrs/role").and_then(|v| v.as_str()),
+            Some("admin"),
+            "default group role should override request value in multi-collision test"
+        );
     }
 }

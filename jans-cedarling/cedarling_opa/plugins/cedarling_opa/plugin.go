@@ -1,10 +1,28 @@
+/*
+Lock Ordering (CRITICAL):
+
+1. globalInstanceMu (R/W) -> CedarPlugin.mtx (R/W)
+   - Always acquire globalInstanceMu BEFORE CedarPlugin.mtx
+   - Never hold CedarPlugin.mtx while trying to acquire globalInstanceMu
+
+2. CedarPlugin.mtx protects:
+   - p.cedar (*cedarling_go.Cedarling)
+   - p.config (Config)
+
+3. globalInstanceMu protects:
+   - globalInstance (*CedarPlugin)
+
+WithCedarlingInstance follows this order:
+   globalInstanceMu.RLock() -> get p -> globalInstanceMu.RUnlock() → p.mtx.RLock()
+*/
+
 package cedarlingopa
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"sync"
 
@@ -21,14 +39,45 @@ const PluginName = "cedarling_opa"
 type Config struct {
 	BootstrapConfig map[string]any `json:"bootstrap_config"`
 	Stderr          bool           `json:"stderr"` // false => stdout, true => stderr
-	PolicyStore     map[string]any `json:"policy_store"`
 }
 
 type CedarPlugin struct {
 	manager *plugins.Manager
-	mtx     sync.Mutex
+	mtx     sync.RWMutex
 	config  Config
 	cedar   *cedarling_go.Cedarling
+}
+
+var globalInstanceMu sync.RWMutex
+var globalInstance *CedarPlugin
+
+func setGlobalInstance(p *CedarPlugin) {
+	globalInstanceMu.Lock()
+	defer globalInstanceMu.Unlock()
+	globalInstance = p
+}
+
+func clearGlobalInstance(p *CedarPlugin) {
+	globalInstanceMu.Lock()
+	defer globalInstanceMu.Unlock()
+	if globalInstance == p {
+		globalInstance = nil
+	}
+}
+
+func WithCedarlingInstance(fn func(*cedarling_go.Cedarling) error) error {
+	globalInstanceMu.RLock()
+	p := globalInstance
+	globalInstanceMu.RUnlock()
+	if p == nil {
+		return errors.New("Cedarling plugin not initialized")
+	}
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+	if p.cedar == nil {
+		return errors.New("Cedarling instance not ready")
+	}
+	return fn(p.cedar)
 }
 
 func logMessage(stderr bool, msg string) {
@@ -41,14 +90,7 @@ func logMessage(stderr bool, msg string) {
 
 func buildBootstrapConfig(cfg Config) (map[string]any, error) {
 	newConfig := make(map[string]any)
-	for k, v := range cfg.BootstrapConfig {
-		newConfig[k] = v
-	}
-	policyStoreBytes, err := json.Marshal(cfg.PolicyStore)
-	if err != nil {
-		return nil, err
-	}
-	newConfig["CEDARLING_POLICY_STORE_LOCAL"] = string(policyStoreBytes)
+	maps.Copy(newConfig, cfg.BootstrapConfig)
 	return newConfig, nil
 }
 
@@ -69,6 +111,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	}
 	p.cedar = instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	setGlobalInstance(p)
 	return nil
 }
 
@@ -77,6 +120,7 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 	cedar := p.cedar
 	p.cedar = nil
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
+	clearGlobalInstance(p)
 	p.mtx.Unlock()
 	if cedar != nil {
 		cedar.ShutDown()
@@ -104,6 +148,7 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.config = cfg
 	p.cedar = new_instance
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	setGlobalInstance(p)
 	p.mtx.Unlock()
 	if old_cedar != nil {
 		old_cedar.ShutDown()
@@ -130,9 +175,6 @@ func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) 
 	}
 	if parsedConfig.BootstrapConfig == nil {
 		return nil, errors.New("Bootstrap config is required")
-	}
-	if parsedConfig.PolicyStore == nil {
-		return nil, errors.New("Policy store is required")
 	}
 	return parsedConfig, nil
 }

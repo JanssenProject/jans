@@ -52,7 +52,7 @@ public class AuditLogInterceptor {
 
             // return if audit disabled
             if (apiAppConfiguration.isDisableAuditLogger()) {
-                AUDIT_LOG.error("Audit is disabled by disableAuditLogger config.");
+                LOG.debug("Audit logging is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
 
@@ -90,7 +90,7 @@ public class AuditLogInterceptor {
     }
 
     private void processRequest(InvocationContext context, AuditLogConf auditLogConf) {
-        LOG.info("Process Audit Log Interceptor - context:{}, auditLogConf:{}", context, auditLogConf);
+        LOG.debug("Processing audit request data - method:{}", context.getMethod().getName());
 
         Object[] ctxParameters = context.getParameters();
         Method method = context.getMethod();
@@ -112,8 +112,8 @@ public class AuditLogInterceptor {
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
-                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+                if (obj != null && !obj.toString().toUpperCase().contains("PASSWORD")
+                        && !obj.toString().toUpperCase().contains("SECRET")) {
                
 
                     LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",

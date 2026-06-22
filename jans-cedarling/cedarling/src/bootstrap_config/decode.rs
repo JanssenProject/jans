@@ -13,6 +13,7 @@ use std::fs;
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::str::FromStr;
+use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
@@ -21,6 +22,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
+use crate::HttpClientConfig;
 use crate::context_data_api::DataStoreConfig;
 use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
@@ -51,54 +53,7 @@ impl BootstrapConfig {
             log_level: raw.log_level,
         };
 
-        // Decode policy store
-        let policy_store_config = match (
-            raw.local_policy_store.clone(),
-            raw.policy_store_uri.clone(),
-            raw.policy_store_local_fn.clone(),
-        ) {
-            // Case: no policy store provided
-            (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
-            // Case: get the policy store from a JSON string
-            (Some(policy_store), None, None) => PolicyStoreConfig {
-                source: PolicyStoreSource::Json(policy_store),
-            },
-            // Case: get the policy store from a URI (auto-detect .cjar archives)
-            (None, Some(policy_store_uri), None) => {
-                let source = if policy_store_uri.to_lowercase().ends_with(".cjar") {
-                    PolicyStoreSource::CjarUrl(policy_store_uri)
-                } else {
-                    PolicyStoreSource::LockServer(policy_store_uri)
-                };
-                PolicyStoreConfig { source }
-            },
-            // Case: get the policy store from a local file or directory
-            (None, None, Some(raw_path)) => {
-                let path = Path::new(&raw_path);
-
-                // Check if it's a directory first
-                let source = if path.is_dir() {
-                    PolicyStoreSource::Directory(path.into())
-                } else {
-                    let file_ext = path
-                        .extension()
-                        .and_then(|ext| ext.to_str())
-                        .map(str::to_lowercase);
-
-                    match file_ext.as_deref() {
-                        Some("json") => PolicyStoreSource::FileJson(path.into()),
-                        Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
-                        Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
-                        _ => Err(
-                            BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
-                        )?,
-                    }
-                };
-                PolicyStoreConfig { source }
-            },
-            // Case: multiple polict stores were set
-            _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
-        };
+        let policy_store_config = build_policy_store_config(raw)?;
 
         // Load the jwks from a local file
         let jwks = raw
@@ -123,15 +78,30 @@ impl BootstrapConfig {
             trusted_issuer_loader: raw
                 .trusted_issuer_loader_type
                 .to_config(raw.trusted_issuer_loader_workers),
+            jwks_refresh_interval: raw.jwks_refresh_interval,
+            jwks_refresh_min_interval: raw.jwks_refresh_min_interval,
+            status_list_refresh_interval_max: raw.status_list_refresh_interval_max,
         };
 
         let authorization_config = AuthorizationConfig {
-            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
+            strict_schema_validation: raw.strict_schema_validation.into(),
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified
         let data_store_config = build_data_store_config(raw);
+
+        let http_client_config = HttpClientConfig {
+            max_retries: raw.http_client_request_max_retries,
+            retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
+            #[cfg(not(target_arch = "wasm32"))]
+            request_timeout: Duration::from_secs(raw.http_client_request_timeout),
+            // `0` is the documented "no cap" sentinel.
+            max_response_size_bytes: match raw.http_client_max_response_size_bytes {
+                0 => None,
+                n => Some(n),
+            },
+        };
 
         Ok(Self {
             application_name: raw.application_name.clone(),
@@ -139,12 +109,66 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
-            entity_builder_config: raw.into(),
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,
             data_store_config,
+            http_client_config,
         })
+    }
+}
+
+/// Build [`PolicyStoreConfig`] from the three mutually-exclusive raw source
+/// fields (`CEDARLING_POLICY_STORE_LOCAL`, `_URI`, `_LOCAL_FN`).
+/// Returns an error if none or more than one are set
+fn build_policy_store_config(
+    raw: &BootstrapConfigRaw,
+) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
+    match (
+        raw.local_policy_store.clone(),
+        raw.policy_store_uri.clone(),
+        raw.policy_store_local_fn.clone(),
+    ) {
+        // Case: no policy store provided
+        (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
+        // Case: get the policy store from a JSON string
+        (Some(policy_store), None, None) => Ok(PolicyStoreConfig {
+            source: PolicyStoreSource::Json(policy_store),
+            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        }),
+        // Case: get the policy store from a URI
+        (None, Some(policy_store_uri), None) => Ok(PolicyStoreConfig {
+            source: PolicyStoreSource::Uri(policy_store_uri),
+            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        }),
+        // Case: get the policy store from a local file or directory
+        (None, None, Some(raw_path)) => {
+            let path = Path::new(&raw_path);
+            let source = if path.is_dir() {
+                PolicyStoreSource::Directory(path.into())
+            } else {
+                let file_ext = path
+                    .extension()
+                    .and_then(|ext| ext.to_str())
+                    .map(str::to_lowercase);
+                match file_ext.as_deref() {
+                    Some("json") => PolicyStoreSource::FileJson(path.into()),
+                    Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
+                    Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
+                    _ => {
+                        return Err(
+                            BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
+                        );
+                    },
+                }
+            };
+            Ok(PolicyStoreConfig {
+                source,
+                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            })
+        },
+        // Case: multiple policy stores were set
+        _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
     }
 }
 

@@ -22,10 +22,6 @@ pub(crate) struct TokenEntityMetadata {
     pub(crate) trusted: bool,
     /// The Cedar entity name that represents this token
     pub(crate) entity_type_name: String,
-    /// The Cedar entities that this token is an attribute of
-    #[serde(default)]
-    #[builder(default)]
-    pub(crate) principal_mapping: HashSet<String>,
     /// An optional string representing the principal identifier (e.g., `jti`).
     #[serde(default = "default_token_id")]
     #[builder(default = default_token_id())]
@@ -41,8 +37,9 @@ fn default_trusted() -> bool {
     true
 }
 
+pub(crate) const DEFAULT_TKN_ID: &str = "jti";
+
 fn default_token_id() -> String {
-    const DEFAULT_TKN_ID: &str = "jti";
     DEFAULT_TKN_ID.to_string()
 }
 
@@ -55,7 +52,6 @@ impl TokenEntityMetadata {
             token_id: default_token_id(),
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
-            principal_mapping: HashSet::from(["Jans::Workload".into()]),
         }
     }
 
@@ -71,7 +67,6 @@ impl TokenEntityMetadata {
                 "exp".into(),
             ]),
             entity_type_name: "Jans::Id_token".into(),
-            principal_mapping: HashSet::from(["Jans::User".into()]),
         }
     }
 
@@ -87,7 +82,6 @@ impl TokenEntityMetadata {
                 "exp".into(),
             ]),
             entity_type_name: "Jans::Userinfo_token".into(),
-            principal_mapping: HashSet::from(["Jans::User".into()]),
         }
     }
 }
@@ -140,7 +134,7 @@ mod test {
         let yaml = "
             entity_type_name: Jans::Access_token
         ";
-        let parsed = serde_yml::from_str::<TokenEntityMetadata>(yaml)
+        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml)
             .expect("Failed to parse an empty YAML object into TokenEntityMetadata");
         assert_eq!(
             parsed,
@@ -156,7 +150,7 @@ mod test {
             role_mapping: ''
             entity_type_name: Jans::Access_token
         ";
-        let parsed = serde_yml::from_str::<TokenEntityMetadata>(yaml).expect(
+        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml).expect(
             "Failed to parse YAML object with user_id and role_mapping into TokenEntityMetadata",
         );
         assert_eq!(

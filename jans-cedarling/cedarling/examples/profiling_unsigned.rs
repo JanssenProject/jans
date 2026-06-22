@@ -7,9 +7,9 @@
 #![allow(dead_code)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -150,20 +150,15 @@ async fn init_cedarling() -> Cedarling {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-        },
-        jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::new(json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .expect("valid rule"),
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default(),
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await
     .expect("should initialize cedarling")
@@ -195,7 +190,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
     .expect("valid resource entity");
 
     RequestUnsigned {
-        principals: vec![principal],
+        principal: Some(principal),
         action: "Jans::Action::\"Update\"".to_string(),
         context: json!({}),
         resource,

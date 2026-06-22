@@ -106,13 +106,35 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    python -m pydoc cedarling_python
    ```
 
-## Running a Python Script
+## Examples
 
-To verify that the library works correctly, you can run the provided `example.py` script. Make sure the virtual environment is activated before running the script:
+Standalone example scripts live in the `examples/` directory, each with its own
+directory-based policy store under `example_files/`. Make sure the virtual environment is
+activated and the package is installed before running them.
+
+### Unsigned authorization (no JWT tokens)
+
+Authorize requests by supplying principals directly as EntityData objects,
+without any JWT tokens. Useful for internal services or test harnesses.
 
 ```bash
-CEDARLING_POLICY_STORE_LOCAL_FN=example_files/policy-store.json python example.py
+python examples/unsigned_authz.py
 ```
+
+- Script: [`examples/unsigned_authz.py`](examples/unsigned_authz.py)
+- Policy store: [`example_files/policy-store-unsigned/`](example_files/policy-store-unsigned/)
+
+### Multi-issuer authorization (JWT tokens)
+
+Authorize requests carrying JWT tokens from one or more issuers, with
+Cedar policies that inspect token attributes via tags.
+
+```bash
+python examples/multi_issuer_authz.py
+```
+
+- Script: [`examples/multi_issuer_authz.py`](examples/multi_issuer_authz.py)
+- Policy store: [`example_files/policy-store-multi-issuer/`](example_files/policy-store-multi-issuer/)
 
 ## Configuration
 
@@ -142,6 +164,10 @@ instance = Cedarling(bootstrap_config)
 # From a URL (.cjar or Lock Server)
 # In your bootstrap-config.yaml:
 # CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar"
+# # Optional: re-fetch the policy store every 60s and atomically swap on change.
+# # Default is 0 (load-once-at-startup). See "Refreshing the policy store" in
+# # docs/cedarling/reference/cedarling-properties.md for details.
+# CEDARLING_POLICY_STORE_REFRESH_INTERVAL: 60
 bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
 instance = Cedarling(bootstrap_config)
 
@@ -152,7 +178,7 @@ bootstrap_config = BootstrapConfig.from_env()
 instance = Cedarling(bootstrap_config)
 ```
 
-For a complete working example showing the full instantiation flow, see [`example.py`](example.py).
+For complete working examples, see the [`examples/`](examples/) directory.
 
 For details on the directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
 

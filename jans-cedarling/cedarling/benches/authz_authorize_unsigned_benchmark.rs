@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
+    InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -148,20 +148,15 @@ async fn prepare_cedarling() -> Result<Cedarling, InitCedarlingError> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
-        },
-        jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            principal_bool_operator: JsonRule::new(json!(
-                {"===": [{"var": "Jans::User"}, "ALLOW"]}
-            ))
-            .expect("valid rule"),
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default(),
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -175,7 +170,6 @@ fn prepare_unsigned_request() -> RequestUnsigned {
             "id": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0"
         },
         "country": "US",
-        "role": ["Admin"],
         "department": "engineering",
         "active": true,
         "suspended": false
@@ -194,8 +188,8 @@ fn prepare_unsigned_request() -> RequestUnsigned {
     .expect("valid resource entity");
 
     RequestUnsigned {
-        principals: vec![principal],
-        action: "Jans::Action::\"Update\"".to_string(),
+        principal: Some(principal),
+        action: "Jans::Action::\"Read\"".to_string(),
         context: json!({}),
         resource,
     }

@@ -11,7 +11,7 @@ keywords:
 home: https://gluu.org/docs/casa/
 sources:
   - https://gluu.org/casa/
-  - https://github.com/JanssenProject/jans/docker-jans-casa
+  - https://github.com/JanssenProject/jans/tree/main/docker-jans-casa
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

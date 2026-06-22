@@ -1,0 +1,7 @@
+comment = 'Cedarling authorization for PostgreSQL Row-Level Security.'
+default_version = '@CARGO_VERSION@'
+module_pathname = '$libdir/cedarling_pg'
+relocatable = false
+superuser = true
+trusted = false
+schema = 'public'

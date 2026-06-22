@@ -542,7 +542,7 @@ objectClass: top
 description: LogoutStatusJwt Custom Script - Sample in Java
 displayName: logout_status_jwt_script_in_java
 inum: 0300-BA15
-jansEnabled: FALSE
+jansEnabled: TRUE
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
@@ -740,6 +740,20 @@ jansScrTyp: fido2_extension
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
+jansProgLng: python
+
+dn: inum=1D3E-A001,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Identity Assertion (ID-JAG) sample script
+displayName: identity_assertion_sample
+inum: 1D3E-A001
+jansEnabled: false
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansRevision: 1
+jansScr::%(identity_assertion_identityassertion)s
+jansScrTyp: identity_assertion
 jansProgLng: python
 
 

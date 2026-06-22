@@ -28,11 +28,6 @@
            <name>GitHub Packages</name>
            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
         </repository>
-        <repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
     </repositories>
 
     <build>
@@ -73,7 +68,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.9.8.2</version>
+                <version>4.9.8.3</version>
             </plugin>
         </plugins>
     </build>

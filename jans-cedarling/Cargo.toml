@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "http_utils", "sparkv", "test_utils"]
+members = ["bindings/*", "cedarling", "cedarling_pg", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
+# cedarling_pg requires `cargo pgrx init` (a managed Postgres install) before its
+# pgrx-pg-sys build script will succeed. Excluding it from default-members keeps
+# `cargo build/test/bench/dylint` at the workspace root working without that setup.
+# It's still a workspace member, so `cargo build -p cedarling_pg` and the dedicated
+# postgres_extension_tests CI job still target it explicitly.
+default-members = ["bindings/*", "cedarling", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
 exclude = ["bindings/cedarling-java", "custom-lints"]
 
 [workspace.dependencies]
@@ -26,13 +32,19 @@ serde-wasm-bindgen = "0.6"
 tokio = "1.42.0"
 tokio-util = "0.7.15"
 mockito = "1.5.0"
+sha2 = "0.10"
 
 [workspace.lints.clippy]
 pedantic = "warn"
+# duration_suboptimal_units suggests from_hours/from_mins which are unstable on stable Rust
+duration-suboptimal-units = { level = "allow", priority = 1 }
 
 
+# Native release builds (java/python/go/uniffi) are speed-oriented.
+# The WASM target is size-oriented instead: it overrides these keys via the
+# config-based profile in bindings/cedarling_wasm/.cargo/config.toml, which Cargo
+# only picks up when building from that directory (i.e. under wasm-pack). Native
+# builds run from this workspace root and never see it.
 [profile.release]
 debug-assertions = false
-opt-level = "z"
-codegen-units = 1
 overflow-checks = false

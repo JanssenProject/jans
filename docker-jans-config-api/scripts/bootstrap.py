@@ -54,8 +54,7 @@ def main():
     sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if not os.path.exists(sql_prop):
-            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
+        render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property(sql_prop)
@@ -117,6 +116,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "root_log_target": "STDOUT",
+        "root_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -160,6 +161,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
         "audit_log_target": "AUDIT_FILE",
+        "root_log_target": "FILE",
     }
 
     for key, value in config.items():
@@ -347,14 +349,19 @@ class PersistenceSetup:
             self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
         # test client
+        #
+        # The id/secret/trusted flag may be pinned via env so an external
+        # integration-test suite (e.g. the GitHub Actions workflow) can target
+        # the config-api with deterministic credentials. When the env vars are
+        # unset the previous random behaviour is preserved.
         ctx["test_client_id"] = self.manager.config.get("test_client_id")
         if not ctx["test_client_id"]:
-            ctx["test_client_id"] = f"{uuid4()}"
+            ctx["test_client_id"] = os.environ.get("CN_CONFIG_API_TEST_CLIENT_ID", "") or f"{uuid4()}"
             self.manager.config.set("test_client_id", ctx["test_client_id"])
 
         ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
         if not ctx["test_client_pw"]:
-            ctx["test_client_pw"] = get_random_chars()
+            ctx["test_client_pw"] = os.environ.get("CN_CONFIG_API_TEST_CLIENT_SECRET", "") or get_random_chars()
             self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
 
         ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
@@ -363,6 +370,8 @@ class PersistenceSetup:
                 ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
             ).decode()
             self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+
+        ctx["test_client_trusted"] = str(as_boolean(os.environ.get("CN_CONFIG_API_TEST_CLIENT_TRUSTED", "false"))).lower()
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:

@@ -104,8 +104,11 @@ export class Cedarling {
    */
   static new_from_map(config: Map<any, any>): Promise<Cedarling>;
   /**
-   * Authorize request for unsigned principals.
-   * makes authorization decision based on the [`RequestUnsigned`]
+   * Authorize an unsigned request carrying an optional single principal.
+   * Makes an authorization decision based on the [`RequestUnsigned`].
+   * When `principal` is omitted / `null` the core uses Cedar partial evaluation;
+   * residual-dependent requests fail closed with `Decision::Deny` and surface
+   * residual policy ids in `response.diagnostics.reason`.
    */
   authorize_unsigned(request: any): Promise<AuthorizeResult>;
   /**
@@ -261,13 +264,9 @@ export class AuthorizeResult {
    */
   json_string(): string;
   /**
-   * Get authorization responses for all principals
+   * Cedar authorization response for the request.
    */
-  principals: Record<string, AuthorizeResultResponse>;
-  /**
-   * Get result for a specific principal
-   */
-  principal(principal: string): AuthorizeResultResponse | undefined;
+  response: AuthorizeResultResponse;
   /**
    * Result of authorization
    * true means `ALLOW`
@@ -419,6 +418,10 @@ Cedarling supports multiple ways to load policy stores. **In WASM environments, 
 // Option 1: Fetch policy store from URL (simple)
 const BOOTSTRAP_CONFIG = {
   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // Optional: re-fetch every 60s and atomically swap on change.
+  // Default is 0 (load-once-at-startup). See "Refreshing the policy store"
+  // in docs/cedarling/reference/cedarling-properties.md for details.
+  CEDARLING_POLICY_STORE_REFRESH_INTERVAL: 60,
   // ... other config
 };
 const cedarling = await init(BOOTSTRAP_CONFIG);

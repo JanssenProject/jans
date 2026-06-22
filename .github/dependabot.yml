@@ -108,11 +108,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker-jans-monolith
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
     directory: /docker-jans-persistence-loader
     schedule:
       interval: daily
