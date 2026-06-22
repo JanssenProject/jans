@@ -115,7 +115,7 @@ public class CertificateService {
     	
     	Map<String, X509Certificate> certificatesMap = new HashMap<String, X509Certificate>(certificates.size());
     	for (X509Certificate certificate : certificates) {
-            String subjectDn = certificate.getSubjectDN().getName().toLowerCase();
+            String subjectDn = certificate.getSubjectX500Principal().getName().toLowerCase();
     		
     		certificatesMap.put(subjectDn, certificate);
     	}

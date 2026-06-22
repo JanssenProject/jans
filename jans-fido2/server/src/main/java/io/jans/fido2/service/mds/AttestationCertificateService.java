@@ -86,7 +86,7 @@ public class AttestationCertificateService {
 
         X509Certificate appleCert = certificateService.getCertificateByDisplayName(APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
         if (appleCert != null) {
-            this.appleRootCaSubjectDn = appleCert.getSubjectDN().getName().toLowerCase();
+            this.appleRootCaSubjectDn = appleCert.getSubjectX500Principal().getName().toLowerCase();
             log.debug("Loaded Apple WebAuthn root CA subject DN from DB: {}", appleRootCaSubjectDn);
         } else {
             log.warn("Apple WebAuthn root CA certificate '{}' not found in DB", APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
