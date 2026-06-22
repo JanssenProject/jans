@@ -106,6 +106,7 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
        (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v')))
     permissions:
+      actions: read   # all-in-one polls this run's jobs API to wait for its base images
       packages: write
       id-token: write
       attestations: write
@@ -282,10 +283,9 @@ jobs:
               echo "Waiting for docker ($img) to complete..."
               CONCLUSION=""
               for attempt in $(seq 1 60); do
-                # filter=all (not the default latest): on a re-run of all-in-one alone, a
-                # sibling that succeeded in an earlier attempt is otherwise invisible.
+                # filter=all + any-success: a re-run's earlier attempt may already hold the image.
                 CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?filter=all&per_page=100" \
-                  --jq "[.jobs[] | select(.name == \"docker ($img)\")] | max_by(.run_attempt) | .conclusion" 2>/dev/null || echo "")
+                  --jq "[.jobs[] | select(.name == \"docker ($img)\")] | if (map(.conclusion) | any(. == \"success\")) then \"success\" elif (map(.conclusion) | any(. == \"skipped\")) then \"skipped\" else (max_by(.run_attempt).conclusion // \"\") end" || echo "")
                 if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
                   echo "  docker ($img): $CONCLUSION"; break
                 elif [[ "$CONCLUSION" == "failure" || "$CONCLUSION" == "cancelled" || "$CONCLUSION" == "timed_out" ]]; then
