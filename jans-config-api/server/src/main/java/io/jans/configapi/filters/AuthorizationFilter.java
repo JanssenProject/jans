@@ -55,7 +55,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
-<<<<<<< HEAD
         log.info("=======================================================================");
         log.info("====== context = " + context + " , info.getAbsolutePath() = " + info.getAbsolutePath()
                 + " , info.getRequestUri() = " + info.getRequestUri() + "\n\n");
@@ -66,25 +65,23 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("====== this.authorizationService.getClass().getName():{} " + this.authorizationService.getClass().getName());
         log.info("======PERFORMING AUTHORIZATION=========================================");
-=======
-        log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), info.getPath(),
-                request.getRemoteAddr());
-
->>>>>>> e0571e40361954214a99b09dd6a67eae3949a59c
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
         boolean configOauthEnabled = authorizationService.isConfigOauthEnabled();
-        log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + " , issuer = "
+                + issuer + " , configOauthEnabled = " + configOauthEnabled + "\n\n\n");
 
         if (!configOauthEnabled) {
             log.debug("OAuth validation disabled - authorization granted");
             return;
         }
 
+        log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
                     info.getPath());
             abortWithUnauthorized(context, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
+            log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
