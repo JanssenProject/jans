@@ -230,6 +230,8 @@ jobs:
       - name: Prepare
         if: steps.build_docker_image.outputs.build
         id: prep
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
