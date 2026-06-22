@@ -18,8 +18,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb
- -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
