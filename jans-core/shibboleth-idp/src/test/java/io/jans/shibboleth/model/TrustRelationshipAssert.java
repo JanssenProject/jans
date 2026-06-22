@@ -153,11 +153,11 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
-    public TrustRelationshipAssert hasNoMetadataSource() {
+    public TrustRelationshipAssert hasNoRealMetadataSource() {
 
         isNotNull();
 
-        if(actual.hasNoMetadataSource()) {
+        if(actual.hasNoRealMetadataSource()) {
 
             return this;
         }
@@ -169,7 +169,7 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
     public TrustRelationshipAssert hasRealMetadataSource() {
 
         isNotNull();
-        if(actual.hasNoMetadataSource()) {
+        if(actual.hasNoRealMetadataSource()) {
 
             failWithMessage("TrustRelationship has no real metadata source (non-NONE).");
         }
@@ -221,10 +221,10 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
-    public TrustRelationshipAssert hasNoActivationDiagnosticsData() {
+    public TrustRelationshipAssert hasNoActivationDiagnostics() {
 
         isNotNull();
-        if (!actual.hasNoActivationDiagnosticsData()) {
+        if (!actual.hasNoActivationDiagnostics()) {
 
             failWithMessage("TrustRelationship has associated activation diagnostics data. Expected: No activation diagnostics data");
         }

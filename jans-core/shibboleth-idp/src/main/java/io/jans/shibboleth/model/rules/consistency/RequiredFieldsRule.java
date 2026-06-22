@@ -1,7 +1,7 @@
 package io.jans.shibboleth.model.rules.consistency;
 
-import io.jans.shibboleth.model.BuildContext;
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.BuildContext;
 import io.jans.shibboleth.model.util.TrustResult;
 
 public class RequiredFieldsRule {

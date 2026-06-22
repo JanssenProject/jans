@@ -6,11 +6,16 @@ public class TrustTransitionError extends TrustError  {
         super(message);
     } 
 
-    public static TrustError candidateRequired() {
+    public static TrustError contextRequired() {
 
-        return new TrustTransitionError("TrustRelationship transition failed. TrustRelationship candidate is required");
+        return new TrustTransitionError("TrustRelationship transition failed. StateTransitionContext is required");
     }
 
+    public static TrustError candidateRequired() {
+
+        return new TrustTransitionError("TrustRelationship transition failed. Candidate in context is required");
+    }
+    
     public static TrustError rulesRequired() {
 
         return new TrustTransitionError("TrustRelationship transition failed. Rules are required");

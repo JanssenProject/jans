@@ -104,7 +104,7 @@ public class TrustRelationshipFixtures {
     public static final TrustRelationship sampleActivatingIndividualTrustRelationship() {
 
         return TrustRelationship.from(sampleReadyIndividualTrustRelationship())
-            .withStatus(TrustStatus.ACTIVATING)
+            .activateCalled()
             .build()
             .getValue();
     }
@@ -112,7 +112,25 @@ public class TrustRelationshipFixtures {
     public static final TrustRelationship sampleActivatingAggregateTrustRelationship() {
 
         return TrustRelationship.from(sampleReadyAggregateTrustRelationship())
-            .withStatus(TrustStatus.ACTIVATING)
+            .activateCalled()
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveIndividualTrustRelationship() {
+
+        return TrustRelationship.from(sampleActivatingIndividualTrustRelationship())
+            .finalizeActivationCalled()
+            .withActivationDiagnostics(sampleActivationDiagnosticsForSuccessfulActivation())
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveAggregateTrustRelationship() {
+
+        return TrustRelationship.from(sampleActivatingAggregateTrustRelationship())
+            .finalizeActivationCalled()
+            .withActivationDiagnostics(sampleActivationDiagnosticsForSuccessfulActivation())
             .build()
             .getValue();
     }

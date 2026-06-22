@@ -2,7 +2,6 @@ package io.jans.shibboleth.model.rules.consistency;
 
 import java.util.Objects;
 
-import io.jans.shibboleth.model.BuildContext;
 import io.jans.shibboleth.model.TrustRelationship;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.error.OperationRestrictedToNature;
@@ -10,6 +9,8 @@ import io.jans.shibboleth.model.error.TrustError;
 import io.jans.shibboleth.model.error.DomainObjectConsistencyFailed;
 import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
+
+import io.jans.shibboleth.model.util.BuildContext;
 import io.jans.shibboleth.model.util.TrustResult;
 
 public class MetadataSourceCompatibilityRule {

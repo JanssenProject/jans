@@ -32,6 +32,9 @@ import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
 import io.jans.shibboleth.model.rules.consistency.TrustConsistencyRules;
 import io.jans.shibboleth.model.rules.state.TrustTransitionRules;
+import io.jans.shibboleth.model.util.BuildContext;
+import io.jans.shibboleth.model.util.OperationType;
+import io.jans.shibboleth.model.util.TrustPredicates;
 import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
@@ -134,12 +137,12 @@ public class TrustRelationship {
 
     public boolean isAggregateNature() {
 
-        return nature == TrustNature.AGGREGATE;
+        return TrustPredicates.hasTrustNature(this,TrustNature.AGGREGATE);
     }
 
     public boolean isIndividualNature() {
 
-        return nature == TrustNature.INDIVIDUAL;
+        return TrustPredicates.hasTrustNature(this,TrustNature.INDIVIDUAL);
     }
 
 
@@ -178,19 +181,19 @@ public class TrustRelationship {
             .build();
     }
 
-    public boolean hasNoMetadataSource() {
+    public boolean hasNoRealMetadataSource() {
 
-        return Objects.equals(metadataSource,NoMetadataSource.getInstance());
+        return !TrustPredicates.hasRealMetadataSource(this);
     }
 
     public boolean hasAnyDiscoveredEntityIds() {
 
-        return discoveredEntityIds.hasAny();
+        return TrustPredicates.hasAnyDiscoveredEntityIds(this);
     }
 
     public boolean hasNoDiscoveredEntityIds() {
 
-        return discoveredEntityIds.hasNone();
+        return !hasAnyDiscoveredEntityIds();
     }
 
     public ShibbolethSsoProfileConfiguration getShibbolethSsoProfileConfiguration() {
@@ -269,17 +272,12 @@ public class TrustRelationship {
 
     public boolean hasNoActiveProfileConfiguration() {
 
-        return shibbolethSsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2AttributeQueryProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2ArtifactResolutionProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2EcpProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2SsoProfileConfiguration.getStatus() == ProfileStatus.INACTIVE
-            && saml2LogoutProfileConfiguration.getStatus() == ProfileStatus.INACTIVE;
+       return !TrustPredicates.hasAnyActiveProfile(this);
     }
 
     public boolean hasNoReleasedAttributes() {
 
-        return releasedAttributes.hasNone();
+        return TrustPredicates.hasNoReleasedAttributes(this);
     }
 
     public TrustResult<TrustRelationship> updateReleasedAttributes(ReleasedAttributes attributes) {
@@ -299,38 +297,47 @@ public class TrustRelationship {
         return activationDiagnostics;
     }
 
-    public boolean hasNoActivationDiagnosticsData() {
+    public boolean hasNoActivationDiagnostics() {
 
-        return activationDiagnostics.getStatus() == ActivationStatus.NO_DATA;
+        return TrustPredicates.hasNoActivationDiagnostics(this);
     }
 
-    public boolean hasSuccessfulActivationDiagnosticsData() {
+    public boolean hasSuccessfulActivationDiagnostics() {
 
-        return activationDiagnostics.getStatus() == ActivationStatus.SUCCEEDED;
+        return TrustPredicates.hasSuccessfulActivationDiagnostics(this);
     }
 
-    public boolean hasFailedActivationDiagnosticsData() {
+    public boolean hasFailedActivationDiagnostics() {
 
-        return activationDiagnostics.getStatus() == ActivationStatus.FAILED;
+        return TrustPredicates.hasFailedActivationDiagnostics(this);
     }
+
     public TrustResult<TrustRelationship> activate() {
 
         return from(this)
-            .withStatus(TrustStatus.ACTIVATING)
+            .activateCalled()
             .withActivationDiagnostics(ActivationDiagnostics.none())
+            .build();
+    }
+
+    public TrustResult<TrustRelationship> cancelActivation() {
+
+        return from(this)
+            .cancelActivationCalled()
             .build();
     }
 
     public TrustResult<TrustRelationship> deactivate() {
 
         return from(this)
-            .withStatus(TrustStatus.READY)
+            .deactivateCalled()
             .build();
     }
 
     public TrustResult<TrustRelationship> finalizeActivation(ActivationDiagnostics activationDiagnostics) {
 
         return from(this)
+            .finalizeActivationCalled()
             .withActivationDiagnostics(activationDiagnostics)
             .build();
     }
@@ -456,6 +463,8 @@ public class TrustRelationship {
         private ReleasedAttributes releasedAttributes;
 
         private ActivationDiagnostics activationDiagnostics;
+        
+        private OperationType operationType;
 
         private Builder (TrustRelationship original) {
 
@@ -483,6 +492,8 @@ public class TrustRelationship {
 
                 activationDiagnostics = original.activationDiagnostics;
             }
+
+            this.operationType = OperationType.NONE;
         }
 
         public Builder withId(Id id) {
@@ -581,6 +592,30 @@ public class TrustRelationship {
             return this;
         }
 
+        public Builder activateCalled() {
+
+            this.operationType = OperationType.ACTIVATE;
+            return this;
+        }
+
+        public Builder cancelActivationCalled() {
+
+            this.operationType = OperationType.CANCEL_ACTIVATION;
+            return this;
+        }
+
+        public Builder deactivateCalled() {
+
+            this.operationType = OperationType.DEACTIVATE;
+            return this;
+        }
+
+        public Builder finalizeActivationCalled() {
+
+            this.operationType = OperationType.FINALIZE_ACTIVATION;
+            return this;
+        }
+
         public TrustResult<TrustRelationship> build() {
 
             BuildContext build_context = createBuildContext();
@@ -588,7 +623,7 @@ public class TrustRelationship {
 
             if (rules_enforcement_result.isFailure()) {
                 
-                if (creatingNewInstance()) {
+                if (creatingNew()) {
                     TrustError error = DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class,rules_enforcement_result.getError());
                     return TrustResult.failure(error);
                 }else {
@@ -597,28 +632,27 @@ public class TrustRelationship {
                 }
             }
 
-            TrustRelationship candidate = createCandidate();
+            
+            if(creatingNew()) {
 
-            if(creatingNewInstance()) {
-
-                return TrustResult.success(candidate);
+                return TrustResult.success(createCandidate());
             }
 
-            if (updatingExistingInstance() && isEssentiallyUnchanged(candidate)) {
+            TrustResult<TrustStatus> newstatus_result = TrustTransitionRules.determineNewStatus(build_context);
+            if(newstatus_result.isFailure()) {
 
-                return TrustResult.success(original);
+                TrustError cause = newstatus_result.getError();
+                return TrustResult.failure(DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class,cause));
             }
 
-            TrustResult<TrustRelationship> updatedcandidate = applyStateTransitions(candidate);
+            status = newstatus_result.getValue();
 
-            if (updatedcandidate.isFailure()) {
-                TrustError error= DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class,updatedcandidate.getError());
-                return TrustResult.failure(error);
+            if (isEffectivelyModified()) {
+
+                version = version.next(); 
             }
+            return TrustResult.success(createCandidate());
 
-            return TrustResult.success(
-                updatedcandidate.getValue().withIncrementedVersion()
-            );
         }
         
         private final BuildContext createBuildContext() {
@@ -640,9 +674,11 @@ public class TrustRelationship {
                     saml2SsoProfileConfiguration,
                     saml2LogoutProfileConfiguration,
                     releasedAttributes,
-                    activationDiagnostics
+                    activationDiagnostics,
+                    operationType
                 );
         }
+
 
         private final TrustRelationship createCandidate () {
 
@@ -667,71 +703,37 @@ public class TrustRelationship {
 
         }
 
-        private final TrustRelationship createCandidateWithNewStatus(TrustRelationship candidate, TrustStatus status) {
-
-            return new TrustRelationship(
-                candidate.id,
-                candidate.displayName,
-                candidate.description,
-                candidate.nature,
-                candidate.version,
-                status,
-                candidate.metadataSource,
-                candidate.discoveredEntityIds,
-                candidate.shibbolethSsoProfileConfiguration,
-                candidate.saml2ArtifactResolutionProfileConfiguration,
-                candidate.saml2AttributeQueryProfileConfiguration,
-                candidate.saml2EcpProfileConfiguration,
-                candidate.saml2SsoProfileConfiguration,
-                candidate.saml2LogoutProfileConfiguration,
-                candidate.releasedAttributes,
-                candidate.activationDiagnostics
-            );
-        }
-
-        private final boolean creatingNewInstance() {
+        private final boolean creatingNew() {
 
             return original == null;
         }
 
-        private final boolean updatingExistingInstance() {
+        private final boolean updatingOriginal() {
 
-            return ! creatingNewInstance();
+            return ! creatingNew();
         }
 
-        private boolean isEssentiallyUnchanged(TrustRelationship candidate) {
+        private boolean isEffectivelyUnmodified() {
 
-            return Objects.equals(original.displayName,candidate.displayName)
-                && Objects.equals(original.description,candidate.description)
-                && Objects.equals(original.status,candidate.status)
-                && Objects.equals(original.nature,candidate.nature)
-                && Objects.equals(original.metadataSource,candidate.metadataSource)
-                && Objects.equals(original.discoveredEntityIds,candidate.discoveredEntityIds)
-                && Objects.equals(original.shibbolethSsoProfileConfiguration,candidate.shibbolethSsoProfileConfiguration)
-                && Objects.equals(original.saml2ArtifactResolutionProfileConfiguration,candidate.saml2ArtifactResolutionProfileConfiguration)
-                && Objects.equals(original.saml2AttributeQueryProfileConfiguration,candidate.saml2AttributeQueryProfileConfiguration)
-                && Objects.equals(original.saml2EcpProfileConfiguration,candidate.saml2EcpProfileConfiguration)
-                && Objects.equals(original.saml2SsoProfileConfiguration,candidate.saml2SsoProfileConfiguration)
-                && Objects.equals(original.saml2LogoutProfileConfiguration,candidate.saml2LogoutProfileConfiguration)
-                && Objects.equals(original.releasedAttributes,candidate.releasedAttributes)
-                && Objects.equals(original.activationDiagnostics,candidate.activationDiagnostics);
+            return Objects.equals(original.displayName,displayName)
+                && Objects.equals(original.description,description)
+                && Objects.equals(original.status,status)
+                && Objects.equals(original.nature,nature)
+                && Objects.equals(original.metadataSource,metadataSource)
+                && Objects.equals(original.discoveredEntityIds,discoveredEntityIds)
+                && Objects.equals(original.shibbolethSsoProfileConfiguration,shibbolethSsoProfileConfiguration)
+                && Objects.equals(original.saml2ArtifactResolutionProfileConfiguration,saml2ArtifactResolutionProfileConfiguration)
+                && Objects.equals(original.saml2AttributeQueryProfileConfiguration,saml2AttributeQueryProfileConfiguration)
+                && Objects.equals(original.saml2EcpProfileConfiguration,saml2EcpProfileConfiguration)
+                && Objects.equals(original.saml2SsoProfileConfiguration,saml2SsoProfileConfiguration)
+                && Objects.equals(original.saml2LogoutProfileConfiguration,saml2LogoutProfileConfiguration)
+                && Objects.equals(original.releasedAttributes,releasedAttributes)
+                && Objects.equals(original.activationDiagnostics,activationDiagnostics);
         }
 
-        private TrustResult<TrustRelationship> applyStateTransitions(TrustRelationship candidate) {
+        private boolean isEffectivelyModified() {
 
-           
-            TrustResult<TrustStatus> newstatus = TrustTransitionRules.determineNewStatus(candidate);
-            if (newstatus.isFailure()) {
-
-                return TrustResult.failure(newstatus.getError());
-            }
-
-            if (newstatus.getValue() != candidate.getStatus()) {
-
-                return TrustResult.success(createCandidateWithNewStatus(candidate,newstatus.getValue()));
-            }
-
-            return TrustResult.success(candidate);
+            return !isEffectivelyUnmodified();
         }
     }
 }

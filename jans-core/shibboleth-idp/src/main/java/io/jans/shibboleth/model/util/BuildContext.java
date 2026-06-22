@@ -1,4 +1,4 @@
-package io.jans.shibboleth.model;
+package io.jans.shibboleth.model.util;
 
 import io.jans.shibboleth.model.core.Id;
 import io.jans.shibboleth.model.core.DisplayName;
@@ -15,6 +15,9 @@ import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfig
 import io.jans.shibboleth.model.config.profiles.Saml2EcpProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2SsoProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2LogoutProfileConfiguration;
+
+import io.jans.shibboleth.model.TrustRelationship;
+import io.jans.shibboleth.model.ReleasedAttributes;
 
 public class BuildContext {
     
@@ -34,6 +37,8 @@ public class BuildContext {
     private final Saml2EcpProfileConfiguration saml2EcpProfileConfiguration;
     private final Saml2SsoProfileConfiguration saml2SsoProfileConfiguration;
     private final Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration;
+
+    private final OperationType operationType;
     
     private final ReleasedAttributes releasedAttributes;
 
@@ -47,7 +52,7 @@ public class BuildContext {
         Saml2AttributeQueryProfileConfiguration saml2AttributeQueryProfileConfiguration,
         Saml2EcpProfileConfiguration saml2EcpProfileConfiguration, Saml2SsoProfileConfiguration saml2SsoProfileConfiguration,
         Saml2LogoutProfileConfiguration saml2LogoutProfileConfiguration, 
-        ReleasedAttributes releasedAttributes, ActivationDiagnostics activationDiagnostics ) {
+        ReleasedAttributes releasedAttributes, ActivationDiagnostics activationDiagnostics, OperationType operationType) {
         
         this.original = original;
         this.id = id;
@@ -66,6 +71,7 @@ public class BuildContext {
         this.saml2LogoutProfileConfiguration = saml2LogoutProfileConfiguration;
         this.releasedAttributes = releasedAttributes;
         this.activationDiagnostics = activationDiagnostics;
+        this.operationType = operationType != null ? operationType : OperationType.NONE;
     }
 
     public TrustRelationship getOriginal() {
@@ -151,5 +157,55 @@ public class BuildContext {
     public ActivationDiagnostics getActivationDiagnostics() {
 
         return activationDiagnostics;
+    }
+
+    public boolean hasRealMetadataSource() {
+
+        return TrustPredicates.hasRealMetadataSource(this);
+    }
+
+    public boolean hasNoRealMetadataSource() {
+
+        return !hasRealMetadataSource();
+    }
+
+    public boolean hasAnyActiveProfileConfiguration() {
+
+        return TrustPredicates.hasAnyActiveProfile(this);
+    }
+
+    public boolean hasNoActiveProfileConfiguration() {
+
+        return !hasAnyActiveProfileConfiguration();
+    }
+
+    public boolean activateCalled() {
+
+        return operationType == OperationType.ACTIVATE;
+    }
+
+    public boolean cancelActivationCalled() {
+
+        return operationType == OperationType.CANCEL_ACTIVATION;
+    }
+
+    public boolean deactivateCalled() {
+
+        return operationType == OperationType.DEACTIVATE;
+    }
+
+    public boolean finalizeActivationCalled() {
+
+        return operationType == OperationType.FINALIZE_ACTIVATION;
+    }
+
+    public boolean hasSuccessfulActivationDiagnostics() {
+
+        return TrustPredicates.hasSuccessfulActivationDiagnostics(this);
+    }
+
+    public boolean hasFailedActivationDiagnostics() {
+
+        return TrustPredicates.hasFailedActivationDiagnostics(this);
     }
 }

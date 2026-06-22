@@ -21,7 +21,6 @@ import io.jans.shibboleth.model.util.TrustResult;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
-import io.jans.shibboleth.model.config.profiles.capabilities.CommonConfigurationCapable;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
@@ -240,13 +239,20 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static final Stream<Arguments> activeTrustRelationshipsOfAllNatures() {
+
+        return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship())  
+        );
+    }
+
     /**
      * Creation Tests
      */
     @Nested
     @DisplayName("Foundation & Creation -- Creation Tests")
     public class CreationTests {
-
 
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithValidValues")
@@ -272,9 +278,11 @@ public class TrustRelationshipTest {
                 .isOfNature(nature)
                 .isInDraftStatus()
                 .isVersion(Version.initial())
-                .hasNoMetadataSource()
+                .hasNoRealMetadataSource()
                 .hasNoDiscoveredEntityIds()
-                .hasNoReleasedAttributes();
+                .hasNoReleasedAttributes()
+                .hasNoActiveProfileConfiguration()
+                .hasNoActivationDiagnostics();
         
             assertThat(trustrelationship).withProfileConfiguration(ProfileType.SHIBBOLETH_SSO)
                 .usesDefaultConfiguration();
@@ -383,6 +391,7 @@ public class TrustRelationshipTest {
             assertThat(updated_tr.getVersion()).isEqualTo(tr.getVersion().next());
         }
 
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -432,7 +441,7 @@ public class TrustRelationshipTest {
 
 
             assertThat(tr).isInDraftStatus();
-            assertThat(tr).hasNoMetadataSource();
+            assertThat(tr).hasNoRealMetadataSource();
 
             TrustResult<TrustRelationship> result = null;
             TrustRelationship same_or_updated_tr = null;
@@ -507,6 +516,7 @@ public class TrustRelationshipTest {
     @DisplayName("Foundation & Creation -- Update Nullability Tests ")
     public class UpdateNullabilityTests {
         
+        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -527,7 +537,6 @@ public class TrustRelationshipTest {
             assertThat(cause.getFieldName()).isEqualTo("displayName");
         }
         
-        
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
@@ -546,7 +555,7 @@ public class TrustRelationshipTest {
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
         }
         
-        
+
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndProfileTypes")
         @DisplayName(
@@ -622,7 +631,7 @@ public class TrustRelationshipTest {
             "WHEN updateMetadataSource() is called with a no-NONE metadata source " +
             "THEN the TrustRelationship should transition to READY state AND increment version "
         )
-        public void shouldTransitionToReady_whenMetadataSourceAddedWithActiveProfile(TrustRelationship tr,  MetadataSource source) {
+        public void shouldTransitionToReady_whenRealMetadataSourceAddedWithActiveProfile(TrustRelationship tr,  MetadataSource source) {
 
             assertThat(tr).isInDraftStatus();
             assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
@@ -777,7 +786,7 @@ public class TrustRelationshipTest {
 
 
     @Nested
-    @DisplayName("Activation and Deactivation")
+    @DisplayName("State Transitions -- Activation and Deactivation")
     public class ActivationAndDeactivationTests {
 
         @ParameterizedTest
@@ -797,7 +806,7 @@ public class TrustRelationshipTest {
             TrustRelationship updated = result.getValue();
             
             assertThat(updated).isInActivatingStatus();
-            assertThat(updated).hasNoActivationDiagnosticsData();
+            assertThat(updated).hasNoActivationDiagnostics();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
 
@@ -805,13 +814,13 @@ public class TrustRelationshipTest {
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
-            "WHEN deactivate() is called " + 
+            "WHEN cancelActivation() is called " + 
             "THEN should transition to READY state and increment version "
         )
-        public void shouldTransitionToReady_whenDeactivateCalledFromActivating(TrustRelationship tr) {
+        public void shouldTransitionToReady_whenCancelActivationCalledFromActivating(TrustRelationship tr) {
 
             assertThat(tr).isInActivatingStatus();
-            TrustResult<TrustRelationship> result = tr.deactivate();
+            TrustResult<TrustRelationship> result = tr.cancelActivation();
 
             assertThat(result.isSuccess()).isTrue();
             TrustRelationship updated = result.getValue();
@@ -819,7 +828,6 @@ public class TrustRelationshipTest {
             assertThat(updated).isInReadyStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
-
 
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
@@ -844,7 +852,6 @@ public class TrustRelationshipTest {
             assertThat(cause).isNotNull();
             assertThat(cause.getFieldName()).isEqualTo("activationDiagnostics");
         }
-
 
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
@@ -884,7 +891,7 @@ public class TrustRelationshipTest {
             assertThat(tr).isInActivatingStatus();
             assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.FAILED);
 
-            TrustResult<TrustRelationship> result =tr.finalizeActivation(diagnostics);
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
 
             assertThat(result.isSuccess()).isTrue();
             TrustRelationship updated = result.getValue();
@@ -894,7 +901,25 @@ public class TrustRelationshipTest {
             assertThat(updated).isVersion(tr.getVersion().next());
         }
 
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN deactivate() is called " +
+            "THEN should transition to INACTIVE state and increment version "
+        )
+        public void shouldTransitionToInactive_whenDeactivateCalledFromActive(TrustRelationship tr) {
 
+            assertThat(tr).isInActiveStatus();
+            
+            TrustResult<TrustRelationship> result = tr.deactivate();
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInInactiveStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
     }
 
 }

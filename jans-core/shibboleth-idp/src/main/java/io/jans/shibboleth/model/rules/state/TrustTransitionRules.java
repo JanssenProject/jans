@@ -5,12 +5,13 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.jans.shibboleth.model.BuildContext;
+import io.jans.shibboleth.model.util.BuildContext;
 import io.jans.shibboleth.model.TrustRelationship;
 import io.jans.shibboleth.model.core.TrustStatus;
 import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.error.TrustTransitionError;
+import io.jans.shibboleth.model.metadata.MetadataSourceType;
 import io.jans.shibboleth.model.util.TrustResult;
 
 public final class TrustTransitionRules {
@@ -20,29 +21,52 @@ public final class TrustTransitionRules {
     public static List<TrustTransitionRule> defaultRules() {
 
         return List.of(
-
             new TrustTransitionRule(
                 TrustStatus.DRAFT,TrustStatus.READY,
-                (candidate) ->  hasRealMetadataSource(candidate) && hasAtLeastOneActiveProfileConfiguration(candidate),
-                "DRAFT -> READY : Real metadatasource and at least one active profile configuration"
+                (ctx) -> ctx.hasRealMetadataSource() && ctx.hasAnyActiveProfileConfiguration(),
+                "DRAFT --> READY: real metadatasource and any active profile configuration"
             ),
 
             new TrustTransitionRule(
                 TrustStatus.READY,TrustStatus.DRAFT,
-                (candidate) -> hasNoRealMetadataSource(candidate) || hasNoActiveProfileConfiguration(candidate),
-                "READY -> DRAFT : No real metadatasource or no active profile configuration"
+                (ctx) -> ctx.hasNoActiveProfileConfiguration(),
+                "READY --> DRAFT: no active profile configuration"
             ),
 
             new TrustTransitionRule(
-                TrustStatus.ACTIVATING,TrustStatus.ACTIVE,
-                (candidate) -> hasSuccessfulActivationDiagnosticsData(candidate),
-                "ACTIVATING -> ACTIVE: Activation diagnostics report activation was successful"
+                TrustStatus.READY,TrustStatus.DRAFT,
+                (ctx) -> ctx.hasNoRealMetadataSource(),
+                "READY --> DRAFT: no real metadatasource"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.READY,TrustStatus.ACTIVATING,
+                (ctx) -> ctx.activateCalled(),
+                "READY --> ACTIVATING: activate() called"
             ),
 
             new TrustTransitionRule(
                 TrustStatus.ACTIVATING,TrustStatus.READY,
-                (candidate) -> hasFailedActivationDiagnosticsData(candidate),
-                "ACTIVATING -> READY: Activation diagnostics report activation failed"
+                (ctx) -> ctx.cancelActivationCalled(), 
+                "ACTIVATING --> READY: cancelActivation() called"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVATING,TrustStatus.ACTIVE, 
+                (ctx) -> ctx.finalizeActivationCalled() && ctx.hasSuccessfulActivationDiagnostics(),
+                "ACTIVATING --> ACTIVE: finalizeActivation() called and successful activation diagnostics"
+            ),
+
+            new TrustTransitionRule(  
+                TrustStatus.ACTIVATING,TrustStatus.READY, 
+                (ctx) -> ctx.finalizeActivationCalled() && ctx.hasFailedActivationDiagnostics(),
+                "ACTIVATING --> READY: finalizeActivation() called and failed activation diagnostics"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVE,TrustStatus.INACTIVE,
+                (ctx) -> ctx.deactivateCalled(),
+                "ACTIVE --> INACTIVE: deactivate() called "
             )
         );
     }
@@ -57,16 +81,16 @@ public final class TrustTransitionRules {
         return Stream.concat(defaultRules().stream(),existing.stream()).collect(Collectors.toList());
     }
 
-    public static TrustResult<TrustStatus> determineNewStatus(TrustRelationship candidate) {
+    public static TrustResult<TrustStatus> determineNewStatus(BuildContext context) {
 
-        return determineNewStatus(candidate,defaultRules());
+        return determineNewStatus(context,defaultRules());
     }
 
-    public static TrustResult<TrustStatus> determineNewStatus(TrustRelationship candidate, List<TrustTransitionRule> rules) {
+    public static TrustResult<TrustStatus> determineNewStatus(BuildContext context, List<TrustTransitionRule> rules) {
         
-        if(candidate == null) {
+        if(context == null) {
 
-            return TrustResult.failure(TrustTransitionError.candidateRequired());
+            return TrustResult.failure(TrustTransitionError.contextRequired());
         }
 
         if (rules == null) {
@@ -75,41 +99,11 @@ public final class TrustTransitionRules {
         }
 
         TrustStatus nextstatus = rules.stream()
-            .filter(rule -> rule.matches(candidate))
+            .filter(rule -> rule.matches(context))
             .findFirst()
             .map(TrustTransitionRule::getTo)
-            .orElse(candidate.getStatus());
+            .orElse(context.getStatus());
     
         return TrustResult.success(nextstatus);
-    }
-
-    private static boolean hasRealMetadataSource(TrustRelationship candidate) {
-
-        return !candidate.hasNoMetadataSource();
-    }
-
-    private static boolean hasNoRealMetadataSource(TrustRelationship candidate) {
-
-        return candidate.hasNoMetadataSource();
-    }
-
-    private static boolean hasAtLeastOneActiveProfileConfiguration(TrustRelationship candidate) {
-
-        return !candidate.hasNoActiveProfileConfiguration();
-    }
-
-    private static boolean hasNoActiveProfileConfiguration(TrustRelationship candidate) {
-
-        return candidate.hasNoActiveProfileConfiguration();
-    }
-
-    private static boolean hasSuccessfulActivationDiagnosticsData(TrustRelationship candidate) {
-
-        return candidate.hasSuccessfulActivationDiagnosticsData();
-    }
-
-    private static boolean hasFailedActivationDiagnosticsData(TrustRelationship candidate) {
-
-        return candidate.hasFailedActivationDiagnosticsData();
     }
 }
