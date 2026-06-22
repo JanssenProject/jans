@@ -1,0 +1,245 @@
+name: terraform-provider
+
+# Runs the Terraform-provider acceptance tests against a live AIO (all-in-one)
+# Janssen instance. AIO is brought up the same way the integration workflow does
+# (the consul+vault+traefik+DB+AIO compose stack) but from the PREBUILT nightly
+# image -- no source build, no DigitalOcean droplet -- so it runs on a plain
+# GitHub runner. Results are uploaded the way test-integration.yml does them:
+# JUnit artifacts + a dorny PR check + a step-summary table + a gate.
+#
+# This replaces the old microk8s workflow, whose 12-leg helm matrix tested the
+# published charts (not the PR) and only dumped results to the step summary.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform-provider-jans/**"
+      - ".github/workflows/test-terraform-provider.yml"
+      - ".github/workflows/scripts/summarize_gotest.py"
+      - "automation/ci/run_aio_for_tf.sh"
+      - "automation/start_janssen_aio_demo.sh"
+      - "!**.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "terraform-provider-jans/**"
+      - ".github/workflows/test-terraform-provider.yml"
+      - ".github/workflows/scripts/summarize_gotest.py"
+      - "automation/ci/run_aio_for_tf.sh"
+      - "automation/start_janssen_aio_demo.sh"
+      - "!**.md"
+  workflow_dispatch:
+    inputs:
+      aio_image_tag:
+        description: 'AIO image to test against'
+        required: false
+        default: 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly'
+  schedule:
+    # nightly, after the nightly image is republished (build-nightly-build runs at 23:00 UTC)
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+  checks: write   # dorny/test-reporter posts the test report as a check run
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-provider:
+    if: github.repository == 'JanssenProject/jans'
+    strategy:
+      fail-fast: false
+      matrix:
+        persistence-backend: ["MYSQL", "PGSQL"]
+    runs-on: ubuntu-latest
+    env:
+      JANS_FQDN: tf-${{ github.run_id }}-${{ matrix.persistence-backend }}.jans.test
+      AIO_IMAGE_TAG: ${{ github.event.inputs.aio_image_tag || 'ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly' }}
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        # this job runs repository code (provider tests); don't leave the token on disk
+        persist-credentials: false
+
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+      with:
+        go-version-file: terraform-provider-jans/go.mod
+        cache-dependency-path: terraform-provider-jans/go.sum
+
+    - name: Map FQDN to localhost (traefik publishes :443 on the runner)
+      run: echo "127.0.0.1 ${JANS_FQDN}" | sudo tee -a /etc/hosts > /dev/null
+
+    - name: Log in to ghcr.io
+      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate test client credentials
+      id: credentials
+      run: |
+        set -euo pipefail
+        TEST_CLIENT_ID=$(uuidgen)
+        TEST_CLIENT_PW=$(openssl rand -hex 24)
+        echo "::add-mask::${TEST_CLIENT_PW}"
+        echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
+        echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
+
+    - name: Bring up AIO from the prebuilt image
+      env:
+        JANS_PERSISTENCE: ${{ matrix.persistence-backend }}
+        # Provision a known, trusted, all-scopes config-api test client (+ test data) so the
+        # provider authenticates deterministically -- no secret extraction/decoding needed.
+        TF_TEST_CLIENT_ID: ${{ steps.credentials.outputs.test_client_id }}
+        TF_TEST_CLIENT_SECRET: ${{ steps.credentials.outputs.test_client_pw }}
+      run: bash automation/ci/run_aio_for_tf.sh
+
+    - name: Install gotestsum
+      # Use the prebuilt binary: `go install` builds gotestsum from source, which pulls an
+      # older golang.org/x/tools that fails to compile under the runner's Go toolchain.
+      run: |
+        set -euo pipefail
+        GTS_VERSION=1.12.0
+        base="https://github.com/gotestyourself/gotestsum/releases/download/v${GTS_VERSION}"
+        tgz="gotestsum_${GTS_VERSION}_linux_amd64.tar.gz"
+        curl -fsSL -o "/tmp/${tgz}" "${base}/${tgz}"
+        curl -fsSL -o /tmp/gotestsum_checksums.txt "${base}/gotestsum-${GTS_VERSION}-checksums.txt"
+        ( cd /tmp && awk -v f="$tgz" '$2==f' gotestsum_checksums.txt | sha256sum -c - )
+        sudo tar -xzf "/tmp/${tgz}" -C /usr/local/bin gotestsum
+        gotestsum --version
+
+    - name: Install Terraform CLI
+      # The acceptance framework otherwise auto-downloads Terraform and verifies it against
+      # HashiCorp's release signing key, which has expired. Install a fixed version directly.
+      run: |
+        set -euo pipefail
+        TF_VERSION=1.9.8
+        base="https://releases.hashicorp.com/terraform/${TF_VERSION}"
+        zip="terraform_${TF_VERSION}_linux_amd64.zip"
+        curl -fsSL -o "/tmp/${zip}" "${base}/${zip}"
+        curl -fsSL -o /tmp/terraform_SHA256SUMS "${base}/terraform_${TF_VERSION}_SHA256SUMS"
+        # verify the download against HashiCorp's published checksum before installing to a privileged path
+        ( cd /tmp && awk -v f="$zip" '$2==f' terraform_SHA256SUMS | sha256sum -c - )
+        sudo unzip -o "/tmp/${zip}" -d /usr/local/bin
+        terraform version
+        echo "TF_ACC_TERRAFORM_PATH=$(command -v terraform)" >> "$GITHUB_ENV"
+
+    - name: Resolve config-api credentials
+      # The test client secret's at-rest encoding is ambiguous (plaintext vs base64 vs
+      # salt-obscured), so resolve empirically: try each candidate against the token endpoint
+      # exactly as the provider does (HTTP Basic + client_credentials) and export the winner.
+      run: |
+        set -uo pipefail
+        TOKEN_URL="https://${JANS_FQDN}/jans-auth/restv1/token"
+        SCOPE="https://jans.io/oauth/config/scopes.readonly"
+        TCID=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().config.get("test_client_id") or "")' 2>/dev/null || true)
+        TC_RAW=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("test_client_pw") or "")' 2>/dev/null || true)
+        TC_ENC=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("test_client_encoded_pw") or "")' 2>/dev/null || true)
+        SALT=$(docker exec jans python3 -c 'from jans.pycloudlib import get_manager; print(get_manager().secret.get("encoded_salt") or "")' 2>/dev/null || true)
+        TC_B64=$(printf '%s' "$TC_RAW" | base64 -d 2>/dev/null || true)
+        TC_SDEC=$(docker exec jans python3 -c "from jans.pycloudlib.utils import decode_text; print(decode_text('${TC_ENC}','${SALT}').decode())" 2>/dev/null || true)
+        try() {
+          [ -n "$1" ] && [ -n "$2" ] || return 1
+          local code
+          code=$(curl -sk -o /dev/null -w '%{http_code}' -u "$1:$2" \
+            --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=${SCOPE}" "$TOKEN_URL")
+          [ "$code" = "200" ]
+        }
+        CANDS=(
+          "${{ steps.credentials.outputs.test_client_id }}|${{ steps.credentials.outputs.test_client_pw }}|provisioned"
+          "${TCID}|${TC_RAW}|test_client_pw (raw)"
+          "${TCID}|${TC_B64}|test_client_pw (base64-decoded)"
+          "${TCID}|${TC_SDEC}|test_client_encoded_pw (salt-decoded)"
+        )
+        for c in "${CANDS[@]}"; do
+          IFS='|' read -r id sec label <<<"$c"
+          if try "$id" "$sec"; then
+            echo "config-api auth OK via: ${label}"
+            echo "::add-mask::${sec}"
+            echo "JANS_CLIENT_ID=${id}" >> "$GITHUB_ENV"
+            echo "JANS_CLIENT_SECRET=${sec}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "auth failed via: ${label}"
+        done
+        echo "::error::no working config-api credentials found"
+        exit 1
+
+    - name: Run Terraform provider acceptance tests
+      id: tf_tests
+      continue-on-error: true
+      working-directory: terraform-provider-jans
+      env:
+        TF_ACC: "1"
+        JANS_URL: https://${{ env.JANS_FQDN }}
+        JANS_INSECURE_CLIENT: "true"
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/test-reports"
+        gotestsum \
+          --junitfile "${GITHUB_WORKSPACE}/test-reports/TEST-terraform-${{ matrix.persistence-backend }}.xml" \
+          --format testname \
+          -- ./... -timeout 30m
+
+    - name: Collect AIO logs
+      if: always()
+      run: |
+        mkdir -p aio-logs
+        docker logs jans > aio-logs/aio-container.log 2>&1 || true
+        docker logs traefik > aio-logs/traefik.log 2>&1 || true
+        docker exec jans supervisorctl -c /app/conf/supervisord.conf status > aio-logs/supervisord-status.txt 2>&1 || true
+        docker compose -f automation/compose.yaml ps > aio-logs/compose-ps.txt 2>&1 || true
+        # per-service jetty logs (FILE/TRACE output, where config-api request errors land)
+        for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
+          docker cp "jans:/opt/jans/jetty/$s/logs" "aio-logs/$s" 2>/dev/null || true
+        done
+
+    - name: Summarise results
+      if: always()
+      env:
+        MATRIX: ${{ matrix.persistence-backend }}
+      run: python3 .github/workflows/scripts/summarize_gotest.py >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: test-reports-${{ matrix.persistence-backend }}
+        path: test-reports/
+        if-no-files-found: warn
+        retention-days: 5
+
+    - name: Upload AIO logs
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: aio-logs-${{ matrix.persistence-backend }}
+        path: aio-logs/
+        if-no-files-found: warn
+        retention-days: 5
+
+    - name: Publish test report (PR check)
+      if: always()
+      continue-on-error: true
+      uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+      with:
+        name: terraform-provider (${{ matrix.persistence-backend }})
+        path: "test-reports/*.xml"
+        reporter: java-junit
+        fail-on-error: false
+
+    - name: Gate on test outcome
+      if: always()
+      run: python3 .github/workflows/scripts/summarize_gotest.py --gate
