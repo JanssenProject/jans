@@ -53,10 +53,6 @@ on:
         description: 'SCIM'
         type: boolean
         default: false
-      monolith:
-        description: 'Monolith'
-        type: boolean
-        default: false
       loadtesting_jmeter:
         description: 'Load Testing JMeter'
         type: boolean
@@ -110,6 +106,7 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
        (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v')))
     permissions:
+      actions: read   # all-in-one polls this run's jobs API to wait for its base images
       packages: write
       id-token: write
       attestations: write
@@ -120,7 +117,7 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
+        docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -146,7 +143,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
-          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa cedarling-flask-sidecar cedarling-opa"
+          ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa cedarling-flask-sidecar cedarling-opa"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -159,7 +156,6 @@ jobs:
               [[ "${{ inputs.fido2 }}" == "true" ]] && SELECTED="$SELECTED fido2"
               [[ "${{ inputs.persistence_loader }}" == "true" ]] && SELECTED="$SELECTED persistence-loader"
               [[ "${{ inputs.scim }}" == "true" ]] && SELECTED="$SELECTED scim"
-              [[ "${{ inputs.monolith }}" == "true" ]] && SELECTED="$SELECTED monolith"
               [[ "${{ inputs.loadtesting_jmeter }}" == "true" ]] && SELECTED="$SELECTED loadtesting-jmeter"
               [[ "${{ inputs.link }}" == "true" ]] && SELECTED="$SELECTED link"
               [[ "${{ inputs.casa }}" == "true" ]] && SELECTED="$SELECTED casa"
@@ -185,8 +181,9 @@ jobs:
               # PR: get changed files via GitHub API
               DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
             elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-              # Chained: the nightly/release publish completed -> build all images
-              DIRECTORIES_CHANGED="$ALL_SERVICES"
+              # Chained nightly/release publish -> build all images. all-in-one is matrix-
+              # only (absent from ALL_SERVICES), so add it or the chain silently skips it.
+              DIRECTORIES_CHANGED="$ALL_SERVICES docker-jans-all-in-one"
             else
               # Direct branch push: use git diff to find which docker dirs changed.
               # Falls back to ALL_SERVICES if before-SHA is unavailable (initial push).
@@ -233,6 +230,8 @@ jobs:
       - name: Prepare
         if: steps.build_docker_image.outputs.build
         id: prep
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
@@ -286,8 +285,9 @@ jobs:
               echo "Waiting for docker ($img) to complete..."
               CONCLUSION=""
               for attempt in $(seq 1 60); do
-                CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-                  --paginate --jq ".jobs[] | select(.name == \"docker ($img)\") | .conclusion" 2>/dev/null || echo "")
+                # filter=all + any-success: a re-run's earlier attempt may already hold the image.
+                CONCLUSION=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?filter=all&per_page=100" \
+                  --jq "[.jobs[] | select(.name == \"docker ($img)\")] | if (map(.conclusion) | any(. == \"success\")) then \"success\" elif (map(.conclusion) | any(. == \"skipped\")) then \"skipped\" else (max_by(.run_attempt).conclusion // \"\") end" || echo "")
                 if [[ "$CONCLUSION" == "success" || "$CONCLUSION" == "skipped" ]]; then
                   echo "  docker ($img): $CONCLUSION"; break
                 elif [[ "$CONCLUSION" == "failure" || "$CONCLUSION" == "cancelled" || "$CONCLUSION" == "timed_out" ]]; then
@@ -385,6 +385,8 @@ jobs:
           # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
           # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
 
+          build-args: |
+            JANS_SOURCE_VERSION=${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
           platforms: ${{ steps.prep.outputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}

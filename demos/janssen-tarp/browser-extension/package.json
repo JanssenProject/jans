@@ -2,13 +2,13 @@
   "name": "janssen-tarp",
   "version": "1.15.0",
   "description": "Relying Party tool in form of a Chrome Extension.",
-  "main": "index.js",
   "license": "Apache",
   "scripts": {
     "watch": "webpack --watch --progress --config webpack.dev.js",
     "build": "webpack --mode=production --progress --config webpack.prod.js",
     "build-dev": "webpack --mode=development --progress --config webpack.dev.js",
-    "pack": "node pack.js"
+    "pack": "node pack.js",
+    "knip": "knip"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
@@ -20,6 +20,7 @@
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.4",
     "html-webpack-plugin": "^5.5.0",
+    "knip": "^6.17.1",
     "postcss": "^8.5.12",
     "postcss-loader": "^8.2.1",
     "react": "^19.2.5",
@@ -33,24 +34,17 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@google/generative-ai": "^0.24.1",
+    "@anthropic-ai/sdk": "^0.104.1",
     "@janssenproject/cedarling_wasm": "0.0.404",
     "@modelcontextprotocol/sdk": "^1.23.0",
     "adm-zip": "^0.5.10",
     "axios": "^1.4.0",
-    "date-fns": "^4.1.0",
-    "dayjs": "^1.11.19",
     "json-edit-react": "^1.29.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^1.11.0",
     "moment": "^2.30.1",
     "openai": "^6.9.1",
     "qs": "^6.11.2",
-    "react-router-dom": "^7.11.0",
-    "react-select": "^5.7.3",
-    "styled-components": "^6.1.0",
     "uuid": "^14.0.0"
   }
 }
