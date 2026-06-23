@@ -44,11 +44,31 @@ mod tests {
     #[test]
     fn test_new() {
         let config: Config = Config::new();
-        assert_eq!(config.max_items, 10_000);
-        assert_eq!(config.max_item_size, 500_000);
-        assert_eq!(config.max_ttl, Duration::seconds(60 * 60));
-        assert_eq!(config.default_ttl, Duration::seconds(5 * 60));
-        assert!(config.auto_clear_expired);
-        assert!(!config.earliest_expiration_eviction);
+        assert_eq!(
+            config.max_items, 10_000,
+            "default max_items should be 10_000"
+        );
+        assert_eq!(
+            config.max_item_size, 500_000,
+            "default max_item_size should be 500_000"
+        );
+        assert_eq!(
+            config.max_ttl,
+            Duration::seconds(60 * 60),
+            "default max_ttl should be 1 hour"
+        );
+        assert_eq!(
+            config.default_ttl,
+            Duration::seconds(5 * 60),
+            "default default_ttl should be 5 minutes"
+        );
+        assert!(
+            config.auto_clear_expired,
+            "auto_clear_expired should default to true"
+        );
+        assert!(
+            !config.earliest_expiration_eviction,
+            "earliest_expiration_eviction should default to false"
+        );
     }
 }

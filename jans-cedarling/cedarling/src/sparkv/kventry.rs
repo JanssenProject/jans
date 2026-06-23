@@ -4,8 +4,8 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
-use chrono::prelude::*;
 use chrono::Duration;
+use chrono::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct KvEntry<T> {
@@ -32,9 +32,18 @@ mod tests {
     #[test]
     fn test_new() {
         let item = KvEntry::<String>::new("key", "value".into(), Duration::seconds(10));
-        assert_eq!(item.key, "key");
-        assert_eq!(item.value, "value");
-        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
-        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
+        assert_eq!(item.key, "key", "KvEntry key should match the provided key");
+        assert_eq!(
+            item.value, "value",
+            "KvEntry value should match the provided value"
+        );
+        assert!(
+            item.expired_at > Utc::now() + Duration::seconds(9),
+            "expired_at should be greater than now + 9s"
+        );
+        assert!(
+            item.expired_at <= Utc::now() + Duration::seconds(10),
+            "expired_at should be <= now + 10s"
+        );
     }
 }

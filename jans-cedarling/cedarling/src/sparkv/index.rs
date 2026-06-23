@@ -97,7 +97,11 @@ mod tests {
         index.add_key_value(index_key.clone(), value_key.clone());
 
         let values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
-        assert_eq!(values, vec![&value_key]);
+        assert_eq!(
+            values,
+            vec![&value_key],
+            "index should return the added value_key"
+        );
     }
 
     #[test]
@@ -112,7 +116,11 @@ mod tests {
 
         let mut values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
         values.sort();
-        assert_eq!(values, vec![&value_key1, &value_key2]);
+        assert_eq!(
+            values,
+            vec![&value_key1, &value_key2],
+            "index should return all added value_keys"
+        );
     }
 
     #[test]
@@ -125,7 +133,10 @@ mod tests {
         index.remove_value_key(&value_key);
 
         let values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
-        assert!(values.is_empty());
+        assert!(
+            values.is_empty(),
+            "after removing value_key, index should have no values"
+        );
     }
 
     #[test]
@@ -137,7 +148,13 @@ mod tests {
         index.add_key_value(index_key.clone(), value_key.clone());
         index.clear();
 
-        assert!(index.buckets.is_empty());
-        assert!(index.index_tracker.is_empty());
+        assert!(
+            index.buckets.is_empty(),
+            "after clear, buckets should be empty"
+        );
+        assert!(
+            index.index_tracker.is_empty(),
+            "after clear, index_tracker should be empty"
+        );
     }
 }

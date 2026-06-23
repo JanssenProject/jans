@@ -94,7 +94,10 @@ fn simple_serde_json() {
     let json = first_json();
     sparkv.set("first", json.clone(), &[]).unwrap();
     let stored_first = sparkv.get("first").unwrap();
-    assert_eq!(&json, stored_first);
+    assert_eq!(
+        &json, stored_first,
+        "stored json value should match original"
+    );
 }
 
 #[test]
@@ -109,7 +112,11 @@ fn type_serde_json() {
 
     // now make sure it's actually stored as the value, not as a String
     let kv = sparkv.get_item("first").unwrap();
-    assert_eq!(kv.value.type_id(), TypeId::of::<serde_json::Value>());
+    assert_eq!(
+        kv.value.type_id(),
+        TypeId::of::<serde_json::Value>(),
+        "stored value should be serde_json::Value type, not String"
+    );
 }
 
 #[test]
@@ -123,8 +130,13 @@ fn fails_size_calculator() {
     let mut sparkv =
         SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
 
-    let should_be_error = sparkv.set("first", json.clone(), &[]);
-    assert_eq!(should_be_error, Err(super::Error::ItemSizeExceeded));
+    let error = sparkv
+        .set("first", json.clone(), &[])
+        .expect_err("setting a value larger than max_item_size should return ItemSizeExceeded");
+    assert!(
+        matches!(error, super::Error::ItemSizeExceeded),
+        "expected ItemSizeExceeded, got {error:?}"
+    );
 }
 
 #[test]
@@ -136,13 +148,15 @@ fn two_json_items() {
     let fj = sparkv.get("first").unwrap();
     assert_eq!(
         fj.pointer("/name").unwrap(),
-        &serde_json::Value::String("first_json".into())
+        &serde_json::Value::String("first_json".into()),
+        "first item name should be first_json"
     );
 
     let sj = sparkv.get("second").unwrap();
     assert_eq!(
         sj.pointer("/name").unwrap(),
-        &serde_json::Value::String("second_json".into())
+        &serde_json::Value::String("second_json".into()),
+        "second item name should be second_json"
     );
 }
 
@@ -154,7 +168,11 @@ fn drain_all_json_items() {
 
     let all_items = sparkv.drain();
     let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
-    assert_eq!(all_values, vec![first_json(), second_json()]);
+    assert_eq!(
+        all_values,
+        vec![first_json(), second_json()],
+        "drain should return all items in insertion order"
+    );
 
     assert!(sparkv.is_empty(), "sparkv not empty");
 }
@@ -170,7 +188,8 @@ fn rc_json_items() {
     let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
     assert_eq!(
         all_values,
-        vec![Rc::new(first_json()), Rc::new(second_json())]
+        vec![Rc::new(first_json()), Rc::new(second_json())],
+        "drain should return all Rc items in insertion order"
     );
 
     assert!(sparkv.is_empty(), "sparkv not empty");
