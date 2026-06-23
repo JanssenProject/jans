@@ -84,4 +84,20 @@ class PackedAttestationProcessorAaguidExtensionTest {
 
         assertDoesNotThrow(() -> packedAttestationProcessor.verifyAaguidExtension(attestationCertificate, authData));
     }
+
+    @Test
+    void verifyAaguidExtension_ifExtensionMalformed_rejected() {
+        X509Certificate attestationCertificate = mock(X509Certificate.class);
+        AuthData authData = mock(AuthData.class);
+        // A DER INTEGER (not an OCTET STRING) is not a valid id-fido-gen-ce-aaguid extension value and
+        // must fail to decode.
+        byte[] notAnOctetString = {0x02, 0x01, 0x05};
+        when(attestationCertificate.getExtensionValue(FIDO_AAGUID_OID)).thenReturn(notAnOctetString);
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("packed_error").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> packedAttestationProcessor.verifyAaguidExtension(attestationCertificate, authData));
+        assertEquals(400, ex.getResponse().getStatus());
+    }
 }

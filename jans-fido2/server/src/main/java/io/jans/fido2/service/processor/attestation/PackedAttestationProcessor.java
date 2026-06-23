@@ -154,6 +154,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 				byte[] inner = ASN1OctetString.getInstance(ext).getOctets();
 				aaguidInCert = ASN1OctetString.getInstance(inner).getOctets();
 			} catch (RuntimeException e) {
+				log.error("Malformed id-fido-gen-ce-aaguid extension in packed attestation certificate", e);
 				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
 						"Malformed id-fido-gen-ce-aaguid extension in packed attestation certificate");
 			}
