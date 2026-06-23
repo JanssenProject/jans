@@ -2,4 +2,8 @@
 # RUSTSEC-2023-0071: Marvin Attack in rsa 0.9.10 (timing side-channel)
 # No fixed version available. Accepted risk: timing attack complexity,
 # used only for JWT signing/verification at auth time.
-ignore = ["RUSTSEC-2023-0071"]
+#
+# RUSTSEC-2021-0127: serde_cbor is unmaintained.
+# Transitively pulled in by pgrx 0.18 (cedarling_pg). No upstream fix yet;
+# pgrx has not migrated to ciborium/minicbor. Mirrored in deny.toml.
+ignore = ["RUSTSEC-2023-0071", "RUSTSEC-2021-0127"]
