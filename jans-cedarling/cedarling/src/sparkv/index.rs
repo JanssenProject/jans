@@ -65,15 +65,19 @@ impl HashMapIndex {
 
     /// Remove `value_key` from the index storage
     pub(super) fn remove_value_key(&mut self, value_key: &ValueKey) {
-        // remove value kays from all buckets
         if let Some(index_keys) = self.index_tracker.get(value_key) {
-            for index_key in index_keys {
-                if let Some(bucket) = self.buckets.get_mut(index_key) {
+            for index_key in index_keys.iter() {
+                let empty = if let Some(bucket) = self.buckets.get_mut(index_key) {
                     bucket.remove(value_key);
+                    bucket.is_empty()
+                } else {
+                    false
+                };
+                if empty {
+                    self.buckets.remove(index_key);
                 }
             }
         }
-        // and remove from tracker
         self.index_tracker.remove(value_key);
     }
 
