@@ -3,17 +3,17 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::sparkv::{Config, SparKV};
 use chrono::{DateTime, Duration, Utc};
-use sparkv::{Config, SparKV};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
+use crate::LogLevel;
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
-use crate::LogLevel;
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
@@ -272,7 +272,7 @@ impl IndexKey {
 mod tests {
     use super::*;
     use crate::jwt::token::TokenClaims;
-    use serde_json::{json, Value};
+    use serde_json::{Value, json};
     use std::collections::HashMap;
 
     fn token_cache(max_ttl: usize) -> TokenCache {

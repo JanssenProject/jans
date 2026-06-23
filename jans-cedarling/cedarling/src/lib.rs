@@ -25,7 +25,9 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
-mod sparkv;
+// is reexported in hidden bindings module
+#[doc(hidden)]
+pub mod sparkv;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(feature = "blocking")]
@@ -87,6 +89,7 @@ pub mod bindings {
     };
     pub use crate::common::policy_store::PolicyStore;
     pub use crate::http::spawn_task;
+    pub use crate::sparkv;
     pub use serde_json;
     pub use serde_yaml_ng;
 }
