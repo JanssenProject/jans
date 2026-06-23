@@ -108,7 +108,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
         // if attestation mode is enabled in the global config
-        if(appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false)
+        if (!appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()))
         {
         	if (attStmt.hasNonNull("x5c")) {
 
@@ -142,8 +142,6 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         credIdAndCounters.setSignatureAlgorithm(alg);
-        //TODO: this should be set from authenticator data and not mds
-        // credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 
 	/**

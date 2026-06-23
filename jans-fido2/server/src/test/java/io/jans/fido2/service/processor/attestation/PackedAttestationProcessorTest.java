@@ -92,7 +92,7 @@ class PackedAttestationProcessorTest {
     void getAttestationFormat_valid_packed() {
         String fmt = packedAttestationProcessor.getAttestationFormat().getFmt();
         assertNotNull(fmt);
-        assertEquals(fmt, "packed");
+        assertEquals("packed", fmt);
     }
 
     @Test
@@ -124,8 +124,8 @@ class PackedAttestationProcessorTest {
         // Verify the exception and response details
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
@@ -160,8 +160,8 @@ class PackedAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
@@ -205,8 +205,8 @@ class PackedAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
@@ -296,8 +296,8 @@ class PackedAttestationProcessorTest {
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        assertEquals(400, res.getResponse().getStatus());
+        assertEquals("test exception", res.getResponse().getEntity());
 
         verify(appConfiguration).getFido2Configuration();
         verify(fido2Configuration).getAttestationMode();
