@@ -61,18 +61,20 @@ mod tests {
 
     #[test]
     fn test_new() {
+        let before = Utc::now();
         let item = ExpEntry::new("key", Duration::seconds(10));
+        let after = Utc::now();
         assert_eq!(
             item.key, "key",
             "ExpEntry key should match the provided key"
         );
         assert!(
-            item.expired_at > Utc::now() + Duration::seconds(9),
-            "expired_at should be greater than now + 9s"
+            item.expired_at >= before + Duration::seconds(10),
+            "expired_at should be at least before + 10s"
         );
         assert!(
-            item.expired_at <= Utc::now() + Duration::seconds(10),
-            "expired_at should be <= now + 10s"
+            item.expired_at <= after + Duration::seconds(10),
+            "expired_at should be at most after + 10s"
         );
     }
 
