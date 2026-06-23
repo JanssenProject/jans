@@ -36,7 +36,7 @@ pub struct SparKV<T> {
     size_calculator: Option<fn(&T) -> usize>,
 }
 
-/// See the SparKV::iter function
+/// See the [`SparKV::iter`] function
 pub struct Iter<'a, T: 'a> {
     btree_value_iter: btree_map::Values<'a, String, KvEntry<T>>,
 }
@@ -55,7 +55,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
-/// See the SparKV::drain function
+/// See the [`SparKV::drain`] function
 pub struct DrainIter<T> {
     value_iter: btree_map::IntoValues<String, KvEntry<T>>,
 }
@@ -75,11 +75,13 @@ impl<T> Iterator for DrainIter<T> {
 }
 
 impl<T> SparKV<T> {
+    #[must_use]
     pub fn new() -> Self {
         let config = Config::new();
         SparKV::with_config(config)
     }
 
+    #[must_use]
     pub fn with_config(config: Config) -> Self {
         SparKV {
             config,
@@ -91,7 +93,8 @@ impl<T> SparKV<T> {
         }
     }
 
-    /// Provide optional size function. See SparKV.size_calculator comments.
+    /// Provide optional size function. See [`SparKV::size_calculator`] comments.
+    #[must_use]
     pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
         SparKV {
             config,
@@ -127,7 +130,7 @@ impl<T> SparKV<T> {
             } else {
                 return Err(err);
             }
-        };
+        }
 
         let item: KvEntry<T> = KvEntry::new(key, value, ttl);
         let exp_item: ExpEntry = ExpEntry::from_kv_entry(&item);
@@ -143,25 +146,30 @@ impl<T> SparKV<T> {
         Ok(())
     }
 
+    #[must_use]
     pub fn get(&self, key: &str) -> Option<&T> {
         Some(&self.get_item(key)?.value)
     }
 
     // Only returns if it is not yet expired
+    #[must_use]
     pub fn get_item(&self, key: &str) -> Option<&KvEntry<T>> {
         let item = self.data.get(key)?;
         (item.expired_at > Utc::now()).then_some(item)
     }
 
+    #[must_use]
     pub fn get_oldest_key_by_expiration(&self) -> Option<&ExpEntry> {
         self.expiries.peek()
     }
 
+    #[must_use]
     pub fn get_keys(&self) -> Vec<String> {
         self.data.keys().cloned().collect()
     }
 
     /// Return an iterator of (key,value) : (&String,&T).
+    #[must_use]
     pub fn iter(&self) -> Iter<'_, T> {
         Iter {
             btree_value_iter: self.data.values(),
@@ -189,27 +197,31 @@ impl<T> SparKV<T> {
         Some(item.value)
     }
 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.data.len()
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
 
+    #[must_use]
     pub fn contains_key(&self, key: &str) -> bool {
         self.data.contains_key(key)
     }
 
-    /// Removes only last element from expires BinaryHeap, even if value is not expired.
-    /// Is used when [Config::earliest_expiration_eviction] is true
+    /// Removes only last element from expires `BinaryHeap`, even if value is not expired.
+    /// Is used when [`Config::earliest_expiration_eviction`] is true
     fn remove_last(&mut self) {
         while let Some(exp_item) = self.expiries.pop() {
-            if let Some(kv_entry) = self.data.get(&exp_item.key) {
-                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
-                    self.pop(&exp_item.key);
-                    return;
-                }
+            if let Some(kv_entry) = self.data.get(&exp_item.key)
+                && kv_entry.key == exp_item.key
+                && kv_entry.expired_at == exp_item.expired_at
+            {
+                self.pop(&exp_item.key);
+                return;
             }
         }
     }
@@ -312,10 +324,10 @@ impl<T> SparKV<T> {
             return Ok(());
         }
 
-        if let Some(calc) = self.size_calculator {
-            if calc(value) > self.config.max_item_size {
-                return Err(Error::ItemSizeExceeded);
-            }
+        if let Some(calc) = self.size_calculator
+            && calc(value) > self.config.max_item_size
+        {
+            return Err(Error::ItemSizeExceeded);
         }
         Ok(())
     }
@@ -325,6 +337,15 @@ impl<T> SparKV<T> {
             return Err(Error::TTLTooLong);
         }
         Ok(())
+    }
+}
+
+impl<'a, T> IntoIterator for &'a SparKV<T> {
+    type Item = (&'a String, &'a T);
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 

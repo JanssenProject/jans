@@ -18,6 +18,7 @@ pub struct Config {
 }
 
 impl Config {
+    #[must_use]
     pub fn new() -> Self {
         Config {
             max_items: 10_000,
@@ -48,6 +49,6 @@ mod tests {
         assert_eq!(config.max_ttl, Duration::seconds(60 * 60));
         assert_eq!(config.default_ttl, Duration::seconds(5 * 60));
         assert!(config.auto_clear_expired);
-        assert!(!config.earliest_expiration_eviction)
+        assert!(!config.earliest_expiration_eviction);
     }
 }

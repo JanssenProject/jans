@@ -32,6 +32,7 @@ impl ExpEntry {
         }
     }
 
+    #[must_use]
     pub fn is_expired(&self) -> bool {
         self.expired_at < Utc::now()
     }

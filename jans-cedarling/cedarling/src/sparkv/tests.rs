@@ -223,7 +223,7 @@ fn test_capacity_disabled() {
     // Should be able to add unlimited items
     for i in 0..1000 {
         sparkv
-            .set(&format!("key{}", i), format!("value{}", i), &[])
+            .set(&format!("key{i}"), format!("value{i}"), &[])
             .unwrap();
     }
     assert_eq!(sparkv.len(), 1000);
