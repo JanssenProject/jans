@@ -110,6 +110,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	}
 	p.config.Evaluation_Logic, err = normalizeEvaluationMode(p.config.Evaluation_Logic)
 	if err != nil {
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
 	p.logger.Info("Initializing Cedarling")

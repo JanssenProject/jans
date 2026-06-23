@@ -1,6 +1,10 @@
 # OPA Cedarling Plugin
 
-A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin also provides the [AuthZen](https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api) access evaluation functionality.
+A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin also provides the [AuthZen](https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api) access evaluation functionality. The plugin provides these endpoints:
+
+- `/.well-known/authzen-configuration` - AuthZen metadata endpoint
+- `/access/v1/evaluation` - Access evaluation endpoint
+- `/access/v1/evaluations` - Multiple access evaluation endpoint
 
 ## Building
 
@@ -85,5 +89,5 @@ docker build . -t opa-cedarling:latest
 docker run -p 8181:8181 opa-cedarling:latest
 ```
 
-## Demo
-The `demo` folder provides a set of defaults to demonstrate the plugin. The configuration file contains a bootstrap for Cedarling where the policy store is configured for unsigned authorization. The `rego` folder contains two example Rego files, one for unsigned and one for multi issuer authorization. Since the policy store does not contain any trusted issuers, multi-issuer authorization is not available with this policy store.
+## Examples
+The `demo` folder provides a set of defaults to demonstrate the plugin. The configuration file contains a bootstrap for Cedarling where an [example policy store](https://github.com/JanssenProject/CedarlingQuickstart/tree/main/tarpUnsignedDemo) is configured for unsigned authorization. If instead multi-issuer authorization is required for AuthZen, a policy store with trusted issuers must be provided. The `rego` folder contains two example Rego files, one for unsigned and one for multi-issuer authorization.
