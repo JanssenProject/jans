@@ -46,7 +46,7 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant OPA
-    Client->>OPA: POST /v1/access/evaluation {"subject": {...}, "action": {...}, "resource": {...}}
+    Client->>OPA: POST /access/v1/evaluation {"subject": {...}, "action": {...}, "resource": {...}}
     OPA->>Client: {"decision": true}
 ```
 
