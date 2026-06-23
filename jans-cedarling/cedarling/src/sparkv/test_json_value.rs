@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::Config;
-use crate::SparKV;
+use super::Config;
+use super::SparKV;
 
 #[cfg(test)]
 fn json_value_size(value: &serde_json::Value) -> usize {
@@ -123,7 +123,7 @@ fn fails_size_calculator() {
         SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
 
     let should_be_error = sparkv.set("first", json.clone(), &[]);
-    assert_eq!(should_be_error, Err(crate::Error::ItemSizeExceeded));
+    assert_eq!(should_be_error, Err(super::Error::ItemSizeExceeded));
 }
 
 #[test]

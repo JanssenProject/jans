@@ -25,6 +25,7 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+mod sparkv;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(feature = "blocking")]
@@ -55,10 +56,10 @@ use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
-use init::policy_store::{load_policy_store, LoadedPolicyStore};
+use init::policy_store::{LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
-    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
-    RefreshWorkerSeed, WorkerContext,
+    AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
+    spawn_refresh_worker,
 };
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -311,7 +312,9 @@ impl Cedarling {
 
 impl TrustedIssuerLoadingInfo for Cedarling {
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.authz.load().is_trusted_issuer_loaded_by_name(issuer_id)
+        self.authz
+            .load()
+            .is_trusted_issuer_loaded_by_name(issuer_id)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -360,15 +363,21 @@ async fn perform_bootstrap_load(
     let (http_client, loaded) = raw_load
         .inspect(|_| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, None))
-                    .set_message("configuration parsed successfully".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message("configuration parsed successfully".to_string()),
             );
         })
         .inspect_err(|err| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_error(err.to_string())
-                    .set_message("configuration parsed with error".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_error(err.to_string())
+                .set_message("configuration parsed with error".to_string()),
             );
         })?;
 

@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
-use std::collections::{btree_map, BTreeMap, BinaryHeap};
+use std::collections::{BTreeMap, BinaryHeap, btree_map};
 
 mod config;
 mod error;
@@ -18,8 +18,8 @@ pub use expentry::ExpEntry;
 use index::HashMapIndex;
 pub use kventry::KvEntry;
 
-use chrono::prelude::*;
 use chrono::Duration;
+use chrono::prelude::*;
 
 pub struct SparKV<T> {
     pub config: Config,

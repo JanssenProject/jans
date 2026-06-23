@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::*;
+use super::*;
 
 #[test]
 fn test_sparkv_config() {
@@ -106,7 +106,7 @@ fn memsize_item_capacity_exceeded() {
     let mut sparkv = SparKV::<String>::with_config(config);
 
     let error = sparkv.set("blue", value, &[]);
-    assert_eq!(error, Err(crate::Error::ItemSizeExceeded));
+    assert_eq!(error, Err(Error::ItemSizeExceeded));
 }
 
 #[test]
@@ -117,7 +117,7 @@ fn custom_item_capacity_exceeded() {
 
     assert_eq!(Ok(()), sparkv.set("short", "value", &[]));
     assert_eq!(
-        Err(crate::Error::ItemSizeExceeded),
+        Err(Error::ItemSizeExceeded),
         sparkv.set("long", "This is a value that exceeds 20 characters", &[])
     );
 }
