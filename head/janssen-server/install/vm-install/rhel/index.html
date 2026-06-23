@@ -2474,7 +2474,7 @@
 <li>Install EPEL and mod-auth-openidc as dependencies</li>
 </ul>
 <div class="highlight"><pre><span></span><code>sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 </code></pre></div>
 <ul>
 <li>Download the release package from the GitHub Janssen Project
@@ -2511,12 +2511,11 @@ sudo yum -y module enable mod_auth_openidc
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
-sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
-</code></pre></div>
+<p><code>bash title="Command"
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' &gt;jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum &amp;&amp; sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum</code></p>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
-</code></pre></div>
+<p><code>text
+  jans-replace-janssen-version-stable.el9.x86_64.rpm: OK</code></p>
 </li>
 <li>
 <p>Install the package</p>
@@ -2529,7 +2528,7 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-
 <li>Install EPEL and mod-auth-openidc as dependencies</li>
 </ul>
 <div class="highlight"><pre><span></span><code>sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 </code></pre></div>
 <ul>
 <li>Download the release package from the GitHub Janssen Project
@@ -2566,8 +2565,7 @@ sudo yum -y module enable mod_auth_openidc
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
-sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
@@ -2704,7 +2702,7 @@ the removal of all the unused dependencies.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 11, 2026 07:17:31 UTC"><span class="timeago" datetime="2026-05-11T07:17:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 11, 2026 07:17:31 UTC">2026-05-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 23, 2026 07:32:16 UTC"><span class="timeago" datetime="2026-06-23T07:32:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 23, 2026 07:32:16 UTC">2026-06-23</span>
   </span>
 
     
