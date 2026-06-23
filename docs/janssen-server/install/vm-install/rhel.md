@@ -79,7 +79,7 @@ sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 
 ```
 sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 ```
 
 - Download the release package from the GitHub Janssen Project
