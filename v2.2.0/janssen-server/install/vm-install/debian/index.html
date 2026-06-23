@@ -2452,7 +2452,7 @@
 <li>
 <p>Download the release package from the GitHub Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.2.0/jans_2.2.0~debian13_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.2.0/jans_2.2.0-stable.debian13_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 </li>
 <li>
@@ -2478,7 +2478,7 @@
 <span class="w">  </span>--bundle<span class="w"> </span>jans-debian13-2.2.0-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>jans_2.2.0~debian13_amd64.deb
+<span class="w">  </span>jans_2.2.0-stable.debian13_amd64.deb
 </code></pre></div>
 <p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
@@ -2488,18 +2488,17 @@
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.2.0/jans_2.2.0~debian13_amd64.deb.sha256sum<span class="w"> </span>-P<span class="w"> </span>/tmp
-sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_2.2.0~debian13_amd64.deb.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">'paste-release-sha256sum jans_2.2.0-stable.debian13_amd64.deb'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s/^sha256://'</span><span class="w"> </span><span class="p">&gt;</span>jans_2.2.0-stable.debian13_amd64.deb.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans_2.2.0-stable.debian13_amd64.deb.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_2.2.0~debian13_amd64.deb: OK
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>jans_2.2.0-stable.debian13_amd64.deb: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./jans_2.2.0~debian13_amd64.deb
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./jans_2.2.0-stable.debian13_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>

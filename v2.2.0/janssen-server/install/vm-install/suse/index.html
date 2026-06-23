@@ -2477,8 +2477,7 @@ needed for OpenID and FIDO.</li>
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v2.2.0/jans-2.2.0-stable.suse16.x86_64.rpm.sha256sum
-sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-2.2.0-stable.suse16.x86_64.rpm.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">'paste-release-sha256sum jans-2.2.0-stable.suse16.x86_64.rpm'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s/^sha256://'</span><span class="w"> </span><span class="p">&gt;</span>jans-2.2.0-stable.suse16.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-2.2.0-stable.suse16.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>jans-2.2.0-stable.suse16.x86_64.rpm: OK
