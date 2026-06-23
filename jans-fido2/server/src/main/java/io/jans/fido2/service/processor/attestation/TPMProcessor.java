@@ -323,8 +323,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				byte[] inner = ASN1OctetString.getInstance(ext).getOctets();
 				aaguidInCert = ASN1OctetString.getInstance(inner).getOctets();
 			} catch (RuntimeException e) {
+				log.error("Malformed id-fido-gen-ce-aaguid extension in AIK certificate", e);
 				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-						"Problem with TPM attestation : malformed id-fido-gen-ce-aaguid extension");
+						"Problem with TPM attestation : malformed id-fido-gen-ce-aaguid extension", e);
 			}
 			if (!Arrays.equals(aaguidInCert, authData.getAaguid())) {
 				log.error("AIK certificate AAGUID does not match authenticator data AAGUID");
