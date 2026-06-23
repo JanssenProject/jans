@@ -3,10 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::sparkv::{Config, SparKV};
-use chrono::{DateTime, Duration, Utc};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
+
+use chrono::{DateTime, Duration, Utc};
 
 use crate::LogLevel;
 use crate::authz::metrics::MetricsCollector;
@@ -14,6 +14,7 @@ use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
+use crate::sparkv::{Config, SparKV};
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
