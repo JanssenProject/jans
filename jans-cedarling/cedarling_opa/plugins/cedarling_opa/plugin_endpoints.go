@@ -53,7 +53,6 @@ func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 		AccessEvaluationEndpoint:  fmt.Sprintf("%s/access/v1/evaluation", p.config.Host),
 		AccessEvaluationsEndpoint: fmt.Sprintf("%s/access/v1/evaluations", p.config.Host),
 	}
-	w.WriteHeader(200)
 	if err := json.NewEncoder(w).Encode(metadata); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
@@ -86,7 +85,8 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	w.WriteHeader(200)
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 	response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		writeError(w, http.StatusInternalServerError, "Something went wrong")
@@ -114,7 +114,9 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if r.Method != "POST" || err != nil || mediaType != "application/json" {
 		writeError(w, http.StatusBadRequest, "Invalid Request")
-		p.logger.Info(err.Error())
+		if err != nil {
+			p.logger.Info(err.Error())
+		}
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -130,7 +132,8 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 			writeError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		w.WriteHeader(200)
+		p.mtx.RLock()
+		defer p.mtx.RUnlock()
 		response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			writeError(w, http.StatusInternalServerError, "Something went wrong")
@@ -166,6 +169,8 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 				}
 			}
 			context := eval.Context
+			p.mtx.RLock()
+			defer p.mtx.RUnlock()
 			response := p.buildEvaluationResponse(subject, action, resource, context, p.config.Evaluation_Logic)
 			responseList = append(responseList, *response)
 			if request.Options.EvaluationSemantic == DenyOnFirstDeny {

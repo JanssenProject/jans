@@ -59,6 +59,7 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
     }
 }
 ```
+
 - `host`: Hostname of the server where OPA is running. Required for the AuthZen [metadata endpoint](https://openid.net/specs/authorization-api-1_0.html#name-policy-decision-point-metad).
 - `bootstrap_config`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
 - `evaluation_logic`: One of `MULTI_ISSUER` or `UNSIGNED`, corresponding to the Cedarling's [authorization modes](https://docs.jans.io/stable/cedarling/reference/cedarling-authz/#which-authorization-method-should-i-use) for the access evaluation API. Defaults to `MULTI_ISSUER`.

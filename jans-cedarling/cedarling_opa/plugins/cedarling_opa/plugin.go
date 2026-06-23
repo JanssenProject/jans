@@ -83,16 +83,15 @@ func WithCedarlingInstance(fn func(Cedarling) error) error {
 	return fn(p.cedar)
 }
 
-func (p *CedarPlugin) ValidateEvaluationMode() error {
-	switch p.config.Evaluation_Logic {
+func normalizeEvaluationMode(mode EvaluationMode) (EvaluationMode, error) {
+	switch mode {
 	case "":
-		p.config.Evaluation_Logic = MultiIssuer
+		return MultiIssuer, nil
 	case MultiIssuer, Unsigned:
+		return mode, nil
 	default:
-		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
-		return fmt.Errorf("Invalid evaluation mode: must be one of MULTI_ISSUER and UNSIGNED")
+		return mode, fmt.Errorf("Invalid evaluation mode: must be one of MULTI_ISSUER and UNSIGNED")
 	}
-	return nil
 }
 
 func buildBootstrapConfig(cfg Config) (map[string]any, error) {
@@ -109,7 +108,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
-	err = p.ValidateEvaluationMode()
+	p.config.Evaluation_Logic, err = normalizeEvaluationMode(p.config.Evaluation_Logic)
 	if err != nil {
 		return err
 	}
@@ -148,7 +147,7 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config any) {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
-	err = p.ValidateEvaluationMode()
+	cfg.Evaluation_Logic, err = normalizeEvaluationMode(cfg.Evaluation_Logic)
 	if err != nil {
 		p.logger.Error(err.Error())
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
@@ -226,10 +225,11 @@ func extractResource(resource *Entity) (cedarling_go.EntityData, error) {
 	if resource == nil {
 		return output, fmt.Errorf("Resource empty")
 	}
-	if resource.Properties == nil {
-		resource.Properties = []byte(`{}`)
+	entity := *resource
+	if entity.Properties == nil {
+		entity.Properties = []byte(`{}`)
 	}
-	err := json.Unmarshal(resource.Properties, &output)
+	err := json.Unmarshal(entity.Properties, &output)
 	if err != nil {
 		return output, fmt.Errorf("Error: invalid resource input")
 	}
