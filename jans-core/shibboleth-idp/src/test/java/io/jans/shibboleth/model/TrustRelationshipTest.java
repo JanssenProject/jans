@@ -247,6 +247,41 @@ public class TrustRelationshipTest {
         );
     }
 
+    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNatures() {
+
+        return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+        );
+    }
+
+    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource() {
+
+        return Stream.of(
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationshipWithNoRealMetadataSource()
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationshipWithNoRealMetadataSource()
+            )
+        );
+    }
+
+    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration() {
+
+        return Stream.of( 
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationshipWithNoActiveProfileConfiguration()
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationshipWithNoActiveProfileConfiguration()
+            )
+        );
+    }
+
     /**
      * Creation Tests
      */
@@ -920,6 +955,53 @@ public class TrustRelationshipTest {
             assertThat(updated).isInInactiveStatus();
             assertThat(updated).isVersion(tr.getVersion().next());
         }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an INACTIVE TrustRelationship with a real metadata source and at least one active profile " +
+            "WHEN activate() is called " + 
+            "THEN should transition to ACTIVATING state and increment version "
+        )
+        public void shouldTransitionToActivatingFromInactive_whenRequirementsMet(TrustRelationship tr) {
+
+            assertThat(tr).isInInactiveStatus();
+            assertThat(tr).hasRealMetadataSource();
+            assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
+
+            TrustResult<TrustRelationship> result = tr.activate();
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInActivatingStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource({
+            "io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource",
+            "io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration"
+        })
+        @DisplayName(
+            "GIVEN an INACTIVE TrustRelationship with no real metadata source or no active profile " +
+            "WHEN activate() is called " +
+            "THEN should transition to DRAFT state and increment version "
+        )
+        public void shouldTransitionToDraft_whenActivateCalledFromInactiveButRequirementsNotMet(TrustRelationship tr) {
+
+            assertThat(tr).isInInactiveStatus();
+            assertThat(tr.hasNoRealMetadataSource() || tr.hasNoActiveProfileConfiguration()).isTrue();
+
+            TrustResult<TrustRelationship> result = tr.activate();
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+    
     }
 
 }

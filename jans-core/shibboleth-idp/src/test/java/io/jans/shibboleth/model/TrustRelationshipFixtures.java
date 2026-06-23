@@ -28,6 +28,7 @@ import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
 import io.jans.shibboleth.model.metadata.MdqMetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSource;
+import io.jans.shibboleth.model.metadata.NoMetadataSource;
 import io.jans.shibboleth.model.metadata.UpstreamMetadataSource;
 import io.jans.shibboleth.model.metadata.UriMetadataSource;
 import io.jans.shibboleth.model.metadata.manual.AssertionConsumerService;
@@ -135,6 +136,64 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final TrustRelationship sampleInactiveIndividualTrustRelationship() {
+
+        return TrustRelationship.from(sampleActiveIndividualTrustRelationship())
+            .deactivateCalled()
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleInactiveAggregateTrustRelationship() {
+
+        return TrustRelationship.from(sampleActiveAggregateTrustRelationship())
+            .deactivateCalled()
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleInactiveIndividualTrustRelationshipWithNoRealMetadataSource() {
+
+        return TrustRelationship.from(sampleInactiveIndividualTrustRelationship())
+            .withMetadataSource(NoMetadataSource.getInstance())
+            .build()
+            .getValue();
+    }
+    
+    public static final TrustRelationship sampleInactiveAggregateTrustRelationshipWithNoRealMetadataSource() {
+
+        return TrustRelationship.from(sampleInactiveAggregateTrustRelationship())
+            .withMetadataSource(NoMetadataSource.getInstance())
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleInactiveIndividualTrustRelationshipWithNoActiveProfileConfiguration() {
+
+        return TrustRelationship.from(sampleInactiveIndividualTrustRelationship())
+            .withShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration())
+            .withSaml2ArtifactResolutionProfileConfiguration(inactiveSaml2ArtifactResolutionProfileConfiguration())
+            .withSaml2AttributeQueryProfileConfiguration(inactiveSaml2AttributeQueryProfileConfiguration())
+            .withSaml2EcpProfileConfiguration(inactiveSaml2EcpProfileConfiguration())
+            .withSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration())
+            .withSaml2LogoutProfileConfiguration(inactiveSaml2LogoutProfileConfiguration())
+            .build()
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleInactiveAggregateTrustRelationshipWithNoActiveProfileConfiguration() {
+
+        return TrustRelationship.from(sampleInactiveAggregateTrustRelationship())
+            .withShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration())
+            .withSaml2ArtifactResolutionProfileConfiguration(inactiveSaml2ArtifactResolutionProfileConfiguration())
+            .withSaml2AttributeQueryProfileConfiguration(inactiveSaml2AttributeQueryProfileConfiguration())
+            .withSaml2EcpProfileConfiguration(inactiveSaml2EcpProfileConfiguration())
+            .withSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration())
+            .withSaml2LogoutProfileConfiguration(inactiveSaml2LogoutProfileConfiguration())
+            .build()
+            .getValue();
+    }
+
     public static final MetadataSource sampleFileMetadataSource() {
 
         return FileMetadataSource.of("/opt/gluu/metadata/sp_metadata.xml").getValue();
@@ -180,11 +239,29 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final ShibbolethSsoProfileConfiguration inactiveShibbolethSsoProfileConfiguration() {
+
+        return ShibbolethSsoProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.shibbolethSso())
+            .status(ProfileStatus.INACTIVE)
+            .build()
+            .getValue();
+    }
+
     public static final Saml2ArtifactResolutionProfileConfiguration activeSaml2ArtifactResolutionProfileConfiguration() {
 
         return Saml2ArtifactResolutionProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
             .status(ProfileStatus.ACTIVE)
+            .build()
+            .getValue();
+    }
+
+    public static final Saml2ArtifactResolutionProfileConfiguration inactiveSaml2ArtifactResolutionProfileConfiguration() {
+
+        return Saml2ArtifactResolutionProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .status(ProfileStatus.INACTIVE)
             .build()
             .getValue();
     }
@@ -198,11 +275,30 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final Saml2AttributeQueryProfileConfiguration inactiveSaml2AttributeQueryProfileConfiguration() {
+
+
+        return Saml2AttributeQueryProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .status(ProfileStatus.INACTIVE)
+            .build()
+            .getValue();
+    }
+
     public static final Saml2EcpProfileConfiguration activeSaml2EcpProfileConfiguration() {
 
         return Saml2EcpProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Ecp())
             .status(ProfileStatus.ACTIVE)
+            .build()
+            .getValue();
+    }
+
+    public static final Saml2EcpProfileConfiguration inactiveSaml2EcpProfileConfiguration() {
+
+        return Saml2EcpProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.saml2Ecp())
+            .status(ProfileStatus.INACTIVE)
             .build()
             .getValue();
     }
@@ -216,11 +312,29 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final Saml2SsoProfileConfiguration inactiveSaml2SsoProfileConfiguration() {
+
+        return Saml2SsoProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.saml2Sso())
+            .status(ProfileStatus.INACTIVE)
+            .build()
+            .getValue();
+    }
+
     public static final Saml2LogoutProfileConfiguration activeSaml2LogoutProfileConfiguration() {
 
         return Saml2LogoutProfileConfiguration
             .from(SamlProfileConfigurationDefaults.saml2Logout())
             .status(ProfileStatus.ACTIVE)
+            .build()
+            .getValue();
+    }
+
+    public static final Saml2LogoutProfileConfiguration inactiveSaml2LogoutProfileConfiguration() {
+
+        return Saml2LogoutProfileConfiguration
+            .from(SamlProfileConfigurationDefaults.saml2Logout())
+            .status(ProfileStatus.INACTIVE)
             .build()
             .getValue();
     }

@@ -67,6 +67,18 @@ public final class TrustTransitionRules {
                 TrustStatus.ACTIVE,TrustStatus.INACTIVE,
                 (ctx) -> ctx.deactivateCalled(),
                 "ACTIVE --> INACTIVE: deactivate() called "
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.INACTIVE,TrustStatus.ACTIVATING,
+                (ctx) -> ctx.activateCalled() && ctx.hasRealMetadataSource() && ctx.hasAnyActiveProfileConfiguration(),
+                "INACTIVE -> ACTIVE: activate() called and requirements met for ACTIVATING "
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.INACTIVE,TrustStatus.DRAFT,
+                (ctx) -> ctx.activateCalled() && (ctx.hasNoRealMetadataSource() || ctx.hasNoActiveProfileConfiguration()),
+                "INACTGIVE -> DRAFT: activate() called and no real metadatasource or no active profile configuration "
             )
         );
     }
