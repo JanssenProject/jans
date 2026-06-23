@@ -70,6 +70,13 @@ pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
 
+/// Git commit hash at build time (`None` if git is unavailable or
+/// `CEDARLING_BUILD_COMMIT` was not set at compile time).
+pub const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
+/// Build timestamp in RFC 3339 format (`None` if
+/// `CEDARLING_BUILD_TIMESTAMP` was not set at compile time).
+pub const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
+
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -166,6 +173,15 @@ impl Cedarling {
             config.http_client_config,
         )
         .await?;
+
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message("Cedarling initialization started".to_string())
+            .set_build_info(BUILD_COMMIT, BUILD_TIMESTAMP),
+        );
 
         // Bootstrap-load: build HttpClient + load policy store. Returns the
         // service config plus the refresh-worker seed in one shot so the

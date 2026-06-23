@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
@@ -67,6 +68,9 @@ public class AttestationCertificateService {
     private DataMapperService dataMapperService;
 
 	private static final String APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME = "Apple_WebAuthn_Root_CA.pem";
+	private static final String ATTESTATION_ROOT_CERTIFICATES = "attestationRootCertificates";
+	private static final String METADATA_STATEMENT = "metadataStatement";
+	private static final String DESCRIPTION = "description";
 
 	private Map<String, X509Certificate> rootCertificatesMap;
 	private String appleRootCaSubjectDn;
@@ -82,7 +86,7 @@ public class AttestationCertificateService {
 
         X509Certificate appleCert = certificateService.getCertificateByDisplayName(APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
         if (appleCert != null) {
-            this.appleRootCaSubjectDn = appleCert.getSubjectDN().getName().toLowerCase();
+            this.appleRootCaSubjectDn = appleCert.getSubjectX500Principal().getName().toLowerCase();
             log.debug("Loaded Apple WebAuthn root CA subject DN from DB: {}", appleRootCaSubjectDn);
         } else {
             log.warn("Apple WebAuthn root CA certificate '{}' not found in DB", APPLE_WEBAUTHN_ROOT_CA_DISPLAY_NAME);
@@ -98,11 +102,11 @@ public class AttestationCertificateService {
 		JsonNode metaDataStatement = null;
 		// incase of u2f-fido2 attestation
 		if ((metadataNode != null)) {
-			if (metadataNode.has("attestationRootCertificates")) {
+			if (metadataNode.has(ATTESTATION_ROOT_CERTIFICATES)) {
 				metaDataStatement = metadataNode;
-			} else if (metadataNode.has("metadataStatement")) {
+			} else if (metadataNode.has(METADATA_STATEMENT)) {
 				try {
-					metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
+					metaDataStatement = dataMapperService.readTree(metadataNode.get(METADATA_STATEMENT).toPrettyString());
 				} catch (IOException e) {
 					log.error("Error parsing the metadata statement", e);
 				}
@@ -110,13 +114,11 @@ public class AttestationCertificateService {
 		}
 
 		if (metadataNode == null || metaDataStatement == null
-				|| !metaDataStatement.has("attestationRootCertificates")) {
-			List<X509Certificate> selectedRootCertificate = certificateService
-					.selectRootCertificates(rootCertificatesMap, attestationCertificates);
-			return selectedRootCertificate;
+				|| !metaDataStatement.has(ATTESTATION_ROOT_CERTIFICATES)) {
+			return certificateService.selectRootCertificates(rootCertificatesMap, attestationCertificates);
 		}
 
-		ArrayNode node = (ArrayNode) metaDataStatement.get("attestationRootCertificates");
+		ArrayNode node = (ArrayNode) metaDataStatement.get(ATTESTATION_ROOT_CERTIFICATES);
 		Iterator<JsonNode> iter = node.elements();
 		List<String> x509certificates = new ArrayList<>();
 		while (iter.hasNext()) {
@@ -131,22 +133,33 @@ public class AttestationCertificateService {
 		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
 		JsonNode metaDataStatement = null;
 		if ((metadataForAuthenticator != null)) {
-			if (metadataForAuthenticator.has("description")) {
+			if (metadataForAuthenticator.has(DESCRIPTION)) {
 				metaDataStatement = metadataForAuthenticator;
-			} else if (metadataForAuthenticator.has("metadataStatement")) {
+			} else if (metadataForAuthenticator.has(METADATA_STATEMENT)) {
 				try {
-					metaDataStatement = dataMapperService.readTree(metadataForAuthenticator.get("metadataStatement").toPrettyString());
+					metaDataStatement = dataMapperService.readTree(metadataForAuthenticator.get(METADATA_STATEMENT).toPrettyString());
 				} catch (IOException e) {
 					log.error("Error parsing the metadata statement", e);
 				}
 			}
 		}
 		if (metadataForAuthenticator == null || metaDataStatement == null
-				|| !metaDataStatement.has("description")) {
+				|| !metaDataStatement.has(DESCRIPTION)) {
 			return null;
 		}
-		return metaDataStatement.get("description").asText();
+		return metaDataStatement.get(DESCRIPTION).asText();
 	}
+	/**
+	 * CONF-19/22 gate: only the {@code enforced} attestation mode applies the stricter MDS trust rules
+	 * (reject on metadata-fetch failure / blocked status). {@code disabled} and {@code monitor} retain
+	 * the previous lenient behavior so existing deployments are unaffected.
+	 */
+	private boolean isAttestationEnforced() {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		return (fido2Configuration != null) && AttestationMode.ENFORCED.getValue()
+				.equalsIgnoreCase(fido2Configuration.getAttestationMode());
+	}
+
 	private JsonNode getMetadataForAuthenticator(AuthData authData) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
@@ -159,7 +172,7 @@ public class AttestationCertificateService {
 		} else {
 			try {
 				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob", aaguid);
-				if (fido2Configuration.isDisableMetadataService() == false)
+				if (!fido2Configuration.isDisableMetadataService())
 				{
 					JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
 					commonVerifiers.verifyThatMetadataIsValid(metadata);
@@ -172,7 +185,11 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-
+				if (isAttestationEnforced()) {
+					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
+					// fall back to empty metadata (which would let attestation succeed unverified).
+					throw ex;
+				}
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}
@@ -204,7 +221,11 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-
+				if (isAttestationEnforced()) {
+					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
+					// fall back to empty metadata (which would let attestation succeed unverified).
+					throw ex;
+				}
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}
@@ -220,7 +241,7 @@ public class AttestationCertificateService {
 	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates) {
 		String aaguid = Hex.encodeHexString(authData. getAaguid());
 		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates);
-		if ((trustedCertificates == null) || (trustedCertificates.size() == 0)) {
+		if ((trustedCertificates == null) || trustedCertificates.isEmpty()) {
 			log.error("Failed to get trusted certificates");
 			return null;
 		}
