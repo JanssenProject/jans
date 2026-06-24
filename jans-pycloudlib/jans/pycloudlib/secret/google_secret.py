@@ -2,21 +2,16 @@
 
 from __future__ import annotations
 
-import binascii
 import hashlib
 import json
 import logging
-import lzma
 import sys
 import os
 import typing as _t
-import zlib
 from contextlib import suppress
 from functools import cached_property
 from math import ceil
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.exceptions import InvalidTag
 from google.cloud import secretmanager
 from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import NotFound
@@ -116,27 +111,6 @@ class GoogleSecret(BaseSecret):
         """
         return hashlib.pbkdf2_hmac("sha256", self.passphrase.encode("utf8"), self.salt, 1000)
 
-    def _decrypt(self, ciphertext: str) -> str:
-        """Decrypt payload.
-
-        Args:
-            ciphertext: encrypted string to decrypt
-
-        Returns:
-            decrypted payload
-        """
-        self.salt, iv, cipher_bytes = map(binascii.unhexlify, ciphertext.split("-"))
-        self.key = self._set_key()
-
-        plaintext = b""
-        try:
-            aes = AESGCM(self.key)
-            plaintext = aes.decrypt(iv, cipher_bytes, None)
-            plaintext = lzma.decompress(plaintext)
-        except InvalidTag:
-            logger.error("Wrong passphrase used.")
-        return plaintext.decode("utf8")
-
     def get_all(self) -> dict[str, _t.Any]:
         """Access the payload for the given secret version if one exists.
 
@@ -176,7 +150,6 @@ class GoogleSecret(BaseSecret):
         if not names:
             return {}
 
-        data = {}
         payload = b""
 
         for name in names:
@@ -196,13 +169,8 @@ class GoogleSecret(BaseSecret):
         if not payload:
             return {}
 
-        data = self._maybe_legacy_payload(payload)
-        if not data:
-            # logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
-            data = json.loads(payload)
-
         # decoded payload
-        return data
+        return json.loads(payload)
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
@@ -354,28 +322,6 @@ class GoogleSecret(BaseSecret):
             logger.info("Created secret: %s", response.name)
             self.multiparts.append(name)
         return name
-
-    def _maybe_legacy_payload(self, payload: bytes) -> dict[str, _t.Any]:
-        data = {}
-        payload_str = ""
-
-        with suppress(zlib.error):
-            # previously data is compressed using zlib
-            payload_str = zlib.decompress(payload).decode("UTF-8")
-
-        if not payload_str:
-            with suppress(lzma.LZMAError):
-                payload_str = lzma.decompress(payload).decode("UTF-8")
-
-        if not payload_str:
-            return data
-
-        try:
-            # previously data is double-encrypted
-            data: dict[str, _t.Any] = json.loads(self._decrypt(payload_str))
-        except binascii.Error:
-            data = json.loads(payload_str)
-        return data
 
     def _destroy_old_versions(self, parent):
         # list of version.state enum
