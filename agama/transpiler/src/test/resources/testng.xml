@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Literals" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.LiteralsTest" />
+        </classes>
+    </test>
+
 </suite>
