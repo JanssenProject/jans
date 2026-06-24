@@ -289,9 +289,9 @@ macro_rules! sparkv_tests {
             config.auto_clear_expired = false;
             let mut sparkv = <$sparkv_type>::with_config(config);
             _ = sparkv.set_with_ttl("not-yet-expired", "v".into(), Duration::seconds(90), &[]);
-            _ = sparkv.set_with_ttl("expiring", "value".into(), Duration::milliseconds(1), &[]);
+            _ = sparkv.set_with_ttl("expiring", "value".into(), Duration::milliseconds(10), &[]);
             _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60), &[]);
-            std::thread::sleep(std::time::Duration::from_millis(2));
+            std::thread::sleep(std::time::Duration::from_millis(20));
             assert_eq!(
                 sparkv.len(),
                 3,
@@ -324,12 +324,12 @@ macro_rules! sparkv_tests {
             _ = sparkv.set_with_ttl(
                 "no-longer",
                 "value".into(),
-                Duration::milliseconds(1),
+                Duration::milliseconds(10),
                 &[],
             );
             _ = sparkv.set_with_ttl("no-longer", "v".into(), Duration::seconds(90), &[]);
             _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60), &[]);
-            std::thread::sleep(std::time::Duration::from_millis(2));
+            std::thread::sleep(std::time::Duration::from_millis(20));
             assert_eq!(
                 sparkv.expiries.len(),
                 3,
@@ -392,11 +392,11 @@ macro_rules! sparkv_tests {
             _ = sparkv.set_with_ttl(
                 "no-longer",
                 "value".into(),
-                Duration::milliseconds(1),
+                Duration::milliseconds(10),
                 &[],
             );
             _ = sparkv.set_with_ttl("no-longer", "v".into(), Duration::seconds(90), &[]);
-            std::thread::sleep(std::time::Duration::from_millis(2));
+            std::thread::sleep(std::time::Duration::from_millis(20));
             _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60), &[]);
             assert_eq!(
                 sparkv.expiries.len(),
@@ -825,10 +825,10 @@ macro_rules! sparkv_tests {
             let mut sparkv = <$sparkv_type>::with_config(config);
 
             sparkv
-                .set_with_ttl("expired", "v".into(), Duration::milliseconds(1), &[])
+                .set_with_ttl("expired", "v".into(), Duration::milliseconds(10), &[])
                 .unwrap();
 
-            std::thread::sleep(std::time::Duration::from_millis(5));
+            std::thread::sleep(std::time::Duration::from_millis(20));
 
             // This should clear the expired entry without panicking/recursing
             sparkv.set("other", "x".into(), &[]).unwrap();
