@@ -232,9 +232,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		switch (keyType) {
 		case RSA: {
 
-			// TODO: replace with constants
-			
-			if (algorithmToUse == -65535 || algorithmToUse == -257 ) 
+			if (algorithmToUse == CoseRSAAlgorithm.RS65535.getNumericValue() || algorithmToUse == CoseRSAAlgorithm.RS256.getNumericValue())
 			 {
 
 				byte[] keyBufferFromTPM = Arrays.copyOfRange(tpm, 2, tpm.length);
@@ -254,8 +252,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		}
 		case EC2: {
 
-			if (algorithmToUse == -7) 
-			// TODO: CoseEC2Algorithm.ES256.getNumericValue()
+			if (algorithmToUse == CoseEC2Algorithm.ES256.getNumericValue())
 			 {
 				int curve = uncompressedECPointNode.get("-1").asInt();
 				byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
