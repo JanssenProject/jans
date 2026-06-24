@@ -43,3 +43,12 @@ To generate/preview docs, run the following steps:
 - https://www.linuxfoundation.org/press-release/2020/12/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation/
 - https://betanews.com/2020/12/08/linux-foundation-open-source-identity-management/
 - https://www.techrepublic.com/article/linux-foundation-debuts-new-secure-open-source-cloud-native-access-management-software-platform/
+
+## License
+
+The `jans-pycloudlib` library is released under Apache Software License.
+
+The following 3rd-party libraries are released under GPL license variants:
+
+- `ldap3`: GNU Lesser General Public License v3 (LGPLv3)
+- `psycopg2`: GNU Library or Lesser General Public License (LGPL)
