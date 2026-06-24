@@ -426,7 +426,7 @@ fn get_std_rng() -> StdRng {
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
 pub(crate) fn gen_uuid7() -> Uuid {
-    use std::sync::{LazyLock, Mutex};
+    use std::cell::RefCell;
     use uuid7::V7Generator;
 
     // from docs uuid7 crate
@@ -434,22 +434,27 @@ pub(crate) fn gen_uuid7() -> Uuid {
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
 
-    static GLOBAL_V7_GENERATOR: LazyLock<
-        Mutex<V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>>,
-    > = LazyLock::new(|| {
-        let mut g = V7Generator::with_rand010(get_std_rng());
-        g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
-        Mutex::new(g)
-    });
-
-    let mut g = GLOBAL_V7_GENERATOR
-        .lock()
-        .expect("GLOBAL_V7_GENERATOR should be locked");
+    // Thread-local generator avoids the global `Mutex::lock` on the request-id hot path.
+    // Monotonicity is preserved per-thread; UUIDs remain time-ordered across threads via the
+    // millisecond timestamp, which is sufficient for unique identifiers (no documented global
+    // monotonic-ordering guarantee). Under `wasm32-unknown-unknown` this collapses to a single
+    // static slot (single-threaded), still removing the lock.
+    thread_local! {
+        static V7_GENERATOR: RefCell<
+            V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>,
+        > = {
+            let mut g = V7Generator::with_rand010(get_std_rng());
+            g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
+            RefCell::new(g)
+        };
+    }
 
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
 
-    #[allow(clippy::cast_sign_loss)]
-    g.generate_or_reset_with_ts(custom_unix_ts_ms as u64)
+    V7_GENERATOR.with(|g| {
+        g.borrow_mut()
+            .generate_or_reset_with_ts(custom_unix_ts_ms.cast_unsigned())
+    })
 }
 
 /// Generates a new `UUIDv4` object utilizing the random number generator inside.
@@ -608,5 +613,46 @@ impl LogTokensInfo {
 
     pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Uuid, gen_uuid7};
+    use std::collections::HashSet;
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
+    #[test]
+    fn gen_uuid7_thread_local_storm_is_unique() {
+        const THREADS: usize = 32;
+        const PER_THREAD: usize = 5_000;
+
+        let collected: Arc<Mutex<Vec<Uuid>>> = Arc::new(Mutex::new(Vec::new()));
+
+        thread::scope(|scope| {
+            for _ in 0..THREADS {
+                let collected = Arc::clone(&collected);
+                scope.spawn(move || {
+                    let mut local = Vec::with_capacity(PER_THREAD);
+                    for _ in 0..PER_THREAD {
+                        local.push(gen_uuid7());
+                    }
+                    collected.lock().expect("collect lock").extend(local);
+                });
+            }
+        });
+
+        let ids = collected.lock().expect("collect lock");
+        assert_eq!(ids.len(), THREADS * PER_THREAD);
+
+        assert!(ids.iter().all(|id| id.as_bytes()[6] >> 4 == 0x7));
+
+        let unique: HashSet<&Uuid> = ids.iter().collect();
+        assert_eq!(
+            unique.len(),
+            ids.len(),
+            "uuid7 collision under thread storm"
+        );
     }
 }
