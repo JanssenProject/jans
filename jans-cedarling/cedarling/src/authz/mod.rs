@@ -237,7 +237,7 @@ impl Authz {
                 .as_str(),
         );
 
-        let multi_diagnostics = vec![authz_info.diagnostics.clone()];
+        let multi_diagnostics = std::slice::from_ref(&authz_info.diagnostics);
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
@@ -246,7 +246,7 @@ impl Authz {
             &DecisionLogMetadata {
                 action: request.action.clone(),
                 resource: resource_uid.to_string(),
-                decision_diagnostics: &multi_diagnostics,
+                decision_diagnostics: multi_diagnostics,
                 decision_time: decision_time_micro_sec,
                 principal: DecisionLogEntry::principal(
                     false, // No person principal for multi-issuer
@@ -396,7 +396,7 @@ impl Authz {
         };
 
         let debug_authorize_info = vec![authz_info.clone()];
-        let diagnostics = vec![authz_info.diagnostics.clone()];
+        let diagnostics = std::slice::from_ref(&authz_info.diagnostics);
 
         // Log policy evaluation errors if any exist
         self.log_policy_evaluation_errors(
@@ -417,7 +417,7 @@ impl Authz {
                 decision: result.decision,
                 tokens_logging_info: LogTokensInfo::empty(),
                 decision_time: decision_time_micro_sec,
-                decision_diagnostics: &diagnostics,
+                decision_diagnostics: diagnostics,
                 principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
             },
