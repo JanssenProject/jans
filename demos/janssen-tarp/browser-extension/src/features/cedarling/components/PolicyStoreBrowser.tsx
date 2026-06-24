@@ -77,18 +77,25 @@ export default function PolicyStoreBrowser({ isOpen, config, onClose }: PolicySt
   const [selected, setSelected] = React.useState<PolicyStoreEntry | null>(null);
 
   const uri = getPolicyStoreUri(config);
+  // Monotonic id for each load(); only the latest request may apply state, so a
+  // slower in-flight fetch can't overwrite a newer one's result.
+  const requestIdRef = React.useRef(0);
 
   const load = React.useCallback(async () => {
     if (!uri) {
       setError('No CEDARLING_POLICY_STORE_URI found in this configuration.');
       return;
     }
+    const requestId = ++requestIdRef.current;
+    const isStale = () => requestId !== requestIdRef.current;
+
     setLoading(true);
     setError('');
     setEntries([]);
     setSelected(null);
     try {
       const result = await downloadAndExtractPolicyStore(uri);
+      if (isStale()) return;
       if (result.length === 0) {
         setError('The policy store archive is empty.');
       }
@@ -97,15 +104,64 @@ export default function PolicyStoreBrowser({ isOpen, config, onClose }: PolicySt
       const initial = result.find((e) => e.path.endsWith('metadata.json')) ?? result[0];
       if (initial) setSelected(initial);
     } catch (err) {
+      if (isStale()) return;
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }, [uri]);
+
+  const dialogRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (isOpen) load();
   }, [isOpen, load]);
+
+  // Escape to close, focus trap within the dialog, and focus restore on unmount.
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    const getFocusable = () =>
+      Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = getFocusable();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+    // Move initial focus into the dialog.
+    getFocusable()[0]?.focus();
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -113,11 +169,17 @@ export default function PolicyStoreBrowser({ isOpen, config, onClose }: PolicySt
 
   return (
     <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center backdrop-blur-sm">
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-4 overflow-hidden flex flex-col h-[80vh]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="policy-store-title"
+        className="relative bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-4 overflow-hidden flex flex-col h-[80vh]"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="min-w-0">
-            <h2 className="text-xl font-bold text-[#002B49]">Policy Store</h2>
+            <h2 id="policy-store-title" className="text-xl font-bold text-[#002B49]">Policy Store</h2>
             <p className="text-xs text-gray-500 mt-0.5 truncate" title={uri}>
               {uri || 'No policy store URI'}
             </p>
@@ -126,13 +188,13 @@ export default function PolicyStoreBrowser({ isOpen, config, onClose }: PolicySt
             <button
               onClick={load}
               disabled={loading || !uri}
+              aria-label="Reload policy store"
               className="p-2 text-gray-500 hover:text-gray-800 rounded transition-colors disabled:opacity-40"
-              title="Reload"
             >
-              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
             </button>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <X size={24} />
+            <button onClick={onClose} aria-label="Close policy store" className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={24} aria-hidden="true" />
             </button>
           </div>
         </div>

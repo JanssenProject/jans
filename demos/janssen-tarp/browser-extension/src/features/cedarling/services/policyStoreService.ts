@@ -1,5 +1,3 @@
-import { unzipSync } from 'fflate';
-
 /**
  * A single extracted entry from a policy store archive (.cjar).
  * `path` is the full POSIX-style path within the archive (e.g. "policies/allow.cedar").
@@ -8,6 +6,40 @@ export interface PolicyStoreEntry {
   path: string;
   size: number;
   bytes: Uint8Array;
+}
+
+/** Maximum accepted archive download size (bytes). */
+const MAX_ARCHIVE_BYTES = 50 * 1024 * 1024; // 50 MB
+/** Maximum time to wait for the download before aborting (ms). */
+const DOWNLOAD_TIMEOUT_MS = 30_000;
+
+function formatBytesLimit(bytes: number): string {
+  return `${Math.round(bytes / (1024 * 1024))} MB`;
+}
+
+/**
+ * Decompresses archive bytes in a Web Worker so the UI thread stays responsive.
+ * The worker is bundled from extension origin to satisfy the MV3 CSP
+ * (script-src 'self'), unlike fflate's blob-based async API.
+ */
+function unzipInWorker(bytes: Uint8Array): Promise<Record<string, Uint8Array>> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./unzip.worker.ts', import.meta.url));
+    worker.onmessage = (e: MessageEvent<{ ok: boolean; result?: Record<string, Uint8Array>; error?: string }>) => {
+      worker.terminate();
+      if (e.data.ok && e.data.result) {
+        resolve(e.data.result);
+      } else {
+        reject(new Error(e.data.error || 'Failed to decompress archive'));
+      }
+    };
+    worker.onerror = (e) => {
+      worker.terminate();
+      reject(new Error(`Decompression worker failed: ${e.message}`));
+    };
+    // Transfer the buffer so it isn't copied into the worker.
+    worker.postMessage(bytes, [bytes.buffer]);
+  });
 }
 
 /** A node in the rendered directory tree. */
@@ -35,23 +67,49 @@ export function getPolicyStoreUri(config: any): string {
  * Throws a descriptive Error on network or parse failure.
  */
 export async function downloadAndExtractPolicyStore(uri: string): Promise<PolicyStoreEntry[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS);
+
   let response: Response;
   try {
-    response = await fetch(uri, { method: 'GET' });
+    response = await fetch(uri, { method: 'GET', signal: controller.signal });
   } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(
+        `Timed out downloading policy store after ${DOWNLOAD_TIMEOUT_MS / 1000}s. The archive may be too large or the server unreachable.`,
+      );
+    }
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(`Failed to download policy store from "${uri}": ${msg}`);
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {
     throw new Error(`Failed to download policy store: HTTP ${response.status} ${response.statusText}`);
   }
 
-  const buffer = new Uint8Array(await response.arrayBuffer());
+  // Reject oversized archives up front via the advertised length, before buffering.
+  const declaredLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARCHIVE_BYTES) {
+    throw new Error(
+      `Policy store archive is too large (${formatBytesLimit(declaredLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
+    );
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  // Guard again on the actual size in case Content-Length was absent or wrong.
+  if (arrayBuffer.byteLength > MAX_ARCHIVE_BYTES) {
+    throw new Error(
+      `Policy store archive is too large (${formatBytesLimit(arrayBuffer.byteLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
+    );
+  }
+
+  const buffer = new Uint8Array(arrayBuffer);
 
   let extracted: Record<string, Uint8Array>;
   try {
-    extracted = unzipSync(buffer);
+    extracted = await unzipInWorker(buffer);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(`Could not read the policy store archive (expected a .cjar/ZIP file): ${msg}`);
