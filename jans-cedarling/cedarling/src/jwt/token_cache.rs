@@ -229,7 +229,7 @@ impl TokenCache {
 /// Hash a string using `ahash` and return the hash value as a string.
 ///
 /// Pre-hashing JWT keys reduces their size from potentially kilobytes down to
-/// ~20 bytes, saving memory in the backing HashMap and making subsequent hash
+/// ~20 bytes, saving memory in the backing `HashMap` and making subsequent hash
 /// computations cheaper during lookups.
 fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
     use core::hash::BuildHasher;
