@@ -7,7 +7,7 @@ use chrono::Duration;
 use serde_json::Value;
 use std::sync::Mutex;
 
-use sparkv::{Config as ConfigSparKV, SparKV};
+use crate::sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
