@@ -75,16 +75,6 @@ fn create_string_set_array(values: &[String]) -> RestrictedExpression {
 
 const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
 
-/// Filter out reserved JWT claims that shouldn't be used as entity tags
-/// Reserved claims: iss (issuer), jti (JWT ID), exp (expiration)
-fn filter_reserved_claims(claims: &HashMap<String, Value>) -> HashMap<String, Value> {
-    claims
-        .iter()
-        .filter(|(key, _)| !RESERVED_CLAIMS.contains(&key.as_str()))
-        .map(|(k, v)| (k.clone(), v.clone()))
-        .collect()
-}
-
 /// Add reserved claims to entity attributes based on schema shape
 fn add_reserved_claims(
     attrs: &mut HashMap<String, RestrictedExpression>,
@@ -370,30 +360,46 @@ impl EntityBuilder {
             .and_then(|schema| schema.get_entity_shape(&entity_type));
 
         let claims = token.claims_value();
-        let mut all_claims = HashMap::with_capacity(claims.len() + 2);
-        all_claims.extend(claims.iter().map(|(k, v)| (k.clone(), v.clone())));
-        all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
-        all_claims.insert(
-            "validated_at".to_string(),
-            Value::Number(chrono::Utc::now().timestamp().into()),
-        );
 
-        // Build entity attributes using the same logic as regular entity builder
-        // This handles schema-based processing, claim mappings, and entity references
-        let mut attrs = super::build_entity_attrs::build_entity_attrs(
-            &all_claims,
-            built_entities,
-            attrs_shape,
-        )?;
+        // Build entity attributes using the same logic as regular entity builder.
+        // Schema path: borrow claims directly and overlay the two synthetic
+        // entries (`token_type`, `validated_at`) via a lookup closure avoids
+        // cloning every claim into a temporary HashMap on the hot path.
+        // No-schema path: fall back to the existing iter-all flow.
+        let mut attrs = if let Some(shape) = attrs_shape {
+            let token_type_val = Value::String(token.name.clone());
+            let validated_at_val = Value::Number(chrono::Utc::now().timestamp().into());
+            super::build_entity_attrs::build_entity_attrs_with_shape_lookup(
+                |name| match name {
+                    "token_type" => Some(&token_type_val),
+                    "validated_at" => Some(&validated_at_val),
+                    other => claims.get(other),
+                },
+                built_entities,
+                shape,
+            )?
+        } else {
+            // Rare path: no schema. Materialize the merged map only here.
+            let mut all_claims = HashMap::with_capacity(claims.len() + 2);
+            all_claims.extend(claims.iter().map(|(k, v)| (k.clone(), v.clone())));
+            all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
+            all_claims.insert(
+                "validated_at".to_string(),
+                Value::Number(chrono::Utc::now().timestamp().into()),
+            );
+            super::build_entity_attrs::build_entity_attrs(&all_claims, built_entities, None)?
+        };
 
         // Overwrite reserved claims with correctly-typed values
         // (e.g. iss as entity UID in no-schema case, jti as entity_id, etc.)
         add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape)?;
 
-        // Create entity tags for non-reserved JWT claims
-        let filtered_claims = filter_reserved_claims(token.claims_value());
+        // Create entity tags for non-reserved JWT claims.
         let mut tags = HashMap::new();
-        for (claim_key, claim_value) in &filtered_claims {
+        for (claim_key, claim_value) in token.claims_value() {
+            if RESERVED_CLAIMS.contains(&claim_key.as_str()) {
+                continue;
+            }
             let value = convert_claim_to_string_set(claim_value);
             tags.insert(claim_key.clone(), value);
         }
