@@ -27,7 +27,7 @@ use chrono::prelude::*;
 pub type BTreeSparKV<T> = SparKV<BTreeMap<String, KvEntry<T>>, T>;
 
 /// HashMap-backed `SparKV`. Provides O(1) lookups for consumers that do not need sorted iteration.
-pub type HashMapSparKV<T> = SparKV<HashMap<String, KvEntry<T>>, T>;
+pub type HashMapSparKV<T> = SparKV<HashMap<String, KvEntry<T>, ahash::RandomState>, T>;
 
 pub struct SparKV<M, T>
 where
