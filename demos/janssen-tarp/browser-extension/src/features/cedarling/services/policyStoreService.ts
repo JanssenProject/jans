@@ -10,6 +10,10 @@ export interface PolicyStoreEntry {
 
 /** Maximum accepted archive download size (bytes). */
 const MAX_ARCHIVE_BYTES = 50 * 1024 * 1024; // 50 MB
+/** Maximum total uncompressed size after extraction (bytes) — zip-bomb guard. */
+const MAX_UNCOMPRESSED_BYTES = 200 * 1024 * 1024; // 200 MB
+/** Maximum number of entries in the archive — zip-bomb guard. */
+const MAX_ENTRIES = 10_000;
 /** Maximum time to wait for the download before aborting (ms). */
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
@@ -38,7 +42,10 @@ function unzipInWorker(bytes: Uint8Array): Promise<Record<string, Uint8Array>> {
       reject(new Error(`Decompression worker failed: ${e.message}`));
     };
     // Transfer the buffer so it isn't copied into the worker.
-    worker.postMessage(bytes, [bytes.buffer]);
+    worker.postMessage(
+      { bytes, maxEntries: MAX_ENTRIES, maxTotalBytes: MAX_UNCOMPRESSED_BYTES },
+      [bytes.buffer],
+    );
   });
 }
 
