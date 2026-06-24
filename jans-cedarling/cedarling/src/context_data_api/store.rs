@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::time::Duration as StdDuration;
 
-use crate::sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
+use crate::sparkv::{Config as SparKVConfig, Error as SparKVError, HashMapSparKV};
 use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
 
@@ -40,7 +40,7 @@ const MAX_SAFE_DURATION_SECS: u64 = (i64::MAX / 1000) as u64;
 /// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
 /// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
 pub(crate) struct DataStore {
-    storage: RwLock<SparKV<DataEntry>>,
+    storage: RwLock<HashMapSparKV<DataEntry>>,
     config: DataStoreConfig,
     metrics: Arc<MetricsCollector>,
 }
@@ -81,7 +81,7 @@ impl DataStore {
             Some(|entry| serde_json::to_string(entry).map_or(0, |s| s.len()));
 
         Ok(Self {
-            storage: RwLock::new(SparKV::with_config_and_sizer(
+            storage: RwLock::new(HashMapSparKV::with_config_and_sizer(
                 sparkv_config,
                 size_calculator,
             )),
