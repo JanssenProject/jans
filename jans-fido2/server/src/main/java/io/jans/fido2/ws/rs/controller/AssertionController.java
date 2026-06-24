@@ -69,21 +69,6 @@ public class AssertionController {
         });
     }
 
-    //TODO: delete this when checking issue related to isAssertionOptionsGenerateEndpointEnabled
-    /*@POST
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @Path("/options/generate")
-    public Response generateAuthenticate(@NotNull AssertionOptionsGenerate assertionOptionsGenerate) {
-        return processRequest(() -> {
-            if (appConfiguration.getFido2Configuration() == null || !appConfiguration.getFido2Configuration().isAssertionOptionsGenerateEndpointEnabled()) {
-                throw errorResponseFactory.forbiddenException();
-            }
-            AsserOptGenerateResponse result = assertionService.generateOptions(assertionOptionsGenerate);
-            return Response.ok().entity(result).build();
-        });
-    }*/
-
     @POST
     @Consumes({"application/json"})
     @Produces({"application/json"})
