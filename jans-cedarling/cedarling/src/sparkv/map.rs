@@ -16,6 +16,11 @@ pub trait Map<T> {
         Self: 'a,
         T: 'a;
 
+    /// Iterator over references to keys.
+    type KeysIter<'a>: Iterator<Item = &'a String>
+    where
+        Self: 'a;
+
     /// Owned iterator consuming the map.
     type IntoIter: Iterator<Item = KvEntry<T>>;
 
@@ -35,6 +40,8 @@ pub trait Map<T> {
 
     fn clear(&mut self);
 
+    fn keys(&self) -> Self::KeysIter<'_>;
+
     fn values(&self) -> Self::Iter<'_>;
 
     fn into_values(self) -> Self::IntoIter;
@@ -46,6 +53,10 @@ impl<T> Map<T> for BTreeMap<String, KvEntry<T>> {
     where
         Self: 'a,
         T: 'a;
+    type KeysIter<'a>
+        = btree_map::Keys<'a, String, KvEntry<T>>
+    where
+        Self: 'a;
     type IntoIter = btree_map::IntoValues<String, KvEntry<T>>;
 
     #[inline]
@@ -89,6 +100,11 @@ impl<T> Map<T> for BTreeMap<String, KvEntry<T>> {
     }
 
     #[inline]
+    fn keys(&self) -> Self::KeysIter<'_> {
+        self.keys()
+    }
+
+    #[inline]
     fn values(&self) -> Self::Iter<'_> {
         self.values()
     }
@@ -108,6 +124,10 @@ where
     where
         Self: 'a,
         T: 'a;
+    type KeysIter<'a>
+        = hash_map::Keys<'a, String, KvEntry<T>>
+    where
+        Self: 'a;
     type IntoIter = hash_map::IntoValues<String, KvEntry<T>>;
 
     #[inline]
@@ -148,6 +168,11 @@ where
     #[inline]
     fn clear(&mut self) {
         self.clear();
+    }
+
+    #[inline]
+    fn keys(&self) -> Self::KeysIter<'_> {
+        self.keys()
     }
 
     #[inline]

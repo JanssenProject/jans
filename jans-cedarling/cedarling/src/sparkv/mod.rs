@@ -195,7 +195,7 @@ where
 
     #[must_use]
     pub fn get_keys(&self) -> Vec<String> {
-        self.data.values().map(|e| e.key.clone()).collect()
+        self.data.keys().cloned().collect()
     }
 
     /// Return an iterator of (key,value) : (&String,&T).
