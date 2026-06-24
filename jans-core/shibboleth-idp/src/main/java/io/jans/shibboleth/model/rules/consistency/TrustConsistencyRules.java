@@ -37,7 +37,11 @@ public class TrustConsistencyRules {
 
         return List.of(
             RequiredFieldsRule::check,
-            MetadataSourceCompatibilityRule::check
+            MetadataSourceCompatibilityRule::check,
+
+            StatusConstrainedOperations.IncorporateEntityIdsRestrictedToActivating::check,
+            
+            NatureConstrainedOperations.IncorporateDiscoveredEntityIdsRestrictedToAggregate::check
         );
     }
 }

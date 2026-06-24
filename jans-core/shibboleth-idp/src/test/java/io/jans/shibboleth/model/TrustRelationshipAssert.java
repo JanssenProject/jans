@@ -183,8 +183,20 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
 
         if(actual.hasAnyDiscoveredEntityIds()) {
 
-            failWithMessage("TrustRelationship has discovered entityIDs");
+            failWithMessage("TrustRelationship has discovered entityIDs. Expected: none");
         }
+        return this;
+    }
+
+    public TrustRelationshipAssert hasAnyDiscoveredEntityIds() {
+
+        isNotNull();
+
+        if(actual.hasNoDiscoveredEntityIds()) {
+
+            failWithMessage("TrustRelationship has no discovered entityIDs. Expected: at least one");
+        }
+
         return this;
     }
 

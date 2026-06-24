@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.junit.jupiter.api.Tag;
-//import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
 import java.net.URI;
@@ -282,6 +281,26 @@ public class TrustRelationshipTest {
         );
     }
 
+    public static final Stream<Arguments> aggregateTrustRelationshipsNotInActivatingState() {
+
+        return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+        );
+    }
+
+    public static final Stream<Arguments> individualTrustRelationshipsInMultipleStates() {
+
+        return Stream.of(
+            Arguments.of(TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship())
+        );
+    }
     /**
      * Creation Tests
      */
@@ -1002,6 +1021,123 @@ public class TrustRelationshipTest {
             assertThat(updated).isVersion(tr.getVersion().next());
         }
     
+    }
+
+    @Nested
+    @DisplayName("State Transitions -- Discovered Entity IDs Tests")
+    public class DiscoveredEntityIdsTests {
+
+        @Test
+        @DisplayName(
+            "GIVEN an ACTIVATING AGGREGATE TrustRelationship " +
+            "WHEN incorporateDiscoveredEntityIds() is called with new valid entity ids " +
+            "THEN should update the discovered entityids and increment version (no state change) "
+        )
+        public void shouldIncorporateDiscoveredEntityIds_whenInActivatingStateForAggregate() {
+
+            TrustRelationship tr = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+            EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(tr.getDiscoveredEntityIds()).isNotEqualTo(ids);
+
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated.getDiscoveredEntityIds()).isEqualTo(ids);
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @Test
+        @DisplayName(
+            "GIVEN an ACTIVATING AGGREGATE TrustRelationship with existing discovered entity ids " + 
+            "WHEN incorporateDiscoveredEntityIds() is called with the exact same entity ids " +
+            "THEN should be idempotent (no version change , no error)" 
+        )
+        public void shouldBeIdempotent_whenIncorporateDiscoveredEntityIdsWithSameValue() {
+
+            TrustRelationship tr = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationshipWithDiscoveredEntityIds();
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(tr).hasAnyDiscoveredEntityIds();
+
+            EntityIds ids = EntityIds.from(tr.getDiscoveredEntityIds()).build().getValue();
+            assertThat(ids).isEqualTo(tr.getDiscoveredEntityIds());
+
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+
+            assertThat(result.isSuccess()).isTrue();
+
+            TrustRelationship same = result.getValue();
+            assertThat(same.getDiscoveredEntityIds()).isEqualTo(ids);
+            assertThat(same).isVersion(tr.getVersion());
+
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#aggregateTrustRelationshipsNotInActivatingState")
+        @DisplayName(
+            "GIVEN an AGGREGATE TrustRelationship that is not in ACTIVATING state " +
+            "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
+            "THEN should fail with appropriate error"
+        )
+        public void shouldRejectIncorporateDiscoveredEntityIds_whenAggregateNotInActivatingState(TrustRelationship tr) {
+
+            assertThat(tr).isOfAggregateNature();
+            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+
+            EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#individualTrustRelationshipsInMultipleStates")
+        @DisplayName(
+            "GIVEN an INDIVIDUAL TrustRelationship irrespective of state " +
+            "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
+            "THEN should fail with appropriate error "
+        )
+        public void shouldRejectIncorporateDiscoveredEntityIds_whenTrustIsIndividual(TrustRelationship tr) {
+
+            assertThat(tr).isOfIndividualNature();
+
+            EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @Test
+        @DisplayName(
+            "GIVEN an ACTIVATING AGGREGATE TrustRelationship " +
+            "WHEN incorporateDiscoveredEntityIds() is called with null entityIds " +
+            "THEN should fail with the appropriate error"
+        )
+        public void shouldFailIncorporateDiscoveredEntityIdsWhenEntityIdsIsNull() {
+
+            TrustRelationship tr = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(tr).isOfAggregateNature();
+
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        }
     }
 
 }

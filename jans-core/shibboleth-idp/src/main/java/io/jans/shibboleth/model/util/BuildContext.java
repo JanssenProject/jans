@@ -199,6 +199,11 @@ public class BuildContext {
         return operationType == OperationType.FINALIZE_ACTIVATION;
     }
 
+    public boolean incorporateDiscoveredEntityIdsCalled() {
+
+        return operationType == OperationType.INCORPORATE_DISCOVERED_ENTITY_IDS;
+    }
+
     public boolean hasSuccessfulActivationDiagnostics() {
 
         return TrustPredicates.hasSuccessfulActivationDiagnostics(this);
@@ -207,5 +212,40 @@ public class BuildContext {
     public boolean hasFailedActivationDiagnostics() {
 
         return TrustPredicates.hasFailedActivationDiagnostics(this);
+    }
+
+    public boolean isAggregateNature() {
+
+        return TrustPredicates.hasTrustNature(this,TrustNature.AGGREGATE);
+    }
+
+    public boolean isIndividualNature() {
+
+        return TrustPredicates.hasTrustNature(this,TrustNature.INDIVIDUAL);
+    }
+
+    public boolean isDraftStatus() {
+
+        return status == TrustStatus.DRAFT;
+    }
+
+    public boolean isReadyStatus() {
+
+        return status == TrustStatus.READY;
+    }
+
+    public boolean isActivatingStatus() {
+
+        return status == TrustStatus.ACTIVATING;
+    }
+
+    public boolean isActiveStatus() {
+
+        return status == TrustStatus.ACTIVE;
+    }
+
+    public boolean isInactiveStatus() {
+
+        return status == TrustStatus.INACTIVE;
     }
 }

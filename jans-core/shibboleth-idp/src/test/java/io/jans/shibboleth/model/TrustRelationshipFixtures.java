@@ -2,6 +2,8 @@ package io.jans.shibboleth.model;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import io.jans.shibboleth.model.config.profiles.Saml2ArtifactResolutionProfileConfiguration;
@@ -118,11 +120,18 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final TrustRelationship sampleActivatingAggregateTrustRelationshipWithDiscoveredEntityIds() {
+
+        return TrustRelationship.from(sampleActivatingAggregateTrustRelationship())
+            .withDiscoveredEntityIds(sampleEntityIds())
+            .build()
+            .getValue();
+    }
+
     public static final TrustRelationship sampleActiveIndividualTrustRelationship() {
 
         return TrustRelationship.from(sampleActivatingIndividualTrustRelationship())
-            .finalizeActivationCalled()
-            .withActivationDiagnostics(sampleActivationDiagnosticsForSuccessfulActivation())
+            .finalizeActivationCalled(sampleActivationDiagnosticsForSuccessfulActivation())
             .build()
             .getValue();
     }
@@ -130,8 +139,7 @@ public class TrustRelationshipFixtures {
     public static final TrustRelationship sampleActiveAggregateTrustRelationship() {
 
         return TrustRelationship.from(sampleActivatingAggregateTrustRelationship())
-            .finalizeActivationCalled()
-            .withActivationDiagnostics(sampleActivationDiagnosticsForSuccessfulActivation())
+            .finalizeActivationCalled(sampleActivationDiagnosticsForSuccessfulActivation())
             .build()
             .getValue();
     }
@@ -374,6 +382,18 @@ public class TrustRelationshipFixtures {
             .origin(Origin.of("troubledidpinstance@some-host"))
             .logEntries(List.of(entry))
             .status(ActivationStatus.FAILED)
+            .build()
+            .getValue();
+    }
+
+
+    public static final EntityIds sampleEntityIds() {
+
+        Collection<EntityId> ids = new ArrayList<>();
+        ids.add(EntityId.of(URI.create("https://www.google.com")).getValue());
+        ids.add(EntityId.of(URI.create("https://gluu.org")).getValue());
+        return EntityIds.builder()
+            .addAll(ids)
             .build()
             .getValue();
     }

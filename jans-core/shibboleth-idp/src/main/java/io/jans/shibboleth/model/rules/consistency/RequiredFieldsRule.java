@@ -85,6 +85,11 @@ public class RequiredFieldsRule {
             return TrustResult.failure(CannotBeNullOrBlank.forField("activationDiagnostics"));
         }
 
+        if (context.getDiscoveredEntityIds() == null) {
+
+            return TrustResult.failure(CannotBeNullOrBlank.forField("discoveredEntityIds"));
+        }
+
         return TrustResult.success(null);
     }
 }

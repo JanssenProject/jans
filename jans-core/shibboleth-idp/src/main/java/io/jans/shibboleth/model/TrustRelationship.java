@@ -177,7 +177,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
 
         return from(this)
-            .withDiscoveredEntityIds(discoveredEntityIds)
+            .incorporateDiscoveredEntityIdsCalled(discoveredEntityIds)
             .build();
     }
 
@@ -316,7 +316,6 @@ public class TrustRelationship {
 
         return from(this)
             .activateCalled()
-            .withActivationDiagnostics(ActivationDiagnostics.none())
             .build();
     }
 
@@ -337,8 +336,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> finalizeActivation(ActivationDiagnostics activationDiagnostics) {
 
         return from(this)
-            .finalizeActivationCalled()
-            .withActivationDiagnostics(activationDiagnostics)
+            .finalizeActivationCalled(activationDiagnostics)
             .build();
     }
 
@@ -594,6 +592,7 @@ public class TrustRelationship {
 
         public Builder activateCalled() {
 
+            this.activationDiagnostics = ActivationDiagnostics.none();
             this.operationType = OperationType.ACTIVATE;
             return this;
         }
@@ -610,9 +609,17 @@ public class TrustRelationship {
             return this;
         }
 
-        public Builder finalizeActivationCalled() {
+        public Builder finalizeActivationCalled(ActivationDiagnostics activationDiagnostics) {
 
             this.operationType = OperationType.FINALIZE_ACTIVATION;
+            this.activationDiagnostics = activationDiagnostics;
+            return this;
+        }
+
+        public Builder incorporateDiscoveredEntityIdsCalled(EntityIds discoveredEntityIds) {
+
+            this.operationType = OperationType.INCORPORATE_DISCOVERED_ENTITY_IDS;
+            this.discoveredEntityIds = discoveredEntityIds;
             return this;
         }
 
