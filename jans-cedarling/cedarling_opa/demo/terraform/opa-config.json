@@ -7,7 +7,7 @@
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_TTL": 60,
-        "CEDARLING_LOG_LEVEL": "INFO",
+        "CEDARLING_LOG_LEVEL": "DEBUG",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256", "RS256"],
         "CEDARLING_POLICY_STORE_LOCAL_FN": "/app/demo/terraform/policy-store"
       }
