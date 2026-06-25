@@ -25,6 +25,9 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+// is reexported in hidden bindings module
+#[doc(hidden)]
+pub mod sparkv;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(feature = "blocking")]
@@ -55,10 +58,10 @@ use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
-use init::policy_store::{load_policy_store, LoadedPolicyStore};
+use init::policy_store::{LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
-    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
-    RefreshWorkerSeed, WorkerContext,
+    AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
+    spawn_refresh_worker,
 };
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -70,6 +73,13 @@ pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
 
+/// Git commit hash at build time (`None` if git is unavailable or
+/// `CEDARLING_BUILD_COMMIT` was not set at compile time).
+pub const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
+/// Build timestamp in RFC 3339 format (`None` if
+/// `CEDARLING_BUILD_TIMESTAMP` was not set at compile time).
+pub const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
+
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -79,6 +89,7 @@ pub mod bindings {
     };
     pub use crate::common::policy_store::PolicyStore;
     pub use crate::http::spawn_task;
+    pub use crate::sparkv;
     pub use serde_json;
     pub use serde_yaml_ng;
 }
@@ -166,6 +177,15 @@ impl Cedarling {
             config.http_client_config,
         )
         .await?;
+
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message("Cedarling initialization started".to_string())
+            .set_build_info(BUILD_COMMIT, BUILD_TIMESTAMP),
+        );
 
         // Bootstrap-load: build HttpClient + load policy store. Returns the
         // service config plus the refresh-worker seed in one shot so the
@@ -295,7 +315,9 @@ impl Cedarling {
 
 impl TrustedIssuerLoadingInfo for Cedarling {
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.authz.load().is_trusted_issuer_loaded_by_name(issuer_id)
+        self.authz
+            .load()
+            .is_trusted_issuer_loaded_by_name(issuer_id)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -344,15 +366,21 @@ async fn perform_bootstrap_load(
     let (http_client, loaded) = raw_load
         .inspect(|_| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, None))
-                    .set_message("configuration parsed successfully".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message("configuration parsed successfully".to_string()),
             );
         })
         .inspect_err(|err| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_error(err.to_string())
-                    .set_message("configuration parsed with error".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_error(err.to_string())
+                .set_message("configuration parsed with error".to_string()),
             );
         })?;
 

@@ -1,12 +1,25 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "cedarling_pg", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
+members = [
+    "bindings/*",
+    "cedarling",
+    "cedarling_pg",
+    "cedarling_pg_codegen",
+    "http_utils",
+    "test_utils",
+]
 # cedarling_pg requires `cargo pgrx init` (a managed Postgres install) before its
 # pgrx-pg-sys build script will succeed. Excluding it from default-members keeps
 # `cargo build/test/bench/dylint` at the workspace root working without that setup.
 # It's still a workspace member, so `cargo build -p cedarling_pg` and the dedicated
 # postgres_extension_tests CI job still target it explicitly.
-default-members = ["bindings/*", "cedarling", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
+default-members = [
+    "bindings/*",
+    "cedarling",
+    "cedarling_pg_codegen",
+    "http_utils",
+    "test_utils",
+]
 exclude = ["bindings/cedarling-java", "custom-lints"]
 
 [workspace.dependencies]
@@ -14,7 +27,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
 derive_more = "2.1.1"
-sparkv = { path = "sparkv" }
 jsonwebtoken = { version = "10.3.0", features = [
     "rust_crypto",
     "use_pem",

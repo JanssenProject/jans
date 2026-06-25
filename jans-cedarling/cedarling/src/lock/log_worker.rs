@@ -18,7 +18,7 @@ use http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::time::sleep;
+use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
@@ -57,6 +57,10 @@ where
         mut rx: mpsc::Receiver<SerializedAuditEntry>,
         cancel_tkn: CancellationToken,
     ) {
+        let mut flush_tick = interval(self.audit_interval);
+        flush_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+        flush_tick.tick().await;
+
         loop {
             tokio::select! {
                 entry = rx.next() => {
@@ -65,11 +69,14 @@ where
                 },
 
                 // Send logs to the server
-                () = sleep(self.audit_interval) => {
+                _ = flush_tick.tick() => {
                     self.flush(&cancel_tkn).await;
                 },
 
                 () = cancel_tkn.cancelled() => {
+                    while let Ok(entry) = rx.try_recv() {
+                        self.buffer.push_back(entry);
+                    }
                     self.flush(&cancel_tkn).await;
                     self.logger
                         .as_ref()
