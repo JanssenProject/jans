@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::BTreeSparKV;
 use super::Config;
-use super::SparKV;
 
 #[cfg(test)]
 fn json_value_size(value: &serde_json::Value) -> usize {
@@ -90,7 +90,7 @@ fn second_json() -> serde_json::Value {
 fn simple_serde_json() {
     let config: Config = Config::new();
     let mut sparkv =
-        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+        BTreeSparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
     sparkv.set("first", json.clone(), &[]).unwrap();
     let stored_first = sparkv.get("first").unwrap();
@@ -106,7 +106,7 @@ fn type_serde_json() {
 
     let config: Config = Config::new();
     let mut sparkv =
-        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+        BTreeSparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
     sparkv.set("first", json.clone(), &[]).unwrap();
 
@@ -128,7 +128,7 @@ fn fails_size_calculator() {
     // set item size to something smaller than item
     config.max_item_size = json_value_size(&json) / 2;
     let mut sparkv =
-        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+        BTreeSparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
 
     let error = sparkv
         .set("first", json.clone(), &[])
@@ -141,7 +141,7 @@ fn fails_size_calculator() {
 
 #[test]
 fn two_json_items() {
-    let mut sparkv = SparKV::<serde_json::Value>::new();
+    let mut sparkv = BTreeSparKV::<serde_json::Value>::new();
     sparkv.set("first", first_json(), &[]).unwrap();
     sparkv.set("second", second_json(), &[]).unwrap();
 
@@ -162,7 +162,7 @@ fn two_json_items() {
 
 #[test]
 fn drain_all_json_items() {
-    let mut sparkv = SparKV::<serde_json::Value>::new();
+    let mut sparkv = BTreeSparKV::<serde_json::Value>::new();
     sparkv.set("first", first_json(), &[]).unwrap();
     sparkv.set("second", second_json(), &[]).unwrap();
 
@@ -180,7 +180,7 @@ fn drain_all_json_items() {
 #[test]
 fn rc_json_items() {
     use std::rc::Rc;
-    let mut sparkv = SparKV::<Rc<serde_json::Value>>::new();
+    let mut sparkv = BTreeSparKV::<Rc<serde_json::Value>>::new();
     sparkv.set("first", Rc::new(first_json()), &[]).unwrap();
     sparkv.set("second", Rc::new(second_json()), &[]).unwrap();
 

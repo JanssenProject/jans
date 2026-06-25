@@ -18,7 +18,7 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::{Mutex, OnceLock};
 
-use cedarling::bindings::sparkv::{Config as SparKvConfig, SparKV};
+use cedarling::bindings::sparkv::{Config as SparKvConfig, HashMapSparKV};
 use chrono::Duration as ChronoDuration;
 
 use crate::guc_config;
@@ -108,7 +108,7 @@ fn sparkv_config_for_authz_cache(max_entries: usize) -> SparKvConfig {
 
 /// Per-backend-process decision cache (shared across connections in the same `PostgreSQL` backend).
 pub(crate) struct AuthzDecisionCache {
-    inner: Mutex<SparKV<bool>>,
+    inner: Mutex<HashMapSparKV<bool>>,
     enabled: bool,
 }
 
@@ -116,7 +116,7 @@ impl AuthzDecisionCache {
     fn new() -> Self {
         let max_entries = configured_cache_size();
         Self {
-            inner: Mutex::new(SparKV::with_config(sparkv_config_for_authz_cache(
+            inner: Mutex::new(HashMapSparKV::with_config(sparkv_config_for_authz_cache(
                 max_entries,
             ))),
             enabled: max_entries > 0,

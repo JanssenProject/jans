@@ -14,7 +14,7 @@ use crate::common::issuer_utils::IssClaim;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
 use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
-use crate::sparkv::{Config, SparKV};
+use crate::sparkv::{Config, HashMapSparKV};
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
@@ -22,7 +22,7 @@ use crate::sparkv::{Config, SparKV};
 /// based on token expiration claims and a configurable maximum TTL.
 #[derive(Clone)]
 pub(crate) struct TokenCache {
-    cache: Option<Arc<RwLock<SparKV<Arc<Token>>>>>,
+    cache: Option<Arc<RwLock<HashMapSparKV<Arc<Token>>>>>,
     max_ttl: usize,
     logger: Option<Logger>,
     metrics: Arc<MetricsCollector>,
@@ -59,7 +59,7 @@ impl TokenCache {
         metrics: Arc<MetricsCollector>,
     ) -> Self {
         let cache = (max_ttl > 0).then(|| {
-            Arc::new(RwLock::new(SparKV::with_config(Config {
+            Arc::new(RwLock::new(HashMapSparKV::with_config(Config {
                 max_ttl: Duration::seconds(i64::try_from(max_ttl).unwrap_or_default()),
                 max_items: capacity,
                 earliest_expiration_eviction,
@@ -226,9 +226,11 @@ impl TokenCache {
     }
 }
 
-/// Hash a string using `ahash` and return the hash value as a string
-/// This is used to create a key for caching tokens
-/// The hash value is used instead of the original string to have shorter keys for [`SparKV`] which utilizes `BTree`.
+/// Hash a string using `ahash` and return the hash value as a string.
+///
+/// Pre-hashing JWT keys reduces their size from potentially kilobytes down to
+/// ~20 bytes, saving memory in the backing `HashMap` and making subsequent hash
+/// computations cheaper during lookups.
 fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
     use core::hash::BuildHasher;
     use std::hash::Hasher;
