@@ -1048,7 +1048,8 @@ mod tests {
         let ti = TrustedIssuer::new(
             "TestIssuer".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com").unwrap(),
+            Url::parse("https://test.issuer.com")
+                .expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
@@ -1057,7 +1058,7 @@ mod tests {
             None, // no schema — exercises the no-schema path
             DefaultEntities::default(),
         )
-        .unwrap();
+        .expect("should create entity builder without schema");
 
         // ── Token: jti and sub are deliberately different ──────────────
         let iss = "https://test.issuer.com";
@@ -1077,7 +1078,7 @@ mod tests {
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
             .build_single_token_entity(&token, &built_entities)
-            .unwrap();
+            .expect("should build token entity without schema");
 
         // ── Verify jti attr = entity_id (NOT the raw jwt jti) ─────────
         // entity_id = "entity-sub-uid" (because token_id = "sub")
@@ -1150,7 +1151,8 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com").unwrap(),
+            Url::parse("https://test.issuer.com")
+                .expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
@@ -1159,7 +1161,7 @@ mod tests {
             Some(&validator_schema),
             DefaultEntities::default(),
         )
-        .unwrap();
+        .expect("should create entity builder with schema");
 
         let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
@@ -1182,7 +1184,7 @@ mod tests {
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
             .build_single_token_entity(&token, &built_entities)
-            .unwrap();
+            .expect("should build token entity with schema path");
 
         // ── Prove the schema path was actually taken ──────────────────
         // `extra_test_claim` is NOT in the schema shape → in the schema
@@ -1272,7 +1274,8 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com").unwrap(),
+            Url::parse("https://test.issuer.com")
+                .expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
@@ -1281,7 +1284,7 @@ mod tests {
             Some(&validator_schema),
             DefaultEntities::default(),
         )
-        .unwrap();
+        .expect("should create entity builder with schema for missing jti test");
 
         let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
