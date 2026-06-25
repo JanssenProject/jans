@@ -215,10 +215,11 @@ impl Authz {
             decision: authz_result.decision().into(),
         };
 
-        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
-
-        // measure time how long request executes
+        // measure time how long request executes, before the result clone so the
+        // clone cost is excluded from the latency measurement
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
+
+        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -375,10 +376,11 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
-        let result = AuthorizeResult::new(response.clone(), request_id);
-
-        // measure time how long request executes
+        // measure time how long request executes, before the result clone so the
+        // clone cost is excluded from the latency measurement
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
+
+        let result = AuthorizeResult::new(response.clone(), request_id);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -431,7 +433,7 @@ impl Authz {
             &DebugLogMetadata {
                 action: request.action.clone(),
                 resource: resource_uid.to_string(),
-                context: request.context.clone(),
+                context: &request.context,
                 entities: &entities,
                 debug_authz_info: debug_authorize_info,
                 decision: result.decision,
@@ -753,7 +755,7 @@ struct DecisionLogMetadata<'a> {
 struct DebugLogMetadata<'a> {
     action: String,
     resource: String,
-    context: serde_json::Value,
+    context: &'a serde_json::Value,
     entities: &'a Entities,
     debug_authz_info: Vec<AuthorizeInfo>,
     decision: bool,
