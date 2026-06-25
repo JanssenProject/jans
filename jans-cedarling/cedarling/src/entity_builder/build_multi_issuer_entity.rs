@@ -75,12 +75,13 @@ fn create_string_set_array(values: &[String]) -> RestrictedExpression {
 
 const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
 
-/// Add reserved claims to entity attributes based on schema shape
+/// Add reserved claims to entity attributes based on schema shape.
 fn add_reserved_claims(
     attrs: &mut HashMap<String, RestrictedExpression>,
     token: &Token,
     entity_id: &str,
     attrs_shape_opt: Option<&HashMap<smol_str::SmolStr, schema::AttrsShape>>,
+    validated_at_ts: i64,
 ) -> Result<(), MultiIssuerEntityError> {
     const TOKEN_TYPE: &str = "token_type";
     const JTI_CLAIM: &str = "jti";
@@ -150,10 +151,9 @@ fn add_reserved_claims(
 
         // add validated_at claim
         if attrs_shape.contains_key(VALIDATED_AT_CLAIM) {
-            let validated_at = chrono::Utc::now().timestamp();
             attrs.insert(
                 VALIDATED_AT_CLAIM.to_string(),
-                RestrictedExpression::new_long(validated_at),
+                RestrictedExpression::new_long(validated_at_ts),
             );
         }
     } else {
@@ -190,10 +190,9 @@ fn add_reserved_claims(
             attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
         }
 
-        let validated_at = chrono::Utc::now().timestamp();
         attrs.insert(
             VALIDATED_AT_CLAIM.to_string(),
-            RestrictedExpression::new_long(validated_at),
+            RestrictedExpression::new_long(validated_at_ts),
         );
     }
 
@@ -361,6 +360,8 @@ impl EntityBuilder {
 
         let claims = token.claims_value();
 
+        let validated_at_ts = chrono::Utc::now().timestamp();
+
         // Build entity attributes using the same logic as regular entity builder.
         // Schema path: borrow claims directly and overlay synthetic entries
         // (`token_type`, `validated_at`, `jti`) via a lookup closure to avoid
@@ -368,7 +369,7 @@ impl EntityBuilder {
         // No-schema path: fall back to the existing iter-all flow.
         let mut attrs = if let Some(shape) = attrs_shape {
             let token_type_val = Value::String(token.name.clone());
-            let validated_at_val = Value::Number(chrono::Utc::now().timestamp().into());
+            let validated_at_val = Value::Number(validated_at_ts.into());
             let jti_val = Value::String(entity_id.clone());
             super::build_entity_attrs::build_entity_attrs_with_shape_lookup(
                 |name| match name {
@@ -387,14 +388,14 @@ impl EntityBuilder {
             all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
             all_claims.insert(
                 "validated_at".to_string(),
-                Value::Number(chrono::Utc::now().timestamp().into()),
+                Value::Number(validated_at_ts.into()),
             );
             super::build_entity_attrs::build_entity_attrs(&all_claims, built_entities, None)?
         };
 
         // Overwrite reserved claims with correctly-typed values
         // (e.g. iss as entity UID in no-schema case, jti as entity_id, etc.)
-        add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape)?;
+        add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape, validated_at_ts)?;
 
         // Create entity tags for non-reserved JWT claims.
         let mut tags = HashMap::new();
