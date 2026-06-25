@@ -30,15 +30,10 @@ class GoogleSecret(BaseSecret):
 
     Supported environment variables:
 
-    - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Deprecated in favor of `CN_GOOGLE_SECRET_VERSION_ID`.
-    - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Deprecated in favor of `CN_GOOGLE_SECRET_NAME_PREFIX`.
-    - `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Deprecated in favor of `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`.
-
     - `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
     - `GOOGLE_PROJECT_ID`: ID of Google project.
     - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
     - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-    - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
     """
 
     def __init__(self) -> None:
@@ -67,20 +62,6 @@ class GoogleSecret(BaseSecret):
         # secrets key value by default
         self.google_secret_name = f"{prefix}-secret"
 
-        # the following attributes are deprecated and will be removed in the future
-        if "CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE" in os.environ:
-            logger.warning(
-                "Found CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE environment variable. "
-                "Note that this environment variable is deprecated in favor of "
-                "CN_GOOGLE_SECRET_MANAGER_PASSPHRASE and soon will be removed."
-            )
-            self.passphrase = os.environ["CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE"] or "secret"
-        else:
-            self.passphrase = os.getenv("CN_GOOGLE_SECRET_MANAGER_PASSPHRASE", "secret")  # NOSONAR the phrase can be overriden via env
-
-        self.salt = os.urandom(16)
-        self.key = self._set_key()
-
         # max payload size (currently 64K)
         self.max_payload_size = 65_536
 
@@ -102,14 +83,6 @@ class GoogleSecret(BaseSecret):
     def client(self) -> secretmanager.SecretManagerServiceClient:
         """Create the Secret Manager client."""
         return secretmanager.SecretManagerServiceClient()
-
-    def _set_key(self) -> bytes:
-        """Return key for for encrypting and decrypting payload.
-
-        Returns:
-            key
-        """
-        return hashlib.pbkdf2_hmac("sha256", self.passphrase.encode("utf8"), self.salt, 1000)
 
     def get_all(self) -> dict[str, _t.Any]:
         """Access the payload for the given secret version if one exists.
