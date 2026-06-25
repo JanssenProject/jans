@@ -363,19 +363,30 @@ impl EntityBuilder {
         let validated_at_ts = chrono::Utc::now().timestamp();
 
         // Build entity attributes using the same logic as regular entity builder.
-        // Schema path: borrow claims directly and overlay synthetic entries
-        // (`token_type`, `validated_at`, `jti`) via a lookup closure to avoid
-        // cloning every claim into a temporary HashMap on the hot path.
+        //
+        // The closure below is a **read-only data source** — it supplies raw
+        // claim values to the schema-driven builder.  It MUST NOT pre-resolve
+        // reserved claims (`jti`, `iss`, `exp`); that is the sole responsibility
+        // of `add_reserved_claims` below.
+        //
+        // Schema path: borrow claims from the token and overlay the two
+        // synthetic entries (`token_type`, `validated_at`) via the closure,
+        // avoiding a full clone of every claim into a temporary HashMap.
         // No-schema path: fall back to the existing iter-all flow.
         let mut attrs = if let Some(shape) = attrs_shape {
             let token_type_val = Value::String(token.name.clone());
             let validated_at_val = Value::Number(validated_at_ts.into());
+            // `jti` may be required by the schema but absent from the JWT
+            // claims (e.g. when token_id is sourced from `sub`).  The
+            // schema-path builder fails hard on missing required attrs,
+            // so we fall back to `entity_id` here.  `add_reserved_claims`
+            // overwrites the final value anyway.
             let jti_val = Value::String(entity_id.clone());
             super::build_entity_attrs::build_entity_attrs_with_shape_lookup(
                 |name| match name {
                     "token_type" => Some(&token_type_val),
                     "validated_at" => Some(&validated_at_val),
-                    "jti" => Some(&jti_val),
+                    "jti" => claims.get("jti").or(Some(&jti_val)),
                     other => claims.get(other),
                 },
                 built_entities,
@@ -393,8 +404,16 @@ impl EntityBuilder {
             super::build_entity_attrs::build_entity_attrs(&all_claims, built_entities, None)?
         };
 
-        // Overwrite reserved claims with correctly-typed values
-        // (e.g. iss as entity UID in no-schema case, jti as entity_id, etc.)
+        // ── Reserved-claims overwrite ──────────────────────────────────
+        // `add_reserved_claims` is the **single authority** that injects
+        // `token_type`, `jti`, `iss`, `exp`, and `validated_at` into `attrs`
+        // with their final, correctly-typed values.  Whatever the schema path
+        // (or no-schema path) placed in `attrs` for these keys gets overwritten
+        // here — this is by design.
+        //
+        // If you change the closure above to pre-resolve any of these keys
+        // you will create dead work and confuse future readers: the value
+        // will be computed twice and the second result (here) wins.
         add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape, validated_at_ts)?;
 
         // Create entity tags for non-reserved JWT claims.
