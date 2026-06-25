@@ -34,7 +34,7 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.104.1",
+    "@anthropic-ai/sdk": "^0.106.0",
     "@janssenproject/cedarling_wasm": "0.0.404",
     "@modelcontextprotocol/sdk": "^1.23.0",
     "adm-zip": "^0.5.10",
