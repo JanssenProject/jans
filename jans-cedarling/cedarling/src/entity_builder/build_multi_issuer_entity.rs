@@ -1173,10 +1173,7 @@ mod tests {
         // This claim is deliberately NOT in the schema shape.  In the
         // schema path it stays out of `attrs`; in the no-schema path
         // it would become an attribute.  We assert it is absent below.
-        claims.insert(
-            "extra_test_claim".to_string(),
-            json!("should-not-be-attr"),
-        );
+        claims.insert("extra_test_claim".to_string(), json!("should-not-be-attr"));
         let token = Token::new(
             "Jans::Access_Token",
             TokenClaims::from(claims),
