@@ -30,9 +30,11 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
-import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
-import io.jans.lock.model.config.AppConfiguration;
+import io.jans.core.cedarling.model.CedarlingPermission;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
+
+//import io.jans.lock.model.config.AppConfiguration;
+
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.util.exception.MissingResourceException;

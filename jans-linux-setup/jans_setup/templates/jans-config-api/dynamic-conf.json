@@ -101,8 +101,18 @@
     ]
   },
   "cedarAuthConfig": {
+  	"enabled": true,
     "applicationName": "jans-config-api",
-    "policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json"
+		"policySources": [
+			{
+				"enabled": false,
+				"authorizationToken": "",
+				"policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json"
+			}
+		],
+		"logType": "STD_OUT",
+		"logLevel": "INFO",
+		"externalPolicyStoreUri": ""
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,

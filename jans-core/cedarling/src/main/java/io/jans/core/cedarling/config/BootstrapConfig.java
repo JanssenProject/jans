@@ -11,14 +11,10 @@ import java.util.Arrays;
 /**
  * Cedarling BootstrapConfig builder
  *
- * @author Yuriy Movchan Date: 12/18/2025
  */
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-// import io.jans.lock.model.config.cedarling.LockTransport;
-// import io.jans.lock.model.config.cedarling.LogLevel;
-// import io.jans.lock.model.config.cedarling.LogType;
 
 /**
  * Configuration class for Cedarling initialization using Enums for Logging.
@@ -43,18 +39,12 @@ public class BootstrapConfig {
     public static final String CEDARLING_JWT_STATUS_VALIDATION = "CEDARLING_JWT_STATUS_VALIDATION";
     public static final String CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED";
 
-    public static final String CEDARLING_LOCK = "CEDARLING_LOCK";
-    public static final String CEDARLING_LOCK_SERVER_CONFIGURATION_URI = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI";
-    public static final String CEDARLING_LOCK_TRANSPORT = "CEDARLING_LOCK_TRANSPORT";
-    public static final String CEDARLING_LOCK_SSA_JWT = "CEDARLING_LOCK_SSA_JWT";
-    public static final String CEDARLING_LOCK_ACCESS_TOKEN_JWT = "CEDARLING_LOCK_ACCESS_TOKEN_JWT";
+    public static final String CEDARLING_SERVER_CONFIGURATION_URI = "CEDARLING_SERVER_CONFIGURATION_URI";
+    public static final String CEDARLING_TRANSPORT = "CEDARLING_TRANSPORT";
+    public static final String CEDARLING_SSA_JWT = "CEDARLING_SSA_JWT";
+    public static final String CEDARLING_ACCESS_TOKEN_JWT = "CEDARLING_ACCESS_TOKEN_JWT";
     
-    public static final String CEDARLING_LOCK_HEALTH_INTERVAL = "CEDARLING_LOCK_HEALTH_INTERVAL";
-    public static final String CEDARLING_LOCK_DYNAMIC_CONFIGURATION = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION";
-    public static final String CEDARLING_LOCK_TELEMETRY_INTERVAL = "CEDARLING_LOCK_TELEMETRY_INTERVAL";
-    public static final String CEDARLING_LOCK_LISTEN_SSE = "CEDARLING_LOCK_LISTEN_SSE";
-    public static final String CEDARLING_LOCK_ACCEPT_INVALID_CERTS = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS";
-
+   
     public static final String CEDARLING_MAX_DEFAULT_ENTITIES = "CEDARLING_MAX_DEFAULT_ENTITIES";
     public static final String CEDARLING_MAX_BASE64_SIZE = "CEDARLING_MAX_BASE64_SIZE";
 
@@ -74,17 +64,6 @@ public class BootstrapConfig {
     private boolean jwtStatusValidation;
     private String[] jwtSignatureAlgorithmsSupported;
 
-    private boolean lock;
-    private String lockServerConfigurationUri;
-    private LockTransport lockTransport;
-    private boolean lockAcceptInvalidCerts;
-    private String lockSsaJwt;
-    private String lockAccessTokenJwt;
-    private boolean lockDynamicConfiguration;
-    private int lockHealthInterval;
-    private int lockTelemetryInterval;
-    private boolean lockListenSse;
-
     private int maxDefaultEntities;
     private long maxBase64Size;
 
@@ -102,18 +81,7 @@ public class BootstrapConfig {
         this.jwtSigValidation = builder.jwtSigValidation;
         this.jwtStatusValidation = builder.jwtStatusValidation;
         this.jwtSignatureAlgorithmsSupported = builder.jwtSignatureAlgorithmsSupported;
-
-        this.lock = builder.lock;
-        this.lockServerConfigurationUri = builder.lockServerConfigurationUri;
-        this.lockTransport = builder.lockTransport;
-        this.lockSsaJwt = builder.lockSsaJwt;
-        this.lockAccessTokenJwt = builder.lockAccessTokenJwt;
-        this.lockAcceptInvalidCerts = builder.lockAcceptInvalidCerts;
-        this.lockDynamicConfiguration = builder.lockDynamicConfiguration;
-        this.lockHealthInterval = builder.lockHealthInterval;
-        this.lockTelemetryInterval = builder.lockTelemetryInterval;
-        this.lockListenSse = builder.lockListenSse;
-
+    
         this.maxDefaultEntities = builder.maxDefaultEntities;
         this.maxBase64Size = builder.maxBase64Size;
     }
@@ -142,17 +110,6 @@ public class BootstrapConfig {
         jo.put(CEDARLING_JWT_SIG_VALIDATION, toEnabled(jwtSigValidation));
         jo.put(CEDARLING_JWT_STATUS_VALIDATION, toEnabled(jwtStatusValidation));
         jo.put(CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED, new JSONArray(Arrays.asList(jwtSignatureAlgorithmsSupported)));
-        
-        jo.put(CEDARLING_LOCK, toEnabled(lock));
-        jo.put(CEDARLING_LOCK_SERVER_CONFIGURATION_URI, lockServerConfigurationUri);
-        jo.put(CEDARLING_LOCK_TRANSPORT, lockTransport.getType());
-        jo.put(CEDARLING_LOCK_SSA_JWT, lockSsaJwt);
-        jo.put(CEDARLING_LOCK_ACCESS_TOKEN_JWT, lockAccessTokenJwt);
-        jo.put(CEDARLING_LOCK_ACCEPT_INVALID_CERTS, toEnabled(lockAcceptInvalidCerts));
-        jo.put(CEDARLING_LOCK_DYNAMIC_CONFIGURATION, toEnabled(lockDynamicConfiguration));
-        jo.put(CEDARLING_LOCK_HEALTH_INTERVAL, lockHealthInterval);
-        jo.put(CEDARLING_LOCK_TELEMETRY_INTERVAL, lockTelemetryInterval);
-        jo.put(CEDARLING_LOCK_LISTEN_SSE, toEnabled(lockListenSse));
 
         jo.put(CEDARLING_MAX_DEFAULT_ENTITIES, maxDefaultEntities);
         jo.put(CEDARLING_MAX_BASE64_SIZE, maxBase64Size);
@@ -179,16 +136,7 @@ public class BootstrapConfig {
         private boolean jwtSigValidation = true;
         private boolean jwtStatusValidation = false;
         private String[] jwtSignatureAlgorithmsSupported = {"HS256", "RS256"};
-        private boolean lock = false;
-        private String lockServerConfigurationUri = null;
-        private LockTransport lockTransport = LockTransport.REST;
-        private boolean lockAcceptInvalidCerts = false;
-        private String lockSsaJwt;
-        private String lockAccessTokenJwt;
-        private boolean lockDynamicConfiguration = false;
-        private int lockHealthInterval = 0;
-        private int lockTelemetryInterval = 0;
-        private boolean lockListenSse = false;
+
         private int maxDefaultEntities = 1000;
         private long maxBase64Size = 1048576L;
 
@@ -205,16 +153,7 @@ public class BootstrapConfig {
         public Builder jwtSigValidation(boolean jwtSigValidation) { this.jwtSigValidation = jwtSigValidation; return this; }
         public Builder jwtStatusValidation(boolean jwtStatusValidation) { this.jwtStatusValidation = jwtStatusValidation; return this; }
         public Builder jwtSignatureAlgorithmsSupported(String[] algorithms) { this.jwtSignatureAlgorithmsSupported = algorithms; return this; }
-        public Builder lock(boolean lock) { this.lock = lock; return this; }
-        public Builder lockServerConfigurationUri(String uri) { this.lockServerConfigurationUri = uri; return this; }
-        public Builder lockLockTransport(LockTransport lockTransport) { this.lockTransport = lockTransport; return this; }
-        public Builder lockAcceptInvalidCerts(boolean lockAcceptInvalidCerts) { this.lockAcceptInvalidCerts = lockAcceptInvalidCerts; return this; }
-        public Builder lockSsaJwt(String lockSsaJwt) { this.lockSsaJwt = lockSsaJwt; return this; }
-        public Builder lockAccessTokenJwt(String lockAccessTokenJwt) { this.lockAccessTokenJwt = lockAccessTokenJwt; return this; }
-        public Builder lockDynamicConfiguration(boolean dynamic) { this.lockDynamicConfiguration = dynamic; return this; }
-        public Builder lockHealthInterval(int interval) { this.lockHealthInterval = interval; return this; }
-        public Builder lockTelemetryInterval(int interval) { this.lockTelemetryInterval = interval; return this; }
-        public Builder lockListenSse(boolean listenSse) { this.lockListenSse = listenSse; return this; }
+        
         public Builder maxDefaultEntities(int max) { this.maxDefaultEntities = max; return this; }
         public Builder maxBase64Size(long size) { this.maxBase64Size = size; return this; }
 

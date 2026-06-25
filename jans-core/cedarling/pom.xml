@@ -4,11 +4,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jans-lock-cedarling</artifactId>
-	<name>Jans Lock Cedarling service</name>
+	<artifactId>jans-core-cedarling</artifactId>
+	<name>Jans Core Cedarling service</name>
 
 	<parent>
-		<artifactId>jans-lock-server-parent</artifactId>
+		<artifactId>jans-core-parent</artifactId>
 		<groupId>io.jans</groupId>
 		<version>0.0.0-nightly</version>
 	</parent>
@@ -84,7 +84,7 @@
 		<!-- Jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-model</artifactId>
+			<artifactId>jans-core-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>

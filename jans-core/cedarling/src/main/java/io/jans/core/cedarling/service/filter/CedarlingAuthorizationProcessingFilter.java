@@ -60,7 +60,7 @@ public abstract class CedarlingAuthorizationProcessingFilter implements Containe
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException;
 	
-    private defaut String extractBearerToken() {
+    protected String extractBearerToken() {
         String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
         
         if (StringUtils.isEmpty(authHeader)) {

@@ -4,7 +4,7 @@
  * Copyright (c) 2025, Janssen Project
  */
 
-package io.jans.lock.cedarling.service;
+package io.jans.core.cedarling.service;
 
 import java.util.Collections;
 import java.util.Map;
@@ -14,10 +14,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
-import io.jans.lock.cedarling.config.BootstrapConfig;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.config.BootstrapConfig;
+
+// import io.jans.lock.model.config.AppConfiguration;
+
+import io.jans.core.model.config.cedarling.CedarlingConfiguration;
+import io.jans.core.model.config.cedarling.CedarlingPolicyConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
