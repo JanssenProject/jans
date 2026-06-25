@@ -153,7 +153,10 @@ fn build_expr_from_value(
             Ok(Some(RestrictedExpression::new_record(fields)?))
         },
         ExpectedClaimType::Extension(name) => {
-            let val = src.as_str().unwrap();
+            let val = src.as_str().ok_or_else(|| TypeMismatchError {
+                expected: "string".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
             let expr = match name.as_str() {
                 "decimal" => Some(RestrictedExpression::new_decimal(val)),
                 "ipaddr" => Some(RestrictedExpression::new_ip(val)),

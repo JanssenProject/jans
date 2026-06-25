@@ -7,9 +7,9 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::time::Duration as StdDuration;
 
+use crate::sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
-use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 
 use crate::authz::metrics::MetricsCollector;
 

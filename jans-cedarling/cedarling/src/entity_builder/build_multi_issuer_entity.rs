@@ -333,8 +333,6 @@ impl EntityBuilder {
         Ok(AuthorizeEntitiesData {
             issuers,
             tokens: token_entities,
-            workload: None,
-            user: None,
             resource,
             default_entities: self.default_entities.clone(),
         })

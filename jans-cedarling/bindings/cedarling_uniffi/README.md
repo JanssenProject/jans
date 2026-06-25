@@ -105,9 +105,12 @@ Cedarling supports multiple ways to load policy stores:
 ```json
 {
   "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store"
+  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+  "CEDARLING_POLICY_STORE_REFRESH_INTERVAL": 60
 }
 ```
+
+> The optional `CEDARLING_POLICY_STORE_REFRESH_INTERVAL` (seconds) enables periodic re-fetch and atomic swap of the policy store for URL-based sources. Default `0` keeps the load-once-at-startup behavior. See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#refreshing-the-policy-store) for full semantics.
 
 #### New Directory-Based Format
 

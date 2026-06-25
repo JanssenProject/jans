@@ -25,14 +25,13 @@ serde = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde_yaml_ng = "0.10.0"
 thiserror = { workspace = true }
-sparkv = { workspace = true }
 uuid7 = { version = "1.6.0", features = [
     "serde",
     "uuid",
     "rand010",
 ], default-features = false }
-cedar-policy = { version = "4.10.0", features = ["partial-eval"] }
-cedar-policy-core = "4.9.0"
+cedar-policy = { version = "4.11.1", features = ["partial-eval"] }
+cedar-policy-core = "4.11.1"
 base64 = "0.22.1"
 url = "2.5.2"
 http_utils = { workspace = true }
@@ -123,6 +122,7 @@ tokio-stream = "0.1.18"
 pprof = { version = "0.15.0", features = ["flamegraph"] }
 
 [build-dependencies]
+chrono = { workspace = true }
 tonic-prost-build = { version = "0.14.3", optional = true }
 
 [package.metadata.cargo-machete]

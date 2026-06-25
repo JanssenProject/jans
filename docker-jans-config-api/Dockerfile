@@ -47,7 +47,10 @@ ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2026-05-04 10:08'
 
-ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-config-api-server-${CN_VERSION}.war
+# Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
+# so the image build need not depend on the GitHub release being populated.
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
@@ -63,7 +66,7 @@ RUN set -e \
     && mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
     && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
     do \
-        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
+        wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
 
 # ===========
@@ -77,7 +80,8 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 

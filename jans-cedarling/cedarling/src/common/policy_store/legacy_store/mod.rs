@@ -451,7 +451,7 @@ pub(crate) struct LegacyPolicyStore {
     pub name: String,
     pub description: Option<String>,
     pub cedar_version: Option<Version>,
-    pub schema: LegacyCedarSchema,
+    pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
@@ -478,11 +478,12 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
         let schema = obj
             .get("schema")
             .or_else(|| obj.get("cedar_schema"))
-            .ok_or_else(|| {
-                de::Error::custom(
-                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
-                )
-            })?;
+            .filter(|v| !v.is_null())
+            .map(|v| {
+                LegacyCedarSchema::deserialize(v)
+                    .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))
+            })
+            .transpose()?;
 
         let policies = obj
             .get("policies")
@@ -510,8 +511,7 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                 .transpose()
                 .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?
                 .flatten(),
-            schema: LegacyCedarSchema::deserialize(schema)
-                .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))?,
+            schema,
             policies: LegacyPoliciesContainer::deserialize(policies)
                 .map_err(|e| de::Error::custom(format!("error parsing policies: {e}")))?,
             trusted_issuers: obj
@@ -539,12 +539,14 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
 
 impl From<LegacyPolicyStore> for super::PolicyStore {
     fn from(v: LegacyPolicyStore) -> Self {
+        let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
         super::PolicyStore {
             version: v.version,
             name: v.name,
             description: v.description,
             cedar_version: v.cedar_version,
-            schema: v.schema.into(),
+            schema_source_exists: schema.is_some(),
+            schema,
             policies: v.policies.into(),
             trusted_issuers: v
                 .trusted_issuers

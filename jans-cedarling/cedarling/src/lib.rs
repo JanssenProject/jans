@@ -25,6 +25,9 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+// is reexported in hidden bindings module
+#[doc(hidden)]
+pub mod sparkv;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(feature = "blocking")]
@@ -55,6 +58,11 @@ use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
+use init::policy_store::{LoadedPolicyStore, load_policy_store};
+use init::policy_store_refresh::{
+    AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
+    spawn_refresh_worker,
+};
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
@@ -65,6 +73,13 @@ pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
 
+/// Git commit hash at build time (`None` if git is unavailable or
+/// `CEDARLING_BUILD_COMMIT` was not set at compile time).
+pub const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
+/// Build timestamp in RFC 3339 format (`None` if
+/// `CEDARLING_BUILD_TIMESTAMP` was not set at compile time).
+pub const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
+
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -74,6 +89,7 @@ pub mod bindings {
     };
     pub use crate::common::policy_store::PolicyStore;
     pub use crate::http::spawn_task;
+    pub use crate::sparkv;
     pub use serde_json;
     pub use serde_yaml_ng;
 }
@@ -108,8 +124,18 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    authz: Arc<Authz>,
+    /// Wrapped in [`ArcSwap`] so the policy-store refresh worker can publish a
+    /// freshly built [`Authz`] (with new policy store, rebuilt JWT service and
+    /// entity builder) atomically. Every public method snapshots via
+    /// [`ArcSwap::load`] so an in-flight authorization keeps using the
+    /// pre-swap instance.
+    authz: Arc<arc_swap::ArcSwap<Authz>>,
     data: Arc<DataStore>,
+    /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
+    /// the worker's `oneshot` shutdown channel so the background refresh loop
+    /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
+    /// the field is intentionally not read.
+    _refresh_handle: Option<Arc<PolicyStoreRefreshHandle>>,
 }
 
 impl Cedarling {
@@ -152,27 +178,20 @@ impl Cedarling {
         )
         .await?;
 
-        let service_config = ServiceConfig::new(config)
-            .await
-            .inspect(|_| {
-                log.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::DEBUG,
-                        None,
-                    ))
-                    .set_message("configuration parsed successfully".to_string()),
-                );
-            })
-            .inspect_err(|err| {
-                log.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::ERROR,
-                        None,
-                    ))
-                    .set_error(err.to_string())
-                    .set_message("configuration parsed with error".to_string()),
-                );
-            })?;
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message("Cedarling initialization started".to_string())
+            .set_build_info(BUILD_COMMIT, BUILD_TIMESTAMP),
+        );
+
+        // Bootstrap-load: build HttpClient + load policy store. Returns the
+        // service config plus the refresh-worker seed in one shot so the
+        // seed values (initial body hash, initial cache validators) stay in
+        // lexical scope right next to the refresh-worker spawn below.
+        let (service_config, refresh_seed) = perform_bootstrap_load(config, &log).await?;
 
         let policy_count = service_config
             .policy_store
@@ -211,10 +230,24 @@ impl Cedarling {
             });
         }
 
+        let authz = service_factory.authz_service().await?;
+        let authz_swap = Arc::new(arc_swap::ArcSwap::from(authz));
+
+        let refresh_handle = maybe_spawn_refresh_worker(
+            config,
+            &service_factory,
+            authz_swap.clone(),
+            log.clone(),
+            data.clone(),
+            metrics.clone(),
+            refresh_seed,
+        );
+
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service().await?,
+            authz: authz_swap,
             data,
+            _refresh_handle: refresh_handle,
         })
     }
 
@@ -230,7 +263,7 @@ impl Cedarling {
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unsigned(&request)
+        self.authz.load().authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
@@ -240,7 +273,7 @@ impl Cedarling {
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.authorize_multi_issuer(&request)
+        self.authz.load().authorize_multi_issuer(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -255,6 +288,7 @@ impl Cedarling {
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.authz
+            .load()
             .get_matching_policies_unsigned(principal, actions, resources)
     }
 
@@ -269,6 +303,7 @@ impl Cedarling {
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.authz
+            .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
@@ -280,28 +315,143 @@ impl Cedarling {
 
 impl TrustedIssuerLoadingInfo for Cedarling {
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+        self.authz
+            .load()
+            .is_trusted_issuer_loaded_by_name(issuer_id)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
-        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+        self.authz.load().is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
     fn total_issuers(&self) -> usize {
-        self.authz.total_issuers()
+        self.authz.load().total_issuers()
     }
 
     fn loaded_trusted_issuers_count(&self) -> usize {
-        self.authz.loaded_trusted_issuers_count()
+        self.authz.load().loaded_trusted_issuers_count()
     }
 
     fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
-        self.authz.loaded_trusted_issuer_ids()
+        self.authz.load().loaded_trusted_issuer_ids()
     }
 
     fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
-        self.authz.failed_trusted_issuer_ids()
+        self.authz.load().failed_trusted_issuer_ids()
     }
+}
+
+/// Build the HTTP client and load the policy store from the bootstrap config.
+/// Returns the parts the rest of `Cedarling::new` needs: the [`ServiceConfig`]
+/// for service-factory construction, and the [`RefreshWorkerSeed`] for the
+/// refresh worker's first-tick short-circuit. Wraps both fallible steps so
+/// the existing "configuration parsed successfully" / "...with error" log
+/// behavior covers the whole bootstrap unit.
+async fn perform_bootstrap_load(
+    config: &BootstrapConfig,
+    log: &log::Logger,
+) -> Result<(ServiceConfig, RefreshWorkerSeed), ServiceConfigError> {
+    let raw_load: Result<(http::HttpClient, LoadedPolicyStore), ServiceConfigError> = async {
+        let http_client = http::HttpClient::new(config.http_client_config)?;
+        let loaded = load_policy_store(
+            &config.policy_store_config,
+            &http_client,
+            config.authorization_config.strict_schema_validation,
+        )
+        .await?;
+        Ok((http_client, loaded))
+    }
+    .await;
+
+    let (http_client, loaded) = raw_load
+        .inspect(|_| {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message("configuration parsed successfully".to_string()),
+            );
+        })
+        .inspect_err(|err| {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_error(err.to_string())
+                .set_message("configuration parsed with error".to_string()),
+            );
+        })?;
+
+    let LoadedPolicyStore {
+        store: policy_store,
+        body_hash,
+        validators,
+    } = loaded;
+    Ok((
+        ServiceConfig {
+            policy_store,
+            http_client,
+        },
+        RefreshWorkerSeed {
+            initial_body_hash: body_hash,
+            initial_validators: validators,
+        },
+    ))
+}
+
+/// Spawn the background policy-store refresh worker if the source is a remote
+/// URL and a non-zero refresh interval was configured. Returns `None` for
+/// local sources or when refresh is disabled. The `seed` carries the
+/// `body_hash` and `validators` captured during initial bootstrap so the
+/// first periodic tick can short-circuit — passed in directly from the
+/// bootstrap-load result rather than detoured through `ServiceFactory`.
+fn maybe_spawn_refresh_worker(
+    config: &BootstrapConfig,
+    service_factory: &ServiceFactory<'_>,
+    authz_swap: Arc<arc_swap::ArcSwap<authz::Authz>>,
+    log: log::Logger,
+    data: Arc<context_data_api::DataStore>,
+    metrics: Arc<authz::metrics::MetricsCollector>,
+    seed: RefreshWorkerSeed,
+) -> Option<Arc<PolicyStoreRefreshHandle>> {
+    if !config.policy_store_config.refresh_enabled() {
+        return None;
+    }
+    let source = RefreshSource::from_policy_store_source(&config.policy_store_config.source)?;
+    let (interval_secs, clamped) = config.policy_store_config.effective_refresh_interval();
+    if clamped {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
+                .set_message(format!(
+                    "CEDARLING_POLICY_STORE_REFRESH_INTERVAL={} is below the minimum; clamped to {} seconds",
+                    config.policy_store_config.refresh_interval_secs,
+                    interval_secs,
+                )),
+        );
+    }
+    let rebuilder = AuthzRebuilder {
+        jwt_config: config.jwt_config.clone(),
+        authorization_config: config.authorization_config.clone(),
+        http_client: service_factory.http_client_for_refresh(),
+        log: log.clone(),
+        data_store: data,
+        metrics: metrics.clone(),
+    };
+    let ctx = WorkerContext {
+        source,
+        interval_secs,
+        http_client: service_factory.http_client_for_refresh(),
+        rebuilder,
+        authz_swap,
+        metrics,
+        log,
+        initial_body_hash: seed.initial_body_hash,
+        initial_validators: seed.initial_validators,
+        strict_schema_validation: config.authorization_config.strict_schema_validation,
+    };
+    Some(Arc::new(spawn_refresh_worker(ctx)))
 }
 
 /// Log detailed information about the loaded policy store metadata, including
