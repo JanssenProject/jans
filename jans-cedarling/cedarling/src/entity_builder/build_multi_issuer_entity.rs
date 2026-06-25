@@ -488,6 +488,7 @@ mod tests {
     use crate::authz::request::CedarEntityMapping;
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::entity_builder::TrustedIssuerIndex;
     use crate::jwt::{Token, TokenClaims};
     use crate::log::NopLogger;
@@ -1029,5 +1030,298 @@ mod tests {
             matches!(iss_value, EvalResult::EntityUid(_)),
             "iss should be an entity reference (EntityUid), got {iss_value:?}"
         );
+    }
+
+    #[test]
+    fn test_jti_attr_uses_entity_id_not_raw_claim_without_schema() {
+        // ── Setup: TrustedIssuer with token_id = "sub" ─────────────────
+        // By default token_id = "jti", making entity_id identical to the
+        // raw `jti` claim.  Setting token_id = "sub" decouples them so we
+        // can prove that the final `jti` attribute comes from
+        // `add_reserved_claims` (entity_id), not from the raw claim.
+        let tkn_meta = TokenEntityMetadata::builder()
+            .entity_type_name("Jans::Access_Token".into())
+            .token_id("sub".into())
+            .build();
+        let mut token_metadata = HashMap::new();
+        token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
+        let ti = TrustedIssuer::new(
+            "TestIssuer".to_string(),
+            String::new(),
+            Url::parse("https://test.issuer.com").unwrap(),
+            token_metadata,
+        );
+        let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
+        let builder = EntityBuilder::new(
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None, // no schema — exercises the no-schema path
+            DefaultEntities::default(),
+        )
+        .unwrap();
+
+        // ── Token: jti and sub are deliberately different ──────────────
+        let iss = "https://test.issuer.com";
+        let mut claims = HashMap::new();
+        claims.insert("iss".to_string(), json!(iss));
+        claims.insert("jti".to_string(), json!("raw-jti-from-jwt"));
+        claims.insert("sub".to_string(), json!("entity-sub-uid"));
+        claims.insert(
+            "exp".to_string(),
+            json!(chrono::Utc::now().timestamp() + 3600),
+        );
+        let token = Token::new(
+            "Jans::Access_Token",
+            TokenClaims::from(claims),
+            builder.find_trusted_issuer_by_iss(iss),
+        );
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .unwrap();
+
+        // ── Verify jti attr = entity_id (NOT the raw jwt jti) ─────────
+        // entity_id = "entity-sub-uid" (because token_id = "sub")
+        // add_reserved_claims overwrites jti with entity_id.
+        let jti_attr = entity
+            .attr("jti")
+            .expect("jti attribute should exist")
+            .expect("jti should be a valid value");
+        assert!(
+            matches!(jti_attr, EvalResult::String(ref val) if val == "entity-sub-uid"),
+            "Expected jti = entity_id ('entity-sub-uid'), proving \
+             add_reserved_claims (not the data path) sets jti. \
+             Got {jti_attr:?}"
+        );
+
+        // Reserved claims must NOT leak into tags
+        assert!(
+            entity.tag("iss").is_none(),
+            "iss should not be a tag (reserved)"
+        );
+        assert!(
+            entity.tag("jti").is_none(),
+            "jti should not be a tag (reserved)"
+        );
+        assert!(
+            entity.tag("exp").is_none(),
+            "exp should not be a tag (reserved)"
+        );
+
+        // Non-reserved claims become tags
+        assert!(
+            entity.tag("sub").is_some(),
+            "sub should be a tag (non-reserved)"
+        );
+    }
+
+    #[test]
+    fn test_reserved_claims_overwrite_schema_path() {
+        // ── Schema: entity name MUST match token entity type name ─────
+        // `determine_token_entity_type` returns the token's entity type
+        // (resolved via trusted-issuer metadata, then fallbacks). For the
+        // schema path to activate, that name must exist in the schema's
+        // entity map.  We define `entity Access_Token` in `Jans` (full
+        // name `Jans::Access_Token`) which matches the token name.
+        let schema_src = r#"
+            namespace Jans {
+                entity Access_Token = {
+                    jti: String,
+                    sub: String,
+                    iss: String,
+                    exp: Long
+                };
+                type Url = {"host": String, "path": String, "protocol": String};
+                entity TrustedIssuer = {"issuer_entity_id": Url};
+            }
+        "#;
+        let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
+            .expect("should parse schema");
+
+        // Same TrustedIssuer with token_id = "sub" as in the no-schema test.
+        // The token_metadata entity_type_name must match the schema entity
+        // so that `determine_token_entity_type` resolves to something the
+        // schema can look up.
+        let tkn_meta = TokenEntityMetadata::builder()
+            .entity_type_name("Jans::Access_Token".into())
+            .token_id("sub".into())
+            .build();
+        let mut token_metadata = HashMap::new();
+        token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
+        let ti = TrustedIssuer::new(
+            "Jans".to_string(),
+            String::new(),
+            Url::parse("https://test.issuer.com").unwrap(),
+            token_metadata,
+        );
+        let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
+        let builder = EntityBuilder::new(
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            Some(&validator_schema),
+            DefaultEntities::default(),
+        )
+        .unwrap();
+
+        let iss = "https://test.issuer.com";
+        let mut claims = HashMap::new();
+        claims.insert("iss".to_string(), json!(iss));
+        claims.insert("jti".to_string(), json!("raw-jti-from-jwt"));
+        claims.insert("sub".to_string(), json!("entity-sub-uid"));
+        claims.insert(
+            "exp".to_string(),
+            json!(chrono::Utc::now().timestamp() + 3600),
+        );
+        // This claim is deliberately NOT in the schema shape.  In the
+        // schema path it stays out of `attrs`; in the no-schema path
+        // it would become an attribute.  We assert it is absent below.
+        claims.insert(
+            "extra_test_claim".to_string(),
+            json!("should-not-be-attr"),
+        );
+        let token = Token::new(
+            "Jans::Access_Token",
+            TokenClaims::from(claims),
+            builder.find_trusted_issuer_by_iss(iss),
+        );
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .unwrap();
+
+        // ── Prove the schema path was actually taken ──────────────────
+        // `extra_test_claim` is NOT in the schema shape → in the schema
+        // path it never enters `attrs`.  The no-schema path would add
+        // every claim as an attribute.  If this assertion passes, the
+        // schema path (not the fallback) was exercised.
+        assert!(
+            entity.attr("extra_test_claim").is_none(),
+            "extra_test_claim should not be an attribute when the schema \
+             path is active (it is not in the schema shape)"
+        );
+
+        // ── jti attr = entity_id, not the raw claim ───────────────────
+        // The schema-path closure returned raw jti = "raw-jti-from-jwt",
+        // then add_reserved_claims overwrote it with entity_id.
+        let jti_attr = entity
+            .attr("jti")
+            .expect("jti attribute should exist")
+            .expect("jti should be a valid value");
+        assert!(
+            matches!(jti_attr, EvalResult::String(ref val) if val == "entity-sub-uid"),
+            "Expected jti = entity_id ('entity-sub-uid'), proving \
+             add_reserved_claims overwrites the schema-built value. \
+             Got {jti_attr:?}"
+        );
+
+        // ── iss attr = EntityUid, not the String from schema ──────────
+        let iss_attr = entity
+            .attr("iss")
+            .expect("iss attribute should exist")
+            .expect("iss should be a valid value");
+        assert!(
+            matches!(iss_attr, EvalResult::EntityUid(_)),
+            "iss should be an EntityUid (overwritten by add_reserved_claims), \
+             not a plain String. Got {iss_attr:?}"
+        );
+
+        // ── exp attr = Long, not String ───────────────────────────────
+        let current_time = chrono::Utc::now().timestamp();
+        let exp_attr = entity
+            .attr("exp")
+            .expect("exp attribute should exist")
+            .expect("exp should be a valid value");
+        assert!(
+            matches!(exp_attr, EvalResult::Long(exp) if exp > current_time),
+            "exp should be a future Long (overwritten by add_reserved_claims). \
+             Got {exp_attr:?}"
+        );
+
+        // Reserved claims must NOT be in tags
+        assert!(entity.tag("iss").is_none(), "iss should not be a tag");
+        assert!(entity.tag("jti").is_none(), "jti should not be a tag");
+        assert!(entity.tag("exp").is_none(), "exp should not be a tag");
+
+        // Non-reserved claims become tags
+        assert!(entity.tag("sub").is_some(), "sub should be a tag");
+    }
+
+    #[test]
+    fn test_schema_path_fallback_to_entity_id_when_jti_missing() {
+        // ── Edge case: schema requires `jti` but JWT has none ─────────
+        // Previously the schema-path builder would fail with
+        // "required claim missing" because `claims.get("jti")` returned
+        // `None`.  The closure now falls back to `entity_id` so the
+        // builder passes; `add_reserved_claims` then sets the final value.
+        let schema_src = r#"
+            namespace Jans {
+                entity Access_Token = {
+                    jti: String,
+                    sub: String,
+                    iss: String,
+                    exp: Long
+                };
+                type Url = {"host": String, "path": String, "protocol": String};
+                entity TrustedIssuer = {"issuer_entity_id": Url};
+            }
+        "#;
+        let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
+            .expect("should parse schema");
+
+        let tkn_meta = TokenEntityMetadata::builder()
+            .entity_type_name("Jans::Access_Token".into())
+            .token_id("sub".into())
+            .build();
+        let mut token_metadata = HashMap::new();
+        token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
+        let ti = TrustedIssuer::new(
+            "Jans".to_string(),
+            String::new(),
+            Url::parse("https://test.issuer.com").unwrap(),
+            token_metadata,
+        );
+        let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
+        let builder = EntityBuilder::new(
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            Some(&validator_schema),
+            DefaultEntities::default(),
+        )
+        .unwrap();
+
+        let iss = "https://test.issuer.com";
+        let mut claims = HashMap::new();
+        // No "jti" claim — deliberately missing to test the fallback.
+        // `entity_id` will come from `sub` (token_id = "sub").
+        claims.insert("iss".to_string(), json!(iss));
+        claims.insert("sub".to_string(), json!("entity-sub-uid"));
+        claims.insert(
+            "exp".to_string(),
+            json!(chrono::Utc::now().timestamp() + 3600),
+        );
+
+        let token = Token::new(
+            "Jans::Access_Token",
+            TokenClaims::from(claims),
+            builder.find_trusted_issuer_by_iss(iss),
+        );
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+
+        // This must NOT fail — the closure should fall back to entity_id
+        // so the schema path doesn't choke on missing required `jti`.
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .expect("should succeed even without jti claim — closure falls back to entity_id");
+
+        // jti attribute should be set to entity_id by add_reserved_claims
+        let jti_attr = entity
+            .attr("jti")
+            .expect("jti attribute should exist")
+            .expect("jti should be a valid value");
+        assert!(
+            matches!(jti_attr, EvalResult::String(ref val) if val == "entity-sub-uid"),
+            "Expected jti = entity_id ('entity-sub-uid') when raw jti claim \
+             is absent. Got {jti_attr:?}"
+        );
+
+        // jti must NOT leak into tags (it is a reserved claim)
+        assert!(entity.tag("jti").is_none(), "jti should not be a tag");
     }
 }
