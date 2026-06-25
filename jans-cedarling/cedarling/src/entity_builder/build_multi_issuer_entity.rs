@@ -362,17 +362,19 @@ impl EntityBuilder {
         let claims = token.claims_value();
 
         // Build entity attributes using the same logic as regular entity builder.
-        // Schema path: borrow claims directly and overlay the two synthetic
-        // entries (`token_type`, `validated_at`) via a lookup closure avoids
+        // Schema path: borrow claims directly and overlay synthetic entries
+        // (`token_type`, `validated_at`, `jti`) via a lookup closure to avoid
         // cloning every claim into a temporary HashMap on the hot path.
         // No-schema path: fall back to the existing iter-all flow.
         let mut attrs = if let Some(shape) = attrs_shape {
             let token_type_val = Value::String(token.name.clone());
             let validated_at_val = Value::Number(chrono::Utc::now().timestamp().into());
+            let jti_val = Value::String(entity_id.clone());
             super::build_entity_attrs::build_entity_attrs_with_shape_lookup(
                 |name| match name {
                     "token_type" => Some(&token_type_val),
                     "validated_at" => Some(&validated_at_val),
+                    "jti" => Some(&jti_val),
                     other => claims.get(other),
                 },
                 built_entities,
