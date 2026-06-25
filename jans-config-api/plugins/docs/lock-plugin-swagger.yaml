@@ -798,9 +798,30 @@ components:
           type: object
           additionalProperties:
             type: integer
-            description: Additional policy statistics as key-value pairs
+            description: Per-policy evaluation counters as key-value pairs
             format: int64
-          description: Additional policy statistics as key-value pairs
+          description: Per-policy evaluation counters as key-value pairs
+        errorCounters:
+          type: object
+          additionalProperties:
+            type: integer
+            description: Error counters broken down by error type
+            format: int64
+          description: Error counters broken down by error type
+        operationalStats:
+          type: object
+          additionalProperties:
+            type: integer
+            description: "Operational statistics (requests, decisions, eval times)\
+              \ as key-value pairs"
+            format: int64
+          description: "Operational statistics (requests, decisions, eval times) as\
+            \ key-value pairs"
+        intervalSecs:
+          type: integer
+          description: Telemetry collection interval in seconds
+          format: int64
+          example: 60
       description: Telemetry audit entry
     ApiError:
       type: object
