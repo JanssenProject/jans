@@ -1097,6 +1097,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#authzen-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuthZen functionality
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#building" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1368,6 +1379,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#authzen-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuthZen functionality
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#building" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1518,12 +1540,11 @@
 
 
 <h1 id="cedarling-opa-plugin">Cedarling OPA Plugin<a class="headerlink" href="#cedarling-opa-plugin" title="Permanent link">#</a></h1>
-<p>A policy evaluation plugin for <a href="https://www.openpolicyagent.org/">Open Policy Agent (OPA)</a> that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows.</p>
+<p>A policy evaluation plugin for <a href="https://www.openpolicyagent.org/">Open Policy Agent (OPA)</a> that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin provides the <a href="https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api">AuthZen</a> access evaluation functionality.</p>
 <h2 id="functionality">Functionality<a class="headerlink" href="#functionality" title="Permanent link">#</a></h2>
 <ol>
 <li>The OPA binary reads rego files and a configuration file containing bootstrap properties and initializes a Cedarling instance accordingly. Then the binary starts in server mode.</li>
-<li>The user may then send queries to the OPA server over HTTP. OPA will call the Cedarling instance's authorization methods and return responses.</li>
-</ol>
+<li>The user may then send queries to the OPA server over HTTP. OPA will call the Cedarling instance's authorization methods and return responses.
 <pre class="mermaid"><code>sequenceDiagram
     participant Client
     participant OPA
@@ -1549,7 +1570,14 @@
     Builtin--&gt;&gt;Rego: result
     Rego--&gt;&gt;OPA: decision object
 
-    OPA--&gt;&gt;Client: Response</code></pre>
+    OPA--&gt;&gt;Client: Response</code></pre></li>
+<li>For AuthZen access evaluation functionality, the user may call endpoints directly following the AuthZen specification.</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Client
+    participant OPA
+    Client-&gt;&gt;OPA: POST /access/v1/evaluation {"subject": {...}, "action": {...}, "resource": {...}}
+    OPA-&gt;&gt;Client: {"decision": true}</code></pre>
 <h2 id="rego-functions">Rego functions<a class="headerlink" href="#rego-functions" title="Permanent link">#</a></h2>
 <p>The plugin provides two new Rego functions:</p>
 <ul>
@@ -1638,6 +1666,125 @@ and can be stored in a variable to perform Rego operations on.</li>
 
 <span class="n">deny_reasons</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">reasons</span>
 </code></pre></div>
+<h2 id="authzen-functionality">AuthZen functionality<a class="headerlink" href="#authzen-functionality" title="Permanent link">#</a></h2>
+<p>The plugin provides the following endpoints:</p>
+<ul>
+<li><code>/.well-known/authzen-configuration</code> - AuthZen metadata endpoint</li>
+<li><code>/access/v1/evaluation</code> - Access evaluation endpoint</li>
+<li><code>/access/v1/evaluations</code> - Multiple access evaluation endpoint</li>
+</ul>
+<p>To use these endpoints, the user needs to provide information for cedarling to build the entities, either for unsigned or multi-issuer authorization. The cedarling subject and resource needs to be supplied in JSON format via the <code>properties</code> field of the AuthZen <a href="https://openid.net/specs/authorization-api-1_0.html#name-subject">subject</a> and <a href="https://openid.net/specs/authorization-api-1_0.html#name-resource">resource</a> types respectively. The action string can be sent in the <code>name</code> field of the <a href="https://openid.net/specs/authorization-api-1_0.html#name-action">action</a> type. The context can be sent directly as-is, corresponding to the <a href="https://openid.net/specs/authorization-api-1_0.html#name-context">context</a> type.</p>
+<p>An example of an AuthZen request for multi-issuer authorization:</p>
+<div class="highlight"><span class="filename">AuthZen evaluation payload</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tokens&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ey...AZgA&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Application&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Healthy&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Allowed&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;America&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The same method is used for unsigned authorization. Each entity has to be provided in JSON format in the properties field. For example:</p>
+<div class="highlight"><span class="filename">AuthZen unsigned evaluation payload</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Entities&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random_id&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random_sub&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Application&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Update\&quot;&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Healthy&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Allowed&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;America&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Following AuthZen specification, any errors during authorization will result in a false decision, and error details will be provided in the context field of the response.</p>
+</div>
 <h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1830,7 +1977,7 @@ And we get a response:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 9, 2026 12:07:01 UTC"><span class="timeago" datetime="2026-06-09T12:07:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 9, 2026 12:07:01 UTC">2026-06-09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 25, 2026 07:38:50 UTC"><span class="timeago" datetime="2026-06-25T07:38:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 25, 2026 07:38:50 UTC">2026-06-25</span>
   </span>
 
     
