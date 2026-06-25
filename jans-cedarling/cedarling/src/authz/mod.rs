@@ -439,7 +439,7 @@ impl Authz {
         );
 
         if !result.decision {
-            self.log_failed_diagnostics(&diagnostics, request_id);
+            self.log_failed_diagnostics(diagnostics, request_id);
         }
 
         // Record metrics
