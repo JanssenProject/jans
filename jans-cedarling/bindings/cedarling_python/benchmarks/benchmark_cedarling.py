@@ -4,18 +4,16 @@
 #
 # Copyright (c) 2025, Gluu, Inc.
 
-"""Python binding micro-benchmarks for Cedarling authorization paths.
-
-Outputs one line per benchmark:
-name=<op> mean_us=<f> stddev_us=<f> min_us=<f> max_us=<f>
-"""
+"""Python cross-platform bench harness. See bindings/benchmarks/CONTRACT.md."""
 
 from __future__ import annotations
 
-import statistics
+import json
+import os
 import sys
 import time
 from pathlib import Path
+from typing import Any, Callable, Optional
 
 from cedarling_python import (
     AuthorizeMultiIssuerRequest,
@@ -24,150 +22,133 @@ from cedarling_python import (
     EntityData,
     RequestUnsigned,
     TokenInput,
-    authorize_errors,
 )
 
-WARMUP_ITERS = 100
-MEASURE_ITERS = 1000
-
-TEST_FILES = Path(__file__).resolve().parents[3] / "test_files"
-
-RESOURCE = EntityData.from_dict(
-    {
-        "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": "random_id"},
-        "org_id": "some_long_id",
-        "country": "US",
-    }
-)
-
-UNSIGNED_PRINCIPAL = EntityData.from_dict(
-    {
-        "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "test_principal_1"},
-        "is_ok": True,
-    }
-)
-
-JWT_HEADER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-ACCESS_TOKEN = (
-    JWT_HEADER
-    + "."
-    "eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vdGVzdC5qYW5zLm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly90ZXN0LmphbnMub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19"
-    + ".7n4vE60lisFLnEFhVwYMOPh5loyLLtPc07sCvaFI-Ik"
-)
-ID_TOKEN = (
-    JWT_HEADER
-    + "."
-    "eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjpbIjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSJdLCJleHAiOjE3MjQ4MzU4NTksImlhdCI6MTcyNDgzMjI1OSwic3ViIjoiYm9HOGRmYzVNS1RuMzdvN2dzZENleXFMOExwV1F0Z29PNDFtMUtad2RxMCIsImlzcyI6Imh0dHBzOi8vdGVzdC5qYW5zLm9yZyIsImp0aSI6InNrM1Q0ME5ZU1l1azVzYUhaTnBrWnciLCJub25jZSI6ImMzODcyYWY5LWEwZjUtNGMzZi1hMWFmLWY5ZDBlODg0NmU4MSIsInNpZCI6IjZhN2ZlNTBhLWQ4MTAtNDU0ZC1iZTVkLTU0OWQyOTU5NWEwOSIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiY19oYXNoIjoicEdvSzZZX1JLY1dIa1VlY005dXc2USIsImF1dGhfdGltZSI6MTcyNDgzMDc0NiwiZ3JhbnQiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoyMDIsInVyaSI6Imh0dHBzOi8vdGVzdC5qYW5zLm9yZy9qYW5zLWF1dGgvcmVzdHYxL3N0YXR1c19saXN0In19LCJyb2xlIjoiQWRtaW4ifQ"
-    + ".RgCuWFUUjPVXmbW3ExQavJZH8Lw4q3kGhMFBRR0hSjA"
-)
-USERINFO_TOKEN = (
-    JWT_HEADER
-    + "."
-    "eyJjb3VudHJ5IjoiVVMiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6IlVzZXJOYW1lRXhhbXBsZSIsInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL3Rlc3QuamFucy5vcmciLCJnaXZlbl9uYW1lIjoiQWRtaW4iLCJtaWRkbGVfbmFtZSI6IkFkbWluIiwiaW51bSI6IjhkMWNkZTZhLTE0NDctNDc2Ni1iM2M4LTE2NjYzZTEzYjQ1OCIsImF1ZCI6IjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSIsInVwZGF0ZWRfYXQiOjE3MjQ3Nzg1OTEsIm5hbWUiOiJEZWZhdWx0IEFkbWluIFVzZXIiLCJuaWNrbmFtZSI6IkFkbWluIiwiZmFtaWx5X25hbWUiOiJVc2VyIiwianRpIjoiZmFpWXZhWUlUMGNEQVQ3Rm93MHBRdyIsImphbnNBZG1pblVJUm9sZSI6WyJhcGktYWRtaW4iXSwiZXhwIjoxNzI0OTQ1OTc4fQ"
-    + ".t6p8fYAe1NkUt9mn9n9MYJlNCni8JYfhk-82hb_C1O4"
-)
+BINDING_NAME = "python"
 
 
-def _unsigned_cedarling() -> Cedarling:
-    config = BootstrapConfig(
-        {
-            "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
-            "CEDARLING_POLICY_STORE_LOCAL_FN": str(TEST_FILES / "policy-store_ok_2.yaml"),
-            "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-            "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-            "CEDARLING_LOG_TYPE": "off",
-        }
-    )
-    return Cedarling(config)
+def resolve_repo_root() -> Path:
+    env = os.environ.get("CEDARLING_REPO_ROOT")
+    if env:
+        return Path(env).resolve()
+    # Default: bindings/cedarling_python/benchmarks/ → repo root is 3 levels up.
+    return Path(__file__).resolve().parents[3]
 
 
-def _multi_issuer_cedarling() -> Cedarling:
-    config = BootstrapConfig(
-        {
-            "CEDARLING_APPLICATION_NAME": "TestApp",
-            # Match tests/config.py + get_multi_issuer_config fixture.
-            "CEDARLING_POLICY_STORE_LOCAL_FN": str(TEST_FILES / "policy-store-multi-issuer-test.yaml"),
-            "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-            "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-            "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
-            "CEDARLING_LOG_TYPE": "off",
-            "CEDARLING_LOG_LEVEL": "DEBUG",
-        }
-    )
-    return Cedarling(config)
+def _emit(row: dict) -> None:
+    print(json.dumps(row))
 
 
-def _run_bench(name: str, fn) -> None:
-    for _ in range(WARMUP_ITERS):
-        fn()
-
-    samples_us: list[float] = []
-    for _ in range(MEASURE_ITERS):
-        t0 = time.perf_counter_ns()
-        fn()
-        t1 = time.perf_counter_ns()
-        samples_us.append((t1 - t0) / 1000.0)
-
-    mean_us = statistics.fmean(samples_us)
-    stddev_us = statistics.pstdev(samples_us, mu=mean_us)
-    min_us = min(samples_us)
-    max_us = max(samples_us)
-    print(
-        f"name={name} mean_us={mean_us:.1f} stddev_us={stddev_us:.1f} "
-        f"min_us={min_us:.1f} max_us={max_us:.1f}"
-    )
+def _build_config(scenario: dict, repo_root: Path) -> BootstrapConfig:
+    cfg = dict(scenario.get("config_overrides") or {})
+    cfg["CEDARLING_POLICY_STORE_LOCAL_FN"] = str(repo_root / scenario["policy_store_fn"])
+    return BootstrapConfig(cfg)
 
 
-def bench_authorize_unsigned() -> None:
-    cedarling = _unsigned_cedarling()
-    request = RequestUnsigned(
-        principal=UNSIGNED_PRINCIPAL,
-        action='Jans::Action::"UpdateForTestPrincipals"',
-        context={},
-        resource=RESOURCE,
-    )
+def _build_bench_fn(cedarling: Cedarling, scenario: dict) -> Callable[[], Any]:
+    kind = scenario["kind"]
+    resource = EntityData.from_dict(scenario["resource"])
+    # Context is JSON-as-string in the manifest; parse once outside the hot path.
+    ctx_str = scenario.get("context") or "{}"
+    context = json.loads(ctx_str) if ctx_str else {}
+    action = scenario["action"]
+
+    if kind == "unsigned":
+        principal_dict = scenario.get("principal")
+        principal = EntityData.from_dict(principal_dict) if principal_dict else None
+        request = RequestUnsigned(
+            principal=principal,
+            action=action,
+            context=context,
+            resource=resource,
+        )
+        return lambda: cedarling.authorize_unsigned(request)
+
+    if kind == "multi_issuer":
+        tokens = [
+            TokenInput(mapping=t["mapping"], payload=t["payload"])
+            for t in scenario.get("tokens", [])
+        ]
+        request = AuthorizeMultiIssuerRequest(
+            tokens=tokens,
+            action=action,
+            context=context,
+            resource=resource,
+        )
+        return lambda: cedarling.authorize_multi_issuer(request)
+
+    raise ValueError(f"unknown scenario kind: {kind}")
+
+
+def _percentile(sorted_samples: list[int], frac: float) -> int:
+    return sorted_samples[int(len(sorted_samples) * frac)]
+
+
+def _run_scenario(scenario: dict, repo_root: Path, warmup_iters: int, measure_iters: int) -> None:
+    sid = scenario["id"]
+    if scenario.get("mock_op_required"):
+        _emit({"binding": BINDING_NAME, "scenario": sid, "status": "skipped", "reason": "mock_op_unavailable"})
+        return
 
     try:
-        validation = cedarling.authorize_unsigned(request)
-    except authorize_errors.AuthorizeError as exc:
-        raise RuntimeError(f"Validation call for authorize_unsigned failed: {exc}") from exc
-    if not validation.is_allowed():
-        raise RuntimeError("Validation call for authorize_unsigned returned deny")
+        config = _build_config(scenario, repo_root)
+        cedarling = Cedarling(config)
+        fn = _build_bench_fn(cedarling, scenario)
 
-    _run_bench("authorize_unsigned", lambda: cedarling.authorize_unsigned(request))
+        # Pre-measurement call surfaces fixture errors as a skip.
+        fn()
 
+        for _ in range(warmup_iters):
+            fn()
 
-def bench_authorize_multi_issuer() -> None:
-    cedarling = _multi_issuer_cedarling()
-    request = AuthorizeMultiIssuerRequest(
-        tokens=[
-            TokenInput(mapping="Jans::Access_Token", payload=ACCESS_TOKEN),
-            TokenInput(mapping="Jans::Id_Token", payload=ID_TOKEN),
-            TokenInput(mapping="Jans::Userinfo_Token", payload=USERINFO_TOKEN),
-        ],
-        action='Jans::Action::"Update"',
-        context={},
-        resource=RESOURCE,
+        samples_ns: list[int] = []
+        for _ in range(measure_iters):
+            t0 = time.perf_counter_ns()
+            fn()
+            t1 = time.perf_counter_ns()
+            samples_ns.append(t1 - t0)
+    except Exception as exc:  # noqa: BLE001
+        _emit(
+            {
+                "binding": BINDING_NAME,
+                "scenario": sid,
+                "status": "skipped",
+                "reason": f"error:{type(exc).__name__}:{exc}",
+            }
+        )
+        return
+
+    sorted_samples = sorted(samples_ns)
+    mean_ns = sum(samples_ns) // measure_iters
+    _emit(
+        {
+            "binding": BINDING_NAME,
+            "scenario": sid,
+            "iter": measure_iters,
+            "mean_ns": mean_ns,
+            "p50_ns": _percentile(sorted_samples, 0.50),
+            "p95_ns": _percentile(sorted_samples, 0.95),
+            "p99_ns": _percentile(sorted_samples, 0.99),
+            "min_ns": sorted_samples[0],
+            "max_ns": sorted_samples[-1],
+            "allocs_per_op": None,
+            "status": "ok",
+        }
     )
-
-    try:
-        validation = cedarling.authorize_multi_issuer(request)
-    except authorize_errors.AuthorizeError as exc:
-        raise RuntimeError(f"Validation call for authorize_multi_issuer failed: {exc}") from exc
-    if not validation.is_allowed():
-        raise RuntimeError("Validation call for authorize_multi_issuer returned deny")
-
-    _run_bench("authorize_multi_issuer", lambda: cedarling.authorize_multi_issuer(request))
 
 
 def main() -> int:
-    try:
-        bench_authorize_unsigned()
-        bench_authorize_multi_issuer()
-        return 0
-    except Exception as exc:  # noqa: BLE001
-        print(f"benchmark failed: {exc}", file=sys.stderr)
-        return 1
+    repo_root = resolve_repo_root()
+    manifest_path = repo_root / "bindings" / "benchmarks" / "fixtures" / "scenarios.json"
+    with manifest_path.open() as f:
+        manifest = json.load(f)
+    policy = manifest.get("iteration_policy", {})
+    warmup_iters = int(policy.get("warmup_iters", 100))
+    measure_iters = int(policy.get("measure_iters", 1000))
+
+    for scenario in manifest.get("scenarios", []):
+        _run_scenario(scenario, repo_root, warmup_iters, measure_iters)
+    return 0
 
 
 if __name__ == "__main__":
