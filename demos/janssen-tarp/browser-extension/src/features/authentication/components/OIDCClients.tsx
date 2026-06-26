@@ -151,7 +151,7 @@ export default function OIDCClients({
 
   const handleDialog = (isOpen: boolean) => {
     setModelOpen(isOpen);
-    notifyOnDataChange();
+    if (!isOpen) notifyOnDataChange();
   };
 
   // Detect expired clients, alert the user, and purge them from storage.
