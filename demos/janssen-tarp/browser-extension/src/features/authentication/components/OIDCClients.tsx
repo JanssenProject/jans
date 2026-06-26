@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  X,
 } from 'lucide-react';
 
 import RegisterClient from './RegisterClient';
@@ -146,11 +147,36 @@ export default function OIDCClients({
   const [modelOpen, setModelOpen] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
+  const [expiredAlert, setExpiredAlert] = React.useState('');
 
   const handleDialog = (isOpen: boolean) => {
     setModelOpen(isOpen);
     notifyOnDataChange();
   };
+
+  // Detect expired clients, alert the user, and purge them from storage.
+  React.useEffect(() => {
+    const expired = data.filter(
+      (client) => client.showClientExpiry && client.expireAt && client.expireAt <= Date.now()
+    );
+    if (expired.length === 0) return;
+
+    const expiredIds = new Set(expired.map((c) => c.clientId));
+    chrome.storage.local.get(['oidcClients'], (result: { oidcClients?: OIDCClient[] }) => {
+      const remaining = (result.oidcClients ?? []).filter(
+        (obj) => !expiredIds.has(obj.clientId)
+      );
+      chrome.storage.local.set({ oidcClients: remaining }, () => {
+        const names = expired.map((c) => c.clientId).join(', ');
+        setExpiredAlert(
+          expired.length === 1
+            ? `Client "${names}" has expired and was removed.`
+            : `${expired.length} clients have expired and were removed: ${names}.`
+        );
+        notifyOnDataChange();
+      });
+    });
+  }, [data, notifyOnDataChange]);
 
   const paginatedRows = React.useMemo(() => {
     const start = page * rowsPerPage;
@@ -186,6 +212,23 @@ export default function OIDCClients({
         isOpen={modelOpen}
         handleDialog={handleDialog}
       />
+
+      {/* Expired client alert */}
+      {expiredAlert && (
+        <div className="mb-6 flex items-start justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span className="flex items-center gap-2">
+            <span aria-hidden="true">⚠</span>
+            {expiredAlert}
+          </span>
+          <button
+            onClick={() => setExpiredAlert('')}
+            aria-label="Dismiss expiry alert"
+            className="text-amber-600 hover:text-amber-800"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
