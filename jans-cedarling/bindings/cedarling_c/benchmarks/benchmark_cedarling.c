@@ -169,6 +169,28 @@ static void run_scenario(const bench_scenario_t *s, const char *repo_root) {
     }
 
 
+    {
+        CedarlingResult vr;
+        int ret = fn(id, s->request_json, &vr);
+        if (ret != 0) {
+            char reason[512];
+            snprintf(reason, sizeof(reason), "validation_error:%s",
+                     vr.error_message ? vr.error_message : "unknown");
+            cedarling_free_result(&vr);
+            cedarling_drop(id);
+            emit_skipped(s->id, reason);
+            return;
+        }
+        if (vr.data == NULL ||
+            strstr((const char *)vr.data, "\"decision\":true") == NULL) {
+            cedarling_free_result(&vr);
+            cedarling_drop(id);
+            emit_skipped(s->id, "validation_deny");
+            return;
+        }
+        cedarling_free_result(&vr);
+    }
+
     for (int i = 0; i < BENCH_WARMUP_ITERS; i++) {
         CedarlingResult r;
         if (fn(id, s->request_json, &r) != 0) {

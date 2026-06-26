@@ -64,7 +64,7 @@ def _build_bench_fn(cedarling: Cedarling, scenario: dict) -> Callable[[], Any]:
             context=context,
             resource=resource,
         )
-        return lambda: cedarling.authorize_unsigned(request)
+        return lambda: cedarling.authorize_unsigned(request).is_allowed()
 
     if kind == "multi_issuer":
         tokens = [
@@ -77,7 +77,7 @@ def _build_bench_fn(cedarling: Cedarling, scenario: dict) -> Callable[[], Any]:
             context=context,
             resource=resource,
         )
-        return lambda: cedarling.authorize_multi_issuer(request)
+        return lambda: cedarling.authorize_multi_issuer(request).is_allowed()
 
     raise ValueError(f"unknown scenario kind: {kind}")
 
@@ -105,6 +105,17 @@ def _run_scenario(
         config = _build_config(scenario, repo_root)
         cedarling = Cedarling(config)
         fn = _build_bench_fn(cedarling, scenario)
+
+        if not fn():
+            _emit(
+                {
+                    "binding": BINDING_NAME,
+                    "scenario": sid,
+                    "status": "skipped",
+                    "reason": "validation_deny",
+                }
+            )
+            return
 
         for _ in range(warmup_iters):
             fn()

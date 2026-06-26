@@ -111,8 +111,18 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 		return
 	}
 
+	allowed, err := fn()
+	if err != nil {
+		emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("validation_error:%v", err)})
+		return
+	}
+	if !allowed {
+		emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: "validation_deny"})
+		return
+	}
+
 	for i := 0; i < warmupIters; i++ {
-		if err := fn(); err != nil {
+		if _, err := fn(); err != nil {
 			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("warmup_loop:%v", err)})
 			return
 		}
@@ -122,7 +132,7 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 	samples := make([]int64, measureIters)
 	for i := 0; i < measureIters; i++ {
 		t0 := time.Now()
-		err := fn()
+		_, err := fn()
 		samples[i] = time.Since(t0).Nanoseconds()
 		if err != nil {
 			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("measure_loop:%v", err)})
@@ -135,7 +145,7 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 	var msStart, msEnd runtime.MemStats
 	runtime.ReadMemStats(&msStart)
 	for i := 0; i < measureIters; i++ {
-		if err := fn(); err != nil {
+		if _, err := fn(); err != nil {
 			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("allocs_loop:%v", err)})
 			return
 		}
@@ -154,7 +164,10 @@ func buildConfig(s scenario, repoRoot string) map[string]any {
 	return config
 }
 
-func buildBenchFn(instance *cedarling.Cedarling, s scenario) (func() error, error) {
+// Returns a closure that authorizes once and yields the decision so the runner
+// can validate before warmup. A scenario that authorizes cleanly but returns
+// Deny would otherwise be timed silently for measureIters iterations.
+func buildBenchFn(instance *cedarling.Cedarling, s scenario) (func() (bool, error), error) {
 	switch s.Kind {
 	case "unsigned":
 		var principal *cedarling.EntityData
@@ -179,9 +192,12 @@ func buildBenchFn(instance *cedarling.Cedarling, s scenario) (func() error, erro
 			Resource:  resource,
 			Context:   ctx,
 		}
-		return func() error {
-			_, err := instance.AuthorizeUnsigned(req)
-			return err
+		return func() (bool, error) {
+			r, err := instance.AuthorizeUnsigned(req)
+			if err != nil {
+				return false, err
+			}
+			return r.Decision, nil
 		}, nil
 	case "multi_issuer":
 		tokens := make([]cedarling.TokenInput, 0, len(s.Tokens))
@@ -202,9 +218,12 @@ func buildBenchFn(instance *cedarling.Cedarling, s scenario) (func() error, erro
 			Action:   s.Action,
 			Context:  ctx,
 		}
-		return func() error {
-			_, err := instance.AuthorizeMultiIssuer(req)
-			return err
+		return func() (bool, error) {
+			r, err := instance.AuthorizeMultiIssuer(req)
+			if err != nil {
+				return false, err
+			}
+			return r.Decision, nil
 		}, nil
 	default:
 		return nil, fmt.Errorf("unknown scenario kind %q", s.Kind)

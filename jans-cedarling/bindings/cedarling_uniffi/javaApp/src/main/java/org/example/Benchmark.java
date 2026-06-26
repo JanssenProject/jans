@@ -40,7 +40,7 @@ public class Benchmark {
 
     @FunctionalInterface
     private interface BenchFn {
-        void run() throws Exception;
+        boolean run() throws Exception;
     }
 
     public static void main(String[] args) throws Exception {
@@ -51,7 +51,8 @@ public class Benchmark {
         JsonNode manifest = MAPPER.readTree(Files.readAllBytes(manifestPath));
 
         JsonNode policy = manifest.path("iteration_policy");
-        int warmupIters = policy.path("warmup_iters").asInt(100) * JVM_WARMUP_MULTIPLIER;
+        int warmupIters =
+            policy.path("warmup_iters").asInt(100) * JVM_WARMUP_MULTIPLIER;
         int measureIters = policy.path("measure_iters").asInt(1000);
 
         for (JsonNode scenario : manifest.path("scenarios")) {
@@ -101,6 +102,14 @@ public class Benchmark {
                 default:
                     emitSkipped(id, "unknown_kind:" + kind);
                     return;
+            }
+
+            // One pre-warmup validation call: catches misconfigured fixtures
+            // that authorize cleanly but return Deny (which would otherwise be
+            // timed silently for measureIters iterations).
+            if (!fn.run()) {
+                emitSkipped(id, "validation_deny");
+                return;
             }
 
             for (int i = 0; i < warmupIters; i++) {
@@ -160,7 +169,9 @@ public class Benchmark {
         String context = scenario.path("context").asText("{}");
 
         return () ->
-            cedarling.authorizeUnsigned(principal, action, resource, context);
+            cedarling
+                .authorizeUnsigned(principal, action, resource, context)
+                .getDecision();
     }
 
     private static BenchFn buildMultiIssuerFn(
@@ -183,7 +194,9 @@ public class Benchmark {
         String context = scenario.path("context").asText("{}");
 
         return () ->
-            cedarling.authorizeMultiIssuer(tokens, action, resource, context);
+            cedarling
+                .authorizeMultiIssuer(tokens, action, resource, context)
+                .getDecision();
     }
 
     private static void emitOk(String id, long[] samples) {
