@@ -18,15 +18,23 @@ ifeq ($(UNAME_S),Darwin)
     LDFLAGS += -lpthread
 endif
 
-.PHONY: all clean run
+.PHONY: all clean run gen-scenarios
 
 all: benchmark_cedarling
 
-benchmark_cedarling: benchmark_cedarling.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LDFLAGS)
+# scenarios_generated.h is produced from bindings/benchmarks/fixtures/scenarios.json
+# by gen_scenarios.py. C has no built-in JSON parser, so the bench consumes
+# pre-formatted string literals instead of parsing the manifest at runtime.
+gen-scenarios: scenarios_generated.h
+
+scenarios_generated.h: ../../benchmarks/fixtures/scenarios.json gen_scenarios.py
+	python3 gen_scenarios.py
+
+benchmark_cedarling: benchmark_cedarling.c scenarios_generated.h
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ benchmark_cedarling.c $(LDFLAGS)
 
 run: benchmark_cedarling
 	LD_LIBRARY_PATH=../../../target/release DYLD_LIBRARY_PATH=../../../target/release ./benchmark_cedarling
 
 clean:
-	rm -f benchmark_cedarling
+	rm -f benchmark_cedarling scenarios_generated.h
