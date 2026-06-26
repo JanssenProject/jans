@@ -36,6 +36,8 @@ public class Benchmark {
     private static final String BINDING_NAME = "java";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final int JVM_WARMUP_MULTIPLIER = 50;
+
     @FunctionalInterface
     private interface BenchFn {
         void run() throws Exception;
@@ -49,7 +51,7 @@ public class Benchmark {
         JsonNode manifest = MAPPER.readTree(Files.readAllBytes(manifestPath));
 
         JsonNode policy = manifest.path("iteration_policy");
-        int warmupIters = policy.path("warmup_iters").asInt(100);
+        int warmupIters = policy.path("warmup_iters").asInt(100) * JVM_WARMUP_MULTIPLIER;
         int measureIters = policy.path("measure_iters").asInt(1000);
 
         for (JsonNode scenario : manifest.path("scenarios")) {
