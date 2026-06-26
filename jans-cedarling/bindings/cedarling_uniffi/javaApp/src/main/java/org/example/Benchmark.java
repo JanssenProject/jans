@@ -9,8 +9,14 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 import uniffi.cedarling_uniffi.TokenInput;
 
 public class Benchmark {
-    private static final int WARMUP_ITERS = 100;
-    private static final int MEASURE_ITERS = 1000;
+    // Warmup must outlast HotSpot's tiered compilation thresholds so that
+    // measurement starts after C2 has JIT-compiled the hot paths.
+    // C1 typically kicks in around 1.5k invocations; C2 around 10k.
+    // 100 iters (the prior value) caught only C1, which is why measured
+    // means jumped 100µs+ between identical reruns.
+    private static final int WARMUP_ITERS = 5_000;
+    private static final int MEASURE_ITERS = 5_000;
+    private static final double TRIM_FRACTION = 0.05; // drop top+bottom 5% before mean/stddev
 
     private static final String UNSIGNED_CONFIG = "{"
             + "\"CEDARLING_APPLICATION_NAME\":\"BenchmarkApp\","
@@ -58,9 +64,17 @@ public class Benchmark {
     }
 
     private static void runBench(String name, BenchFn fn) throws Exception {
+        // Warmup: drive tiered compilation past C2 thresholds.
         for (int i = 0; i < WARMUP_ITERS; i++) {
             fn.run();
         }
+
+        // Give the JVM a clean heap before measuring so a stop-the-world GC
+        // mid-loop doesn't blow up a single sample and dominate the mean.
+        // Two GC + finalize cycles is the standard JMH-style trick.
+        System.gc();
+        System.runFinalization();
+        System.gc();
 
         double[] samples = new double[MEASURE_ITERS];
         for (int i = 0; i < MEASURE_ITERS; i++) {
@@ -70,6 +84,7 @@ public class Benchmark {
             samples[i] = elapsedUs(t0, t1);
         }
 
+        // Untrimmed full-distribution stats (kept for visibility into the raw signal).
         double sum = 0.0;
         double min = samples[0];
         double max = samples[0];
@@ -78,17 +93,43 @@ public class Benchmark {
             if (v < min) min = v;
             if (v > max) max = v;
         }
-        double mean = sum / MEASURE_ITERS;
-        double var = 0.0;
+        double meanRaw = sum / MEASURE_ITERS;
+        double varRaw = 0.0;
         for (double v : samples) {
-            double d = v - mean;
-            var += d * d;
+            double d = v - meanRaw;
+            varRaw += d * d;
         }
-        double stddev = Math.sqrt(var / MEASURE_ITERS);
+        double stddevRaw = Math.sqrt(varRaw / MEASURE_ITERS);
+
+        // Sort once for percentiles + trimmed mean.
+        double[] sorted = samples.clone();
+        java.util.Arrays.sort(sorted);
+        double p50 = sorted[(int) (MEASURE_ITERS * 0.50)];
+        double p95 = sorted[(int) (MEASURE_ITERS * 0.95)];
+        double p99 = sorted[(int) (MEASURE_ITERS * 0.99)];
+
+        // Trimmed mean/stddev: drop top+bottom TRIM_FRACTION to suppress
+        // GC-pause / JIT-recompile outliers. Median is unaffected by trimming.
+        int trim = (int) (MEASURE_ITERS * TRIM_FRACTION);
+        int kept = MEASURE_ITERS - 2 * trim;
+        double trimSum = 0.0;
+        for (int i = trim; i < MEASURE_ITERS - trim; i++) {
+            trimSum += sorted[i];
+        }
+        double meanTrim = trimSum / kept;
+        double varTrim = 0.0;
+        for (int i = trim; i < MEASURE_ITERS - trim; i++) {
+            double d = sorted[i] - meanTrim;
+            varTrim += d * d;
+        }
+        double stddevTrim = Math.sqrt(varTrim / kept);
 
         System.out.printf(
-                "name=%s mean_us=%.1f stddev_us=%.1f min_us=%.1f max_us=%.1f%n",
-                name, mean, stddev, min, max);
+                "name=%s mean_us=%.1f stddev_us=%.1f min_us=%.1f max_us=%.1f"
+                        + " mean_trim_us=%.1f stddev_trim_us=%.1f"
+                        + " p50_us=%.1f p95_us=%.1f p99_us=%.1f%n",
+                name, meanRaw, stddevRaw, min, max,
+                meanTrim, stddevTrim, p50, p95, p99);
     }
 
     private static void benchAuthorizeUnsigned() throws Exception {

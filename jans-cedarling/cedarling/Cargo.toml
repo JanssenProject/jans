@@ -25,7 +25,6 @@ serde = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde_yaml_ng = "0.10.0"
 thiserror = { workspace = true }
-sparkv = { workspace = true }
 uuid7 = { version = "1.6.0", features = [
     "serde",
     "uuid",
