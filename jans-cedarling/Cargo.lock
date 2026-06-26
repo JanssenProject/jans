@@ -731,7 +731,6 @@ dependencies = [
  "serde_json",
  "serde_yaml_ng",
  "smol_str",
- "sparkv",
  "stats_alloc",
  "strum",
  "tempfile",
@@ -788,7 +787,6 @@ dependencies = [
  "pgrx-tests",
  "serde_json",
  "sha2 0.10.9",
- "sparkv",
  "tempfile",
  "test_utils",
  "thiserror 2.0.18",
@@ -2884,9 +2882,9 @@ checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
 
 [[package]]
 name = "memmap2"
-version = "0.9.10"
+version = "0.9.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "714098028fe011992e1c3962653c96b2d578c4b4bce9036e15ff220319b1e0e3"
+checksum = "d1219ed1b7f229ee7104d281dd01d6802fe28bb6e95d292942c4daacdeb798c0"
 dependencies = [
  "libc",
 ]
@@ -3933,9 +3931,9 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.11.14"
+version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "434b42fec591c96ef50e21e886936e66d3cc3f737104fdb9b737c40ffb94c098"
+checksum = "4fcb935c5bec503c2f0e306bdd3e58bb9029dcb14fa8d9ac76e3a5256ac0763e"
 dependencies = [
  "aws-lc-rs",
  "bytes",
@@ -4876,15 +4874,6 @@ checksum = "52d1cfed4120b4d927bf7c0f86d2087a4a7d6027c906d9f9d525a80573b9be51"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "sparkv"
-version = "0.1.1"
-dependencies = [
- "chrono",
- "serde_json",
- "thiserror 2.0.18",
 ]
 
 [[package]]
