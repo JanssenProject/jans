@@ -26,6 +26,11 @@ The Janssen Project is chartered under the Linux Foundation.
 - Janssen Tarp    : An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                 
 - Jans Chip       : Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                              
 
+## Documentation
+
+- Documentation: http://docs.jans.io/llms.txt
+- Full documentation: http://docs.jans.io/llms-full.txt
+
 ## Installation
 
 ### Development Environments
@@ -42,10 +47,6 @@ VM install: https://docs.jans.io/head/janssen-server/install/vm-install/vm-requi
 - Microsoft Azure AKS: https://docs.jans.io/head/janssen-server/install/helm-install/microsoft-azure/
 - Google GKE: https://docs.jans.io/head/janssen-server/install/helm-install/google-gke/
 - Rancher: https://docs.jans.io/head/janssen-server/install/helm-install/rancher/
-
-## Documentation
-
-- Full documentation: https://docs.jans.io
 
 ## Important links
 
