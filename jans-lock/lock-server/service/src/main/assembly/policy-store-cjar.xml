@@ -17,11 +17,7 @@
                 <include>metadata.json</include>
                 <include>schema.cedarschema</include>
                 <include>policies/**</include>
-                <!-- Optional Cedar Archive parts; add when present:
-                <include>templates/**</include>
-                <include>entities/**</include>
                 <include>trusted-issuers/**</include>
-                -->
             </includes>
         </fileSet>
     </fileSets>
