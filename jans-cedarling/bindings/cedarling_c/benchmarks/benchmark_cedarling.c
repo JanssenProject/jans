@@ -55,10 +55,44 @@ static int cmp_long_long(const void *a, const void *b) {
     return (da > db) - (da < db);
 }
 
+// JSON-escape `s` into `out` (truncates at out_size-1). Cedarling error
+// messages can contain quotes/backslashes/newlines that would otherwise
+// break the JSONL row.
+static void json_escape(const char *s, char *out, size_t out_size) {
+    size_t j = 0;
+    if (out_size == 0) return;
+    for (size_t i = 0; s != NULL && s[i] != '\0' && j + 2 < out_size; i++) {
+        unsigned char c = (unsigned char)s[i];
+        const char *esc = NULL;
+        switch (c) {
+            case '"':  esc = "\\\""; break;
+            case '\\': esc = "\\\\"; break;
+            case '\n': esc = "\\n";  break;
+            case '\r': esc = "\\r";  break;
+            case '\t': esc = "\\t";  break;
+            case '\b': esc = "\\b";  break;
+            case '\f': esc = "\\f";  break;
+        }
+        if (esc != NULL) {
+            if (j + 2 >= out_size) break;
+            out[j++] = esc[0];
+            out[j++] = esc[1];
+        } else if (c < 0x20) {
+            if (j + 6 >= out_size) break;
+            j += (size_t)snprintf(out + j, out_size - j, "\\u%04x", c);
+        } else {
+            out[j++] = (char)c;
+        }
+    }
+    out[j] = '\0';
+}
+
 static void emit_skipped(const char *id, const char *reason) {
+    char escaped[1024];
+    json_escape(reason, escaped, sizeof(escaped));
     printf(
         "{\"binding\":\"%s\",\"scenario\":\"%s\",\"status\":\"skipped\",\"reason\":\"%s\"}\n",
-        BINDING_NAME, id, reason
+        BINDING_NAME, id, escaped
     );
 }
 

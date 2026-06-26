@@ -27,7 +27,7 @@ Every binding loads the same manifest and dispatches scenarios by `id`. No inlin
       "id": "unsigned_simple",
       "kind": "unsigned" | "multi_issuer",
       "policy_store_fn": "test_files/...yaml",
-      "config_overrides": { "CEDARLING_...": "..." },
+      "config_overrides": { "CEDARLING_...": <string | array | bool | number> },
       "principal": { ... } | null,
       "action": "Jans::Action::\"...\"",
       "resource": { ... },

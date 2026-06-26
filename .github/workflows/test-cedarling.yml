@@ -214,7 +214,7 @@ jobs:
         node benchmarks/benchmark.mjs | tee bench_output.jsonl
         python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload WASM bench JSONL
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bench-jsonl-wasm
         path: jans-cedarling/bindings/cedarling_wasm/bench_output.jsonl
@@ -260,7 +260,7 @@ jobs:
         python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload Python bench JSONL
       if: matrix.python-version == '3.11'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bench-jsonl-python
         path: jans-cedarling/bindings/cedarling_python/bench_output.jsonl
@@ -309,7 +309,7 @@ jobs:
         go run ./benchmarks/ | tee bench_output.jsonl
         python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload Go bench JSONL
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bench-jsonl-go
         path: jans-cedarling/bindings/cedarling_go/bench_output.jsonl
@@ -353,7 +353,7 @@ jobs:
         ./benchmark_cedarling | tee bench_output.jsonl
         python3 ../../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload C bench JSONL
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bench-jsonl-c
         path: jans-cedarling/bindings/cedarling_c/benchmarks/bench_output.jsonl
@@ -392,7 +392,7 @@ jobs:
         mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.jsonl
         python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload UniFFI Java bench JSONL
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bench-jsonl-java
         path: jans-cedarling/bindings/cedarling_uniffi/javaApp/bench_output.jsonl
@@ -464,7 +464,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Download all bench JSONL artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
       with:
         path: bench-artifacts
         pattern: bench-jsonl-*

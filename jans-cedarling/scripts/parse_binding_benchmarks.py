@@ -166,15 +166,16 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
         return "### Cross-Platform Binding Benchmarks\n\n_No results found._\n"
 
     by_key: dict[tuple[str, str], dict] = {}
-    bindings: list[str] = []
-    scenarios: list[str] = []
+    bindings_set: set[str] = set()
+    scenarios_set: set[str] = set()
     for r in rows:
         b, s = r["binding"], r["scenario"]
-        if b not in bindings:
-            bindings.append(b)
-        if s not in scenarios:
-            scenarios.append(s)
+        bindings_set.add(b)
+        scenarios_set.add(s)
         by_key[(b, s)] = r
+    # Sort so column / row order is stable across runs regardless of input file order.
+    bindings = sorted(bindings_set)
+    scenarios = sorted(scenarios_set)
 
     out: list[str] = ["### Cross-Platform Binding Benchmarks\n\n"]
     out.append("#### Mean (µs) per scenario × binding\n\n")

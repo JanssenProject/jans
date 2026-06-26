@@ -118,15 +118,22 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 		return
 	}
 	for i := 0; i < warmupIters; i++ {
-		_ = fn()
+		if err := fn(); err != nil {
+			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("warmup_loop:%v", err)})
+			return
+		}
 	}
 
 	runtime.GC()
 	samples := make([]int64, measureIters)
 	for i := 0; i < measureIters; i++ {
 		t0 := time.Now()
-		_ = fn()
+		err := fn()
 		samples[i] = time.Since(t0).Nanoseconds()
+		if err != nil {
+			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("measure_loop:%v", err)})
+			return
+		}
 	}
 
 	// Allocs measured OUTSIDE the timed loop via runtime.MemStats diff.
@@ -134,7 +141,10 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 	var msStart, msEnd runtime.MemStats
 	runtime.ReadMemStats(&msStart)
 	for i := 0; i < measureIters; i++ {
-		_ = fn()
+		if err := fn(); err != nil {
+			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("allocs_loop:%v", err)})
+			return
+		}
 	}
 	runtime.ReadMemStats(&msEnd)
 	allocs := float64(msEnd.Mallocs-msStart.Mallocs) / float64(measureIters)

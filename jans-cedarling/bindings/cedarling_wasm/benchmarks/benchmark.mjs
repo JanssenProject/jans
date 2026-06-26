@@ -85,18 +85,28 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
     return;
   }
 
-  let cedarling;
-  let request;
-  let invoke;
+  let samplesNs;
   try {
     const config = buildConfig(scenario, repoRoot);
-    cedarling = await init(config);
-    request = buildRequest(scenario);
-    invoke = scenario.kind === "unsigned"
+    const cedarling = await init(config);
+    const request = buildRequest(scenario);
+    const invoke = scenario.kind === "unsigned"
       ? () => cedarling.authorize_unsigned(request)
       : () => cedarling.authorize_multi_issuer(request);
     await invoke(); // pre-measurement; fixture errors surface as a skip
 
+    for (let i = 0; i < warmupIters; i += 1) {
+      await invoke();
+    }
+
+    // performance.now() returns ms with sub-µs resolution; *1e6 → integer ns.
+    samplesNs = new Array(measureIters);
+    for (let i = 0; i < measureIters; i += 1) {
+      const t0 = performance.now();
+      await invoke();
+      const t1 = performance.now();
+      samplesNs[i] = Math.round((t1 - t0) * 1e6);
+    }
   } catch (err) {
     emit({
       binding: BINDING_NAME,
@@ -105,19 +115,6 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
       reason: `error:${err.name || "Error"}:${err.message || err}`,
     });
     return;
-  }
-
-  for (let i = 0; i < warmupIters; i += 1) {
-    await invoke();
-  }
-
-  // performance.now() returns ms with sub-µs resolution; *1e6 → integer ns.
-  const samplesNs = new Array(measureIters);
-  for (let i = 0; i < measureIters; i += 1) {
-    const t0 = performance.now();
-    await invoke();
-    const t1 = performance.now();
-    samplesNs[i] = Math.round((t1 - t0) * 1e6);
   }
 
   const sorted = samplesNs.slice().sort((a, b) => a - b);

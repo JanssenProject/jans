@@ -15,10 +15,14 @@ def c_escape(s: str) -> str:
 
 
 def build_config_template(scenario: dict) -> str:
-    # %s survives json.dumps unchanged; the C bench fills the abs path at runtime.
+    # Output is a snprintf format string: any literal `%` in override values must
+    # be doubled so it's emitted as `%%`. The single `%s` for the policy-store
+    # path is injected via a sentinel so it survives the escaping pass intact.
     overrides = dict(scenario.get("config_overrides") or {})
-    overrides["CEDARLING_POLICY_STORE_LOCAL_FN"] = "%s"
-    return json.dumps(overrides, separators=(",", ":"))
+    sentinel = "__POLICY_STORE_LOCAL_FN_PLACEHOLDER__"
+    overrides["CEDARLING_POLICY_STORE_LOCAL_FN"] = sentinel
+    encoded = json.dumps(overrides, separators=(",", ":"))
+    return encoded.replace("%", "%%").replace(sentinel, "%s")
 
 
 def build_request_json(scenario: dict) -> str:
