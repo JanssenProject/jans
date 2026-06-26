@@ -58,18 +58,16 @@ public class TrustRelationshipFixtures {
 
     public static final TrustRelationship sampleDraftIndividualTrustRelationshipWithActiveProfile() {
 
-        return TrustRelationship.from(sampleDraftIndividualTrustRelationship())
-            .withShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration())
-            .build()
+        return sampleDraftIndividualTrustRelationship()
+            .updateShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration())
             .getValue();
     }
 
     
     public static final TrustRelationship sampleDraftAggregateTrustRelationshipWithActiveProfile() {
 
-        return TrustRelationship.from(sampleDraftAggregateTrustRelationship())
-            .withSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration())
-            .build()
+        return sampleDraftAggregateTrustRelationship()
+            .updateSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration())
             .getValue();
     }
 
@@ -89,117 +87,104 @@ public class TrustRelationshipFixtures {
 
     public static final TrustRelationship sampleReadyIndividualTrustRelationship() {
 
-        return TrustRelationship.from(sampleDraftIndividualTrustRelationshipWithActiveProfile())
-            .withMetadataSource(sampleFileMetadataSource())
-            .build()
+        return sampleDraftIndividualTrustRelationshipWithActiveProfile()
+            .updateMetadataSource(sampleFileMetadataSource())
             .getValue();
     }
 
 
     public static final TrustRelationship sampleReadyAggregateTrustRelationship() {
-
-        return TrustRelationship.from(sampleDraftAggregateTrustRelationshipWithActiveProfile())
-            .withMetadataSource(sampleMdqMetadataSource())
-            .build()
+ 
+        return sampleDraftAggregateTrustRelationshipWithActiveProfile()
+            .updateMetadataSource(sampleMdqMetadataSource())
             .getValue();
     }
 
     public static final TrustRelationship sampleActivatingIndividualTrustRelationship() {
 
-        return TrustRelationship.from(sampleReadyIndividualTrustRelationship())
-            .activateCalled()
-            .build()
-            .getValue();
+        return sampleReadyIndividualTrustRelationship().activate().getValue();
     }
 
     public static final TrustRelationship sampleActivatingAggregateTrustRelationship() {
 
-        return TrustRelationship.from(sampleReadyAggregateTrustRelationship())
-            .activateCalled()
-            .build()
-            .getValue();
+        return sampleReadyAggregateTrustRelationship().activate().getValue();
     }
 
     public static final TrustRelationship sampleActivatingAggregateTrustRelationshipWithDiscoveredEntityIds() {
 
-        return TrustRelationship.from(sampleActivatingAggregateTrustRelationship())
-            .withDiscoveredEntityIds(sampleEntityIds())
-            .build()
+       return sampleActivatingAggregateTrustRelationship()
+            .incorporateDiscoveredEntityIds(sampleEntityIds())
             .getValue();
     }
 
     public static final TrustRelationship sampleActiveIndividualTrustRelationship() {
 
-        return TrustRelationship.from(sampleActivatingIndividualTrustRelationship())
-            .finalizeActivationCalled(sampleActivationDiagnosticsForSuccessfulActivation())
-            .build()
+        return sampleActivatingIndividualTrustRelationship()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
             .getValue();
     }
 
     public static final TrustRelationship sampleActiveAggregateTrustRelationship() {
 
-        return TrustRelationship.from(sampleActivatingAggregateTrustRelationship())
-            .finalizeActivationCalled(sampleActivationDiagnosticsForSuccessfulActivation())
-            .build()
+
+        return sampleActivatingAggregateTrustRelationship()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
             .getValue();
     }
 
     public static final TrustRelationship sampleInactiveIndividualTrustRelationship() {
 
-        return TrustRelationship.from(sampleActiveIndividualTrustRelationship())
-            .deactivateCalled()
-            .build()
+        return sampleActiveIndividualTrustRelationship()
+            .deactivate()
             .getValue();
     }
 
     public static final TrustRelationship sampleInactiveAggregateTrustRelationship() {
 
-        return TrustRelationship.from(sampleActiveAggregateTrustRelationship())
-            .deactivateCalled()
-            .build()
+       return sampleActiveAggregateTrustRelationship()
+            .deactivate()
             .getValue();
     }
 
     public static final TrustRelationship sampleInactiveIndividualTrustRelationshipWithNoRealMetadataSource() {
 
-        return TrustRelationship.from(sampleInactiveIndividualTrustRelationship())
-            .withMetadataSource(NoMetadataSource.getInstance())
-            .build()
+       return sampleInactiveIndividualTrustRelationship()
+            .updateMetadataSource(NoMetadataSource.getInstance())
             .getValue();
     }
     
     public static final TrustRelationship sampleInactiveAggregateTrustRelationshipWithNoRealMetadataSource() {
 
-        return TrustRelationship.from(sampleInactiveAggregateTrustRelationship())
-            .withMetadataSource(NoMetadataSource.getInstance())
-            .build()
+        return sampleInactiveAggregateTrustRelationship()
+            .updateMetadataSource(NoMetadataSource.getInstance())
+            .getValue();
+        
+    }
+
+    private static final TrustRelationship withNoActiveProfileConfiguration(TrustRelationship tr) {
+
+        return tr.updateShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration())
+            .getValue()
+            .updateSaml2ArtifactResolutionProfileConfiguration(inactiveSaml2ArtifactResolutionProfileConfiguration())
+            .getValue()
+            .updateSaml2AttributeQueryProfileConfiguration(inactiveSaml2AttributeQueryProfileConfiguration())
+            .getValue()
+            .updateSaml2EcpProfileConfiguration(inactiveSaml2EcpProfileConfiguration())
+            .getValue()
+            .updateSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration())
+            .getValue()
+            .updateSaml2LogoutProfileConfiguration(inactiveSaml2LogoutProfileConfiguration())
             .getValue();
     }
 
     public static final TrustRelationship sampleInactiveIndividualTrustRelationshipWithNoActiveProfileConfiguration() {
 
-        return TrustRelationship.from(sampleInactiveIndividualTrustRelationship())
-            .withShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration())
-            .withSaml2ArtifactResolutionProfileConfiguration(inactiveSaml2ArtifactResolutionProfileConfiguration())
-            .withSaml2AttributeQueryProfileConfiguration(inactiveSaml2AttributeQueryProfileConfiguration())
-            .withSaml2EcpProfileConfiguration(inactiveSaml2EcpProfileConfiguration())
-            .withSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration())
-            .withSaml2LogoutProfileConfiguration(inactiveSaml2LogoutProfileConfiguration())
-            .build()
-            .getValue();
+        return withNoActiveProfileConfiguration(sampleInactiveIndividualTrustRelationship());
     }
 
     public static final TrustRelationship sampleInactiveAggregateTrustRelationshipWithNoActiveProfileConfiguration() {
 
-        return TrustRelationship.from(sampleInactiveAggregateTrustRelationship())
-            .withShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration())
-            .withSaml2ArtifactResolutionProfileConfiguration(inactiveSaml2ArtifactResolutionProfileConfiguration())
-            .withSaml2AttributeQueryProfileConfiguration(inactiveSaml2AttributeQueryProfileConfiguration())
-            .withSaml2EcpProfileConfiguration(inactiveSaml2EcpProfileConfiguration())
-            .withSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration())
-            .withSaml2LogoutProfileConfiguration(inactiveSaml2LogoutProfileConfiguration())
-            .build()
-            .getValue();
+        return withNoActiveProfileConfiguration(sampleInactiveAggregateTrustRelationship());
     }
 
     public static final MetadataSource sampleFileMetadataSource() {

@@ -18,6 +18,7 @@ import io.jans.shibboleth.model.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.model.config.profiles.*;
 import io.jans.shibboleth.model.config.profiles.common.*;
 import io.jans.shibboleth.model.util.TrustResult;
+import net.bytebuddy.asm.Advice.Argument;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
@@ -238,6 +239,50 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static final Stream<Arguments> activatingTrustRelationshipsOfAllNaturesWithSupportedMetadataSources() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+
+        return Stream.of(
+            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
+            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
+            Arguments.of(individual,NoMetadataSource.getInstance()),
+
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
+            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource()),
+            Arguments.of(aggregate,NoMetadataSource.getInstance())
+        );
+    }
+
+
+    private static final Stream<Arguments> activatingTrustRelationshipsWithProfileConfigurationsAndProfileTypes() {
+
+        TrustRelationship individual = TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship();
+        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+        return Stream.of(
+
+            //Individual
+            Arguments.of(individual,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
+
+            //Aggregate
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT)
+        );
+    }
+
     private static final Stream<Arguments> activeTrustRelationshipsOfAllNatures() {
 
         return Stream.of(
@@ -301,6 +346,24 @@ public class TrustRelationshipTest {
             Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship())
         );
     }
+
+    public static final Stream<Arguments> trustRelationshipsOfAllNaturesNotInActivatingState() {
+
+        return Stream.of(
+            //Individual
+            Arguments.of(TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship()),
+
+            //Aggregate
+            Arguments.of(TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship()),
+            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+        );
+    }
+
     /**
      * Creation Tests
      */
@@ -1137,6 +1200,111 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Restrictions , Nature Rules & Error Cases -- State Restriction Rules")
+    public class StateRestrictionRulesTest {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNaturesWithSupportedMetadataSources")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " + 
+            "WHEN updateMetadataSource() is called " +
+            "THEN should fail with the appropriate error "
+        )
+        public void shouldFailWhenUpdateMetadataSourceCalledInActivatingState(TrustRelationship tr,MetadataSource source) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithProfileConfigurationsAndProfileTypes")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called " +
+            "THEN should fail with the appropriate error " 
+        )
+        public void shouldFailWhenUpdateProfileConfigurationCalledInActivatingStatus(TrustRelationship tr,Object config, ProfileType profileType) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = null;
+            switch(profileType) {
+                case SHIBBOLETH_SSO:
+                    result = tr.updateShibbolethSsoProfileConfiguration((ShibbolethSsoProfileConfiguration)config);
+                    break;
+                case SAML2_ARTIFACT_RESOLUTION:
+                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration((Saml2ArtifactResolutionProfileConfiguration)config);
+                    break;
+                case SAML2_ATTRIBUTE_QUERY:
+                    result = tr.updateSaml2AttributeQueryProfileConfiguration((Saml2AttributeQueryProfileConfiguration)config);
+                    break;
+                case SAML2_ECP:
+                    result = tr.updateSaml2EcpProfileConfiguration((Saml2EcpProfileConfiguration) config);
+                    break;
+                case SAML2_LOGOUT:
+                    result = tr.updateSaml2LogoutProfileConfiguration((Saml2LogoutProfileConfiguration) config);
+                    break;
+                case SAML2_SSO:
+                    result = tr.updateSaml2SsoProfileConfiguration((Saml2SsoProfileConfiguration) config);
+                    break;
+                default:
+                    fail("Specified profile type isn't supported in test");
+                    break;
+            }
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesNotInActivatingState")
+        @DisplayName(
+            "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
+            "WHEN finalizeActivation() is called " +
+            "THEN should fail with the appropriate error "
+        )
+        public void shouldFailFinalizeActivation_whenNotInActivatingState(TrustRelationship tr) {
+
+            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+
+            ActivationDiagnostics diagnostics = TrustRelationshipFixtures.sampleActivationDiagnosticsForFailedActivation();
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesNotInActivatingState")
+        @DisplayName(
+            "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
+            "WHEN cancelActivation() is called " + 
+            "THEN should fail with OperationRestrictedByStatus error "
+        )
+        public void shoudlFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
+
+            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+            TrustResult<TrustRelationship> result = tr.cancelActivation();
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
         }
     }
 

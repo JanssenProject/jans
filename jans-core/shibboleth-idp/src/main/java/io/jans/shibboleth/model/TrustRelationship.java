@@ -165,7 +165,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> updateMetadataSource(MetadataSource source) {
 
         return from(this)
-            .withMetadataSource(source)
+            .updateMetadataSourceCalled(source)
             .build();
     }
 
@@ -229,35 +229,35 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> updateShibbolethSsoProfileConfiguration(ShibbolethSsoProfileConfiguration profileconfig) {
 
         return from(this)
-            .withShibbolethSsoProfileConfiguration(profileconfig)
+            .updateShibbolethSsoProfileConfigurationCalled(profileconfig)
             .build();
     }
 
     public TrustResult<TrustRelationship> updateSaml2AttributeQueryProfileConfiguration(Saml2AttributeQueryProfileConfiguration profileconfig) {
 
         return from(this)
-            .withSaml2AttributeQueryProfileConfiguration(profileconfig)
+            .updateSaml2AttributeQueryProfileConfigurationCalled(profileconfig)
             .build();
     }
 
     public TrustResult<TrustRelationship> updateSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
 
         return from(this)
-            .withSaml2ArtifactResolutionProfileConfiguration(profileconfig)
+            .updateSaml2ArtifactResolutionProfileConfigurationCalled(profileconfig)
             .build();
     }
 
     public TrustResult<TrustRelationship> updateSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
 
         return from(this)
-            .withSaml2EcpProfileConfiguration(profileconfig)
+            .updateSaml2EcpProfileConfigurationCalled(profileconfig)
             .build();
     }
 
     public TrustResult<TrustRelationship> updateSaml2SsoProfileConfiguration(Saml2SsoProfileConfiguration profileconfig) {
 
         return from(this)
-            .withSaml2SsoProfileConfiguration(profileconfig)
+            .updateSaml2SsoProfileConfigurationCalled(profileconfig)
             .build();
 
     }
@@ -265,7 +265,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> updateSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
 
         return from(this)
-            .withSaml2LogoutProfileConfiguration(profileconfig)
+            .updateSaml2LogoutProfileConfigurationCalled(profileconfig)
             .build();
     }
     
@@ -536,6 +536,13 @@ public class TrustRelationship {
             return this;
         }
 
+        private Builder updateMetadataSourceCalled(MetadataSource metadataSource) {
+
+            this.operationType = OperationType.UPDATE_METADATA_SOURCE;
+            this.metadataSource = metadataSource;
+            return this;
+        }
+
         public Builder withDiscoveredEntityIds(EntityIds discoveredEntityIds) {
 
             this.discoveredEntityIds = discoveredEntityIds;
@@ -548,8 +555,22 @@ public class TrustRelationship {
             return this;
         }
 
+        private Builder updateShibbolethSsoProfileConfigurationCalled(ShibbolethSsoProfileConfiguration profileconfig) {
+
+            this.operationType = OperationType.UPDATE_SHIBBOLETH_SSO_PROFILE_CONFIGURATION;
+            this.shibbolethSsoProfileConfiguration = profileconfig;
+            return this;
+        }
+
         public Builder withSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
 
+            this.saml2ArtifactResolutionProfileConfiguration = profileconfig;
+            return this;
+        }
+
+        private Builder updateSaml2ArtifactResolutionProfileConfigurationCalled(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
+
+            this.operationType = OperationType.UPDATE_SAML2_ARTIFACT_RESOLUTION_PROFILE_CONFIGURATION;
             this.saml2ArtifactResolutionProfileConfiguration = profileconfig;
             return this;
         }
@@ -560,8 +581,22 @@ public class TrustRelationship {
             return this;
         }
 
+        private Builder updateSaml2AttributeQueryProfileConfigurationCalled(Saml2AttributeQueryProfileConfiguration profileconfig) {
+
+            this.operationType = OperationType.UPDATE_SAML2_ATTRIBUTE_QUERY_PROFILE_CONFIGURATION;
+            this.saml2AttributeQueryProfileConfiguration = profileconfig;
+            return this;
+        }
+
         public Builder withSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
 
+            this.saml2EcpProfileConfiguration = profileconfig;
+            return this;
+        }
+
+        private Builder updateSaml2EcpProfileConfigurationCalled(Saml2EcpProfileConfiguration profileconfig) {
+
+            this.operationType = OperationType.UPDATE_SAML2_ECP_PROFILE_CONFIGURATION;
             this.saml2EcpProfileConfiguration = profileconfig;
             return this;
         }
@@ -572,11 +607,26 @@ public class TrustRelationship {
             return this;
         }
 
+        private Builder updateSaml2SsoProfileConfigurationCalled(Saml2SsoProfileConfiguration profileConfiguration) {
+
+            this.operationType = OperationType.UPDATE_SAML2_SSO_PROFILE_CONFIGURATION;
+            this.saml2SsoProfileConfiguration = profileConfiguration;
+            return this;
+        }
+
         public Builder withSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
 
             this.saml2LogoutProfileConfiguration = profileconfig;
             return this;
         }
+
+        public Builder updateSaml2LogoutProfileConfigurationCalled(Saml2LogoutProfileConfiguration profileconfig) {
+
+            this.operationType = OperationType.UPDATE_SAML2_LOGOUT_PROFILE_CONFIGURATION;
+            this.saml2LogoutProfileConfiguration = profileconfig;
+            return this;
+        }
+
 
         public Builder withReleasedAttributes(ReleasedAttributes releasedAttributes) {
 
@@ -590,33 +640,33 @@ public class TrustRelationship {
             return this;
         }
 
-        public Builder activateCalled() {
+        private Builder activateCalled() {
 
             this.activationDiagnostics = ActivationDiagnostics.none();
             this.operationType = OperationType.ACTIVATE;
             return this;
         }
 
-        public Builder cancelActivationCalled() {
+        private Builder cancelActivationCalled() {
 
             this.operationType = OperationType.CANCEL_ACTIVATION;
             return this;
         }
 
-        public Builder deactivateCalled() {
+        private Builder deactivateCalled() {
 
             this.operationType = OperationType.DEACTIVATE;
             return this;
         }
 
-        public Builder finalizeActivationCalled(ActivationDiagnostics activationDiagnostics) {
+        private Builder finalizeActivationCalled(ActivationDiagnostics activationDiagnostics) {
 
             this.operationType = OperationType.FINALIZE_ACTIVATION;
             this.activationDiagnostics = activationDiagnostics;
             return this;
         }
 
-        public Builder incorporateDiscoveredEntityIdsCalled(EntityIds discoveredEntityIds) {
+        private Builder incorporateDiscoveredEntityIdsCalled(EntityIds discoveredEntityIds) {
 
             this.operationType = OperationType.INCORPORATE_DISCOVERED_ENTITY_IDS;
             this.discoveredEntityIds = discoveredEntityIds;

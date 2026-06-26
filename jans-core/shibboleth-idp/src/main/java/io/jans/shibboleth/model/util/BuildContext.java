@@ -114,6 +114,11 @@ public class BuildContext {
         return metadataSource;
     }
 
+    public boolean updateMetadataSourceCalled() {
+
+        return operationType == OperationType.UPDATE_METADATA_SOURCE;
+    }
+
     public EntityIds getDiscoveredEntityIds() {
 
         return discoveredEntityIds;
@@ -147,6 +152,16 @@ public class BuildContext {
     public Saml2LogoutProfileConfiguration getSaml2LogoutProfileConfiguration() {
 
         return saml2LogoutProfileConfiguration;
+    }
+
+    public boolean updateProfileConfigurationCalled() {
+
+        return operationType == OperationType.UPDATE_SHIBBOLETH_SSO_PROFILE_CONFIGURATION
+            || operationType == OperationType.UPDATE_SAML2_ARTIFACT_RESOLUTION_PROFILE_CONFIGURATION
+            || operationType == OperationType.UPDATE_SAML2_ATTRIBUTE_QUERY_PROFILE_CONFIGURATION
+            || operationType == OperationType.UPDATE_SAML2_ECP_PROFILE_CONFIGURATION
+            || operationType == OperationType.UPDATE_SAML2_SSO_PROFILE_CONFIGURATION
+            || operationType == OperationType.UPDATE_SAML2_LOGOUT_PROFILE_CONFIGURATION;
     }
 
     public ReleasedAttributes getReleasedAttributes() {

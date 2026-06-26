@@ -40,7 +40,11 @@ public class TrustConsistencyRules {
             MetadataSourceCompatibilityRule::check,
 
             StatusConstrainedOperations.IncorporateEntityIdsRestrictedToActivating::check,
-            
+            StatusConstrainedOperations.UpdateMetadataSourceDeniedFromActivating::check,
+            StatusConstrainedOperations.UpdateProfileConfigurationDeniedFromActivating::check,
+            StatusConstrainedOperations.FinalizeActivationRestrictedToActivating::check,
+            StatusConstrainedOperations.CancelActivationRestrictedToActivating::check,
+
             NatureConstrainedOperations.IncorporateDiscoveredEntityIdsRestrictedToAggregate::check
         );
     }
