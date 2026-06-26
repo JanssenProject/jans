@@ -168,23 +168,7 @@ static void run_scenario(const bench_scenario_t *s, const char *repo_root) {
         return;
     }
 
-    /* One pre-measurement call surfaces fixture errors as a skip. */
-    {
-        CedarlingResult vr;
-        ret = fn(id, s->request_json, &vr);
-        if (ret != 0) {
-            char reason[512];
-            snprintf(reason, sizeof(reason), "warmup_call:%s",
-                     vr.error_message ? vr.error_message : "unknown");
-            cedarling_free_result(&vr);
-            cedarling_drop(id);
-            emit_skipped(s->id, reason);
-            return;
-        }
-        cedarling_free_result(&vr);
-    }
 
-    /* Warmup loop. */
     for (int i = 0; i < BENCH_WARMUP_ITERS; i++) {
         CedarlingResult r;
         if (fn(id, s->request_json, &r) != 0) {

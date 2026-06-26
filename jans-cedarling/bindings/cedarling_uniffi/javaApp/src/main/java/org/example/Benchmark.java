@@ -101,10 +101,6 @@ public class Benchmark {
                     return;
             }
 
-            // One pre-measurement call surfaces config / fixture errors as a
-            // skip rather than skewing the warmup phase.
-            fn.run();
-
             for (int i = 0; i < warmupIters; i++) {
                 fn.run();
             }

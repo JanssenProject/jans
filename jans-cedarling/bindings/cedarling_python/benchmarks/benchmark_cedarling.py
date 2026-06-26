@@ -41,7 +41,9 @@ def _emit(row: dict) -> None:
 
 def _build_config(scenario: dict, repo_root: Path) -> BootstrapConfig:
     cfg = dict(scenario.get("config_overrides") or {})
-    cfg["CEDARLING_POLICY_STORE_LOCAL_FN"] = str(repo_root / scenario["policy_store_fn"])
+    cfg["CEDARLING_POLICY_STORE_LOCAL_FN"] = str(
+        repo_root / scenario["policy_store_fn"]
+    )
     return BootstrapConfig(cfg)
 
 
@@ -84,19 +86,25 @@ def _percentile(sorted_samples: list[int], frac: float) -> int:
     return sorted_samples[int(len(sorted_samples) * frac)]
 
 
-def _run_scenario(scenario: dict, repo_root: Path, warmup_iters: int, measure_iters: int) -> None:
+def _run_scenario(
+    scenario: dict, repo_root: Path, warmup_iters: int, measure_iters: int
+) -> None:
     sid = scenario["id"]
     if scenario.get("mock_op_required"):
-        _emit({"binding": BINDING_NAME, "scenario": sid, "status": "skipped", "reason": "mock_op_unavailable"})
+        _emit(
+            {
+                "binding": BINDING_NAME,
+                "scenario": sid,
+                "status": "skipped",
+                "reason": "mock_op_unavailable",
+            }
+        )
         return
 
     try:
         config = _build_config(scenario, repo_root)
         cedarling = Cedarling(config)
         fn = _build_bench_fn(cedarling, scenario)
-
-        # Pre-measurement call surfaces fixture errors as a skip.
-        fn()
 
         for _ in range(warmup_iters):
             fn()
@@ -139,7 +147,9 @@ def _run_scenario(scenario: dict, repo_root: Path, warmup_iters: int, measure_it
 
 def main() -> int:
     repo_root = resolve_repo_root()
-    manifest_path = repo_root / "bindings" / "benchmarks" / "fixtures" / "scenarios.json"
+    manifest_path = (
+        repo_root / "bindings" / "benchmarks" / "fixtures" / "scenarios.json"
+    )
     with manifest_path.open() as f:
         manifest = json.load(f)
     policy = manifest.get("iteration_policy", {})

@@ -81,7 +81,12 @@ function percentile(sorted, frac) {
 async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
   const sid = scenario.id;
   if (scenario.mock_op_required) {
-    emit({ binding: BINDING_NAME, scenario: sid, status: "skipped", reason: "mock_op_unavailable" });
+    emit({
+      binding: BINDING_NAME,
+      scenario: sid,
+      status: "skipped",
+      reason: "mock_op_unavailable",
+    });
     return;
   }
 
@@ -90,10 +95,10 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
     const config = buildConfig(scenario, repoRoot);
     const cedarling = await init(config);
     const request = buildRequest(scenario);
-    const invoke = scenario.kind === "unsigned"
-      ? () => cedarling.authorize_unsigned(request)
-      : () => cedarling.authorize_multi_issuer(request);
-    await invoke(); // pre-measurement; fixture errors surface as a skip
+    const invoke =
+      scenario.kind === "unsigned"
+        ? () => cedarling.authorize_unsigned(request)
+        : () => cedarling.authorize_multi_issuer(request);
 
     for (let i = 0; i < warmupIters; i += 1) {
       await invoke();
@@ -124,7 +129,7 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
     scenario: sid,
     iter: measureIters,
     mean_ns: Math.round(sum / measureIters),
-    p50_ns: percentile(sorted, 0.50),
+    p50_ns: percentile(sorted, 0.5),
     p95_ns: percentile(sorted, 0.95),
     p99_ns: percentile(sorted, 0.99),
     min_ns: sorted[0],
@@ -136,7 +141,13 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
 
 async function main() {
   const repoRoot = resolveRepoRoot();
-  const manifestPath = path.join(repoRoot, "bindings", "benchmarks", "fixtures", "scenarios.json");
+  const manifestPath = path.join(
+    repoRoot,
+    "bindings",
+    "benchmarks",
+    "fixtures",
+    "scenarios.json",
+  );
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const policy = manifest.iteration_policy || {};
   const warmupIters = policy.warmup_iters ?? 100;

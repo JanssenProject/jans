@@ -24,7 +24,6 @@ import json
 import re
 import sys
 
-
 # ---------------------------------------------------------------------------
 # Go format
 # ---------------------------------------------------------------------------
@@ -32,10 +31,10 @@ import sys
 #   BenchmarkAuthorizeUnsigned-8        1000    1234567 ns/op    2048 B/op    18 allocs/op
 # ---------------------------------------------------------------------------
 _GO_RE = re.compile(
-    r"^(Benchmark\S+?)-\d+\s+"   # name + GOMAXPROCS suffix
-    r"\d+\s+"                    # iterations (b.N)
-    r"([\d.]+)\s+ns/op"          # ns/op  ← the metric we want
-    r"(?:\s+([\d.]+)\s+B/op)?"   # optional B/op
+    r"^(Benchmark\S+?)-\d+\s+"  # name + GOMAXPROCS suffix
+    r"\d+\s+"  # iterations (b.N)
+    r"([\d.]+)\s+ns/op"  # ns/op  ← the metric we want
+    r"(?:\s+([\d.]+)\s+B/op)?"  # optional B/op
     r"(?:\s+([\d.]+)\s+allocs/op)?",  # optional allocs/op
     re.MULTILINE,
 )
@@ -150,6 +149,7 @@ def parse_jsonl(text: str) -> list[dict]:
 # Markdown output
 # ---------------------------------------------------------------------------
 
+
 def _fmt_us(v: float) -> str:
     return f"{v:,.1f}"
 
@@ -169,10 +169,17 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
     bindings_set: set[str] = set()
     scenarios_set: set[str] = set()
     for r in rows:
-        b, s = r["binding"], r["scenario"]
-        bindings_set.add(b)
-        scenarios_set.add(s)
-        by_key[(b, s)] = r
+        key = (r["binding"], r["scenario"])
+        if key in by_key:
+            print(
+                f"parse_binding_benchmarks: duplicate row for "
+                f"binding={key[0]!r} scenario={key[1]!r} — keeping first, ignoring later entry",
+                file=sys.stderr,
+            )
+            continue
+        bindings_set.add(key[0])
+        scenarios_set.add(key[1])
+        by_key[key] = r
     # Sort so column / row order is stable across runs regardless of input file order.
     bindings = sorted(bindings_set)
     scenarios = sorted(scenarios_set)
@@ -195,8 +202,12 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
     out.append("\n")
     for b in bindings:
         out.append(f"#### {b} detail\n\n")
-        out.append("| Scenario | Mean | p50 | p95 | p99 | Min | Max | Allocs/op | Status |\n")
-        out.append("|----------|----:|----:|----:|----:|----:|----:|----------:|--------|\n")
+        out.append(
+            "| Scenario | Mean | p50 | p95 | p99 | Min | Max | Allocs/op | Status |\n"
+        )
+        out.append(
+            "|----------|----:|----:|----:|----:|----:|----:|----------:|--------|\n"
+        )
         for s in scenarios:
             r = by_key.get((b, s))
             if r is None:
@@ -247,7 +258,9 @@ def render_markdown(binding: str, rows: list[dict]) -> str:
     lines = [header]
     for r in rows:
         if has_allocs:
-            allocs = str(r["allocs_per_op"]) if r.get("allocs_per_op") is not None else "—"
+            allocs = (
+                str(r["allocs_per_op"]) if r.get("allocs_per_op") is not None else "—"
+            )
             lines.append(f"| {r['operation']} | {_fmt_us(r['mean_us'])} | {allocs} |\n")
         elif has_stddev:
             stddev = _fmt_us(r["stddev_us"]) if r.get("stddev_us") is not None else "—"

@@ -14,7 +14,6 @@ import (
 	cedarling "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 )
 
-
 const bindingName = "go"
 
 type manifest struct {
@@ -112,11 +111,6 @@ func runScenario(s scenario, repoRoot string, warmupIters, measureIters int) {
 		return
 	}
 
-	// Pre-measurement call surfaces fixture errors as a skip.
-	if err := fn(); err != nil {
-		emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("warmup_call:%v", err)})
-		return
-	}
 	for i := 0; i < warmupIters; i++ {
 		if err := fn(); err != nil {
 			emit(result{Binding: bindingName, Scenario: s.ID, Status: "skipped", Reason: fmt.Sprintf("warmup_loop:%v", err)})
