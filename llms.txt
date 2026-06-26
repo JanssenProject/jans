@@ -53,7 +53,7 @@ VM install: https://docs.jans.io/head/janssen-server/install/vm-install/vm-requi
 - Releases: https://github.com/JanssenProject/jans/releases
 - Chat: https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/
 - Contribute: https://docs.jans.io/head/CONTRIBUTING/
-- Linkedin: https://www.linkedin.com/company/janssen-project
+- LinkedIn: https://www.linkedin.com/company/janssen-project
 - YouTube channel: https://www.youtube.com/@JanssenProject
 - Learning resources: https://docs.jans.io/stable/janssen-server/reference/learning-reference/
 - Artifact Hub: https://artifacthub.io/packages/search?repo=janssen-auth-server
