@@ -1,11 +1,7 @@
 package io.jans.casa.plugins.authnmethod.service.otp;
 
-import com.google.common.io.BaseEncoding;
-import com.lochbridge.oath.otp.HmacShaAlgorithm;
-import com.lochbridge.oath.otp.TOTP;
-import com.lochbridge.oath.otp.TOTPBuilder;
-import com.lochbridge.oath.otp.keyprovisioning.OTPAuthURIBuilder;
-import com.lochbridge.oath.otp.keyprovisioning.OTPKey;
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.TOTPConfig;
 import org.slf4j.Logger;
@@ -13,15 +9,15 @@ import org.slf4j.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.net.URI;
+import java.time.Duration;
 import java.util.Base64;
-import java.util.concurrent.TimeUnit;
-
-import static com.lochbridge.oath.otp.keyprovisioning.OTPKey.OTPType;
 
 /**
  * Created by jgomer on 2018-06-28.
  * An app. scoped bean that encapsulates logic related to generating and validating OTP keys.
  * See https://tools.ietf.org/html/rfc6238 and https://tools.ietf.org/html/rfc4226.
+ * Migrated from com.lochbridge.oath to com.github.bastiaanjansen:otp-java.
  */
 @ApplicationScoped
 public class TOTPAlgorithmService implements IOTPAlgorithm {
@@ -33,30 +29,38 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
 
     private String issuer;
 
-    private HmacShaAlgorithm hmacShaAlgorithm;
+    private HMACAlgorithm hmacShaAlgorithm;
 
     public void init(TOTPConfig conf, String issuer) {
         this.issuer = issuer;
         this.conf = conf;
-        hmacShaAlgorithm = HmacShaAlgorithm.from("Hmac" + conf.getHmacShaAlgorithm().toUpperCase());
+        // conf value is e.g. "SHA1" / "SHA256" / "SHA512"
+        hmacShaAlgorithm = HMACAlgorithm.valueOf(conf.getHmacShaAlgorithm().toUpperCase());
     }
 
     public byte[] generateSecretKey() {
         return Utils.randomBytes(conf.getKeyLength());
     }
 
+    private TOTPGenerator buildGenerator(byte[] secret) {
+        return new TOTPGenerator.Builder(secret)
+                .withHOTPGenerator(builder -> {
+                    builder.withPasswordLength(conf.getDigits());
+                    builder.withAlgorithm(hmacShaAlgorithm);
+                })
+                .withPeriod(Duration.ofSeconds(conf.getTimeStep()))
+                .build();
+    }
+
     public String generateSecretKeyUri(byte[] secretKey, String displayName) {
-
-        String secretKeyBase32 = BaseEncoding.base32().omitPadding().encode(secretKey);
-        OTPKey otpKey = new OTPKey(secretKeyBase32, OTPType.TOTP);
-
-        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName.replace(':', ' '));
-        uribe = uribe.issuer(issuer).digits(conf.getDigits());
-        uribe = uribe.timeStep(TimeUnit.SECONDS.toMillis(conf.getTimeStep()));
-
         logger.trace("Generating secret key URI");
-        return uribe.build().toUriString();
-
+        try {
+            // getURI base32-encodes the secret in the otpauth:// URI, as scanners expect.
+            URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
+            return uri.toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not build TOTP key URI", e);
+        }
     }
 
     public String getExternalUid(String secretKey, String code) {
@@ -66,12 +70,8 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     public boolean validateKey(String secretKey, String otpCode) {
-        
         byte[] bsecret = Base64.getUrlDecoder().decode(secretKey);
-        TOTPBuilder builder = TOTP.key(bsecret).digits(conf.getDigits()).hmacSha(hmacShaAlgorithm);
-        String localTotpKey = builder.timeStep(TimeUnit.SECONDS.toMillis(conf.getTimeStep())).build().value();
-        return otpCode.equals(localTotpKey);
-        
+        return buildGenerator(bsecret).verify(otpCode);
     }
 
 }

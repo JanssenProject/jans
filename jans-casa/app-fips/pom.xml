@@ -237,14 +237,9 @@
 
         <!-- OTP -->
         <dependency>
-            <groupId>com.lochbridge.oath</groupId>
-            <artifactId>oath-otp</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lochbridge.oath</groupId>
-            <artifactId>oath-otp-keyprovisioning</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>com.github.bastiaanjansen</groupId>
+            <artifactId>otp-java</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
         <!-- PF4J -->
@@ -293,7 +288,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
-            <version>11.34</version>
+            <version>11.37</version>
         </dependency>
 
         <dependency>
@@ -311,7 +306,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-fips</artifactId>
-            <version>2.1.10</version>
+            <version>2.1.11</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -327,7 +322,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>build-casa-fips-war</id>

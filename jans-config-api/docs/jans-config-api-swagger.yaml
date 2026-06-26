@@ -1853,13 +1853,13 @@ paths:
       - name: start_date
         in: query
         description: "Start date/time for the log entries report. Accepted: dd-MM-yyyy\
-          \ or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
+          \ or ISO-8601 date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z')."
         schema:
           type: string
       - name: end_date
         in: query
         description: "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601\
-          \ date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
+          \ date-time (e.g. dd-MM-yyyy'T'HH:mm:ss.SSS'Z')."
         schema:
           type: string
       responses:
@@ -15691,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -18556,8 +18556,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18569,6 +18567,8 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

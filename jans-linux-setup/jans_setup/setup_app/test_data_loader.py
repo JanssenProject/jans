@@ -222,7 +222,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
                                     'grantTypesAndResponseTypesAutofixEnabled': True,
-                                    'grantTypesSupportedByDynamicRegistration': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange" ],
+                                    'grantTypesSupportedByDynamicRegistration': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:jwt-bearer" ],
                                     'legacyIdTokenClaims': True,
                                     'authenticationFiltersEnabled': True,
                                     'clientAuthenticationFiltersEnabled': True,
@@ -239,7 +239,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'userInfoSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'consentGatheringScriptBackwardCompatibility': False,
                                     'claimsParameterSupported': True,
-                                    'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password', 'urn:ietf:params:oauth:grant-type:token-exchange' ],
+                                    'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password', 'urn:ietf:params:oauth:grant-type:token-exchange', 'urn:ietf:params:oauth:grant-type:jwt-bearer' ],
                                     'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'accessTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
@@ -260,33 +260,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation'],
                                     'loggingLevel': 'TRACE',
                                     }
-
-        if Config.get('config_patch_creds'):
-            data = None
-            datajs = None
-            patch_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'protected/jans-auth/jans-auth-test-config-patch.json')
-            req = urllib.request.Request(patch_url)
-            credentials = Config.get('config_patch_creds')
-            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
-            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
-            self.logIt("Retreiving auto test ciba patch from " + patch_url)
-
-            try:
-                resp = urllib.request.urlopen(req)
-                data = resp.read()
-                self.logIt("Auto test ciba patch retreived")
-            except:
-                self.logIt("Can't retreive auto test ciba patch", True)
-
-            if data:
-                try:
-                    datajs = json.loads(data.decode())
-                except:
-                    self.logIt("Can't decode json for auto test ciba patch", True)
-
-            if datajs:
-                jans_auth_conf_dynamic_changes.update(datajs)
-                self.logIt("jans_auth_conf_dynamic was updated with auto test ciba patch")
 
         self.dbUtils.set_jans_auth_conf_dynamic(jans_auth_conf_dynamic_changes)
 

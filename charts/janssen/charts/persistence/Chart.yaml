@@ -9,7 +9,7 @@ keywords:
   - persistence prep
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans/docker-jans-persistence-loader
+  - https://github.com/JanssenProject/jans/tree/main/docker-jans-persistence-loader
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

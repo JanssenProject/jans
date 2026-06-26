@@ -164,7 +164,7 @@
     ProxyPass   /device-code http://localhost:${jans_auth_port}/jans-auth/device_authorization.htm
 
     % if context.get('install_jans_lock') in ('true', True):
-    ProxyPass   /.well-known/lock-server-configuration http://localhost:${lock_host_port}/${lock_host_suffix}/api/v1/configuration'
+    ProxyPass   /.well-known/lock-server-configuration http://localhost:${lock_host_port}/${lock_host_suffix}/api/v1/configuration
     <Location /jans-lock>
         Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly
         ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix} retry=5 connectiontimeout=60 timeout=60

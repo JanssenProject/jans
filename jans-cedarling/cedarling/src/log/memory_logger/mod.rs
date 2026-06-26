@@ -7,7 +7,7 @@ use chrono::Duration;
 use serde_json::Value;
 use std::sync::Mutex;
 
-use sparkv::{Config as ConfigSparKV, Error, SparKV};
+use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
@@ -47,6 +47,11 @@ impl MemoryLogger {
             .expect("a valid duration"),
             max_items: config.max_items.unwrap_or(default_config.max_items),
             max_item_size: config.max_item_size.unwrap_or(default_config.max_item_size),
+            // Let SparKV evict the earliest-expiring entry on capacity overflow.
+            // Its `remove_last` skips stale heap entries; the previous in-logger
+            // single-shot eviction did not, so capacity failures could silently
+            // drop log entries (including DecisionLogEntry telemetry).
+            earliest_expiration_eviction: true,
             ..Default::default()
         };
 
@@ -65,80 +70,35 @@ impl MemoryLogger {
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
         let json = to_json_value(entry);
-        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
-        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
-        let err = match set_result {
-            Ok(()) => return,
-            Err(Error::CapacityExceeded) => {
-                // remove oldest key and try again
 
-                let key_to_delete = storage
-                    .get_oldest_key_by_expiration()
-                    .map(|exp_entry| exp_entry.key.clone());
-
-                if let Some(key) = key_to_delete {
-                    storage.pop(&key);
-                }
-
-                // It should be rare case, so instead of cloning the whole entry,
-                // in success case we convert raw value to json (here).
-                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
-                let json = to_json_value(entry);
-
-                // set_again
-                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
-                    err
-                } else {
-                    return;
-                }
-            },
-            Err(err) => err,
+        let err = {
+            let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+            match storage.set(&entry_id, json, index_keys.as_slice()) {
+                Ok(()) => return,
+                Err(err) => err,
+            }
         };
-        fallback::log(
-            &format!("could not store LogEntry to memory: {err:?}"),
-            &self.pdp_id,
-            self.app_name.as_ref(),
+
+        // Storage failed even though SparKV is configured to evict on capacity.
+        // Surface the original entry's id/request_id via ErrorLogEntry so a
+        // dropped entry stays correlatable in fallback output.
+        let err_entry = ErrorLogEntry::from_loggable(
+            entry,
+            format!("could not store LogEntry to memory: {err:?}"),
         );
+        fallback::log(err_entry, &self.pdp_id, self.app_name.as_ref());
     }
 }
 
 /// In case of failure in [`MemoryLogger`], log to stderr where supported.
 /// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
 mod fallback {
+    use super::ErrorLogEntry;
     use crate::LogLevel;
     use crate::app_types::{ApplicationName, PdpID};
     use crate::log::StdOutLoggerMode;
     use crate::log::log_strategy::LogStrategyLogger;
     use crate::log::stdout_logger::StdOutLogger;
-
-    /// conform to Loggable requirement imposed by [`LogStrategy`]
-    #[derive(serde::Serialize, Clone)]
-    struct StrWrap(String);
-
-    impl crate::log::interface::Indexed for StrWrap {
-        fn get_id(&self) -> uuid7::Uuid {
-            crate::log::log_entry::gen_uuid7()
-        }
-
-        fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
-            Vec::new()
-        }
-
-        fn get_tags(&self) -> Vec<&str> {
-            Vec::new()
-        }
-    }
-
-    impl crate::log::interface::Loggable for StrWrap {
-        fn get_log_level(&self) -> Option<LogLevel> {
-            // These must always be logged.
-            Some(LogLevel::TRACE)
-        }
-
-        fn get_log_kind(&self) -> Option<crate::log::LogType> {
-            None
-        }
-    }
 
     /// Fetch the correct logger. That takes some work, and it's done on every
     /// call. But this is a fallback logger, so it is not intended to be used
@@ -150,13 +110,11 @@ mod fallback {
     /// Panics when:
     /// - A runtime to initialize a new [`LogStrategy`] could not be built.
     /// - A fallback logger could not be initialized.
-    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: Option<&ApplicationName>) {
+    pub(super) fn log(entry: ErrorLogEntry, pdp_id: &PdpID, app_name: Option<&ApplicationName>) {
         use crate::log::interface::LogWriter;
 
-        // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
-        // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new_with_logger(
             LogStrategyLogger::StdOut(logger),
             *pdp_id,
@@ -164,8 +122,7 @@ mod fallback {
             None,
         );
 
-        // a string is always serializable
-        log_strategy.log_any(StrWrap(msg.to_string()));
+        log_strategy.log_any(entry);
     }
 }
 
@@ -540,5 +497,51 @@ mod tests {
             None,
         );
         assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 10_000);
+    }
+
+    #[test]
+    fn test_capacity_overflow_evicts_oldest_and_keeps_logging() {
+        // Regression: prior to enabling earliest_expiration_eviction in SparKV,
+        // a manual single-shot eviction in MemoryLogger could no-op against
+        // stale heap entries, silently dropping log entries past max_items.
+        let max_items = 3;
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 60,
+                max_items: Some(max_items),
+                max_item_size: None,
+            },
+            LogLevel::TRACE,
+            PdpID::new(),
+            None,
+        );
+
+        // Push well past capacity. None of these should fail; the store should
+        // stay at max_items and the latest entries should be present.
+        let total = max_items * 4;
+        let mut entries = Vec::with_capacity(total);
+        for _ in 0..total {
+            let entry = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
+            logger.log_any(entry.clone());
+            entries.push(entry);
+        }
+
+        let ids = logger.get_log_ids();
+        assert_eq!(
+            ids.len(),
+            max_items,
+            "storage should cap at max_items={max_items}, got {}",
+            ids.len()
+        );
+
+        // The most recent `max_items` entries must all be retrievable by id
+        // (i.e. the eviction kept the newest, not silently dropped them).
+        for entry in entries.iter().rev().take(max_items) {
+            let id = entry.get_id().to_string();
+            assert!(
+                logger.get_log_by_id(&id).is_some(),
+                "expected most-recent entry {id} to be retained after overflow"
+            );
+        }
     }
 }

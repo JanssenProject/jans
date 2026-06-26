@@ -13,6 +13,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.20</kotlin.version>
+        <exec.mainClass>org.example.Main</exec.mainClass>
     </properties>
     <dependencies>
         <!-- Kotlin dependencies -->
@@ -135,7 +136,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.example.Main</mainClass>
+                    <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>

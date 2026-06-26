@@ -1,19 +1,28 @@
 package io.jans.configapi.plugin.shibboleth.service;
 
+import io.jans.agama.model.Flow;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.configapi.plugin.shibboleth.model.TrustRelationship;
-
+import io.jans.configapi.plugin.shibboleth.model.EntityType;
 import io.jans.configapi.plugin.shibboleth.model.Status;
 import io.jans.configapi.plugin.shibboleth.util.Constants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SearchRequest;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.DefaultBatchOperation;
+import io.jans.orm.model.ProcessBatchOperation;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.impl.SqlEntryManager;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-import io.jans.configapi.core.service.ConfigHttpService;
+
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -26,20 +35,20 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import java.util.stream.*;
 
 import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
 public class ShibbolethService {
 
-    private static final String SHIBBOLETH_IDP_CONFIG_DN = "ou=shibboleth-idp-plugin,ou=configuration,o=jans";
-    private static final String SHIBBOLETH_TR_CONFIG_DN = "inum=%s,ou=trustRelationships,%s";
+    private static final String SHIBBOLETH_TR_CONFIG_DN = "inum=%s,ou=trustRelationship,%s";
 
     @Inject
     private Logger logger;
@@ -84,7 +93,7 @@ public class ShibbolethService {
     public String getDnForTrustRelationship(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=trustRelationships,%s", orgDn);
+            return String.format("ou=trustRelationship,%s", orgDn);
         }
         return String.format(SHIBBOLETH_TR_CONFIG_DN, inum, orgDn);
     }
@@ -100,7 +109,6 @@ public class ShibbolethService {
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }
-
         }
         return null;
     }
@@ -127,11 +135,10 @@ public class ShibbolethService {
     }
 
     public List<TrustRelationship> getAllTrustRelationshipByDisplayName(String name) {
-        logger.info("Search TrustRelationship with name:{}", name);
+        logger.info(" \n\n New Search TrustRelationship with name:{}", name);
 
-        String[] targetArray = new String[] { name };
-        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        logger.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
+        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
+        logger.error("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
@@ -154,13 +161,14 @@ public class ShibbolethService {
     }
 
     public PagedResult<TrustRelationship> getTrustRelationship(SearchRequest searchRequest) {
-        logger.debug("Search TrustRelationship with searchRequest:{}", searchRequest);
+        logger.error("\n\n\n Search TrustRelationship with searchRequest:{}, searchRequest.getFilterAssertionValue:{}", searchRequest, searchRequest.getFilterAssertionValue());
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
-
+            logger.error("\n\n\n Block 1");
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                logger.error("\n\n\n Block 2 - assertionValue:{} ", assertionValue);
                 String[] targetArray = new String[] { assertionValue };
                 Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                         targetArray, null);
@@ -172,9 +180,10 @@ public class ShibbolethService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.trace("TrustRelationship pattern searchFilter:{}", searchFilter);
+        logger.error("TrustRelationship pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            logger.error("\n\n\n Block 3");
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
                 logger.trace("TrustRelationship dataFilter:{}", dataFilter);
@@ -184,7 +193,7 @@ public class ShibbolethService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.debug("TrustRelationship searchFilter:{}", searchFilter);
+        logger.error("TrustRelationship searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -192,7 +201,53 @@ public class ShibbolethService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+    public Set<String> getFederationEntityId(String fedId) {
+        logger.debug("Search TrustRelationship with fedId:{}", fedId);
+
+        if (StringUtils.isBlank(fedId)) {
+            throw new InvalidAttributeException("Federation ID cannot be null");
+        }
+
+        TrustRelationship trustRelationship = getTrustRelationshipByInum(fedId);
+        if (trustRelationship == null) {
+            throw new InvalidAttributeException("No Federation found by inum:{" + fedId + "}");
+        }
+
+        if (trustRelationship.getEntityType() != EntityType.AGGREGATE) {
+            throw new InvalidAttributeException("{" + fedId + "} is not a Federation");
+        }
+        return trustRelationship.getEntityIds();
+    }
+
+    public List<TrustRelationship> getActiveChildren(TrustRelationship trustRelationship) {
+
+        if (trustRelationship == null) {
+            throw new InvalidAttributeException("TrustRelationship is null");
+        }
+
+        if (!EntityType.AGGREGATE.equals(trustRelationship.getEntityType())) {
+            throw new InvalidAttributeException("TrustRelationship is not an AGGREGATE ");
+        }
+
+        // get active children
+        Filter searchFilter = Filter.createANDFilter(
+                Filter.createEqualityFilter("jansContainerFed", trustRelationship.getJansContainerFedId()),
+                Filter.createEqualityFilter("jansStatus", Status.ACTIVE));
+
+        logger.debug("Search TrustRelationship with searchFilter:{}", searchFilter);
+        List<TrustRelationship> trustRelationshipList = persistenceEntryManager
+                .findEntries(getDnForTrustRelationship(null), TrustRelationship.class, searchFilter);
+        logger.debug("Active children for trustRelationship.getJansContainerFedId():{} are trustRelationshipList:{}",
+                trustRelationship.getJansContainerFedId(), trustRelationshipList);
+
+        return trustRelationshipList;
+
+    }
+
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
+        trustRelationship.setInum(this.generateInumForNewRelationship());
+        trustRelationship.setBaseDn(SHIBBOLETH_TR_CONFIG_DN);
+        trustRelationship.setDn(this.getDnForTrustRelationship(trustRelationship.getInum()));
         return addTrustRelationship(trustRelationship, null);
     }
 
@@ -213,6 +268,9 @@ public class ShibbolethService {
     public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
             throws IOException {
         logger.info("Update trustRelationship:{}, file:{}", trustRelationship, file);
+        if (trustRelationship == null) {
+            return trustRelationship;
+        }
         setTrustRelationshipDefaultValue(trustRelationship, true);
 
         if (file != null && file.available() > 0) {
@@ -224,9 +282,30 @@ public class ShibbolethService {
 
     }
 
-    public void removeTrustRelationship(TrustRelationship trustRelationship) {
-        persistenceEntryManager.removeRecursively(trustRelationship.getDn(), TrustRelationship.class);
+    public void deleteTrustRelationship(String inum) {
+        logger.info("TrustRelationship to remove is inum:{}", inum);
 
+        // validate TrustRelationship is valid
+        TrustRelationship trustRelationship = this.getTrustRelationshipByInum(inum);
+        if (trustRelationship == null) {
+            throw new InvalidAttributeException("No TrustRelationship exists with given ID '{" + inum + "}'");
+        }
+
+        // get active children
+        List<TrustRelationship> trustRelationshipList = this.getActiveChildren(trustRelationship);
+        logger.info("Active children for inum:{} are trustRelationshipList:{}", inum, trustRelationshipList);
+
+        // Block if an AGGREGATE has ACTIVE children.
+        if (Status.ACTIVE.equals(trustRelationship.getStatus())
+                && EntityType.AGGREGATE.equals(trustRelationship.getEntityType())
+                && (trustRelationshipList != null && trustRelationshipList.size() > 0)) {
+            throw new InvalidAttributeException("TrustRelationship {'" + trustRelationship.getDisplayName()
+                    + "}' is 'ACTIVE' and has associated Trust Relationship(s)  depending on it and cannot be deleted. Please disable the federation and try again.");
+        }
+        // Mark Children and AGGREGATE trustRelationship as INACTIVE for the Worker to
+        // unpublish.
+        markChildrenInactive(trustRelationship);
+        markTrustRelationshipInactive(trustRelationship);
     }
 
     public boolean urlExists(String urlPath) {
@@ -234,6 +313,71 @@ public class ShibbolethService {
     }
 
     /* Helper methods */
+    private List<TrustRelationship> markTrustRelationshipInactive(List<TrustRelationship> trustRelationshipList) {
+        logger.info("TrustRelationships to be marked as INACTIVE are:{}", trustRelationshipList);
+
+        if (trustRelationshipList == null || trustRelationshipList.isEmpty()) {
+            throw new InvalidAttributeException("TrustRelationship is null");
+        }
+        for (TrustRelationship trustRelationship : trustRelationshipList) {
+            markTrustRelationshipInactive(trustRelationship);
+        }
+        return trustRelationshipList;
+
+    }
+
+    private TrustRelationship markTrustRelationshipInactive(TrustRelationship trustRelationship) {
+        logger.info("TrustRelationship to be marked as INACTIVE is:{}", trustRelationship);
+
+        if (trustRelationship == null) {
+            throw new InvalidAttributeException("TrustRelationship is null");
+        }
+
+        trustRelationship.setStatus(Status.INACTIVE);
+        persistenceEntryManager.merge(trustRelationship);
+
+        return trustRelationship;
+
+    }
+
+    private List<TrustRelationship> markChildrenInactive(TrustRelationship fedTrustRelationship) {
+        if (fedTrustRelationship == null) {
+            throw new InvalidAttributeException("TrustRelationship is null");
+        }
+
+        BatchOperation<TrustRelationship> updateBatchOperation = new ProcessBatchOperation<TrustRelationship>() {
+            private int processedCount = 0;
+
+            @Override
+            public void performAction(List<TrustRelationship> objects) {
+                int currentProcessedCount = 0;
+                for (TrustRelationship trustRelationship : objects) {
+                    try {
+
+                        trustRelationship.setStatus(Status.INACTIVE);
+                        persistenceEntryManager.merge(trustRelationship);
+                        processedCount++;
+                        currentProcessedCount++;
+                    } catch (EntryPersistenceException ex) {
+                        logger.error("Failed to update entry", ex);
+                    }
+                }
+                logger.info("Currnet batch count processed trustRelationship:{} ", currentProcessedCount);
+
+                logger.info("Total processed trustRelationship:{} ", processedCount);
+            }
+        };
+
+        final Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("jansContainerFed", fedTrustRelationship.getJansContainerFedId()),
+                Filter.createEqualityFilter("jansStatus", Status.ACTIVE));
+
+        List<TrustRelationship> trustRelationshipList = persistenceEntryManager.findEntries(
+                getDnForTrustRelationship(null), TrustRelationship.class, filter, SearchScope.SUB, null,
+                updateBatchOperation, 0, 0, 100);
+        logger.info("Updated trustRelationshipList:{} ", trustRelationshipList);
+        return trustRelationshipList;
+    }
 
     private TrustRelationship setTrustRelationshipDefaultValue(TrustRelationship trustRelationship, boolean isUpdate) {
         logger.debug("trustRelationship:{}, isUpdate:{}", trustRelationship, isUpdate);

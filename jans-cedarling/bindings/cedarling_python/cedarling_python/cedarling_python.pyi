@@ -14,7 +14,6 @@ class BootstrapConfig:
     Example Usage:
         bootstrap_config = BootstrapConfig({
             "CEDARLING_APPLICATION_NAME": "MyApp",
-            "CEDARLING_POLICY_STORE_ID": "12345",
             "CEDARLING_LOG_TYPE": "memory",
             "CEDARLING_LOG_TTL": 30,
             ...

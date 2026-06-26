@@ -132,7 +132,7 @@ paths:
           default: ""
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
+        description: Index of the first query result
         schema:
           type: integer
           format: int32
@@ -157,6 +157,7 @@ paths:
         schema:
           type: integer
           format: int32
+          default: 1
       - name: fieldValuePair
         in: query
         description: Field and value pair for searching
@@ -177,7 +178,48 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: example/shibboleth/trust-relationship/get-shibboleth-trust
+                  value: |
+                    {
+                      "start": 0,
+                      "totalEntriesCount": 2,
+                      "entriesCount": 2,
+                      "entries": [
+                        {
+                          "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                          "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                          "displayName": "TR-2",
+                          "description": "Trust-relationship 2",
+                          "entityType": "individual",
+                          "metadataSource": {
+                            "metadataSourceType": "file"
+                          },
+                          "releasedAttributes": [
+                            "inum=C4F7,ou=scopes,o=jans",
+                            "inum=10B2,ou=scopes,o=jans"
+                          ],
+                          "status": "draft",
+                          "version": 0,
+                          "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                        },
+                        {
+                          "dn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans",
+                          "inum": "3d197836-38d1-4020-873b-1e3c920a69cc",
+                          "displayName": "TR-1",
+                          "description": "Trust-relationship 1",
+                          "entityType": "individual",
+                          "metadataSource": {
+                            "metadataSourceType": "file"
+                          },
+                          "releasedAttributes": [
+                            "inum=C4F7,ou=scopes,o=jans",
+                            "inum=10B2,ou=scopes,o=jans"
+                          ],
+                          "status": "draft",
+                          "version": 0,
+                          "baseDn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans"
+                        }
+                      ]
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -185,6 +227,54 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+    put:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Update Trust Relationship details
+      description: Update Trust Relationship details
+      operationId: put-shibboleth-trust
+      requestBody:
+        description: Trust Relationship object
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TrustRelationshipForm"
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Updated Trust Relationship
+          content:
+            multipart/form-data:
+              schema:
+                $ref: "#/components/schemas/TrustRelationship"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
@@ -198,7 +288,7 @@ paths:
       requestBody:
         description: Trust Relationship object
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/TrustRelationship"
             examples:
@@ -238,16 +328,231 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
   /shibboleth/trust-relationship/{inum}:
-    put:
+    get:
       tags:
       - Shibboleth - Trust Relationship
-      summary: Update Trust Relationship details
-      description: Update Trust Relationship details
-      operationId: put-shibboleth-trust
+      summary: Gets trusted service provider by unique identifier
+      description: shibbolethService
+      operationId: get-shibboleth-trust-by-inum
+      parameters:
+      - name: inum
+        in: path
+        description: Trust Relationship identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustRelationship"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                      "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                      "displayName": "TR-2",
+                      "description": "Trust-relationship 2",
+                      "entityType": "individual",
+                      "metadataSource": {
+                        "metadataSourceType": "file"
+                      },
+                      "releasedAttributes": [
+                        "inum=C4F7,ou=scopes,o=jans",
+                        "inum=10B2,ou=scopes,o=jans"
+                      ],
+                      "status": "draft",
+                      "version": 0,
+                      "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+    delete:
+      tags:
+      - OAuth - OpenID Connect - Clients
+      summary: Marks Trust Relationship for deletion
+      description: Marks Trust Relationship for deletion
+      operationId: delete-shibboleth-trust-by-inum
       parameters:
       - name: inum
         in: path
         description: TrustRelationship inum
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.delete
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationship/fedId/discovery/entities/{fed-id}:
+    get:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Gets list of federation entity ID based on federation ID
+      description: Gets list of federation entity ID based on federation ID
+      operationId: get-entities-by-fed-id
+      parameters:
+      - name: fedId
+        in: path
+        description: Federation ID
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringPagedResult"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationship/release-policy/effective/{inum}:
+    get:
+      tags:
+      - Shibboleth - Trust Relaattributetionship
+      summary: Get final attribute list
+      description: Get attribute list for Trust Relationship
+      operationId: get-shibboleth-trust-attribute-list
+      parameters:
+      - name: inum
+        in: path
+        description: Trust Relationship identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                      "inum=C4F7,ou=scopes,o=jans",
+                      "inum=10B2,ou=scopes,o=jans"
+                    ]
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationship/{inum}saml-profiles:
+    get:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Gets configured SAML profiles for a trust relationship
+      description: Gets configured SAML profiles for a trust relationship
+      operationId: get-shibboleth-trust-saml-profiles
+      parameters:
+      - name: inum
+        in: path
+        description: Trust Relationship identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SAMLProfile"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+    put:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Updates configured SAML profiles for a trust relationship
+      description: Updates configured SAML profiles for a trust relationship
+      operationId: post-shibboleth-trust_1
+      parameters:
+      - name: inum
+        in: path
+        description: Trust Relationship identifier
         required: true
         schema:
           type: string
@@ -256,18 +561,26 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/TrustRelationshipForm"
+              type: array
+              items:
+                $ref: "#/components/schemas/SAMLProfile"
             examples:
               Request example:
                 description: Request example
                 value: ""
       responses:
         "200":
-          description: Updated Trust Relationship
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrustRelationship"
+                type: array
+                items:
+                  $ref: "#/components/schemas/SAMLProfile"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
         "400":
           description: Bad Request
           content:
@@ -289,6 +602,63 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
       security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationship/name/{name}:
+    get:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: Gets trusted service providers by name.
+      description: Gets list of trusted service providers by name
+      operationId: get-shibboleth-trust-by-name
+      parameters:
+      - name: name
+        in: path
+        description: Trust Relationship Name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrustRelationship"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                      {
+                        "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
+                        "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
+                        "displayName": "TR-2",
+                        "description": "Trust-relationship 2",
+                        "entityType": "individual",
+                        "metadataSource": {
+                          "metadataSourceType": "file"
+                        },
+                        "releasedAttributes": [
+                          "inum=C4F7,ou=scopes,o=jans",
+                          "inum=10B2,ou=scopes,o=jans"
+                        ],
+                        "status": "draft",
+                        "version": 0,
+                        "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
+                      }
+                    ]
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.readonly
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
@@ -329,7 +699,7 @@ components:
           type: string
           description: Metadata Source Details
       description: Metadata source for Trust Relationship.
-    Profile:
+    SAMLProfile:
       type: object
       properties:
         profileType:
@@ -448,7 +818,6 @@ components:
         encryptAttribute:
           type: boolean
           description: Indicates whether to encrypt attributes
-      description: SAML profiles.
     TrustRelationship:
       required:
       - displayName
@@ -484,16 +853,20 @@ components:
           items:
             type: string
         entityIds:
+          uniqueItems: true
           type: array
           description: Uniquely identifies the entity across federated systems.
           items:
             type: string
             description: Uniquely identifies the entity across federated systems.
+        jansContainerFedId:
+          type: string
+          description: DN of the Federation
         jansProfileConfiguration:
           type: array
           description: SAML profiles.
           items:
-            $ref: "#/components/schemas/Profile"
+            $ref: "#/components/schemas/SAMLProfile"
         status:
           type: string
           enum:
@@ -518,16 +891,22 @@ components:
           type: string
         description:
           type: string
-    TrustRelationshipForm:
-      required:
-      - trustRelationship
+    StringPagedResult:
       type: object
       properties:
-        trustRelationship:
-          $ref: "#/components/schemas/TrustRelationship"
-        metaDataFile:
-          type: string
-          format: binary
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: string
     TrustRelationshipPagedResult:
       type: object
       properties:
@@ -544,6 +923,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TrustRelationship"
+    TrustRelationshipForm:
+      required:
+      - trustRelationship
+      type: object
+      properties:
+        trustRelationship:
+          $ref: "#/components/schemas/TrustRelationship"
+        metaDataFile:
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2

@@ -7,8 +7,9 @@
 #![allow(dead_code)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, JwtConfig,
-    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -156,6 +157,7 @@ async fn init_cedarling() -> Cedarling {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await
     .expect("should initialize cedarling")

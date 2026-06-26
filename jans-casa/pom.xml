@@ -48,11 +48,6 @@
            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
         </repository>
         <repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
-        <repository>
             <id>ZK CE</id>
             <name>ZK CE Repository</name>
             <url>https://mavensync.zkoss.org/maven2</url>

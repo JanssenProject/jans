@@ -28,11 +28,6 @@
            <name>GitHub Packages</name>
            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
         </repository>
-		<repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-		</repository>
 	</repositories>
 
 	<build>
@@ -117,7 +112,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>11.34</version>
+			<version>11.37</version>
 			<scope>provided</scope>
        		 </dependency>
 	</dependencies>

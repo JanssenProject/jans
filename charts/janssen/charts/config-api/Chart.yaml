@@ -10,8 +10,8 @@ keywords:
   - API
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans/jans-config-api
-  - https://github.com/JanssenProject/jans/docker-jans-config-api
+  - https://github.com/JanssenProject/jans/tree/main/jans-config-api
+  - https://github.com/JanssenProject/jans/tree/main/docker-jans-config-api
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

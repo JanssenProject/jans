@@ -250,8 +250,8 @@ impl DiagnosticsSummary {
 /// Policy diagnostic info
 #[derive(Debug, Default, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyInfo {
-    pub id: String,
-    pub description: Option<String>,
+    pub id: SmolStr,
+    pub description: Option<SmolStr>,
 }
 
 impl Hash for PolicyInfo {
@@ -274,13 +274,13 @@ impl Diagnostics {
         let reason = cedar_diagnostic
             .reason()
             .map(|policy_id| {
-                let id = policy_id.to_string();
+                let id: SmolStr = policy_id.to_string().into();
 
                 PolicyInfo {
                     description: policies
                         .get_policy_description(id.as_str())
-                        .map(std::string::ToString::to_string),
-                    id: policy_id.to_string(),
+                        .map(SmolStr::from),
+                    id,
                 }
             })
             .collect::<HashSet<_>>();
@@ -321,6 +321,24 @@ pub(crate) struct DecisionLogEntry {
     /// Information about pushed data that was injected into the context
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pushed_data: Option<PushedDataInfo>,
+}
+
+/// Telemetry log entry following the 3-map model.
+///
+/// Contains per-policy evaluation counts, classified error counters, and
+/// operational statistics for a single telemetry interval.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct MetricsLogEntry {
+    #[serde(flatten)]
+    pub base: BaseLogEntry,
+    /// Per-policy evaluation counts (`policy_id` → count)
+    pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters (`error_key` → count)
+    pub error_counters: HashMap<String, i64>,
+    /// Operational metrics (`stat_key` → value)
+    pub operational_stats: HashMap<String, i64>,
+    /// Duration of the collection interval in seconds
+    pub interval_secs: i64,
 }
 
 /// Information about pushed data injected into the authorization context
@@ -365,6 +383,30 @@ impl Indexed for DecisionLogEntry {
 }
 
 impl Loggable for DecisionLogEntry {
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
+}
+
+impl Indexed for MetricsLogEntry {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
+    }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for MetricsLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }

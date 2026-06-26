@@ -11,7 +11,6 @@ import ssl
 import json
 
 from urllib import request
-from urllib.parse import urljoin, urlparse
 from pathlib import Path
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -22,7 +21,6 @@ SETUP_BRANCH = 'main'
 package_dependencies = []
 jans_dir = '/opt/jans'
 jans_app_dir = '/opt/dist/jans'
-maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 jetty_home = '/opt/jans/jetty'
 jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
 openbanking_zip_file = os.path.join(jans_app_dir, 'openbanking.zip')
@@ -43,7 +41,7 @@ parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable 
 parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
-parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
+parser.add_argument('--setup-branch', help="Janssen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
 parser.add_argument('-force-download', help="Force downloading files", action='store_true')
 parser.add_argument('--github-access-token', help="Github access token to retrieve openbanking setup profile")
@@ -179,16 +177,6 @@ def extract_setup():
     if not os.path.exists(target_setup):
         os.symlink(os.path.join(argsp.setup_dir, 'jans_setup.py'), target_setup)
 
-    o = urlparse(maven_base_url)
-    app_info_fn = os.path.join(argsp.setup_dir, 'app_info.json')
-    with open(app_info_fn) as f:
-        app_info = json.load(f)
-
-    app_info['JANS_MAVEN'] = o._replace(path='').geturl()
-
-    with open(app_info_fn, 'w') as w:
-        json.dump(app_info, w, indent=2)
-
     with open(os.path.join(argsp.setup_dir, 'profile'), 'w') as w:
         w.write(argsp.profile)
 
@@ -219,7 +207,7 @@ def uninstall_jans():
             else:
                 print("Please type \033[1m yes \033[0m to uninstall")
 
-    print("Uninstalling Jannsen Server...")
+    print("Uninstalling Janssen Server...")
 
     service_list = os.listdir(jetty_home)
 

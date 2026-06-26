@@ -5,6 +5,7 @@ edition = "2021"
 description = "The Cedarling is a performant local authorization service that runs the Rust Cedar Engine"
 license = "Apache-2.0"
 repository = "git+https://github.com/JanssenProject/jans.git"
+publish = false
 
 [package.metadata.publishConfig]
 registry = "https://registry.npmjs.org/"
@@ -25,11 +26,22 @@ serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 wasm-bindgen-test = "0.3.49"
 
-[profile.release]
-lto = true
-strip = "symbols"
+# NOTE: profile settings (lto/opt-level/strip/codegen-units) for the WASM build
+# are NOT set here — Cargo ignores [profile.*] in non-root workspace members.
+# They live in ./.cargo/config.toml (a config-based profile Cargo honors only when
+# building from this directory, i.e. under wasm-pack).
+# wasm-opt runs AFTER LTO; fat-LTO output uses bulk-memory + nontrapping
+# float-to-int, so those features must be enabled here or wasm-opt fails validation.
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ['-O4', '--enable-reference-types', '--enable-gc']
+wasm-opt = [
+    '-Oz',
+    '--enable-reference-types',
+    '--enable-bulk-memory',
+    '--enable-nontrapping-float-to-int',
+    '--enable-sign-ext',
+    '--enable-mutable-globals',
+    '--enable-multivalue',
+]
 
 [dev-dependencies]
 # is used in testing

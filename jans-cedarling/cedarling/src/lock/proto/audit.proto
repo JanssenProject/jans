@@ -55,18 +55,13 @@ message BulkLogRequest {
 // Telemetry Entry Message
 message TelemetryEntry {
   google.protobuf.Timestamp creation_date = 1;
-  google.protobuf.Timestamp event_time = 2;
-  string service = 3;
-  string node_name = 4;
-  string status = 5;
-  int64 last_policy_load_size = 6;
-  int64 policy_success_load_counter = 7;
-  int64 policy_failed_load_counter = 8;
-  int64 last_policy_evaluation_time_ns = 9;
-  int64 avg_policy_evaluation_time_ns = 10;
-  int64 memory_usage = 11;
-  int64 evaluation_requests_count = 12;
-  map<string, int64> policy_stats = 13;
+  string service = 2;
+  string node_name = 3;
+  string status = 4;
+  map<string, int64> policy_stats = 5;
+  map<string, int64> error_counters = 6;
+  map<string, int64> operational_stats = 7;
+  int64 interval_secs = 8;
 }
 
 message TelemetryRequest {

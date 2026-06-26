@@ -10,9 +10,13 @@
     <name>Janssen Shibboleth SAML Plugin</name>
     <description>Config API plugin for managing Shibboleth IDP SAML configuration</description>
 
-    <properties>
-        <jans.version>${project.version}</jans.version>
-    </properties>
+	<properties>
+		<httpcore.version>4.4.14</httpcore.version>
+		<httpclient.version>4.5.13</httpclient.version>
+		<jans.version>${project.version}</jans.version>
+		
+		<sonar.cpd.exclusions>src/main/java/io/jans/configapi/plugin/fido2/model/config/*</sonar.cpd.exclusions>
+	</properties>
 
     <dependencies>
         <dependency>
@@ -48,7 +52,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-core-saml</artifactId>
+			<artifactId>jans-core-shibboleth-idp</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
 		

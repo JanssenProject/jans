@@ -6,6 +6,8 @@
 
 package io.jans.configapi.plugin.shibboleth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Metadata source details
  * 
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataSource implements Serializable{
 
     private static final long serialVersionUID = 1L;

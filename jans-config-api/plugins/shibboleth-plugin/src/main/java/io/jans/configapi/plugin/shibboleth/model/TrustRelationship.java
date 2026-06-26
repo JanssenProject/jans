@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.configapi.plugin.shibboleth.model.profile.*;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -48,6 +48,7 @@ public class TrustRelationship extends Entry implements Serializable {
     @NotNull
     @AttributeName
     @Schema(description = "Metadata source for Trust Relationship.")
+    @JsonObject
     private MetadataSource metadataSource;
     
     @AttributeName(name = "jansReleasedAttr")
@@ -55,11 +56,15 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(name = "jansEntityId")
     @Schema(description = "Uniquely identifies the entity across federated systems.")
-    private List<String> entityIds;
+    private Set<String> entityIds;
+    
+    @AttributeName(name = "jansContainerFed")
+    @Schema(description = "DN of the Federation")
+    private String jansContainerFedId;
         
     @AttributeName(name = "jansProfileConfiguration")
     @Schema(description = "SAML profiles.")
-    private List<Profile> jansProfileConfiguration;
+    private List<SAMLProfile> jansProfileConfiguration;
 
     @AttributeName(name = "jansStatus")
     private Status status;
@@ -116,19 +121,27 @@ public class TrustRelationship extends Entry implements Serializable {
         this.releasedAttributes = releasedAttributes;
     }
 
-    public List<String> getEntityIds() {
+    public Set<String> getEntityIds() {
         return entityIds;
     }
 
-    public void setEntityIds(List<String> entityIds) {
+    public void setEntityIds(Set<String> entityIds) {
         this.entityIds = entityIds;
     }
 
-    public List<Profile> getJansProfileConfiguration() {
+    public String getJansContainerFedId() {
+        return jansContainerFedId;
+    }
+
+    public void setJansContainerFedId(String jansContainerFedId) {
+        this.jansContainerFedId = jansContainerFedId;
+    }
+
+    public List<SAMLProfile> getJansProfileConfiguration() {
         return jansProfileConfiguration;
     }
 
-    public void setJansProfileConfiguration(List<Profile> jansProfileConfiguration) {
+    public void setJansProfileConfiguration(List<SAMLProfile> jansProfileConfiguration) {
         this.jansProfileConfiguration = jansProfileConfiguration;
     }
 
@@ -152,8 +165,8 @@ public class TrustRelationship extends Entry implements Serializable {
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", entityType=" + entityType + ", metadataSource=" + metadataSource + ", releasedAttributes="
-                + releasedAttributes + ", entityIds=" + entityIds + ", jansProfileConfiguration="
-                + jansProfileConfiguration + ", status=" + status + ", version=" + version + "]";
-    }    
-
+                + releasedAttributes + ", entityIds=" + entityIds + ", jansContainerFedId=" + jansContainerFedId
+                + ", jansProfileConfiguration=" + jansProfileConfiguration + ", status=" + status + ", version="
+                + version + "]";
+    }
 }

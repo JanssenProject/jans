@@ -58,7 +58,7 @@
 //!   ones expire.
 //! - [x] Statuslist Check: The `status` claim of a JWT should be validated if present.
 //!   This is done through the [`status_list`] crate for the implementation.
-//! - [ ] JWK rotation (WIP): The service should automatically fetch new keys if the old
+//! - [x] JWK rotation: A per-issuer background task periodically re-fetches JWKS
 
 mod decode;
 mod error;
@@ -81,16 +81,18 @@ pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
 pub(crate) use token::{Token, TokenClaims};
 pub(crate) use token_cache::TokenCache;
-pub(crate) use validation::TrustedIssuerError;
+pub(crate) use validation::{TrustedIssuerError, ValidateJwtError};
 
 use crate::JwtConfig;
 use crate::LogLevel;
 use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
+use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
@@ -98,14 +100,17 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
+use smol_str::SmolStr;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+use tokio::sync::Notify;
+use tokio_util::sync::CancellationToken;
 use trusted_issuers_loader::TrustedIssuerLoader;
 use validation::{
     JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
-    ValidateJwtError, ValidatedJwt, ValidatorInfo, validate_required_claims,
+    ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
 /// Handles JWT validation
@@ -113,11 +118,15 @@ pub(crate) struct JwtService {
     validators: Arc<JwtValidatorCache>,
     key_service: Arc<KeyService>,
     issuer_configs: Arc<IssuerIndex>,
-    /// Trusted issuer validator for advanced validation scenarios
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
     loading_state: Arc<TrustedIssuerLoadingState>,
+    /// Per-issuer notifiers for triggering on-demand JWKS re-fetch
+    jwks_refresh_notifiers: Arc<Mutex<HashMap<IssClaim, Arc<Notify>>>>,
+    /// Cancellation token to stop all background JWKS refresh tasks on drop
+    jwks_cancel_token: CancellationToken,
+    metrics: Arc<MetricsCollector>,
 }
 
 struct IssuerConfig {
@@ -136,7 +145,7 @@ impl JwtService {
     /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
     /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
     /// * `logger` - Optional logger for diagnostic messages
-    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 means no TTL limit — the token's `exp` claim is used instead)
+    /// * `metrics` - Shared metrics collector for telemetry
     ///
     /// # Errors
     ///
@@ -145,10 +154,21 @@ impl JwtService {
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
+        metrics: Arc<MetricsCollector>,
+        http_client: HttpClient,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
         }
+
+        // Apply field-level invariants once here so the bootstrap deserializer is
+        // not the only line of defense - programmatic callers that build a
+        // `JwtConfig` directly cannot otherwise reach the normalization.
+        let mut jwt_config = jwt_config.clone();
+        jwt_config.normalize();
+        let jwt_config = &jwt_config;
+
+        warn_if_jwt_validation_disabled(jwt_config, logger.as_ref());
 
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
@@ -160,10 +180,14 @@ impl JwtService {
             jwt_config.token_cache_capacity,
             jwt_config.token_cache_earliest_expiration_eviction,
             logger.clone(),
+            metrics.clone(),
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
         let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
+
+        let jwks_refresh_notifiers = Arc::new(Mutex::new(HashMap::new()));
+        let jwks_cancel_token = CancellationToken::new();
 
         let loader = TrustedIssuerLoader {
             jwt_config: jwt_config.clone(),
@@ -174,12 +198,29 @@ impl JwtService {
             token_cache: token_cache.clone(),
             logger: logger.clone(),
             loading_state: loading_state.clone(),
+            http_client,
+            jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
+            jwks_cancel_token: jwks_cancel_token.clone(),
         };
 
         loader.load_trusted_issuers(trusted_issuers.clone()).await?;
 
         // Create TrustedIssuerValidator for advanced validation scenarios
         let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
+
+        {
+            let cache = token_cache.clone();
+            let cancel = jwks_cancel_token.clone();
+            crate::http::spawn_task(async move {
+                loop {
+                    tokio::select! {
+                        () = crate::async_sleep::sleep(std::time::Duration::from_secs(30)) => {},
+                        () = cancel.cancelled() => { break; },
+                    }
+                    cache.clear_expired();
+                }
+            });
+        }
 
         Ok(Self {
             validators,
@@ -189,6 +230,9 @@ impl JwtService {
             logger,
             token_cache,
             loading_state,
+            jwks_refresh_notifiers,
+            jwks_cancel_token,
+            metrics,
         })
     }
 
@@ -204,6 +248,12 @@ impl JwtService {
         let decoding_key_info = decoded_jwt.decoding_key_info();
         let decoding_key = self.key_service.get_key(&decoding_key_info);
 
+        if decoding_key.is_none()
+            && let Some(iss) = &decoding_key_info.issuer
+        {
+            self.signal_jwks_refresh(iss);
+        }
+
         // get validator
         let normalized_iss = decoded_jwt.iss();
         let validator_key = ValidatorInfo {
@@ -211,20 +261,15 @@ impl JwtService {
             token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<std::sync::RwLock<JwtValidator>> =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<JwtValidator> = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
         // was set on initialization
-        let mut validated_jwt = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(jwt, decoding_key)?
-        };
+        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
 
         // Use TrustedIssuerValidator to find and validate against trusted issuer
         // This implements Requirement 5: "WHEN processing JWT tokens THEN the Cedarling
@@ -325,9 +370,6 @@ impl JwtService {
         let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
 
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
-
         let now = Utc::now();
 
         for (index, token) in tokens.iter().enumerate() {
@@ -355,6 +397,7 @@ impl JwtService {
                 // Validate JWT using existing single token validation
                 match self.validate_single_token(&token_kind, &token.payload) {
                     Ok(validated_jwt) => {
+                        self.metrics.record_jwt_validation(true);
                         // Extract issuer for non-deterministic check
                         let issuer = validated_jwt
                             .claims
@@ -363,22 +406,12 @@ impl JwtService {
                             .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                         // Check for non-deterministic tokens (graceful validation)
-                        let combination = format!("{}:{}", issuer, token.mapping);
-                        if seen_combinations.insert(combination.clone()) {
+                        let combination =
+                            (SmolStr::from(issuer), SmolStr::from(token.mapping.as_str()));
+                        if seen_combinations.insert(combination) {
                             // Convert ValidatedJwt to Token
-                            let claims =
-                                serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                                    .map_err(|err| {
-                                        if let Some(logger) = &self.logger {
-                                            logger.log_any(JwtLogEntry::new(
-                                                format!(
-                                                    "failed to deserialize token claims: {err}"
-                                                ),
-                                                Some(LogLevel::ERROR),
-                                            ));
-                                        }
-                                        MultiIssuerValidationError::TokenValidationFailed
-                                    })?;
+                            let claims = TokenClaims::try_from(validated_jwt.claims)
+                                .map_err(MultiIssuerValidationError::InvalidClaims)?;
 
                             let cedar_token = Arc::new(Token::new(
                                 &token_name,
@@ -408,12 +441,14 @@ impl JwtService {
                         }
                     },
                     Err(err) => {
+                        self.metrics.record_jwt_validation(false);
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
                                 format!("Token validation failed at index {index}: {err}"),
                                 Some(LogLevel::WARN),
                             ));
                         }
+                        self.metrics.record_error(&err);
                     },
                 }
             }
@@ -440,6 +475,28 @@ impl JwtService {
         self.issuer_configs.get_trusted_issuer(iss_claim)
     }
 
+    /// Signals the background JWKS refresher for the given issuer, if one exists.
+    fn signal_jwks_refresh(&self, iss: &IssClaim) {
+        let notify = {
+            let notifiers = self
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock");
+            notifiers.get(iss).cloned()
+        };
+
+        if let Some(notify) = notify {
+            notify.notify_one();
+            self.logger.log_any(JwtLogEntry::new(
+                format!(
+                    "signalled background JWKS refresh for issuer '{}'",
+                    iss.as_str()
+                ),
+                Some(LogLevel::INFO),
+            ));
+        }
+    }
+
     /// Find the token metadata key for a given entity type name
     /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
     fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
@@ -452,6 +509,12 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         Cow::Borrowed(entity_type_name)
+    }
+}
+
+impl Drop for JwtService {
+    fn drop(&mut self) {
+        self.jwks_cancel_token.cancel();
     }
 }
 
@@ -482,6 +545,29 @@ impl TrustedIssuerLoadingInfo for JwtService {
     }
 }
 
+/// Emits a WARN log entry once per `JwtService::new` when either JWT signature
+/// or status validation has been explicitly disabled. The defaults are strict,
+/// so reaching this code means an operator opted out.
+fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logger>) {
+    if !jwt_config.jwt_sig_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT signature validation is disabled (CEDARLING_JWT_SIG_VALIDATION=disabled); \
+             tokens are accepted without cryptographic verification"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+
+    if !jwt_config.jwt_status_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT status validation is disabled (CEDARLING_JWT_STATUS_VALIDATION=disabled); \
+             revoked tokens may continue to be accepted"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::JwtService;
@@ -489,12 +575,28 @@ mod test {
     use super::test_utils::*;
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
+    use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::http::HttpClient;
+    use crate::http::HttpClientConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
+    use std::sync::Arc;
+    use std::sync::LazyLock;
+    use std::time::Duration;
     use tokio::test;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+        max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed")
+    });
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
@@ -529,7 +631,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -539,7 +640,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -555,6 +655,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -591,6 +693,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -617,6 +721,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -656,7 +762,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -667,7 +772,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -684,6 +788,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -733,7 +839,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -750,6 +855,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -792,6 +899,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -803,6 +912,151 @@ mod test {
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
         ));
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_succeeds_after_key_rotation_without_reinit() {
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("Mock server with default OIDC/JWKS should initialize");
+
+        let mapping = "Jans::Access_Token".to_string();
+        let mut iss = server.trusted_issuer();
+        iss.token_metadata.insert(
+            mapping.clone(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: mapping.clone(),
+                token_id: "jti".to_string(),
+                required_claims: HashSet::new(),
+            },
+        );
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                jwks_refresh_min_interval: 0,
+                ..Default::default()
+            },
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
+            None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("JwtService should initialize with trusted issuer metadata");
+
+        let mut claims_before_rotation = json!({
+            "iss": server.issuer(),
+            "sub": "user-before-rotation",
+            "jti": 1_111_111_111_u64,
+            "exp": u64::MAX,
+        });
+        let token_before_rotation = server
+            .generate_token_with_hs256sig(&mut claims_before_rotation, None)
+            .expect("Token signed with initial key should be generated");
+
+        jwt_service
+            .validate_multi_issuer_tokens(&[TokenInput::new(
+                mapping.clone(),
+                token_before_rotation,
+            )])
+            .expect("Token signed with initial key should validate before key rotation");
+
+        server
+            .rotate_signing_key_hs256("rotated_hs256_key_after_init")
+            .expect("Mock issuer should rotate signing key and JWKS response");
+
+        let mut claims_after_rotation = json!({
+            "iss": server.issuer(),
+            "sub": "user-after-rotation",
+            "jti": 2_222_222_222_u64,
+            "exp": u64::MAX,
+        });
+        let token_after_rotation = server
+            .generate_token_with_hs256sig(&mut claims_after_rotation, None)
+            .expect("Token signed with rotated key should be generated");
+
+        jwt_service
+            .validate_multi_issuer_tokens(&[TokenInput::new(
+                mapping.clone(),
+                token_after_rotation.clone(),
+            )])
+            .expect_err("First call after rotation should fail");
+
+        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+
+        jwt_service
+            .validate_multi_issuer_tokens(&[TokenInput::new(mapping, token_after_rotation)])
+            .expect("Token signed with rotated key should validate after background JWKS refresh");
+    }
+
+    #[test]
+    async fn test_validate_multi_issuer_tokens_recovers_when_first_seen_kid_is_rotated() {
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("Mock server with default OIDC/JWKS should initialize");
+
+        let mapping = "Jans::Access_Token".to_string();
+        let mut iss = server.trusted_issuer();
+        iss.token_metadata.insert(
+            mapping.clone(),
+            TokenEntityMetadata {
+                trusted: true,
+                entity_type_name: mapping.clone(),
+                token_id: "jti".to_string(),
+                required_claims: HashSet::new(),
+            },
+        );
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                jwks_refresh_min_interval: 0,
+                ..Default::default()
+            },
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
+            None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("JwtService should initialize with trusted issuer metadata");
+
+        server
+            .rotate_signing_key_hs256("rotated_hs256_key_before_first_validation")
+            .expect("Mock issuer should rotate signing key and JWKS response");
+
+        let mut claims_after_rotation = json!({
+            "iss": server.issuer(),
+            "sub": "user-after-rotation",
+            "jti": 3_333_333_333_u64,
+            "exp": u64::MAX,
+        });
+        let token_after_rotation = server
+            .generate_token_with_hs256sig(&mut claims_after_rotation, None)
+            .expect("Token signed with rotated key should be generated");
+
+        jwt_service
+            .validate_multi_issuer_tokens(&[TokenInput::new(
+                mapping.clone(),
+                token_after_rotation.clone(),
+            )])
+            .expect_err("First call with rotated kid should fail (stale key)");
+
+        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+
+        jwt_service
+            .validate_multi_issuer_tokens(&[TokenInput::new(mapping, token_after_rotation)])
+            .expect(
+                "Validation should recover from unknown rotated kid after background JWKS refresh",
+            );
     }
 
     #[test]
@@ -820,6 +1074,8 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
+            Arc::new(MetricsCollector::new(0)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");

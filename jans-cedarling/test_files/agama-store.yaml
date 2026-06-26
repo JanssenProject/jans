@@ -31,19 +31,15 @@ policy_stores:
         access_tokens:
           trusted: true
           token_id: ''
-          role_mapping: ''
         id_tokens:
           trusted: true
           token_id: sub
-          role_mapping: ''
         userinfo_tokens:
           trusted: true
           token_id: ''
-          role_mapping: role
         tx_tokens:
           trusted: true
           token_id: ''
-          role_mapping: ''
     schema:
       encoding: none
       content_type: cedar
