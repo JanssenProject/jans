@@ -363,6 +363,47 @@ public class TrustRelationshipTest {
             Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
         );
     }
+    
+    public static final Stream<Arguments> trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources() {
+
+        return Stream.of(
+
+            //Individual
+            Arguments.of( 
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                TrustRelationshipFixtures.sampleMdqMetadataSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship(),
+                TrustRelationshipFixtures.sampleMdqMetadataSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship(),
+                TrustRelationshipFixtures.sampleMdqMetadataSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship(),
+                TrustRelationshipFixtures.sampleMdqMetadataSource()
+            ),
+            //Aggregate
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                TrustRelationshipFixtures.sampleManualMetadataSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship(),
+                TrustRelationshipFixtures.sampleUpstreamMetadatSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship(),
+                TrustRelationshipFixtures.sampleManualMetadataSource()
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship(),
+                TrustRelationshipFixtures.sampleUpstreamMetadatSource()
+            )
+        );
+    }
 
     /**
      * Creation Tests
@@ -1277,7 +1318,7 @@ public class TrustRelationshipTest {
         )
         public void shouldFailFinalizeActivation_whenNotInActivatingState(TrustRelationship tr) {
 
-            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+            assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
 
             ActivationDiagnostics diagnostics = TrustRelationshipFixtures.sampleActivationDiagnosticsForFailedActivation();
             TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
@@ -1297,13 +1338,63 @@ public class TrustRelationshipTest {
         )
         public void shoudlFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
 
-            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+            assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
             TrustResult<TrustRelationship> result = tr.cancelActivation();
 
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
 
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Restrictions, Nature Rules & Error Cases -- Nature Restrictions")
+    public class NatureRestrictionsTest {
+
+        @Test
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipFixtures#sampleActivatingIndividualTrustRelationship")
+        @DisplayName(
+            "GIVEN an ACTIVATING INDIVIDUAL TrustRelationship " +
+            "WHEN incorporateDiscoveredEntityIds() is called "  +
+            "THEN should fail with the appropriate error "
+        )
+        public void shouldRejectIncorporateDiscoveredEntityIds_whenTrustIsIndividual() {
+
+            TrustRelationship tr = TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship();
+
+            assertThat(tr).isOfIndividualNature();
+            assertThat(tr).isInActivatingStatus();
+
+            EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+            
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        // shouldFailWhenUsingMetadataSourceUnsupportedByTrustRelationshipNature()
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources")
+        @DisplayName(
+            "GIVEN a TrustRelationship NOT in ACTIVATING state " +
+            "WHEN updateMetadataSource() is called with a metadatasource incompatible with its nature " +
+            "THEN should fail with the appropriate error "
+        )
+        public void shouldFailWhenUsingIncompatibleMetadataSourceForTrustNature(TrustRelationship tr, MetadataSource source) {
+
+            assertThat(tr).doesNotSupportMetadataSource(source);
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
         }
     }

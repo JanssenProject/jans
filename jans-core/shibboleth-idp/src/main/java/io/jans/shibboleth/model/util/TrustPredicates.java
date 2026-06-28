@@ -62,6 +62,20 @@ public class TrustPredicates {
         return isRealMetadataSource(ctx.getMetadataSource());
     }
 
+    public static boolean supportsMetadataSource(TrustRelationship tr, MetadataSource source) {
+
+        if (tr == null || source == null) return false;
+
+        return metadataSourceSupportedByTrustRelationshipWithNature(source,tr.getNature());
+    }
+
+    public static boolean supportsMetadataSource(BuildContext ctx ,MetadataSource source) {
+
+        if (ctx == null || source == null) return false;
+
+        return metadataSourceSupportedByTrustRelationshipWithNature(source,ctx.getNature());
+    }
+
     public static boolean hasAnyDiscoveredEntityIds(TrustRelationship tr) {
 
         if (tr == null) return false;
@@ -144,6 +158,28 @@ public class TrustPredicates {
     private static boolean isRealMetadataSource(MetadataSource source) {
 
         return source != null && source.getType() != MetadataSourceType.NONE;
+    }
+
+    private static boolean metadataSourceSupportedByTrustRelationshipWithNature(MetadataSource source,TrustNature nature) {
+
+        MetadataSourceType sourcetype = source.getType();
+
+        if (nature == TrustNature.INDIVIDUAL) {
+
+            return sourcetype == MetadataSourceType.NONE
+                || sourcetype == MetadataSourceType.FILE
+                || sourcetype == MetadataSourceType.URI
+                || sourcetype == MetadataSourceType.UPSTREAM
+                || sourcetype == MetadataSourceType.MANUAL;
+        }else if (nature == TrustNature.AGGREGATE) {
+
+            return sourcetype == MetadataSourceType.NONE
+                || sourcetype == MetadataSourceType.FILE
+                || sourcetype == MetadataSourceType.URI
+                || sourcetype == MetadataSourceType.MDQ;
+        }
+
+        return false;
     }
 
     private static boolean hasAnyEntityId(EntityIds entityIds) {

@@ -5,8 +5,9 @@ import io.jans.shibboleth.model.core.DisplayName;
 import io.jans.shibboleth.model.core.Id;
 import io.jans.shibboleth.model.core.Version;
 import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
+import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
-
+import io.jans.shibboleth.model.util.TrustPredicates;
 import io.jans.shibboleth.model.core.TrustNature;
 import io.jans.shibboleth.model.core.TrustStatus;
 
@@ -162,7 +163,12 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
             return this;
         }
 
-        failWithMessage("TrustRelationship has metadata source type <%s>. Expected: <%s>",actual.getMetadataSource().getType(),MetadataSourceType.NONE);
+        failWithMessage(
+            "TrustRelationship has metadata source type <%s>. Expected: <%s>",
+            actual.getMetadataSource().getType(),
+            MetadataSourceType.NONE
+        );
+        
         return this;
     }
 
@@ -174,6 +180,32 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
             failWithMessage("TrustRelationship has no real metadata source (non-NONE).");
         }
         
+        return this;
+    }
+
+    public TrustRelationshipAssert supportsMetadataSource(MetadataSource source) {
+
+        if(! TrustPredicates.supportsMetadataSource(actual,source) ) {
+
+            failWithMessage(
+                "TrustRelationship of nature <%s> does not support metadatasource of type <%s>",
+                actual.getNature(),
+                actual.getMetadataSource().getType()
+            );
+        }
+        return this;
+    }
+
+    public TrustRelationshipAssert doesNotSupportMetadataSource(MetadataSource source) {
+
+        if (TrustPredicates.supportsMetadataSource(actual,source)) {
+
+            failWithMessage(
+                "TrustRelationship of nature <%s> supports metadatasource of type <%s>",
+                actual.getNature(),
+                actual.getMetadataSource().getType()
+            );
+        }
         return this;
     }
 

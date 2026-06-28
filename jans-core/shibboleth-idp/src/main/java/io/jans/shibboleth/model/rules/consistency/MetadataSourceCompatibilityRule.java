@@ -11,6 +11,7 @@ import io.jans.shibboleth.model.metadata.MetadataSource;
 import io.jans.shibboleth.model.metadata.MetadataSourceType;
 
 import io.jans.shibboleth.model.util.BuildContext;
+import io.jans.shibboleth.model.util.TrustPredicates;
 import io.jans.shibboleth.model.util.TrustResult;
 
 public class MetadataSourceCompatibilityRule {
@@ -25,7 +26,7 @@ public class MetadataSourceCompatibilityRule {
             return TrustResult.success(null);
         }
 
-        if ( !isCompatible(context.getMetadataSource(),context.getNature()) ) {
+        if ( !TrustPredicates.supportsMetadataSource(context, context.getMetadataSource())) {
 
             TrustNature required_nature = context.getNature() == TrustNature.INDIVIDUAL ? TrustNature.AGGREGATE : TrustNature.INDIVIDUAL;
 
@@ -34,37 +35,5 @@ public class MetadataSourceCompatibilityRule {
         }
 
         return TrustResult.success(null);
-    }
-
-    private static final boolean isCompatible(MetadataSource source, TrustNature nature) {
-
-        if (nature.isIndividual() && isSupportedForIndividual(source.getType())) {
-
-            return true;
-        }
-
-        if (nature.isAggregate() && isSupportedForAggregate(source.getType())) {
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private static final boolean isSupportedForIndividual(MetadataSourceType sourcetype) {
-
-        return sourcetype == MetadataSourceType.NONE
-            || sourcetype == MetadataSourceType.FILE
-            || sourcetype == MetadataSourceType.MANUAL
-            || sourcetype == MetadataSourceType.UPSTREAM
-            || sourcetype == MetadataSourceType.URI;
-    }
-
-    private static final boolean isSupportedForAggregate(MetadataSourceType sourcetype) {
-
-        return sourcetype == MetadataSourceType.NONE
-            || sourcetype == MetadataSourceType.FILE
-            || sourcetype == MetadataSourceType.MDQ
-            || sourcetype == MetadataSourceType.URI;
     }
 }

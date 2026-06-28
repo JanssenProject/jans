@@ -12,7 +12,7 @@ public class DomainObjectUpdateFailed extends TrustError {
         super("");
         this.targetClass = Objects.requireNonNull(targetClass);
         this.cause = cause;
-        this.message = message != null ? message : "Failed to create " + targetClass.getSimpleName();
+        this.message = message != null ? message : "Failed to update " + targetClass.getSimpleName();
         this.message = cause != null ? this.message + " : " + cause.getMessage() : this.message;
     }
 
