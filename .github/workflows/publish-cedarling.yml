@@ -103,10 +103,13 @@ jobs:
         # Find the highest 0.0.X patch already published for cedarling.
         # Fail fast on curl error so a network outage does not silently publish 0.0.1
         # as if no prior nightly versions exist.
-        INDEX_RESPONSE=$(curl -sf --connect-timeout 10 --max-time 30 \
+        # Use -s without -f: a 404 (crate not yet published) must not fail the step.
+        # Only genuine network errors (timeout, connection refused) produce a non-zero
+        # curl exit code and trigger the hard failure below.
+        INDEX_RESPONSE=$(curl -s --connect-timeout 10 --max-time 30 \
           -H "User-Agent: jans-cedarling-publish-workflow" \
           "https://index.crates.io/ce/da/cedarling") || {
-          echo "ERROR: Failed to fetch cedarling from the sparse registry index."
+          echo "ERROR: Network error fetching cedarling from the sparse registry index."
           exit 1
         }
         LAST_PATCH=$(echo "${INDEX_RESPONSE}" \
