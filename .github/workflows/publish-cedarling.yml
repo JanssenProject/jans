@@ -77,18 +77,25 @@ jobs:
         HTTP_UTILS_VERSION=$(cargo metadata --no-deps --format-version 1 \
           | jq -r '.packages[] | select(.name == "http_utils") | .version')
         echo "Waiting for http_utils@${HTTP_UTILS_VERSION} in the registry..."
+        found=0
         for i in $(seq 1 20); do
+          # Guard curl+jq with || true so a transient network error retries instead of aborting.
           STATUS=$(curl -sf \
             -H "User-Agent: jans-cedarling-publish-workflow" \
             "https://crates.io/api/v1/crates/http_utils/${HTTP_UTILS_VERSION}" \
-            | jq -r '.version.num // empty')
+            2>/dev/null | jq -r '.version.num // empty' 2>/dev/null || true)
           if [ "${STATUS}" = "${HTTP_UTILS_VERSION}" ]; then
             echo "http_utils@${HTTP_UTILS_VERSION} is available."
+            found=1
             break
           fi
           echo "Not yet available (attempt ${i}/20); retrying in 15s..."
           sleep 15
         done
+        if [ "${found}" -eq 0 ]; then
+          echo "ERROR: http_utils@${HTTP_UTILS_VERSION} did not appear in the registry after 20 attempts."
+          exit 1
+        fi
 
     - name: Publish cedarling
       if: ${{ github.event.inputs.dry_run != 'true' }}
