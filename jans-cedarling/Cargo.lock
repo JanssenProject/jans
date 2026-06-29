@@ -717,7 +717,6 @@ dependencies = [
  "getrandom 0.4.3",
  "gloo-timers",
  "hdrhistogram",
- "http_utils",
  "jsonwebkey",
  "jsonwebtoken",
  "mockito",
@@ -2197,18 +2196,6 @@ dependencies = [
  "http",
  "http-body",
  "pin-project-lite",
-]
-
-[[package]]
-name = "http_utils"
-version = "0.1.0"
-dependencies = [
- "mockito",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
 ]
 
 [[package]]

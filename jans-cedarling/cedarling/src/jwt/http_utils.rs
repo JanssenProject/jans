@@ -131,7 +131,7 @@ impl JwkSet {
 
         // Read the body with the configured size cap so a hostile JWKS endpoint
         // can't OOM the backend with an oversized response.
-        let bytes = http_utils::read_response_capped(response, client.max_response_size_bytes())
+        let bytes = crate::http_utils::read_response_capped(response, client.max_response_size_bytes())
             .await
             .map_err(|e| HttpError::Request(HttpClientError::new(e, None)))?;
         let jwk_set: JwkSet =
@@ -177,7 +177,7 @@ impl StatusListJwtStr {
             }
         }
 
-        let bytes = http_utils::read_response_capped(response, client.max_response_size_bytes())
+        let bytes = crate::http_utils::read_response_capped(response, client.max_response_size_bytes())
             .await
             .map_err(|e| HttpError::Request(HttpClientError::new(e, None)))?;
         let status_list_jwt = String::from_utf8(bytes).map_err(HttpError::InvalidUtf8)?;
