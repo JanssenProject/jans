@@ -79,7 +79,8 @@ jobs:
         INDEX_URL="https://index.crates.io/ht/tp/http_utils"
 
         index_has_version() {
-          curl -sf -H "User-Agent: jans-cedarling-publish-workflow" \
+          curl -sf --connect-timeout 10 --max-time 30 \
+            -H "User-Agent: jans-cedarling-publish-workflow" \
             "${INDEX_URL}" 2>/dev/null \
             | grep -q '"vers":"'"${HTTP_UTILS_VERSION}"'"'
         }
