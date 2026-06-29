@@ -65,47 +65,51 @@ jobs:
       working-directory: jans-cedarling
       run: cargo publish -p http_utils --locked --dry-run
 
-    - name: Publish http_utils
+    - name: Publish http_utils and wait for index
       if: ${{ github.event.inputs.dry_run != 'true' }}
+      # Idempotent: preflight the sparse index first so a workflow re-run skips
+      # the upload when http_utils was already published on a prior attempt.
+      # Sparse index path for "http_utils" (len > 3): <ch1><ch2>/<ch3><ch4>/<name>
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      run: cargo publish -p http_utils --locked
+      run: |
+        HTTP_UTILS_VERSION=$(cargo metadata --no-deps --format-version 1 \
+          | jq -r '.packages[] | select(.name == "http_utils") | .version')
+        INDEX_URL="https://index.crates.io/ht/tp/http_utils"
+
+        index_has_version() {
+          curl -sf -H "User-Agent: jans-cedarling-publish-workflow" \
+            "${INDEX_URL}" 2>/dev/null \
+            | grep -q '"vers":"'"${HTTP_UTILS_VERSION}"'"'
+        }
+
+        if index_has_version; then
+          echo "http_utils@${HTTP_UTILS_VERSION} is already in the registry index; skipping publish."
+        else
+          cargo publish -p http_utils --locked
+          echo "Waiting for http_utils@${HTTP_UTILS_VERSION} in the sparse registry index..."
+          found=0
+          for i in $(seq 1 20); do
+            # Guard curl with || true so transient network errors retry.
+            if index_has_version; then
+              echo "http_utils@${HTTP_UTILS_VERSION} is visible in the registry index."
+              found=1
+              break
+            fi
+            echo "Not yet visible (attempt ${i}/20); retrying in 15s..."
+            sleep 15
+          done
+          if [ "${found}" -eq 0 ]; then
+            echo "ERROR: http_utils@${HTTP_UTILS_VERSION} did not appear in the registry index after 20 attempts."
+            exit 1
+          fi
+        fi
 
     - name: Dry-run package check (cedarling)
       if: ${{ github.event.inputs.dry_run == 'true' }}
       working-directory: jans-cedarling
       run: cargo publish -p cedarling --locked --dry-run
-
-    - name: Wait for registry index to pick up http_utils
-      if: ${{ github.event.inputs.dry_run != 'true' }}
-      # Poll the sparse registry index (the same source Cargo resolves from) rather
-      # than the crates.io JSON API, which is a separate system and can diverge.
-      # Sparse index path for "http_utils" (len > 3): <ch1><ch2>/<ch3><ch4>/<name>
-      working-directory: jans-cedarling
-      run: |
-        HTTP_UTILS_VERSION=$(cargo metadata --no-deps --format-version 1 \
-          | jq -r '.packages[] | select(.name == "http_utils") | .version')
-        INDEX_URL="https://index.crates.io/ht/tp/http_utils"
-        echo "Waiting for http_utils@${HTTP_UTILS_VERSION} in the sparse registry index..."
-        found=0
-        for i in $(seq 1 20); do
-          # Each line of the sparse index is a JSON object with a "vers" field.
-          # Guard curl with || true so transient network errors retry.
-          if curl -sf -H "User-Agent: jans-cedarling-publish-workflow" \
-              "${INDEX_URL}" 2>/dev/null \
-              | grep -q '"vers":"'"${HTTP_UTILS_VERSION}"'"'; then
-            echo "http_utils@${HTTP_UTILS_VERSION} is visible in the registry index."
-            found=1
-            break
-          fi
-          echo "Not yet visible (attempt ${i}/20); retrying in 15s..."
-          sleep 15
-        done
-        if [ "${found}" -eq 0 ]; then
-          echo "ERROR: http_utils@${HTTP_UTILS_VERSION} did not appear in the registry index after 20 attempts."
-          exit 1
-        fi
 
     - name: Publish cedarling
       if: ${{ github.event.inputs.dry_run != 'true' }}
