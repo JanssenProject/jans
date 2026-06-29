@@ -1,0 +1,376 @@
+# Getting Started with Cedarling Python
+
+- [Installation](#installation)
+- [Usage](#usage)
+
+## Installation
+
+The Cedarling Python bindings are available via package managers using PyPI. To use them, you can either install the [cedarling-python](https://pypi.org/project/cedarling-python/) package or [build it from the source](#building-from-source).
+
+### Building from source
+
+You can compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
+
+**1. Set up a virtual environment**
+
+```
+python -m venv venv
+source venv/bin/activate
+```
+
+**2. Install `maturin`**
+
+```
+# for non-Linux systems
+pip install maturin
+
+# for Linux systems
+pip install maturin[patchelf]
+```
+
+**3. Clone the [jans](https://github.com/JanssenProject/jans) repository and navigate to the python bindings directory.**
+
+```
+git clone https://github.com/JanssenProject/jans.git jans
+cd jans/jans-cedarling/bindings/cedarling_python/
+```
+
+**Build the bindings**
+
+You have two options from here:
+
+**a. Build a wheel**
+
+```
+maturin build --release
+```
+
+This produces a `.whl` file in the `target/wheels/` directory.
+
+**b. Install into your virtual environment directly**
+
+```
+maturin develop
+```
+
+## Including in projects
+
+If you're using a dependency manager like [Poetry](https://python-poetry.org/), you can:
+
+**Option 1: Add the package from PyPI**
+
+```
+poetry add cedarling-python
+```
+
+**Option 2: Install the wheel manually into Poetry's virtual environment**
+
+```
+poetry run pip install path/to/wheel.whl
+```
+
+**Option 3: Add it to `pyproject.toml` statically**
+
+```
+[tool.poetry.dependencies]
+cedarling_python = {path = "path/to/wheel.whl"}
+```
+
+For other dependency managers, refer to their documentation on how to use local wheels.
+
+## Usage
+
+### Initialization
+
+```
+# Load the bootstrap properties from the environment variable, using default values
+# for unset properties
+bootstrap_config = BootstrapConfig.from_env()
+
+# Initialize Cedarling
+cedarling = Cedarling(bootstrap_config)
+```
+
+See the python documentation for `BootstrapConfig` for other config loading options.
+
+### Policy Store Sources
+
+Python bindings support all policy store source types. See [Cedarling Properties](https://docs.jans.io/head/cedarling/reference/cedarling-properties/index.md) for the full list of configuration options.
+
+**Example configurations:**
+
+```
+# Load from a directory
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store/"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a local .cjar archive (Cedar Archive)
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a remote .cjar archive (Cedar Archive)
+os.environ["CEDARLING_POLICY_STORE_URI"] = "https://example.com/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+```
+
+See [Policy Store Formats](https://docs.jans.io/head/cedarling/reference/cedarling-policy-store/#policy-store-formats) for more details.
+
+### Authorization
+
+Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
+
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+
+#### Token-Based Authorization (Multi-Issuer)
+
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+
+**1. Prepare tokens**
+
+Tokens are provided as a list of `TokenInput` objects:
+
+```
+from cedarling_python import TokenInput
+
+tokens = [
+    TokenInput(mapping="Jans::Access_token", payload="<access_token_jwt>"),
+    TokenInput(mapping="Jans::Id_token", payload="<id_token_jwt>"),
+]
+```
+
+**2. Define the resource**
+
+```
+resource = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Application",
+    id="app_id_001"
+  ),
+  name="App Name",
+  url={
+    "host": "example.com",
+    "path": "/admin-dashboard",
+    "protocol": "https"
+  }
+)
+```
+
+**3. Define the action**
+
+```
+action = 'Jans::Action::"Read"'
+```
+
+**4. Define Context (optional)**
+
+```
+context = {
+  "current_time": int(time.time()),
+}
+```
+
+**5. Authorize**
+
+```
+from cedarling_python import AuthorizeMultiIssuerRequest
+
+request = AuthorizeMultiIssuerRequest(
+    tokens=tokens,
+    action=action,
+    resource=resource,
+    context=context
+)
+result = cedarling.authorize_multi_issuer(request)
+```
+
+See [Multi-Issuer Authorization](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+
+#### Unsigned Authorization
+
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to run the request with partial evaluation. If partial evaluation leaves unresolved residuals (i.e. the decision cannot be fully determined without a concrete principal), the request is **denied** (fail-closed). The unresolved residuals are surfaced in the diagnostics of the authorization result, so you can inspect which policies could not be evaluated to understand why the request was denied.
+
+**1. Define the Principal**
+
+```
+principal = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::User",
+    id="random_user_id"
+  ),
+  role=["admin", "manager"]
+)
+```
+
+**2. Define the Resource**
+
+This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+
+```
+resource = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Application",
+    id="app_id_001"
+  ),
+  name="App Name",
+  url={
+    "host": "example.com",
+    "path": "/admin-dashboard",
+    "protocol": "https"
+  }
+)
+```
+
+**3. Define the Action**
+
+An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+
+```
+action = 'Jans::Action::"Write"'
+```
+
+**4. Define the Context**
+
+The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+
+```
+context = {
+    "current_time": int(time.time()),
+    "device_health": ["Healthy"],
+    "location": "US",
+    "network": "127.0.0.1",
+    "operating_system": "Linux",
+}
+```
+
+**5. Build the Request**
+
+Now you'll construct the ***request*** by including the *principal*, *action*, and *context*.
+
+```
+request = RequestUnsigned(
+  principal=principal,
+  action=action,
+  resource=resource,
+  context=context
+)
+```
+
+**6. Perform Authorization**
+
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
+
+```
+result = cedarling.authorize_unsigned(request)
+```
+
+#### Multi-Issuer Authorization
+
+Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers without requiring traditional User/Workload principals.
+
+**1. Create Tokens**
+
+```
+from cedarling_python import TokenInput
+
+tokens = [
+  TokenInput(
+    mapping="Jans::Access_Token",
+    payload="<access_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Jans::Id_Token",
+    payload="<id_token_jwt>"
+  ),
+  TokenInput(
+    mapping="Acme::DolphinToken",  # Custom token type
+    payload="<custom_token_jwt>"
+  )
+]
+```
+
+**2. Define the Resource**
+
+```
+resource = EntityData(
+  cedar_entity_mapping=CedarEntityMapping(
+    entity_type="Jans::Document",
+    id="doc_123"
+  ),
+  owner="alice@example.com",
+  classification="confidential"
+)
+```
+
+**3. Define the Action**
+
+```
+action = 'Jans::Action::"Read"'
+```
+
+**4. Define Context**
+
+```
+context = {
+  "ip_address": "54.9.21.201",
+  "time": int(time.time())
+}
+```
+
+**5. Build the Request**
+
+```
+from cedarling_python import AuthorizeMultiIssuerRequest
+
+request = AuthorizeMultiIssuerRequest(
+  tokens=tokens,
+  action=action,
+  resource=resource,
+  context=context
+)
+```
+
+**6. Perform Authorization**
+
+```
+result = cedarling.authorize_multi_issuer(request)
+
+# Check decision
+if result.decision:
+  print("Access allowed")
+  print(f"Request ID: {result.request_id}")
+else:
+  print("Access denied")
+```
+
+**Key Differences between authorization methods**:
+
+| Feature         | authorize_unsigned                   | authorize_multi_issuer                |
+| --------------- | ------------------------------------ | ------------------------------------- |
+| Principal Model | Directly provided entities           | Token-derived (from `token_metadata`) |
+| Token Sources   | No tokens required                   | Multiple issuers supported            |
+| Result Type     | `AuthorizeResult`                    | `MultiIssuerAuthorizeResult`          |
+| Decision Access | `result.decision`, `result.response` | `result.decision` (boolean)           |
+| Use Case        | Internal data, custom principals     | Federation, OIDC, multi-org access    |
+
+### Logging
+
+The logs could be retrieved using the `pop_logs` function.
+
+```
+# Obtain latest logs from cedarling
+logs: dict = cedarling.pop_logs()
+
+# Or obtain by request ID after authorization is performed
+request_id = result.request_id()
+logs: dict = cedarling.get_log_by_id(request_id)
+```
+
+______________________________________________________________________
+
+## See Also
+
+- [Cedarling TBAC quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling Sidecar Tutorial](https://docs.jans.io/head/cedarling/developer/sidecar/cedarling-sidecar-tutorial/index.md)
+- [Multi-Issuer Authorization Details](https://docs.jans.io/head/cedarling/reference/cedarling-authz/#multi-issuer-authorization-authorize_multi_issuer-recommended)
