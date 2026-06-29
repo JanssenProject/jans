@@ -1,4 +1,4 @@
-package io.jans.lock.cedarling.service;
+package io.jans.core.cedarling.service;
 
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;

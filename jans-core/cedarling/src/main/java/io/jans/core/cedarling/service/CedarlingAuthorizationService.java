@@ -15,9 +15,6 @@ import org.slf4j.Logger;
 
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 import io.jans.core.cedarling.config.BootstrapConfig;
-
-// import io.jans.lock.model.config.AppConfiguration;
-
 import io.jans.core.model.config.cedarling.CedarlingConfiguration;
 import io.jans.core.model.config.cedarling.CedarlingPolicyConfiguration;
 import jakarta.annotation.PostConstruct;
@@ -34,18 +31,18 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 public class CedarlingAuthorizationService {
 
 	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_token";
-	public static final String CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME = "lock-policy-store";
+	public static final String CEDARLING_POLICY_STORE_RESOURCE_NAME = "%spolicy-store";
 
 	@Inject
 	private Logger log;
 
 	@Inject
-	private AppConfiguration appConfiguration;
+	private CedarlingConfiguration cedarConf;
 
 	@Inject
 	private CedarlingPolicyConfiguration policyConfiguration;	
 
-	private String policyStoreLocalFn = CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME;
+	private String policyStoreLocalFn = CEDARLING_POLICY_STORE_RESOURCE_NAME;
 	private CedarlingAdapter cedarlingAdapter;
 	private boolean initialized = false;
 
@@ -53,7 +50,6 @@ public class CedarlingAuthorizationService {
 	public void init() {
 		log.info("Initialising Cedarling service");
 
-		CedarlingConfiguration cedarConf = appConfiguration.getCedarlingConfiguration();
 		if (cedarConf.isEnabled()) {
 			this.cedarlingAdapter = initAdapter(cedarConf);
 			initialized = true;

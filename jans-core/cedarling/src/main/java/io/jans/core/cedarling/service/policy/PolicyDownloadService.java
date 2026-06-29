@@ -77,7 +77,7 @@ public class PolicyDownloadService {
 	private Event<TimerEvent> timerEvent;
 
     @Inject
-	private AppConfiguration appConfiguration;
+	private CedarlingConfiguration cedarlingConfiguration;
 
 	@Inject
 	private BaseHttpService httpService;
@@ -135,7 +135,7 @@ public class PolicyDownloadService {
 	}
 
 	private void reloadPolicies() {
-		CedarlingConfiguration cedarlingConfiguration = appConfiguration.getCedarlingConfiguration();
+		
 		if ((cedarlingConfiguration.getPolicySources() == null) || (cedarlingConfiguration.getPolicySources().size() == 0)) {
 			log.debug("Policies sources is not specified");
 			
