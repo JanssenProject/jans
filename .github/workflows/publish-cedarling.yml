@@ -136,12 +136,22 @@ jobs:
       env:
         REF: ${{ inputs.ref }}
       run: |
-        if [ "${REF}" = "nightly" ]; then
-          cargo publish -p http_utils --allow-dirty --dry-run
-          cargo publish -p cedarling --allow-dirty --dry-run
+        DIRTY_FLAGS="--locked"
+        [ "${REF}" = "nightly" ] && DIRTY_FLAGS="--allow-dirty"
+
+        cargo publish -p http_utils ${DIRTY_FLAGS} --dry-run
+
+        # cedarling's dry-run resolves http_utils from the crates.io index.
+        # Skip it when http_utils has never been published (first-ever run).
+        HTTP_UTILS_VERSION=$(cargo metadata --no-deps --format-version 1 \
+          | jq -r '.packages[] | select(.name == "http_utils") | .version')
+        if curl -s --connect-timeout 10 --max-time 30 \
+            -H "User-Agent: jans-cedarling-publish-workflow" \
+            "https://index.crates.io/ht/tp/http_utils" 2>/dev/null \
+            | grep -q '"vers":"'"${HTTP_UTILS_VERSION}"'"'; then
+          cargo publish -p cedarling ${DIRTY_FLAGS} --dry-run
         else
-          cargo publish -p http_utils --locked --dry-run
-          cargo publish -p cedarling --locked --dry-run
+          echo "Skipping cedarling dry-run: http_utils@${HTTP_UTILS_VERSION} not yet in the crates.io index (first publish). Run again after http_utils is published."
         fi
 
     - name: Publish http_utils and wait for index
