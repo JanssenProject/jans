@@ -32,6 +32,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.junit.jupiter.api.Tag;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.net.URI;
 import java.time.Duration;
@@ -401,6 +403,126 @@ public class TrustRelationshipTest {
             Arguments.of(
                 TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship(),
                 TrustRelationshipFixtures.sampleUpstreamMetadatSource()
+            )
+        );
+    }
+
+    public static final Stream<Arguments> draftTrustRelationshipsWithRequiredFieldsInvalidators() {
+
+        return Stream.of(
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withId(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withDisplayName(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withDescription(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withNature(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withVersion(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withStatus(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withMetadataSource(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withShibbolethSsoProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2ArtifactResolutionProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2AttributeQueryProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2EcpProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2SsoProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2LogoutProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withReleasedAttributes(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withActivationDiagnostics(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Consumer<TrustRelationship.Builder>) b -> b.withDiscoveredEntityIds(null)
+            )
+        );
+    }
+
+    public static Stream<Arguments> draftTrustRelationshipsWithProfileConfigInvalidators() {
+
+        return Stream.of(
+
+            Arguments.of (
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withShibbolethSsoProfileConfiguration(null)
+            ),
+            Arguments.of (
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2ArtifactResolutionProfileConfiguration(null)
+            ),
+
+            Arguments.of (
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2AttributeQueryProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2EcpProfileConfiguration(null)
+            ),
+
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2SsoProfileConfiguration(null)
+            ),
+            Arguments.of(
+                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
+                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2LogoutProfileConfiguration(null)
             )
         );
     }
@@ -1189,7 +1311,7 @@ public class TrustRelationshipTest {
         public void shouldRejectIncorporateDiscoveredEntityIds_whenAggregateNotInActivatingState(TrustRelationship tr) {
 
             assertThat(tr).isOfAggregateNature();
-            assertThat(tr.getStatus()).isNotEqualTo(TrustStatus.ACTIVATING);
+            assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
 
             EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
             TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
@@ -1336,7 +1458,7 @@ public class TrustRelationshipTest {
             "WHEN cancelActivation() is called " + 
             "THEN should fail with OperationRestrictedByStatus error "
         )
-        public void shoudlFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
+        public void shouldFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
 
             assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
             TrustResult<TrustRelationship> result = tr.cancelActivation();
@@ -1351,7 +1473,7 @@ public class TrustRelationshipTest {
 
     @Nested
     @DisplayName("Restrictions, Nature Rules & Error Cases -- Nature Restrictions")
-    public class NatureRestrictionsTest {
+    public class NatureRestrictionsTests {
 
         @Test
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipFixtures#sampleActivatingIndividualTrustRelationship")
@@ -1377,7 +1499,6 @@ public class TrustRelationshipTest {
             assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
         }
 
-        // shouldFailWhenUsingMetadataSourceUnsupportedByTrustRelationshipNature()
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources")
         @DisplayName(
@@ -1399,4 +1520,86 @@ public class TrustRelationshipTest {
         }
     }
 
+    @Nested
+    @DisplayName("Restrictions, Nature Rules and Error Cases -- Consistency and Invariant Violations ")
+    public class ConsistencyAndInvariantViolationsTests {
+
+       @ParameterizedTest
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRequiredFieldsInvalidators")
+       @DisplayName(
+            "GIVEN a Builder with one required field set to null or invalid " +
+            "WHEN build() is called " +
+            "THEN should fail with the appropriate error "
+       )
+       public void shouldFailWhenRequiredFieldsAreNullOrInvalidDuringBuild(TrustRelationship tr,Consumer<TrustRelationship.Builder> invalidator) {
+
+            TrustRelationship.Builder builder = TrustRelationship.from(tr);
+            invalidator.accept(builder);
+            TrustResult<TrustRelationship> result = builder.build();
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+       }
+
+       @ParameterizedTest
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+       @DisplayName(
+            "GIVEN a Builder with metadataSource set to null " +
+            "WHEN build() is called  " +
+            "THEN should fail with the appropriate error "
+       )
+       public void shouldFailWhenMetadataSourceIsNull(TrustRelationship tr) {
+
+            TrustResult<TrustRelationship> result = TrustRelationship
+                .from(tr)
+                .withMetadataSource(null)
+                .build();
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+       }
+
+       @ParameterizedTest
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigInvalidators")
+       @DisplayName(
+            "GIVEN a TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration is called with an null value " + 
+            "THEN should fail with the appropriate error " 
+       )
+       public void shouldFailWhenAnyProfileConfigurationIsNull(TrustRelationship tr, 
+            Function<TrustRelationship.Builder,TrustRelationship.Builder> profileConfigInvalidator) {
+            
+            TrustResult<TrustRelationship> result = profileConfigInvalidator
+                .apply(TrustRelationship.from(tr))
+                .build();
+            
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+       }
+
+       @ParameterizedTest
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+       public void shouldFailWhenDiscoveredEntityIdsIsNull(TrustRelationship tr) {
+
+            TrustResult<TrustRelationship> result = TrustRelationship
+                .from(tr)
+                .withDiscoveredEntityIds(null)
+                .build();
+            
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+       }
+       
+    }
 }
