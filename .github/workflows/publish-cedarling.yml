@@ -1,26 +1,52 @@
 name: "Cedarling: publish to crates.io"
 
 # Publishes http_utils (internal dep) then cedarling to crates.io.
-# Triggered manually after a release tag has been pushed by release-trigger.yml.
-# Default dry_run=true so every manual dispatch is validation-first; set to
-# false explicitly to perform the real publish.
+#
+# Two trigger paths:
+#   workflow_dispatch — manual; dry_run defaults to true (validation-first).
+#   workflow_call     — called by release-trigger.yml (versioned release) and
+#                       build-nightly-build.yml (nightly incremental publish).
+#
+# Valid ref values:
+#   nightly    — queries the sparse index to find the highest 0.0.X already
+#                published, then publishes at 0.0.(X+1). Mirrors the npm
+#                nightly increment used by cedarling_wasm.
+#   vX.Y.Z     — versions were already bumped by version_bump.py; publishes
+#                as-is from the tagged tree.
+#
+# Both crate publish steps are idempotent via a sparse index preflight.
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Release tag to publish from (e.g. v1.2.0)'
+        description: 'Release tag (v1.2.3) or "nightly"'
         required: true
       dry_run:
         description: 'Package but do not upload (cargo publish --dry-run). Default true — set false to publish for real.'
         type: boolean
         default: true
 
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Release tag (v1.2.3) or "nightly"'
+        required: true
+        type: string
+      dry_run:
+        description: 'Package but do not upload'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      CARGO_REGISTRY_TOKEN:
+        required: true
+
 permissions:
   contents: read
 
 concurrency:
-  group: publish-cedarling
+  group: publish-cedarling-${{ inputs.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -33,18 +59,18 @@ jobs:
       with:
         egress-policy: audit
 
-    - name: Validate ref is a release tag
+    - name: Validate ref
       env:
-        REF: ${{ github.event.inputs.ref }}
+        REF: ${{ inputs.ref }}
       run: |
-        if ! echo "${REF}" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
-          echo "ERROR: ref '${REF}' is not a release tag (expected vX.Y.Z). Publishing must happen from a release tag."
+        if ! echo "${REF}" | grep -qE '^(nightly|v[0-9]+\.[0-9]+\.[0-9]+)'; then
+          echo "ERROR: ref '${REF}' must be a release tag (vX.Y.Z) or 'nightly'."
           exit 1
         fi
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.inputs.ref }}
+        ref: ${{ inputs.ref }}
         persist-credentials: false
 
     - name: Install Protoc
@@ -60,16 +86,50 @@ jobs:
       with:
         workspaces: jans-cedarling
 
-    - name: Dry-run package check (http_utils)
-      if: ${{ github.event.inputs.dry_run == 'true' }}
+    - name: Compute and patch nightly version
+      if: ${{ inputs.ref == 'nightly' }}
+      # Mirrors the npm nightly increment used by cedarling_wasm (build-packages.yml):
+      # query the registry for the highest 0.0.X already published, publish at 0.0.(X+1).
+      # Patches Cargo.toml files in-place; cargo publish uses --allow-dirty (no --locked)
+      # because the working tree is intentionally modified.
       working-directory: jans-cedarling
-      run: cargo publish -p http_utils --locked --dry-run
+      run: |
+        # Find the highest 0.0.X patch already published for cedarling.
+        LAST_PATCH=$(curl -sf --connect-timeout 10 --max-time 30 \
+          -H "User-Agent: jans-cedarling-publish-workflow" \
+          "https://index.crates.io/ce/da/cedarling" 2>/dev/null \
+          | grep -o '"vers":"0\.0\.[0-9]*"' \
+          | sed 's/"vers":"0\.0\.\([0-9]*\)"/\1/' \
+          | sort -n | tail -1 || true)
+        LAST_PATCH="${LAST_PATCH:-0}"
+        NIGHTLY_VERSION="0.0.$((LAST_PATCH + 1))"
+        echo "Last published patch: 0.0.${LAST_PATCH} → publishing ${NIGHTLY_VERSION}"
+
+        # Patch http_utils version
+        sed -i "s/^version = \".*\"/version = \"${NIGHTLY_VERSION}\"/" http_utils/Cargo.toml
+        # Patch workspace dep version constraint so cedarling's published manifest resolves correctly
+        sed -i "s/http_utils = { path = \"http_utils\", version = \"[^\"]*\" }/http_utils = { path = \"http_utils\", version = \"${NIGHTLY_VERSION}\" }/" Cargo.toml
+        # Patch cedarling version
+        sed -i "s/^version = \".*\"/version = \"${NIGHTLY_VERSION}\"/" cedarling/Cargo.toml
+
+        echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
+
+    - name: Dry-run package check (http_utils + cedarling)
+      if: ${{ inputs.dry_run == true }}
+      working-directory: jans-cedarling
+      run: |
+        if [ "${{ inputs.ref }}" = "nightly" ]; then
+          cargo publish -p http_utils --allow-dirty --dry-run
+          cargo publish -p cedarling --allow-dirty --dry-run
+        else
+          cargo publish -p http_utils --locked --dry-run
+          cargo publish -p cedarling --locked --dry-run
+        fi
 
     - name: Publish http_utils and wait for index
-      if: ${{ github.event.inputs.dry_run != 'true' }}
-      # Idempotent: preflight the sparse index first so a workflow re-run skips
-      # the upload when http_utils was already published on a prior attempt.
-      # Sparse index path for "http_utils" (len > 3): <ch1><ch2>/<ch3><ch4>/<name>
+      if: ${{ inputs.dry_run != true }}
+      # Idempotent: preflight the sparse index so a re-run skips an already-uploaded version.
+      # Sparse index path for "http_utils" (len > 3): ht/tp/http_utils
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
@@ -86,13 +146,15 @@ jobs:
         }
 
         if index_has_version; then
-          echo "http_utils@${HTTP_UTILS_VERSION} is already in the registry index; skipping publish."
+          echo "http_utils@${HTTP_UTILS_VERSION} already in registry index; skipping publish."
         else
-          cargo publish -p http_utils --locked
+          PUBLISH_FLAGS="--locked"
+          [ "${{ inputs.ref }}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
+          cargo publish -p http_utils ${PUBLISH_FLAGS}
+
           echo "Waiting for http_utils@${HTTP_UTILS_VERSION} in the sparse registry index..."
           found=0
           for i in $(seq 1 20); do
-            # Guard curl with || true so transient network errors retry.
             if index_has_version; then
               echo "http_utils@${HTTP_UTILS_VERSION} is visible in the registry index."
               found=1
@@ -107,14 +169,29 @@ jobs:
           fi
         fi
 
-    - name: Dry-run package check (cedarling)
-      if: ${{ github.event.inputs.dry_run == 'true' }}
-      working-directory: jans-cedarling
-      run: cargo publish -p cedarling --locked --dry-run
-
     - name: Publish cedarling
-      if: ${{ github.event.inputs.dry_run != 'true' }}
+      if: ${{ inputs.dry_run != true }}
+      # Idempotent: preflight the sparse index so re-runs skip already-uploaded versions.
+      # Sparse index path for "cedarling" (len > 3): ce/da/cedarling
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      run: cargo publish -p cedarling --locked
+      run: |
+        CEDARLING_VERSION=$(cargo metadata --no-deps --format-version 1 \
+          | jq -r '.packages[] | select(.name == "cedarling") | .version')
+        INDEX_URL="https://index.crates.io/ce/da/cedarling"
+
+        index_has_version() {
+          curl -sf --connect-timeout 10 --max-time 30 \
+            -H "User-Agent: jans-cedarling-publish-workflow" \
+            "${INDEX_URL}" 2>/dev/null \
+            | grep -q '"vers":"'"${CEDARLING_VERSION}"'"'
+        }
+
+        if index_has_version; then
+          echo "cedarling@${CEDARLING_VERSION} already in registry index; skipping publish."
+        else
+          PUBLISH_FLAGS="--locked"
+          [ "${{ inputs.ref }}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
+          cargo publish -p cedarling ${PUBLISH_FLAGS}
+        fi
