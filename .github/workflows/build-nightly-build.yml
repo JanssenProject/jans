@@ -54,6 +54,10 @@ jobs:
 
   publish-cedarling-nightly:
     needs: publish_binary_packages
+    # Only publish on scheduled runs or when the target branch is main (default).
+    # A workflow_dispatch targeting a feature branch would produce a nightly from
+    # an unstable ref; skip the crates.io publish in that case.
+    if: github.event_name == 'schedule' || github.event.inputs.branch == '' || github.event.inputs.branch == 'main'
     uses: ./.github/workflows/publish-cedarling.yml
     with:
       ref: nightly

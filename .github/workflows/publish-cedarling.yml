@@ -63,14 +63,20 @@ jobs:
       env:
         REF: ${{ inputs.ref }}
       run: |
-        if ! echo "${REF}" | grep -qE '^(nightly|v[0-9]+\.[0-9]+\.[0-9]+)'; then
-          echo "ERROR: ref '${REF}' must be a release tag (vX.Y.Z) or 'nightly'."
+        # Accept "nightly", plain vX.Y.Z, or pre-release tags like v1.2.3-rc1.
+        # Anchored at end ($) to reject trailing junk. Mirrors the version regex
+        # in release-trigger.yml: ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$
+        if ! echo "${REF}" | grep -qE '^(nightly|v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)$'; then
+          echo "ERROR: ref '${REF}' must be a release tag (vX.Y.Z, vX.Y.Z-rc1, …) or 'nightly'."
           exit 1
         fi
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ inputs.ref }}
+        # Translate "nightly" to "main": the nightly tag is deleted and recreated by
+        # build-nightly-build, so it is unreliable across jobs. main is the stable
+        # source for all nightly builds.
+        ref: ${{ inputs.ref == 'nightly' && 'main' || inputs.ref }}
         persist-credentials: false
 
     - name: Install Protoc
@@ -95,12 +101,19 @@ jobs:
       working-directory: jans-cedarling
       run: |
         # Find the highest 0.0.X patch already published for cedarling.
-        LAST_PATCH=$(curl -sf --connect-timeout 10 --max-time 30 \
+        # Fail fast on curl error so a network outage does not silently publish 0.0.1
+        # as if no prior nightly versions exist.
+        INDEX_RESPONSE=$(curl -sf --connect-timeout 10 --max-time 30 \
           -H "User-Agent: jans-cedarling-publish-workflow" \
-          "https://index.crates.io/ce/da/cedarling" 2>/dev/null \
+          "https://index.crates.io/ce/da/cedarling") || {
+          echo "ERROR: Failed to fetch cedarling from the sparse registry index."
+          exit 1
+        }
+        LAST_PATCH=$(echo "${INDEX_RESPONSE}" \
           | grep -o '"vers":"0\.0\.[0-9]*"' \
           | sed 's/"vers":"0\.0\.\([0-9]*\)"/\1/' \
-          | sort -n | tail -1 || true)
+          | sort -n | tail -1)
+        # Empty means no 0.0.X versions published yet; start the series at 0.0.1.
         LAST_PATCH="${LAST_PATCH:-0}"
         NIGHTLY_VERSION="0.0.$((LAST_PATCH + 1))"
         echo "Last published patch: 0.0.${LAST_PATCH} → publishing ${NIGHTLY_VERSION}"
@@ -117,8 +130,10 @@ jobs:
     - name: Dry-run package check (http_utils + cedarling)
       if: ${{ inputs.dry_run == true }}
       working-directory: jans-cedarling
+      env:
+        REF: ${{ inputs.ref }}
       run: |
-        if [ "${{ inputs.ref }}" = "nightly" ]; then
+        if [ "${REF}" = "nightly" ]; then
           cargo publish -p http_utils --allow-dirty --dry-run
           cargo publish -p cedarling --allow-dirty --dry-run
         else
@@ -133,6 +148,7 @@ jobs:
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        REF: ${{ inputs.ref }}
       run: |
         HTTP_UTILS_VERSION=$(cargo metadata --no-deps --format-version 1 \
           | jq -r '.packages[] | select(.name == "http_utils") | .version')
@@ -149,7 +165,7 @@ jobs:
           echo "http_utils@${HTTP_UTILS_VERSION} already in registry index; skipping publish."
         else
           PUBLISH_FLAGS="--locked"
-          [ "${{ inputs.ref }}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
+          [ "${REF}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
           cargo publish -p http_utils ${PUBLISH_FLAGS}
 
           echo "Waiting for http_utils@${HTTP_UTILS_VERSION} in the sparse registry index..."
@@ -172,10 +188,13 @@ jobs:
     - name: Publish cedarling
       if: ${{ inputs.dry_run != true }}
       # Idempotent: preflight the sparse index so re-runs skip already-uploaded versions.
+      # Mirrors the http_utils wait loop: polls until the version is visible before
+      # exiting so a re-run does not race a just-uploaded but not-yet-indexed version.
       # Sparse index path for "cedarling" (len > 3): ce/da/cedarling
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        REF: ${{ inputs.ref }}
       run: |
         CEDARLING_VERSION=$(cargo metadata --no-deps --format-version 1 \
           | jq -r '.packages[] | select(.name == "cedarling") | .version')
@@ -192,6 +211,22 @@ jobs:
           echo "cedarling@${CEDARLING_VERSION} already in registry index; skipping publish."
         else
           PUBLISH_FLAGS="--locked"
-          [ "${{ inputs.ref }}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
+          [ "${REF}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
           cargo publish -p cedarling ${PUBLISH_FLAGS}
+
+          echo "Waiting for cedarling@${CEDARLING_VERSION} in the sparse registry index..."
+          found=0
+          for i in $(seq 1 20); do
+            if index_has_version; then
+              echo "cedarling@${CEDARLING_VERSION} is visible in the registry index."
+              found=1
+              break
+            fi
+            echo "Not yet visible (attempt ${i}/20); retrying in 15s..."
+            sleep 15
+          done
+          if [ "${found}" -eq 0 ]; then
+            echo "ERROR: cedarling@${CEDARLING_VERSION} did not appear in the registry index after 20 attempts."
+            exit 1
+          fi
         fi
