@@ -66,18 +66,21 @@ where
                 entry = rx.next() => {
                     let Some(entry) = entry else { break; };
                     self.buffer.push_back(entry);
+                    if matches!(self.kind, AuditKind::Telemetry(_)) {
+                        self.flush(Some(&cancel_tkn)).await;
+                    }
                 },
 
                 // Send logs to the server
                 _ = flush_tick.tick() => {
-                    self.flush(&cancel_tkn).await;
+                    self.flush(Some(&cancel_tkn)).await;
                 },
 
                 () = cancel_tkn.cancelled() => {
                     while let Ok(entry) = rx.try_recv() {
                         self.buffer.push_back(entry);
                     }
-                    self.flush(&cancel_tkn).await;
+                    self.flush(None).await;
                     self.logger
                         .as_ref()
                         .and_then(std::sync::Weak::upgrade)
@@ -91,7 +94,7 @@ where
         }
     }
 
-    async fn flush(&mut self, cancel_tkn: &CancellationToken) {
+    async fn flush(&mut self, cancel_tkn: Option<&CancellationToken>) {
         // save the length at the time the function is called
         let batch_size = self.buffer.len();
         if batch_size == 0 {
@@ -118,14 +121,21 @@ where
                         self.kind,
                     )));
 
-                    tokio::select! {
-                        _ = backoff.snooze() => {},
-                        () = cancel_tkn.cancelled() => {
-                            logger.log_any(LockLogEntry::warn(format!(
-                                "cancellation requested during retry; dropping {batch_size} {} entries",
-                                self.kind,
-                            )));
-                            break;
+                    match cancel_tkn {
+                        Some(tkn) => {
+                            tokio::select! {
+                                _ = backoff.snooze() => {},
+                                () = tkn.cancelled() => {
+                                    logger.log_any(LockLogEntry::warn(format!(
+                                        "cancellation requested during retry; dropping {batch_size} {} entries",
+                                        self.kind,
+                                    )));
+                                    break;
+                                },
+                            }
+                        },
+                        None => {
+                            let _ = backoff.snooze().await;
                         },
                     }
                 },
