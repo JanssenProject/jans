@@ -7,32 +7,36 @@ import inspect
 from types import ModuleType
 import cedarling_python
 
-
 # script to show the signature and documentation string for a python cedarling bindings
 
 
 def is_module(variable):
-    '''
+    """
     Check if a variable is a module
-    '''
+    """
     return isinstance(variable, ModuleType)
 
 
 def print_inspect(type_value):
-    '''
-        this is a helper function to show the signature and doc string for a given type
-        is used only to validate is documentation and signature from the python side
-    '''
+    """
+    this is a helper function to show the signature and doc string for a given type
+    is used only to validate is documentation and signature from the python side
+    """
     # we add additional newlines to make it more readable.
     print("___")
     print(f"Show documentation string of type: {type_value.__name__}:\n")
     print(type_value.__doc__)
     print("\n")
 
-    print(f"Show signature of type: {type_value.__name__}: {inspect.signature(type_value)}")
+    print(
+        f"Show signature of type: {type_value.__name__}: {inspect.signature(type_value)}"
+    )
 
-    methods_list = [method for method in dir(type_value) if callable(
-        getattr(type_value, method)) and not method.startswith("_")]
+    methods_list = [
+        method
+        for method in dir(type_value)
+        if callable(getattr(type_value, method)) and not method.startswith("_")
+    ]
 
     for i, method in enumerate(methods_list):
         if i != 0:
@@ -45,29 +49,36 @@ def print_inspect(type_value):
 
 
 def print_header():
-    print('''
+    print("""
 # Cedarling Python bindings types documentation
 
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
-''')
+
+## Policy Store Sources
+
+For details on the new directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
+
+---
+""")
 
 
 def fix_newlines(str_value):
-    '''
+    """
     make newline in markdown correct
-    '''
+    """
     return str_value.replace("\n:", "  \n:")
 
 
 def print_doc(type_value: any, module_name: str | None = None):
-    '''
-        this is a helper function show to doc string for a given type
-    '''
+    """
+    this is a helper function show to doc string for a given type
+    """
 
     # Handle missing or empty docstring
     if not type_value.__doc__ or not type_value.__doc__.strip():
         import sys
+
         print(f"Warning: Missing docstring for {type_value.__name__}", file=sys.stderr)
         return
 
@@ -81,15 +92,17 @@ def print_doc(type_value: any, module_name: str | None = None):
     message = "\n".join(message_lines)
 
     if module_name is not None:
-        message = message.replace(type_value.__name__, "{}.{}".format(
-            module_name, type_value.__name__))
+        message = message.replace(
+            type_value.__name__, "{}.{}".format(module_name, type_value.__name__)
+        )
     print(message)
     print("___\n")
 
 
 def print_module_doc(module: ModuleType):
-    attrs = [attr for attr in dir(
-        module) if not attr.startswith("_") and attr is not None]
+    attrs = [
+        attr for attr in dir(module) if not attr.startswith("_") and attr is not None
+    ]
     attrs.sort()
 
     for attr in attrs:
