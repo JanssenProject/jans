@@ -124,7 +124,15 @@ where
                     match cancel_tkn {
                         Some(tkn) => {
                             tokio::select! {
-                                _ = backoff.snooze() => {},
+                                result = backoff.snooze() => {
+                                    if result.is_err() {
+                                        logger.log_any(LockLogEntry::warn(format!(
+                                            "retries exhausted; dropping {batch_size} {} entries",
+                                            self.kind,
+                                        )));
+                                        break;
+                                    }
+                                },
                                 () = tkn.cancelled() => {
                                     logger.log_any(LockLogEntry::warn(format!(
                                         "cancellation requested during retry; dropping {batch_size} {} entries",
@@ -135,7 +143,13 @@ where
                             }
                         },
                         None => {
-                            let _ = backoff.snooze().await;
+                            if backoff.snooze().await.is_err() {
+                                logger.log_any(LockLogEntry::warn(format!(
+                                    "retries exhausted; dropping {batch_size} {} entries",
+                                    self.kind,
+                                )));
+                                break;
+                            }
                         },
                     }
                 },
