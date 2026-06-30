@@ -1,0 +1,13 @@
+# Customize logs
+
+Sometimes it can be useful to customize logging behavior or override AS loggers. It is possible to fully override AS logging configuration by specifying own `log4j2.xml` file in `externalLoggerConfiguration` AS configuration property. It must point to valid `log4j2.xml` file.
+
+Note: invalid external `log4j2.xml` can lead to AS start up issues and no logs in [standard log files](https://docs.jans.io/nightly/janssen-server/auth-server/logging/standard-logs/index.md) or otherwise in other log files if such are defined by `log4j2.xml`.
+
+## Have questions in the meantime?
+
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+
+## Want to contribute?
+
+If you'd like to contribute content to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

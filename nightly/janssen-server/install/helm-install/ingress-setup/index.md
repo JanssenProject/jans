@@ -1,0 +1,213 @@
+# External Access & Traffic Management
+
+This guide explains how to expose and route external traffic to your Janssen deployment, using either the modern Gateway API (recommended) or the legacy Ingress API.
+
+## Networking Architecture Selection: Gateway API vs. Ingress
+
+### Comparison Matrix
+
+| Capability            | **Gateway API (Recommended)**                                                   | **Standard Ingress (Legacy)** |
+| --------------------- | ------------------------------------------------------------------------------- | ----------------------------- |
+| **Ecosystem Support** | **Broad:** NGINX, Istio, Traefik, Envoy, kgateway, airlock-microgateway, cilium | **Limited:** NGINX, Istio     |
+| **Audit gRPC API**    | **Yes** (Note: NGINX requires Snippets enabled)                                 | **No**                        |
+| **Audit REST API**    | **Yes**                                                                         | **Yes**                       |
+
+### Which Pathway Should You Choose?
+
+Selecting the correct networking model depends on your specific security and protocol requirements:
+
+**Choose Gateway API if:**
+
+- You require **gRPC auditing** for your services.
+- You are using modern networking stacks like **Cilium**, **Traefik**, or **Envoy**.
+- You want a more expressive, role-oriented API that is the evolving standard for Kubernetes networking.
+
+**Choose Standard Ingress if:**
+
+- You are operating in a legacy environment that only supports the standard Ingress controller.
+- You only require **REST API auditing** and do not use gRPC.
+- Your organization has strict policies against enabling **NGINX Snippets** (which are required for advanced Gateway API features).
+
+## Option 1: Gateway API (Recommended)
+
+The Kubernetes Gateway API provides a more expressive and extensible way to manage traffic.
+
+### Install Gateway API CRDs
+
+If your cluster does not have the Gateway API Custom Resource Definitions:
+
+```
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+```
+
+### Install a Gateway Controller
+
+You must have a [conformant Gateway Controller](https://gateway-api.sigs.k8s.io/implementations/#conformant) installed.
+
+Example using Nginx Gateway Fabric:
+
+```
+helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway
+```
+
+### Configure Gateway IP
+
+**Option A: Static IP (Recommended)**
+
+Reserve a static public IP with your cloud provider before installation. Add this IP to your `override.yaml`.
+
+**Option B: Dynamic IP**
+
+1. Run initial Helm install without `global.lbIp`
+
+1. Wait for the cloud provider to assign an IP:
+
+   ```
+   kubectl get gateway -n jans
+   ```
+
+1. Add the IP to `global.lbIp` in `override.yaml`
+
+1. Run `helm upgrade` to apply
+
+### Gateway API Configuration
+
+Gateway API configuration changes
+
+In previous version, Gateway API is configured via `global.gatewayApi` and `gatewayApi`. As of current version, they are replaced by `global.gateway-api` and `gateway-api` respectively.
+
+Attribute changes:
+
+| Legacy                          | New                                 |
+| ------------------------------- | ----------------------------------- |
+| `global.gatewayApi.enabled`     | `global.gateway-api.enabled`        |
+| `gatewayApi.gatewayClassName`   | `gateway-api.gateway.className`     |
+| `gatewayApi.name`               | `gateway-api.gateway.name`          |
+| `gatewayApi.httpPort`           | `gateway-api.gateway.httpPort`      |
+| `gatewayApi.httpsPort`          | `gateway-api.gateway.httpsPort`     |
+| `gatewayApi.tlsSecretName`      | `gateway-api.gateway.tlsSecretName` |
+| `gatewayApi.gatewayLabels`      | `gateway-api.gateway.labels`        |
+| `gatewayApi.gatewayAnnotations` | `gateway-api.gateway.annotations`   |
+| `gatewayApi.routeLabels`        | `gateway-api.routes.labels`         |
+| `gatewayApi.routeAnnotations`   | `gateway-api.routes.annotations`    |
+
+Add this to your `override.yaml`:
+
+```
+global:
+  lbIp: ""  # Add your static IP here
+  fqdn: demoexample.jans.io  # Your domain
+  isFqdnRegistered: true  # Set to false if no registered domain
+  gateway-api:
+    enabled: true
+  nginx-ingress:
+    enabled: false
+gateway-api:
+  gateway:
+    className: nginx  # Match your controller (nginx, istio, etc.)
+    name: jans-gateway
+    httpPort: 80
+    httpsPort: 443
+    attachLbIp: false # Set the value to true if loadbalancer didn't assign IP address to the gateway automatically
+```
+
+## Option 2: Kubernetes Ingress (Legacy)
+
+Use this if you prefer the traditional Ingress resource.
+
+Retirement Notice
+
+The upstream [ingress-nginx](https://github.com/kubernetes/ingress-nginx) project is in a terminal maintenance window through March 2026 and will receive no further releases, bug fixes, or security updates after that date. Consider migrating to Gateway API (Option 1) or an alternative maintained ingress controller. See the [upstream announcement](https://github.com/kubernetes/ingress-nginx) for details.
+
+### Install Nginx Ingress Controller
+
+```
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+helm install nginx ingress-nginx/ingress-nginx
+```
+
+### Get the Load Balancer Address
+
+**For GKE/AKS (IP address):**
+
+```
+kubectl get svc nginx-ingress-nginx-controller --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+
+**For EKS (hostname):**
+
+```
+kubectl get svc nginx-ingress-nginx-controller --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+
+### Ingress Configuration
+
+Choose the configuration that matches your setup:
+
+#### With a Registered Domain (FQDN)
+
+For GKE/AKS with a registered domain:
+
+```
+global:
+  lbIp: ""  # Add LoadBalancer IP from previous command
+  fqdn: demoexample.jans.io  # Your registered domain
+  isFqdnRegistered: true
+nginx-ingress:
+  ingress:
+    path: /
+    hosts:
+      - demoexample.jans.io  # Your domain
+    tls:
+      - secretName: tls-certificate
+        hosts:
+          - demoexample.jans.io  # Your domain
+```
+
+For EKS with a registered domain (uses hostname instead of IP):
+
+```
+global:
+  fqdn: demoexample.jans.io  # Your registered domain
+  isFqdnRegistered: true
+config:
+  configmap:
+    lbAddr: http://YOUR-EKS-HOSTNAME.elb.amazonaws.com  # Add EKS hostname here
+nginx-ingress:
+  ingress:
+    path: /
+    hosts:
+      - demoexample.jans.io  # Your domain
+    tls:
+      - secretName: tls-certificate
+        hosts:
+          - demoexample.jans.io  # Your domain
+```
+
+#### Without a Registered Domain
+
+If you don't have a registered domain, use the LoadBalancer address directly:
+
+For GKE/AKS:
+
+```
+global:
+  lbIp: ""  # Add LoadBalancer IP from previous command
+  isFqdnRegistered: false
+```
+
+For EKS:
+
+```
+config:
+  configmap:
+    lbAddr: http://YOUR-EKS-HOSTNAME.elb.amazonaws.com  # Add EKS hostname here
+global:
+  isFqdnRegistered: false
+```
+
+## Next Steps
+
+Proceed to [Database Setup](https://docs.jans.io/nightly/janssen-server/install/helm-install/database-setup/index.md) to configure persistence storage.

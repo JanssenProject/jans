@@ -1,0 +1,282 @@
+# Cedarling Entity Mappings
+
+Cedarling creates Cedar entities automatically based on the authorization interface used. The two interfaces build different sets of entities:
+
+| Entity Type                                             | `authorize_unsigned`               | `authorize_multi_issuer` |
+| ------------------------------------------------------- | ---------------------------------- | ------------------------ |
+| [Trusted Issuer](#trusted-issuer)                       | Created at startup                 | Created at startup       |
+| [Principal (User, Workload, etc.)](#principal-entities) | Built from `EntityData` (optional) | Not created              |
+| [Token (JWT)](#token-entities)                          | Not created                        | Built from JWT claims    |
+| [Resource](#resource-entity)                            | Built from `EntityData`            | Built from `EntityData`  |
+
+The entity type names are defined in the Cedar schema within the policy store.
+
+> ***Notes***
+>
+> - Attribute presence depends on the data provided and the Cedar schema in the policy store.
+
+## Trusted Issuer
+
+Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the [policy store](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#trusted-issuers-schema).
+
+- *Namespace:* Corresponds to the trusted issuer name in the policy store.
+- *Type Name:* `TrustedIssuer`
+- *Entity ID:* Set using the issuer URL (corresponds to `iss` in tokens).
+
+## Principal Entities
+
+Principals are created only in the `authorize_unsigned` interface. The caller optionally provides a single principal as `EntityData`, specifying the Cedar entity type, ID, and attributes explicitly.
+
+There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include `User` and `Workload`, but these are just conventions defined in your schema.
+
+The principal is optional. When omitted, Cedarling evaluates the request using Cedar's partial evaluator. See [Optional principal and partial evaluation](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#optional-principal-and-partial-evaluation) in the authorization reference for the full semantics.
+
+### EntityData Structure
+
+The principal is passed as an `EntityData`:
+
+```
+{
+  "cedar_mapping": {
+    "entity_type": "Jans::User",
+    "id": "user_123"
+  },
+  "attributes": {
+    "sub": "user_123",
+    "email": "bob@email.com"
+  }
+}
+```
+
+- *Type Name:* Defined in `cedar_mapping.entity_type`. Must match a type in the Cedar schema.
+- *Entity ID:* Defined in `cedar_mapping.id`.
+- *Entity Attributes:* Cedarling checks the Cedar schema and maps the provided attributes to the entity's schema shape.
+
+### Example: User Principal
+
+Given the following `authorize_unsigned` request with a User principal:
+
+```
+{
+  "principal": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::User",
+      "id": "some_sub"
+    },
+    "attributes": {
+      "sub": "some_sub",
+      "email": {"domain": "email.com", "uid": "bob"}
+    }
+  },
+  "action": "MyApp::Action::\"Read\"",
+  "resource": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::Application",
+      "id": "app_1"
+    },
+    "attributes": {
+      "app_id": "app_1",
+      "name": "MyApp",
+      "url": {"host": "myapp.com", "path": "/", "protocol": "https"}
+    }
+  },
+  "context": {}
+}
+```
+
+and Cedar schema:
+
+```
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// MyApp namespace: your business entities.
+namespace MyApp {
+  entity User = {
+    email?: Jans::email_address,
+    phone_number?: String,
+    sub: String,
+    "username"?: String,
+  };
+};
+```
+
+Cedarling builds the following entity:
+
+**User entity:**
+
+```
+{
+  "uid": {"type": "MyApp::User", "id": "some_sub"},
+  "attrs": {
+    "sub": "some_sub",
+    "email": {"domain": "email.com", "uid": "bob"}
+  },
+  "parents": []
+}
+```
+
+### Example: Workload Principal
+
+```
+{
+  "principal": {
+    "cedar_mapping": {
+      "entity_type": "MyApp::Workload",
+      "id": "my_client"
+    },
+    "attributes": {
+      "client_id": "my_client",
+      "name": "Backend Service"
+    }
+  },
+  "action": "MyApp::Action::\"Read\"",
+  "resource": { "..." : "..." },
+  "context": {}
+}
+```
+
+Cedarling builds:
+
+```
+{
+  "uid": {"type": "MyApp::Workload", "id": "my_client"},
+  "attrs": {
+    "client_id": "my_client",
+    "name": "Backend Service"
+  },
+  "parents": []
+}
+```
+
+## Token Entities
+
+Token entities are created only in the `authorize_multi_issuer` interface. Cedarling builds one entity per JWT token provided in the request.
+
+- *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#token-metadata-schema), or derived from the token's mapping name.
+- *Entity ID:* Extracted from the `jti` (JWT ID) claim by default, configurable via `token_id` in TEMS.
+- *Attributes:* JWT claims are mapped to entity attributes based on the Cedar schema. Reserved claims (`iss`, `jti`, `exp`) are typed correctly (entity reference, string, long). Synthetic attributes `token_type` and `validated_at` are added automatically.
+- *Tags:* Non-reserved JWT claims are also added as entity tags (`Set<String>`), enabling `hasTag`/`getTag` operations in policies.
+
+### Example: Multi-Issuer Token Entity
+
+Given the following `authorize_multi_issuer` request:
+
+```
+{
+  "tokens": [
+    {
+      "mapping": "Acme::Access_Token",
+      "payload": "<signed JWT>"
+    }
+  ],
+  "action": "Acme::Action::\"GetFood\"",
+  "resource": {
+    "cedar_mapping": {
+      "entity_type": "Acme::Resource",
+      "id": "approved_foods"
+    },
+    "attributes": {
+      "name": "Approved Foods"
+    }
+  }
+}
+```
+
+Where the JWT payload decodes to:
+
+```
+{
+  "iss": "https://idp.acme.com/auth",
+  "sub": "user_123",
+  "jti": "token_abc",
+  "scope": ["read", "write"],
+  "exp": 2000000000
+}
+```
+
+Cedarling builds the following token entity:
+
+```
+{
+  "uid": {"type": "Acme::Access_Token", "id": "token_abc"},
+  "attrs": {
+    "token_type": "Acme::Access_Token",
+    "jti": "token_abc",
+    "iss": {"__entity": {"type": "Acme::TrustedIssuer", "id": "https://idp.acme.com/auth"}},
+    "exp": 2000000000,
+    "validated_at": 1710892800,
+    "sub": "user_123",
+    "scope": ["read", "write"]
+  },
+  "tags": {
+    "sub": ["user_123"],
+    "scope": ["read", "write"]
+  },
+  "parents": []
+}
+```
+
+Token entities are accessible in policies via the context (e.g., `context.tokens.acme_access_token`).
+
+## Resource Entity
+
+Resource entities are built in both authorization interfaces from the `EntityData` provided in the request. The structure is identical to [principal entities](#entitydata-structure), but resources have no parent entities.
+
+If no attributes are provided and a default entity with the same UID exists in the policy store, the default entity's attributes are used.
+
+## Entity Merging and Conflict Resolution
+
+Cedarling automatically merges entities from multiple sources during authorization requests. The merging process follows specific rules to ensure consistency and handle conflicts appropriately.
+
+### Merging Order and Precedence
+
+1. **Request Entities**: Resource, issuers, tokens, and principal entities
+1. **Default Entities**: Loaded from policy store configuration (take precedence on UID conflict)
+1. **Conflict Resolution**: Default entities override request entities when UID conflicts occur
+
+### Example: Entity Override Scenario
+
+When a resource entity has the same UID as a default entity:
+
+```
+// Default entity in policy store
+{
+  "org1": {
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "org1"
+    },
+    "attrs": {
+      "name": "Default Organization",
+      "is_active": true
+    },
+    "parents": []
+  }
+}
+
+// Request resource entity
+{
+  "uid": {
+    "type": "Jans::Organization",
+    "id": "org1"
+  },
+  "attrs": {
+    "name": "Updated Organization",
+    "is_active": false
+  },
+  "parents": []
+}
+```
+
+Result: Any attributes that differ between the default entity and the request entity will use the default entity's values. In this case, the default entity's values (`"Default Organization"`, `is_active: true`) take precedence, ensuring that policy-store entities cannot be overridden by request data.

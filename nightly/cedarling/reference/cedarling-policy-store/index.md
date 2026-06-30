@@ -1,0 +1,1023 @@
+# Cedarling Policy Store
+
+The Policy Store provides:
+
+1. **Cedar Schema**: The Cedar schema encoded in Base64.
+1. **Cedar Policies**: The Cedar policies encoded in Base64.
+1. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
+1. **Default Entities**: Optional static entities that are loaded at startup and available for all policy evaluations (see [below](#default-entities)).
+
+For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
+
+**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK` and `CEDARLING_POLICY_STORE_URI` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
+
+## Policy Store Formats
+
+Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
+
+| Configuration                                                        | Detection                    |
+| -------------------------------------------------------------------- | ---------------------------- |
+| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL       |
+| `CEDARLING_POLICY_STORE_URI`, response body is JSON                  | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory              | Directory-based format       |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension             | Cedar Archive file           |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension             | JSON file                    |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension      | YAML file                    |
+
+### 1. Legacy Single-File Format (JSON/YAML)
+
+The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.
+
+### 2. New Directory-Based Format
+
+The new directory-based format uses human-readable Cedar files organized in a structured directory:
+
+```
+policy-store/
+├── metadata.json           # Required: Store identification and versioning
+├── schema.cedarschema      # Option A: Single schema file (takes precedence)
+├── schemas/                # Option B: Split schema directory (fallback)
+│   ├── users.cedarschema
+│   └── resources.cedarschema
+├── policies/               # Required: Directory containing .cedar policy files
+│   ├── allow-read.cedar
+│   └── deny-guest.cedar
+├── templates/              # Optional: Directory containing .cedar template files
+├── entities/               # Optional: Directory containing .json entity files
+└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+```
+
+The schema can be provided in one of two ways (but not both):
+
+- **Option A — single file**: `schema.cedarschema` at the store root. This is the original format.
+- **Option B — split across multiple files**: `schemas/*.cedarschema` directory. Each file is parsed as an independent `SchemaFragment`, then merged via `Schema::from_schema_fragments`. This is useful for large schemas with multiple namespaces.
+
+If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, behavior depends on `CEDARLING_STRICT_SCHEMA_VALIDATION`: with strict mode enabled (the default), loading fails with a `MissingSchemaSource` error; with strict mode disabled, the store loads successfully and policies run without schema-based attribute validation.
+
+#### metadata.json
+
+Contains policy store identification and versioning:
+
+```
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies",
+    "description": "Optional description",
+    "version": "1.0.0",
+    "created_date": "2024-01-01T00:00:00Z",
+    "updated_date": "2024-01-02T00:00:00Z"
+  }
+}
+```
+
+#### Policy Files
+
+Policies are stored as human-readable `.cedar` files in the `policies/` directory:
+
+```
+@id("allow-read")
+permit(
+    principal,
+    action == MyApp::Action::"read",
+    resource
+);
+```
+
+When a `.cedar` file contains **multiple** policies, each policy must have its own Cedar `@id("...")` annotation so every policy has a stable, unique id (the loader does not fall back to the filename in that case).
+
+For a **single-policy** file, `@id("...")` is optional: if it is omitted, the parser still accepts the file and derives the policy id from the filename (without the `.cedar` extension), after validation.
+
+##### Multiple policies per file
+
+A single `.cedar` file may contain more than one policy. In that case each policy must have its own `@id("...")` annotation:
+
+```
+@id("researcher-search")
+permit(
+    principal == User::"researcher",
+    action == Action::"search",
+    resource
+);
+
+@id("researcher-edit")
+permit(
+    principal == User::"researcher",
+    action == Action::"edit",
+    resource
+);
+```
+
+#### Template Files
+
+Templates are stored as human-readable `.cedar` files in the `templates/` directory:
+
+```
+@id("resource-access-template")
+permit(
+    principal == ?principal,
+    action,
+    resource == ?resource
+);
+```
+
+Each template file must have an `@id` annotation and use Cedar's template slot syntax (`?principal`, `?resource`).
+
+#### Entity Files
+
+Entity files in the `entities/` directory use the Cedar JSON entity format as a **JSON array**. Each file can contain one or more entity definitions:
+
+```
+[
+  {
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "acme-dolphins"
+    },
+    "attrs": {
+      "name": "Acme Dolphins Division",
+      "org_id": "100129",
+      "domain": "acme-dolphin.sea",
+      "regions": ["Atlantic", "Pacific", "Indian"]
+    },
+    "parents": []
+  },
+  {
+    "uid": {
+      "type": "Jans::Role",
+      "id": "admin"
+    },
+    "attrs": {
+      "name": "Administrator",
+      "permissions": ["read", "write", "delete"]
+    },
+    "parents": []
+  }
+]
+```
+
+Each entity requires:
+
+- **`uid`**: Object with `type` (Cedar entity type name, e.g., `"Jans::Organization"`) and `id` (unique entity identifier)
+- **`attrs`**: Object containing entity attributes matching your Cedar schema
+- **`parents`**: Optional array of parent entity references for hierarchical relationships
+
+Example with parent relationships (`entities/users.json`):
+
+```
+[
+  {
+    "uid": {
+      "type": "Jans::User",
+      "id": "alice"
+    },
+    "attrs": {
+      "name": "Alice Smith",
+      "email": "alice@example.com"
+    },
+    "parents": [
+      {"type": "Jans::Role", "id": "admin"},
+      {"type": "Jans::Organization", "id": "acme-dolphins"}
+    ]
+  }
+]
+```
+
+#### Trusted Issuer Files
+
+Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. **Each file describes exactly one issuer** as a JSON object with the issuer's fields at the top level:
+
+```
+{
+  "name": "Jans Server",
+  "description": "Primary Janssen Identity Provider",
+  "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_token",
+      "token_id": "jti"
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Id_token",
+      "token_id": "jti"
+    }
+  }
+}
+```
+
+Each trusted issuer file includes:
+
+- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
+- **`description`**: Optional description of the issuer.
+- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, `configuration_endpoint` is also accepted.
+- **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
+- **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
+
+To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
+
+> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
+
+#### Cedar Archive (.cjar) Format
+
+The directory structure can be packaged as a `.cjar` file (ZIP archive) for distribution:
+
+```
+# Create a .cjar archive from a policy store directory
+cd policy-store && zip -r ../policy-store.cjar .
+```
+
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `init_from_archive_bytes()` for custom fetch scenarios.
+
+## Advanced: Loading from Bytes
+
+For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
+
+- **WASM**: Use `init_from_archive_bytes(config, bytes)` function
+- **Rust**: Use `PolicyStoreSource::ArchiveBytes(Vec<u8>)` or `load_policy_store_archive_bytes()` function
+
+```
+// WASM example with custom fetch
+const response = await fetch(url, { headers: { Authorization: "..." } });
+const bytes = new Uint8Array(await response.arrayBuffer());
+const cedarling = await init_from_archive_bytes(config, bytes);
+```
+
+## Background refresh
+
+For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory `Authz` instance so long-running processes see policy updates without restart. Refresh is **opt-in** via [`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/#refreshing-the-policy-store) and is silently ignored for local sources.
+
+### Per-request consistency
+
+Every public Cedarling method snapshots the current `Authz` via `Arc<ArcSwap<Authz>>::load()` at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all *subsequent* calls.
+
+### Strategy ladder
+
+The worker selects from three fetch strategies and degrades automatically when the upstream proves it doesn't support the more efficient mode. A periodic probe attempts to upgrade back so a transiently misconfigured upstream doesn't permanently lock the worker into a heavier path.
+
+| Strategy                | Wire behavior                                                                                       | When the worker uses it                                                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `Conditional` (default) | Conditional GET with `If-None-Match` / `If-Modified-Since`; expects `304 Not Modified` on no-op     | Starting state. Lock Server / CDN deployments stay here.                                                                            |
+| `HeadThenGet`           | HEAD first; compare returned `ETag` / `Last-Modified` against cache; full GET only when they differ | Auto-degraded into after three consecutive ticks where the server returned `200` with an identical body despite conditional headers |
+| `PlainGet`              | Plain GET every tick; relies on body-hash short-circuit to detect no-op reloads                     | Auto-degraded into after three consecutive HEAD responses with no useful validators, or immediately on HEAD `405` / `501`           |
+
+Across all three strategies the worker maintains a body-hash short-circuit: even when the server returns `200` with byte-identical bytes (some servers ignore conditional headers, some emit non-deterministic `ETag`s), Cedarling skips parse / rebuild / swap entirely.
+
+A `Cache-Control: max-age` / `Expires` hint in any successful response may **shorten** the next sleep but never lengthens it past the operator-configured interval.
+
+### Failure handling
+
+Failures (network, HTTP, parse, rebuild) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
+
+### Metrics
+
+The refresh worker emits the following keys into the `operational_stats` map of each metrics snapshot. Keys are emitted **sparsely** — only when the underlying value is non-zero — so dashboards can distinguish "no observation yet" from a genuine zero reading.
+
+| Key                                                       | Meaning                                                                                                                                                          |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `policy_store_refresh.last_attempt_secs`                  | Unix timestamp of the most recent tick attempt                                                                                                                   |
+| `policy_store_refresh.last_success_secs`                  | Unix timestamp of the most recent `Success` or `NotModified` outcome                                                                                             |
+| `policy_store_refresh.consecutive_failures`               | Current failure streak (resets to zero on success)                                                                                                               |
+| `policy_store_refresh.last_outcome`                       | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError                                   |
+| `policy_store_refresh.strategy_current`                   | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet                                                                                                     |
+| `policy_store_refresh.conditional_to_head_transitions`    | Cumulative count of `Conditional → HeadThenGet` degrades                                                                                                         |
+| `policy_store_refresh.head_to_plain_transitions`          | Cumulative count of `HeadThenGet → PlainGet` degrades                                                                                                            |
+| `policy_store_refresh.upgrade_to_head_transitions`        | Cumulative count of probes that upgraded `PlainGet → HeadThenGet`                                                                                                |
+| `policy_store_refresh.upgrade_to_conditional_transitions` | Cumulative count of probes that upgraded back to `Conditional`                                                                                                   |
+| `policy_store_refresh.outcome_success`                    | Cumulative count of `Success` outcomes                                                                                                                           |
+| `policy_store_refresh.outcome_not_modified`               | Cumulative count of `NotModified` outcomes                                                                                                                       |
+| `policy_store_refresh.outcome_http_error`                 | Cumulative count of `HttpError` outcomes                                                                                                                         |
+| `policy_store_refresh.outcome_network_error`              | Cumulative count of `NetworkError` outcomes                                                                                                                      |
+| `policy_store_refresh.outcome_parse_error`                | Cumulative count of `ParseError` outcomes (body couldn't be parsed)                                                                                              |
+| `policy_store_refresh.outcome_rebuild_error`              | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed)                                    |
+| `policy_store_refresh.outcome_decode_error`               | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
+
+## Legacy Single-File Format (JSON)
+
+The following sections document the legacy single-file JSON format.
+
+### JSON Schema
+
+The JSON Schema accepted by Cedarling is defined as follows:
+
+```
+{
+  "cedar_version": "v4.0.0",
+  "policy_stores": {
+      "some_unique_string_id": {
+          "name": "DoveCRM Policy Store",
+          "description": "DoveCRM policies, schema, and trusted JWT issuers.",
+          "policies": { ... },
+          "schema": { ... },
+          "trusted_issuers": { ... },
+          "default_entities": { ... }
+      }
+  }
+}
+```
+
+- **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
+- **policies** : (*Object*) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
+- **schema** : (*String* | *Object*) Base64 encoded JSON Object. See [schema](#schema) below.
+- **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
+- **default_entities** : (*Object*) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
+
+### `schema`
+
+Either *String* or *Object*, where *Object* is preferred.
+
+Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+
+```
+"schema": {
+    "encoding": "none", // can be one of "none" or "base64"
+    "content_type": "cedar", // can be one of "cedar" or "cedar-json"
+    "body": "namespace Jans {\ntype Url = {"host": String, "path": String, "protocol": String};..."
+}
+```
+
+Where *String* - The schema in cedar-json format, encoded as Base64. For example:
+
+```
+"schema": "cGVybWl0KAogICAgc..."
+```
+
+## Default Entities
+
+Default entities allow you to preload static entity records that are available to every authorization request. Cedarling loads these at startup alongside policies and schema.
+
+Format:
+
+- Each entry is a simple key-value pair where the key is the entity ID and the value is a Base64-encoded JSON object representing the entity payload.
+- Default entities support two formats:
+- **Cedar format**: `{"uid": {"type": "...", "id": "..."}, "attrs": {...}, "parents": [...]}`
+- **Legacy format**: `{"entity_type": "...", "entity_id": "...", ...attributes...}` (for backward compatibility)
+
+```
+"default_entities": {
+  "1694c954f8d9": "eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=",
+  "74d109b20248": "eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119"
+}
+```
+
+Example of the decoded payloads for two default entities:
+
+```
+{
+  "1694c954f8d9": {
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "1694c954f8d9"
+    },
+    "attrs": {
+      "o": "Acme Dolphins Division",
+      "org_id": "100129",
+      "domain": "acme-dolphin.sea",
+      "regions": ["Atlantic", "Pacific", "Indian"]
+    },
+    "parents": []
+  },
+  "74d109b20248": {
+    "uid": {
+      "type": "Jans::PriceList",
+      "id": "74d109b20248"
+    },
+    "attrs": {
+      "description": "2025 Price List",
+      "products": { "15020": 9.95, "15050": 14.95 },
+      "services": { "51001": 99.0, "51020": 299.0 }
+    },
+    "parents": []
+  }
+}
+```
+
+Notes:
+
+- Cedar policies can reference these entities directly by type and ID, just like any other entity present during evaluation.
+- A common use case is defining an organization entity and writing policies that compare runtime attributes (e.g., `resource.org_id`) to attributes on the default entity.
+
+### Entity Conflict Resolution
+
+When request entities have the same UID as default entities, Cedarling automatically resolves conflicts by giving **default entities precedence** over request entities. This ensures that policy-store entities — representing change-controlled, trusted shared state — cannot be overwritten by attacker-controlled request data.
+
+Example: If a resource entity with UID `"org1"` is passed in an authorization request and a default entity with the same UID exists, the default entity's attributes will be used instead of the resource entity's attributes.
+
+## Cedar Policies Schema
+
+The `policies` field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a `unique_policy_id`.
+
+```
+  "policies": {
+    "unique_policy_id": {
+      "description": "simple policy example",
+      "policy_content": { ... },
+    },
+    ...
+  }
+```
+
+- **unique_policy_id**: (*String*) A unique policy ID used to for tracking and auditing purposes.
+- **description** : (*String*) A brief description of cedar policy
+- **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
+
+### `policy_content`
+
+Either *String* or *Object*, where *Object* is preferred.
+
+Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+
+```
+"policy_content": {
+    "encoding": "none", // can be one of "none" or "base64"
+    "content_type": "cedar", // ONLY "cedar" for now due to limitations in cedar-policy crate
+    "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
+}
+```
+
+Where *String* - The policy in cedar format, encoded as Base64. For example:
+
+```
+"policy_content": "cGVybWl0KAogICAgc..."
+```
+
+### Example of `policies`
+
+Here is a non-normative example of the `policies` field:
+
+```
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example for principal workload",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    },
+    "0fo1kl928Afa0sc9123scma0123891asklajsh1233ab": {
+      "description": "another policy example",
+      "policy_content": "kJW1bWl0KA0g3CAxa..."
+    },
+    "1fo1kl928Afa0sc9123scma0123891asklajsh1233ac": {
+      "description": "another policy example",
+      "policy_content": {
+        "encoding": "none",
+        "content_type" : "cedar",
+        "body": "permit(...) where {...}"
+      }
+    },
+    "2fo1kl928Afa0sc9123scma0123891asklajsh1233ad": {
+      "description": "another policy example",
+      "policy_content": {
+        "encoding": "base64",
+        "content_type" : "cedar",
+        "body": "kJW1bWl0KA0g3CAxa..."
+      }
+    },
+    ...
+  }
+```
+
+## Trusted Issuers Schema
+
+This record contains the information needed to validate tokens from this issuer:
+
+```
+"trusted_issuers": {
+  "trusted_issuer_id" : {
+    "name": "name_of_the_trusted_issuer",
+    "description": "description for the trusted issuer",
+    "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
+    "token_metadata": {
+      "access_tokens": {
+        "trusted": true,
+        "token_id": "jti",
+        ...
+      },
+      "id_tokens": { ... },
+      "userinfo_tokens": { ... },
+      "tx_tokens": { ... },
+      ...
+    }
+  },
+  "another_issuer_id": {
+    ...
+  }
+  ...
+}
+```
+
+- **name** : (*String*) The name of the trusted issuer.
+- **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
+- **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
+- **trusted_issuer_id** : (*Object*, *optional*) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](https://docs.jans.io/nightly/cedarling/reference/cedarling-entities/#trusted-issuer) that Cedarling automatically creates at startup.
+- **token_metadata** : (*Object*, *optional*) Tokens metadata in a map of *token name* -> *token metadata*. See [Token Metadata Schema](#token-metadata-schema).
+
+### Token Metadata Schema
+
+The Token Entity Metadata Schema defines how tokens are mapped and validated within Cedarling. It specifies the Cedar entity type for each token, which claim to use as the entity ID, and which claims are required.
+
+```
+{
+  "trusted": true,
+  "entity_type_name": "Acme::Access_token",
+  "token_id": "jti",
+  "required_claims": ["iss", "exp", "some_custom_claim"]
+}
+```
+
+- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
+- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`.
+- `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
+- `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
+
+## Example Policy store
+
+Here is a non-normative example of a `cedarling_store.json` file:
+
+```
+{
+  "cedar_version": "v4.0.0",
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "policy_content": "cedar_policy_encoded_in_base64"
+    }
+  },
+  "schema": "schema_encoded_in_base64",
+  "trusted_issuers": {
+    "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb": {
+      "name": "Google",
+      "description": "Consumer IDP",
+      "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+      "token_metadata": {
+        "access_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Access_token",
+          "token_id": "jti"
+        },
+        "id_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Id_token",
+          "token_id": "jti"
+        },
+        "userinfo_token": {
+          "trusted": true,
+          "entity_type_name": "Jans::Userinfo_token",
+          "token_id": "jti"
+        }
+      }
+    }
+  },
+  "default_entities": {
+    "1694c954f8d9": "eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=",
+    "74d109b20248": "eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119"
+  }
+}
+```
+
+## Multi-Issuer Token Entities
+
+When using the `authorize_multi_issuer` method, Cedarling creates token entities dynamically without requiring predefined User/Workload principals. This section describes how these token entities are structured and made available in policies.
+
+> **⚠️ SCHEMA REQUIREMENT**: Multi-issuer authorization requires specific Cedar schema modifications. Your schema **must** include the multi-issuer token structure or authorization will fail with schema validation errors. See [Schema Requirements](#schema-requirements-for-multi-issuer) below.
+
+### Token Entity Structure
+
+Each validated token in a multi-issuer authorization request becomes a Cedar entity with the following structure:
+
+**Required Attributes** (stored as entity attributes):
+
+- `token_type` (String): The entity type name (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+- `jti` (String): Unique token identifier from JWT
+- `iss?` (TrustedIssuer): JWT issuer claim value (derived from iss to TrustedIssuer); optional when the token has not been verified or the issuer could not be determined.
+- `exp` (Long): Token expiration timestamp
+- `validated_at` (Long): Timestamp when Cedarling validated the token
+
+**Optional Attributes** (JWT claims stored as entity tags):
+
+- All other JWT claims are stored as **entity tags** with `Set<String>` type by default
+- Examples: `scope`, `aud`, `sub`, `client_id`, custom claims
+
+**Complete Example**:
+
+```
+namespace Jans{
+  entity Access_token = {
+    "token_type": String,        // Required: Entity type name
+    "jti": String,               // Required: Token ID
+    "iss": Jans::TrustedIssuer,  // Required: JWT issuer
+    "exp": Long,                 // Required: Expiration
+    "validated_at": Long,        // Required: Validation timestamp
+    // Optional JWT claims (must be optional)
+    "aud"?: String,
+    "iat"?: Long,
+    "scope"?: Set<String>,
+    // ... other claims
+  } tags Set<String>;            // Required: For dynamic claim storage
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+}
+```
+
+**Important Notes**:
+
+- All token entity attributes (except the five required ones) **must be optional** (`?`) to support tokens with varying claim structures
+- JWT claims not defined as attributes are stored as **entity tags** (Set by default)
+- The `tags Set<String>` declaration is required for dynamic JWT claim access
+
+### Accessing Token Claims in Policies
+
+JWT claims are accessed using Cedar's tag syntax:
+
+```
+// Check if token has a claim
+context.tokens.acme_access_token.hasTag("scope")
+
+// Get claim value (returns a Set)
+context.tokens.acme_access_token.getTag("scope")
+
+// Check if Set contains specific value
+context.tokens.acme_access_token.getTag("scope").contains("read:profile")
+```
+
+**Examples of claim access**:
+
+```
+// Single-valued claim (stored as single-element Set)
+context.tokens.acme_access_token.hasTag("sub") &&
+context.tokens.acme_access_token.getTag("sub").contains("user123")
+
+// Multi-valued claim (stored as Set)
+context.tokens.acme_access_token.hasTag("scope") &&
+context.tokens.acme_access_token.getTag("scope").contains("read:profile")
+
+// Audience claim (typically multi-valued)
+context.tokens.acme_access_token.hasTag("aud") &&
+context.tokens.acme_access_token.getTag("aud").contains("my-client-id")
+
+// Custom claim
+context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed")
+```
+
+### Token Collection in Context
+
+Validated tokens are organized into a `tokens` collection in the Cedar context using predictable naming:
+
+```
+entity Tokens = {
+  // Format: {issuer_name}_{token_type}
+  "acme_access_token": Token,           // Access token from Acme
+  "acme_id_token": Token,               // ID token from Acme
+  "google_id_token": Token,             // ID token from Google
+  "dolphin_dolphintoken": Token,  // Custom token type from Dolphin
+  "total_token_count": Long,            // Number of validated tokens
+};
+```
+
+The naming follows this pattern:
+
+- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
+- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
+- Both converted to lowercase with underscores replacing special characters
+
+### Schema Requirements for Multi-Issuer
+
+#### 1. Token Entity Schema
+
+All token entities **must** include these five required attributes and declare tags.
+
+Each trusted issuer gets its own Cedar namespace. The `TrustedIssuer` entity type must be defined in each issuer's namespace separately, since Cedar namespaces are independent. Token entities reference their own namespace's `TrustedIssuer` via the `iss` attribute.
+
+For example, if you have two issuers (Acme and Dolphin), you will have `Acme::TrustedIssuer` and `Dolphin::TrustedIssuer` — each with the same structure but in separate namespaces:
+
+```
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,        // Entity type (e.g., "Acme::Access_token")
+    jti?: String,               // JWT ID - unique token identifier
+    iss?: TrustedIssuer,        // Issuer entity reference
+    exp?: Long,                 // Token expiration timestamp
+    validated_at?: Long,        // Validation timestamp
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,               // Audience
+    iat?: Long,                 // Issued at
+    scope?: Set<String>,        // OAuth scopes
+    client_id?: String,         // Client ID
+    sub?: String,               // Subject
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity id_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: Set<String>,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    acr?: String,
+    amr?: Set<String>,
+    azp?: String,
+    birthdate?: String,
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+
+  entity Userinfo_token = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Optional JWT claims - ALL MUST BE OPTIONAL (?)
+    aud?: String,
+    iat?: Long,
+    sub?: String,
+    email?: Jans::email_address,
+    name?: String,
+    birthdate?: String,
+    phone_number?: String,
+    role?: Set<String>,
+    // Add other claims as needed
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+};
+
+// Dolphin namespace: token entities for the Dolphin IDP.
+// Note: TrustedIssuer is defined again — each namespace needs its own copy.
+namespace Dolphin {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: String,
+    iat?: Long,
+    scope?: Set<String>,
+    // Add other claims as needed
+  } tags Set<String>;
+};
+```
+
+#### 2. Custom Token Types
+
+For custom token types, follow the same pattern:
+
+```
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Dolphin namespace: custom token entities for the Dolphin service.
+namespace Dolphin {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity DolphinToken = {
+    // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+
+    // Custom token-specific attributes (all optional)
+    waiver?: String,
+    location?: String,
+    clearance_level?: Long,
+  } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+};
+```
+
+#### 3. Context Type Schema
+
+The Context type **must** include a `tokens` field:
+
+```
+type Context = {
+  // Standard context fields
+  network?: String,
+  network_type?: String,
+  user_agent?: String,
+  operating_system?: String,
+  device_health?: Set<String>,
+  current_time?: Long,
+  geolocation?: Set<String>,
+  fraud_indicators?: Set<String>,
+
+  // *** REQUIRED FOR MULTI-ISSUER ***
+  tokens?: TokensContext,
+};
+
+type TokensContext = {
+  total_token_count: Long,      // Required field
+  // Individual token fields added dynamically:
+  // Pattern: {issuer_name}_{token_type}
+  // Example: acme_access_token, google_id_token
+};
+```
+
+#### Key Requirements
+
+1. **Required Attributes**: Add `token_type`, `jti`, `iss`, `exp`, `validated_at` to all token entities
+1. **Optional Modifier**: All attributes must be optional (`?`) to support varying token structures
+1. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claims
+1. **Context Update**: Add `tokens?: TokensContext` field to your Context type
+1. **Consistency**: Use the same attribute names across all token entity types
+
+#### Why These Changes Are Required
+
+- **Schema Validation**: Cedar validates all entities against the schema; missing required attributes cause authorization failures
+- **Dynamic Claims**: JWT claims vary by issuer and token type; tags allow flexible claim storage
+- **Context Structure**: Multi-issuer authorization places token entities in `context.tokens.*` which requires schema support
+- **Compatibility**: Optional attributes ensure schema works with both standard and multi-issuer authorization
+
+#### Schema Update Checklist
+
+Before using multi-issuer authorization, verify your schema has:
+
+- Added five required attributes to all token entities (token_type, jti, issuer, exp, validated_at)
+- Made all token entity attributes optional (`?`)
+- Added `tags Set<String>` declaration to all token entities
+- Added `tokens?: TokensContext` field to Context type
+- Defined `TokensContext` type with `total_token_count: Long`
+
+### Policy Examples Using Token Entities
+
+**Simple token validation**:
+
+```
+permit(
+  principal,
+  action == Jans::Action::"Read",
+  resource in Jans::Document
+) when {
+  context has tokens.acme_access_token &&
+  context.tokens.acme_access_token.hasTag("scope") &&
+  context.tokens.acme_access_token.getTag("scope").contains("read:documents")
+};
+```
+
+**Multi-issuer validation**:
+
+```
+permit(
+  principal,
+  action == Trade::Action::"Vote",
+  resource in Trade::Election
+) when {
+  // Require token from trade association
+  context has tokens.trade_association_access_token &&
+  context.tokens.trade_association_access_token.hasTag("member_status") &&
+  context.tokens.trade_association_access_token.getTag("member_status").contains("Corporate Member") &&
+  // AND token from employer
+  context has tokens.company_access_token &&
+  context.tokens.company_access_token.hasTag("employee_id")
+};
+```
+
+**Custom token type**:
+
+```
+permit(
+  principal,
+  action == Acme::Action::"SwimWithDolphin",
+  resource == Acme::Aquarium::"Miami"
+) when {
+  context has tokens.dolphin_dolphintoken &&
+  context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+  context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed") &&
+  context.tokens.dolphin_dolphintoken.hasTag("clearance_level") &&
+  context.tokens.dolphin_dolphintoken.getTag("clearance_level").contains(5)
+};
+```
+
+### Trusted Issuer Configuration for Multi-Issuer
+
+The `name` field in trusted issuer configuration is critical for multi-issuer authorization:
+
+```
+"trusted_issuers": {
+  "acme_issuer_id": {
+    "name": "Acme",  // Used in token collection naming: "acme_access_token" and depict namespace for `TrustedIssuer` cedar type
+    "description": "Acme Corporation IDP",
+    "openid_configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
+    "token_metadata": {
+      "access_token": {
+        "entity_type_name": "Jans::Access_Token",
+        "token_id": "jti"
+      }
+    }
+  },
+  "dolphin_issuer_id": {
+    "name": "Dolphin",  // Used in token collection naming: "dolphin_dolphintoken" and depict namespace for `TrustedIssuer` cedar type
+    "description": "Dolphin Service Provider",
+    "openid_configuration_endpoint": "https://idp.dolphin.sea/.well-known/openid-configuration",
+    "token_metadata": {
+      "dolphin_token": {
+        "entity_type_name": "Acme::DolphinToken",
+        "token_id": "jti"
+      }
+    }
+  }
+}
+```
+
+**Note**: The `name` field ensures predictable and secure token entity naming in the policy evaluation context. And is used as **namespace** for `TrustedIssuer` cedar type.
+
+## Policy and Schema Authoring
+
+You can manually create your Cedar policies and schema in [Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar). Make sure you run the cedar command line tool to validate both your schema and policies.
+
+The easiest way to author your policy store is to use the Policy Designer in [Agama Lab](https://cloud.gluu.org/agama-lab). This tool helps you define the policies, schema and trusted IDPs and to publish a policy store to a Github repository.
+
+### Minimum Cedar Schema
+
+There are no mandatory entity types — your schema depends on which authorization interface you use:
+
+- **`authorize_unsigned`**: Define any principal, resource, and action types your application needs. Entity types and attributes are entirely up to you.
+- **`authorize_multi_issuer`**: Token entities require specific attributes and `tags Set<String>` declaration. See [Schema Requirements for Multi-Issuer](#schema-requirements-for-multi-issuer).
+
+Here is an example of a minimal schema for `authorize_unsigned`:
+
+```
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// MyApp namespace: your business entities.
+namespace MyApp {
+  entity Role;
+  entity User in [Role] = {
+    sub: String,
+    email?: String,
+  };
+
+  entity Document = {
+    owner: String,
+  };
+
+  action "Read" appliesTo {
+    principal: [User, Role],
+    resource: [Document],
+    context: {}
+  };
+};
+```
+
+For `authorize_multi_issuer`, add token entities with the required structure. See the [Multi-Issuer Token Entities](#multi-issuer-token-entities) section for a complete example.
+
+## Note on test fixtures
+
+You will notice that test fixtures in the cedarling code base are quite often in yaml rather than in json.
+
+yaml is intended for **cedarling internal use only**.
+
+The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.

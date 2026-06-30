@@ -1,0 +1,334 @@
+# Getting Started with Cedarling in a Rust app
+
+## Installation
+
+### Building from source
+
+To get started, clone the [Jans](https://github.com/JanssenProject/jans) repository. The source can be found in the \[`jans-cedarling/cedarling`\] directory.
+
+#### Requirements
+
+If you haven't installed Rust yet, follow the official installation guide:
+
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+After installation, restart your terminal or run:
+
+```
+source $HOME/.cargo/env
+```
+
+Verify the installation:
+
+```
+rustc --version
+cargo --version
+```
+
+#### Building
+
+**1. Clone the repository**
+
+```
+git clone https://github.com/JanssenProject/jans.git
+cd jans/jans-cedarling
+```
+
+**2. Build the library**
+
+```
+cargo build --release
+```
+
+**3. Run tests**
+
+```
+cargo test --workspace
+```
+
+**4. Generate documentation**
+
+```
+cargo doc -p cedarling --no-deps --open
+```
+
+## Usage
+
+### Initialization
+
+```
+use cedarling::*;
+
+// Load the bootstrap properties from the environment variable, using default values
+// for unset properties
+let bootstrap_config = BootstrapConfig.from_env();
+
+// Initialize Cedarling
+let cedarling = Cedarling::new(bootstrap_config)
+```
+
+See the [bootstrap properties docs](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) for other config loading options.
+
+### Policy Store Sources
+
+Rust bindings support all policy store source types:
+
+| Source Type                                | Description                      |
+| ------------------------------------------ | -------------------------------- |
+| `PolicyStoreSource::Json(String)`          | Inline JSON policy store         |
+| `PolicyStoreSource::Yaml(String)`          | Inline YAML policy store         |
+| `PolicyStoreSource::FileJson(PathBuf)`     | Local JSON file                  |
+| `PolicyStoreSource::FileYaml(PathBuf)`     | Local YAML file                  |
+| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files |
+| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file         |
+| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL  |
+| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server               |
+| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch) |
+
+**Loading from Bytes:**
+
+For advanced use cases (embedded archives, custom fetch logic):
+
+```
+use cedarling::*;
+
+// Option 1: Via PolicyStoreSource enum (recommended)
+let archive_bytes: Vec<u8> = fetch_archive_with_auth();
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::ArchiveBytes(archive_bytes));
+
+// Option 2: Direct function call
+use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
+let loaded = load_policy_store_archive_bytes(archive_bytes)?;
+```
+
+**Example programmatic configuration:**
+
+```
+use cedarling::*;
+use std::path::PathBuf;
+
+// Load from a directory
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::Directory(
+        PathBuf::from("/path/to/policy-store/")
+    ));
+
+// Load from a local .cjar archive (Cedar Archive)
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::CjarFile(
+        PathBuf::from("/path/to/policy-store.cjar")
+    ));
+
+// Load from a remote .cjar archive (Cedar Archive)
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::CjarUrl(
+        "https://example.com/policy-store.cjar".to_string()
+    ));
+```
+
+See [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for more details.
+
+### Authorization
+
+Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
+
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+
+#### Token-Based Authorization (Multi-Issuer)
+
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities.
+
+**1. Prepare tokens**
+
+```
+use cedarling::TokenInput;
+
+let tokens = vec![
+    TokenInput::new("Jans::Access_token".to_string(), access_token_jwt),
+    TokenInput::new("Jans::Id_token".to_string(), id_token_jwt),
+];
+```
+
+**2. Define the resource**
+
+```
+use std::collections::HashMap;
+use serde_json::json;
+
+let resource = EntityData {
+  cedar_mapping: CedarEntityMapping {
+    entity_type: "Jans::Application".to_string(),
+    id: "app_id_001".to_string(),
+  },
+  attributes: HashMap::from_iter([
+    ("protocol".to_string(), json!("https")),
+    ("host".to_string(), json!("example.com")),
+    ("path".to_string(), json!("/admin-dashboard")),
+  ]),
+};
+```
+
+**3. Define the action**
+
+```
+let action = r#"Jans::Action::"Read""#.to_string();
+```
+
+**4. Define Context (optional)**
+
+```
+use serde_json::json;
+
+let context = json!({});
+```
+
+**5. Build and execute the request**
+
+```
+use cedarling::AuthorizeMultiIssuerRequest;
+
+let request = AuthorizeMultiIssuerRequest {
+    tokens,
+    action,
+    resource,
+    context: Some(context),
+};
+
+let result = cedarling.authorize_multi_issuer(request).await?;
+
+match result.decision {
+    true => println!("Access granted"),
+    false => println!("Access denied"),
+}
+```
+
+See [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+
+#### Unsigned Authorization
+
+In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — pass `None` to evaluate the request with partial evaluation.
+
+**1. Define the Principal**
+
+```
+use cedarling::*;
+use std::collections::HashMap;
+use serde_json::json;
+
+let principal = Some(EntityData {
+  cedar_mapping: CedarEntityMapping {
+    entity_type: "Jans::User".to_string(),
+    id: "random_user_id".to_string(),
+  },
+  attributes: HashMap::from_iter([
+    ("role".to_string(), json!(["admin", "manager"])),
+  ]),
+});
+```
+
+**2. Define the Resource**
+
+This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+
+```
+use std::collections::HashMap;
+use serde_json::json;
+
+let resource = EntityData {
+  cedar_mapping: CedarEntityMapping {
+    entity_type: "Jans::Application".to_string(),
+    id: "app_id_001".to_string(),
+  },
+  attributes: HashMap::from_iter([
+    ("protocol".to_string(), json!("https")),
+    ("host".to_string(), json!("example.com")),
+    ("path".to_string(), json!("/admin-dashboard")),
+  ]),
+}
+```
+
+**3. Define the Action**
+
+An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+
+```
+let action = r#"Jans::Action::"Read""#.to_string();
+```
+
+**4. Define the Context**
+
+The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+
+```
+use std::time::{SystemTime, UNIX_EPOCH};
+use serde_json::json;
+
+let context = json!({
+    "current_time": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
+    "device_health": ["Healthy"],
+    "fraud_indicators": ["Allowed"],
+    "geolocation": ["America"],
+    "network": "127.0.0.1",
+    "network_type": "Local",
+    "operating_system": "Linux",
+    "user_agent": "Linux"
+});
+```
+
+**5. Build the Request**
+
+Now you'll construct the ***request*** by including the *principal*, *action*, and *context*.
+
+```
+use std::collections::HashMap;
+
+let request = RequestUnsigned {
+    principal,
+    action,
+    resource,
+    context,
+};
+```
+
+**6. Perform Authorization**
+
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
+
+```
+let result = cedarling.authorize_unsigned(request).await?;
+
+match result.decision {
+    true => println!("Access granted"),
+    false => println!("Access denied: {:?}", result.diagnostics),
+}
+```
+
+### Logging
+
+The logs could be retrieved using the `pop_logs` function.
+
+```
+let logs = cedarling.pop_logs();
+println!("{:#?}", logs);
+```
+
+For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/index.md).
+
+## Example
+
+Refer to [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/#complete-example) for a complete code example.
+
+## Defined API
+
+Please refer to [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/#api-reference).
+
+## See Also
+
+- [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/index.md)
+- [Cedarling TBAC quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity)
+- [Cedarling Sidecar Tutorial](https://docs.jans.io/nightly/cedarling/developer/sidecar/cedarling-sidecar-tutorial/index.md)
