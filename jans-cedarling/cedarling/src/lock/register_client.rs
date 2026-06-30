@@ -94,11 +94,11 @@ pub(super) struct ClientCredentials {
 #[derive(Debug, Error)]
 pub enum ClientRegistrationError {
     #[error("failed to get openid config: {0}")]
-    GetOpenidConfig(#[source] http_utils::HttpRequestError),
+    GetOpenidConfig(#[source] crate::http_utils::HttpRequestError),
     #[error("failed to register lock client: {0}")]
-    RegisterLockClient(#[source] http_utils::HttpRequestError),
+    RegisterLockClient(#[source] crate::http_utils::HttpRequestError),
     #[error("failed to get access token: {0}")]
-    GetAccessToken(#[source] http_utils::HttpRequestError),
+    GetAccessToken(#[source] crate::http_utils::HttpRequestError),
     #[error("failed to initialize HTTP client: {0}")]
     InitializeHttpClient(#[from] InitializeHttpClientError),
 }

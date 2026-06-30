@@ -28,7 +28,7 @@ use crate::{
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
-use http_utils::Backoff;
+use crate::http_utils::Backoff;
 
 use crate::http::spawn_task;
 

@@ -499,9 +499,10 @@ fn load_policy_store_from_archive_bytes(
     use crate::common::policy_store::loader;
 
     // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation).map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
-    })?;
+    let loaded =
+        loader::load_policy_store_archive_bytes(bytes, strict_schema_validation).map_err(|e| {
+            PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
+        })?;
 
     // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
