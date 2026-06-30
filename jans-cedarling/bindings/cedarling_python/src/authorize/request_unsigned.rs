@@ -10,6 +10,7 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
+use std::sync::OnceLock;
 
 /// RequestUnsigned
 /// =======
@@ -32,15 +33,21 @@ use serde_pyobject::from_pyobject;
 /// # Create a request for authorization
 /// request = RequestUnsigned(principal=principal, action="read", resource=resource, context={})
 /// ```
-#[pyclass(get_all, set_all)]
+#[pyclass]
 pub struct RequestUnsigned {
+    #[pyo3(get, set)]
     pub principal: Option<EntityData>,
     /// cedar_policy action
+    #[pyo3(get, set)]
     pub action: String,
     /// cedar_policy resource data
+    #[pyo3(get, set)]
     pub resource: EntityData,
     /// context to be used in cedar_policy
+    #[pyo3(get, set)]
     pub context: Py<PyDict>,
+    /// Sticky cache of `context` deserialized to `serde_json::Value`; populated on first `to_cedarling()` call so subsequent calls skip the PyDict→Value round-trip.
+    cached_context: OnceLock<serde_json::Value>,
 }
 
 #[pymethods]
@@ -58,6 +65,7 @@ impl RequestUnsigned {
             action,
             resource,
             context,
+            cached_context: OnceLock::new(),
         }
     }
 }
@@ -66,12 +74,18 @@ impl RequestUnsigned {
     pub fn to_cedarling(&self) -> Result<cedarling::RequestUnsigned, PyErr> {
         let principal = self.principal.clone().map(|p| p.into());
 
-        let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
-            let context = self.context.clone_ref(py).into_bound(py);
-            from_pyobject(context).map_err(|err| {
-                PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
-            })
-        })?;
+        let context = if let Some(cached) = self.cached_context.get() {
+            cached.clone()
+        } else {
+            let value = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
+                let ctx = self.context.clone_ref(py).into_bound(py);
+                from_pyobject(ctx).map_err(|err| {
+                    PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
+                })
+            })?;
+            let _ = self.cached_context.set(value.clone());
+            value
+        };
 
         Ok(cedarling::RequestUnsigned {
             principal,
