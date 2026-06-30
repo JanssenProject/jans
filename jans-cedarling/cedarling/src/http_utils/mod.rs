@@ -241,7 +241,10 @@ impl Sender {
             .await
             .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
         serde_json::from_slice::<T>(&bytes).map_err(|e| {
-            HttpRequestError::new(HttpRequestReasonError::DeserializeBytesToJson(e), Some(status))
+            HttpRequestError::new(
+                HttpRequestReasonError::DeserializeBytesToJson(e),
+                Some(status),
+            )
         })
     }
 
@@ -268,7 +271,10 @@ impl Sender {
             .await
             .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
         serde_json::from_slice::<T>(&bytes).map_err(|e| {
-            HttpRequestError::new(HttpRequestReasonError::DeserializeBytesToJson(e), Some(status))
+            HttpRequestError::new(
+                HttpRequestReasonError::DeserializeBytesToJson(e),
+                Some(status),
+            )
         })
     }
 
@@ -329,14 +335,15 @@ pub(crate) async fn read_response_capped(
             .bytes()
             .await
             .map_err(HttpRequestReasonError::DecodeResponseBytes)?;
-        if let Some(limit) = max_response_size {
-            if (bytes.len() as u64) > limit {
-                return Err(HttpRequestReasonError::ResponseTooLarge {
-                    limit,
-                    read_so_far: bytes.len() as u64,
-                });
-            }
+        if let Some(limit) = max_response_size
+            && (bytes.len() as u64) > limit
+        {
+            return Err(HttpRequestReasonError::ResponseTooLarge {
+                limit,
+                read_so_far: bytes.len() as u64,
+            });
         }
+
         Ok(bytes.to_vec())
     }
 
@@ -425,10 +432,8 @@ mod tests {
                     },
                 }
             }
-            sock.write_all(
-                b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n",
-            )
-            .expect("write headers");
+            sock.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n")
+                .expect("write headers");
             sock.flush().expect("flush headers");
             // Far fewer than the advertised 1000 bytes, then drop = close.
             let _ = sock.write_all(b"partial");
@@ -457,8 +462,7 @@ mod tests {
         );
 
         // Cross-check the negative directions on stable error variants.
-        let max_retries =
-            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
+        let max_retries = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
         assert!(
             !max_retries.is_decode_error(),
             "MaxRetriesExceeded must not satisfy is_decode_error() — the three classifiers are mutually exclusive",
@@ -468,8 +472,7 @@ mod tests {
             "MaxRetriesExceeded variant must satisfy is_max_retries_exceeded()",
         );
 
-        let status =
-            HttpRequestError::new(HttpRequestReasonError::HttpStatusError, None);
+        let status = HttpRequestError::new(HttpRequestReasonError::HttpStatusError, None);
         assert!(
             !status.is_decode_error(),
             "HttpStatusError must not satisfy is_decode_error() — they classify different failure modes",
