@@ -17,11 +17,25 @@ tags:
 **Prerequisites**
 
 - Java Development Kit (JDK): version 11 or higher
+- A GitHub Personal Access Token (PAT) with `read:packages` scope
 
-To use Cedarling Java bindings in Java Maven Project add following
-`repository` and `dependency` in pom.xml of the project.
+GitHub Packages requires authentication even for public packages. Add your credentials to ~/.m2/settings.xml (outside the project — never commit this file). The <id> must match the repository <id> used in pom.xml:
 
-```declarative
+```xml
+<settings>
+    <servers>
+        <server>
+            <id>jans</id>
+            <username>YOUR_GITHUB_USERNAME</username>
+            <password>YOUR_GITHUB_PAT</password>
+        </server>
+    </servers>
+</settings>
+```
+Generate a PAT at GitHub → Settings → Developer settings → Personal access tokens and enable the read:packages scope.
+Then add the following repository and dependency to your project's pom.xml:
+
+```xml
 <repositories>
     <repository>
         <id>jans</id>
@@ -31,17 +45,27 @@ To use Cedarling Java bindings in Java Maven Project add following
 </repositories>
 ```
 
-```declarative
+```xml
 <dependency>
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>{latest-jans-stable-version}</version>
+    <version>2.2.0</version>
 </dependency>
 ```
+
+> Replace `2.2.0` with the [latest stable Jans release](https://github.com/JanssenProject/jans/releases).
 
 ### Building from Source
 
 Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
+
+!!! info "Note"
+
+    The Cedarling dependency available in the GitHub Maven Registry works only in a 
+    Linux environment.
+
+    Refer to the following guide for instructions on building the Java bindings to work 
+    on macOS or Windows.
 
 ## Usage
 

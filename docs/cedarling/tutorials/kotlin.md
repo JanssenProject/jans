@@ -56,7 +56,15 @@ After editing `build.gradle.kts`, click **Load Gradle Changes** in IntelliJ (or 
 
 ### Building from Source
 
-Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Kotlin binding from source.
+The same Cedarling java binding dependency is used here. Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
+
+!!! info "Note"
+    
+    The Cedarling dependency available in the GitHub Maven Registry works only in a 
+    Linux environment.
+
+    Refer to the following guide for instructions on building the Java bindings to work 
+    on macOS or Windows.
 
 ---
 
@@ -99,7 +107,7 @@ val adapter = try {
 
 ### Policy Store Sources
 
-Kotlin bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options and [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for format details.
+Java bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options and [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for format details.
 
 **Example configurations:**
 
