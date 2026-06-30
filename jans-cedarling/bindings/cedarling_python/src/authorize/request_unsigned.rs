@@ -44,7 +44,10 @@ pub struct RequestUnsigned {
     #[pyo3(get, set)]
     pub resource: EntityData,
     /// context to be used in cedar_policy
-    #[pyo3(get, set)]
+    /// (custom setter below clears `cached_context` on assignment; in-place
+    /// edits like `req.context["k"] = v` are NOT detected and leave the cache
+    /// stale — re-assign the field or rebuild the request after in-place edits).
+    #[pyo3(get)]
     pub context: Py<PyDict>,
     /// Sticky cache of `context` deserialized to `serde_json::Value`; populated on first `to_cedarling()` call so subsequent calls skip the PyDict→Value round-trip.
     cached_context: OnceLock<serde_json::Value>,
@@ -67,6 +70,13 @@ impl RequestUnsigned {
             context,
             cached_context: OnceLock::new(),
         }
+    }
+
+    /// Setter that clears the deserialized cache so the next `to_cedarling()` re-reads the new dict.
+    #[setter]
+    fn set_context(&mut self, value: Py<PyDict>) {
+        self.context = value;
+        self.cached_context = OnceLock::new();
     }
 }
 

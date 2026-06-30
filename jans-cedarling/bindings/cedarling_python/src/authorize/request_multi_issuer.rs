@@ -44,7 +44,10 @@ use std::sync::OnceLock;
 #[pyclass]
 pub struct AuthorizeMultiIssuerRequest {
     /// List of TokenInput objects
-    #[pyo3(get, set)]
+    /// (custom setter below clears `cached_tokens` on assignment; in-place
+    /// edits like `req.tokens.append(t)` are NOT detected and leave the cache
+    /// stale — re-assign the field or rebuild the request after in-place edits).
+    #[pyo3(get)]
     pub tokens: Vec<TokenInput>,
     /// cedar_policy resource data
     #[pyo3(get, set)]
@@ -53,7 +56,9 @@ pub struct AuthorizeMultiIssuerRequest {
     #[pyo3(get, set)]
     pub action: String,
     /// Optional context to be used in cedar_policy
-    #[pyo3(get, set)]
+    /// (custom setter below clears `cached_context` on assignment; in-place
+    /// edits to the dict are NOT detected — re-assign or rebuild after them).
+    #[pyo3(get)]
     pub context: Option<Py<PyDict>>,
     /// Sticky cache of `tokens` converted to `cedarling::TokenInput`; avoids the per-call wrapper walk + Vec realloc for  JWT payloads.
     cached_tokens: OnceLock<Vec<cedarling::TokenInput>>,
@@ -79,6 +84,20 @@ impl AuthorizeMultiIssuerRequest {
             cached_tokens: OnceLock::new(),
             cached_context: OnceLock::new(),
         }
+    }
+
+    /// Setter that clears the cached converted Vec so the next `to_cedarling()` re-walks the new list.
+    #[setter]
+    fn set_tokens(&mut self, value: Vec<TokenInput>) {
+        self.tokens = value;
+        self.cached_tokens = OnceLock::new();
+    }
+
+    /// Setter that clears the deserialized cache so the next `to_cedarling()` re-reads the new dict.
+    #[setter]
+    fn set_context(&mut self, value: Option<Py<PyDict>>) {
+        self.context = value;
+        self.cached_context = OnceLock::new();
     }
 }
 
