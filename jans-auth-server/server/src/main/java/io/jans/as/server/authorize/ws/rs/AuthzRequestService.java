@@ -572,6 +572,7 @@ public class AuthzRequestService {
     public void createRedirectUriResponse(AuthzRequest authzRequest) {
         RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
         redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+        redirectUriResponse.setAppConfiguration(appConfiguration);
 
         authzRequest.setRedirectUriResponse(redirectUriResponse);
     }
