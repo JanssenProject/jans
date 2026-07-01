@@ -40,13 +40,13 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "inum", ignoreDuringUpdate = true)
 	private String inum;
 
-	@JsonProperty("creationDate")
+	@JsonProperty("creation_date")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
 	@Schema(description = "Creation date of the entry", example = "2024-04-21T17:25:43-05:00")
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-	@JsonProperty("eventTime")
+	@JsonProperty("event_time")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
 	@Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
 	@AttributeName(name = "eventTime")
@@ -57,7 +57,7 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "jansService")
 	private String service;
 
-	@JsonProperty("nodeName")
+	@JsonProperty("node_name")
 	@Schema(description = "Node name or identifier", example = "1")
 	@AttributeName(name = "jansNodeName")
 	private String nodeName;
@@ -68,6 +68,7 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	private String status;
 
 	// Details: cedarEngineStatus, cedarPolicyStatus, tokenDataStatus. etc..
+	@JsonProperty("engine_status")
 	@JsonObject
 	@AttributeName(name = "engineStatus")
 	private Map<String, String> engineStatus;
