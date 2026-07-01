@@ -43,10 +43,8 @@ use std::sync::OnceLock;
 /// ```
 #[pyclass]
 pub struct AuthorizeMultiIssuerRequest {
-    /// List of TokenInput objects
-    /// (custom setter below clears `cached_tokens` on assignment; in-place
-    /// edits like `req.tokens.append(t)` are NOT detected and leave the cache
-    /// stale — re-assign the field or rebuild the request after in-place edits).
+    /// List of TokenInput objects. Getter materializes a fresh Python list, so
+    /// `req.tokens.append(t)` is silently discarded — reassign to mutate.
     #[pyo3(get)]
     pub tokens: Vec<TokenInput>,
     /// cedar_policy resource data
@@ -55,14 +53,12 @@ pub struct AuthorizeMultiIssuerRequest {
     /// cedar_policy action
     #[pyo3(get, set)]
     pub action: String,
-    /// Optional context to be used in cedar_policy
-    /// (custom setter below clears `cached_context` on assignment; in-place
-    /// edits to the dict are NOT detected — re-assign or rebuild after them).
-    #[pyo3(get)]
+    /// Optional context dict. Getter returns a MappingProxyType view — in-place edits
+    /// raise TypeError; reassign to replace and refresh the cache.
     pub context: Option<Py<PyDict>>,
-    /// Sticky cache of `tokens` converted to `cedarling::TokenInput`; avoids the per-call wrapper walk + Vec realloc for  JWT payloads.
+    /// Sticky cache of `tokens` converted to `cedarling::TokenInput`.
     cached_tokens: OnceLock<Vec<cedarling::TokenInput>>,
-    /// Sticky cache of `context` deserialized
+    /// Sticky cache of `context` deserialized.
     cached_context: OnceLock<Option<serde_json::Value>>,
 }
 
@@ -86,14 +82,27 @@ impl AuthorizeMultiIssuerRequest {
         }
     }
 
-    /// Setter that clears the cached converted Vec so the next `to_cedarling()` re-walks the new list.
+    /// Setter clears the cached converted Vec.
     #[setter]
     fn set_tokens(&mut self, value: Vec<TokenInput>) {
         self.tokens = value;
         self.cached_tokens = OnceLock::new();
     }
 
-    /// Setter that clears the deserialized cache so the next `to_cedarling()` re-reads the new dict.
+    /// Read-only view over the context dict; mutation raises TypeError.
+    #[getter]
+    fn context(&self, py: Python) -> PyResult<Option<Py<PyAny>>> {
+        match &self.context {
+            Some(ctx) => {
+                let proxy_cls = py.import("types")?.getattr("MappingProxyType")?;
+                let proxy = proxy_cls.call1((ctx.clone_ref(py),))?;
+                Ok(Some(proxy.unbind()))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Setter clears the deserialized cache.
     #[setter]
     fn set_context(&mut self, value: Option<Py<PyDict>>) {
         self.context = value;
