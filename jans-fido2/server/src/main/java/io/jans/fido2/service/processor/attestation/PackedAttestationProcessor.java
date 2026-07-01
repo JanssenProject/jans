@@ -154,8 +154,11 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
 					"Packed attestation certificate must be version 3");
 		}
-		// getBasicConstraints() returns -1 when the certificate is not a CA (CA component false/absent).
-		if (attestationCertificate.getBasicConstraints() != -1) {
+		// The Basic Constraints extension MUST be present with the CA component set to false.
+		// getBasicConstraints() returns -1 for both CA=false and an absent extension, so the
+		// presence of the extension (OID 2.5.29.19) is verified explicitly as well.
+		if (attestationCertificate.getExtensionValue("2.5.29.19") == null
+				|| attestationCertificate.getBasicConstraints() != -1) {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
 					"Packed attestation certificate BasicConstraints CA component must be false");
 		}
@@ -199,7 +202,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
 	private boolean isValidCountryCode(String country) {
 		return (country != null) && (country.length() == 2)
-				&& Arrays.asList(Locale.getISOCountries()).contains(country.toUpperCase());
+				&& Arrays.asList(Locale.getISOCountries()).contains(country.toUpperCase(Locale.ROOT));
 	}
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {

@@ -66,6 +66,10 @@ class PackedAttestationProcessorCertRequirementsTest {
     }
 
     private X509Certificate buildCertificate(String subjectDn, boolean isCa) throws Exception {
+        return buildCertificate(subjectDn, new BasicConstraints(isCa));
+    }
+
+    private X509Certificate buildCertificate(String subjectDn, BasicConstraints basicConstraints) throws Exception {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         kpg.initialize(new ECGenParameterSpec("secp256r1"));
         KeyPair keyPair = kpg.generateKeyPair();
@@ -74,7 +78,10 @@ class PackedAttestationProcessorCertRequirementsTest {
         Date notAfter = new Date(System.currentTimeMillis() + 3600_000L);
         JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
                 subject, BigInteger.ONE, notBefore, notAfter, subject, keyPair.getPublic());
-        builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+        // A null value builds a certificate without the Basic Constraints extension.
+        if (basicConstraints != null) {
+            builder.addExtension(Extension.basicConstraints, true, basicConstraints);
+        }
         String bc = SecurityProviderUtility.getBCProviderName();
         ContentSigner signer = new JcaContentSignerBuilder("SHA256withECDSA").setProvider(bc).build(keyPair.getPrivate());
         return new JcaX509CertificateConverter().setProvider(bc).getCertificate(builder.build(signer));
@@ -100,6 +107,18 @@ class PackedAttestationProcessorCertRequirementsTest {
     @Test
     void verifyPackedAttestationCertRequirements_ifCertificateIsCa_rejected() throws Exception {
         X509Certificate cert = buildCertificate(VALID_SUBJECT, true);
+        stubError();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> packedAttestationProcessor.verifyPackedAttestationCertRequirements(cert));
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyPackedAttestationCertRequirements_ifBasicConstraintsAbsent_rejected() throws Exception {
+        // getBasicConstraints() returns -1 for a missing extension too, so a cert without
+        // Basic Constraints must still be rejected.
+        X509Certificate cert = buildCertificate(VALID_SUBJECT, (BasicConstraints) null);
         stubError();
 
         WebApplicationException ex = assertThrows(WebApplicationException.class,
