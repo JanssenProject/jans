@@ -43,13 +43,10 @@ pub struct RequestUnsigned {
     /// cedar_policy resource data
     #[pyo3(get, set)]
     pub resource: EntityData,
-    /// context to be used in cedar_policy
-    /// (custom setter below clears `cached_context` on assignment; in-place
-    /// edits like `req.context["k"] = v` are NOT detected and leave the cache
-    /// stale — re-assign the field or rebuild the request after in-place edits).
-    #[pyo3(get)]
+    /// Context dict. Getter returns a MappingProxyType view — in-place edits
+    /// raise TypeError; reassign (`req.context = {...}`) to replace and refresh the cache.
     pub context: Py<PyDict>,
-    /// Sticky cache of `context` deserialized to `serde_json::Value`; populated on first `to_cedarling()` call so subsequent calls skip the PyDict→Value round-trip.
+    /// Sticky cache of `context` deserialized; populated on first `to_cedarling()` call.
     cached_context: OnceLock<serde_json::Value>,
 }
 
@@ -72,7 +69,15 @@ impl RequestUnsigned {
         }
     }
 
-    /// Setter that clears the deserialized cache so the next `to_cedarling()` re-reads the new dict.
+    /// Read-only view over the context dict; mutation raises TypeError.
+    #[getter]
+    fn context(&self, py: Python) -> PyResult<Py<PyAny>> {
+        let proxy_cls = py.import("types")?.getattr("MappingProxyType")?;
+        let proxy = proxy_cls.call1((self.context.clone_ref(py),))?;
+        Ok(proxy.unbind())
+    }
+
+    /// Setter clears the deserialized cache.
     #[setter]
     fn set_context(&mut self, value: Py<PyDict>) {
         self.context = value;
