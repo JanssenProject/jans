@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.kerby.asn1.type.Asn1OctetString;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -128,7 +129,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 			log.debug("cborPublicKey {}", cborPublicKey);
 		} catch (IOException e) {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM + ": " + e.getMessage());
+					TPM_ATTESTATION_PROBLEM + ": " + e.getMessage(), e);
 		}
 
 		verifyVersion2(attStmt);
@@ -310,11 +311,34 @@ public class TPMProcessor implements AttestationFormatProcessor {
 	}
 
 	private void verifyTPMCertificateExtenstion(X509Certificate aikCertificate, AuthData authData) {
-		byte[] ext = aikCertificate.getExtensionValue("1 3 6 1 4 1 45724 1 1 4");
-		if (ext != null && ext.length > 0 && !Arrays.equals(authData.getAaguid(), ext)) {
-			log.error("authData.getAaguid() :{} and ext : {}", authData.getAaguid(), ext);
+		// id-fido-gen-ce-aaguid (1.3.6.1.4.1.45724.1.1.4)
+		byte[] ext = aikCertificate.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
+		if (ext != null && ext.length > 0) {
+			byte[] aaguid = decodeAaguidExtension(ext);
+			if (!Arrays.equals(authData.getAaguid(), aaguid)) {
+				log.error("authData.getAaguid() :{} and ext aaguid : {}", authData.getAaguid(), aaguid);
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+						TPM_ATTESTATION_PROBLEM + " : verifyTPMCertificateExtenstion");
+			}
+		}
+	}
+
+	/**
+	 * The id-fido-gen-ce-aaguid extension value returned by
+	 * {@link X509Certificate#getExtensionValue(String)} is the DER-encoded
+	 * extnValue OCTET STRING, whose content is itself a DER-encoded OCTET STRING
+	 * wrapping the raw 16-byte AAGUID. Both layers must be decoded before comparing.
+	 */
+	private byte[] decodeAaguidExtension(byte[] extensionValue) {
+		try {
+			Asn1OctetString extensionEnvelope = new Asn1OctetString();
+			extensionEnvelope.decode(extensionValue);
+			Asn1OctetString aaguidOctetString = new Asn1OctetString();
+			aaguidOctetString.decode(extensionEnvelope.getValue());
+			return aaguidOctetString.getValue();
+		} catch (IOException | RuntimeException e) {
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					TPM_ATTESTATION_PROBLEM + " : verifyTPMCertificateExtenstion");
+					TPM_ATTESTATION_PROBLEM + " : unable to parse AAGUID extension", e);
 		}
 	}
 

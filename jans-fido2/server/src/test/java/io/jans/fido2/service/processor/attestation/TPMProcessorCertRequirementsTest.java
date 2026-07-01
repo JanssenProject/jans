@@ -12,11 +12,13 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.security.auth.x500.X500Principal;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,6 +122,28 @@ class TPMProcessorCertRequirementsTest {
         WebApplicationException res = assertThrows(WebApplicationException.class,
                 () -> tpmProcessor.verifyTpmAttestationCertRequirements(aikCertificate));
         assertResponse(res);
+    }
+
+    @Test
+    void verifyTpmAttestationCertRequirements_certificateParsingException_propagatesCause() throws Exception {
+        X509Certificate aikCertificate = mock(X509Certificate.class);
+        when(aikCertificate.getVersion()).thenReturn(3);
+        when(aikCertificate.getSubjectX500Principal()).thenReturn(new X500Principal(""));
+        when(aikCertificate.getBasicConstraints()).thenReturn(-1);
+        CertificateParsingException parsingException = new CertificateParsingException("malformed extension");
+        when(aikCertificate.getExtendedKeyUsage()).thenThrow(parsingException);
+        when(errorResponseFactory.badRequestException(any(AttestationErrorResponseType.class), anyString(),
+                any(Throwable.class)))
+                .thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
+
+        WebApplicationException res = assertThrows(WebApplicationException.class,
+                () -> tpmProcessor.verifyTpmAttestationCertRequirements(aikCertificate));
+        assertResponse(res);
+
+        ArgumentCaptor<Throwable> causeCaptor = ArgumentCaptor.forClass(Throwable.class);
+        verify(errorResponseFactory).badRequestException(any(AttestationErrorResponseType.class), anyString(),
+                causeCaptor.capture());
+        org.junit.jupiter.api.Assertions.assertSame(parsingException, causeCaptor.getValue());
     }
 
     private void stubBadRequest() {
