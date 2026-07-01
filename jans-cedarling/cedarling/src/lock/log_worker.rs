@@ -14,7 +14,7 @@ use crate::log::LoggerWeak;
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
 use futures::channel::mpsc;
-use http_utils::Backoff;
+use crate::http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
