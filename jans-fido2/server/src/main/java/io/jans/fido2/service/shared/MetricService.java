@@ -214,16 +214,21 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Common method to record registration metrics
      */
-    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime, 
+    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
                                         String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // Capture request-derived data (IP, User-Agent, device info) on the request thread.
+        // The injected @Context HttpServletRequest is a thread-bound proxy and cannot be read
+        // from the async task below, so it must be resolved synchronously first.
+        RequestData requestData = extractRequestData(request);
+
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
+                recordDetailedMetrics(username, status, requestData, startTime, authenticatorType, errorReason,
                                     this::createRegistrationMetricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
@@ -272,16 +277,21 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Common method to record authentication metrics
      */
-    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime, 
+    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime,
                                           String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // Capture request-derived data (IP, User-Agent, device info) on the request thread.
+        // The injected @Context HttpServletRequest is a thread-bound proxy and cannot be read
+        // from the async task below, so it must be resolved synchronously first.
+        RequestData requestData = extractRequestData(request);
+
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_AUTHENTICATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
+                recordDetailedMetrics(username, status, requestData, startTime, authenticatorType, errorReason,
                                     this::createAuthenticationMetricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
@@ -304,11 +314,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Record detailed metrics with device info collection
      */
-    private void recordDetailedMetrics(String username, String status, HttpServletRequest request, long startTime, 
-                                     String authenticatorType, String errorReason, 
+    private void recordDetailedMetrics(String username, String status, RequestData requestData, long startTime,
+                                     String authenticatorType, String errorReason,
                                      MetricsDataCreator dataCreator) {
         if (appConfiguration.isFido2DeviceInfoCollection()) {
-            Fido2MetricsData metricsData = dataCreator.create(username, status, request, authenticatorType);
+            Fido2MetricsData metricsData = dataCreator.create(username, status, requestData, authenticatorType);
             
             if (!ATTEMPT_STATUS.equals(status)) {
                 long duration = System.currentTimeMillis() - startTime;
@@ -336,7 +346,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     @FunctionalInterface
     private interface MetricsDataCreator {
-        Fido2MetricsData create(String username, String status, HttpServletRequest request, String authenticatorType);
+        Fido2MetricsData create(String username, String status, RequestData requestData, String authenticatorType);
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
@@ -389,21 +399,21 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Create registration metrics data object
      */
-    private Fido2MetricsData createRegistrationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("REGISTRATION", username, status, request, authenticatorType);
+    private Fido2MetricsData createRegistrationMetricsData(String username, String status, RequestData requestData, String authenticatorType) {
+        return createMetricsData("REGISTRATION", username, status, requestData, authenticatorType);
     }
 
     /**
      * Create authentication metrics data object
      */
-    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("AUTHENTICATION", username, status, request, authenticatorType);
+    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, RequestData requestData, String authenticatorType) {
+        return createMetricsData("AUTHENTICATION", username, status, requestData, authenticatorType);
     }
 
     /**
      * Common method to create metrics data objects
      */
-    private Fido2MetricsData createMetricsData(String operationType, String username, String status, HttpServletRequest request, String authenticatorType) {
+    private Fido2MetricsData createMetricsData(String operationType, String username, String status, RequestData requestData, String authenticatorType) {
         Fido2MetricsData metricsData = new Fido2MetricsData();
         metricsData.setOperationType(operationType);
         metricsData.setOperationStatus(status);
@@ -424,31 +434,16 @@ public class MetricService extends io.jans.service.metric.MetricService {
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
         
-        // Extract HTTP request details
-        if (request != null) {
-            try {
-                // Extract IP address - check proxy headers first, then fall back to remote address
-                String ipAddress = extractIpAddress(request);
-                metricsData.setIpAddress(ipAddress);
-                
-                // Extract User-Agent header
-                String userAgent = request.getHeader("User-Agent");
-                metricsData.setUserAgent(userAgent);
-            } catch (Exception e) {
-                log.debug("Failed to extract request details: {}", e.getMessage());
-            }
-            
-            // Extract device info if enabled
-            if (appConfiguration.isFido2DeviceInfoCollection()) {
-                try {
-                    metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
-                } catch (Exception e) {
-                    log.debug("Failed to extract device info: {}", e.getMessage());
-                    metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
-                }
+        // Populate HTTP request details captured on the request thread (see extractRequestData).
+        // These values must not be read from the async task via the HttpServletRequest proxy.
+        if (requestData != null) {
+            metricsData.setIpAddress(requestData.getIpAddress());
+            metricsData.setUserAgent(requestData.getUserAgent());
+            if (requestData.getDeviceInfo() != null) {
+                metricsData.setDeviceInfo(requestData.getDeviceInfo());
             }
         }
-        
+
         // Set node identifier (for cluster environments) - only if available
         try {
             String nodeId = networkService.getMacAdress();
@@ -460,8 +455,77 @@ public class MetricService extends io.jans.service.metric.MetricService {
         }
         
         // Note: applicationType is not set as it's always "FIDO2" and redundant
-        
+
         return metricsData;
+    }
+
+    /**
+     * Capture request-derived data (client IP, User-Agent and device info) from the HTTP request.
+     *
+     * <p>This MUST be invoked on the request-handling thread. The injected
+     * {@code @Context HttpServletRequest} is a thread-bound proxy that resolves the active request
+     * from the current thread, so it cannot be read from the asynchronous tasks used to store
+     * metrics. Reading it there previously left ipAddress/userAgent/deviceInfo null, which caused
+     * them to be dropped from the metrics API response (fields use {@code @JsonInclude(NON_NULL)}).
+     *
+     * @param request HTTP servlet request (may be null)
+     * @return immutable holder with the extracted values (never null; fields may be null)
+     */
+    private RequestData extractRequestData(HttpServletRequest request) {
+        if (request == null) {
+            return new RequestData(null, null, null);
+        }
+
+        String ipAddress = null;
+        String userAgent = null;
+        try {
+            // Extract IP address - check proxy headers first, then fall back to remote address
+            ipAddress = extractIpAddress(request);
+            // Extract User-Agent header
+            userAgent = request.getHeader("User-Agent");
+        } catch (Exception e) {
+            log.debug("Failed to extract request details: {}", e.getMessage());
+        }
+
+        Fido2MetricsData.DeviceInfo deviceInfo = null;
+        if (appConfiguration.isFido2DeviceInfoCollection()) {
+            try {
+                deviceInfo = deviceInfoExtractor.extractDeviceInfo(request);
+            } catch (Exception e) {
+                log.debug("Failed to extract device info: {}", e.getMessage());
+                deviceInfo = deviceInfoExtractor.createMinimalDeviceInfo();
+            }
+        }
+
+        return new RequestData(ipAddress, userAgent, deviceInfo);
+    }
+
+    /**
+     * Immutable holder for request-derived metric data captured on the request thread,
+     * so it can be safely consumed by the asynchronous metric-storage tasks.
+     */
+    private static final class RequestData {
+        private final String ipAddress;
+        private final String userAgent;
+        private final Fido2MetricsData.DeviceInfo deviceInfo;
+
+        RequestData(String ipAddress, String userAgent, Fido2MetricsData.DeviceInfo deviceInfo) {
+            this.ipAddress = ipAddress;
+            this.userAgent = userAgent;
+            this.deviceInfo = deviceInfo;
+        }
+
+        String getIpAddress() {
+            return ipAddress;
+        }
+
+        String getUserAgent() {
+            return userAgent;
+        }
+
+        Fido2MetricsData.DeviceInfo getDeviceInfo() {
+            return deviceInfo;
+        }
     }
 
     /**
