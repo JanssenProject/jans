@@ -53,13 +53,12 @@ pub struct AuthorizeMultiIssuerRequest {
     /// cedar_policy action
     #[pyo3(get, set)]
     pub action: String,
-    /// Optional context dict. Getter returns a MappingProxyType view — in-place edits
-    /// raise TypeError; reassign to replace and refresh the cache.
+    /// Optional context dict; deserialized on every `to_cedarling()` call so
+    /// mutations to the source dict (or nested values) are always picked up.
+    #[pyo3(get, set)]
     pub context: Option<Py<PyDict>>,
     /// Sticky cache of `tokens` converted to `cedarling::TokenInput`.
     cached_tokens: OnceLock<Vec<cedarling::TokenInput>>,
-    /// Sticky cache of `context` deserialized.
-    cached_context: OnceLock<Option<serde_json::Value>>,
 }
 
 #[pymethods]
@@ -78,7 +77,6 @@ impl AuthorizeMultiIssuerRequest {
             action,
             context,
             cached_tokens: OnceLock::new(),
-            cached_context: OnceLock::new(),
         }
     }
 
@@ -87,26 +85,6 @@ impl AuthorizeMultiIssuerRequest {
     fn set_tokens(&mut self, value: Vec<TokenInput>) {
         self.tokens = value;
         self.cached_tokens = OnceLock::new();
-    }
-
-    /// Read-only view over the context dict; mutation raises TypeError.
-    #[getter]
-    fn context(&self, py: Python) -> PyResult<Option<Py<PyAny>>> {
-        match &self.context {
-            Some(ctx) => {
-                let proxy_cls = py.import("types")?.getattr("MappingProxyType")?;
-                let proxy = proxy_cls.call1((ctx.clone_ref(py),))?;
-                Ok(Some(proxy.unbind()))
-            }
-            None => Ok(None),
-        }
-    }
-
-    /// Setter clears the deserialized cache.
-    #[setter]
-    fn set_context(&mut self, value: Option<Py<PyDict>>) {
-        self.context = value;
-        self.cached_context = OnceLock::new();
     }
 }
 
@@ -118,23 +96,17 @@ impl AuthorizeMultiIssuerRequest {
             .get_or_init(|| self.tokens.iter().cloned().map(Into::into).collect())
             .clone();
 
-        let context = if let Some(cached) = self.cached_context.get() {
-            cached.clone()
-        } else {
-            let value = match &self.context {
-                Some(ctx) => Python::attach(|py| -> Result<Option<serde_json::Value>, PyErr> {
-                    let bound = ctx.clone_ref(py).into_bound(py);
-                    Ok(Some(from_pyobject(bound).map_err(|err| {
-                        PyRuntimeError::new_err(format!(
-                            "Failed to convert context to json: {}",
-                            err
-                        ))
-                    })?))
-                })?,
-                None => None,
-            };
-            let _ = self.cached_context.set(value.clone());
-            value
+        let context = match &self.context {
+            Some(ctx) => Python::attach(|py| -> Result<Option<serde_json::Value>, PyErr> {
+                let bound = ctx.clone_ref(py).into_bound(py);
+                Ok(Some(from_pyobject(bound).map_err(|err| {
+                    PyRuntimeError::new_err(format!(
+                        "Failed to convert context to json: {}",
+                        err
+                    ))
+                })?))
+            })?,
+            None => None,
         };
 
         Ok(cedarling::AuthorizeMultiIssuerRequest {
