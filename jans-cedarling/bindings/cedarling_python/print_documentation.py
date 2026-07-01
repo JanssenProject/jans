@@ -93,10 +93,10 @@ def print_doc(type_value: any, module_name: str | None = None):
 
     if module_name is not None:
         message = message.replace(
-            type_value.__name__, "{}.{}".format(module_name, type_value.__name__)
+            type_value.__name__, f"{module_name}.{type_value.__name__}"
         )
     print(message)
-    print("___\n")
+    print("---\n")
 
 
 def print_module_doc(module: ModuleType):
