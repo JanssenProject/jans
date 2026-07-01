@@ -206,7 +206,9 @@ jobs:
 
     - name: Upload assets to release
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         OS="${{ matrix.name }}"
         VERSION="${{ steps.previoustag.outputs.version }}"
@@ -337,7 +339,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -347,7 +349,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -493,7 +495,9 @@ jobs:
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -556,7 +560,9 @@ jobs:
     - name: Build with Ubuntu
       continue-on-error: true
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         sudo apt-get update
         sudo apt-get install -y zip jq
@@ -806,7 +812,9 @@ jobs:
       id: sign-cedarling
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -985,7 +993,9 @@ jobs:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
@@ -1108,7 +1118,9 @@ jobs:
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
@@ -1167,7 +1179,9 @@ jobs:
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -1260,7 +1274,9 @@ jobs:
     - name: Sign and upload kotlin binding
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -1821,7 +1837,9 @@ jobs:
       - name: Sign and upload cedarling_pg tarball
         working-directory: ${{ env.EXT_DIR }}
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then

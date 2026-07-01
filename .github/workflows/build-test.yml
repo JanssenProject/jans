@@ -287,7 +287,9 @@ jobs:
       if: contains(steps.mods.outputs.modules, 'cedarling-java')
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         NV: ${{ steps.ver.outputs.native_version }}
         TAG: ${{ steps.ver.outputs.tag }}
       run: |
@@ -385,7 +387,9 @@ jobs:
 
     - name: Sign and upload binaries to release
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        # Release-asset uploads run under a second account (RELEASE_UPLOAD_TOKEN) to spread the
+        # REST rate limit off the release account; falls back to it when the secret is unset.
+        GH_TOKEN: ${{ secrets.RELEASE_UPLOAD_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         TAG: ${{ steps.ver.outputs.tag }}
         DIR: ${{ steps.collect.outputs.dir }}
       run: |
