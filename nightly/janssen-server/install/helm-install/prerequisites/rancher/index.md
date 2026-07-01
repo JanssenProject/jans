@@ -43,12 +43,12 @@ For this setup to work, a PV provisioner must be present and configured in your 
 Open a kubectl shell from the top right navigation menu `>_` and run:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml # adjust values as preferred
 ```
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml # adjust values as preferred
 ```
 
