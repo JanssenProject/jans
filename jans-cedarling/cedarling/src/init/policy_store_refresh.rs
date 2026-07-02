@@ -1678,7 +1678,7 @@ mod tests {
 
     #[test]
     fn classify_max_retries_exceeded_without_status_routes_to_network_error() {
-        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
         let (kind, outcome) = classify_fetch_error(&err);
         assert_eq!(
@@ -1694,7 +1694,7 @@ mod tests {
 
     #[test]
     fn classify_max_retries_exceeded_with_status_routes_to_http_error() {
-        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(
             HttpRequestReasonError::MaxRetriesExceeded,
             Some(reqwest::StatusCode::NOT_FOUND),
@@ -1713,7 +1713,7 @@ mod tests {
 
     #[test]
     fn classify_http_status_error_routes_to_http_error() {
-        use http_utils::{HttpRequestError, HttpRequestReasonError};
+        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
         let err = HttpRequestError::new(
             HttpRequestReasonError::HttpStatusError,
             Some(reqwest::StatusCode::INTERNAL_SERVER_ERROR),

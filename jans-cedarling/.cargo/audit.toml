@@ -6,4 +6,15 @@
 # RUSTSEC-2021-0127: serde_cbor is unmaintained.
 # Transitively pulled in by pgrx 0.18 (cedarling_pg). No upstream fix yet;
 # pgrx has not migrated to ciborium/minicbor. Mirrored in deny.toml.
-ignore = ["RUSTSEC-2023-0071", "RUSTSEC-2021-0127"]
+#
+# RUSTSEC-2026-0194 / RUSTSEC-2026-0195: quick-xml 0.26.0 DoS vectors (quadratic
+# attribute check and unbounded namespace allocation on untrusted XML). Fixed in
+# quick-xml >= 0.41.0, but the only consumer is the dev-only profiling chain
+# pprof 0.15 -> inferno 0.11 -> quick-xml ^0.26, which pins the old version and
+# has no upgrade path. Not reachable: pprof only renders flamegraph SVGs from our
+ignore = [
+    "RUSTSEC-2023-0071",
+    "RUSTSEC-2021-0127",
+    "RUSTSEC-2026-0194",
+    "RUSTSEC-2026-0195",
+]
