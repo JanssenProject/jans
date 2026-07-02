@@ -243,7 +243,7 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let result = loader.load_directory(".", true);
 
         let err = result.expect_err("Expected error for invalid metadata JSON");
         assert!(
@@ -262,7 +262,7 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let result = loader.load_directory(".", true);
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
         assert!(
@@ -281,7 +281,7 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
 
         // Parse entities to trigger validation
         let entity_file = loaded_directory
@@ -303,7 +303,7 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
 
         // Parse issuers to trigger validation
         let issuer_file = loaded_directory
@@ -325,7 +325,7 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
 
         // Parse all entities and detect duplicates
         let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();
@@ -396,7 +396,7 @@ permit(principal, action, resource);"#,
         // Cedar allows special characters in @id() annotations within the policy content.
         // The loader is expected to accept such policies successfully.
         let loaded_directory = loader
-            .load_directory(".")
+            .load_directory(".", true)
             .expect("Policy with special-character @id should load successfully");
 
         // Verify policy was loaded with the special character ID
@@ -429,7 +429,7 @@ mod resource_exhaustion {
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let result = loader.load_directory(".", true);
 
         result.expect("Policy store with many policies should load successfully");
     }
@@ -456,7 +456,7 @@ when {{ {large_condition} }};"#
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Large policies should be handled gracefully
-        let result = loader.load_directory(".");
+        let result = loader.load_directory(".", true);
 
         // Verify loading succeeds - Cedar can handle large policies
         result.expect("Large policy should load successfully");
@@ -488,7 +488,7 @@ when {{ {large_condition} }};"#
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let result = loader.load_directory(".", true);
 
         // Should handle deep hierarchy
         result.expect("Policy store with deeply nested entity hierarchy should load successfully");
