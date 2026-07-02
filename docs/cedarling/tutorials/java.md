@@ -64,7 +64,7 @@ Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-so
     The Cedarling dependency available in the GitHub Maven Registry works only in a 
     Linux environment.
 
-    Refer to the following guide for instructions on building the Java bindings to work 
+    Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for instructions on building the Java bindings to work 
     on macOS or Windows.
 
 ## Usage

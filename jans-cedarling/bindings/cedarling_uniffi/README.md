@@ -32,7 +32,7 @@ If you do not want to build from source, you can use the pre-built XCFramework p
 
 6. Build and Run the project to verify the setup.
 
-### Manually Built iOS Release Assets
+### Manually Built iOS Assets
 
 ### Prerequisites
 
