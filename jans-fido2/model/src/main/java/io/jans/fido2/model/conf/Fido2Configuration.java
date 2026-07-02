@@ -47,6 +47,10 @@ public class Fido2Configuration {
 	private List<MetadataServer> metadataServers = new ArrayList<MetadataServer>();
 	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
 	private boolean disableMetadataService = false;
+	@DocProperty(description = "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)", defaultValue = "3")
+	private int mdsDownloadStartupRetries = 3;
+	@DocProperty(description = "Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing", defaultValue = "30")
+	private int mdsDownloadStartupRetryInterval = 30;
 	@DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
 	private List<String> hints = new ArrayList<String>();
 	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
@@ -154,6 +158,22 @@ public class Fido2Configuration {
 		this.disableMetadataService = disableMetadataService;
 	}
 
+	public int getMdsDownloadStartupRetries() {
+		return mdsDownloadStartupRetries;
+	}
+
+	public void setMdsDownloadStartupRetries(int mdsDownloadStartupRetries) {
+		this.mdsDownloadStartupRetries = mdsDownloadStartupRetries;
+	}
+
+	public int getMdsDownloadStartupRetryInterval() {
+		return mdsDownloadStartupRetryInterval;
+	}
+
+	public void setMdsDownloadStartupRetryInterval(int mdsDownloadStartupRetryInterval) {
+		this.mdsDownloadStartupRetryInterval = mdsDownloadStartupRetryInterval;
+	}
+
 	public List<MetadataServer> getMetadataServers() {
 		return metadataServers;
 	}
@@ -206,8 +226,9 @@ public class Fido2Configuration {
 				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
 				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
 				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
-				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
-				+ ", attestationMode=" + attestationMode + "]";
+				+ disableMetadataService + ", mdsDownloadStartupRetries=" + mdsDownloadStartupRetries
+				+ ", mdsDownloadStartupRetryInterval=" + mdsDownloadStartupRetryInterval + ", hints=" + hints
+				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode + "]";
 	}
 
 }

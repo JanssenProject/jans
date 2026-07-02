@@ -55,6 +55,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.model.Document;
@@ -99,8 +100,19 @@ public class TocService {
 	private LocalDate nextUpdate;
 	private MessageDigest digester;
 
+	/**
+	 * Loads the MDS TOC at server startup.
+	 * <p>
+	 * Runs asynchronously (via the {@link Asynchronous} interceptor, which the container applies when
+	 * it dispatches this observer) so the potentially slow download — including the retry loop when the
+	 * TOC blob is missing — never blocks application initialization. The FIDO2 server keeps starting up
+	 * while the TOC is fetched in the background; requests that need it before it's ready are already
+	 * handled defensively (see {@link #getAuthenticatorsMetadata(String)}). We retry the download a few
+	 * times only when the TOC blob is missing, because without it the server can't validate attestations.
+	 */
+	@Asynchronous
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
-		fetchMetadata();
+		fetchMetadata(true);
 	}
 
 	public void refreshTOCEntries() {
@@ -113,33 +125,105 @@ public class TocService {
 	}
 
 	public void fetchMetadata() {
+		fetchMetadata(false);
+	}
 
-		try {
-			if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
-				log.debug("SkipDownloadMds is enabled");
-			} else {
+	/**
+	 * Fetches the MDS TOC blob.
+	 *
+	 * @param retryWhenTocMissing when {@code true} (server startup) and the MDS TOC blob is missing
+	 *        from the DB, the download is retried a few times before giving up. A missing TOC blob
+	 *        prevents the FIDO2 server from validating attestations, so it's worth a few extra
+	 *        attempts to recover from a transient outage of the FIDO Alliance metadata service. When
+	 *        the TOC is merely stale (present but past its {@code nextUpdate}) a single attempt is
+	 *        made, matching the behaviour of the daily {@code MDS3UpdateTimer}.
+	 */
+	public void fetchMetadata(boolean retryWhenTocMissing) {
+		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
+			log.debug("SkipDownloadMds is enabled");
+			return;
+		}
 
-				LocalDate nextUpdateOn = getNextUpdateDate();
+		int maxAttempts = 1;
+		if (retryWhenTocMissing && isTocContentMissing()) {
+			maxAttempts = Math.max(1, appConfiguration.getFido2Configuration().getMdsDownloadStartupRetries());
+			log.info("MDS TOC blob is missing at startup, will attempt to download it up to {} time(s)", maxAttempts);
+		}
 
-				if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
-					log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
-					MetadataServer metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration()
-							.getMetadataServers().get(0));
-
-					// as of now, we have only one metadata server, hence get(0), I cant envisage
-					// why there will be multiple metadata servers
-					boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
-					if (success) {
-						refreshTOCEntries();
-						saveNextUpdateDateOfTheMDS();
-					}
-
-				}
+		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				fetchMetadataOnce();
+			} catch (Exception e) {
+				log.error("Attempt {}/{} to download the MDS TOC failed: {}", attempt, maxAttempts, e.getMessage(), e);
 			}
 
-		} catch (MalformedURLException e) {
-			log.error("Error while parsing the FIDO alliance URL :", e);
-			return;
+			// Stop as soon as the TOC is available; only keep retrying while it's still missing.
+			if (attempt >= maxAttempts || !isTocContentMissing()) {
+				return;
+			}
+
+			sleepBeforeRetry();
+		}
+	}
+
+	private void fetchMetadataOnce() {
+		LocalDate nextUpdateOn = getNextUpdateDate();
+
+		if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
+			log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
+			MetadataServer metaDataServer;
+			try {
+				metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration().getMetadataServers().get(0));
+			} catch (IndexOutOfBoundsException e) {
+				throw new Fido2RuntimeException("No FIDO2 metadata server is configured", e);
+			}
+
+			// as of now, we have only one metadata server, hence get(0), I cant envisage
+			// why there will be multiple metadata servers
+			URL metadataUrl;
+			try {
+				metadataUrl = new URL(metaDataServer.getUrl());
+			} catch (MalformedURLException e) {
+				throw new Fido2RuntimeException("Error while parsing the FIDO alliance URL: " + e.getMessage(), e);
+			}
+
+			boolean success = downloadMdsFromServer(metadataUrl);
+			if (success) {
+				refreshTOCEntries();
+				saveNextUpdateDateOfTheMDS();
+			}
+		}
+	}
+
+	/**
+	 * Returns {@code true} when the MDS TOC blob is absent or empty in the DB. This is the only
+	 * condition under which the startup download is retried.
+	 */
+	private boolean isTocContentMissing() {
+		try {
+			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
+			if (documents == null || documents.isEmpty()) {
+				return true;
+			}
+			return StringHelper.isEmpty(documents.get(0).getDocument());
+		} catch (Exception e) {
+			log.warn("Unable to determine whether the MDS TOC blob exists, treating it as missing: {}", e.getMessage());
+			return true;
+		}
+	}
+
+	private void sleepBeforeRetry() {
+		int retryIntervalSeconds = Math.max(1,
+				appConfiguration.getFido2Configuration().getMdsDownloadStartupRetryInterval());
+		log.info("Retrying MDS TOC download in {} second(s)", retryIntervalSeconds);
+		try {
+			Thread.sleep(retryIntervalSeconds * 1000L);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.warn("MDS TOC download retry wait was interrupted");
 		}
 	}
 

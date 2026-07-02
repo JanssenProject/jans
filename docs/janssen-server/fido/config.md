@@ -41,6 +41,8 @@ tags:
 | `requestedParties`            | Array of Objects    | The list of requested parties (RPs) configuration for FIDO authentication.                                 | `[ { "id": "https://%(hostname)s", "origins": ["%(hostname)s"] } ]` |
 | `metadataServers`             | Array of Objects    | A list of metadata servers providing external metadata URLs for FIDO authentication.                      | `[ { "url": "https://mds.fidoalliance.org/" } ]`      |
 | `disableMetadataService`      | Boolean             | Whether downloading MDS metadata should be skipped.                                                        | `false`                                              |
+| `mdsDownloadStartupRetries`   | Integer             | Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). | `3`                              |
+| `mdsDownloadStartupRetryInterval` | Integer         | Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing.          | `30`                                                 |
 | `hints`                       | Array of Strings    | Hints provided to the RP (e.g., security-key, client-device, hybrid).                                      | `["security-key", "client-device", "hybrid"]`        |
 | `enterpriseAttestation`       | Boolean             | Whether enterprise authenticators are enabled for use in a specific protected environment.                | `false`                                              |
 | `attestationMode`             | String              | "disabled" means attestation "none", "monitor" means attestation "direct" but still accept if none return, "enforced" means that credential creation will fail if attestation is not returned                                            | `"monitor"`                                          |
@@ -83,6 +85,8 @@ Response:
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
     "metadataUrlsProvider": "",
     "disableMetadataService": false,
+    "mdsDownloadStartupRetries": 3,
+    "mdsDownloadStartupRetryInterval": 30,
     "attestationMode": "monitor",
     "assertionOptionsGenerateEndpointEnabled":true,
     "enabledFidoAlgorithms": [
