@@ -85,7 +85,7 @@ Copy `cedarling_uniffi.swift` into `Sources/CedarlingSDK/`, then add the local p
 
 ### Building from Source
 
-Refer to the [iOS build guide](../developer/cedarling-ios.md#manually-built-ios-assets) for steps to build the XCFramework from source using Rust and Xcode.
+Refer to the [iOS build guide](../developer/mobile-apps/cedarling-ios.md#manually-built-ios-assets) for steps to build the XCFramework from source using Rust and Xcode.
 
 ---
 
@@ -350,6 +350,6 @@ let systemLogs: [String] = adapter.getLogsByTag(tag: "System")
 
 ## See Also
 
-- [Using Pre-Built iOS Release Assets](../developer/cedarling-ios.md#using-pre-built-ios-release-assets)
+- [Using Pre-Built iOS Release Assets](../developer/mobile-apps/cedarling-ios.md#using-pre-built-ios-release-assets)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
