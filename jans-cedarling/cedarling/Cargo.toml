@@ -34,7 +34,6 @@ cedar-policy = { version = "4.11.1", features = ["partial-eval"] }
 cedar-policy-core = "4.11.1"
 base64 = "0.22.1"
 url = "2.5.2"
-http_utils = { workspace = true }
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
 typed-builder = "0.23.2"
