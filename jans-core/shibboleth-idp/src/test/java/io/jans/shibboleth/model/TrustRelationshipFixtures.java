@@ -5,7 +5,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import io.jans.shibboleth.model.config.profiles.ProfileConfigurationAccessor;
 import io.jans.shibboleth.model.config.profiles.Saml2ArtifactResolutionProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2AttributeQueryProfileConfiguration;
 import io.jans.shibboleth.model.config.profiles.Saml2EcpProfileConfiguration;
@@ -36,6 +39,8 @@ import io.jans.shibboleth.model.metadata.UriMetadataSource;
 import io.jans.shibboleth.model.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.model.metadata.manual.SamlBinding;
 import io.jans.shibboleth.model.metadata.manual.ValidityPeriod;
+
+import io.jans.shibboleth.model.util.TrustResult;
 
 public class TrustRelationshipFixtures {
     
@@ -120,6 +125,49 @@ public class TrustRelationshipFixtures {
     public static final TrustRelationship sampleActiveIndividualTrustRelationship() {
 
         return sampleActivatingIndividualTrustRelationship()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveIndividualTrustRelationship(MetadataSource source) {
+
+        return sampleDraftIndividualTrustRelationshipWithActiveProfile()
+            .updateMetadataSource(source)
+            .getValue()
+            .activate()
+            .getValue()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveIndividualTrustRelationship(ProfileConfigurationAccessor accessor, Object profileconfig) {
+        
+        
+        return accessor.update(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),profileconfig)
+                .getValue()
+                .activate()
+                .getValue()
+                .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
+                .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveAggregateTrustRelationship(MetadataSource source) {
+
+        return sampleDraftAggregateTrustRelationshipWithActiveProfile()
+            .updateMetadataSource(source)
+            .getValue()
+            .activate()
+            .getValue()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleActiveAggregateTrustRelationship(ProfileConfigurationAccessor accessor , Object profileconfig)  {
+        
+        return accessor.update(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(), profileconfig)
+            .getValue()
+            .activate()
+            .getValue()
             .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
             .getValue();
     }

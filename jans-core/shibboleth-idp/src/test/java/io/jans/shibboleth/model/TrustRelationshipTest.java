@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Tag;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.net.URI;
 import java.time.Duration;
@@ -43,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static io.jans.shibboleth.model.TrustRelationshipAssert.assertThat;
 import static io.jans.shibboleth.model.config.profiles.ProfileConfigurationAssert.assertThat;
+import static io.jans.shibboleth.model.TrustRelationshipFixtures.*;
 
 
 
@@ -77,64 +79,61 @@ public class TrustRelationshipTest {
 
     private static final Stream<TrustRelationship> draftTrustRelationshipsOfAllNatures() {
 
-        return Stream.of(
-            TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-            TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()
-        );
+        return Stream.of( sampleDraftIndividualTrustRelationship(),sampleDraftAggregateTrustRelationship() );
     }
 
     private static final Stream<Arguments> draftTrustRelationshipsWithSupportedMetadataSources() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+        TrustRelationship individual = sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleDraftAggregateTrustRelationship();
 
         return Stream.of( 
 
             //Individual nature 
             Arguments.of(individual,NoMetadataSource.getInstance()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
+            Arguments.of(individual,sampleFileMetadataSource()),
+            Arguments.of(individual,sampleUriMetadataSource()),
+            Arguments.of(individual,sampleUpstreamMetadatSource()),
+            Arguments.of(individual,sampleManualMetadataSource()),
 
             //Aggregate nature 
             Arguments.of(aggregate,NoMetadataSource.getInstance()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource())
+            Arguments.of(aggregate,sampleFileMetadataSource()),
+            Arguments.of(aggregate,sampleUriMetadataSource()),
+            Arguments.of(aggregate,sampleMdqMetadataSource())
         );
 
     }
 
     private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurationsAndProfileTypes() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+        TrustRelationship individual = sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleDraftAggregateTrustRelationship();
 
         return Stream.of(
 
             //Individual nature 
-            Arguments.of(individual,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
+            Arguments.of(individual,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(individual,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(individual,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(individual,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
 
             //Aggregate nature
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
+            Arguments.of(aggregate,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
+            Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(aggregate,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
         );
     }
 
     private static final Stream<Arguments> draftTrustRelationshipsAndProfileTypes() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship();
+        TrustRelationship individual = sampleDraftIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleDraftAggregateTrustRelationship();
 
         return Stream.of(
 
@@ -174,61 +173,45 @@ public class TrustRelationshipTest {
 
     private static final Stream<Arguments> draftTrustRelationshipsWithAnActiveProfileAndRealMetadataSource() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithActiveProfile();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithActiveProfile();
+        TrustRelationship individual = sampleDraftIndividualTrustRelationshipWithActiveProfile();
+        TrustRelationship aggregate  = sampleDraftAggregateTrustRelationshipWithActiveProfile();
         return Stream.of(
 
             //Individual Nature
-            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
+            Arguments.of(individual,sampleFileMetadataSource()),
+            Arguments.of(individual,sampleUriMetadataSource()),
+            Arguments.of(individual,sampleUpstreamMetadatSource()),
+            Arguments.of(individual,sampleManualMetadataSource()),
 
             //Aggregate Nature
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource())
+            Arguments.of(aggregate,sampleFileMetadataSource()),
+            Arguments.of(aggregate,sampleUriMetadataSource()),
+            Arguments.of(aggregate,sampleMdqMetadataSource())
         );
     }
 
     private static final Stream<Arguments> draftTrustRelationshipsWithRealMetadataSourcePairedWithActiveProfiles() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
+        TrustRelationship individual = sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
+        TrustRelationship aggregate  = sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
 
         return Stream.of(
 
             //Individual TrustRelationship
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),
-                TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),
-                ProfileType.SHIBBOLETH_SSO
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),
-                TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),
-                ProfileType.SAML2_ARTIFACT_RESOLUTION
-            ),
+            Arguments.of(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
 
             //Aggregate TrustRelationship
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),
-                TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),
-                ProfileType.SAML2_SSO
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),
-                TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),
-                ProfileType.SAML2_ECP
-            )
+            Arguments.of(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP)
         );
     }
 
     private static final Stream<Arguments> readyTrustRelationshipsOfAllNatures() {
 
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship())
+            Arguments.of(sampleReadyIndividualTrustRelationship()),
+            Arguments.of(sampleReadyAggregateTrustRelationship())
         );
     }
 
@@ -236,26 +219,26 @@ public class TrustRelationshipTest {
     private static final Stream<Arguments> activatingTrustRelationshipsOfAllNatures() {
  
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship())
+            Arguments.of(sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(sampleActivatingAggregateTrustRelationship())
         );
     }
 
     private static final Stream<Arguments> activatingTrustRelationshipsOfAllNaturesWithSupportedMetadataSources() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+        TrustRelationship individual = sampleActivatingIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleActivatingAggregateTrustRelationship();
 
         return Stream.of(
-            Arguments.of(individual,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleUpstreamMetadatSource()),
-            Arguments.of(individual,TrustRelationshipFixtures.sampleManualMetadataSource()),
+            Arguments.of(individual,sampleFileMetadataSource()),
+            Arguments.of(individual,sampleUriMetadataSource()),
+            Arguments.of(individual,sampleUpstreamMetadatSource()),
+            Arguments.of(individual,sampleManualMetadataSource()),
             Arguments.of(individual,NoMetadataSource.getInstance()),
 
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleFileMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleUriMetadataSource()),
-            Arguments.of(aggregate,TrustRelationshipFixtures.sampleMdqMetadataSource()),
+            Arguments.of(aggregate,sampleFileMetadataSource()),
+            Arguments.of(aggregate,sampleUriMetadataSource()),
+            Arguments.of(aggregate,sampleMdqMetadataSource()),
             Arguments.of(aggregate,NoMetadataSource.getInstance())
         );
     }
@@ -263,89 +246,78 @@ public class TrustRelationshipTest {
 
     private static final Stream<Arguments> activatingTrustRelationshipsWithProfileConfigurationsAndProfileTypes() {
 
-        TrustRelationship individual = TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship();
-        TrustRelationship aggregate  = TrustRelationshipFixtures.sampleActivatingAggregateTrustRelationship();
+        TrustRelationship individual = sampleActivatingIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleActivatingAggregateTrustRelationship();
         return Stream.of(
 
             //Individual
-            Arguments.of(individual,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(individual,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
+            Arguments.of(individual,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(individual,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
+            Arguments.of(individual,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(individual,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
 
             //Aggregate
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(aggregate,TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT)
+            Arguments.of(aggregate,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP),
+            Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
+            Arguments.of(aggregate,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT)
         );
     }
 
     private static final Stream<Arguments> activeTrustRelationshipsOfAllNatures() {
 
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship())  
+            Arguments.of(sampleActiveIndividualTrustRelationship()),
+            Arguments.of(sampleActiveAggregateTrustRelationship())  
         );
     }
 
-    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNatures() {
+    private static final Stream<Arguments> inactiveTrustRelationshipsOfAllNatures() {
 
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+            Arguments.of(sampleInactiveIndividualTrustRelationship()),
+            Arguments.of(sampleInactiveAggregateTrustRelationship())
         );
     }
 
-    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource() {
+    private static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource() {
 
         return Stream.of(
-            Arguments.of(
-                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationshipWithNoRealMetadataSource()
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationshipWithNoRealMetadataSource()
-            )
+            Arguments.of(sampleInactiveIndividualTrustRelationshipWithNoRealMetadataSource()),
+            Arguments.of(sampleInactiveAggregateTrustRelationshipWithNoRealMetadataSource())
         );
     }
 
-    public static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration() {
+    private static final Stream<Arguments> inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration() {
 
         return Stream.of( 
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationshipWithNoActiveProfileConfiguration()
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationshipWithNoActiveProfileConfiguration()
-            )
+            Arguments.of(sampleInactiveIndividualTrustRelationshipWithNoActiveProfileConfiguration()),
+            Arguments.of(sampleInactiveAggregateTrustRelationshipWithNoActiveProfileConfiguration())
         );
     }
 
     public static final Stream<Arguments> aggregateTrustRelationshipsNotInActivatingState() {
 
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+            Arguments.of(sampleDraftAggregateTrustRelationship()),
+            Arguments.of(sampleReadyAggregateTrustRelationship()),
+            Arguments.of(sampleActiveAggregateTrustRelationship()),
+            Arguments.of(sampleInactiveAggregateTrustRelationship())
         );
     }
 
     public static final Stream<Arguments> individualTrustRelationshipsInMultipleStates() {
 
         return Stream.of(
-            Arguments.of(TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActivatingIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship())
+            Arguments.of(sampleDraftIndividualTrustRelationship()),
+            Arguments.of(sampleReadyIndividualTrustRelationship()),
+            Arguments.of(sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(sampleActiveIndividualTrustRelationship()),
+            Arguments.of(sampleInactiveIndividualTrustRelationship())
         );
     }
 
@@ -353,16 +325,16 @@ public class TrustRelationshipTest {
 
         return Stream.of(
             //Individual
-            Arguments.of(TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship()),
+            Arguments.of(sampleDraftIndividualTrustRelationship()),
+            Arguments.of(sampleReadyIndividualTrustRelationship()),
+            Arguments.of(sampleActiveIndividualTrustRelationship()),
+            Arguments.of(sampleInactiveIndividualTrustRelationship()),
 
             //Aggregate
-            Arguments.of(TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship()),
-            Arguments.of(TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship())
+            Arguments.of(sampleDraftAggregateTrustRelationship()),
+            Arguments.of(sampleReadyAggregateTrustRelationship()),
+            Arguments.of(sampleActiveAggregateTrustRelationship()),
+            Arguments.of(sampleInactiveAggregateTrustRelationship())
         );
     }
     
@@ -371,35 +343,14 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual
-            Arguments.of( 
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                TrustRelationshipFixtures.sampleMdqMetadataSource()
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleReadyIndividualTrustRelationship(),
-                TrustRelationshipFixtures.sampleMdqMetadataSource()
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleActiveIndividualTrustRelationship(),
-                TrustRelationshipFixtures.sampleMdqMetadataSource()
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleInactiveIndividualTrustRelationship(),
-                TrustRelationshipFixtures.sampleMdqMetadataSource()
-            ),
+            Arguments.of(sampleDraftIndividualTrustRelationship(),sampleMdqMetadataSource()),
+            Arguments.of(sampleReadyIndividualTrustRelationship(),sampleMdqMetadataSource()),
+            Arguments.of(sampleActiveIndividualTrustRelationship(),sampleMdqMetadataSource()),
+            Arguments.of(sampleInactiveIndividualTrustRelationship(),sampleMdqMetadataSource()),
             //Aggregate
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                TrustRelationshipFixtures.sampleManualMetadataSource()
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleReadyAggregateTrustRelationship(),
-                TrustRelationshipFixtures.sampleUpstreamMetadatSource()
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleActiveAggregateTrustRelationship(),
-                TrustRelationshipFixtures.sampleManualMetadataSource()
-            ),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),sampleManualMetadataSource()),
+            Arguments.of(sampleReadyAggregateTrustRelationship(),sampleUpstreamMetadatSource()),
+            Arguments.of(sampleActiveAggregateTrustRelationship(),sampleManualMetadataSource()),
             Arguments.of(
                 TrustRelationshipFixtures.sampleInactiveAggregateTrustRelationship(),
                 TrustRelationshipFixtures.sampleUpstreamMetadatSource()
@@ -411,119 +362,108 @@ public class TrustRelationshipTest {
 
         return Stream.of(
 
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withId(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withDisplayName(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withDescription(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withNature(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withVersion(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withStatus(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withMetadataSource(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withShibbolethSsoProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2ArtifactResolutionProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2AttributeQueryProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2EcpProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2SsoProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withSaml2LogoutProfileConfiguration(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withReleasedAttributes(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withActivationDiagnostics(null)
-            ),
-
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Consumer<TrustRelationship.Builder>) b -> b.withDiscoveredEntityIds(null)
-            )
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withId(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withDisplayName(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withDescription(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withNature(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withVersion(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withStatus(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withMetadataSource(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withShibbolethSsoProfileConfiguration(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withSaml2ArtifactResolutionProfileConfiguration(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withSaml2AttributeQueryProfileConfiguration(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withSaml2EcpProfileConfiguration(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),(Consumer<TrustRelationship.Builder>) b -> b.withSaml2SsoProfileConfiguration(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withSaml2LogoutProfileConfiguration(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withReleasedAttributes(null)),
+            Arguments.of(sampleDraftIndividualTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withActivationDiagnostics(null)),
+            Arguments.of(sampleDraftAggregateTrustRelationship(), (Consumer<TrustRelationship.Builder>) b -> b.withDiscoveredEntityIds(null))
         );
     }
 
-    public static Stream<Arguments> draftTrustRelationshipsWithProfileConfigInvalidators() {
+    public static Stream<Arguments> draftTrustRelationshipsWithProfileConfigUpdaters() {
 
         return Stream.of(
 
-            Arguments.of (
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withShibbolethSsoProfileConfiguration(null)
-            ),
-            Arguments.of (
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2ArtifactResolutionProfileConfiguration(null)
-            ),
+            Arguments.of(sampleDraftIndividualTrustRelationship(),ProfileConfigurationAccessor.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
+            Arguments.of (sampleDraftIndividualTrustRelationship(),ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),ProfileConfigurationAccessor.SAML2_ECP,"saml2EcpProfileConfiguration"),
+            Arguments.of(sampleDraftIndividualTrustRelationship(),ProfileConfigurationAccessor.SAML2_SSO,"saml2SsoProfileConfiguration"),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),ProfileConfigurationAccessor.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
+        );
+    }
 
-            Arguments.of (
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2AttributeQueryProfileConfiguration(null)
-            ),
+    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources() {
 
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2EcpProfileConfiguration(null)
-            ),
+        MetadataSource filesource = FileMetadataSource.of("/opt/gluu/original_sp.xml").getValue();
+        MetadataSource urisource = UriMetadataSource.of(URI.create("https://sample.gluu.org/sp_metadata.xml")).getValue();
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship(filesource);
+        TrustRelationship aggregate = sampleActiveAggregateTrustRelationship(urisource);
+        
+        return Stream.of(
+            Arguments.of(individual,urisource),
+            Arguments.of(aggregate,filesource)
+        );
+    }
 
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftIndividualTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2SsoProfileConfiguration(null)
-            ),
-            Arguments.of(
-                TrustRelationshipFixtures.sampleDraftAggregateTrustRelationship(),
-                (Function<TrustRelationship.Builder,TrustRelationship.Builder>) b -> b.withSaml2LogoutProfileConfiguration(null)
-            )
+    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameMetadataSources() {
+
+        MetadataSource filesource = FileMetadataSource.of("/opt/gluu/original_sp.xml").getValue();
+        MetadataSource urisource = UriMetadataSource.of(URI.create("https://sample.gluu.org/sp_metadata.xml")).getValue();
+        
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship(filesource);
+        TrustRelationship aggregate  = sampleActiveAggregateTrustRelationship(urisource);
+        
+        return Stream.of(
+            Arguments.of(individual,filesource),
+            Arguments.of(aggregate,urisource)
+        );
+    }
+
+    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration() {
+
+        Saml2SsoProfileConfiguration newsaml2sso = Saml2SsoProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration())
+            .assertionLifetime(Duration.ofDays(1000))
+            .build()
+            .getValue();
+        
+        Saml2LogoutProfileConfiguration newsaml2logout = Saml2LogoutProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration())
+            .messageSigningPolicy(MessageSigningPolicy.SIGN_NONE)
+            .build()
+            .getValue();
+        
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship(ProfileConfigurationAccessor.SAML2_SSO, newsaml2sso);
+        TrustRelationship aggregate  = sampleActiveAggregateTrustRelationship(ProfileConfigurationAccessor.SAML2_LOGOUT,newsaml2logout);
+        
+        return Stream.of (
+            Arguments.of(individual,newsaml2logout,ProfileConfigurationAccessor.SAML2_LOGOUT),
+            Arguments.of(aggregate,newsaml2sso,ProfileConfigurationAccessor.SAML2_SSO)
+        );
+    }
+
+    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameProfileConfiguration() {
+
+        Saml2SsoProfileConfiguration saml2sso = Saml2SsoProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration())
+            .assertionLifetime(Duration.ofDays(1000))
+            .build()
+            .getValue();
+        
+        Saml2LogoutProfileConfiguration saml2logout = Saml2LogoutProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration())
+            .messageSigningPolicy(MessageSigningPolicy.SIGN_NONE)
+            .build()
+            .getValue();
+        
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship(ProfileConfigurationAccessor.SAML2_LOGOUT,saml2logout);
+        TrustRelationship aggregate  = sampleActiveAggregateTrustRelationship(ProfileConfigurationAccessor.SAML2_SSO,saml2sso);
+
+        return Stream.of (
+            Arguments.of(individual,saml2logout,ProfileConfigurationAccessor.SAML2_LOGOUT),
+            Arguments.of(aggregate,saml2sso,ProfileConfigurationAccessor.SAML2_SSO)
         );
     }
 
@@ -1250,6 +1190,72 @@ public class TrustRelationshipTest {
     }
 
     @Nested
+    @DisplayName("State Transitions -- Updates From ACTIVE State")
+    public class UpdatesFromActiveStateTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateMetadataSource() is called with a different real metadata source " +
+            "THEN should transition to ACTIVATING state and increment version "
+        )
+        public void shouldTransitionToActivating_whenMetadataSourceUpdatedFromActive(TrustRelationship tr, MetadataSource source) {
+        
+            assertThat(tr).isInActiveStatus();
+            assertThat(source).isNotEqualTo(NoMetadataSource.getInstance());
+            assertThat(source).isNotEqualTo(tr.getMetadataSource());
+        
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(updated).isInActivatingStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateMetadataSource() is called with the *same* current metadata source " +
+            "THEN should remain in ACTIVE state and version should not change (idempotent) "
+        )
+        public void shouldRemainInActive_whenMetadataSourceUpdateIsNoOp(TrustRelationship tr) {
+
+            assertThat(tr).isInActiveStatus();
+            MetadataSource source = tr.getMetadataSource();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship same = result.getValue();
+            assertThat(same).isInActiveStatus();
+            assertThat(same).isVersion(tr.getVersion());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called with a *different* configuration than the current one " +
+            "     that keeps at one active profile " +
+            "THEN should transition to ACTIVATING state and increment version "
+        )
+        public void shouldTransitionToActivating_whenProfileConfigurationActuallyChangedFromActive(
+            TrustRelationship tr,Object profileconfig, ProfileConfigurationAccessor accessor) {
+
+            assertThat(tr).isInActiveStatus();
+            assertThat(accessor.extract(tr)).isNotEqualTo(profileconfig);
+
+            TrustResult<TrustRelationship> result = accessor.update(tr, profileconfig);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(updated).isInActivatingStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+        
+    }
+
+    @Nested
     @DisplayName("State Transitions -- Discovered Entity IDs Tests")
     public class DiscoveredEntityIdsTests {
 
@@ -1565,28 +1571,33 @@ public class TrustRelationshipTest {
        }
 
        @ParameterizedTest
-       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigInvalidators")
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigUpdaters")
        @DisplayName(
-            "GIVEN a TrustRelationship " +
-            "WHEN updateXXXProfileConfiguration is called with an null value " + 
-            "THEN should fail with the appropriate error " 
+            "GIVEN a Builder with at least one profileconfiguration set to null " +
+            "WHEN build() is called  " + 
+            "THEN should fail with CannotBeNullOrBlank as root cause " 
        )
-       public void shouldFailWhenAnyProfileConfigurationIsNull(TrustRelationship tr, 
-            Function<TrustRelationship.Builder,TrustRelationship.Builder> profileConfigInvalidator) {
-            
-            TrustResult<TrustRelationship> result = profileConfigInvalidator
-                .apply(TrustRelationship.from(tr))
-                .build();
-            
+       public void shouldFailWhenAnyProfileConfigurationIsNull(TrustRelationship tr, ProfileConfigurationAccessor accessor,String requiredField) {
+
+            TrustRelationship.Builder builder  = accessor.configureWithBuilder(TrustRelationship.from(tr),null);
+
+            TrustResult<TrustRelationship> result = builder.build();
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
-
-            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            DomainObjectUpdateFailed error  = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+            CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+            assertThat(cause.getFieldName()).isEqualTo(requiredField);
+
        }
 
        @ParameterizedTest
        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+       @DisplayName(
+            "GIVEN a Builder with discoveredEntityIds set to null " +
+            "WHEN build() is called " +
+            "THEN should fail with the appropriate error "
+       )
        public void shouldFailWhenDiscoveredEntityIdsIsNull(TrustRelationship tr) {
 
             TrustResult<TrustRelationship> result = TrustRelationship
@@ -1602,4 +1613,11 @@ public class TrustRelationshipTest {
        }
        
     }
-}
+
+    @Nested
+    @DisplayName("Advanced Scenarios and Edge Cases -- Complex State Transitions and Interactions")
+    public class ComplexStateTransitionsAndInteractionsTests {
+        
+        
+    }
+} 

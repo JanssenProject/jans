@@ -263,4 +263,28 @@ public class BuildContext {
 
         return status == TrustStatus.INACTIVE;
     }
+
+    public boolean hasMetadataSourceChanged() {
+
+        if (original == null) return false;
+
+        return !original.getMetadataSource().equals(metadataSource);
+    }
+
+    public boolean hasNoProfileConfigurationChanged() {
+
+        if (original == null) return true;
+
+        return original.getShibbolethSsoProfileConfiguration().equals(shibbolethSsoProfileConfiguration)
+            && original.getSaml2ArtifactResolutionProfileConfiguration().equals(saml2ArtifactResolutionProfileConfiguration)
+            && original.getSaml2AttributeQueryProfileConfiguration().equals(saml2AttributeQueryProfileConfiguration)
+            && original.getSaml2EcpProfileConfiguration().equals(saml2EcpProfileConfiguration)
+            && original.getSaml2SsoProfileConfiguration().equals(saml2SsoProfileConfiguration)
+            && original.getSaml2LogoutProfileConfiguration().equals(saml2LogoutProfileConfiguration);
+    }
+
+    public boolean hasAnyProfileConfigurationChanged() {
+
+        return !hasNoProfileConfigurationChanged();
+    }
 }

@@ -78,8 +78,20 @@ public final class TrustTransitionRules {
             new TrustTransitionRule(
                 TrustStatus.INACTIVE,TrustStatus.DRAFT,
                 (ctx) -> ctx.activateCalled() && (ctx.hasNoRealMetadataSource() || ctx.hasNoActiveProfileConfiguration()),
-                "INACTGIVE -> DRAFT: activate() called and no real metadatasource or no active profile configuration "
-            )
+                "INACTIVE -> DRAFT: activate() called and no real metadatasource or no active profile configuration "
+            ),
+
+            new TrustTransitionRule( 
+                TrustStatus.ACTIVE,TrustStatus.ACTIVATING,
+                (ctx) -> ctx.updateMetadataSourceCalled() && ctx.hasRealMetadataSource() && ctx.hasMetadataSourceChanged(),
+                "ACTIVE -> ACTIVATING: updateMetadataSource() called and real metadatasource <> previous metadatasource"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVE,TrustStatus.ACTIVATING,
+                (ctx) -> ctx.updateProfileConfigurationCalled() && ctx.hasAnyActiveProfileConfiguration() && ctx.hasAnyProfileConfigurationChanged(),
+                "ACTIVE -> ACTIVATING : updateXXXProfileConfiguration() called and active profiles >=1 and profile configuration changed "
+            ) 
         );
     }
 
