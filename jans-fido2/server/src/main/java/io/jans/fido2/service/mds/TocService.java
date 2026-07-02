@@ -8,13 +8,10 @@ package io.jans.fido2.service.mds;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -74,6 +71,8 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class TocService {
 
+	private static final String ADDED_TOC_ENTRY_MSG = "Added TOC entry: {} ";
+
 	@Inject
 	private Logger log;
 
@@ -95,10 +94,13 @@ public class TocService {
 	@Inject
 	private DBDocumentService dbDocumentService;
 
-	private Map<String, JsonNode> tocEntries;
+	// volatile: these are populated by the asynchronous startup init()/fetchMetadata() (and the MDS3
+	// update timer) on a background thread, but read by request-handling threads. volatile publishes
+	// the reference writes across threads so requests reliably observe the loaded TOC.
+	private volatile Map<String, JsonNode> tocEntries;
 
-	private LocalDate nextUpdate;
-	private MessageDigest digester;
+	private volatile LocalDate nextUpdate;
+	private volatile MessageDigest digester;
 
 	/**
 	 * Loads the MDS TOC at server startup.
@@ -116,7 +118,7 @@ public class TocService {
 	}
 
 	public void refreshTOCEntries() {
-		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
+		this.tocEntries = Collections.synchronizedMap(new HashMap<>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		} else {
@@ -166,14 +168,15 @@ public class TocService {
 		}
 	}
 
-	private void fetchMetadataOnce() {
+	// package-private for testability (spied in TocServiceTest)
+	void fetchMetadataOnce() {
 		LocalDate nextUpdateOn = getNextUpdateDate();
 
 		if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
 			log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
 			MetadataServer metaDataServer;
 			try {
-				metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration().getMetadataServers().get(0));
+				metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
 			} catch (IndexOutOfBoundsException e) {
 				throw new Fido2RuntimeException("No FIDO2 metadata server is configured", e);
 			}
@@ -198,8 +201,10 @@ public class TocService {
 	/**
 	 * Returns {@code true} when the MDS TOC blob is absent or empty in the DB. This is the only
 	 * condition under which the startup download is retried.
+	 * <p>
+	 * package-private for testability (spied/exercised in TocServiceTest).
 	 */
-	private boolean isTocContentMissing() {
+	boolean isTocContentMissing() {
 		try {
 			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
@@ -215,7 +220,8 @@ public class TocService {
 		}
 	}
 
-	private void sleepBeforeRetry() {
+	// package-private for testability (stubbed in TocServiceTest to avoid real waits)
+	void sleepBeforeRetry() {
 		int retryIntervalSeconds = Math.max(1,
 				appConfiguration.getFido2Configuration().getMdsDownloadStartupRetryInterval());
 		log.info("Retrying MDS TOC download in {} second(s)", retryIntervalSeconds);
@@ -234,7 +240,7 @@ public class TocService {
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
-			return new HashMap<String, JsonNode>();
+			return new HashMap<>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 
@@ -251,18 +257,9 @@ public class TocService {
 		return mergeAndResolveDuplicateEntries(maps);
 	}
 
-	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content)
-			throws IOException, ParseException {
+	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content) {
 		String decodedString = new String(base64Service.decode(content));
 		return readEntriesFromTocJWT(decodedString, mdsTocRootCertsFolder, true);
-	}
-
-	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, Path path)
-			throws IOException, ParseException {
-		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			String tocJwt = reader.readLine();
-			return readEntriesFromTocJWT(tocJwt, mdsTocRootCertsFolder, true);
-		}
 	}
 
 	private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder,
@@ -319,7 +316,7 @@ public class TocService {
 
 	private Map<String, JsonNode> mergeAndResolveDuplicateEntries(List<Map<String, JsonNode>> maps) {
 		Map<String, JsonNode> allEntries = new HashMap<>();
-		Map<String, JsonNode> a[] = new Map[maps.size()];
+		Map<String, JsonNode>[] a = new Map[maps.size()];
 		maps.toArray(a);
 
 		allEntries.putAll(Stream.of(a).flatMap(m -> m.entrySet().stream())
@@ -378,23 +375,27 @@ public class TocService {
 
 			String encodedString = base64Service.encodeToString(sourceBytes);
 
-			try {
-				Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-				String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-
-				Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-				document.setDocument(encodedString);
-				document.setFilePath(mdsTocFilesFolder);
-				dbDocumentService.updateDocument(document);
-				return true;
-			} catch (Exception e) {
-				log.error("Failed to add new document of mdsTocFilesFolder", e);
-				throw new DocumentException(e);
-			}
+			return persistTocDocument(encodedString);
 
 		} catch (IOException e) {
 			log.warn("Can't access document {}", metadataUrl, e);
 			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
+		}
+	}
+
+	private boolean persistTocDocument(String encodedString) {
+		try {
+			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+
+			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
+			document.setDocument(encodedString);
+			document.setFilePath(mdsTocFilesFolder);
+			dbDocumentService.updateDocument(document);
+			return true;
+		} catch (Exception e) {
+			log.error("Failed to add new document of mdsTocFilesFolder", e);
+			throw new DocumentException(e);
 		}
 	}
 
@@ -441,7 +442,9 @@ public class TocService {
 
 	private Pair<LocalDate, Map<String, JsonNode>> readEntriesFromTocJWT(String tocJwt, String mdsTocRootCertsFolder,
 			boolean loadGlobalVariables) {
-		log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
+		if (log.isDebugEnabled()) {
+			log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
+		}
 
 		JWSObject blobDecoded = parseJwt(tocJwt);
 		JWSAlgorithm algorithm = blobDecoded.getHeader().getAlgorithm();
@@ -456,8 +459,10 @@ public class TocService {
 		}
 
 		JsonNode entriesNode = toc.get("entries");
-		log.debug("Legal header: {}", toc.get("legalHeader"));
-		log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
+		if (log.isDebugEnabled()) {
+			log.debug("Legal header: {}", toc.get("legalHeader"));
+			log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
+		}
 
 		Map<String, JsonNode> entries = processMetadataEntries(entriesNode);
 
@@ -536,7 +541,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaguid, metadataEntryNode);
-			log.info("Added TOC entry: {} ", aaguid);
+			log.info(ADDED_TOC_ENTRY_MSG, aaguid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -549,7 +554,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaid, metadataEntryNode);
-			log.info("Added TOC entry: {} ", aaid);
+			log.info(ADDED_TOC_ENTRY_MSG, aaid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -562,7 +567,7 @@ public class TocService {
 					List.class);
 			for (String keyIdentifier : keyIdentifiersList) {
 				entries.put(keyIdentifier, entriesNode);
-				log.info("Added TOC entry: {} ", keyIdentifier);
+				log.info(ADDED_TOC_ENTRY_MSG, keyIdentifier);
 			}
 		} catch (IOException e) {
 			log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: {}",
