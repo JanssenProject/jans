@@ -51,6 +51,11 @@ public enum AttestationErrorResponseType implements IErrorType {
     APPLE_ERROR("apple_error"),
 
     /**
+     * Android Key validation error
+     */
+    ANDROID_KEY_ERROR("android_key_error"),
+
+    /**
      * Fido U2F validation error
      */
     FIDO_U2F_ERROR("fido_u2f_error"),

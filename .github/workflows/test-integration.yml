@@ -2,7 +2,7 @@ name: integration-tests
 
 # Java integration test-suite, run against an all-in-one (AIO) server with the
 # integration test-data loaded (CN_PERSISTENCE_LOAD_TEST_DATA=true). Replaces the
-# jenkins.jans.io test runner.
+# legacy Jenkins test runner.
 #
 # Flow per matrix leg (MYSQL / PGSQL):
 #   build persistence-loader + config-api (from this checkout) + assemble AIO
