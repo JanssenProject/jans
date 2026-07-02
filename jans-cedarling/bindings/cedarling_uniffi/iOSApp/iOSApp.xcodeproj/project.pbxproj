@@ -9,11 +9,11 @@
 /* Begin PBXBuildFile section */
 		8E3059872D5377DB0056107D /* tokens.json in Resources */ = {isa = PBXBuildFile; fileRef = 8E3059862D5377DB0056107D /* tokens.json */; };
 		8E30598B2D5380ED0056107D /* resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 8E30598A2D5380ED0056107D /* resource.json */; };
-		8E361AA92F714F9D002AD4C1 /* Mobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */; };
-		8E361AAB2F71514A002AD4C1 /* cedarling_uniffi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */; };
 		8E361AAD2F715620002AD4C1 /* TokenMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E361AAC2F715620002AD4C1 /* TokenMapping.swift */; };
 		8E361AAF2F71723A002AD4C1 /* MyStore.cjar in Resources */ = {isa = PBXBuildFile; fileRef = 8E361AAE2F71723A002AD4C1 /* MyStore.cjar */; };
 		8E361AB22F717C76002AD4C1 /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = 8E361AB12F717C76002AD4C1 /* Zip */; };
+		8E5C67682FF65D25006A7084 /* Cedarling.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E5C67672FF65D25006A7084 /* Cedarling.xcframework */; };
+		8E5C67712FF65F3C006A7084 /* cedarling_uniffi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5C67702FF65F3C006A7084 /* cedarling_uniffi.swift */; };
 		8E7754142D609AA60078EBCA /* Labels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7754132D609AA60078EBCA /* Labels.swift */; };
 		8EBA63E52D567B3D0005899A /* context.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EBA63E42D567B3D0005899A /* context.json */; };
 		8EBA63E92D568EA20005899A /* bootstrap.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EBA63E82D568EA20005899A /* bootstrap.json */; };
@@ -49,10 +49,10 @@
 /* Begin PBXFileReference section */
 		8E3059862D5377DB0056107D /* tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokens.json; sourceTree = "<group>"; };
 		8E30598A2D5380ED0056107D /* resource.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = resource.json; sourceTree = "<group>"; };
-		8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Mobile.xcframework; path = ../../../ios/Mobile.xcframework; sourceTree = "<group>"; };
-		8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = cedarling_uniffi.swift; path = ../output/cedarling_uniffi.swift; sourceTree = "<group>"; };
 		8E361AAC2F715620002AD4C1 /* TokenMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenMapping.swift; sourceTree = "<group>"; };
 		8E361AAE2F71723A002AD4C1 /* MyStore.cjar */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyStore.cjar; sourceTree = "<group>"; };
+		8E5C67672FF65D25006A7084 /* Cedarling.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Cedarling.xcframework; path = ../../../../../../Downloads/Cedarling.xcframework; sourceTree = "<group>"; };
+		8E5C67702FF65F3C006A7084 /* cedarling_uniffi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = cedarling_uniffi.swift; path = ../../../../../../Downloads/cedarling_uniffi.swift; sourceTree = "<group>"; };
 		8E7754132D609AA60078EBCA /* Labels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Labels.swift; sourceTree = "<group>"; };
 		8EBA63E42D567B3D0005899A /* context.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = context.json; sourceTree = "<group>"; };
 		8EBA63E82D568EA20005899A /* bootstrap.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bootstrap.json; sourceTree = "<group>"; };
@@ -77,7 +77,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E361AB22F717C76002AD4C1 /* Zip in Frameworks */,
-				8E361AA92F714F9D002AD4C1 /* Mobile.xcframework in Frameworks */,
+				8E5C67682FF65D25006A7084 /* Cedarling.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +98,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8E5C67662FF65D25006A7084 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8E5C67672FF65D25006A7084 /* Cedarling.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		8E7754102D6084650078EBCA /* data */ = {
 			isa = PBXGroup;
 			children = (
@@ -133,12 +141,12 @@
 		8EF92A442D52A53D00047C56 = {
 			isa = PBXGroup;
 			children = (
-				8E361AAA2F71514A002AD4C1 /* cedarling_uniffi.swift */,
-				8E361AA82F714F9D002AD4C1 /* Mobile.xcframework */,
+				8E5C67702FF65F3C006A7084 /* cedarling_uniffi.swift */,
 				8EF92A4F2D52A53D00047C56 /* iOSApp */,
 				8EF92A602D52A53F00047C56 /* iOSAppTests */,
 				8EF92A6A2D52A53F00047C56 /* iOSAppUITests */,
 				8EF92A4E2D52A53D00047C56 /* Products */,
+				8E5C67662FF65D25006A7084 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -333,10 +341,10 @@
 			files = (
 				8EF92A532D52A53D00047C56 /* ContentView.swift in Sources */,
 				8EFB8D952D5F9CB7004D549C /* DataParserView.swift in Sources */,
+				8E5C67712FF65F3C006A7084 /* cedarling_uniffi.swift in Sources */,
 				8E361AAD2F715620002AD4C1 /* TokenMapping.swift in Sources */,
 				8EF4CC152D56746300056A1B /* Helper.swift in Sources */,
 				8E7754142D609AA60078EBCA /* Labels.swift in Sources */,
-				8E361AAB2F71514A002AD4C1 /* cedarling_uniffi.swift in Sources */,
 				8EFB8D932D5F7D81004D549C /* JSONTreeNodeView.swift in Sources */,
 				8EF92A512D52A53D00047C56 /* iOSAppApp.swift in Sources */,
 			);
