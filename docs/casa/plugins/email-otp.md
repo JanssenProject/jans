@@ -22,7 +22,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Plugin
 
-1. Download the plugin [jar](https://maven.jans.io/maven/io/jans/casa/plugins/email_2fa/replace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
+1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
 
 1. Login to Casa using an administrative account
 
@@ -38,7 +38,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://maven.jans.io/maven/io/jans/casa/plugins/email_2fa-agama/replace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
+1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 

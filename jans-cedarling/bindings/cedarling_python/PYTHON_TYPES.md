@@ -10,7 +10,8 @@ For details on the new directory-based format and .cjar archives, see [Policy St
 
 ---
 
-# AuthorizeMultiIssuerRequest
+AuthorizeMultiIssuerRequest
+===========================
 
 A Python wrapper for the Rust `cedarling::AuthorizeMultiIssuerRequest` struct.
 Represents a multi-issuer authorization request with multiple JWT tokens from different issuers.
@@ -37,7 +38,7 @@ request = AuthorizeMultiIssuerRequest(
     context={"location": "miami"}
 )
 ```
-___
+---
 
 AuthorizeResult
 ===============
@@ -50,10 +51,7 @@ Methods
 .. method:: is_allowed(self) -> bool
     Returns whether the request is allowed.
 
-.. method:: workload(self) -> AuthorizeResultResponse
-    Returns the detailed response as an `AuthorizeResultResponse` object.
-
-___
+---
 
 AuthorizeResultResponse
 =======================
@@ -65,7 +63,7 @@ Attributes
 ----------  
 :param decision: The authorization decision (wrapped `Decision` object).  
 :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
-___
+---
 
 BootstrapConfig
 =========
@@ -105,11 +103,11 @@ Methods
     :param config: Optional dictionary with additional configuration to merge with environment variables.
     :returns: A BootstrapConfig instance
     :raises ValueError: If a provided value is invalid or decoding fails.
-___
+---
 
 # CedarEntityMapping
 Cedar entity mapping information
-___
+---
 
 CedarType
 =========
@@ -128,7 +126,7 @@ Values
 - Decimal: Decimal extension type
 - DateTime: DateTime extension type
 - Duration: Duration extension type
-___
+---
 
 Cedarling
 =========
@@ -148,11 +146,6 @@ Methods
     Initializes the Cedarling instance with the provided configuration.
 
     :param config: A `BootstrapConfig` object with startup settings.
-
-.. method:: authorize(self, request: Request) -> AuthorizeResult
-
-    Execute authorize request
-    :param request: Request struct for authorize.
 
 .. method:: authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult
 
@@ -269,7 +262,7 @@ Methods
 
     :returns: A DataStoreStats object
     :raises DataErrorCtx: If the operation fails
-___
+---
 
 DataEntry
 =========
@@ -280,8 +273,8 @@ Attributes
 ----------
 key : str
     The key for this entry
-value : Any
-    The actual value stored (any JSON-deserializable Python type: dict, list, str, int, float, bool, None)
+value : dict | list | str | int | float | bool | None
+    The actual value stored, deserialized from JSON — may be any JSON-compatible Python shape
 data_type : CedarType
     The inferred Cedar type of the value
 created_at : str
@@ -290,7 +283,7 @@ expires_at : str | None
     Timestamp when this entry expires (RFC 3339 format), or None if no TTL
 access_count : int
     Number of times this entry has been accessed
-___
+---
 
 DataStoreStats
 ==============
@@ -299,34 +292,25 @@ Statistics about the DataStore.
 
 Attributes
 ----------
-
 entry_count : int
     Number of entries currently stored
-
 max_entries : int
     Maximum number of entries allowed (0 = unlimited)
-
 max_entry_size : int
     Maximum size per entry in bytes (0 = unlimited)
-
 metrics_enabled : bool
     Whether metrics tracking is enabled
-
 total_size_bytes : int
     Total size of all entries in bytes (approximate, based on JSON serialization)
-
 avg_entry_size_bytes : int
     Average size per entry in bytes (0 if no entries)
-
 capacity_usage_percent : float
     Percentage of capacity used (0.0-100.0, based on entry count)
-
 memory_alert_threshold : float
     Memory usage threshold percentage (from config)
-
 memory_alert_triggered : bool
     Whether memory usage exceeds the alert threshold
-___
+---
 
 Decision
 ========
@@ -343,7 +327,7 @@ __repr__() -> str
     Returns the detailed type representation of the decision.
 __eq__(other: Decision) -> bool
     Compares two `Decision` objects for equality.
-___
+---
 
 Diagnostics
 ===========
@@ -356,7 +340,7 @@ reason : set of str
     A set of `PolicyId`s for the policies that contributed to the decision. If no policies applied, this set is empty.
 errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
-___
+---
 
 EntityData
 ============
@@ -378,7 +362,7 @@ Methods
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
-___
+---
 
 MultiIssuerAuthorizeResult
 ==========================
@@ -397,7 +381,18 @@ Methods
 .. method:: request_id(self) -> str
     Returns the unique request ID for this authorization.
 
-___
+---
+
+PolicyEffect
+============
+
+Represents the effect of a Cedar policy.
+
+Values
+------
+- Permit: The policy permits the request.
+- Forbid: The policy forbids the request.
+---
 
 PolicyEvaluationError
 =====================
@@ -410,38 +405,32 @@ id : str
     The ID of the policy that caused the error.
 error : str
     The error message describing the evaluation failure.
-___
+---
 
-Request
-=======
+PolicyMetadata
+==============
 
-A Python wrapper for the Rust `cedarling::Request` struct. Represents
-authorization data with access token, action, resource, and context.
+Metadata about a Cedar policy, including its ID, effect, annotations, and source code.
 
 Attributes
 ----------  
-:param tokens: A class containing the JWTs that will be used for the request.  
-:param action: The action to be authorized.  
-:param resource: Resource data (wrapped `EntityData` object).  
-:param context: Python dictionary with additional context.
-
-Example
--------
-```python
-# Create a request for authorization
-request = Request(access_token="token123", action="read", resource=resource, context={})
-```
-___
+:param id: The policy ID string.  
+:param effect: The policy effect as a PolicyEffect enum value.  
+:param annotations: Dictionary of policy annotations.  
+:param source: The Cedar policy source code.
+---
 
 RequestUnsigned
 =======
 
 A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
-authorization data for unsigned authorization requests for many principals.
+authorization data for an unsigned authorization request for an optional single
+principal.
 
 Attributes
 ----------  
-:param principals: A list of `EntityData` objects representing the principals.  
+:param principal: Optional `EntityData` representing the principal. When `None`,
+    the core performs partial evaluation of the policies.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
 :param context: Python dictionary with additional context.
@@ -450,9 +439,9 @@ Example
 -------
 ```python
 # Create a request for authorization
-request = RequestUnsigned(principals=[principal], action="read", resource=resource, context={})
+request = RequestUnsigned(principal=principal, action="read", resource=resource, context={})
 ```
-___
+---
 
 TokenInput
 ==========
@@ -471,107 +460,89 @@ Example
 # Create a token input for multi-issuer authorization
 token = TokenInput(mapping="Jans::Access_Token", payload="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 ```
-___
+---
 
 # authorize_errors.ActionError
 Error encountered while parsing Action to EntityUid
-___
+---
 
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
-___
+---
 
 # authorize_errors.BuildContextError
 Error encountered while building the request context
-___
+---
 
 # authorize_errors.BuildEntityError
 Error encountered while building Cedar entities
-___
+---
 
 # authorize_errors.BuildUnsignedRoleEntityError
 Error building Role entity for unsigned request
-___
+---
 
 # authorize_errors.CreateContextError
 Error encountered while validating context according to the schema
-___
+---
 
 # authorize_errors.EntitiesToJsonError
 Error encountered while parsing all entities to json for logging
-___
+---
 
-# authorize_errors.ExecuteRuleError
-Error encountered while executing the rule for principals
-___
-
-# authorize_errors.IdTokenTrustModeError
-Error encountered while running on strict id token trust mode
-___
+# authorize_errors.IdentifierParsingError
+Error encountered while parsing an entity type name or action identifier
+---
 
 # authorize_errors.InvalidPrincipalError
 Error encountered while creating cedar_policy::Request for principal
-___
+---
 
 # authorize_errors.MultiIssuerEntityError
 Error encountered while building multi-issuer entities
-___
+---
 
 # authorize_errors.MultiIssuerValidationError
 Error encountered during multi-issuer token validation
-___
+---
 
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
-___
+---
 
 # authorize_errors.RequestValidationError
 Error encountered while validating the request
-___
+---
 
 # authorize_errors.ValidateEntitiesError
 Error encountered while validating the entities to the schema
-___
+---
 
 # data_errors_ctx.DataErrorCtx
-
 Base exception for errors encountered during data operations in Cedarling context storage.
-
 ---
 
 # data_errors_ctx.InvalidKey
-
 Raised when an invalid (e.g., empty) key is provided to the context data store. This typically means the key argument was missing or empty.
-
 ---
 
 # data_errors_ctx.KeyNotFound
-
 Raised when a requested key is not found in the context data store. This usually means the key does not exist or has expired.
-
 ---
 
 # data_errors_ctx.SerializationError
-
 Raised when there is a failure serializing or deserializing data for storage or retrieval in the context data store.
-
 ---
 
 # data_errors_ctx.StorageLimitExceeded
-
 Raised when an operation would exceed the maximum allowed storage size for the context data store.
-
 ---
 
 # data_errors_ctx.TTLExceeded
-
 Raised when a requested time-to-live (TTL) value exceeds the maximum allowed by the context data store.
-
 ---
 
 # data_errors_ctx.ValueTooLarge
-
 Raised when a value is too large to be stored in the context data store, exceeding the allowed size limit.
-
 ---
 

@@ -187,7 +187,7 @@ public class Fido2MetricsController {
     }
 
     /**
-     * Get aggregation summary statistics
+     * Ge/t aggregation summary statistics
      * 
      * @param aggregationType Aggregation type (HOURLY, DAILY, WEEKLY, MONTHLY)
      * @param startTime Start time in ISO format
