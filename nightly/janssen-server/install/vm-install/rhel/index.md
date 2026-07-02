@@ -16,7 +16,7 @@ sudo yum -y install mod_auth_openidc
 - Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -30,7 +30,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
     ```
 
   - Verify the signature:
@@ -39,10 +39,10 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
     ```
     cosign verify-blob \
-      --bundle ~/jans-el9-0.0.0-nightly.bundle \
+      --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      ~/jans-0.0.0-nightly.el9.x86_64.rpm
+      ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -55,16 +55,16 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
 - Optionally, verify integrity using the published checksum file (secondary check):
 
-  `bash title="Command" echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum`
+  `bash title="Command" echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum`
 
   Output similar to below should confirm the integrity of the downloaded package.
 
-  `text jans-0.0.0-nightly.el9.x86_64.rpm: OK`
+  `text jans-replace-janssen-version-stable.el9.x86_64.rpm: OK`
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 ```
 
 ### RHEL 10
@@ -79,7 +79,7 @@ sudo yum -y install mod_auth_openidc
 - Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -93,7 +93,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
     ```
 
   - Verify the signature:
@@ -102,10 +102,10 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
     ```
     cosign verify-blob \
-      --bundle ~/jans-el10-0.0.0-nightly.bundle \
+      --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-     ~/jans-0.0.0-nightly.el10.x86_64.rpm
+     ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -121,19 +121,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
   Command
 
   ```
-  echo 'paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+  echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
 
   ```
-  jans-0.0.0-nightly.el10.x86_64.rpm: OK
+  jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
   ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
