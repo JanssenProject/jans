@@ -195,6 +195,8 @@ By design, the refresh interval for the Status List JWT is driven by the `ttl` c
 
 The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` (default `300` seconds) caps that interval: the effective refresh interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`, so the issuer can always request a *more frequent* refresh, but never a less frequent one. When the issuer omits the `ttl` claim, the max value is used directly so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds are clamped up to `5` seconds.
 
+Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
+
 ## JWT Validation Flow Diagram
 
 JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
