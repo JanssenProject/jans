@@ -54,7 +54,7 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | | `authorize_multi_issuer` | `authorize_unsigned` |
 |---|---|---|
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
-| **JWT validation** | Yes — full signature, expiration, and status validation | No — accepts raw entity data as-is |
+| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
 | **Principal source** | Derived from JWT token claims | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
@@ -291,7 +291,7 @@ All validated token entities are placed under the `context.tokens` namespace. Ea
 - Any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store
 - Any data pushed via the [Context Data API](../tutorials/cedarling-getting-started.md#context-data-api) under `context.data`
 
-**Entity merging automatically resolves conflicts**, ensuring that request entities take precedence over default entities when UIDs match.
+**Entity merging automatically resolves conflicts**, ensuring that default entities take precedence over request entities when UIDs match.
 
 ### Example Policy
 

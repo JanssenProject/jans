@@ -90,4 +90,9 @@
             <class name="io.jans.as.model.util.UtilTest"/>
         </classes>
     </test>
+    <test name="ECDSAPublicKey Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.crypto.signature.ECDSAPublicKeyTest"/>
+        </classes>
+    </test>    
 </suite>

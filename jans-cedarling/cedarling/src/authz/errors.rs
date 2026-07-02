@@ -8,7 +8,7 @@ use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
 use crate::entity_builder::MultiIssuerEntityError;
-use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
+use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError};
 use crate::jwt::JwtProcessingError;
 use cedar_policy::entities_errors::EntitiesError;
 
@@ -42,13 +42,6 @@ pub enum TokenInputError {
 
     #[error("Empty payload")]
     EmptyPayload,
-}
-
-/// Error type for Authorization Service initialization
-#[derive(Debug, thiserror::Error)]
-pub enum AuthzServiceInitError {
-    #[error(transparent)]
-    InitEntityBuilder(#[from] InitEntityBuilderError),
 }
 
 /// Error type for Authorization Service

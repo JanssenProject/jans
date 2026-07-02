@@ -2,7 +2,7 @@
 
 This mirrors the relevant parts of jans-linux-setup's ``test_data_loader`` so the
 Janssen integration test-suite can run against an all-in-one (AIO) deployment
-without jenkins.jans.io. It is gated behind the ``CN_PERSISTENCE_LOAD_TEST_DATA``
+without Jenkins. It is gated behind the ``CN_PERSISTENCE_LOAD_TEST_DATA``
 environment variable (default ``false``) and only targets the SQL backend, which
 is what the integration tests run on (MySQL/PGSQL).
 

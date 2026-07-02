@@ -2,32 +2,6 @@ import React from 'react';
 import { Info } from "lucide-react";
 import { CircleAlert } from 'lucide-react';
 
-export const LabelWithTooltipMultiLine = (
-  label: React.ReactNode,
-  tooltip: React.ReactNode
-) => (
-  <span className="inline-flex items-center gap-2">
-    {label}
-
-    <div className="relative group">
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-label={`${label} help`}
-        className="p-1 rounded-sm hover:bg-gray-100"
-      >
-        <Info className="w-[18px] h-[18px] opacity-75" tabIndex={-1} />
-      </button>
-
-      <div className="absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 group-hover:block">
-        <div className="rounded-md bg-gray-900 px-2 py-1 text-sm text-white shadow-lg whitespace-nowrap">
-          {tooltip}
-        </div>
-      </div>
-    </div>
-  </span>
-);
-
 /** Tooltip label helper */
 export const LabelWithTooltip = ({ label, tip }: { label: string; tip: string }) => {
   const [show, setShow] = React.useState(false);
@@ -96,15 +70,6 @@ export const Spinner = () => (
 /* -------------------------------------------------------------------------- */
 /* Empty State Alert                                                          */
 /* -------------------------------------------------------------------------- */
-
-export const InfoAlert = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-      <Info className="w-4 h-4 mt-0.5 shrink-0" />
-      <div>{children}</div>
-    </div>
-  );
-}
 
 export const SuccessAlert = ({ children }: { children: React.ReactNode }) => {
   return (
