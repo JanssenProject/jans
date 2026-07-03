@@ -105,7 +105,7 @@ public class TrustRelationshipTest {
 
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurationsAndProfileTypes() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithProfileConfigurationsAndAccessors() {
 
         TrustRelationship individual = sampleDraftIndividualTrustRelationship();
         TrustRelationship aggregate  = sampleDraftAggregateTrustRelationship();
@@ -113,24 +113,24 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual nature 
-            Arguments.of(individual,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(individual,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(individual,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(individual,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(individual,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(individual,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT),
+            Arguments.of(individual,activeShibbolethSsoProfileConfiguration(),ProfileConfigurationAccessor.SHIBBOLETH_SSO),
+            Arguments.of(individual,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,activeSaml2AttributeQueryProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,activeSaml2EcpProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ECP), 
+            Arguments.of(individual,activeSaml2SsoProfileConfiguration(),ProfileConfigurationAccessor.SAML2_SSO),
+            Arguments.of(individual,activeSaml2LogoutProfileConfiguration(),ProfileConfigurationAccessor.SAML2_LOGOUT),
 
             //Aggregate nature
-            Arguments.of(aggregate,activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(aggregate,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
-            Arguments.of(aggregate,activeSaml2AttributeQueryProfileConfiguration(),ProfileType.SAML2_ATTRIBUTE_QUERY),
-            Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP), 
-            Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(aggregate,activeSaml2LogoutProfileConfiguration(),ProfileType.SAML2_LOGOUT) 
+            Arguments.of(aggregate,activeShibbolethSsoProfileConfiguration(),ProfileConfigurationAccessor.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,activeSaml2AttributeQueryProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ECP), 
+            Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileConfigurationAccessor.SAML2_SSO),
+            Arguments.of(aggregate,activeSaml2LogoutProfileConfiguration(),ProfileConfigurationAccessor.SAML2_LOGOUT) 
         );
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsAndProfileTypes() {
+    private static final Stream<Arguments> draftTrustRelationshipsAndAccessors() {
 
         TrustRelationship individual = sampleDraftIndividualTrustRelationship();
         TrustRelationship aggregate  = sampleDraftAggregateTrustRelationship();
@@ -138,20 +138,20 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual nature
-            Arguments.of(individual,ProfileType.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
-            Arguments.of(individual,ProfileType.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
-            Arguments.of(individual,ProfileType.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
-            Arguments.of(individual,ProfileType.SAML2_ECP,"saml2EcpProfileConfiguration"),
-            Arguments.of(individual,ProfileType.SAML2_SSO,"saml2SsoProfileConfiguration"),
-            Arguments.of(individual,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ECP,"saml2EcpProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_SSO,"saml2SsoProfileConfiguration"),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_LOGOUT,"saml2LogoutProfileConfiguration"),
 
             //Aggregate nature
-            Arguments.of(aggregate,ProfileType.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
-            Arguments.of(aggregate,ProfileType.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
-            Arguments.of(aggregate,ProfileType.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
-            Arguments.of(aggregate,ProfileType.SAML2_ECP,"saml2EcpProfileConfiguration"),
-            Arguments.of(aggregate,ProfileType.SAML2_SSO,"saml2SsoProfileConfiguration"),
-            Arguments.of(aggregate,ProfileType.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SHIBBOLETH_SSO,"shibbolethSsoProfileConfiguration"),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION,"saml2ArtifactResolutionProfileConfiguration"),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY,"saml2AttributeQueryProfileConfiguration"),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ECP,"saml2EcpProfileConfiguration"),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_SSO,"saml2SsoProfileConfiguration"),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_LOGOUT,"saml2LogoutProfileConfiguration")
         );
     }
 
@@ -190,7 +190,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    private static final Stream<Arguments> draftTrustRelationshipsWithRealMetadataSourcePairedWithActiveProfiles() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithRealMetadataSourceAndActiveProfileConfigurationToUpdate() {
 
         TrustRelationship individual = sampleDraftIndividualTrustRelationshipWithRealMetadataSource();
         TrustRelationship aggregate  = sampleDraftAggregateTrustRelationshipWithRealMetadataSource();
@@ -198,12 +198,12 @@ public class TrustRelationshipTest {
         return Stream.of(
 
             //Individual TrustRelationship
-            Arguments.of(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),activeShibbolethSsoProfileConfiguration(),ProfileType.SHIBBOLETH_SSO),
-            Arguments.of(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),activeSaml2ArtifactResolutionProfileConfiguration(),ProfileType.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,activeShibbolethSsoProfileConfiguration(),ProfileConfigurationAccessor.SHIBBOLETH_SSO),
+            Arguments.of(individual,activeSaml2ArtifactResolutionProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION),
 
             //Aggregate TrustRelationship
-            Arguments.of(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),activeSaml2SsoProfileConfiguration(),ProfileType.SAML2_SSO),
-            Arguments.of(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),activeSaml2EcpProfileConfiguration(),ProfileType.SAML2_ECP)
+            Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileConfigurationAccessor.SAML2_SSO),
+            Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ECP)
         );
     }
 
@@ -651,63 +651,23 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurationsAndProfileTypes")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurationsAndAccessors")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with no metadatasources " + 
             "WHEN updateXXXProfileConfiguration() is called " +
             "THEN the operation updates the profile configuration and maintains the DRAFT status "
         )
-        public void shouldUpdateProfileConfigurationAndStayInDraft_whenNoMetadataSource(TrustRelationship tr, Object profileconfig, ProfileType profiletype) {
+        public void shouldUpdateProfileConfigurationAndStayInDraft_whenNoMetadataSource(TrustRelationship tr, Object profileconfig,ProfileConfigurationAccessor accessor) {
 
 
             assertThat(tr).isInDraftStatus();
             assertThat(tr).hasNoRealMetadataSource();
 
-            TrustResult<TrustRelationship> result = null;
-            TrustRelationship same_or_updated_tr = null;
-
-            switch(profiletype) {
-                case SHIBBOLETH_SSO:
-                    result = tr.updateShibbolethSsoProfileConfiguration((ShibbolethSsoProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getShibbolethSsoProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                case SAML2_ATTRIBUTE_QUERY:
-                    result = tr.updateSaml2AttributeQueryProfileConfiguration((Saml2AttributeQueryProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getSaml2AttributeQueryProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                case SAML2_ARTIFACT_RESOLUTION:
-                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration((Saml2ArtifactResolutionProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getSaml2ArtifactResolutionProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                case SAML2_ECP:
-                    result = tr.updateSaml2EcpProfileConfiguration((Saml2EcpProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getSaml2EcpProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                case SAML2_SSO:
-                    result = tr.updateSaml2SsoProfileConfiguration((Saml2SsoProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getSaml2SsoProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                case SAML2_LOGOUT:
-                    result = tr.updateSaml2LogoutProfileConfiguration((Saml2LogoutProfileConfiguration)profileconfig);
-                    assertThat(result.isSuccess()).isTrue();
-                    same_or_updated_tr = result.getValue();
-                    assertThat(same_or_updated_tr.getSaml2LogoutProfileConfiguration()).isEqualTo(profileconfig);
-                    break;
-                default:
-                    fail("Profile Type '%s' unsupported in tests",profiletype);
-                    break;
-            }
-
+            TrustResult<TrustRelationship> result = accessor.update(tr, profileconfig);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+            assertThat(accessor.extract(updated)).isEqualTo(profileconfig);
+            assertThat(updated).isInDraftStatus();
         }
 
         @ParameterizedTest
@@ -777,39 +737,15 @@ public class TrustRelationshipTest {
         
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndProfileTypes")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndAccessors")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called with a null parameter " +
             "THEN the call should fail with the appropriate error "
         )
-        public void shouldFailWhenUpdateProfileConfigurationWithNull(TrustRelationship tr, ProfileType profiletype,String requiredFieldName) {
+        public void shouldFailWhenUpdateProfileConfigurationWithNull(TrustRelationship tr, ProfileConfigurationAccessor accessor,String requiredFieldName) {
         
-            TrustResult<TrustRelationship> result = null;
-                    
-            switch(profiletype) {
-                case SHIBBOLETH_SSO:
-                    result = tr.updateShibbolethSsoProfileConfiguration(null);
-                    break;
-                case SAML2_ATTRIBUTE_QUERY:
-                    result = tr.updateSaml2AttributeQueryProfileConfiguration(null);
-                    break;
-                case SAML2_ARTIFACT_RESOLUTION:
-                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration(null);
-                    break;
-                case SAML2_ECP:
-                    result = tr.updateSaml2EcpProfileConfiguration(null);
-                    break;
-                case SAML2_SSO:
-                    result = tr.updateSaml2SsoProfileConfiguration(null);
-                    break;
-                case SAML2_LOGOUT:
-                    result = tr.updateSaml2LogoutProfileConfiguration(null);
-                    break;
-                default:
-                    fail("Profile type '%s' unsupported in tests", profiletype);
-                    break;
-            }
+            TrustResult<TrustRelationship> result = accessor.update(tr,null);
         
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -865,43 +801,20 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRealMetadataSourcePairedWithActiveProfiles")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRealMetadataSourceAndActiveProfileConfigurationToUpdate")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with a REAL(non-NONE) metadata source " +
             "WHEN updateXXXProfileConfiguration is called with an ACTIVE profile configuration " +
             "THEN the TrustRelationship should transition to READY status AND increment version "
         )
-        public void shouldTransitionToReady_whenProfileConfigurationEnabledWithRealMetadataSource(TrustRelationship tr, Object profileconfig, ProfileType profiletype) {
+        public void shouldTransitionToReady_whenProfileConfigurationEnabledWithRealMetadataSource(TrustRelationship tr, Object profileconfig, ProfileConfigurationAccessor accessor) {
 
             assertThat(tr).isInDraftStatus();
             assertThat(tr).hasRealMetadataSource();
-            assertThat(profileconfig,profiletype).isActive();
+            assertThat(accessor.getStatus(profileconfig)).isEqualTo(ProfileStatus.ACTIVE);
 
-            TrustResult<TrustRelationship> result = null;
-            switch(profiletype) {
-                case SHIBBOLETH_SSO:
-                    result = tr.updateShibbolethSsoProfileConfiguration((ShibbolethSsoProfileConfiguration)profileconfig);
-                    break;
-                case SAML2_ATTRIBUTE_QUERY:
-                    result = tr.updateSaml2AttributeQueryProfileConfiguration((Saml2AttributeQueryProfileConfiguration)profileconfig);
-                    break;
-                case SAML2_ARTIFACT_RESOLUTION:
-                    result = tr.updateSaml2ArtifactResolutionProfileConfiguration((Saml2ArtifactResolutionProfileConfiguration)profileconfig);
-                    break;
-                case SAML2_ECP:
-                    result = tr.updateSaml2EcpProfileConfiguration((Saml2EcpProfileConfiguration)profileconfig);
-                    break;
-                case SAML2_SSO:
-                    result = tr.updateSaml2SsoProfileConfiguration((Saml2SsoProfileConfiguration)profileconfig);
-                    break;
-                case SAML2_LOGOUT:
-                    result = tr.updateSaml2LogoutProfileConfiguration((Saml2LogoutProfileConfiguration)profileconfig);
-                    break;
-                default:
-                    fail("Profile type '%s' unsupported in tests",profiletype);
-                    break;
-            }
-
+            TrustResult<TrustRelationship> result = accessor.update(tr,profileconfig);
+            
             assertThat(result.isSuccess()).isTrue();
             TrustRelationship updated = result.getValue();
             assertThat(updated).isInReadyStatus();
