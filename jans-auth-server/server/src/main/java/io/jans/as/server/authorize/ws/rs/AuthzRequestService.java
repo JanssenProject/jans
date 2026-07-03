@@ -335,7 +335,7 @@ public class AuthzRequestService {
         }
 
         // JARM
-        if (authzRequest.getResponseModeEnum().isJarm()) {
+        if (authzRequest.getResponseModeEnum() != null && authzRequest.getResponseModeEnum().isJarm()) {
             JsonWebResponse jwe = parseRequestToJwr(authzRequest.getRequest());
             fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
         }
