@@ -213,7 +213,7 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.62.2</version>
+			<version>1.75.0</version>
 			<scope>test</scope>
 		</dependency>
 
