@@ -5,7 +5,7 @@
 
 use crate::{
     AuthorizeError, DataError,
-    authz::{BuildContextError, MultiIssuerValidationError},
+    authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
     jwt::{TrustedIssuerError, ValidateJwtError},
 };
@@ -30,6 +30,16 @@ impl ErrorMetricKey for MultiIssuerValidationError {
     }
 }
 
+impl ErrorMetricKey for BatchValidationError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            Self::EmptyItems => "batch.empty_items",
+            Self::EmptyTokens => "batch.empty_tokens",
+            Self::InvalidItemContext { .. } => "batch.invalid_item_context",
+        }
+    }
+}
+
 impl ErrorMetricKey for AuthorizeError {
     fn metric_key(&self) -> &'static str {
         match self {
@@ -46,6 +56,7 @@ impl ErrorMetricKey for AuthorizeError {
             Self::BuildUnsignedRoleEntity(e) => e.metric_key(),
             Self::MultiIssuerValidation(e) => e.metric_key(),
             Self::MultiIssuerEntity(e) => e.metric_key(),
+            Self::BatchValidation(e) => e.metric_key(),
         }
     }
 }
