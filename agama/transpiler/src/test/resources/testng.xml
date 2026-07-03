@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Web interaction" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.WebInteractionTest" />
+        </classes>
+    </test>
+
 </suite>
