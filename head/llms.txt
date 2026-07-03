@@ -58,6 +58,7 @@ Long description of my project.
 - [Standard Logs](https://docs.jans.io/head/janssen-server/auth-server/logging/standard-logs/index.md)
 - [OpenID Connect Provider (OP)](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/index.md)
 - [Authorization Code Grant](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/auth-code-grant/index.md)
+- [Authorization Server Issuer Identification](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/authorization-server-issuer-identification/index.md)
 - [Client ID Metadata Document](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/cimd/index.md)
 - [Client Credential Grant](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/client-credential-grant/index.md)
 - [Device Grant](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/device-grant/index.md)
