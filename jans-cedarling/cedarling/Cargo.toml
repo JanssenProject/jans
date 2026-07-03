@@ -4,7 +4,7 @@ version = "0.0.0"
 edition = "2024"
 description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"
-publish = false
+publish = true
 
 [features]
 default = ["grpc"]
@@ -25,7 +25,6 @@ serde = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde_yaml_ng = "0.10.0"
 thiserror = { workspace = true }
-sparkv = { workspace = true }
 uuid7 = { version = "1.6.0", features = [
     "serde",
     "uuid",
@@ -35,7 +34,6 @@ cedar-policy = { version = "4.11.1", features = ["partial-eval"] }
 cedar-policy-core = "4.11.1"
 base64 = "0.22.1"
 url = "2.5.2"
-http_utils = { workspace = true }
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
 typed-builder = "0.23.2"
