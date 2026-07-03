@@ -191,6 +191,7 @@ public class Fido2Configuration {
 	}
 
 	public Fido2Configuration() {
+		// Default constructor required for JSON (Jackson) deserialization of the FIDO2 configuration.
 	}
 
 	@Override

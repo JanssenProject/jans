@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,13 +95,15 @@ public class TocService {
 	@Inject
 	private DBDocumentService dbDocumentService;
 
-	// volatile: these are populated by the asynchronous startup init()/fetchMetadata() (and the MDS3
-	// update timer) on a background thread, but read by request-handling threads. volatile publishes
-	// the reference writes across threads so requests reliably observe the loaded TOC.
-	private volatile Map<String, JsonNode> tocEntries;
+	// tocEntries is populated by the asynchronous startup init()/fetchMetadata() (and the MDS3 update
+	// timer) on a background thread, but read by request-handling threads. An AtomicReference gives it
+	// safe cross-thread publication and lets each refresh atomically swap in a fully-built map.
+	private final AtomicReference<Map<String, JsonNode>> tocEntries = new AtomicReference<>();
 
+	// nextUpdate is written and read within the same fetchMetadata() flow; volatile keeps it visible
+	// should a later refresh run on a different pool thread. LocalDate is immutable, so this is safe.
 	private volatile LocalDate nextUpdate;
-	private volatile MessageDigest digester;
+	private MessageDigest digester;
 
 	/**
 	 * Loads the MDS TOC at server startup.
@@ -118,12 +121,14 @@ public class TocService {
 	}
 
 	public void refreshTOCEntries() {
-		this.tocEntries = Collections.synchronizedMap(new HashMap<>());
+		Map<String, JsonNode> entries = Collections.synchronizedMap(new HashMap<>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		} else {
-			tocEntries.putAll(parseTOCs());
+			entries.putAll(parseTOCs());
 		}
+		// Atomically publish the fully-built map so readers never observe a half-populated one.
+		tocEntries.set(entries);
 	}
 
 	public void fetchMetadata() {
@@ -353,11 +358,12 @@ public class TocService {
 	}
 
 	public JsonNode getAuthenticatorsMetadata(String aaguid) {
-		if (tocEntries == null) {
+		Map<String, JsonNode> entries = tocEntries.get();
+		if (entries == null) {
 			log.warn("TOC entries map is null");
 			return null;
 		}
-		JsonNode entry = tocEntries.get(aaguid);
+		JsonNode entry = entries.get(aaguid);
 		if (entry == null) {
 			log.warn("No entry found for AAGUID: {}", aaguid);
 		}
