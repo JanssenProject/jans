@@ -8,7 +8,7 @@ import AuthenticationService from '../features/authentication/services/authentic
 import { ILooseObject } from "../shared/types";
 import StorageHelper from './helper/StorageHelper'
 import ConfigurationManager from './helper/ConfigurationManager'
-import { STORAGE_KEYS, DEFAULT_VALUES } from './helper/Constants';
+import { STORAGE_KEYS, DEFAULT_VALUES, LLMProviderType, providerRequiresApiKey } from './helper/Constants';
 
 // Services
 const authClientService = new AuthClientService();
@@ -32,6 +32,10 @@ const client = new Client(
 // State
 let isConnected = false;
 let llmClient: any = null;
+// Signature of the config the cached llmClient was built from. When the user
+// changes provider / model / API key / Ollama endpoint, this no longer matches
+// and the client is rebuilt instead of reusing the stale one.
+let llmClientKey: string | null = null;
 
 // Type definitions
 interface ToolCallResult {
@@ -81,16 +85,30 @@ async function initializeLLMClient(): Promise<any> {
 
   try {
     const provider = await ConfigurationManager.getProvider();
+
+    if (provider === LLMProviderType.OLLAMA) {
+      // Ollama runs locally and needs no API key — only the server endpoint.
+      const baseURL = await ConfigurationManager.getOllamaBaseUrl();
+      const key = `${provider}:${baseURL}`;
+      if (llmClient && llmClientKey === key) return llmClient;
+
+      llmClient = await LLMClientFactory.createClient(provider);
+      await llmClient.initialize(undefined, baseURL);
+      llmClientKey = key;
+      return llmClient;
+    }
+
     const apiKey = await ConfigurationManager.getApiKey();
-
-    if (llmClient) return llmClient;
-
-    if (!apiKey) {
+    if (!apiKey && providerRequiresApiKey(provider)) {
       throw new Error(`API key not found for ${provider}. Please configure your API key.`);
     }
 
+    const key = `${provider}:${apiKey}`;
+    if (llmClient && llmClientKey === key) return llmClient;
+
     llmClient = await LLMClientFactory.createClient(provider);
     await llmClient.initialize(apiKey);
+    llmClientKey = key;
 
     return llmClient;
   } catch (error) {
@@ -156,7 +174,8 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
 
   return {
     tool: "registerOIDCClient",
-    result: toolResult
+    result: toolResult,
+    notifyOnDataChange: true
   };
 }
 
@@ -349,6 +368,37 @@ export async function handleUserPrompt(prompt: string) {
       };
     }
 
+    // Guard against over-eager tool calls (common with small/local models):
+    // if a requested tool is missing required parameters, don't execute it —
+    // ask the user for the missing details instead.
+    const functionCalls = toolCalls.filter((tc: any) => tc.type === "function");
+    const invalidCalls = functionCalls
+      .map((tc: any) => {
+        let args: any = {};
+        try {
+          args = typeof tc.function.arguments === "string"
+            ? JSON.parse(tc.function.arguments || "{}")
+            : (tc.function.arguments || {});
+        } catch {
+          args = {};
+        }
+        return { name: tc.function.name, ...authClientService.validateToolCall(tc.function.name, args) };
+      })
+      .filter((v: any) => !v.valid);
+
+    if (invalidCalls.length > 0) {
+      const details = invalidCalls
+        .map((c: any) => c.missing.length
+          ? `${c.name} (needs: ${c.missing.join(", ")})`
+          : c.name)
+        .join("; ");
+      return {
+        type: "text",
+        content: message?.content?.trim() ||
+          `I need a bit more information before I can do that. To proceed with ${details}, please provide the required details in your message.`
+      };
+    }
+
     const results = await processToolCalls(toolCalls);
 
     return {
@@ -363,8 +413,3 @@ export async function handleUserPrompt(prompt: string) {
     };
   }
 }
-
-// ==================== EXPORTED FUNCTIONS ====================
-export const updateProvider = ConfigurationManager.updateProvider;
-export const updateApiKey = ConfigurationManager.updateApiKey;
-export const updateModel = ConfigurationManager.updateModel;

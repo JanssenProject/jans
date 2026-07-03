@@ -89,7 +89,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../janssen-server/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://maven.jans.io/maven/io/jans/casa-agama/replace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 
