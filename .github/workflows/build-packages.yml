@@ -744,6 +744,10 @@ jobs:
         python3 -c 'import re,sys; p,v=sys.argv[1],sys.argv[2]; c=open(p,encoding="utf-8").read(); c=re.sub("(name = \"cedarling_python\"\nversion = \")[^\"]*(\")",lambda m:m.group(1)+v+m.group(2),c); open(p,"w",encoding="utf-8").write(c)' "${CARGO_LOCK}" "${VERSION_TO_PUBLISH}"
         echo "Updated Cargo.lock to version ${VERSION_TO_PUBLISH}"
 
+    - name: Configure macOS SDK
+      if: runner.os == 'macOS'
+      run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -921,6 +925,10 @@ jobs:
         uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
         with:
           toolchain: stable
+
+      - name: Configure macOS SDK
+        if: runner.os == 'macOS'
+        run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
 
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
