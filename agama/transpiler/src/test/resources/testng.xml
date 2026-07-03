@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Finish and Log" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.FinishAndLogTest" />
+        </classes>
+    </test>
+
 </suite>
