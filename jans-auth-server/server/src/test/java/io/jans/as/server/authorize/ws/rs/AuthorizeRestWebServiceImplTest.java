@@ -279,11 +279,7 @@ public class AuthorizeRestWebServiceImplTest {
         when(appConfiguration.getIssuer()).thenReturn("https://issuer.example.com");
 
         RedirectUri redirectUri = mock(RedirectUri.class);
-
-        Method method = AuthorizeRestWebServiceImpl.class.getDeclaredMethod(
-                "addResponseParameterIss", RedirectUri.class, ResponseMode.class);
-        method.setAccessible(true);
-        method.invoke(authorizeRestWebService, redirectUri, ResponseMode.QUERY);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.QUERY);
 
         verify(redirectUri).addResponseParameter(AuthorizeResponseParam.ISS, "https://issuer.example.com");
     }
@@ -293,11 +289,7 @@ public class AuthorizeRestWebServiceImplTest {
         when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(true);
 
         RedirectUri redirectUri = mock(RedirectUri.class);
-
-        Method method = AuthorizeRestWebServiceImpl.class.getDeclaredMethod(
-                "addResponseParameterIss", RedirectUri.class, ResponseMode.class);
-        method.setAccessible(true);
-        method.invoke(authorizeRestWebService, redirectUri, ResponseMode.JWT);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.JWT);
 
         verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
     }
@@ -307,12 +299,15 @@ public class AuthorizeRestWebServiceImplTest {
         when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(false);
 
         RedirectUri redirectUri = mock(RedirectUri.class);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.QUERY);
 
+        verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
+    }
+
+    private void invokeAddResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) throws Exception {
         Method method = AuthorizeRestWebServiceImpl.class.getDeclaredMethod(
                 "addResponseParameterIss", RedirectUri.class, ResponseMode.class);
         method.setAccessible(true);
-        method.invoke(authorizeRestWebService, redirectUri, ResponseMode.QUERY);
-
-        verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
+        method.invoke(authorizeRestWebService, redirectUri, responseMode);
     }
 }
