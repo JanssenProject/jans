@@ -2,16 +2,20 @@
 runner = 'wasm-bindgen-test-runner'
 rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
 
-[env]
+# This handles your CFLAGS, CXXFLAGS, and DEPLOYMENT_TARGET
+# NOTE: these must stay scoped to the iOS targets below (not a global [env]
+# section) — a global IPHONEOS_DEPLOYMENT_TARGET leaks into native macOS
+# builds and causes clang to target iPhone while SDKROOT points at the
+# macOS SDK, which breaks aws-lc-sys's compiler self-test on macOS runners.
+[target.aarch64-apple-ios.env]
 IOS_MIN = "17.5"
 IPHONEOS_DEPLOYMENT_TARGET = "17.5"
-
-# This handles your CFLAGS, CXXFLAGS, and DEPLOYMENT_TARGET
-[target.aarch64-apple-ios.env]
 CFLAGS = "-miphoneos-version-min=17.5"
 CXXFLAGS = "-miphoneos-version-min=17.5"
 
 [target.aarch64-apple-ios-sim.env]
+IOS_MIN = "17.5"
+IPHONEOS_DEPLOYMENT_TARGET = "17.5"
 CFLAGS = "-mios-simulator-version-min=17.5"
 CXXFLAGS = "-mios-simulator-version-min=17.5"
 
