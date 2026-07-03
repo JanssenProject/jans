@@ -2,22 +2,17 @@
 runner = 'wasm-bindgen-test-runner'
 rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
 
-# This handles your CFLAGS, CXXFLAGS, and DEPLOYMENT_TARGET
-# NOTE: these must stay scoped to the iOS targets below (not a global [env]
-# section) — a global IPHONEOS_DEPLOYMENT_TARGET leaks into native macOS
-# builds and causes clang to target iPhone while SDKROOT points at the
-# macOS SDK, which breaks aws-lc-sys's compiler self-test on macOS runners.
-[target.aarch64-apple-ios.env]
-IOS_MIN = "17.5"
-IPHONEOS_DEPLOYMENT_TARGET = "17.5"
-CFLAGS = "-miphoneos-version-min=17.5"
-CXXFLAGS = "-miphoneos-version-min=17.5"
-
-[target.aarch64-apple-ios-sim.env]
-IOS_MIN = "17.5"
-IPHONEOS_DEPLOYMENT_TARGET = "17.5"
-CFLAGS = "-mios-simulator-version-min=17.5"
-CXXFLAGS = "-mios-simulator-version-min=17.5"
+# CFLAGS/CXXFLAGS below use the `cc` crate's target-suffixed variable naming
+# convention (e.g. `CFLAGS_aarch64_apple_ios`), which the `cc` crate looks up
+# *before* falling back to the plain `CFLAGS`/`CXXFLAGS` names. This means
+# these values only apply when actually compiling for that specific target
+# triple, even though the `[env]` table itself is global (Cargo has no
+# `[target.<triple>.env]` section — that is not valid config syntax).
+[env]
+CFLAGS_aarch64_apple_ios = "-miphoneos-version-min=17.5"
+CXXFLAGS_aarch64_apple_ios = "-miphoneos-version-min=17.5"
+CFLAGS_aarch64_apple_ios_sim = "-mios-simulator-version-min=17.5"
+CXXFLAGS_aarch64_apple_ios_sim = "-mios-simulator-version-min=17.5"
 
 # Configuration specifically for 64-bit ARM iOS devices
 [target.aarch64-apple-ios]
