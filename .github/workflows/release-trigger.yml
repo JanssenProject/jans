@@ -1,0 +1,164 @@
+name: "Release: bump & tag"
+
+# Manually cut a release WITHOUT ever committing the version bump to main.
+#
+# Mechanism: check out the source ref (main), bump every Janssen-owned version in
+# the working tree, commit on a DETACHED HEAD (no branch ref is created), tag that
+# commit `v<version>`, and push ONLY the tag. main is byte-for-byte untouched --
+# the bumped tree exists solely under the tag. Pushing the `v**` tag triggers
+# build-test.yml ("Janssen Build & Publish"), which then chains the docker/package
+# builds; they all build from the fully-bumped tagged tree.
+#
+# The bump is validated (automation/release/version_bump.py --verify) BEFORE the
+# commit, so a missed version aborts the run before any tag is pushed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version, e.g. 1.15.0 (no leading v)'
+        required: true
+      ref:
+        description: 'Source ref to release from'
+        required: false
+        default: 'main'
+      dry_run:
+        description: 'Bump + verify only; do not commit, tag, or push'
+        type: boolean
+        default: false
+      pin_source_sha:
+        description: 'Pin Dockerfile JANS_SOURCE_VERSION to the released base commit'
+        type: boolean
+        default: false
+      docker_suffix:
+        description: 'Image-tag suffix (image tags become X.Y.Z-<suffix>)'
+        required: false
+        default: '1'
+
+permissions:
+  contents: read   # the tag push + release use MOAUTO_WORKFLOW_TOKEN, not GITHUB_TOKEN
+
+concurrency:
+  group: release-trigger-${{ github.event.inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  bump-and-tag:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Validate version input
+      # Pass the input via env (not inline ${{ }}) so a value containing quotes can't break
+      # out of the shell command -- this step runs before any validation.
+      env:
+        VERSION_INPUT: ${{ github.event.inputs.version }}
+        SUFFIX_INPUT: ${{ github.event.inputs.docker_suffix }}
+      run: |
+        V="$VERSION_INPUT"
+        if [[ ! "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+          echo "::error::version must be X.Y.Z (optionally -suffix)"
+          exit 1
+        fi
+        if [[ ! "$SUFFIX_INPUT" =~ ^[0-9A-Za-z.]+$ ]]; then
+          echo "::error::docker_suffix must be alphanumeric (got '$SUFFIX_INPUT')"
+          exit 1
+        fi
+
+    # Full history so the tag's commit has a real parent. The PAT is what makes
+    # the later tag push trigger downstream workflows (GITHUB_TOKEN-pushed tags do not).
+    - name: Checkout source ref
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.inputs.ref }}
+        fetch-depth: 0
+        token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+    - name: Refuse if tag already exists
+      run: |
+        if git ls-remote --tags origin "refs/tags/v${{ github.event.inputs.version }}" | grep -q .; then
+          echo "::error::tag v${{ github.event.inputs.version }} already exists on origin"
+          exit 1
+        fi
+
+    # Detached HEAD guarantees no branch pointer can move: commits advance only HEAD.
+    - name: Detach HEAD
+      run: git checkout --detach
+
+    - name: Bump every owned version in the working tree
+      run: |
+        EXTRA=""
+        if [[ "${{ github.event.inputs.pin_source_sha }}" == "true" ]]; then
+          EXTRA="--pin-source-sha $(git rev-parse HEAD)"
+        fi
+        python3 automation/release/version_bump.py "${{ github.event.inputs.version }}" \
+          --docker-suffix "${{ github.event.inputs.docker_suffix }}" $EXTRA
+
+    # Safety net: abort BEFORE committing/pushing if any owned version was missed.
+    - name: Verify the tree is fully bumped
+      run: python3 automation/release/version_bump.py "${{ github.event.inputs.version }}" --verify
+
+    - name: Assert HEAD is detached
+      run: |
+        if git symbolic-ref -q HEAD >/dev/null; then
+          echo "::error::HEAD is on a branch -- refusing to proceed (would risk committing to a branch)"
+          exit 1
+        fi
+
+    - name: Commit the bump (detached) and tag it
+      id: commit
+      run: |
+        git config user.name "jans-release-bot"
+        git config user.email "mo@gluu.org"
+        git add -A
+        git commit -m "release: v${{ github.event.inputs.version }}"
+        SHA="$(git rev-parse HEAD)"
+        echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+        git tag -a "v${{ github.event.inputs.version }}" -m "Janssen v${{ github.event.inputs.version }}"
+
+    - name: Push ONLY the tag (main is never pushed)
+      if: ${{ github.event.inputs.dry_run != 'true' }}
+      run: |
+        # Single fully-qualified tag refspec. NEVER push a branch / HEAD / --all / --follow-tags.
+        git symbolic-ref -q HEAD >/dev/null && { echo "::error::HEAD not detached"; exit 1; }
+        git push origin "refs/tags/v${{ github.event.inputs.version }}"
+
+    - name: Create the GitHub Release on the tag
+      if: ${{ github.event.inputs.dry_run != 'true' }}
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+      run: |
+        # build-test.yml uploads WAR/jar assets to this release, so it must exist.
+        # --target is the bump commit (already on origin via the tag), not a branch.
+        gh release create "v${{ github.event.inputs.version }}" \
+          --title "v${{ github.event.inputs.version }}" \
+          --target "${{ steps.commit.outputs.sha }}" \
+          --generate-notes
+
+    - name: Summary
+      if: always()
+      run: |
+        echo "## Release v${{ github.event.inputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Source ref: \`${{ github.event.inputs.ref }}\`" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Dry run: \`${{ github.event.inputs.dry_run }}\`" >> "$GITHUB_STEP_SUMMARY"
+        if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+          echo "- Bumped + verified only; no tag pushed." >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "- Pushed tag \`v${{ github.event.inputs.version }}\` and created its release." >> "$GITHUB_STEP_SUMMARY"
+          echo "- \`main\` was not modified." >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+  publish-cedarling:
+    needs: bump-and-tag
+    if: ${{ github.event.inputs.dry_run != 'true' }}
+    uses: ./.github/workflows/publish-cedarling.yml
+    with:
+      ref: v${{ github.event.inputs.version }}
+      dry_run: false
+    secrets:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

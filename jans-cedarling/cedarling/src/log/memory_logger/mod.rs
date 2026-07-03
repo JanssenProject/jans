@@ -7,7 +7,7 @@ use chrono::Duration;
 use serde_json::Value;
 use std::sync::Mutex;
 
-use sparkv::{Config as ConfigSparKV, SparKV};
+use crate::sparkv::{BTreeSparKV, Config as ConfigSparKV};
 
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
@@ -24,7 +24,7 @@ const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should un
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    storage: Mutex<SparKV<serde_json::Value>>,
+    storage: Mutex<BTreeSparKV<serde_json::Value>>,
     log_level: LogLevel,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
@@ -56,7 +56,7 @@ impl MemoryLogger {
         };
 
         MemoryLogger {
-            storage: Mutex::new(SparKV::with_config_and_sizer(
+            storage: Mutex::new(BTreeSparKV::with_config_and_sizer(
                 sparkv_config,
                 Some(calculate_memory_usage),
             )),

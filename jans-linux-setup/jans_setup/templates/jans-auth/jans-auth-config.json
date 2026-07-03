@@ -23,7 +23,8 @@
       "status_list",
       "logout_status_jwt",
       "rate_limit",
-      "access_evaluation"
+      "access_evaluation",
+      "identity_assertion_authz_grant"
     ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
