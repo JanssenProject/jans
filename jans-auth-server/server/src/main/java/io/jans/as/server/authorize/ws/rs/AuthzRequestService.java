@@ -335,8 +335,7 @@ public class AuthzRequestService {
         }
 
         // JARM
-        Set<ResponseMode> jwtResponseModes = Sets.newHashSet(ResponseMode.QUERY_JWT, ResponseMode.FRAGMENT_JWT, ResponseMode.JWT, ResponseMode.FORM_POST_JWT);
-        if (jwtResponseModes.contains(authzRequest.getResponseModeEnum())) {
+        if (authzRequest.getResponseModeEnum().isJarm()) {
             JsonWebResponse jwe = parseRequestToJwr(authzRequest.getRequest());
             fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
         }
