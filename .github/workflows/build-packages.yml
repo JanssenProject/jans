@@ -1376,20 +1376,14 @@ jobs:
       
           # Tell aws-lc-sys to use the cmake builder instead of cc — avoids the memcmp detection
           echo "AWS_LC_SYS_CMAKE_BUILDER=1" >> $GITHUB_ENV
-
-      # Step 3 — Install Rust and add iOS targets
-      - name: Install Rust and add iOS targets
-        run: |
-          rustup toolchain install stable
-          rustup default stable
        
-      # Step 4 — build host dylib so uniffi-bindgen can introspect it
+      # Step 3 — build host dylib so uniffi-bindgen can introspect it
       - name: Build host library (dylib)
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
           cargo build --release -p cedarling_uniffi
  
-      # Step 5 — generate Swift bindings
+      # Step 4 — generate Swift bindings
       - name: Generate Swift bindings
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
@@ -1398,29 +1392,29 @@ jobs:
             --language swift \
             --out-dir ./output
  
-      # Step 6 — rename modulemap (Xcode requires module.modulemap, not cedarling_uniffiFFI.modulemap)
+      # Step 5 — rename modulemap (Xcode requires module.modulemap, not cedarling_uniffiFFI.modulemap)
       - name: Rename modulemap
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
           mv ./output/cedarling_uniffiFFI.modulemap ./output/module.modulemap
 
-      # Step 7 — Add iOS Rust targets
+      # Step 6 — Add iOS Rust targets
       - name: Add iOS Rust targets
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
-          rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
+          rustup target add aarch64-apple-ios-sim aarch64-apple-ios
 
-      # Step 8 — build iOS device static library
+      # Step 7 — build iOS simulator static library
       - name: Build iOS device library (aarch64-apple-ios-sim)
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: cargo build --release --target aarch64-apple-ios-sim -p cedarling_uniffi
  
-      # Step 9 — build iOS simulator static library
+      # Step 8 — build iOS device static library
       - name: Build iOS simulator library (aarch64-apple-ios)
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: cargo build --release --target aarch64-apple-ios -p cedarling_uniffi
  
-      # Step 10 — assemble XCFramework
+      # Step 9 — assemble XCFramework
       - name: Create XCFramework
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
@@ -1431,14 +1425,14 @@ jobs:
             -headers ./output \
             -output ./Cedarling.xcframework
  
-      # Step 11 — zip (required by SPM binaryTarget + smaller release asset)
+      # Step 10 — zip (required by SPM binaryTarget + smaller release asset)
       - name: Zip XCFramework
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
           TAG="${{ steps.previoustag.outputs.tag }}"
           zip -r "cedarling_uniffi-ios-${TAG}.zip" Cedarling.xcframework
  
-      # Step 12 — compute SPM checksum (sha256 of the zip; consumers paste this into Package.swift)
+      # Step 11 — compute SPM checksum (sha256 of the zip; consumers paste this into Package.swift)
       - name: Compute SPM checksum
         id: spm_checksum
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
@@ -1450,7 +1444,7 @@ jobs:
           # Write checksum alongside zip so it's available as a release asset
           echo "${CHECKSUM}" > "cedarling_uniffi-ios-${TAG}.zip.spm-checksum"
  
-      # Step 13 — smoke-test: verify XCFramework contains expected binaries
+      # Step 12 — smoke-test: verify XCFramework contains expected binaries
       - name: Smoke-test XCFramework
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: |
@@ -1473,7 +1467,7 @@ jobs:
           fi
           echo "Smoke-test passed."
  
-      # Step 14 — sign and upload to GitHub release
+      # Step 13 — sign and upload to GitHub release
       - name: Sign and upload iOS artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         env:
@@ -1492,7 +1486,7 @@ jobs:
             --repo ${{ github.repository }} \
             --clobber
  
-      # Step 15 — compute SHA256 digest for SLSA provenance
+      # Step 14 — compute SHA256 digest for SLSA provenance
       - name: Compute SHA256 digest for SLSA provenance
         id: compute_uniffi_ios_digest
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi

@@ -346,7 +346,7 @@ if let firstId = logIds.first {
 let systemLogs: [String] = adapter.getLogsByTag(tag: "System")
 ```
 
-> To use the log functions, set the bootstrap properties **CEDARLING_LOG_TYPE** to **memory** and configure **CEDARLING_LOG_TTL** with an appropriate value (in seconds). See the [Log behavior](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/#optional-properties) documentation to learn about other log-related bootstrap properties.
+> To use the log functions, set the bootstrap properties, **CEDARLING_LOG_TYPE** to **memory** and configure **CEDARLING_LOG_TTL** with an appropriate value (in seconds). See the [Log behavior](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/#optional-properties) documentation to learn about other log-related bootstrap properties.
 
 ---
 
