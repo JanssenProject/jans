@@ -197,6 +197,27 @@ where
         http_client,
     } = ctx;
 
+    // If a refresh fails, drop the cached list instead of serving a stale one.
+    // Tokens that need it then get rejected until a refresh works again. We also
+    // clear the token cache so a token already cached as valid gets re-checked.
+    let fail_closed = || {
+        let removed = {
+            let mut lists = status_lists.write().expect("obtain status list write lock");
+            lists.remove(status_list_url.as_str()).is_some()
+        };
+        if removed {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "dropped the cached status list for '{0}' after a failed refresh; \
+                     tokens that reference it will be rejected until it refreshes successfully",
+                    status_list_url.as_str(),
+                ),
+                Some(LogLevel::WARN),
+            ));
+            cb();
+        }
+    };
+
     loop {
         sleep(ttl).await;
 
@@ -212,6 +233,7 @@ where
                         ),
                         Some(LogLevel::ERROR),
                     ));
+                    fail_closed();
                     continue;
                 },
             };
@@ -228,6 +250,7 @@ where
                     ),
                     Some(LogLevel::ERROR),
                 ));
+                fail_closed();
                 continue;
             },
         };
@@ -243,6 +266,7 @@ where
                     ),
                     Some(LogLevel::ERROR),
                 ));
+                fail_closed();
                 continue;
             },
         };
@@ -261,28 +285,18 @@ where
                     ),
                     Some(LogLevel::ERROR),
                 ));
+                fail_closed();
                 continue;
             },
         };
 
         {
             let mut lists = status_lists.write().expect("obtain status list write lock");
-
-            if let Some(list) = lists.get_mut(status_list_url.as_str()) {
-                *list = updated_status_list;
-                // call callback on updated status list
-                cb();
-            } else {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "missing entry for '{}' in the status list cache, will no longer keep this entry updated",
-                        status_list_url.as_str(),
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
-                return;
-            }
+            // insert, not update: re-creates the entry if a failed refresh dropped it
+            lists.insert(status_list_url.to_string(), updated_status_list);
         }
+        // call callback on updated status list
+        cb();
     }
 }
 
@@ -414,6 +428,86 @@ mod test {
                     list: vec![0b0000_0001],
                 },
                 "the status list was not updated",
+            );
+        }
+    }
+
+    /// When the status endpoint becomes unavailable, the background refresh
+    /// fails closed: it drops the cached status list so tokens that depend on
+    /// it are rejected instead of being checked against stale revocation data.
+    #[tokio::test]
+    async fn refresh_failure_evicts_status_list() {
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+            max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed");
+
+        let validators = JwtValidatorCache::default();
+        let key_service = KeyService::default();
+        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
+        key_service
+            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .await
+            .unwrap();
+        mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
+        let status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            HashMap::default(),
+        );
+
+        let iss_config = IssuerConfig {
+            issuer_id: "some_iss_id".into(),
+            policy: Arc::new(ti),
+            openid_config: Some(mock_server.openid_config()),
+        };
+        validators.init_for_iss(
+            &iss_config,
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: false,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+                ..Default::default()
+            },
+            &status_list,
+            None,
+        );
+        status_list
+            .init_for_iss(
+                &iss_config,
+                InitForIssArgs {
+                    validators: &validators,
+                    key_service: &key_service,
+                    token_cache: TokenCache::default(),
+                    logger: None,
+                    http_client,
+                    refresh_interval_max: Duration::from_millis(200),
+                },
+            )
+            .await
+            .unwrap();
+
+        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+
+        // init cached the list; now make the endpoint fail and let one refresh run.
+        mock_server.fail_status_list_endpoint();
+        tokio::time::sleep(Duration::from_millis(600)).await;
+
+        {
+            let lists = status_list
+                .status_lists
+                .read()
+                .expect("obtain status_lists read lock");
+            assert!(
+                !lists.contains_key(&status_list_uri),
+                "a failed refresh should drop the cached status list (fail closed)",
             );
         }
     }
