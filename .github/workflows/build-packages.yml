@@ -218,7 +218,7 @@ jobs:
         OS="${{ matrix.name }}"
         VERSION="${{ steps.previoustag.outputs.version }}"
         SUFFIX="${{ matrix.asset_suffix }}"
-        
+
         gh release upload ${{ steps.previoustag.outputs.tag }} \
           "${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VERSION}${SUFFIX}" \
           "${{github.workspace}}/jans-${OS}-${VERSION}.bundle" \
@@ -302,7 +302,7 @@ jobs:
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         pip3 install shiv wheel setuptools
-        sudo chown -R runner:docker /home/runner/work/jans/jans  
+        sudo chown -R runner:docker /home/runner/work/jans/jans
         cd jans-linux-setup
         make zipapp || echo "Creating linux setup failed for ubuntu"
         mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz || echo "Failed"
@@ -1906,7 +1906,7 @@ jobs:
 
   provenance-cedarling-uniffi-ios:
     needs: [collect-cedarling-uniffi-ios-digests]
- 
+
     permissions:
       actions: read
       id-token: write
