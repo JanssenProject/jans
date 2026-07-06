@@ -314,7 +314,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static final Stream<Arguments> aggregateTrustRelationshipsNotInActivatingState() {
+    private static final Stream<Arguments> aggregateTrustRelationshipsNotInActivatingState() {
 
         return Stream.of(
             Arguments.of(sampleDraftAggregateTrustRelationship()),
@@ -324,7 +324,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static final Stream<Arguments> individualTrustRelationshipsInMultipleStates() {
+    private static final Stream<Arguments> individualTrustRelationshipsInMultipleStates() {
 
         return Stream.of(
             Arguments.of(sampleDraftIndividualTrustRelationship()),
@@ -335,7 +335,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static final Stream<Arguments> trustRelationshipsOfAllNaturesNotInActivatingState() {
+    private static final Stream<Arguments> trustRelationshipsOfAllNaturesNotInActivatingState() {
 
         return Stream.of(
             //Individual
@@ -352,7 +352,7 @@ public class TrustRelationshipTest {
         );
     }
     
-    public static final Stream<Arguments> trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources() {
+    private static final Stream<Arguments> trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources() {
 
         return Stream.of(
 
@@ -372,7 +372,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static final Stream<Arguments> draftTrustRelationshipsWithRequiredFieldsInvalidators() {
+    private static final Stream<Arguments> draftTrustRelationshipsWithRequiredFieldsInvalidators() {
 
         return Stream.of(
 
@@ -395,7 +395,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static Stream<Arguments> draftTrustRelationshipsWithProfileConfigUpdaters() {
+    private static Stream<Arguments> draftTrustRelationshipsWithProfileConfigUpdaters() {
 
         return Stream.of(
 
@@ -408,7 +408,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources() {
+    private static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources() {
 
         MetadataSource filesource = FileMetadataSource.of("/opt/gluu/original_sp.xml").getValue();
         MetadataSource urisource = UriMetadataSource.of(URI.create("https://sample.gluu.org/sp_metadata.xml")).getValue();
@@ -421,7 +421,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameMetadataSources() {
+    private static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameMetadataSources() {
 
         MetadataSource filesource = FileMetadataSource.of("/opt/gluu/original_sp.xml").getValue();
         MetadataSource urisource = UriMetadataSource.of(URI.create("https://sample.gluu.org/sp_metadata.xml")).getValue();
@@ -435,7 +435,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration() {
+    private static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration() {
 
         Saml2SsoProfileConfiguration newsaml2sso = Saml2SsoProfileConfiguration
             .from(TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration())
@@ -458,7 +458,7 @@ public class TrustRelationshipTest {
         );
     }
 
-    public static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameProfileConfiguration() {
+    private static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithSameProfileConfiguration() {
 
         Saml2SsoProfileConfiguration saml2sso = Saml2SsoProfileConfiguration
             .from(TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration())
@@ -478,6 +478,29 @@ public class TrustRelationshipTest {
         return Stream.of (
             Arguments.of(individual,saml2logout,ProfileConfigurationAccessor.SAML2_LOGOUT),
             Arguments.of(aggregate,saml2sso,ProfileConfigurationAccessor.SAML2_SSO)
+        );
+    }
+
+    private static Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor() {
+
+        Saml2SsoProfileConfiguration saml2sso = Saml2SsoProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2SsoProfileConfiguration())
+            .assertionLifetime(Duration.ofDays(1000))
+            .build()
+            .getValue();
+        
+        Saml2LogoutProfileConfiguration saml2logout = Saml2LogoutProfileConfiguration
+            .from(TrustRelationshipFixtures.activeSaml2LogoutProfileConfiguration())
+            .messageSigningPolicy(MessageSigningPolicy.SIGN_NONE)
+            .build()
+            .getValue();
+        
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship(ProfileConfigurationAccessor.SAML2_LOGOUT,saml2logout);
+        TrustRelationship aggregate  = sampleActiveAggregateTrustRelationship(ProfileConfigurationAccessor.SAML2_SSO,saml2sso);
+
+        return Stream.of(
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_LOGOUT),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_SSO)
         );
     }
 
@@ -1472,6 +1495,66 @@ public class TrustRelationshipTest {
     @DisplayName("Advanced Scenarios and Edge Cases -- Complex State Transitions and Interactions")
     public class ComplexStateTransitionsAndInteractionsTests {
         
-        
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateMetadataSource() is called with a  *different* metadatasource " +
+            "THEN should transition to ACTIVATING state and increment version " 
+        )
+        public void shouldTransitionToActivating_whenMetadataSourceUpdatedFromActive(TrustRelationship tr, MetadataSource newsource) {
+
+            assertThat(tr).isInActiveStatus();
+            assertThat(newsource).isNotEqualTo(tr.getMetadataSource());
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(newsource);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInActivatingStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateMetadataSource() is called with the *same* current metadata source " +
+            "THEN should remain in ACTIVE state and version should not change (idempotent) " 
+        )
+        public void shouldRemainInActive_whenMetadataSourceUpdateIsNoOp(TrustRelationship tr) {
+
+            assertThat(tr).isInActiveStatus();
+            MetadataSource samesource = tr.getMetadataSource();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(samesource);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship same = result.getValue();
+
+            assertThat(same).isInActiveStatus();
+            assertThat(same).isVersion(tr.getVersion());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
+            "THEN should transition to DRAFT state and increment version "
+        )
+        public void shouldTransitionToDraft_whenAllProfilesDisabledFromActive(TrustRelationship tr,ProfileConfigurationAccessor accessor) {
+
+            assertThat(tr).isInActiveStatus();
+            assertThat(tr).hasActiveProfileConfigurationCount(1);
+
+            TrustResult<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
     }
 } 

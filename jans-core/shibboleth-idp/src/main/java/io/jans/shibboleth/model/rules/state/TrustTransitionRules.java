@@ -91,7 +91,13 @@ public final class TrustTransitionRules {
                 TrustStatus.ACTIVE,TrustStatus.ACTIVATING,
                 (ctx) -> ctx.updateProfileConfigurationCalled() && ctx.hasAnyActiveProfileConfiguration() && ctx.hasAnyProfileConfigurationChanged(),
                 "ACTIVE -> ACTIVATING : updateXXXProfileConfiguration() called and active profiles >=1 and profile configuration changed "
-            ) 
+            ),
+
+            new TrustTransitionRule( 
+                TrustStatus.ACTIVE,TrustStatus.DRAFT,
+                (ctx) -> ctx.updateProfileConfigurationCalled() && ctx.hasNoActiveProfileConfiguration(),
+                "ACTIVE -> DRAFT : updateXXXProfileConfiguration() called and active profiles == 0"
+            )
         );
     }
 
