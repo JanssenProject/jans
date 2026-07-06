@@ -39,6 +39,8 @@
       "unfinishedRequestExpiration":180,
 	  
       "disableMetadataService":false,
+      "mdsDownloadStartupRetries":3,
+      "mdsDownloadStartupRetryInterval":30,
       "attestationMode":"monitor",
       "enterpriseAttestation":"false",
       "hints": ["client-device"]

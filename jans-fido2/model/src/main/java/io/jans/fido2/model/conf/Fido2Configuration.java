@@ -39,16 +39,20 @@ public class Fido2Configuration {
 	@DocProperty(description = "Authenticators metadata in json format")
 	private String serverMetadataFolder;
 	@DocProperty(description = "List of Requested Credential Types")
-	private List<String> enabledFidoAlgorithms = new ArrayList<String>();
+	private List<String> enabledFidoAlgorithms = new ArrayList<>();
 	@DocProperty(description = "Authenticators metadata in json format")
 	@JsonProperty(value = "rp")
-	private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
+	private List<RequestedParty> requestedParties = new ArrayList<>();
 	@DocProperty(description = "String value to provide source of URLs with external metadata")
-	private List<MetadataServer> metadataServers = new ArrayList<MetadataServer>();
+	private List<MetadataServer> metadataServers = new ArrayList<>();
 	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
 	private boolean disableMetadataService = false;
+	@DocProperty(description = "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)", defaultValue = "3")
+	private int mdsDownloadStartupRetries = 3;
+	@DocProperty(description = "Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing", defaultValue = "30")
+	private int mdsDownloadStartupRetryInterval = 30;
 	@DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
-	private List<String> hints = new ArrayList<String>();
+	private List<String> hints = new ArrayList<>();
 	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
 	private boolean enterpriseAttestation = false;
 	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
@@ -154,6 +158,22 @@ public class Fido2Configuration {
 		this.disableMetadataService = disableMetadataService;
 	}
 
+	public int getMdsDownloadStartupRetries() {
+		return mdsDownloadStartupRetries;
+	}
+
+	public void setMdsDownloadStartupRetries(int mdsDownloadStartupRetries) {
+		this.mdsDownloadStartupRetries = mdsDownloadStartupRetries;
+	}
+
+	public int getMdsDownloadStartupRetryInterval() {
+		return mdsDownloadStartupRetryInterval;
+	}
+
+	public void setMdsDownloadStartupRetryInterval(int mdsDownloadStartupRetryInterval) {
+		this.mdsDownloadStartupRetryInterval = mdsDownloadStartupRetryInterval;
+	}
+
 	public List<MetadataServer> getMetadataServers() {
 		return metadataServers;
 	}
@@ -170,32 +190,8 @@ public class Fido2Configuration {
 		this.attestationMode = attestationMode;
 	}
 
-	public Fido2Configuration(String authenticatorCertsFolder, String mdsAccessToken, String mdsCertsFolder,
-			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
-			int unfinishedRequestExpiration, int authenticationHistoryExpiration, String serverMetadataFolder,
-			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
-			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
-			List<String> hints, boolean enterpriseAttestation) {
-		super();
-		this.authenticatorCertsFolder = authenticatorCertsFolder;
-
-		this.mdsCertsFolder = mdsCertsFolder;
-		this.mdsTocsFolder = mdsTocsFolder;
-
-		this.userAutoEnrollment = debugUserAutoEnrollment;
-		this.unfinishedRequestExpiration = unfinishedRequestExpiration;
-		this.authenticationHistoryExpiration = authenticationHistoryExpiration;
-		this.serverMetadataFolder = serverMetadataFolder;
-		this.enabledFidoAlgorithms = enabledFidoAlgorithms;
-		this.requestedParties = requestedParties;
-		this.metadataServers = metadataServers;
-		this.disableMetadataService = disableMetadataService;
-		this.attestationMode = attestationMode;
-		this.hints = hints;
-		this.enterpriseAttestation = enterpriseAttestation;
-	}
-
 	public Fido2Configuration() {
+		// Default constructor required for JSON (Jackson) deserialization of the FIDO2 configuration.
 	}
 
 	@Override
@@ -206,8 +202,9 @@ public class Fido2Configuration {
 				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
 				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
 				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
-				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
-				+ ", attestationMode=" + attestationMode + "]";
+				+ disableMetadataService + ", mdsDownloadStartupRetries=" + mdsDownloadStartupRetries
+				+ ", mdsDownloadStartupRetryInterval=" + mdsDownloadStartupRetryInterval + ", hints=" + hints
+				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode + "]";
 	}
 
 }
