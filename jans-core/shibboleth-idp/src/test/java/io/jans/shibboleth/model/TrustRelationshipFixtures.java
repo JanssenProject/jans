@@ -97,6 +97,15 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final TrustRelationship sampleReadyIndividualTrustRelationship(ProfileConfigurationAccessor accessor,Object profileconfig) {
+
+        return accessor.update(sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),profileconfig).getValue();
+    }
+
+    public static final TrustRelationship sampleReadyAggregateTrustRelationship(ProfileConfigurationAccessor accessor,Object profileconfig) {
+
+        return accessor.update(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),profileconfig).getValue();
+    }
 
     public static final TrustRelationship sampleReadyAggregateTrustRelationship() {
  

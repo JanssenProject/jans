@@ -253,6 +253,24 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
+    public TrustRelationshipAssert hasActiveProfileConfigurationCount(int expectedcount) {
+
+        isNotNull();
+        int activecount = 0;
+        activecount = actual.getShibbolethSsoProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount ;
+        activecount = actual.getSaml2ArtifactResolutionProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount;
+        activecount = actual.getSaml2AttributeQueryProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount;
+        activecount = actual.getSaml2EcpProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount;
+        activecount = actual.getSaml2SsoProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount;
+        activecount = actual.getSaml2LogoutProfileConfiguration().getStatus() == ProfileStatus.ACTIVE ? ++activecount : activecount;
+
+        if (activecount != expectedcount) {
+            
+            failWithMessage("TrustRelationship has <%d> active profiles. Expected count: <%d>",activecount,expectedcount);
+        }
+        return this;
+    }
+
     public TrustRelationshipAssert hasNoReleasedAttributes() {
 
         isNotNull();
