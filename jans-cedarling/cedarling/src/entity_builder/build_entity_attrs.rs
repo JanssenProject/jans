@@ -23,18 +23,38 @@ pub(super) fn build_entity_attrs(
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        build_entity_attrs_with_shape(attrs_src, entities, attrs_shape)
+        build_entity_attrs_with_shape(
+            |name| attrs_src.get(name),
+            entities,
+            attrs_shape,
+        )
     } else {
         build_entity_attrs_without_schema(attrs_src)
     }
 }
 
-/// Uses the schema as guide in building the attributes
-fn build_entity_attrs_with_shape(
-    attrs_src: &HashMap<String, Value>,
+/// Schema-driven variant that accepts a borrow-based lookup closure instead of
+/// a full `HashMap`.
+pub(super) fn build_entity_attrs_with_shape_lookup<'a, F>(
+    lookup: F,
     entities: &BuiltEntities,
     attrs_shape: &HashMap<SmolStr, AttrsShape>,
-) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec>
+where
+    F: Fn(&str) -> Option<&'a Value>,
+{
+    build_entity_attrs_with_shape(lookup, entities, attrs_shape)
+}
+
+/// Uses the schema as guide in building the attributes
+fn build_entity_attrs_with_shape<'a, F>(
+    lookup: F,
+    entities: &BuiltEntities,
+    attrs_shape: &HashMap<SmolStr, AttrsShape>,
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec>
+where
+    F: Fn(&str) -> Option<&'a Value>,
+{
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
     let mut required_missing_claims: Vec<SmolStr> = Vec::new();
@@ -44,7 +64,7 @@ fn build_entity_attrs_with_shape(
         match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
                 // skip if the source couldn't be found and was not required
-                let Some(src) = attrs_src.get(attr_name.as_str()) else {
+                let Some(src) = lookup(attr_name.as_str()) else {
                     if attr_shape.is_required() {
                         required_missing_claims.push(attr_name.to_smolstr());
                     }
@@ -67,9 +87,8 @@ fn build_entity_attrs_with_shape(
                     Some(eid) => Some(eid),
                     None => match entities.get_multiple(entity_ref_src) {
                         Some(eids) => {
-                            let src_val_opt = attrs_src
-                                .get(attr_name.as_str())
-                                .and_then(|val| val.as_str());
+                            let src_val_opt =
+                                lookup(attr_name.as_str()).and_then(|val| val.as_str());
 
                             match src_val_opt {
                                 Some(src_val) if eids.contains(&src_val.to_smolstr()) => {

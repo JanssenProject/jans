@@ -20,13 +20,14 @@ package cedarlingopa
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
-	"os"
 	"sync"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
+	"github.com/open-policy-agent/opa/v1/logging"
 	"github.com/open-policy-agent/opa/v1/plugins"
 	"github.com/open-policy-agent/opa/v1/util"
 )
@@ -37,15 +38,17 @@ import "C"
 const PluginName = "cedarling_opa"
 
 type Config struct {
-	BootstrapConfig map[string]any `json:"bootstrap_config"`
-	Stderr          bool           `json:"stderr"` // false => stdout, true => stderr
+	BootstrapConfig  map[string]any `json:"bootstrap_config"`
+	Host             string         `json:"host"`
+	Evaluation_Logic EvaluationMode `json:"evaluation_logic"`
 }
 
 type CedarPlugin struct {
 	manager *plugins.Manager
 	mtx     sync.RWMutex
 	config  Config
-	cedar   *cedarling_go.Cedarling
+	cedar   Cedarling
+	logger  logging.Logger
 }
 
 var globalInstanceMu sync.RWMutex
@@ -65,7 +68,7 @@ func clearGlobalInstance(p *CedarPlugin) {
 	}
 }
 
-func WithCedarlingInstance(fn func(*cedarling_go.Cedarling) error) error {
+func WithCedarlingInstance(fn func(Cedarling) error) error {
 	globalInstanceMu.RLock()
 	p := globalInstance
 	globalInstanceMu.RUnlock()
@@ -80,11 +83,14 @@ func WithCedarlingInstance(fn func(*cedarling_go.Cedarling) error) error {
 	return fn(p.cedar)
 }
 
-func logMessage(stderr bool, msg string) {
-	if stderr {
-		fmt.Fprintln(os.Stderr, msg)
-	} else {
-		fmt.Println(msg)
+func normalizeEvaluationMode(mode EvaluationMode) (EvaluationMode, error) {
+	switch mode {
+	case "":
+		return MultiIssuer, nil
+	case MultiIssuer, Unsigned:
+		return mode, nil
+	default:
+		return mode, fmt.Errorf("Invalid evaluation mode: must be one of MULTI_ISSUER and UNSIGNED")
 	}
 }
 
@@ -102,14 +108,21 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
-	var stderr bool = p.config.Stderr
-	logMessage(stderr, "Initializing Cedarling")
+	p.config.Evaluation_Logic, err = normalizeEvaluationMode(p.config.Evaluation_Logic)
+	if err != nil {
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
+		return err
+	}
+	p.logger.Info("Initializing Cedarling")
 	instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
-	p.cedar = instance
+	p.cedar = Cedarling(instance)
+	p.manager.ExtraRoute("/.well-known/authzen-configuration", "metadata", p.MetaDataHandler)
+	p.manager.ExtraRoute("/access/v1/evaluation", "evaluation", p.AccessEvaluationHandler)
+	p.manager.ExtraRoute("/access/v1/evaluations", "evaluations", p.AccessEvaluationsHandler)
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
 	setGlobalInstance(p)
 	return nil
@@ -127,19 +140,24 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 	}
 }
 
-func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
+func (p *CedarPlugin) Reconfigure(ctx context.Context, config any) {
 	cfg := config.(Config)
 	new_config, err := buildBootstrapConfig(cfg)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		p.logger.Error(err.Error())
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
-	var stderr bool = cfg.Stderr
-	logMessage(stderr, "Initializing Cedarling")
+	cfg.Evaluation_Logic, err = normalizeEvaluationMode(cfg.Evaluation_Logic)
+	if err != nil {
+		p.logger.Error(err.Error())
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
+		return
+	}
+	p.logger.Info("Initializing Cedarling")
 	new_instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		p.logger.Error(err.Error())
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
@@ -157,17 +175,18 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 
 type Factory struct{}
 
-func (Factory) New(m *plugins.Manager, config interface{}) plugins.Plugin {
+func (Factory) New(m *plugins.Manager, config any) plugins.Plugin {
 
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
 	return &CedarPlugin{
 		manager: m,
 		config:  config.(Config),
+		logger:  m.Logger().WithFields(map[string]any{"plugin": PluginName}),
 	}
 }
 
-func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) {
+func (Factory) Validate(_ *plugins.Manager, config []byte) (any, error) {
 	parsedConfig := Config{}
 	err := util.Unmarshal(config, &parsedConfig)
 	if err != nil {
@@ -177,4 +196,135 @@ func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) 
 		return nil, errors.New("Bootstrap config is required")
 	}
 	return parsedConfig, nil
+}
+
+func extractTokens(subject *Entity) ([]cedarling_go.TokenInput, error) {
+	if subject == nil {
+		return nil, fmt.Errorf("Subject empty")
+	}
+	entity := *subject
+	var tokens TokenList
+	if entity.Properties == nil {
+		entity.Properties = []byte(`{}`)
+	}
+	if err := json.Unmarshal(entity.Properties, &tokens); err != nil {
+		return nil, fmt.Errorf("Error: invalid token input")
+	}
+	output := []cedarling_go.TokenInput{}
+	for _, token := range tokens.Tokens {
+		temp := cedarling_go.TokenInput{
+			Mapping: token.Mapping,
+			Payload: token.Payload,
+		}
+		output = append(output, temp)
+	}
+	return output, nil
+}
+
+func extractResource(resource *Entity) (cedarling_go.EntityData, error) {
+	var output cedarling_go.EntityData
+	if resource == nil {
+		return output, fmt.Errorf("Resource empty")
+	}
+	entity := *resource
+	if entity.Properties == nil {
+		entity.Properties = []byte(`{}`)
+	}
+	err := json.Unmarshal(entity.Properties, &output)
+	if err != nil {
+		return output, fmt.Errorf("Error: invalid resource input")
+	}
+	return output, err
+}
+
+func (p *CedarPlugin) evaluate(subject *Entity, action *Action, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
+	tokens, err := extractTokens(subject)
+	if err != nil {
+		return nil, err
+	}
+	if action == nil {
+		return nil, fmt.Errorf("Action empty")
+	}
+	resourceEntity, err := extractResource(resource)
+	if err != nil {
+		return nil, err
+	}
+	authorization_request := cedarling_go.AuthorizeMultiIssuerRequest{
+		Tokens:   tokens,
+		Action:   action.Name,
+		Resource: resourceEntity,
+		Context:  context,
+	}
+	authorization_result, err := p.cedar.AuthorizeMultiIssuer(authorization_request)
+	if err != nil {
+		return nil, err
+	}
+	return &AuthorizeResult{
+		Response:  authorization_result.Response,
+		Decision:  authorization_result.Decision,
+		RequestID: authorization_result.RequestID,
+	}, nil
+}
+
+func (p *CedarPlugin) evaluateUnsigned(subject *Entity, action *Action, resource *Entity, context map[string]any) (*AuthorizeResult, error) {
+	if subject == nil {
+		return nil, fmt.Errorf("Subject empty")
+	}
+	if action == nil {
+		return nil, fmt.Errorf("Action empty")
+	}
+	if resource == nil {
+		return nil, fmt.Errorf("Resource empty")
+	}
+	subject_bytes, err := json.Marshal(subject)
+	if err != nil {
+		return nil, err
+	}
+	resource_bytes, err := json.Marshal(resource)
+	if err != nil {
+		return nil, err
+	}
+	var subject_entity cedarling_go.EntityData
+	var resource_entity cedarling_go.EntityData
+	if err := json.Unmarshal(subject_bytes, &subject_entity); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(resource_bytes, &resource_entity); err != nil {
+		return nil, err
+	}
+	authorization_request := cedarling_go.RequestUnsigned{
+		Principal: &subject_entity,
+		Action:    action.Name,
+		Resource:  resource_entity,
+		Context:   context,
+	}
+	authorization_result, err := p.cedar.AuthorizeUnsigned(authorization_request)
+	if err != nil {
+		return nil, err
+	}
+	return &AuthorizeResult{
+		Response:  authorization_result.Response,
+		Decision:  authorization_result.Decision,
+		RequestID: authorization_result.RequestID,
+	}, nil
+}
+
+func (p *CedarPlugin) buildEvaluationResponse(subject *Entity, action *Action, resource *Entity, context map[string]any, evaluation_mode EvaluationMode) *EvaluationResponse {
+	var result *AuthorizeResult
+	var err error
+	if evaluation_mode == MultiIssuer {
+		result, err = p.evaluate(subject, action, resource, context)
+	} else {
+		result, err = p.evaluateUnsigned(subject, action, resource, context)
+	}
+	response := EvaluationResponse{}
+	if err != nil {
+		response.Decision = false
+		response.Context = map[string]any{
+			"error": err.Error(),
+		}
+	} else {
+		response.Decision = result.Decision
+	}
+	return &response
 }
