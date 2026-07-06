@@ -206,7 +206,7 @@ jobs:
 
     - name: Upload assets to release
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         OS="${{ matrix.name }}"
         VERSION="${{ steps.previoustag.outputs.version }}"
@@ -337,7 +337,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -347,7 +347,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -493,7 +493,7 @@ jobs:
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -556,7 +556,7 @@ jobs:
     - name: Build with Ubuntu
       continue-on-error: true
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         sudo apt-get update
         sudo apt-get install -y zip jq
@@ -744,6 +744,14 @@ jobs:
         python3 -c 'import re,sys; p,v=sys.argv[1],sys.argv[2]; c=open(p,encoding="utf-8").read(); c=re.sub("(name = \"cedarling_python\"\nversion = \")[^\"]*(\")",lambda m:m.group(1)+v+m.group(2),c); open(p,"w",encoding="utf-8").write(c)' "${CARGO_LOCK}" "${VERSION_TO_PUBLISH}"
         echo "Updated Cargo.lock to version ${VERSION_TO_PUBLISH}"
 
+    - name: Configure macOS SDK
+      if: runner.os == 'macOS'
+      run: |
+        echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+        echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> $GITHUB_ENV
+        # Clearing it here (see aws/aws-lc-rs#532) neutralizes it for the rest of this job.
+        echo "IPHONEOS_DEPLOYMENT_TARGET=" >> $GITHUB_ENV
+
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -806,7 +814,7 @@ jobs:
       id: sign-cedarling
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -922,6 +930,14 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Configure macOS SDK
+        if: runner.os == 'macOS'
+        run: |
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+          echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> $GITHUB_ENV
+          # Clearing it here (see aws/aws-lc-rs#532) neutralizes it for the rest of this job.
+          echo "IPHONEOS_DEPLOYMENT_TARGET=" >> $GITHUB_ENV
+
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
@@ -985,7 +1001,7 @@ jobs:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
@@ -1108,7 +1124,7 @@ jobs:
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
@@ -1167,7 +1183,7 @@ jobs:
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -1260,7 +1276,7 @@ jobs:
     - name: Sign and upload kotlin binding
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -1821,7 +1837,7 @@ jobs:
       - name: Sign and upload cedarling_pg tarball
         working-directory: ${{ env.EXT_DIR }}
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
