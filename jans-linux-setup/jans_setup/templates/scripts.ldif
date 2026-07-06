@@ -752,7 +752,7 @@ jansEnabled: false
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(identity_assertion_identity_assertion)s
+jansScr::%(identity_assertion_identityassertion)s
 jansScrTyp: identity_assertion
 jansProgLng: python
 
