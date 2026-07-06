@@ -389,7 +389,6 @@ impl LockService {
     }
 
     pub(crate) async fn shut_down(&mut self) {
-        self.cancel_tkn.cancel();
         if let Some((cancel_tkn, handle)) = self.telemetry_ticker.take() {
             cancel_tkn.cancel();
             () = handle.await_result().await;
@@ -398,6 +397,8 @@ impl LockService {
             cancel_tkn.cancel();
             () = handle.await_result().await;
         }
+
+        self.cancel_tkn.cancel();
         if let Some(worker) = self.log_worker.take() {
             () = worker.handle.await_result().await;
         }

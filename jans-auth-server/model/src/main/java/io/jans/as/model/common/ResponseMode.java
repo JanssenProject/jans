@@ -132,4 +132,8 @@ public enum ResponseMode implements HasParamName, AttributeEnum {
     public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
+
+    public boolean isJarm() {
+        return this == QUERY_JWT || this == FRAGMENT_JWT || this == FORM_POST_JWT || this == JWT;
+    }
 }

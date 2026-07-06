@@ -152,3 +152,13 @@ jobs:
           echo "- Pushed tag \`v${{ github.event.inputs.version }}\` and created its release." >> "$GITHUB_STEP_SUMMARY"
           echo "- \`main\` was not modified." >> "$GITHUB_STEP_SUMMARY"
         fi
+
+  publish-cedarling:
+    needs: bump-and-tag
+    if: ${{ github.event.inputs.dry_run != 'true' }}
+    uses: ./.github/workflows/publish-cedarling.yml
+    with:
+      ref: v${{ github.event.inputs.version }}
+      dry_run: false
+    secrets:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

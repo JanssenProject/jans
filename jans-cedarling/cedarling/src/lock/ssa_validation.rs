@@ -77,7 +77,7 @@ use crate::{
     jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
 };
 use base64::Engine;
-use http_utils::HttpRequestError;
+use crate::http_utils::HttpRequestError;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
