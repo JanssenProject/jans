@@ -372,8 +372,7 @@ public class AssertionService {
 
 		// FIDO2 conformance: when present, userHandle must map to the credential owner.
 		String userHandle = response.getUserHandle();
-		if (StringHelper.isNotEmpty(userHandle) && registrationData.getUserId() != null
-				&& !userHandle.equals(registrationData.getUserId())) {
+		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
 			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
 		}
 
