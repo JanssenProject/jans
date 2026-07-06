@@ -414,7 +414,7 @@ AS 'MODULE_PATHNAME', 'cedarling_validate_schema_by_oid_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/authz/where_clause.rs:643
+-- cedarling_pg/src/authz/where_clause.rs:644
 -- cedarling_pg::authz::where_clause::cedarling_where
 CREATE  FUNCTION "cedarling_where"(
 	"table_name" TEXT, /* & str */
