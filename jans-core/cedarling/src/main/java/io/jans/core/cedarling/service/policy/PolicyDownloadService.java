@@ -41,9 +41,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.core.cedarling.service.event.PolicyDownloadEvent;
-import io.jans.core.model.config.AppConfiguration;
-import io.jans.core.model.config.cedarling.CedarlingConfiguration;
-import io.jans.core.model.config.cedarling.PolicySource;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.PolicySource;
 import io.jans.service.EncryptionService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;

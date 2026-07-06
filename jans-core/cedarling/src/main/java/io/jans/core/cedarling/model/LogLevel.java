@@ -4,7 +4,8 @@
  * Copyright (c) 2025, Janssen Project
  */
 
-package io.jans.core.model.config.cedarling;
+package io.jans.core.cedarling.model;
+
 
 /**
  * 

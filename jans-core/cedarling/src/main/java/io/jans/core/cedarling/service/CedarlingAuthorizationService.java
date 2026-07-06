@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 import io.jans.core.cedarling.config.BootstrapConfig;
-import io.jans.core.model.config.cedarling.CedarlingConfiguration;
-import io.jans.core.model.config.cedarling.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;

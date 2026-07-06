@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package io.jans.core.model.config.cedarling;
+package io.jans.core.cedarling.model;
+
 
 import java.io.IOException;
 

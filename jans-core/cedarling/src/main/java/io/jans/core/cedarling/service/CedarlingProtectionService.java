@@ -31,9 +31,9 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.core.cedarling.model.CedarlingPermission;
+import io.jans.core.cedarling.model.OpenIDConnectConfig;
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 
-//import io.jans.lock.model.config.AppConfiguration;
 
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -51,7 +51,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     private Logger log;
 
     @Inject
-    private AppConfiguration appConfiguration;
+    private OpenIDConnectConfig openIDConnectConfig;
     
     @Inject
     private CedarlingAuthorizationService authorizationService;
@@ -237,7 +237,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
     }
 
 	private OpenIdConfigurationResponse getOpenIdConfiguration() {
-		String openIdIssuer = appConfiguration.getOpenIdIssuer();
+		String openIdIssuer = openIDConnectConfig.getIssuer();
 		if (StringHelper.isEmpty(openIdIssuer)) {
 			throw new InvalidConfigurationException("OpenIdIssuer Url is invalid");
 		}

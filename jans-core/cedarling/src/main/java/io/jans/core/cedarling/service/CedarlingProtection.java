@@ -4,7 +4,7 @@
  * Copyright (c) 2025, Janssen Project
  */
 
-package io.jans.core.cedarling.service;
+package  io.jans.core.cedarling.service;
 
 import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.ws.rs.container.ResourceInfo;

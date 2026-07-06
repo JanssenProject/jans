@@ -1,4 +1,4 @@
-package io.jans.core.model.config.cedarling;
+package io.jans.core.cedarling.model;
 
 /**
  * @author Yuriy Movchan Date: 12/18/2025

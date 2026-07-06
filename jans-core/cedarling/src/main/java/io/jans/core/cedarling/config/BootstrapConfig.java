@@ -14,7 +14,7 @@ import java.util.Arrays;
  */
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import io.jans.core.cedarling.model.*;
 
 /**
  * Configuration class for Cedarling initialization using Enums for Logging.

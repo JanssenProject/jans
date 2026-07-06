@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import io.jans.core.cedarling.service.CedarlingProtection;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 
 import io.jans.net.InetAddressUtility;
 import jakarta.annotation.Priority;
@@ -33,9 +35,7 @@ public abstract class CedarlingAuthorizationProcessingFilter implements Containe
 
 	@Inject
 	private CedarlingProtection protectionService;
-	
-	@Inject
-	private ApplicationCedarlingAuditLogger applicationCedarlingAuditLogger;
+
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -58,7 +58,7 @@ public abstract class CedarlingAuthorizationProcessingFilter implements Containe
 	 *             to interface implemented.
 	 */
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IOException;
+	public abstract void filter(ContainerRequestContext requestContext) throws IOException;
 	
     protected String extractBearerToken() {
         String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
