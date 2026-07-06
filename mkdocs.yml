@@ -192,6 +192,7 @@ nav:
         - MTLS: janssen-server/auth-server/oauth-features/mtls.md
         - PAR: janssen-server/auth-server/oauth-features/par.md
         - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
+        - Authorization Server Issuer Identification: janssen-server/auth-server/oauth-features/authorization-server-issuer-identification.md
       - Tokens:
         - janssen-server/auth-server/tokens/README.md
         - Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md

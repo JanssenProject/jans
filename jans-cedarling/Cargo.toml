@@ -18,7 +18,7 @@ default-members = [
     "cedarling_pg_codegen",
     "test_utils",
 ]
-exclude = ["bindings/cedarling-java", "custom-lints"]
+exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints"]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
