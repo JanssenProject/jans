@@ -62,7 +62,7 @@ The schema can be provided in one of two ways (but not both):
 - **Option A — single file**: `schema.cedarschema` at the store root. This is the original format.
 - **Option B — split across multiple files**: `schemas/*.cedarschema` directory. Each file is parsed as an independent `SchemaFragment`, then merged via `Schema::from_schema_fragments`. This is useful for large schemas with multiple namespaces.
 
-If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, loading fails with a `MissingSchemaSource` error.
+If both exist, the single file `schema.cedarschema` takes precedence and the `schemas/` directory is ignored. If neither exists, behavior depends on `CEDARLING_STRICT_SCHEMA_VALIDATION`: with strict mode enabled (the default), loading fails with a `MissingSchemaSource` error; with strict mode disabled, the store loads successfully and policies run without schema-based attribute validation.
 
 #### metadata.json
 
@@ -299,6 +299,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
+| `policy_store_refresh.upgrade_to_head_transitions` | Cumulative count of probes that upgraded `PlainGet → HeadThenGet` |
 | `policy_store_refresh.upgrade_to_conditional_transitions` | Cumulative count of probes that upgraded back to `Conditional` |
 | `policy_store_refresh.outcome_success` | Cumulative count of `Success` outcomes |
 | `policy_store_refresh.outcome_not_modified` | Cumulative count of `NotModified` outcomes |

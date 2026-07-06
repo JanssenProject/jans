@@ -125,7 +125,7 @@ impl PolicyStore {
 
 #[derive(Debug, derive_more::Display, derive_more::Error)]
 #[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
-pub struct TrustedIssuersValidationError {
+pub(crate) struct TrustedIssuersValidationError {
     oidc_url: String,
 }
 
