@@ -1392,6 +1392,9 @@ jobs:
       
           # Tell aws-lc-sys to use the cmake builder instead of cc — avoids the memcmp detection
           echo "AWS_LC_SYS_CMAKE_BUILDER=1" >> $GITHUB_ENV
+
+          # Set minimum deployment target — must be 12.0+ for ___chkstk_darwin
+          echo "IPHONEOS_DEPLOYMENT_TARGET=14.0" >> $GITHUB_ENV
        
       # Step 3 — build host dylib so uniffi-bindgen can introspect it
       - name: Build host library (dylib)
