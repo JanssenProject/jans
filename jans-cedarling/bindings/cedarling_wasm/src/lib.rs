@@ -167,14 +167,13 @@ impl Cedarling {
     /// partial evaluation; residual-dependent requests fail closed with
     /// `Decision::Deny` and surface residual policy ids in
     /// `response.diagnostics.reason`.
-    pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: RequestUnsigned = serde_wasm_bindgen::from_value(request_object)?;
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+    /// ```
+    pub async fn authorize_unsigned(&self, request: &str) -> Result<AuthorizeResult, Error> {
+        let cedar_request: RequestUnsigned =
+            serde_json::from_str(request).map_err(Error::new)?;
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
@@ -184,19 +183,17 @@ impl Cedarling {
     }
 
     /// Authorize multi-issuer request.
-    /// Makes authorization decision based on multiple JWT tokens from different issuers
+    /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+    /// ```
     pub async fn authorize_multi_issuer(
         &self,
-        request: JsValue,
+        request: &str,
     ) -> Result<MultiIssuerAuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
         let cedar_request: AuthorizeMultiIssuerRequest =
-            serde_wasm_bindgen::from_value(request_object)?;
+            serde_json::from_str(request).map_err(Error::new)?;
         let result = self
             .instance
             .authorize_multi_issuer(cedar_request)

@@ -198,15 +198,15 @@ async fn test_run_cedarling() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&request)
-        .expect("RequestUnsigned should be converted to JsValue");
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
 
     let result = instance
-        .authorize_unsigned(js_request)
+        .authorize_unsigned(&request_str)
         .await
         .expect("authorize_unsigned request should be executed");
 
-    assert!(result.decision, "decision should be allowed")
+    assert!(result.decision, "decision should be allowed");
 }
 
 /// Test memory log interface.
@@ -272,11 +272,11 @@ async fn test_memory_log_interface() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&request)
-        .expect("RequestUnsigned should be converted to JsValue");
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
 
     let _result = instance
-        .authorize_unsigned(js_request)
+        .authorize_unsigned(&request_str)
         .await
         .expect("authorize_unsigned request should be executed");
 
@@ -361,7 +361,7 @@ async fn test_authorize_unsigned_single_principal_allow() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -404,7 +404,7 @@ async fn test_authorize_unsigned_no_principal_public_action_allow() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -446,7 +446,7 @@ async fn test_authorize_unsigned_no_principal_principal_dependent_deny() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -518,11 +518,11 @@ async fn test_multi_issuer_authorize_single_token() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("authorize_multi_issuer request should be executed");
 
@@ -636,11 +636,11 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("authorize_multi_issuer request should be executed");
 
@@ -712,12 +712,12 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     // Graceful degradation: invalid tokens are ignored, valid tokens are processed
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("Should succeed gracefully when some tokens are invalid");
 
@@ -761,11 +761,11 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     // This should fail due to empty tokens
-    let result = instance.authorize_multi_issuer(js_request).await;
+    let result = instance.authorize_multi_issuer(&request_str).await;
     assert!(result.is_err(), "Should fail with empty token array");
 }
 

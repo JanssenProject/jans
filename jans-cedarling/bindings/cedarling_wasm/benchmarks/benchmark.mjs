@@ -97,9 +97,12 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
     const request = buildRequest(scenario);
     const invoke =
       scenario.kind === "unsigned"
-        ? async () => (await cedarling.authorize_unsigned(request)).decision
+        ? async () =>
+            (await cedarling.authorize_unsigned(JSON.stringify(request)))
+              .decision
         : async () =>
-            (await cedarling.authorize_multi_issuer(request)).decision;
+            (await cedarling.authorize_multi_issuer(JSON.stringify(request)))
+              .decision;
 
     if (!(await invoke())) {
       emit({
