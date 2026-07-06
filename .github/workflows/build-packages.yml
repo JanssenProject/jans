@@ -55,7 +55,9 @@ on:
         type: boolean
         default: false
       run_cedarling_uniffi_ios:
-        description: 'Run "build_cedarling_uniffi_ios" job? (builds XCFramework for Swift/SPM)'
+        description: >-
+          Run "build_cedarling_uniffi_ios" job? 
+          Builds XCFramework for Swift/SPM.
         required: true
         type: boolean
         default: false
