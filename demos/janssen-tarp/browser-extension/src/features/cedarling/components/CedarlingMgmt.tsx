@@ -5,12 +5,16 @@ import UnsignedAuthzForm from './UnsignedAuthzForm';
 import MultiIssuerAuthzForm from './MultiIssuerAuthzForm';
 import HelpDrawer from '../../../options/helpDrawer';
 import { JsonEditor } from 'json-edit-react';
-import { Pencil, Trash2, Plus, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, ChevronRight, FolderTree } from 'lucide-react';
 import { SuccessAlert } from '../../../shared/components/Common';
+import PolicyStoreBrowser from './PolicyStoreBrowser';
+import { getPolicyStoreUri } from '../services/policyStoreService';
 function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void }) {
   const { row, rowIndex, notifyOnDataChange } = props;
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
+  const [browseOpen, setBrowseOpen] = React.useState(false);
+  const hasPolicyStoreUri = !!getPolicyStoreUri(row);
 
   const handleDialog = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -31,6 +35,7 @@ function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void
   return (
     <>
       <AddCedarlingConfig isOpen={open} handleDialog={handleDialog} newData={row} />
+      <PolicyStoreBrowser isOpen={browseOpen} config={row} onClose={() => setBrowseOpen(false)} />
       <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
         <td className="px-4 py-3 w-10" colSpan={2}>
           <button
@@ -104,6 +109,16 @@ function Row(props: { row: any; rowIndex: number; notifyOnDataChange: () => void
         </td>
         <td className="px-4 py-3 w-24 text-right">
           <div className="flex items-center justify-end gap-2">
+            {hasPolicyStoreUri && (
+              <button
+                onClick={() => setBrowseOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold hover:bg-emerald-100 hover:border-emerald-300 shadow-sm transition-colors"
+                title="Browse Policy Store"
+              >
+                <FolderTree size={16} />
+                Browse Policy Store
+              </button>
+            )}
             <button
               onClick={() => { setOpen(true); notifyOnDataChange(); }}
               className="p-1.5 text-gray-500 hover:text-gray-800 rounded transition-colors"

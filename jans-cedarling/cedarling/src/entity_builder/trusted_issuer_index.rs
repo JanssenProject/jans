@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use ahash::HashMapExt as _;
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
@@ -30,14 +31,14 @@ use crate::{
 /// Full-URL lookups remain unaffected.
 #[derive(Debug, Clone)]
 pub(crate) struct TrustedIssuerIndex {
-    url_index: HashMap<IssClaim, Arc<TrustedIssuer>>,
-    origin_index: HashMap<IssClaim, Arc<TrustedIssuer>>,
+    url_index: ahash::HashMap<IssClaim, Arc<TrustedIssuer>>,
+    origin_index: ahash::HashMap<IssClaim, Arc<TrustedIssuer>>,
 }
 
 impl TrustedIssuerIndex {
     pub(crate) fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<&Logger>) -> Self {
-        let mut origin_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
-        let mut url_index: HashMap<IssClaim, Arc<TrustedIssuer>> = HashMap::new();
+        let mut origin_index: ahash::HashMap<IssClaim, Arc<TrustedIssuer>> = ahash::HashMap::new();
+        let mut url_index: ahash::HashMap<IssClaim, Arc<TrustedIssuer>> = ahash::HashMap::new();
 
         let mut sorted: Vec<(&String, &TrustedIssuer)> = issuers.iter().collect();
         sorted.sort_by(|a, b| a.0.cmp(b.0));
