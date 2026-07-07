@@ -562,6 +562,26 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static Stream<Arguments> trustRelationshipsOfVariousStatuses() {
+
+        return Stream.of(
+            Arguments.of(sampleDraftIndividualTrustRelationship()),
+            Arguments.of(sampleDraftAggregateTrustRelationship()),
+            
+            Arguments.of(sampleReadyIndividualTrustRelationship()),
+            Arguments.of(sampleReadyAggregateTrustRelationship()),
+
+            Arguments.of(sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(sampleActivatingAggregateTrustRelationship()),
+
+            Arguments.of(sampleActiveIndividualTrustRelationship()),
+            Arguments.of(sampleActiveAggregateTrustRelationship()),
+
+            Arguments.of(sampleInactiveIndividualTrustRelationship()),
+            Arguments.of(sampleInactiveAggregateTrustRelationship())
+        );
+    }
+
     /**
      * Creation Tests
      */
@@ -1719,6 +1739,43 @@ public class TrustRelationshipTest {
 
             assertThat(updated).isInReadyStatus();
             assertThat(updated.getActivationDiagnostics()).isEqualTo(failed_diagnostics);
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Scenarios and Edge Cases -- Reconstruction & Persistence Scenarios")
+    public class ReconstructionAndPersistenceScenariosTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfVariousStatuses")
+        @DisplayName(
+            "GIVEN a fully populated TrustRelationship in any state " +
+            "WHEN it is rebuilt using the builder from persisted data (reconstruction scenario) " +
+            "THEN all data, state, version and invariants should be preserved " 
+        )
+        public void shouldPreserveAllDataWhenRebuildingFromStorage(TrustRelationship tr) {
+
+            TrustResult<TrustRelationship> result  = TrustRelationship.builder()
+                .withId(tr.getId())
+                .withVersion(tr.getVersion())
+                .withDisplayName(tr.getDisplayName())
+                .withDescription(tr.getDescription())
+                .withNature(tr.getNature())
+                .withStatus(tr.getStatus())
+                .withMetadataSource(tr.getMetadataSource())
+                .withDiscoveredEntityIds(tr.getDiscoveredEntityIds())
+                .withShibbolethSsoProfileConfiguration(tr.getShibbolethSsoProfileConfiguration())
+                .withSaml2ArtifactResolutionProfileConfiguration(tr.getSaml2ArtifactResolutionProfileConfiguration())
+                .withSaml2AttributeQueryProfileConfiguration(tr.getSaml2AttributeQueryProfileConfiguration())
+                .withSaml2EcpProfileConfiguration(tr.getSaml2EcpProfileConfiguration())
+                .withSaml2SsoProfileConfiguration(tr.getSaml2SsoProfileConfiguration())
+                .withSaml2LogoutProfileConfiguration(tr.getSaml2LogoutProfileConfiguration())
+                .withReleasedAttributes(tr.getReleasedAttributes())
+                .withActivationDiagnostics(tr.getActivationDiagnostics())
+                .build();
+            
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(result.getValue()).isEqualTo(tr);
         }
     }
 } 
