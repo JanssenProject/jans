@@ -175,6 +175,9 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 						"AAGUID in packed attestation certificate does not match authenticator data");
 			}
 		}
+	}
+
+	/**
 	 * Enforces the WebAuthn packed full-attestation certificate requirements: X.509 version 3,
 	 * BasicConstraints CA component false, Subject-OU exactly "Authenticator Attestation", non-empty
 	 * Subject-O and Subject-CN, and a valid ISO 3166 Subject-C. Package-private for unit testing.
