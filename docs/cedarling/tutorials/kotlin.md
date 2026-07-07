@@ -63,7 +63,7 @@ The same Cedarling java binding dependency is used here. Refer to the following 
     The Cedarling dependency available in the GitHub Maven Registry works only in a 
     Linux environment.
 
-    Refer to the following guide for instructions on building the Java bindings to work 
+    Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for instructions on building the Java bindings to work 
     on macOS or Windows.
 
 ---
