@@ -1431,7 +1431,7 @@ jobs:
         run: cargo build --release --target aarch64-apple-ios-sim -p cedarling_uniffi
 
       # Step 8 — build iOS device static library
-      - name: Build iOS simulator library (aarch64-apple-ios)
+      - name: Build iOS device library (aarch64-apple-ios)
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: cargo build --release --target aarch64-apple-ios -p cedarling_uniffi
 
