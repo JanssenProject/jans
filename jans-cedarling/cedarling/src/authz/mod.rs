@@ -25,7 +25,10 @@ use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use metrics::MetricsCollector;
-use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
+use request::{
+    AuthorizeMultiIssuerRequest, BatchAuthorizeResponse, BatchAuthorizeUnsignedRequest, BatchItem,
+    RequestUnsigned,
+};
 use serde_json::json;
 use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
@@ -259,6 +262,7 @@ impl Authz {
                 tokens_logging_info,
                 decision: result.decision,
                 pushed_data: pushed_data_info,
+                batch_id: None,
             },
         );
 
@@ -428,6 +432,7 @@ impl Authz {
                 decision_diagnostics: diagnostics,
                 principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
+                batch_id: None,
             },
         );
 
@@ -465,6 +470,204 @@ impl Authz {
         );
 
         Ok(result)
+    }
+
+    /// Evaluate a batch of unsigned authorization requests.
+    ///
+    /// Runs [`Self::unsigned_setup`] once (principal + default entities +
+    /// pushed-data snapshot), then evaluates each item with its own resource
+    /// entity and context. Every per-item decision-log entry carries the
+    /// shared `batch_id` returned to the caller for audit correlation.
+    ///
+    /// Error partitioning:
+    ///
+    /// * Batch-level failures (validation, principal parse) return `Err` and
+    ///   fail the whole call.
+    /// * Per-item failures (invalid action UID, resource build, context
+    ///   build, schema validation, Cedar request validation) synthesize a
+    ///   fail-closed `Deny` for that item and record an error metric — they
+    ///   never fail other items in the batch.
+    #[allow(clippy::too_many_lines)]
+    pub(super) fn authorize_unsigned_batch(
+        &self,
+        request: &BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+        let batch_start_time = Utc::now();
+        let batch_id = gen_uuid7();
+
+        request.validate().inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
+
+        let UnsignedSetup {
+            principal,
+            built_entities,
+        } = self.unsigned_setup(request.principal.as_ref())?;
+        let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
+
+        // Atomic snapshot: pushed data captured once for the whole batch so
+        // every item is evaluated against identical state.
+        let (pushed_data, pushed_data_info) = self.get_pushed_data();
+
+        let schema = &self.config.policy_store.schema;
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
+
+        let mut results = Vec::with_capacity(request.items.len());
+        for item in &request.items {
+            let item_start = Utc::now();
+            let item_request_id = gen_uuid7();
+
+            let (response, resource_uid_str) = match self.try_batch_item_unsigned(
+                item,
+                principal.as_ref(),
+                principal_uid.as_ref(),
+                &built_entities,
+                pushed_data.clone(),
+                schema_ref,
+            ) {
+                Ok((resp, uid)) => {
+                    let uid_str = uid.to_string();
+                    (resp, uid_str)
+                },
+                Err(e) => {
+                    self.config.metrics.record_error(&e);
+                    self.config.metrics.record_authz_error();
+                    let log_entry =
+                        LogEntry::new(BaseLogEntry::new_decision(item_request_id))
+                            .set_message(format!(
+                                "Batch item failed setup for batch {batch_id}"
+                            ))
+                            .set_error(e.to_string());
+                    self.config.log_service.log_any(log_entry);
+                    let uid_str = format!(
+                        "{}::\"{}\"",
+                        item.resource.cedar_mapping.entity_type,
+                        item.resource.cedar_mapping.id,
+                    );
+                    (
+                        cedar_policy::Response::new(
+                            cedar_policy::Decision::Deny,
+                            HashSet::new(),
+                            Vec::new(),
+                        ),
+                        uid_str,
+                    )
+                },
+            };
+
+            let decision = response.decision() == cedar_policy::Decision::Allow;
+            let decision_time_micro_sec = calculate_elapsed_time(item_start);
+
+            let diagnostics = Diagnostics::new(
+                response.diagnostics(),
+                &self.config.policy_store.policies,
+            );
+            let principal_label = principal_uid
+                .as_ref()
+                .map_or_else(|| "None".to_string(), ToString::to_string);
+            self.log_policy_evaluation_errors(&diagnostics, &principal_label, item_request_id);
+
+            let logged_principals: Vec<EntityUid> =
+                principal_uid.iter().cloned().collect();
+            let diagnostics_slice = std::slice::from_ref(&diagnostics);
+
+            self.log_decision(
+                item_request_id,
+                &DecisionLogMetadata {
+                    action: item.action.clone(),
+                    resource: resource_uid_str,
+                    decision,
+                    tokens_logging_info: LogTokensInfo::empty(),
+                    decision_time: decision_time_micro_sec,
+                    decision_diagnostics: diagnostics_slice,
+                    principal: DecisionLogEntry::all_principals(&logged_principals),
+                    pushed_data: pushed_data_info.clone(),
+                    batch_id: Some(batch_id),
+                },
+            );
+
+            if !decision {
+                self.log_failed_diagnostics(diagnostics_slice, item_request_id);
+            }
+
+            let cedar_decision = Decision::from(decision);
+            let policy_decisions = diagnostics
+                .reason
+                .iter()
+                .map(|p| (p.id.as_str(), cedar_decision));
+            self.config.metrics.record_evaluation(
+                decision_time_micro_sec,
+                cedar_decision,
+                true,
+                policy_decisions,
+            );
+
+            results.push(AuthorizeResult::new(response, item_request_id));
+        }
+
+        self.config.metrics.record_batch(request.items.len());
+        let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
+        self.config.log_service.log_any(
+            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
+                .set_message(format!(
+                    "Batch authorize (unsigned): {} items in {batch_time_micro_sec}μs",
+                    request.items.len(),
+                )),
+        );
+
+        Ok(BatchAuthorizeResponse::new(batch_id, results))
+    }
+
+    /// Per-item core of [`Self::authorize_unsigned_batch`]. Kept separate so
+    /// setup errors on a single item can be caught and converted to a
+    /// fail-closed `Deny` without a large `match` in the loop body.
+    fn try_batch_item_unsigned(
+        &self,
+        item: &BatchItem,
+        principal: Option<&Entity>,
+        principal_uid: Option<&EntityUid>,
+        built_entities: &BuiltEntities,
+        pushed_data: HashMap<String, serde_json::Value>,
+        schema_ref: Option<&cedar_policy::Schema>,
+    ) -> Result<(cedar_policy::Response, EntityUid), AuthorizeError> {
+        let action =
+            cedar_policy::EntityUid::from_str(&item.action).map_err(AuthorizeError::from)?;
+        let resource = self
+            .config
+            .entity_builder
+            .build_resource_entity(&item.resource)
+            .map_err(|e| {
+                AuthorizeError::from(crate::entity_builder::BuildUnsignedEntityError::from(
+                    Box::new(e),
+                ))
+            })?;
+        let context = build_context(
+            &self.config,
+            item.context.clone(),
+            built_entities,
+            &action,
+            pushed_data,
+        )?;
+
+        let resource_uid = resource.uid();
+        let entities = Entities::from_entities(
+            principal.cloned().into_iter().chain([resource]),
+            schema_ref,
+        )
+        .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))?;
+
+        let response = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_uid.cloned(),
+                action,
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)?;
+
+        Ok((response, resource_uid))
     }
 
     /// Build the resource-independent setup for an unsigned request.
@@ -658,6 +861,7 @@ impl Authz {
             decision_time_micro_sec: metadata.decision_time,
             diagnostics: DiagnosticsSummary::from_diagnostics(metadata.decision_diagnostics),
             pushed_data: metadata.pushed_data.clone(),
+            batch_id: metadata.batch_id,
         });
         self.config.log_service.log_fn(entry);
     }
@@ -817,6 +1021,8 @@ struct DecisionLogMetadata<'a> {
     decision_time: i64,
     decision: bool,
     pushed_data: Option<PushedDataInfo>,
+    /// Shared correlation id when this entry is part of a batch call.
+    batch_id: Option<Uuid>,
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.
@@ -951,7 +1157,7 @@ mod tests {
         assert_eq!(
             json.pointer("/attrs/name").and_then(|v| v.as_str()),
             Some("trusted"),
-            "default org name should override request value"
+     5       "default org name should override request value"
         );
         assert_eq!(
             json.pointer("/attrs/is_admin")
