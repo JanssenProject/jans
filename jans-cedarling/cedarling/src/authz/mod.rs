@@ -13,7 +13,8 @@ use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
-use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
+use crate::EntityData;
+use crate::entity_builder::{BuiltEntities, EntityBuilder, MultiIssuerSetupEntities};
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
@@ -133,27 +134,23 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
 
-        let validated_tokens = self
-            .config
-            .jwt_service
-            .validate_multi_issuer_tokens(&request.tokens)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+        let MultiIssuerSetup {
+            validated_tokens,
+            entities: setup_entities,
+        } = self.multi_issuer_setup(&request.tokens)?;
 
-        let entities_data = self
+        let resource = self
             .config
             .entity_builder
-            .build_multi_issuer_entities(
-                &validated_tokens,
-                &request.resource,
-                self.config.log_service.as_ref(),
-            )
+            .build_resource_entity(&request.resource)
             .map_err(|e| {
-                self.config.metrics.record_error(&e);
+                let wrapped =
+                    crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
+                        e.to_string(),
+                    );
+                self.config.metrics.record_error(&wrapped);
                 self.config.metrics.record_authz_error();
-                AuthorizeError::MultiIssuerEntity(e)
+                AuthorizeError::MultiIssuerEntity(wrapped)
             })?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -170,7 +167,7 @@ impl Authz {
 
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
-            &entities_data.tokens,
+            &setup_entities.tokens,
             schema_ref,
             &action,
             pushed_data,
@@ -180,6 +177,12 @@ impl Authz {
             self.config.metrics.record_authz_error();
         })?;
 
+        let entities_data = AuthorizeEntitiesData {
+            issuers: setup_entities.issuers,
+            tokens: setup_entities.tokens,
+            resource,
+            default_entities: setup_entities.default_entities,
+        };
         let resource_uid = entities_data.resource.uid();
 
         let entities = entities_data
@@ -325,17 +328,20 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
-        let BuiltEntitiesUnsigned {
+        let UnsignedSetup {
             principal,
-            resource,
             built_entities,
-        } = self
+        } = self.unsigned_setup(request.principal.as_ref())?;
+
+        let resource = self
             .config
             .entity_builder
-            .build_entities_unsigned(request)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
+            .build_resource_entity(&request.resource)
+            .map_err(|e| {
+                let wrapped = crate::entity_builder::BuildUnsignedEntityError::from(Box::new(e));
+                self.config.metrics.record_error(&wrapped);
                 self.config.metrics.record_authz_error();
+                AuthorizeError::from(wrapped)
             })?;
         let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
@@ -459,6 +465,68 @@ impl Authz {
         );
 
         Ok(result)
+    }
+
+    /// Build the resource-independent setup for an unsigned request.
+    ///
+    /// Runs principal construction once so it can be reused across multiple
+    /// items in a batch. Callers combine the result with a per-item
+    /// [`EntityBuilder::build_resource_entity`] call and per-item context
+    /// build to complete each authorization decision.
+    fn unsigned_setup(
+        &self,
+        principal: Option<&EntityData>,
+    ) -> Result<UnsignedSetup, AuthorizeError> {
+        let (principal, built_entities) = self
+            .config
+            .entity_builder
+            .build_unsigned_principal(principal)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
+        Ok(UnsignedSetup {
+            principal,
+            built_entities,
+        })
+    }
+
+    /// Build the resource-independent setup for a multi-issuer request.
+    ///
+    /// Validates tokens once and builds token/issuer entities once so they can
+    /// be reused across every item in a batch. Callers combine the result
+    /// with a per-item resource entity + per-item multi-issuer context to
+    /// complete each authorization decision.
+    fn multi_issuer_setup(
+        &self,
+        tokens: &[crate::TokenInput],
+    ) -> Result<MultiIssuerSetup, AuthorizeError> {
+        let validated_tokens = self
+            .config
+            .jwt_service
+            .validate_multi_issuer_tokens(tokens)
+            .inspect_err(|e| {
+                self.config.metrics.record_error(e);
+                self.config.metrics.record_authz_error();
+            })?;
+
+        let setup_entities = self
+            .config
+            .entity_builder
+            .build_multi_issuer_setup_entities(
+                &validated_tokens,
+                self.config.log_service.as_ref(),
+            )
+            .map_err(|e| {
+                self.config.metrics.record_error(&e);
+                self.config.metrics.record_authz_error();
+                AuthorizeError::MultiIssuerEntity(e)
+            })?;
+
+        Ok(MultiIssuerSetup {
+            validated_tokens,
+            entities: setup_entities,
+        })
     }
 
     /// Execute cedar policy `is_authorized` method to check
@@ -768,6 +836,26 @@ struct ExecuteAuthorizeParameters<'a> {
     action: EntityUid,
     resource: EntityUid,
     context: cedar_policy::Context,
+}
+
+/// Resource-independent setup shared across all items in an unsigned batch.
+///
+/// Built once via [`Authz::unsigned_setup`] and combined with a per-item
+/// resource entity + context by the caller.
+struct UnsignedSetup {
+    principal: Option<Entity>,
+    built_entities: BuiltEntities,
+}
+
+/// Resource-independent setup shared across all items in a multi-issuer batch.
+///
+/// Built once via [`Authz::multi_issuer_setup`] and combined with a per-item
+/// resource entity + context by the caller. `validated_tokens` is retained so
+/// that [`LogTokensInfo`] can be produced from the same snapshot the entities
+/// were built from.
+struct MultiIssuerSetup {
+    validated_tokens: HashMap<String, Arc<crate::jwt::Token>>,
+    entities: MultiIssuerSetupEntities,
 }
 
 /// Structure to hold entites created from tokens

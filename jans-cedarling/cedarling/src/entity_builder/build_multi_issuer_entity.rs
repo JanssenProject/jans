@@ -9,6 +9,7 @@ use super::{
     default_tkn_entity_name,
 };
 use crate::authz::AuthorizeEntitiesData;
+use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
@@ -240,17 +241,68 @@ fn determine_token_entity_type(token: &Token) -> String {
     DEFAULT_ENTITY_TYPE_NAME.to_string()
 }
 
+/// Resource-independent multi-issuer entities. Built once per batch and
+/// combined with a per-item resource entity inside
+/// [`EntityBuilder::build_multi_issuer_entities`] or directly by the batch
+/// authorization path.
+#[derive(Debug, Clone)]
+pub(crate) struct MultiIssuerSetupEntities {
+    pub tokens: HashMap<String, Entity>,
+    pub issuers: HashSet<Entity>,
+    pub default_entities: DefaultEntities,
+}
+
 impl EntityBuilder {
-    /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles)
+    /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles).
+    ///
+    /// Convenience wrapper around [`Self::build_multi_issuer_setup_entities`] +
+    /// [`Self::build_resource_entity`]. Currently used only by tests — production
+    /// code paths compose the granular helpers so they can amortize the setup
+    /// phase across items in a batch.
+    #[allow(dead_code)]
     pub(crate) fn build_multi_issuer_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
         resource: &EntityData,
         log_service: &impl LogWriter,
     ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
+        let setup = self.build_multi_issuer_setup_entities(tokens, log_service)?;
+        let resource = self
+            .build_resource_entity(resource)
+            .inspect_err(|e| {
+                log_service.log_any(
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::ERROR,
+                        None,
+                    ))
+                    .set_message(
+                        "Failed to build resource entity for multi-issuer authorization"
+                            .to_string(),
+                    )
+                    .set_error(e.to_string()),
+                );
+            })
+            .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
+
+        Ok(AuthorizeEntitiesData {
+            issuers: setup.issuers,
+            tokens: setup.tokens,
+            resource,
+            default_entities: setup.default_entities,
+        })
+    }
+
+    /// Build the resource-independent multi-issuer entities (tokens + issuers +
+    /// default entities). Used by batch authorization to amortize entity
+    /// construction across items and by the single-item path via
+    /// [`Self::build_multi_issuer_entities`].
+    pub(crate) fn build_multi_issuer_setup_entities(
+        &self,
+        tokens: &HashMap<String, Arc<Token>>,
+        log_service: &impl LogWriter,
+    ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
-        // Build token entities using the existing multi-issuer logic
         let mut token_entities = HashMap::new();
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token, &built_entities) {
@@ -299,30 +351,11 @@ impl EntityBuilder {
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
-        // Build resource entity
-        let resource = self
-            .build_resource_entity(resource)
-            .inspect_err(|e| {
-                log_service.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::ERROR,
-                        None,
-                    ))
-                    .set_message(
-                        "Failed to build resource entity for multi-issuer authorization"
-                            .to_string(),
-                    )
-                    .set_error(e.to_string()),
-                );
-            })
-            .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
-
         let issuers = self.iss_entities.values().cloned().collect();
 
-        Ok(AuthorizeEntitiesData {
-            issuers,
+        Ok(MultiIssuerSetupEntities {
             tokens: token_entities,
-            resource,
+            issuers,
             default_entities: self.default_entities.clone(),
         })
     }

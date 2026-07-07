@@ -44,6 +44,22 @@ pub enum TokenInputError {
     EmptyPayload,
 }
 
+/// Error type for batch authorization request validation.
+#[derive(Debug, thiserror::Error, PartialEq)]
+pub enum BatchValidationError {
+    /// The `items` array was empty.
+    #[error("Empty items array")]
+    EmptyItems,
+
+    /// The `tokens` array was empty (multi-issuer batch only).
+    #[error("Empty tokens array")]
+    EmptyTokens,
+
+    /// A batch item's context field is not a JSON object.
+    #[error("Context for item {index} must be a JSON object")]
+    InvalidItemContext { index: usize },
+}
+
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
@@ -83,6 +99,9 @@ pub enum AuthorizeError {
     /// Error encountered while validating multi-issuer request
     #[error(transparent)]
     MultiIssuerValidation(#[from] MultiIssuerValidationError),
+    /// Error encountered while validating a batch authorization request
+    #[error(transparent)]
+    BatchValidation(#[from] BatchValidationError),
     /// Error encountered while building multi-issuer entities
     #[error("Multi-issuer entity building failed: {0}")]
     MultiIssuerEntity(MultiIssuerEntityError),

@@ -51,7 +51,9 @@ pub use crate::context_data_api::{
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
+    TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
