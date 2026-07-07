@@ -49,11 +49,11 @@ Then add the following repository and dependency to your project's pom.xml:
 <dependency>
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>2.2.0</version>
+    <version>{version}</version>
 </dependency>
 ```
 
-> Replace `2.2.0` with the [latest stable Jans release](https://github.com/JanssenProject/jans/releases).
+> Replace `{version}` with the [latest stable Jans release version](https://github.com/JanssenProject/jans/releases), e.g 2.2.0.
 
 ### Building from Source
 
