@@ -192,6 +192,7 @@ nav:
         - MTLS: janssen-server/auth-server/oauth-features/mtls.md
         - PAR: janssen-server/auth-server/oauth-features/par.md
         - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
+        - Authorization Server Issuer Identification: janssen-server/auth-server/oauth-features/authorization-server-issuer-identification.md
       - Tokens:
         - janssen-server/auth-server/tokens/README.md
         - Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md
@@ -620,6 +621,29 @@ plugins:
 - include-markdown
 - tags
 - search
+- llmstxt:
+    full_output: llms-full.txt
+    markdown_description: Long description of my project.
+    sections:
+      Introduction documentation:
+      - index.md
+      Janssen server documentation:
+      - janssen-server/*.md
+      Agama documentation:
+      - agama/*.md
+      Casa documentation:
+      - casa/*.md
+      Cedarling documentation:
+      - cedarling/*.md
+      Contribution Guidelines documentation:
+      - contribute/*.md
+      Governance documentation:
+      - governance/*.md
+      Script catalog documentation:
+      - script-catalog/*.md
+      Community documentation:
+      - CONTRIBUTING.md
+      - CODE_OF_CONDUCT.md
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
