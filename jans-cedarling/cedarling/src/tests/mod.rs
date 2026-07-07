@@ -9,6 +9,7 @@ mod utils;
 
 mod authorize_multi_issuer;
 mod authorize_unsigned;
+mod authorize_unsigned_batch;
 mod authorize_without_schema;
 mod context_data_api;
 mod policy_store_loader;
