@@ -135,6 +135,11 @@ struct IntervalState {
     authz_decision_allow: AtomicI64,
     authz_decision_deny: AtomicI64,
     authz_errors_total: AtomicI64,
+    /// Number of batch authorization calls in this interval.
+    authz_batch_total: AtomicI64,
+    /// Cumulative item count across all batch calls in this interval;
+    /// divide by [`Self::authz_batch_total`] for the mean batch size.
+    authz_batch_items: AtomicI64,
 
     timing_recorder: Mutex<TimingRecorder>,
     last_eval_time_us: AtomicI64,
@@ -165,6 +170,8 @@ impl IntervalState {
             authz_decision_allow: AtomicI64::new(0),
             authz_decision_deny: AtomicI64::new(0),
             authz_errors_total: AtomicI64::new(0),
+            authz_batch_total: AtomicI64::new(0),
+            authz_batch_items: AtomicI64::new(0),
             timing_recorder: Mutex::new(TimingRecorder::new()),
             last_eval_time_us: AtomicI64::new(0),
             token_cache_hits: AtomicI64::new(0),
@@ -224,6 +231,14 @@ impl IntervalState {
             (
                 "authz.errors_total".to_string(),
                 load(&self.authz_errors_total),
+            ),
+            (
+                "authz.batch_total".to_string(),
+                load(&self.authz_batch_total),
+            ),
+            (
+                "authz.batch_items".to_string(),
+                load(&self.authz_batch_items),
             ),
             (
                 "authz.last_eval_time_us".to_string(),
@@ -573,6 +588,22 @@ impl MetricsCollector {
                     .record(pol_decision);
             }
         }
+    }
+
+    /// Records a batch authorization call: increments `authz.batch_total` by
+    /// one and `authz.batch_items` by the item count.
+    pub(crate) fn record_batch(&self, item_count: usize) {
+        if !self.enabled {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        interval
+            .authz_batch_total
+            .fetch_add(1, Ordering::Relaxed);
+        interval
+            .authz_batch_items
+            .fetch_add(saturating_usize_to_i64(item_count), Ordering::Relaxed);
     }
 
     /// Increments `authz.errors_total` counter.
