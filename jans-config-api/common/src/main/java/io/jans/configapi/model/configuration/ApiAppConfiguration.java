@@ -3,6 +3,7 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.doc.annotation.DocProperty;
 
 import java.util.List;
@@ -18,8 +19,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
     
-    @Schema(description = "Cedar OAuth authentication enable/disable flag. Default value `true`.")
-    private boolean cedarAuthEnabled;
+    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
     private boolean disableLoggerTimer;
@@ -392,14 +394,6 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setAssetMgtConfiguration(AssetMgtConfiguration assetMgtConfiguration) {
         this.assetMgtConfiguration = assetMgtConfiguration;
-    }
-
-    public boolean isCedarAuthEnabled() {
-        return cedarAuthEnabled;
-    }
-
-    public void setCedarAuthEnabled(boolean cedarAuthEnabled) {
-        this.cedarAuthEnabled = cedarAuthEnabled;
     }
 
     public CedarConfig getCedarConfig() {
