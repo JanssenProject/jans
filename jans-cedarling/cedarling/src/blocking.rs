@@ -8,9 +8,10 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    AuthorizeError, AuthorizeResult, BatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
+    BootstrapConfig, DataApi, DataEntry, DataError, DataStoreStats, EntityData,
+    InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, PolicyMetadata, RequestUnsigned,
+    TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -55,6 +56,19 @@ impl Cedarling {
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         self.instance.authz.load().authorize_unsigned(&request)
+    }
+
+    /// Authorize a batch of unsigned requests. See
+    /// [`crate::Cedarling::authorize_unsigned_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+        self.instance
+            .authz
+            .load()
+            .authorize_unsigned_batch(&request)
     }
 
     /// Authorize multi-issuer request.

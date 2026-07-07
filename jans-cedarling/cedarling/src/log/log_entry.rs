@@ -339,6 +339,10 @@ pub(crate) struct DecisionLogEntry {
     /// Information about pushed data that was injected into the context
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pushed_data: Option<PushedDataInfo>,
+    /// Shared correlation id when this entry was produced from a batch
+    /// authorization call. `None` for single-item calls.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub batch_id: Option<Uuid>,
 }
 
 /// Telemetry log entry following the 3-map model.
