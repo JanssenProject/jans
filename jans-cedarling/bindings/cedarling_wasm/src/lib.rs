@@ -172,8 +172,8 @@ impl Cedarling {
     /// const result = await cedarling.authorize_unsigned(JSON.stringify(request));
     /// ```
     pub async fn authorize_unsigned(&self, request: &str) -> Result<AuthorizeResult, Error> {
-        let cedar_request: RequestUnsigned =
-            serde_json::from_str(request).map_err(Error::new)?;
+        let cedar_request: RequestUnsigned = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
@@ -192,8 +192,8 @@ impl Cedarling {
         &self,
         request: &str,
     ) -> Result<MultiIssuerAuthorizeResult, Error> {
-        let cedar_request: AuthorizeMultiIssuerRequest =
-            serde_json::from_str(request).map_err(Error::new)?;
+        let cedar_request: AuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_multi_issuer(cedar_request)
