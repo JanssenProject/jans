@@ -1357,7 +1357,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
-      - name: Install Rust with iOS targets
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
         with:
           toolchain: stable
@@ -1426,7 +1426,7 @@ jobs:
           rustup target add aarch64-apple-ios-sim aarch64-apple-ios
 
       # Step 7 — build iOS simulator static library
-      - name: Build iOS device library (aarch64-apple-ios-sim)
+      - name: Build iOS simulator library (aarch64-apple-ios-sim)
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
         run: cargo build --release --target aarch64-apple-ios-sim -p cedarling_uniffi
 

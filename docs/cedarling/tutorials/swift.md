@@ -35,7 +35,7 @@ Unzip `cedarling_uniffi-ios-{version}.zip` to get `Cedarling.xcframework`.
 
 ---
 
-#### Option A — Add directly to Xcode (manual)
+#### Add to Xcode (manual)
 
 1. Open your project in Xcode and click the **project name** at the top of the file navigator.
 2. Select your **app target** under *Targets* and open the **General** tab.
@@ -43,43 +43,6 @@ Unzip `cedarling_uniffi-ios-{version}.zip` to get `Cedarling.xcframework`.
 4. Drag `Cedarling.xcframework` into the list and set the embed option to **Do Not Embed** (it is a static library — embedding will cause a codesigning error).
 5. Drag `cedarling_uniffi.swift` into your source group, ensuring **Add to target** is checked.
 6. Press **⌘B** to verify the build.
-
----
-
-#### Option B — Add via Swift Package Manager
-
-SPM can reference the XCFramework directly from the GitHub release URL.
-
-Create a local Swift package (or use an existing one) with the following `Package.swift`:
-
-```swift
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "CedarlingSDK",
-    platforms: [.iOS(.v14)],
-    products: [
-        .library(name: "CedarlingSDK", targets: ["CedarlingSDK"])
-    ],
-    targets: [
-        .binaryTarget(
-            name: "CedarlingFFI",
-            url: "https://github.com/JanssenProject/jans/releases/download/v2.2.0/cedarling_uniffi-ios-v2.2.0.zip",
-            checksum: "<value from cedarling_uniffi-ios-v2.2.0.zip.spm-checksum>"
-        ),
-        .target(
-            name: "CedarlingSDK",
-            dependencies: ["CedarlingFFI"],
-            path: "Sources/CedarlingSDK"
-        )
-    ]
-)
-```
-
-Copy `cedarling_uniffi.swift` into `Sources/CedarlingSDK/`, then add the local package to your app via **File → Add Package Dependencies → Add Local**.
-
-> Replace `v2.2.0` with the [latest stable release](https://github.com/JanssenProject/jans/releases). The checksum value is the contents of the `cedarling_uniffi-ios-{version}.zip.spm-checksum` file published alongside the zip on the releases page.
 
 ---
 

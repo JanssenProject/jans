@@ -10,10 +10,12 @@ Read [this article](./docs/DetailBuildSteps.md) for detail steps.
 
 If you do not want to build from source, you can use the pre-built XCFramework published with each Janssen release. This is the recommended approach for most iOS app developers.
 
-### Prerequisites
+#### Prerequisites
 
 - iOS 14+ deployment target
 - Xcode 14 or later
+
+#### Steps
 
 1. Go to the Janssen [releases](https://github.com/JanssenProject/jans/releases) page and download the following two files for your target version:
 
@@ -34,15 +36,17 @@ If you do not want to build from source, you can use the pre-built XCFramework p
 
 ### Manually Built iOS Assets
 
-### Prerequisites
+#### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
 - Xcode 14 or later
 
+#### Steps
+
 1. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
 
 ```bash
-rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
+rustup target add aarch64-apple-ios-sim aarch64-apple-ios
 ```
 
 2. Run below command to build and import binding into iOS project.
