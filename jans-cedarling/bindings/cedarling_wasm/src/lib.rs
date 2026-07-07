@@ -168,6 +168,12 @@ impl Cedarling {
     /// `Decision::Deny` and surface residual policy ids in
     /// `response.diagnostics.reason`.
     ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`RequestUnsigned`].
+    ///
+    /// # Example
+    ///
     /// ```javascript
     /// const result = await cedarling.authorize_unsigned(JSON.stringify(request));
     /// ```
@@ -184,6 +190,12 @@ impl Cedarling {
 
     /// Authorize multi-issuer request.
     /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`AuthorizeMultiIssuerRequest`].
+    ///
+    /// # Example
     ///
     /// ```javascript
     /// const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
