@@ -235,10 +235,9 @@ public class TrustRelationshipTest {
             .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
             .getValue()
             .updateMetadataSource(NoMetadataSource.getInstance())
-            .getValue();
-            /*
+            .getValue()
             .updateMetadataSource(sampleUriMetadataSource())
-            .getValue();*/
+            .getValue();
         
         TrustRelationship aggregate = sampleActivatingAggregateTrustRelationship()
             .finalizeActivation(sampleActivationDiagnosticsForFailedActivation())
@@ -297,6 +296,22 @@ public class TrustRelationshipTest {
             Arguments.of(aggregate,activeSaml2EcpProfileConfiguration(),ProfileConfigurationAccessor.SAML2_ECP),
             Arguments.of(aggregate,activeSaml2SsoProfileConfiguration(),ProfileConfigurationAccessor.SAML2_SSO),
             Arguments.of(aggregate,activeSaml2LogoutProfileConfiguration(),ProfileConfigurationAccessor.SAML2_LOGOUT)
+        );
+    }
+
+    private static final Stream<Arguments> activatingTrustRelationshipsWithSuccessActivationDiagnostics() {
+
+        return Stream.of(
+            Arguments.of(sampleActivatingIndividualTrustRelationship(),sampleActivationDiagnosticsForSuccessfulActivation()),
+            Arguments.of(sampleActivatingAggregateTrustRelationship(),sampleActivationDiagnosticsForSuccessfulActivation())
+        );
+    }
+
+    private static final Stream<Arguments> activatingTrustRelationshipsWithFailedActivationDiagnostics() {
+
+        return Stream.of(
+            Arguments.of(sampleActivatingIndividualTrustRelationship(),sampleActivationDiagnosticsForFailedActivation()),
+            Arguments.of(sampleActivatingAggregateTrustRelationship(),sampleActivationDiagnosticsForFailedActivation())
         );
     }
 
@@ -1643,7 +1658,6 @@ public class TrustRelationshipTest {
     @DisplayName("Advanced Scenarios and Edge Cases -- Activation Diagnostics Behavior")
     public class ActivationDiagnosticsBehaviorTests {
 
-        @Disabled
         @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsWithActivationDiagnostics")
         @DisplayName(
@@ -1651,7 +1665,7 @@ public class TrustRelationshipTest {
             "WHEN activate() is called " +
             "THEN should clear previous diagnostics and transition to ACTIVATING "
         )
-        public void shouldClearPreviousDiagnostics_whenActivateIsCalled(TrustRelationship tr) {
+        public void shouldClearPreviousDiagnostics_whenActivateIsCalledFromReady(TrustRelationship tr) {
 
             assertThat(tr).isInReadyStatus();
             assertThat(tr).hasActivationDiagnostics();
@@ -1663,6 +1677,48 @@ public class TrustRelationshipTest {
 
             assertThat(updated).hasNoActivationDiagnostics();
             assertThat(updated).isInActivatingStatus();
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithSuccessActivationDiagnostics")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN finalizeActivation() is called with a successful ActivationContext containing diagnostics " +
+            "THEN the resulting TrustRelationship should be in ACTIVE state and contain the activation diagnostics " 
+        )
+        public void shouldIncludeActivationDiagnosticsAfterSuccessfulFinalizeActivation(TrustRelationship tr,ActivationDiagnostics success_diagnostics) {
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(success_diagnostics.getStatus()).isEqualTo(ActivationStatus.SUCCEEDED);
+
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(success_diagnostics);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInActiveStatus();
+            assertThat(updated.getActivationDiagnostics()).isEqualTo(success_diagnostics);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithFailedActivationDiagnostics")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN finalizeActivation() is called with a failed ActivationContext " +
+            "THEN the resulting TrustRelationship should be in READY state and contain the activation diagnostics "
+        )
+        public void shouldIncludeActivationDiagnosticsAfterFailedFinalizeActivation(TrustRelationship tr, ActivationDiagnostics failed_diagnostics) {
+
+            assertThat(tr).isInActivatingStatus();
+            assertThat(failed_diagnostics.getStatus()).isEqualTo(ActivationStatus.FAILED);
+
+            TrustResult<TrustRelationship> result = tr.finalizeActivation(failed_diagnostics);
+
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInReadyStatus();
+            assertThat(updated.getActivationDiagnostics()).isEqualTo(failed_diagnostics);
         }
     }
 } 
