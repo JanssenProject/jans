@@ -294,6 +294,17 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
+    public TrustRelationshipAssert hasActivationDiagnostics() {
+
+        isNotNull();
+        if (actual.hasNoActivationDiagnostics()) {
+
+            failWithMessage("TrustRelationship has no activation diagnostics data. Expected: successful/unsuccessful diagnostics data");
+        }
+
+        return this;
+    }
+
     public ProfileConfigurationAssert withProfileConfiguration(ProfileType profileType) {
 
         ProfileConfigurationAssert ret = null;

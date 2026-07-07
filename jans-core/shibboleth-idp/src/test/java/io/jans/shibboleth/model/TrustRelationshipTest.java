@@ -229,6 +229,24 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static final Stream<Arguments> readyTrustRelationshipsWithActivationDiagnostics() {
+
+        TrustRelationship individual = sampleActivatingIndividualTrustRelationship()
+            .finalizeActivation(sampleActivationDiagnosticsForSuccessfulActivation())
+            .getValue()
+            .updateMetadataSource(NoMetadataSource.getInstance())
+            .getValue();
+            /*
+            .updateMetadataSource(sampleUriMetadataSource())
+            .getValue();*/
+        
+        TrustRelationship aggregate = sampleActivatingAggregateTrustRelationship()
+            .finalizeActivation(sampleActivationDiagnosticsForFailedActivation())
+            .getValue();
+        
+        return Stream.of(Arguments.of(individual),Arguments.of(aggregate));
+    }
+
 
     private static final Stream<Arguments> activatingTrustRelationshipsOfAllNatures() {
  
@@ -287,6 +305,31 @@ public class TrustRelationshipTest {
         return Stream.of(
             Arguments.of(sampleActiveIndividualTrustRelationship()),
             Arguments.of(sampleActiveAggregateTrustRelationship())  
+        );
+    }
+
+    private static final Stream<Arguments> activeTrustRelationshipsOfAllNaturesWithAllProfileAccessors() {
+
+        TrustRelationship individual = sampleActiveIndividualTrustRelationship();
+        TrustRelationship aggregate  = sampleActiveAggregateTrustRelationship();
+
+        return Stream.of(
+
+            //individual 
+            Arguments.of(individual,ProfileConfigurationAccessor.SHIBBOLETH_SSO),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_ECP),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_SSO),
+            Arguments.of(individual,ProfileConfigurationAccessor.SAML2_LOGOUT),
+
+            //aggregate
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SHIBBOLETH_SSO),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ARTIFACT_RESOLUTION),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ATTRIBUTE_QUERY),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_ECP),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_SSO),
+            Arguments.of(aggregate,ProfileConfigurationAccessor.SAML2_LOGOUT)
         );
     }
 
@@ -1133,6 +1176,26 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateMetadataSource() is called with a metadatasource of type `NONE` " +
+            "THEN should transition to DRAFT state and increment version "
+        )
+        public void shouldTransitionToDraft_whenMetadataSourceSetToNoneFromActive(TrustRelationship tr) {
+
+            assertThat(tr).isInActiveStatus();
+            MetadataSource source = NoMetadataSource.getInstance();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
+
+        @ParameterizedTest
         @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
@@ -1153,6 +1216,44 @@ public class TrustRelationshipTest {
             assertThat(updated).isVersion(tr.getVersion().next());
         }
         
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithAllProfileAccessors")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called with the *same* configuration as the current one " +
+            "THEN should remaine in ACTIVE state and version should not change (idempotent) "
+        )
+        public void shouldRemainInActive_whenProfileConfigurationIsNoOp(TrustRelationship tr, ProfileConfigurationAccessor accessor) {
+
+            assertThat(tr).isInActiveStatus();
+            
+            TrustResult<TrustRelationship> result = accessor.update(tr,accessor.extract(tr));
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship same = result.getValue();
+
+            assertThat(same).isInActiveStatus();
+            assertThat(same).isVersion(tr.getVersion());
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor")
+        @DisplayName(
+            "GIVEN an ACTIVE TrustRelationship " +
+            "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
+            "THEN should transition to DRAFT state and increment version "
+        )
+        public void shouldTransitionToDraft_whenAllProfilesDisabledFromActive(TrustRelationship tr,ProfileConfigurationAccessor accessor) {
+
+            assertThat(tr).isInActiveStatus();
+            assertThat(tr).hasActiveProfileConfigurationCount(1);
+
+            TrustResult<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
+            assertThat(result.isSuccess()).isTrue();
+            TrustRelationship updated = result.getValue();
+
+            assertThat(updated).isInDraftStatus();
+            assertThat(updated).isVersion(tr.getVersion().next());
+        }
     }
 
     @Nested
@@ -1536,25 +1637,32 @@ public class TrustRelationshipTest {
             assertThat(same).isInActiveStatus();
             assertThat(same).isVersion(tr.getVersion());
         }
+    }
 
+    @Nested
+    @DisplayName("Advanced Scenarios and Edge Cases -- Activation Diagnostics Behavior")
+    public class ActivationDiagnosticsBehaviorTests {
+
+        @Disabled
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsWithActivationDiagnostics")
         @DisplayName(
-            "GIVEN an ACTIVE TrustRelationship " +
-            "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
-            "THEN should transition to DRAFT state and increment version "
+            "GIVEN a READY TrustRelationship with previous activation diagnostics " +
+            "WHEN activate() is called " +
+            "THEN should clear previous diagnostics and transition to ACTIVATING "
         )
-        public void shouldTransitionToDraft_whenAllProfilesDisabledFromActive(TrustRelationship tr,ProfileConfigurationAccessor accessor) {
+        public void shouldClearPreviousDiagnostics_whenActivateIsCalled(TrustRelationship tr) {
 
-            assertThat(tr).isInActiveStatus();
-            assertThat(tr).hasActiveProfileConfigurationCount(1);
+            assertThat(tr).isInReadyStatus();
+            assertThat(tr).hasActivationDiagnostics();
 
-            TrustResult<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
+            TrustResult<TrustRelationship> result = tr.activate();
+
             assertThat(result.isSuccess()).isTrue();
             TrustRelationship updated = result.getValue();
 
-            assertThat(updated).isInDraftStatus();
-            assertThat(updated).isVersion(tr.getVersion().next());
+            assertThat(updated).hasNoActivationDiagnostics();
+            assertThat(updated).isInActivatingStatus();
         }
     }
 } 

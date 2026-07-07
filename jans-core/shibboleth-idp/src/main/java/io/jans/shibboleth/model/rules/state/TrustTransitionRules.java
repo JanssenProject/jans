@@ -21,6 +21,7 @@ public final class TrustTransitionRules {
     public static List<TrustTransitionRule> defaultRules() {
 
         return List.of(
+
             new TrustTransitionRule(
                 TrustStatus.DRAFT,TrustStatus.READY,
                 (ctx) -> ctx.hasRealMetadataSource() && ctx.hasAnyActiveProfileConfiguration(),
@@ -69,18 +70,6 @@ public final class TrustTransitionRules {
                 "ACTIVE --> INACTIVE: deactivate() called "
             ),
 
-            new TrustTransitionRule(
-                TrustStatus.INACTIVE,TrustStatus.ACTIVATING,
-                (ctx) -> ctx.activateCalled() && ctx.hasRealMetadataSource() && ctx.hasAnyActiveProfileConfiguration(),
-                "INACTIVE -> ACTIVE: activate() called and requirements met for ACTIVATING "
-            ),
-
-            new TrustTransitionRule(
-                TrustStatus.INACTIVE,TrustStatus.DRAFT,
-                (ctx) -> ctx.activateCalled() && (ctx.hasNoRealMetadataSource() || ctx.hasNoActiveProfileConfiguration()),
-                "INACTIVE -> DRAFT: activate() called and no real metadatasource or no active profile configuration "
-            ),
-
             new TrustTransitionRule( 
                 TrustStatus.ACTIVE,TrustStatus.ACTIVATING,
                 (ctx) -> ctx.updateMetadataSourceCalled() && ctx.hasRealMetadataSource() && ctx.hasMetadataSourceChanged(),
@@ -97,6 +86,24 @@ public final class TrustTransitionRules {
                 TrustStatus.ACTIVE,TrustStatus.DRAFT,
                 (ctx) -> ctx.updateProfileConfigurationCalled() && ctx.hasNoActiveProfileConfiguration(),
                 "ACTIVE -> DRAFT : updateXXXProfileConfiguration() called and active profiles == 0"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.ACTIVE,TrustStatus.DRAFT,
+                (ctx) -> ctx.updateMetadataSourceCalled() && ctx.hasNoRealMetadataSource(),
+                "ACTIVE -> DRAFT : updateMetadataSource() called with NONE metadatasource "
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.INACTIVE,TrustStatus.DRAFT,
+                (ctx) -> ctx.activateCalled() && (ctx.hasNoRealMetadataSource() || ctx.hasNoActiveProfileConfiguration()),
+                "INACTIVE -> DRAFT : activate() called but requirements not met"
+            ),
+
+            new TrustTransitionRule(
+                TrustStatus.INACTIVE,TrustStatus.ACTIVATING,
+                (ctx) -> ctx.activateCalled() && ctx.hasRealMetadataSource() && ctx.hasAnyActiveProfileConfiguration(),
+                "INACTIVE -> ACTIVE: activate() called and requirements met for ACTIVATING "
             )
         );
     }
