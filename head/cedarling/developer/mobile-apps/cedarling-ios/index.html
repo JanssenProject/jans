@@ -1129,6 +1129,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-pre-built-ios-release-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Pre-Built iOS Release Assets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Pre-Built iOS Release Assets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1138,15 +1150,37 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
+  <a href="#manually-built-ios-assets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building
+        Manually Built iOS Assets
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Manually Built iOS Assets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1389,6 +1423,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-pre-built-ios-release-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Pre-Built iOS Release Assets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Pre-Built iOS Release Assets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1398,15 +1444,37 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
+  <a href="#manually-built-ios-assets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building
+        Manually Built iOS Assets
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Manually Built iOS Assets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1500,13 +1568,60 @@
 
 <h1 id="using-uniffi-binding-ios-app">Using UniFFI binding iOS App<a class="headerlink" href="#using-uniffi-binding-ios-app" title="Permanent link">#</a></h1>
 <p>Cedarling UniFFI binding exposes its <code>init</code>, <code>authz</code> and <code>log</code> interfaces to different languages and on all the different platforms, including Swift for iOS. This section covers how to build and use Cedarling UniFFI binding in an iOS app.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<h2 id="using-pre-built-ios-release-assets">Using Pre-Built iOS Release Assets<a class="headerlink" href="#using-pre-built-ios-release-assets" title="Permanent link">#</a></h2>
+<p>If you do not want to build from source, you can use the pre-built XCFramework published with each Janssen release. This is the recommended approach for most iOS app developers.</p>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
+<ul>
+<li>iOS 14+ deployment target</li>
+<li>
+<p>Xcode 14 or later</p>
+</li>
+<li>
+<p>Go to the Janssen <a href="https://github.com/JanssenProject/jans/releases">releases</a> page and download the following two files for your target version:</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cedarling_uniffi-ios-{version}.zip</td>
+<td>The XCFramework containing Cedarling's compiled libraries for device and simulator</td>
+</tr>
+<tr>
+<td>cedarling_uniffi.swift</td>
+<td>UniFFI-generated Swift source that exposes the Rust API</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>
+<p>Unzip cedarling_uniffi-ios-{version}.zip to get Cedarling.xcframework.</p>
+</li>
+<li>
+<p>Open your project in Xcode and click the project name at the top of the file navigator. Select your app target (not the project) under Targets.</p>
+</li>
+<li>
+<p>Open the General tab and scroll down to Frameworks, Libraries, and Embedded Content. Drag <code>Cedarling.xcframework</code> into the list. Set the embed option to <strong>Do Not Embed</strong> (the XCFramework contains static libraries — embedding will cause a codesigning error at archive time).</p>
+</li>
+<li>
+<p>Drag <code>cedarling_uniffi.swift</code> into your project's source group in the file navigator. When prompted, ensure <strong>Add to target</strong> is checked for your app target.</p>
+</li>
+<li>
+<p>Build and Run the project to verify the setup.</p>
+</li>
+</ol>
+<h2 id="manually-built-ios-assets">Manually Built iOS Assets<a class="headerlink" href="#manually-built-ios-assets" title="Permanent link">#</a></h2>
+<h3 id="prerequisites_1">Prerequisites<a class="headerlink" href="#prerequisites_1" title="Permanent link">#</a></h3>
 <ul>
 <li>Rust: Install it from <a href="https://www.rust-lang.org/tools/install">the official Rust website</a>.</li>
-<li>Xcode: Available on the Mac App Store.</li>
-</ul>
-<h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
-<ol>
+<li>
+<p>Xcode 14 or later</p>
+</li>
 <li>
 <p>Clone the jans monorepo and change directory to <code>/path/of/jans/jans-cedarling/bindings/cedarling_uniffi</code>.
    <div class="highlight"><pre><span></span><code><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JanssenProject/jans.git
@@ -1530,7 +1645,7 @@
 <li>
 <p>Run iOS project on simulator.</p>
 </li>
-</ol>
+</ul>
 <p>We have included <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi/iOSApp">a sample iOS app</a> using Cedarling UniFFI binding for making authorisation decisions. Here is a demonstration video of its working.</p>
 <div style="position: relative; padding-bottom: 214.62686567164178%; height: 0;"><iframe src="https://www.loom.com/embed/9ee1a9cf5cc04c1ea17fdc638ca45625?sid=c22f2463-22f0-4531-8749-403a1e6a25db" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
@@ -1555,7 +1670,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 17, 2026 06:12:23 UTC"><span class="timeago" datetime="2026-04-17T06:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 17, 2026 06:12:23 UTC">2026-04-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 7, 2026 18:52:58 UTC"><span class="timeago" datetime="2026-07-07T18:52:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 7, 2026 18:52:58 UTC">2026-07-07</span>
   </span>
 
     

@@ -42,11 +42,11 @@ Generate a PAT at GitHub → Settings → Developer settings → Personal access
 <dependency>
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>2.2.0</version>
+    <version>{version}</version>
 </dependency>
 ```
 
-> Replace `2.2.0` with the [latest stable Jans release](https://github.com/JanssenProject/jans/releases).
+> Replace `{version}` with the [latest stable Jans release version](https://github.com/JanssenProject/jans/releases), e.g 2.2.0.
 
 ### Building from Source
 
@@ -56,7 +56,7 @@ Note
 
 The Cedarling dependency available in the GitHub Maven Registry works only in a Linux environment.
 
-Refer to the following guide for instructions on building the Java bindings to work on macOS or Windows.
+Refer to the following [guide](https://docs.jans.io/head/cedarling/developer/cedarling-kotlin/#building-from-source) for instructions on building the Java bindings to work on macOS or Windows.
 
 ## Usage
 
