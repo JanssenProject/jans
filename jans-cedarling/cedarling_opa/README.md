@@ -1,12 +1,16 @@
 # OPA Cedarling Plugin
 
-A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows.
+A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin also provides the [AuthZen](https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api) access evaluation functionality. The plugin provides these endpoints:
+
+- `/.well-known/authzen-configuration` - AuthZen metadata endpoint
+- `/access/v1/evaluation` - Access evaluation endpoint
+- `/access/v1/evaluations` - Multiple access evaluation endpoint
 
 ## Building
 
 To compile OPA with the Cedarling plugin, you need the following:
 
-- Go 1.25+
+- Go 1.26+
 - Rust toolchain 1.95+
 - Make (for building the plugin. This build process is currently Linux only).
 
@@ -52,14 +56,17 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
 {
     "plugins": {
         "cedarling_opa": {
-            "stderr": false,
-            "bootstrap_config": {}
+            "host": "https://opa.cedarling.test",
+            "bootstrap_config": {},
+            "evaluation_logic": "MULTI_ISSUER"
         }
     }
 }
 ```
-- `stderr`: Whether or not the **plugin** emits errors to stdout or stderr
+
+- `host`: Hostname of the server where OPA is running. Required for the AuthZen [metadata endpoint](https://openid.net/specs/authorization-api-1_0.html#name-policy-decision-point-metad).
 - `bootstrap_config`: Bootstrap configuration dictionary for the Cedarling instance. Refer to the documentation for [bootstrap](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/) and [policy store](https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/) configuration. 
+- `evaluation_logic`: One of `MULTI_ISSUER` or `UNSIGNED`, corresponding to the Cedarling's [authorization modes](https://docs.jans.io/stable/cedarling/reference/cedarling-authz/#which-authorization-method-should-i-use) for the access evaluation API. Defaults to `MULTI_ISSUER`.
 
 3. Finally, run the binary with the plugin and provided rego examples:
 
@@ -82,5 +89,5 @@ docker build . -t opa-cedarling:latest
 docker run -p 8181:8181 opa-cedarling:latest
 ```
 
-## Demo
-The `demo` folder provides a set of defaults to demonstrate the plugin. The configuration file contains a bootstrap for Cedarling where the policy store is configured for unsigned authorization. The `rego` folder contains two example Rego files, one for unsigned and one for multi issuer authorization. Since the policy store does not contain any trusted issuers, multi-issuer authorization is not available with this policy store.
+## Examples
+The `demo` folder provides a set of defaults to demonstrate the plugin. The configuration file contains a bootstrap for Cedarling where an [example policy store](https://github.com/JanssenProject/CedarlingQuickstart/tree/main/tarpUnsignedDemo) is configured for unsigned authorization. If instead multi-issuer authorization is required for AuthZen, a policy store with trusted issuers must be provided. The `rego` folder contains two example Rego files, one for unsigned and one for multi-issuer authorization.

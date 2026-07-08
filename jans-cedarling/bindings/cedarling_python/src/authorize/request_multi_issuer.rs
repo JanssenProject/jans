@@ -11,6 +11,7 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
+use std::sync::OnceLock;
 
 /// AuthorizeMultiIssuerRequest
 /// ===========================
@@ -40,16 +41,24 @@ use serde_pyobject::from_pyobject;
 ///     context={"location": "miami"}
 /// )
 /// ```
-#[pyclass(get_all, set_all)]
+#[pyclass]
 pub struct AuthorizeMultiIssuerRequest {
-    /// List of TokenInput objects
+    /// List of TokenInput objects. Getter materializes a fresh Python list, so
+    /// `req.tokens.append(t)` is silently discarded — reassign to mutate.
+    #[pyo3(get)]
     pub tokens: Vec<TokenInput>,
     /// cedar_policy resource data
+    #[pyo3(get, set)]
     pub resource: EntityData,
     /// cedar_policy action
+    #[pyo3(get, set)]
     pub action: String,
-    /// Optional context to be used in cedar_policy
+    /// Optional context dict; deserialized on every `to_cedarling()` call so
+    /// mutations to the source dict (or nested values) are always picked up.
+    #[pyo3(get, set)]
     pub context: Option<Py<PyDict>>,
+    /// Sticky cache of `tokens` converted to `cedarling::TokenInput`.
+    cached_tokens: OnceLock<Vec<cedarling::TokenInput>>,
 }
 
 #[pymethods]
@@ -67,23 +76,37 @@ impl AuthorizeMultiIssuerRequest {
             resource,
             action,
             context,
+            cached_tokens: OnceLock::new(),
         }
+    }
+
+    /// Setter clears the cached converted Vec.
+    #[setter]
+    fn set_tokens(&mut self, value: Vec<TokenInput>) {
+        self.tokens = value;
+        self.cached_tokens = OnceLock::new();
     }
 }
 
 impl AuthorizeMultiIssuerRequest {
     pub fn to_cedarling(&self) -> Result<cedarling::AuthorizeMultiIssuerRequest, PyErr> {
-        let tokens = self.tokens.clone().into_iter().map(Into::into).collect();
+        // First call builds and stores; later calls clone the cached Vec.
+        let tokens = self
+            .cached_tokens
+            .get_or_init(|| self.tokens.iter().cloned().map(Into::into).collect())
+            .clone();
 
-        let context = if let Some(ref ctx) = self.context {
-            Some(Python::attach(|py| -> Result<serde_json::Value, PyErr> {
-                let context = ctx.clone_ref(py).into_bound(py);
-                from_pyobject(context).map_err(|err| {
-                    PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
-                })
-            })?)
-        } else {
-            None
+        let context = match &self.context {
+            Some(ctx) => Python::attach(|py| -> Result<Option<serde_json::Value>, PyErr> {
+                let bound = ctx.clone_ref(py).into_bound(py);
+                Ok(Some(from_pyobject(bound).map_err(|err| {
+                    PyRuntimeError::new_err(format!(
+                        "Failed to convert context to json: {}",
+                        err
+                    ))
+                })?))
+            })?,
+            None => None,
         };
 
         Ok(cedarling::AuthorizeMultiIssuerRequest {

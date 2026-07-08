@@ -79,6 +79,12 @@ export default function AuthFlowInputs({
   const triggerCodeFlow = async () => {
     if (!validateJson(additionalParams)) return;
 
+    // Block the flow if the client has a known expiry that has already passed.
+    if (client.showClientExpiry && client.expireAt && client.expireAt <= Date.now()) {
+      setErrorMessage('This client has expired. Please register a new client to continue.');
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMessage('');

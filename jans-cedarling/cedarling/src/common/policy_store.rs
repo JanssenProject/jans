@@ -63,8 +63,12 @@ pub struct PolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     pub cedar_version: Option<Version>,
 
-    /// Cedar schema
-    pub schema: CedarSchema,
+    /// Cedar schema (optional — `None` when strict schema validation is disabled)
+    pub schema: Option<CedarSchema>,
+
+    /// Whether a schema source was present in the policy store source,
+    /// regardless of whether it was loaded (used for log messages).
+    pub schema_source_exists: bool,
 
     /// Cedar policy set
     pub policies: PoliciesContainer,
@@ -121,7 +125,7 @@ impl PolicyStore {
 
 #[derive(Debug, derive_more::Display, derive_more::Error)]
 #[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
-pub struct TrustedIssuersValidationError {
+pub(crate) struct TrustedIssuersValidationError {
     oidc_url: String,
 }
 
@@ -130,6 +134,7 @@ pub struct TrustedIssuersValidationError {
 /// When loaded from the new directory/archive format, includes optional metadata
 /// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
+#[cfg_attr(test, derive(Debug))]
 pub(crate) struct PolicyStoreWithID {
     /// ID of policy store
     pub(crate) id: String,

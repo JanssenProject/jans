@@ -149,7 +149,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=22.0.0,<23" },
     { name = "jinja2", specifier = ">=3.1.6,<4" },
     { name = "orjson", specifier = ">=3.11.5,<4" },
-    { name = "python-dotenv", specifier = ">=1.0.1,<2" },
+    { name = "python-dotenv", specifier = ">=1.2.2,<2" },
     { name = "python-json-logger", specifier = ">=2.0.7,<3" },
     { name = "pyyaml", specifier = ">=6.0.2,<7" },
     { name = "structlog", specifier = ">=24.4.0,<25" },

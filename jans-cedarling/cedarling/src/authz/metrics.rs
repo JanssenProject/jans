@@ -22,7 +22,11 @@ use std::{
     },
 };
 
-use crate::{authz::error_metrics::ErrorMetricKey, log::Decision};
+use crate::{
+    authz::error_metrics::ErrorMetricKey,
+    init::policy_store_refresh::{RefreshOutcome, RefreshStrategy},
+    log::Decision,
+};
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
 const TIMING_LOCK_POISONED: &str = "timing recorder lock poisoned";
@@ -259,6 +263,169 @@ impl IntervalState {
     }
 }
 
+/// Atomics for the long-running policy-store-refresh worker.
+#[derive(Debug, Default)]
+struct PolicyStoreRefreshMetrics {
+    last_attempt_secs: AtomicI64,
+    last_success_secs: AtomicI64,
+    consecutive_failures: AtomicI64,
+    last_outcome: AtomicI64,
+    strategy_current: AtomicI64,
+    /// Cumulative count of `Conditional → HeadThenGet` transitions.
+    conditional_to_head_transitions: AtomicI64,
+    /// Cumulative count of `HeadThenGet → PlainGet` transitions.
+    head_to_plain_transitions: AtomicI64,
+    /// Cumulative count of probes that upgraded `PlainGet → HeadThenGet`.
+    upgrade_to_head_transitions: AtomicI64,
+    /// Cumulative count of probes that upgraded back to `Conditional`.
+    upgrade_to_conditional_transitions: AtomicI64,
+    outcome_success: AtomicI64,
+    outcome_not_modified: AtomicI64,
+    outcome_http_error: AtomicI64,
+    outcome_network_error: AtomicI64,
+    outcome_parse_error: AtomicI64,
+    outcome_rebuild_error: AtomicI64,
+    outcome_decode_error: AtomicI64,
+}
+
+impl PolicyStoreRefreshMetrics {
+    fn record(&self, outcome: RefreshOutcome) {
+        let now_secs = Utc::now().timestamp();
+        self.last_attempt_secs.store(now_secs, Ordering::Relaxed);
+        self.last_outcome
+            .store(outcome.metric_value(), Ordering::Relaxed);
+
+        let per_outcome = match outcome {
+            RefreshOutcome::Success => &self.outcome_success,
+            RefreshOutcome::NotModified => &self.outcome_not_modified,
+            RefreshOutcome::HttpError => &self.outcome_http_error,
+            RefreshOutcome::NetworkError => &self.outcome_network_error,
+            RefreshOutcome::ParseError => &self.outcome_parse_error,
+            RefreshOutcome::RebuildError => &self.outcome_rebuild_error,
+            RefreshOutcome::DecodeError => &self.outcome_decode_error,
+        };
+        per_outcome.fetch_add(1, Ordering::Relaxed);
+
+        match outcome {
+            RefreshOutcome::Success | RefreshOutcome::NotModified => {
+                self.last_success_secs.store(now_secs, Ordering::Relaxed);
+                self.consecutive_failures.store(0, Ordering::Relaxed);
+            },
+            RefreshOutcome::HttpError
+            | RefreshOutcome::NetworkError
+            | RefreshOutcome::ParseError
+            | RefreshOutcome::RebuildError
+            | RefreshOutcome::DecodeError => {
+                self.consecutive_failures.fetch_add(1, Ordering::Relaxed);
+            },
+        }
+    }
+
+    fn set_strategy_state(
+        &self,
+        current_strategy: RefreshStrategy,
+        conditional_to_head_transitions: u32,
+        head_to_plain_transitions: u32,
+        upgrade_to_head_transitions: u32,
+        upgrade_to_conditional_transitions: u32,
+    ) {
+        self.strategy_current
+            .store(current_strategy.metric_value(), Ordering::Relaxed);
+        self.conditional_to_head_transitions.store(
+            i64::from(conditional_to_head_transitions),
+            Ordering::Relaxed,
+        );
+        self.head_to_plain_transitions
+            .store(i64::from(head_to_plain_transitions), Ordering::Relaxed);
+        self.upgrade_to_head_transitions
+            .store(i64::from(upgrade_to_head_transitions), Ordering::Relaxed);
+        self.upgrade_to_conditional_transitions.store(
+            i64::from(upgrade_to_conditional_transitions),
+            Ordering::Relaxed,
+        );
+    }
+
+    /// Injects non-zero counters into `ops` using the canonical `policy_store_refresh.*` keys.
+    fn inject_if_nonzero(&self, ops: &mut HashMap<String, i64>) {
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.last_attempt_secs",
+            &self.last_attempt_secs,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.last_success_secs",
+            &self.last_success_secs,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.consecutive_failures",
+            &self.consecutive_failures,
+        );
+        insert_if_nonzero(ops, "policy_store_refresh.last_outcome", &self.last_outcome);
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.strategy_current",
+            &self.strategy_current,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.conditional_to_head_transitions",
+            &self.conditional_to_head_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.head_to_plain_transitions",
+            &self.head_to_plain_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.upgrade_to_head_transitions",
+            &self.upgrade_to_head_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.upgrade_to_conditional_transitions",
+            &self.upgrade_to_conditional_transitions,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_success",
+            &self.outcome_success,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_not_modified",
+            &self.outcome_not_modified,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_http_error",
+            &self.outcome_http_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_network_error",
+            &self.outcome_network_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_parse_error",
+            &self.outcome_parse_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_rebuild_error",
+            &self.outcome_rebuild_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_decode_error",
+            &self.outcome_decode_error,
+        );
+    }
+}
+
 /// Thread-safe telemetry metrics collector.
 ///
 /// Uses atomic operations for hot-path counters (lock-free within each interval).
@@ -275,6 +442,10 @@ pub(crate) struct MetricsCollector {
 
     /// Swapped wholesale on each snapshot; read lock for record_*, write lock for snapshot
     interval: RwLock<Box<IntervalState>>,
+
+    // Long-running refresh-worker counters — emitted on every snapshot regardless
+    // of telemetry interval (they reflect worker state, not per-interval activity).
+    refresh: PolicyStoreRefreshMetrics,
 }
 
 impl MetricsCollector {
@@ -285,6 +456,7 @@ impl MetricsCollector {
             init_time: now,
             policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
             interval: RwLock::new(Box::new(IntervalState::new(now))),
+            refresh: PolicyStoreRefreshMetrics::default(),
         }
     }
 
@@ -294,7 +466,35 @@ impl MetricsCollector {
             init_time: Utc::now(),
             policy_count: AtomicI64::new(0),
             interval: RwLock::new(Box::new(IntervalState::new(Utc::now()))),
+            refresh: PolicyStoreRefreshMetrics::default(),
         }
+    }
+
+    /// Records a refresh-worker tick outcome. Always runs regardless of
+    /// `enabled`, since refresh state should be observable even if telemetry
+    /// emission to Lock is disabled.
+    pub(crate) fn record_policy_store_refresh(&self, outcome: RefreshOutcome) {
+        self.refresh.record(outcome);
+    }
+
+    /// Records the current strategy and cumulative transition counts after a
+    /// refresh tick. Always runs regardless of `enabled` for the same reason as
+    /// [`Self::record_policy_store_refresh`].
+    pub(crate) fn record_policy_store_refresh_strategy(
+        &self,
+        current_strategy: RefreshStrategy,
+        conditional_to_head_transitions: u32,
+        head_to_plain_transitions: u32,
+        upgrade_to_head_transitions: u32,
+        upgrade_to_conditional_transitions: u32,
+    ) {
+        self.refresh.set_strategy_state(
+            current_strategy,
+            conditional_to_head_transitions,
+            head_to_plain_transitions,
+            upgrade_to_head_transitions,
+            upgrade_to_conditional_transitions,
+        );
     }
 
     /// Records a completed authorization evaluation with timing and policy data.
@@ -555,7 +755,8 @@ impl MetricsCollector {
             .expect(ERROR_COUNTERS_LOCK_POISONED)
             .clone();
 
-        let ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
+        let mut ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
+        self.refresh.inject_if_nonzero(&mut ops);
 
         MetricsSnapshot {
             policy_stats,
@@ -563,6 +764,18 @@ impl MetricsCollector {
             operational_stats: ops,
             interval_secs,
         }
+    }
+}
+
+/// Reads `atomic` with `Relaxed` ordering and inserts the value into `map`
+/// under `key` only when it's non-zero. Used to keep "no observation yet"
+/// indistinguishable from missing in the emitted metric map. Taking the
+/// `AtomicI64` directly drops the per-call `.load(Ordering::Relaxed)`
+/// boilerplate and pins the ordering choice to one place.
+fn insert_if_nonzero(map: &mut HashMap<String, i64>, key: &str, atomic: &AtomicI64) {
+    let value = atomic.load(Ordering::Relaxed);
+    if value != 0 {
+        map.insert(key.to_string(), value);
     }
 }
 
@@ -740,6 +953,47 @@ mod tests {
     }
 
     #[test]
+    fn set_policy_count_updates_gauge_for_next_snapshot() {
+        // Refresh-worker contract: after a successful policy-store swap with a
+        // different policy count, the `instance.policy_count` gauge must
+        // reflect the new value on subsequent snapshots. Without this the
+        // gauge would stay pinned at the bootstrap value indefinitely while
+        // authorization decisions used the new set.
+        let collector = MetricsCollector::new(5);
+        let snap_initial = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_initial.operational_stats.get("instance.policy_count"),
+            Some(&5),
+            "initial gauge must report the bootstrap count",
+        );
+
+        collector.set_policy_count(50);
+        let snap_after_swap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_after_swap
+                .operational_stats
+                .get("instance.policy_count"),
+            Some(&50),
+            "snapshot after set_policy_count(50) must report 50, not the stale bootstrap value",
+        );
+
+        // Another swap to a smaller set — gauge must move both directions,
+        // not just monotonically grow.
+        collector.set_policy_count(3);
+        let snap_after_shrink = collector.snapshot_and_reset();
+        assert_eq!(
+            snap_after_shrink
+                .operational_stats
+                .get("instance.policy_count"),
+            Some(&3),
+            "gauge must reflect a shrunk policy set as well, got {:?}",
+            snap_after_shrink
+                .operational_stats
+                .get("instance.policy_count"),
+        );
+    }
+
+    #[test]
     fn timing_recorder_empty_returns_zeros() {
         let mut recorder = TimingRecorder::new();
         let (p50, p95, p99, max) = recorder.drain_and_compute();
@@ -901,6 +1155,240 @@ mod tests {
             snap.operational_stats.get("data.remove_ops"),
             Some(&1),
             "remove ops must be 1"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_keys_omitted_when_zero() {
+        let collector = MetricsCollector::new(0);
+        let snap = collector.snapshot_and_reset();
+        for key in snap.operational_stats.keys() {
+            assert!(
+                !key.starts_with("policy_store_refresh."),
+                "expected no policy_store_refresh.* keys before any tick, got {key}"
+            );
+        }
+    }
+
+    #[test]
+    fn policy_store_refresh_keys_emitted_after_tick() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::Success);
+        collector.record_policy_store_refresh(RefreshOutcome::Success);
+        collector.record_policy_store_refresh(RefreshOutcome::NotModified);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.last_outcome"),
+            Some(&(RefreshOutcome::NotModified.metric_value()))
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_success"),
+            Some(&2),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_not_modified"),
+            Some(&1),
+        );
+        assert!(
+            !snap
+                .operational_stats
+                .contains_key("policy_store_refresh.outcome_http_error"),
+            "zero per-outcome counters stay omitted"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_strategy_keys_track_transitions() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 1, 0, 0, 0);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.strategy_current"),
+            Some(&2),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.conditional_to_head_transitions"),
+            Some(&1),
+        );
+        assert!(
+            !snap
+                .operational_stats
+                .contains_key("policy_store_refresh.head_to_plain_transitions"),
+            "zero transitions stay omitted"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_consecutive_failures_resets_on_success() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::HttpError);
+        collector.record_policy_store_refresh(RefreshOutcome::HttpError);
+        collector.record_policy_store_refresh(RefreshOutcome::HttpError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&3),
+        );
+
+        collector.record_policy_store_refresh(RefreshOutcome::Success);
+        let snap = collector.snapshot_and_reset();
+        assert!(
+            !snap
+                .operational_stats
+                .contains_key("policy_store_refresh.consecutive_failures"),
+            "consecutive_failures resets to 0 after success and disappears (sparse)"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_consecutive_failures_increments_only_on_errors() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::NotModified);
+        collector.record_policy_store_refresh(RefreshOutcome::NotModified);
+        let snap = collector.snapshot_and_reset();
+        assert!(
+            !snap
+                .operational_stats
+                .contains_key("policy_store_refresh.consecutive_failures"),
+            "NotModified is a non-error outcome and must not bump failures"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_error_outcomes_distinguishable() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::HttpError);
+        collector.record_policy_store_refresh(RefreshOutcome::HttpError);
+        collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
+        collector.record_policy_store_refresh(RefreshOutcome::ParseError);
+        collector.record_policy_store_refresh(RefreshOutcome::ParseError);
+        collector.record_policy_store_refresh(RefreshOutcome::ParseError);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_http_error"),
+            Some(&2),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_network_error"),
+            Some(&1),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_parse_error"),
+            Some(&3),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_rebuild_error"),
+            Some(&1),
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.last_outcome"),
+            Some(&(RefreshOutcome::RebuildError.metric_value())),
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_rebuild_error_bumps_consecutive_failures() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
+        collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&2),
+            "RebuildError counts as a failure for the streak"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_decode_error_distinct_from_network_error() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
+        collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
+        collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_decode_error"),
+            Some(&2),
+            "DecodeError must increment its own per-outcome counter",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_network_error"),
+            Some(&1),
+            "DecodeError must not increment outcome_network_error — the whole point of the variant is to distinguish them",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&3),
+            "DecodeError counts toward the failure streak (response read failed → the refresh did not succeed)",
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_per_outcome_counters_survive_snapshot() {
+        // Per-outcome counters are *cumulative* (not interval-scoped) so they
+        // must not zero on snapshot.
+
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh(RefreshOutcome::Success);
+        collector.record_policy_store_refresh(RefreshOutcome::Success);
+        let _ = collector.snapshot_and_reset();
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_success"),
+            Some(&2),
+            "per-outcome counters persist across snapshots"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_strategy_current_overwrites_on_each_call() {
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 5, 1, 0, 2);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.strategy_current"),
+            Some(&2),
+            "strategy_current is a gauge — only the latest value is reported"
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.upgrade_to_conditional_transitions"),
+            Some(&2),
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_strategy_current_one_omitted_when_at_default_conditional() {
+        // The "no observation yet" case (strategy_current == 0) is omitted,
+        // but a worker that has actively reported "current = Conditional (1)"
+        // MUST be visible — distinguishing "not running" from "running and
+        // healthy" is the whole point of the sparse encoding.
+        let collector = MetricsCollector::new(0);
+        collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.strategy_current"),
+            Some(&1),
         );
     }
 
