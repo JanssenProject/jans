@@ -80,4 +80,53 @@ public class StatusConstrainedOperations {
             return TrustResult.success(null);
         }
     }
+
+    public static class ActivateRestrictions {
+
+        public static TrustResult<Void> check(BuildContext context) {
+
+            if (context.activateCalled() && activateCannotBeCalledFromStatus(context.getStatus())) {
+
+                TrustError cause = OperationForbiddenFromStatus.of("activate",context.getStatus());
+                return TrustResult.failure(DomainObjectConsistencyFailed.forClassWithCause(TrustRelationship.class, cause));
+            }
+
+            return TrustResult.success(null);
+        }
+
+        private static boolean activateCannotBeCalledFromStatus(TrustStatus status) {
+
+            return !activateCanBeCalledFromStatus(status);
+        }
+
+        private static boolean activateCanBeCalledFromStatus(TrustStatus status) {
+
+            return status == TrustStatus.READY || status == TrustStatus.INACTIVE;
+        }
+    }
+
+    public static class DeactivateRestrictions {
+
+        public static TrustResult<Void>  check(BuildContext context) {
+
+            if (context.deactivateCalled() && deactivateCannotBeCalledFromStatus(context.getStatus())) {
+
+                TrustError cause = OperationForbiddenFromStatus.of("deactivate",context.getStatus());
+                return TrustResult.failure(DomainObjectConsistencyFailed.forClassWithCause(TrustRelationship.class, cause));
+            }
+
+            return TrustResult.success(null);
+        }
+
+        public static boolean deactivateCannotBeCalledFromStatus(TrustStatus status) {
+
+            return !deactivateCanBeCalledFromStatus(status);
+        }
+
+        private static boolean deactivateCanBeCalledFromStatus(TrustStatus status) {
+
+            return status == TrustStatus.ACTIVE;
+        }
+    }
+
 }

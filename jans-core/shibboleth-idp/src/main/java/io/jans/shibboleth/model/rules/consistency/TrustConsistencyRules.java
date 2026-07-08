@@ -44,8 +44,11 @@ public class TrustConsistencyRules {
             StatusConstrainedOperations.UpdateProfileConfigurationDeniedFromActivating::check,
             StatusConstrainedOperations.FinalizeActivationRestrictedToActivating::check,
             StatusConstrainedOperations.CancelActivationRestrictedToActivating::check,
+            StatusConstrainedOperations.ActivateRestrictions::check,
+            StatusConstrainedOperations.DeactivateRestrictions::check,
 
             NatureConstrainedOperations.IncorporateDiscoveredEntityIdsRestrictedToAggregate::check
+
         );
     }
 }

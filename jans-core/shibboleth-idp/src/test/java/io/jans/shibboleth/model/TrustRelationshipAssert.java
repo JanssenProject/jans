@@ -105,6 +105,16 @@ public class TrustRelationshipAssert extends AbstractAssert<TrustRelationshipAss
         return this;
     }
 
+    public TrustRelationshipAssert isNotInStatus(TrustStatus status) {
+
+        isNotNull();
+        if (actual.getStatus() == status) {
+
+            failWithMessage("TrustRelationship should not be in status is <%s>.",status);
+        }
+        return this;
+    }
+
     public TrustRelationshipAssert isInDraftStatus() {
 
         return isInStatus(TrustStatus.DRAFT);

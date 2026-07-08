@@ -609,6 +609,23 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static Stream<Arguments> trustRelationshipsOfAllStatusesExceptActive() {
+
+        return Stream.of(
+            Arguments.of(sampleDraftIndividualTrustRelationship()),
+            Arguments.of(sampleDraftAggregateTrustRelationship()),
+            
+            Arguments.of(sampleReadyIndividualTrustRelationship()),
+            Arguments.of(sampleReadyAggregateTrustRelationship()),
+
+            Arguments.of(sampleActivatingIndividualTrustRelationship()),
+            Arguments.of(sampleActivatingAggregateTrustRelationship()),
+
+            Arguments.of(sampleInactiveIndividualTrustRelationship()),
+            Arguments.of(sampleInactiveAggregateTrustRelationship())
+        );
+    }
+
     /**
      * Creation Tests
      */
@@ -1842,6 +1859,68 @@ public class TrustRelationshipTest {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
             assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Scenarios and Edge Cases -- Additional Error Cases")
+    public class AdditionalErrorCasesTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN activate() is called " + 
+            "THEN should fail with OperationForbiddenFromStatus error"
+        )
+        public void shouldFailWhenActivateCalledFromActivatingState(TrustRelationship tr) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = tr.activate();
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllStatusesExceptActive")
+        @DisplayName(
+            "GIVEN a TrustRelationship that is not in ACTIVE state " +
+            "WHEN deactivate() is called " +
+            "THEN should fail with OperationForbiddenFromStatus error"
+        )
+        public void shouldFailWhenDeactivateCalledFromNonActiveState(TrustRelationship tr) {
+
+            assertThat(tr).isNotInStatus(TrustStatus.ACTIVE);
+
+            TrustResult<TrustRelationship> result = tr.deactivate();
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN deactivate() is called " +
+            "THEN should fail with OperationForbiddenFromStatus error"
+        )
+        public void shouldFailWhenDeactivateCalledFromActivatingStatus(TrustRelationship tr) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = tr.deactivate();
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
         }
     }
 } 
