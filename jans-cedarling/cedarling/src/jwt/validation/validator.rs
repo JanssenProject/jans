@@ -863,9 +863,6 @@ mod test {
         );
     }
 
-    // --- Tests demonstrating the bug: exp/nbf are not validated unless
-    //     "exp"/"nbf" appear in required_claims ---
-
     /// Helper: `TokenEntityMetadata` with **empty** `required_claims`.
     /// Represents the default configuration most deployments use.
     fn tkn_meta_no_required_claims() -> TokenEntityMetadata {
@@ -877,10 +874,9 @@ mod test {
         }
     }
 
-    /// Expired token (exp=0) passes validation when `required_claims` does NOT contain "exp".
-    /// This is the bug: `validate_exp` is false, so the jwt crate never checks expiry.
+    /// Expired token (exp=0) is rejected even when "exp" is not in `required_claims`.
     #[test]
-    fn bug_expired_token_accepted_without_exp_in_required_claims_no_sig() {
+    fn rejects_expired_token_without_exp_in_required_claims_no_sig() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -904,23 +900,20 @@ mod test {
             false,
         );
 
-        // BUG: no error — expired token passes
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err(
-                "BUG: expired token should be rejected even when 'exp' is not in required_claims",
-            );
+            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
-            "BUG: expected ExpiredSignature, got {err:?}"
+            "expected ExpiredSignature, got {err:?}"
         );
     }
 
-    /// Expired token (exp=0) passes validation WITH signature check when `required_claims` does NOT contain "exp".
+    /// Expired token (exp=0) is rejected with signature validation when "exp" is not in `required_claims`.
     #[test]
-    fn bug_expired_token_accepted_without_exp_in_required_claims_with_sig() {
+    fn rejects_expired_token_without_exp_in_required_claims_with_sig() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -946,20 +939,18 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err(
-                "BUG: expired token should be rejected even when 'exp' is not in required_claims",
-            );
+            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
-            "BUG: expected ExpiredSignature, got {err:?}"
+            "expected ExpiredSignature, got {err:?}"
         );
     }
 
-    /// Immature token (`nbf=u64::MAX`) passes validation when `required_claims` does NOT contain "nbf".
+    /// Immature token (nbf=u64::MAX) is rejected even when "nbf" is not in `required_claims`.
     #[test]
-    fn bug_immature_token_accepted_without_nbf_in_required_claims_no_sig() {
+    fn rejects_immature_token_without_nbf_in_required_claims_no_sig() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -985,20 +976,18 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err(
-                "BUG: immature token should be rejected even when 'nbf' is not in required_claims",
-            );
+            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
-            "BUG: expected ImmatureSignature, got {err:?}"
+            "expected ImmatureSignature, got {err:?}"
         );
     }
 
-    /// Immature token (`nbf=u64::MAX`) passes validation WITH signature check when `required_claims` does NOT contain "nbf".
+    /// Immature token (nbf=u64::MAX) is rejected with signature validation when "nbf" is not in `required_claims`.
     #[test]
-    fn bug_immature_token_accepted_without_nbf_in_required_claims_with_sig() {
+    fn rejects_immature_token_without_nbf_in_required_claims_with_sig() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -1024,20 +1013,18 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err(
-                "BUG: immature token should be rejected even when 'nbf' is not in required_claims",
-            );
+            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
-            "BUG: expected ImmatureSignature, got {err:?}"
+            "expected ImmatureSignature, got {err:?}"
         );
     }
 
-    /// Same bug via `new_multi_issuer_tkn_validator`: expired token passes when "exp" is not in `required_claims`.
+    /// Expired token is rejected by the multi-issuer validator when "exp" is not in `required_claims`.
     #[test]
-    fn bug_expired_token_accepted_multi_issuer_without_exp_in_required_claims() {
+    fn rejects_expired_token_multi_issuer_without_exp_in_required_claims() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -1063,18 +1050,18 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: expired token should be rejected by multi-issuer validator even when 'exp' is not in required_claims");
+            .expect_err("expired token should be rejected by multi-issuer validator even when 'exp' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
-            "BUG: expected ExpiredSignature, got {err:?}"
+            "expected ExpiredSignature, got {err:?}"
         );
     }
 
-    /// Same bug via `new_multi_issuer_tkn_validator`: immature token passes when "nbf" is not in `required_claims`.
+    /// Immature token is rejected by the multi-issuer validator when "nbf" is not in `required_claims`.
     #[test]
-    fn bug_immature_token_accepted_multi_issuer_without_nbf_in_required_claims() {
+    fn rejects_immature_token_multi_issuer_without_nbf_in_required_claims() {
         let keys = generate_keys();
         let iss = "127.0.0.1";
 
@@ -1100,12 +1087,12 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: immature token should be rejected by multi-issuer validator even when 'nbf' is not in required_claims");
+            .expect_err("immature token should be rejected by multi-issuer validator even when 'nbf' is not in required_claims");
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
                 if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
-            "BUG: expected ImmatureSignature, got {err:?}"
+            "expected ImmatureSignature, got {err:?}"
         );
     }
 
