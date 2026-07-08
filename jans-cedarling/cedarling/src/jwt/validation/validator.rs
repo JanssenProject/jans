@@ -95,8 +95,8 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthzRequestInput(tkn_name);
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = token_metadata.required_claims.contains("exp");
-        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+        validation.validate_exp = true;
+        validation.validate_nbf = true;
 
         // we will validate the missing claims in another function since the
         // jsonwebtoken crate does not support required custom claims
@@ -137,8 +137,8 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(tkn_name));
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = token_metadata.required_claims.contains("exp");
-        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+        validation.validate_exp = true;
+        validation.validate_nbf = true;
 
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
@@ -281,8 +281,10 @@ impl JwtValidator {
         let now = jwt::get_current_timestamp();
         let claims = &validated_jwt.claims;
 
-        if self.validation.validate_exp {
-            let exp = claims.get("exp").and_then(Value::as_u64).ok_or_else(|| {
+        if self.validation.validate_exp
+            && let Some(exp) = claims.get("exp")
+        {
+            let exp = exp.as_u64().ok_or_else(|| {
                 ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
                     "exp".to_string(),
                 )))
@@ -905,7 +907,9 @@ mod test {
         // BUG: no error — expired token passes
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: expired token should be rejected even when 'exp' is not in required_claims");
+            .expect_err(
+                "BUG: expired token should be rejected even when 'exp' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -942,7 +946,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: expired token should be rejected even when 'exp' is not in required_claims");
+            .expect_err(
+                "BUG: expired token should be rejected even when 'exp' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -979,7 +985,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: immature token should be rejected even when 'nbf' is not in required_claims");
+            .expect_err(
+                "BUG: immature token should be rejected even when 'nbf' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -1016,7 +1024,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("BUG: immature token should be rejected even when 'nbf' is not in required_claims");
+            .expect_err(
+                "BUG: immature token should be rejected even when 'nbf' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
