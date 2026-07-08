@@ -8,13 +8,15 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
+use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
-use crate::EntityData;
-use crate::entity_builder::{BuiltEntities, EntityBuilder, MultiIssuerSetupEntities};
+use crate::entity_builder::{
+    BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
+};
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
@@ -26,8 +28,8 @@ use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use metrics::MetricsCollector;
 use request::{
-    AuthorizeMultiIssuerRequest, BatchAuthorizeResponse, BatchAuthorizeUnsignedRequest, BatchItem,
-    RequestUnsigned,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItem, RequestUnsigned,
 };
 use serde_json::json;
 use smol_str::SmolStr;
@@ -147,10 +149,9 @@ impl Authz {
             .entity_builder
             .build_resource_entity(&request.resource)
             .map_err(|e| {
-                let wrapped =
-                    crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
-                        e.to_string(),
-                    );
+                let wrapped = crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
+                    e.to_string(),
+                );
                 self.config.metrics.record_error(&wrapped);
                 self.config.metrics.record_authz_error();
                 AuthorizeError::MultiIssuerEntity(wrapped)
@@ -304,6 +305,200 @@ impl Authz {
         );
 
         Ok(result)
+    }
+
+    /// Evaluate a batch of multi-issuer authorization requests.
+    ///
+    /// Runs [`Self::multi_issuer_setup`] once (validates tokens, builds
+    /// token/issuer entities, snapshots pushed data) and evaluates each item
+    /// with its own resource entity and context. Every per-item decision-log
+    /// entry carries the shared `batch_id` returned to the caller.
+    ///
+    /// Error partitioning:
+    ///
+    /// * Batch-level failures (validation, JWT verification, status-list
+    ///   refresh, all-tokens-invalid) return `Err` and fail the whole call.
+    /// * Per-item failures (invalid action UID, resource build, context
+    ///   build, schema validation, Cedar request validation) synthesize a
+    ///   fail-closed `Deny` for that item and record an error metric — they
+    ///   never fail other items in the batch.
+    #[allow(clippy::too_many_lines)]
+    pub(super) fn authorize_multi_issuer_batch(
+        &self,
+        request: &BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+        let batch_start_time = Utc::now();
+        let batch_id = gen_uuid7();
+
+        request.validate().inspect_err(|e| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        })?;
+
+        let MultiIssuerSetup {
+            validated_tokens,
+            entities: setup_entities,
+        } = self.multi_issuer_setup(&request.tokens)?;
+
+        // Atomic snapshot: pushed data captured once for the whole batch.
+        let (pushed_data, pushed_data_info) = self.get_pushed_data();
+
+        let schema = &self.config.policy_store.schema;
+        let schema_ref = schema.as_ref().map(|s| &s.schema);
+
+        let tokens_logging_info = LogTokensInfo::new(
+            &validated_tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
+
+        let mut results = Vec::with_capacity(request.items.len());
+        for item in &request.items {
+            let item_start = Utc::now();
+            let item_request_id = gen_uuid7();
+
+            let (response, resource_uid_str) = match self.try_batch_item_multi_issuer(
+                item,
+                &setup_entities,
+                pushed_data.clone(),
+                schema_ref,
+            ) {
+                Ok((resp, uid)) => (resp, uid.to_string()),
+                Err(e) => {
+                    self.config.metrics.record_error(&e);
+                    self.config.metrics.record_authz_error();
+                    let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
+                        .set_message(format!("Batch item failed setup for batch {batch_id}"))
+                        .set_error(e.to_string());
+                    self.config.log_service.log_any(log_entry);
+                    let uid_str = format!(
+                        "{}::\"{}\"",
+                        item.resource.cedar_mapping.entity_type, item.resource.cedar_mapping.id,
+                    );
+                    (
+                        cedar_policy::Response::new(
+                            cedar_policy::Decision::Deny,
+                            HashSet::new(),
+                            Vec::new(),
+                        ),
+                        uid_str,
+                    )
+                },
+            };
+
+            let decision = response.decision() == cedar_policy::Decision::Allow;
+            let decision_time_micro_sec = calculate_elapsed_time(item_start);
+
+            let diagnostics =
+                Diagnostics::new(response.diagnostics(), &self.config.policy_store.policies);
+            self.log_policy_evaluation_errors(
+                &diagnostics,
+                "multi-issuer (no principal)",
+                item_request_id,
+            );
+
+            let diagnostics_slice = std::slice::from_ref(&diagnostics);
+
+            self.log_decision(
+                item_request_id,
+                &DecisionLogMetadata {
+                    action: item.action.clone(),
+                    resource: resource_uid_str,
+                    decision,
+                    tokens_logging_info: tokens_logging_info.clone(),
+                    decision_time: decision_time_micro_sec,
+                    decision_diagnostics: diagnostics_slice,
+                    principal: DecisionLogEntry::principal(false, false),
+                    pushed_data: pushed_data_info.clone(),
+                    batch_id: Some(batch_id),
+                },
+            );
+
+            if !decision {
+                self.log_failed_diagnostics(diagnostics_slice, item_request_id);
+            }
+
+            let cedar_decision = Decision::from(decision);
+            let policy_decisions = diagnostics
+                .reason
+                .iter()
+                .map(|p| (p.id.as_str(), cedar_decision));
+            self.config.metrics.record_evaluation(
+                decision_time_micro_sec,
+                cedar_decision,
+                false,
+                policy_decisions,
+            );
+
+            results.push(MultiIssuerAuthorizeResult::new(response, item_request_id));
+        }
+
+        self.config.metrics.record_batch(request.items.len());
+        let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
+        self.config.log_service.log_any(
+            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id)).set_message(format!(
+                "Batch authorize (multi-issuer): {} items in {batch_time_micro_sec}μs",
+                request.items.len(),
+            )),
+        );
+
+        Ok(BatchAuthorizeResponse::new(batch_id, results))
+    }
+
+    /// Per-item core of [`Self::authorize_multi_issuer_batch`]. Setup errors
+    /// on one item are caught by the caller and converted to fail-closed `Deny`.
+    fn try_batch_item_multi_issuer(
+        &self,
+        item: &BatchItem,
+        setup: &MultiIssuerSetupEntities,
+        pushed_data: HashMap<String, serde_json::Value>,
+        schema_ref: Option<&cedar_policy::Schema>,
+    ) -> Result<(cedar_policy::Response, EntityUid), AuthorizeError> {
+        let action =
+            cedar_policy::EntityUid::from_str(&item.action).map_err(AuthorizeError::from)?;
+        let resource = self
+            .config
+            .entity_builder
+            .build_resource_entity(&item.resource)
+            .map_err(|e| {
+                AuthorizeError::MultiIssuerEntity(
+                    crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
+                        e.to_string(),
+                    ),
+                )
+            })?;
+        let context = build_multi_issuer_context(
+            item.context.clone(),
+            &setup.tokens,
+            schema_ref,
+            &action,
+            pushed_data,
+        )?;
+
+        let entities_data = AuthorizeEntitiesData {
+            issuers: setup.issuers.clone(),
+            tokens: setup.tokens.clone(),
+            resource,
+            default_entities: setup.default_entities.clone(),
+        };
+        let resource_uid = entities_data.resource.uid();
+        let entities = entities_data
+            .entities(schema_ref)
+            .map_err(AuthorizeError::ValidateEntities)?;
+
+        let response = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: None,
+                action,
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::RequestValidation)?;
+
+        Ok((response, resource_uid))
     }
 
     /// Evaluate Authorization Request with unsigned data.
@@ -533,17 +728,13 @@ impl Authz {
                 Err(e) => {
                     self.config.metrics.record_error(&e);
                     self.config.metrics.record_authz_error();
-                    let log_entry =
-                        LogEntry::new(BaseLogEntry::new_decision(item_request_id))
-                            .set_message(format!(
-                                "Batch item failed setup for batch {batch_id}"
-                            ))
-                            .set_error(e.to_string());
+                    let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
+                        .set_message(format!("Batch item failed setup for batch {batch_id}"))
+                        .set_error(e.to_string());
                     self.config.log_service.log_any(log_entry);
                     let uid_str = format!(
                         "{}::\"{}\"",
-                        item.resource.cedar_mapping.entity_type,
-                        item.resource.cedar_mapping.id,
+                        item.resource.cedar_mapping.entity_type, item.resource.cedar_mapping.id,
                     );
                     (
                         cedar_policy::Response::new(
@@ -559,17 +750,14 @@ impl Authz {
             let decision = response.decision() == cedar_policy::Decision::Allow;
             let decision_time_micro_sec = calculate_elapsed_time(item_start);
 
-            let diagnostics = Diagnostics::new(
-                response.diagnostics(),
-                &self.config.policy_store.policies,
-            );
+            let diagnostics =
+                Diagnostics::new(response.diagnostics(), &self.config.policy_store.policies);
             let principal_label = principal_uid
                 .as_ref()
                 .map_or_else(|| "None".to_string(), ToString::to_string);
             self.log_policy_evaluation_errors(&diagnostics, &principal_label, item_request_id);
 
-            let logged_principals: Vec<EntityUid> =
-                principal_uid.iter().cloned().collect();
+            let logged_principals: Vec<EntityUid> = principal_uid.iter().cloned().collect();
             let diagnostics_slice = std::slice::from_ref(&diagnostics);
 
             self.log_decision(
@@ -609,11 +797,10 @@ impl Authz {
         self.config.metrics.record_batch(request.items.len());
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
-            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
-                .set_message(format!(
-                    "Batch authorize (unsigned): {} items in {batch_time_micro_sec}μs",
-                    request.items.len(),
-                )),
+            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id)).set_message(format!(
+                "Batch authorize (unsigned): {} items in {batch_time_micro_sec}μs",
+                request.items.len(),
+            )),
         );
 
         Ok(BatchAuthorizeResponse::new(batch_id, results))
@@ -651,11 +838,9 @@ impl Authz {
         )?;
 
         let resource_uid = resource.uid();
-        let entities = Entities::from_entities(
-            principal.cloned().into_iter().chain([resource]),
-            schema_ref,
-        )
-        .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))?;
+        let entities =
+            Entities::from_entities(principal.cloned().into_iter().chain([resource]), schema_ref)
+                .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))?;
 
         let response = self
             .execute_authorize(ExecuteAuthorizeParameters {
@@ -680,7 +865,10 @@ impl Authz {
         &self,
         principal: Option<&EntityData>,
     ) -> Result<UnsignedSetup, AuthorizeError> {
-        let (principal, built_entities) = self
+        let UnsignedPrincipalBuild {
+            principal,
+            built_entities,
+        } = self
             .config
             .entity_builder
             .build_unsigned_principal(principal)
@@ -716,10 +904,7 @@ impl Authz {
         let setup_entities = self
             .config
             .entity_builder
-            .build_multi_issuer_setup_entities(
-                &validated_tokens,
-                self.config.log_service.as_ref(),
-            )
+            .build_multi_issuer_setup_entities(&validated_tokens, self.config.log_service.as_ref())
             .map_err(|e| {
                 self.config.metrics.record_error(&e);
                 self.config.metrics.record_authz_error();
@@ -1157,7 +1342,7 @@ mod tests {
         assert_eq!(
             json.pointer("/attrs/name").and_then(|v| v.as_str()),
             Some("trusted"),
-     5       "default org name should override request value"
+            "default org name should override request value"
         );
         assert_eq!(
             json.pointer("/attrs/is_admin")
