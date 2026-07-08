@@ -3,6 +3,7 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
 import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.doc.annotation.DocProperty;
 
@@ -113,7 +114,7 @@ public class ApiAppConfiguration implements Configuration {
     private DataFormatConversionConf dataFormatConversionConf;
     
     @Schema(description = "Cedar Configuration for authorization.")
-    private CedarConfig cedarConfig;
+    private CedarlingPolicyConfiguration cedarlingPolicyConfiguration;
 
     @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
@@ -140,7 +141,7 @@ public class ApiAppConfiguration implements Configuration {
     public LockProtectionMode getProtectionMode() {
         return protectionMode;
     }
-
+    
     /**
      * Set the lock protection mode.
      *
@@ -384,6 +385,19 @@ public class ApiAppConfiguration implements Configuration {
     public void setAuditLogConf(AuditLogConf auditLogConf) {
         this.auditLogConf = auditLogConf;
     }
+    
+    /**
+     * Accesses the Cedarling configuration for the application.
+     *
+     * @return the CedarlingConfiguration instance for this application, or null if not configured
+     */
+    public CedarlingConfiguration getCedarlingConfiguration() {
+        return cedarlingConfiguration;
+    }
+
+    public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
+        this.cedarlingConfiguration = cedarlingConfiguration;
+    }
 
     public DataFormatConversionConf getDataFormatConversionConf() {
         return dataFormatConversionConf;
@@ -409,17 +423,12 @@ public class ApiAppConfiguration implements Configuration {
         this.assetMgtConfiguration = assetMgtConfiguration;
     }
 
-    public CedarConfig getCedarConfig() {
-        return cedarConfig;
-    }
 
-    public void setCedarConfig(CedarConfig cedarConfig) {
-        this.cedarConfig = cedarConfig;
-    }
 
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
+                + " ,protectionMode=" +protectionMode
                 + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
                 + acrValidationEnabled  + ", returnClientSecretInResponse="+ returnClientSecretInResponse
@@ -435,8 +444,8 @@ public class ApiAppConfiguration implements Configuration {
                 + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
                 + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
                 + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
-                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", cedarConfig="
-                + cedarConfig + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", cedarlingConfiguration="
+                + cedarlingConfiguration + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
     }
         
 }

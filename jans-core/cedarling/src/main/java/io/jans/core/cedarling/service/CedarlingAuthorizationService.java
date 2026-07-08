@@ -28,7 +28,7 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
  * @author Yuriy Movchan Date: 10/08/2022
  */
 @ApplicationScoped
-public class CedarlingAuthorizationService {
+public class CedarlingAuthorizationService  {
 
 	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_token";
 	public static final String CEDARLING_POLICY_STORE_RESOURCE_NAME = "%spolicy-store";

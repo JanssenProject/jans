@@ -15,6 +15,7 @@ import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.configapi.model.configuration.CedarConfig;
+import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.model.custom.script.CustomScriptType;
@@ -198,8 +199,20 @@ public class AppInitializer {
     
     @Produces
     @ApplicationScoped
-    public CedarConfig getCedarlingPolicy() {
-        return this.configurationFactory.policyConfiguration;
+    public LockProtectionMode getProtectionMode() {
+        return this.configurationFactory.getProtectionMode();
+    }
+    
+    @Produces
+    @ApplicationScoped
+    public CedarlingConfiguration getCedarlingConfiguration() {
+        return this.configurationFactory.getCedarlingConfiguration();
+    }
+    
+    @Produces
+    @ApplicationScoped
+    public AssetMgtConfiguration getAssetMgtConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().get();
     }
 
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
