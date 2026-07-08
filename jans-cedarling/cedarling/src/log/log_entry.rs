@@ -341,6 +341,10 @@ pub(crate) struct DecisionLogEntry {
     pub pushed_data: Option<PushedDataInfo>,
     /// Shared correlation id when this entry was produced from a batch
     /// authorization call. `None` for single-item calls.
+    ///
+    /// Indexed via [`get_additional_ids`](Indexed::get_additional_ids) — use
+    /// [`LogStorage::get_logs_by_request_id`] to retrieve all decision entries
+    /// belonging to one batch.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub batch_id: Option<Uuid>,
 }
@@ -396,7 +400,9 @@ impl Indexed for DecisionLogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        self.base.get_additional_ids()
+        let mut ids = self.base.get_additional_ids();
+        ids.extend(self.batch_id);
+        ids
     }
 
     fn get_tags(&self) -> Vec<&str> {

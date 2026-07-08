@@ -1207,6 +1207,7 @@ struct DecisionLogMetadata<'a> {
     decision: bool,
     pushed_data: Option<PushedDataInfo>,
     /// Shared correlation id when this entry is part of a batch call.
+    /// Indexed in the decision-log entry — see [`DecisionLogEntry::batch_id`].
     batch_id: Option<Uuid>,
 }
 

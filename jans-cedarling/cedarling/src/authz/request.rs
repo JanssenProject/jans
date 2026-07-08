@@ -250,6 +250,10 @@ impl BatchAuthorizeMultiIssuerRequest {
 /// `batch_id` field stamped on the per-item decision-log entries emitted
 /// during evaluation, so callers can correlate their client-side logs with
 /// the server-side audit trail.
+///
+/// The `batch_id` is also indexed in the in-memory decision-log store — use
+/// [`LogStorage::get_logs_by_request_id`](crate::log::interface::LogStorage::get_logs_by_request_id)
+/// with `batch_id.to_string()` to retrieve all decision entries for this batch.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BatchAuthorizeResponse<R> {
     /// Shared correlation ID for every decision-log entry emitted by this batch.
