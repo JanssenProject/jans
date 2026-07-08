@@ -948,7 +948,7 @@ mod test {
         );
     }
 
-    /// Immature token (nbf=u64::MAX) is rejected even when "nbf" is not in `required_claims`.
+    /// Immature token (`nbf=u64::MAX`) is rejected even when "nbf" is not in `required_claims`.
     #[test]
     fn rejects_immature_token_without_nbf_in_required_claims_no_sig() {
         let keys = generate_keys();
@@ -985,7 +985,7 @@ mod test {
         );
     }
 
-    /// Immature token (nbf=u64::MAX) is rejected with signature validation when "nbf" is not in `required_claims`.
+    /// Immature token (`nbf=u64::MAX`) is rejected with signature validation when "nbf" is not in `required_claims`.
     #[test]
     fn rejects_immature_token_without_nbf_in_required_claims_with_sig() {
         let keys = generate_keys();
