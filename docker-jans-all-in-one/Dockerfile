@@ -12,7 +12,7 @@ ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader
 ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${BASE_VERSION}
 ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:2.2.0-1
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
 ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}
 
