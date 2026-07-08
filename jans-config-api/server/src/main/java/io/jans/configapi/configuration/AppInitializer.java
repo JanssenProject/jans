@@ -14,6 +14,7 @@ import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
+import io.jans.configapi.model.configuration.CedarConfig;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.model.custom.script.CustomScriptType;
@@ -193,6 +194,12 @@ public class AppInitializer {
             throw new ConfigurationException("Failed to create AuthorizationService instance  - apiProtectionType = "
                     + configurationFactory.getApiProtectionType(), ex);
         }
+    }
+    
+    @Produces
+    @ApplicationScoped
+    public CedarConfig getCedarlingPolicy() {
+        return this.configurationFactory.policyConfiguration;
     }
 
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {

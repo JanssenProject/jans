@@ -136,6 +136,19 @@ public class ApiAppConfiguration implements Configuration {
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
     }
+    
+    public LockProtectionMode getProtectionMode() {
+        return protectionMode;
+    }
+
+    /**
+     * Set the lock protection mode.
+     *
+     * @param protectionMode the lock protection mode to use
+     */
+    public void setProtectionMode(LockProtectionMode protectionMode) {
+        this.protectionMode = protectionMode;
+    }
 
     public boolean isDisableLoggerTimer() {
         return disableLoggerTimer;
