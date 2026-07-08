@@ -90,7 +90,10 @@ public enum FeatureFlagType {
     SSA("ssa"),
     @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
             defaultValue = "Disabled")
-    CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document");
+    CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document"),
+    @DocFeatureFlag(description = "Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support",
+            defaultValue = "Disabled")
+    IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant");
 
     private final String value;
 

@@ -59,7 +59,8 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=b375b3744fd7b4cc57cd333c3c20992edf182ca8
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -205,6 +206,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
     CN_JETTY_IDLE_TIMEOUT=30000 \
     CN_CONFIG_API_CREATE_SCOPES=true \
+    CN_PERSISTENCE_LOAD_TEST_DATA=false \
     CN_AUTH_JETTY_HOST=127.0.0.1 \
     CN_AUTH_JETTY_PORT=8081 \
     CN_CONFIG_API_JETTY_HOST=127.0.0.1 \

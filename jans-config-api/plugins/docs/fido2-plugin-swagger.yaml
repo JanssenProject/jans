@@ -115,6 +115,8 @@ paths:
                         "adoptionRate": 1,
                         "totalUniqueUsers": 1
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -173,6 +175,8 @@ paths:
                         },
                         "browsers": {}
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -225,6 +229,8 @@ paths:
                   value: "{\n    \"errorCategories\": {},\n    \"failureRate\": 0.75,\n\
                     \    \"successRate\": 0.25,\n\t\"completionRate\": 0.48,\n\t\"\
                     dropOffRate\": 0.52,\n    \"topErrors\": {}\n}\n"
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -340,6 +346,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -405,6 +413,8 @@ paths:
                         "avgRegistrationSuccessRate": 0.25,
                         "avgAuthenticationSuccessRate": 0
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -500,6 +510,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -599,6 +611,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -769,6 +783,8 @@ paths:
                             }
                         ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -864,6 +880,8 @@ paths:
                         "registrationMaxDuration": 890,
                         "registrationMinDuration": 210
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -919,6 +937,8 @@ paths:
                         },
                         "currentPeriod": {}
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -1012,6 +1032,8 @@ paths:
                         }
                       ]
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -1549,15 +1571,16 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         metricsData:
           type: object
           additionalProperties:
             type: object
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         fallbackEvents:
           type: integer
           format: int64
@@ -1566,40 +1589,39 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        performanceMetrics:
+        errorCounts:
           type: object
           additionalProperties:
-            type: object
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
+            type: integer
+            format: int64
         registrationAttempts:
           type: integer
           format: int64
         registrationSuccesses:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
         registrationFailures:
           type: integer
           format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAvgDuration:
+          type: number
+          format: double
         authenticationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
           type: integer
           format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
         authenticationFailures:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
         period:
           type: string
         baseDn:

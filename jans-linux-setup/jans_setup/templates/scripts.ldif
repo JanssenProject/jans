@@ -742,5 +742,19 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
+dn: inum=1D3E-A001,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Identity Assertion (ID-JAG) sample script
+displayName: identity_assertion_sample
+inum: 1D3E-A001
+jansEnabled: false
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansRevision: 1
+jansScr::%(identity_assertion_identityassertion)s
+jansScrTyp: identity_assertion
+jansProgLng: python
+
 
 

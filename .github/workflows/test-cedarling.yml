@@ -38,10 +38,13 @@ jobs:
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
-      run: cargo test --locked --workspace
+      # cedarling_pg is excluded here — it pulls pgrx-pg-sys, whose build script
+      # requires `cargo pgrx init`. The dedicated postgres_extension_tests job
+      # below covers it end-to-end.
+      run: cargo test --locked --workspace --exclude cedarling_pg
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: cargo +stable clippy --workspace --all-targets -- -D warnings
+      run: cargo +stable clippy --workspace --exclude cedarling_pg --all-targets -- -D warnings
 
   cargo_audit:
     runs-on: ubuntu-latest
@@ -51,15 +54,33 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Run cargo-audit
-      uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: jans-cedarling
-        # RUSTSEC-2023-0071: `rsa` Marvin timing sidechannel affects RSA decryption.
-        # Cedarling only uses `jsonwebtoken` for signature verification; the
-        # decryption path is not reachable. No upstream fix available.
-        ignore: RUSTSEC-2023-0071
+        toolchain: stable
+    - name: Get week stamp for advisory DB cache key
+      id: date
+      run: echo "week=$(date +%Y-%U)" >> $GITHUB_OUTPUT
+    - name: Cache advisory database
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ~/.cargo/advisory-db
+        # Refresh weekly; advisory-db- fallback reuses the most recent weekly snapshot.
+        key: advisory-db-${{ steps.date.outputs.week }}
+        restore-keys: advisory-db-
+    - name: Install cargo-audit
+      uses: taiki-e/install-action@9bcaee1dcae34154180f412e2fa69355a7cda9f6 # v2.82.6
+      with:
+        tool: cargo-audit
+    - name: Run cargo-audit
+      working-directory: jans-cedarling
+      # rustsec/audit-check uses the GitHub API to fetch the advisory DB and hits
+      # rate limits on PRs. Running cargo-audit directly with a cached advisory DB
+      # avoids the API calls entirely.
+      # RUSTSEC-2023-0071: `rsa` Marvin timing sidechannel affects RSA decryption.
+      # Cedarling only uses `jsonwebtoken` for signature verification; the
+      # decryption path is not reachable. No upstream fix available.
+      run: cargo audit --ignore RUSTSEC-2023-0071
 
   cargo_deny:
     runs-on: ubuntu-latest
@@ -121,7 +142,7 @@ jobs:
         # To upgrade: 1) Find the nightly used by the target dylint release
         # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
         # 3) Update the pin below and in the toolchain install step above
-        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
+        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --path custom-lints
 
   rust_benchmarks:
     runs-on: ubuntu-latest
@@ -143,7 +164,7 @@ jobs:
         workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: cargo bench
+      run: cargo bench --workspace --exclude cedarling_pg
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
       run: |
@@ -208,8 +229,14 @@ jobs:
     - name: Run WASM binding benchmarks
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        node benchmarks/benchmark.mjs | tee bench_output.txt
-        python3 ../../scripts/parse_binding_benchmarks.py --format wasm bench_output.txt >> $GITHUB_STEP_SUMMARY
+        node benchmarks/benchmark.mjs | tee bench_output.jsonl
+        python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload WASM bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-wasm
+        path: jans-cedarling/bindings/cedarling_wasm/bench_output.jsonl
+        retention-days: 7
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
@@ -247,8 +274,15 @@ jobs:
       if: matrix.python-version == '3.11'
       working-directory: jans-cedarling/bindings/cedarling_python
       run: |
-        tox -e benchmark | tee bench_output.txt
-        python3 ../../scripts/parse_binding_benchmarks.py --format python bench_output.txt >> $GITHUB_STEP_SUMMARY
+        tox -e benchmark | tee bench_output.jsonl
+        python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload Python bench JSONL
+      if: matrix.python-version == '3.11'
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-python
+        path: jans-cedarling/bindings/cedarling_python/bench_output.jsonl
+        retention-days: 7
 
   golang_tests:
     runs-on: ubuntu-latest
@@ -290,8 +324,14 @@ jobs:
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
         export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
-        go test -bench=. -benchmem -benchtime=5s -count=1 -run=^$ | tee bench_output.txt
-        python3 ../../scripts/parse_binding_benchmarks.py --format go bench_output.txt >> $GITHUB_STEP_SUMMARY
+        go run ./benchmarks/ | tee bench_output.jsonl
+        python3 ../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload Go bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-go
+        path: jans-cedarling/bindings/cedarling_go/bench_output.jsonl
+        retention-days: 7
 
   c_tests:
     runs-on: ubuntu-latest
@@ -328,8 +368,14 @@ jobs:
       run: |
         export LD_LIBRARY_PATH="../../target/release:${LD_LIBRARY_PATH}"
         cd benchmarks && make
-        ./benchmark_cedarling | tee bench_output.txt
-        python3 ../../../scripts/parse_binding_benchmarks.py --format c bench_output.txt >> $GITHUB_STEP_SUMMARY
+        ./benchmark_cedarling | tee bench_output.jsonl
+        python3 ../../../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload C bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-c
+        path: jans-cedarling/bindings/cedarling_c/benchmarks/bench_output.jsonl
+        retention-days: 7
 
   uniffi_benchmarks:
     runs-on: ubuntu-latest
@@ -361,5 +407,91 @@ jobs:
       working-directory: jans-cedarling/bindings/cedarling_uniffi/javaApp
       run: |
         export LD_LIBRARY_PATH="${GITHUB_WORKSPACE}/target/release:${LD_LIBRARY_PATH}"
-        mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.txt
-        python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format java bench_output.txt >> $GITHUB_STEP_SUMMARY
+        mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark | tee bench_output.jsonl
+        python3 "${GITHUB_WORKSPACE}/jans-cedarling/scripts/parse_binding_benchmarks.py" --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload UniFFI Java bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-java
+        path: jans-cedarling/bindings/cedarling_uniffi/javaApp/bench_output.jsonl
+        retention-days: 7
+
+  postgres_extension_tests:
+    # Exercises the cedarling_pg Postgres extension under pgrx-managed Postgres.
+    # The workspace-level rust_tests job already runs the non-pgrx unit tests and
+    # clippy; this job additionally:
+    #   1. runs the #[pg_test] suite against a real Postgres backend (cargo pgrx test)
+    #   2. regenerates sql/cedarling_pg--0.1.0.sql and fails if it drifts from the
+    #      committed copy, so the packaged schema stays in sync with #[pg_extern]s.
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        components: clippy
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Install Postgres build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
+          libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
+    - name: Install cargo-pgrx
+      run: cargo install --locked cargo-pgrx --version =0.18.0
+    - name: Initialize pgrx (pg16)
+      run: cargo pgrx init --pg16 download
+    - name: Run cedarling_pg pgrx tests
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx test --features pg16
+    - name: Regenerate extension SQL schema
+      working-directory: jans-cedarling/cedarling_pg
+      run: cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql
+    - name: Fail if committed SQL schema drifted
+      working-directory: jans-cedarling/cedarling_pg
+      run: |
+        git --no-pager diff --exit-code sql/cedarling_pg--0.1.0.sql \
+          || (echo "sql/cedarling_pg--0.1.0.sql is out of date; run 'cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql' and commit the result." && exit 1)
+
+  cross_binding_bench_summary:
+    runs-on: ubuntu-latest
+    needs:
+      - wasm_tests
+      - python_tests
+      - golang_tests
+      - c_tests
+      - uniffi_benchmarks
+    if: always()
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Download all bench JSONL artifacts
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        path: bench-artifacts
+        pattern: bench-jsonl-*
+        merge-multiple: false
+    - name: Render cross-binding pivot
+      run: |
+        files=$(find bench-artifacts -name '*.jsonl' -print 2>/dev/null || true)
+        if [ -z "$files" ]; then
+          echo "No bench JSONL artifacts present; skipping cross-binding summary." >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+        echo "## Cross-Platform Cedarling Benchmark Summary" >> $GITHUB_STEP_SUMMARY
+        python3 jans-cedarling/scripts/parse_binding_benchmarks.py --format jsonl $files >> $GITHUB_STEP_SUMMARY

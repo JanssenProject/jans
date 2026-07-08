@@ -11,8 +11,8 @@ use super::default_values::{
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
     default_jwks_refresh_min_interval,
     default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_max, default_token_cache_capacity,
-    default_token_cache_max_ttl, default_true,
+    default_status_list_refresh_interval_max,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -175,6 +175,16 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
+
+    /// When enabled, Cedar schema is required and all policies and entities are validated
+    /// against it. When disabled, Cedarling runs without schema-based validation,
+    /// allowing quick-start and prototyping without a schema.
+    #[serde(
+        rename = "CEDARLING_STRICT_SCHEMA_VALIDATION",
+        default = "default_enabled_feature_toggle"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub strict_schema_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
@@ -449,12 +459,32 @@ pub struct BootstrapConfigRaw {
     /// `ttl`, this value is used directly. A value of `0` or an unset variable is
     /// treated as "use the default" (300 seconds) so the status list cannot silently
     /// go stale forever. Non-zero values below `5` are clamped to `5`.
+    ///
+    /// Fail-closed behavior: if any background refresh fails — fetch error, 5xx
+    /// response, or the status list body is invalid (JWT validation fails,
+    /// deserialization fails, or bit-string parsing fails) — the cached status list
+    /// is dropped and all tokens that reference it are rejected until the next
+    /// successful refresh. This prevents a revoked token from being accepted based on
+    /// stale data at the cost of temporarily denying valid tokens when the issuer's
+    /// status endpoint is unreachable or returns a malformed payload.
     #[serde(
         rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
         default = "default_status_list_refresh_interval_max"
     )]
     #[serde(deserialize_with = "deserialize_status_list_refresh_interval_max")]
     pub status_list_refresh_interval_max: u64,
+
+    /// Base refresh interval, in seconds, for periodic background refresh of
+    /// remote policy stores (`CjarUrl` / `LockServer`). `0` disables refresh and
+    /// preserves the load-once-at-startup behavior. Non-zero values below the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor are clamped at service-init time (with
+    /// a `WARN` log emitted) so the worker never busy-polls the upstream — see
+    /// [`PolicyStoreConfig::effective_refresh_interval`]. A server
+    /// `Cache-Control: max-age` / `Expires` hint can *shorten* the next
+    /// interval but never extends it.
+    #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub policy_store_refresh_interval_secs: u64,
 }
 
 impl Default for BootstrapConfigRaw {
