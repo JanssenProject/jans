@@ -8,10 +8,10 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
-    BootstrapConfig, DataApi, DataEntry, DataError, DataStoreStats, EntityData,
-    InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, PolicyMetadata, RequestUnsigned,
-    TokenInput, TrustedIssuerLoadingInfo,
+    AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BootstrapConfig, DataApi, DataEntry, DataError, DataStoreStats,
+    EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, PolicyMetadata,
+    RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -79,6 +79,19 @@ impl Cedarling {
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.instance.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Authorize a batch of multi-issuer requests. See
+    /// [`crate::Cedarling::authorize_multi_issuer_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+        self.instance
+            .authz
+            .load()
+            .authorize_multi_issuer_batch(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
