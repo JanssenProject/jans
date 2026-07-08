@@ -1,13 +1,14 @@
 package io.jans.shibboleth.model.config.profiles.support;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import io.jans.shibboleth.model.config.profiles.common.AssertionSigningPolicy;
 import io.jans.shibboleth.model.config.profiles.common.AssertionTimeCondition;
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.TrustResult;
 
 public class SamlAssertionConfigurationSupport {
-
-    private static final Duration DEFAULT_ASSERTION_LIFETIME = Duration.ofMinutes(5);
 
     private final AssertionSigningPolicy assertionSigningPolicy;
     private final AssertionTimeCondition assertionTimeCondition;
@@ -15,14 +16,19 @@ public class SamlAssertionConfigurationSupport {
 
     private SamlAssertionConfigurationSupport(AssertionSigningPolicy assertionSigningPolicy, AssertionTimeCondition assertionTimeCondition,Duration assertionLifetime) {
 
-        this.assertionSigningPolicy = assertionSigningPolicy != null ? assertionSigningPolicy : AssertionSigningPolicy.SIGN_ASSERTIONS;
-        this.assertionTimeCondition = assertionTimeCondition != null ? assertionTimeCondition : AssertionTimeCondition.INCLUDE_NOT_BEFORE;
-        this.assertionLifetime = assertionLifetime != null ? assertionLifetime : DEFAULT_ASSERTION_LIFETIME;
+        this.assertionSigningPolicy = assertionSigningPolicy;
+        this.assertionTimeCondition = assertionTimeCondition;
+        this.assertionLifetime = assertionLifetime;
     }
 
-    public static SamlAssertionConfigurationSupport of(AssertionSigningPolicy assertionSigningPolicy, AssertionTimeCondition assertionTimeCondition, Duration assertionLifetime) {
+    public static TrustResult<SamlAssertionConfigurationSupport> of(AssertionSigningPolicy assertionSigningPolicy, 
+        AssertionTimeCondition assertionTimeCondition, Duration assertionLifetime) {
 
-        return new SamlAssertionConfigurationSupport(assertionSigningPolicy,assertionTimeCondition,assertionLifetime);
+        return builder()
+            .assertionSigningPolicy(assertionSigningPolicy)
+            .assertionTimeCondition(assertionTimeCondition)
+            .assertionLifetime(assertionLifetime)
+            .build();
     }
 
     public AssertionSigningPolicy getAssertionSigningPolicy() {
@@ -38,5 +44,89 @@ public class SamlAssertionConfigurationSupport {
     public Duration getAssertionLifetime() {
 
         return assertionLifetime;
+    }
+
+    
+
+    @Override
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true;
+
+        if ( o == null || getClass() != o.getClass() ) return false; 
+
+        SamlAssertionConfigurationSupport other = (SamlAssertionConfigurationSupport) o; 
+
+        return assertionSigningPolicy == other.assertionSigningPolicy 
+            && assertionTimeCondition == other.assertionTimeCondition
+            && Objects.equals(assertionLifetime,other.assertionLifetime);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(assertionSigningPolicy,assertionTimeCondition,assertionLifetime);
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(SamlAssertionConfigurationSupport base) {
+
+        return new Builder(base);
+    }
+
+    public static class Builder {
+
+        private AssertionSigningPolicy assertionSigningPolicy;
+        private AssertionTimeCondition assertionTimeCondition;
+        private Duration assertionLifetime;
+
+        public Builder(SamlAssertionConfigurationSupport base) {
+
+            this.assertionSigningPolicy = base != null ? base.assertionSigningPolicy : null;
+            this.assertionTimeCondition = base != null ? base.assertionTimeCondition : null;
+            this.assertionLifetime  = base != null ? base.assertionLifetime : null; 
+        }
+
+        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+
+            this.assertionSigningPolicy = policy;
+            return this;
+        }
+
+        public Builder assertionTimeCondition(AssertionTimeCondition timecondition) {
+
+            this.assertionTimeCondition = timecondition;
+            return this;
+        }
+
+        public Builder assertionLifetime(Duration lifetime) {
+
+            this.assertionLifetime = lifetime;
+            return this;
+        }
+
+        public TrustResult<SamlAssertionConfigurationSupport> build() {
+
+            if (assertionSigningPolicy == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
+            }
+
+            if (assertionTimeCondition == null) {
+                
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionTimeCondition"));
+            }
+
+            if (assertionLifetime == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionLifetime"));
+            }
+
+            return TrustResult.success(new SamlAssertionConfigurationSupport(assertionSigningPolicy, assertionTimeCondition, assertionLifetime));
+        }
     }
 }

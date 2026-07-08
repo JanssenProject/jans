@@ -3,14 +3,15 @@ package io.jans.shibboleth.model.config.profiles;
 import io.jans.shibboleth.model.config.profiles.capabilities.*;
 import io.jans.shibboleth.model.config.profiles.common.*;
 import io.jans.shibboleth.model.config.profiles.support.*;
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public final class ShibbolethSsoProfileConfiguration implements CommonConfigurationCapable, AuthenticationConfigurationCapable, 
     SamlConfigurationCapable, SamlAssertionConfigurationCapable {
     
-    private static final Duration DEFAULT_PROFILE_ASSERTION_LIFETIME = Duration.ofMinutes(5);
-
     private final CommonConfigurationSupport commonConfigurationSupport;
     private final AuthenticationConfigurationSupport authenticationConfigurationSupport;
     private final SamlConfigurationSupport samlConfigurationSupport;
@@ -19,23 +20,20 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
     private final AttributeStatementPolicy attributeStatementPolicy;
     private final NameIdentifiers nameIdFormatPrecedence;
 
-    private ShibbolethSsoProfileConfiguration() {
+    private ShibbolethSsoProfileConfiguration(
+        CommonConfigurationSupport commonConfigurationSupport,
+        AuthenticationConfigurationSupport authenticationConfigurationSupport,
+        SamlConfigurationSupport samlConfigurationSupport,
+        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
+        AttributeStatementPolicy attributeStatementPolicy,
+        NameIdentifiers nameIdFormatPrecedence) {
         
-       commonConfigurationSupport = CommonConfigurationSupport.of();
-       authenticationConfigurationSupport = AuthenticationConfigurationSupport.of(null,null,Duration.ofMinutes(0));
-       samlConfigurationSupport = SamlConfigurationSupport.of(MessageSigningPolicy.SIGN_RESPONSES_ONLY);
-       samlAssertionConfigurationSupport = SamlAssertionConfigurationSupport.of(
-            AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS,
-            AssertionTimeCondition.INCLUDE_NOT_BEFORE,
-            DEFAULT_PROFILE_ASSERTION_LIFETIME
-        );
-        attributeStatementPolicy = AttributeStatementPolicy.OMIT_ATTRIBUTE_STATEMENT;
-        nameIdFormatPrecedence   = NameIdentifiers.empty();
-    }
-
-    public static ShibbolethSsoProfileConfiguration defaultConfiguration() {
-
-       return new ShibbolethSsoProfileConfiguration();
+        this.commonConfigurationSupport = commonConfigurationSupport;
+        this.authenticationConfigurationSupport = authenticationConfigurationSupport;
+        this.samlConfigurationSupport = samlConfigurationSupport;
+        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
+        this.attributeStatementPolicy = attributeStatementPolicy;
+        this.nameIdFormatPrecedence = nameIdFormatPrecedence;
     }
 
     //Profile Configuration
@@ -118,5 +116,175 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
     public NameIdentifiers getNameIdFormatPrecedence() {
 
         return nameIdFormatPrecedence;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass() ) return false;
+
+        ShibbolethSsoProfileConfiguration other = (ShibbolethSsoProfileConfiguration) o;
+        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
+            && Objects.equals(authenticationConfigurationSupport,other.authenticationConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
+            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
+            && attributeStatementPolicy == other.attributeStatementPolicy 
+            && Objects.equals(nameIdFormatPrecedence,other.nameIdFormatPrecedence);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(
+            commonConfigurationSupport,authenticationConfigurationSupport,samlAssertionConfigurationSupport,
+            samlAssertionConfigurationSupport,attributeStatementPolicy,nameIdFormatPrecedence
+        );
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(ShibbolethSsoProfileConfiguration config) {
+
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final CommonConfigurationSupport.Builder common;
+        private final AuthenticationConfigurationSupport.Builder auth;
+        private final SamlConfigurationSupport.Builder saml;
+        private final SamlAssertionConfigurationSupport.Builder samlAssertion;
+        private AttributeStatementPolicy attributeStatementPolicy;
+        private NameIdentifiers nameIdFormatPrecedence;
+
+        public Builder(ShibbolethSsoProfileConfiguration config) {
+
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
+            auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport) : AuthenticationConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
+            attributeStatementPolicy = config != null ?  config.attributeStatementPolicy : null;
+            nameIdFormatPrecedence = config != null ? config.nameIdFormatPrecedence : null;
+        }
+
+        public Builder status(ProfileStatus status) {
+
+            common.status(status);
+            return this;
+        }
+
+        public Builder inboundFlows(InterceptorFlows flows) {
+
+            common.inboundFlows(flows);
+            return this;
+        }
+
+        public Builder outboundFlows(InterceptorFlows flows) {
+
+            common.outboundFlows(flows);
+            return this;
+        }
+
+        public Builder postAuthenticationFlows(InterceptorFlows flows) {
+
+            auth.postAuthenticationFlows(flows);
+            return this;
+        }
+
+        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
+
+            auth.authenticationResultReusePolicy(policy);
+            return this;
+        }
+
+        public Builder maximumAuthenticationAge(Duration age) {
+
+            auth.maximumAuthenticationAge(age);
+            return this;
+        }
+
+        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+
+            saml.messageSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+
+            samlAssertion.assertionSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
+
+            samlAssertion.assertionTimeCondition(condition);
+            return this;
+        }
+
+        public Builder assertionLifetime(Duration lifetime) {
+
+            samlAssertion.assertionLifetime(lifetime);
+            return this;
+        }
+
+        public Builder attributeStatementPolicy(AttributeStatementPolicy policy) {
+
+            attributeStatementPolicy = policy;
+            return this;
+        }
+
+        public Builder nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
+
+            nameIdFormatPrecedence = nameIdentifiers;
+            return this;
+        }
+
+        public TrustResult<ShibbolethSsoProfileConfiguration> build() {
+
+
+            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            if (commonResult.isFailure()) {
+
+                return TrustResult.failure(commonResult.getError());
+            }
+
+            TrustResult<AuthenticationConfigurationSupport> authResult = auth.build();
+            if (authResult.isFailure()) {
+                return TrustResult.failure(authResult.getError());
+            }
+
+            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            if (samlResult.isFailure()) {
+
+                return TrustResult.failure(samlResult.getError());
+            }
+
+            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            if (samlAssertionResult.isFailure()) {
+
+                return TrustResult.failure(samlAssertionResult.getError());
+            }
+
+            if (attributeStatementPolicy == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
+            }
+
+            if (nameIdFormatPrecedence == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
+            }
+
+            return TrustResult.success(new ShibbolethSsoProfileConfiguration(
+                commonResult.getValue(),authResult.getValue(),samlResult.getValue(),
+                samlAssertionResult.getValue(), attributeStatementPolicy,nameIdFormatPrecedence
+            ));
+        }
+
     }
 }

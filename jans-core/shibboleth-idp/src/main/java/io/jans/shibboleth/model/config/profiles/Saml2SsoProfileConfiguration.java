@@ -29,13 +29,14 @@ import io.jans.shibboleth.model.config.profiles.support.Saml2ConfigurationSuppor
 import io.jans.shibboleth.model.config.profiles.support.Saml2SsoConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlConfigurationSupport;
+import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable, AuthenticationConfigurationCapable, SamlConfigurationCapable, 
     SamlAssertionConfigurationCapable, Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
     
-    private static final Duration DEFAULT_PROFILE_ASSERTION_LIFETIME = Duration.ofMinutes(5);
 
     private final CommonConfigurationSupport commonConfigurationSupport;
     private final AuthenticationConfigurationSupport authenticationConfigurationSupport;
@@ -44,39 +45,17 @@ public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable,
     private final SamlAssertionConfigurationSupport samlAssertionConfigurationSupport;
     private final Saml2SsoConfigurationSupport saml2SsoConfigurationSupport;
 
-    private Saml2SsoProfileConfiguration() {
+    private Saml2SsoProfileConfiguration(
+        CommonConfigurationSupport commonConfigurationSupport, AuthenticationConfigurationSupport authenticationConfigurationSupport,
+        SamlConfigurationSupport samlConfigurationSupport, Saml2ConfigurationSupport saml2ConfigurationSupport,
+        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport, Saml2SsoConfigurationSupport saml2SsoConfigurationSupport) {
 
-        commonConfigurationSupport = CommonConfigurationSupport.of();
-        authenticationConfigurationSupport = AuthenticationConfigurationSupport.of();
-        samlConfigurationSupport = SamlConfigurationSupport.of(MessageSigningPolicy.SIGN_RESPONSES_ONLY);
-
-        saml2ConfigurationSupport = Saml2ConfigurationSupport.of(
-            RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE,
-            EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT,
-            NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS
-        );
-
-        samlAssertionConfigurationSupport = SamlAssertionConfigurationSupport.of(
-            AssertionSigningPolicy.DO_NOT_SIGN_ASSERTIONS,
-            AssertionTimeCondition.INCLUDE_NOT_BEFORE,
-            Duration.ofMinutes(5));
-
-        saml2SsoConfigurationSupport = Saml2SsoConfigurationSupport.of (
-            AuthenticationResultReusePolicy.ALLOW_REUSE,
-            AssertionEncryptionPolicy.ENCRYPT_ASSERTIONS,
-            AttributeEncryptionPolicy.DO_NOT_ENCRYPT_ATTRIBUTES,
-            Duration.ofSeconds(0),
-            EndpointValidationPolicy.SKIP_VALIDATION_WHEN_REQUEST_SIGNED,
-            AttributeStatementPolicy.INCLUDE_ATTRIBUTE_STATEMENT,
-            FriendlyNameRandomizationPolicy.RANDOMIZED,
-            NameIdentifiers.empty(),
-            RequestSigningRequirement.ALLOW_UNSIGNED_REQUESTS                                                                                                                                                                                  
-        );
-    }
-
-    public static Saml2SsoProfileConfiguration defaultConfiguration() {
-
-        return new Saml2SsoProfileConfiguration();
+        this.commonConfigurationSupport = commonConfigurationSupport;
+        this.authenticationConfigurationSupport = authenticationConfigurationSupport;
+        this.samlConfigurationSupport = samlConfigurationSupport;
+        this.saml2ConfigurationSupport = saml2ConfigurationSupport;
+        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
+        this.saml2SsoConfigurationSupport = saml2SsoConfigurationSupport;
     }
 
     //Profile configuration 
@@ -222,4 +201,233 @@ public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable,
         return saml2SsoConfigurationSupport.getRequestSigningRequirement();
     }
     //End Saml2Sso configuration
+
+    @Override
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true;
+
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        Saml2SsoProfileConfiguration other = (Saml2SsoProfileConfiguration) o; 
+
+        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
+            && Objects.equals(authenticationConfigurationSupport,other.authenticationConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport) 
+            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
+            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
+            && Objects.equals(saml2SsoConfigurationSupport,other.saml2SsoConfigurationSupport);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(
+            commonConfigurationSupport,authenticationConfigurationSupport,samlConfigurationSupport,
+            saml2ConfigurationSupport,samlAssertionConfigurationSupport,saml2SsoConfigurationSupport
+        );
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(Saml2SsoProfileConfiguration config) {
+
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final CommonConfigurationSupport.Builder common;
+        private final AuthenticationConfigurationSupport.Builder auth;
+        private final SamlConfigurationSupport.Builder saml;
+        private final Saml2ConfigurationSupport.Builder saml2;
+        private final SamlAssertionConfigurationSupport.Builder samlAssertion;
+        private final Saml2SsoConfigurationSupport.Builder saml2sso;
+
+        public Builder(Saml2SsoProfileConfiguration config) {
+
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
+            auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport) : AuthenticationConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
+            saml2sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport) : Saml2SsoConfigurationSupport.builder();
+        }
+
+        public Builder status(ProfileStatus status) {
+
+            common.status(status);
+            return this;
+        }
+
+        public Builder inboundFlows(InterceptorFlows flows) {
+
+            common.inboundFlows(flows);
+            return this;
+        }
+
+        public Builder outboundFlows(InterceptorFlows flows) {
+
+            common.outboundFlows(flows);
+            return this;
+        }
+
+        public Builder postAuthenticationFlows(InterceptorFlows flows) {
+
+            auth.postAuthenticationFlows(flows);
+            return this;
+        }
+
+        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
+
+            auth.authenticationResultReusePolicy(policy);
+            saml2sso.authenticationResultReusePolicy(policy);
+
+            return this;
+        }
+
+        public Builder maximumAuthenticationAge(Duration age) {
+
+            auth.maximumAuthenticationAge(age);
+            return this;
+        }
+
+        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+
+            saml.messageSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
+
+            saml2.requestSignatureValidationPolicy(policy);
+            return this;
+        }
+
+        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
+
+            saml2.encryptionFallbackPolicy(policy);
+            return this;
+        }
+
+        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
+
+            saml2.nameIdEncryptionPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+
+            samlAssertion.assertionSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
+
+            samlAssertion.assertionTimeCondition(condition);
+            return this;
+        }
+
+        public Builder assertionLifetime(Duration lifetime) {
+
+            samlAssertion.assertionLifetime(lifetime);
+            return this;
+        }
+        
+        public Builder assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
+
+            saml2sso.assertionEncryptionPolicy(policy);
+            return this;
+        }
+
+        public Builder attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
+
+            saml2sso.attributeEncryptionPolicy(policy);
+            return this;
+        }
+
+        public Builder maximumSPSessionLifetime(Duration lifetime) {
+
+            saml2sso.maximumSPSessionLifetime(lifetime);
+            return this;
+        }
+
+        public Builder endpointValidationPolicy(EndpointValidationPolicy policy) {
+
+            saml2sso.endpointValidationPolicy(policy);
+            return  this;
+        }
+
+        public Builder attributeStatementPolicy(AttributeStatementPolicy policy) {
+
+            saml2sso.attributeStatementPolicy(policy);
+            return this;
+        }
+
+        public Builder friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
+
+            saml2sso.friendlyNameRandomizationPolicy(policy);
+            return this;
+        }
+
+        public Builder nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
+
+            saml2sso.nameIdFormatPrecedence(nameIdentifiers);
+            return this;
+        }
+
+        public Builder requestSigningRequirement(RequestSigningRequirement requirement) {
+            
+            saml2sso.requestSigningRequirement(requirement);
+            return this;
+        }
+
+        public TrustResult<Saml2SsoProfileConfiguration> build() {
+        
+            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            if (commonResult.isFailure()) {
+
+                return TrustResult.failure(commonResult.getError());
+            }
+
+            TrustResult<AuthenticationConfigurationSupport> authResult = auth.build();
+            if (authResult.isFailure()) {
+
+                return TrustResult.failure(authResult.getError());
+            }
+
+            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            if (samlResult.isFailure()) {
+
+                return TrustResult.failure(samlResult.getError());
+            }
+
+            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            if(saml2Result.isFailure()) {
+
+                return TrustResult.failure(saml2Result.getError());
+            }
+
+            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            if (samlAssertionResult.isFailure()) {
+
+                return TrustResult.failure(samlAssertionResult.getError());
+            }
+
+            TrustResult<Saml2SsoConfigurationSupport> saml2ssoResult = saml2sso.build();
+            if (saml2ssoResult.isFailure()) {
+
+                return TrustResult.failure(saml2ssoResult.getError());
+            }
+
+            return TrustResult.success(new Saml2SsoProfileConfiguration(
+                commonResult.getValue(),authResult.getValue(), samlResult.getValue(),
+                saml2Result.getValue(), samlAssertionResult.getValue(), saml2ssoResult.getValue()
+            ));
+        }
+
+    }
 }

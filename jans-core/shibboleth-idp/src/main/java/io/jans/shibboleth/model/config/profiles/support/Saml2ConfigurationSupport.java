@@ -1,8 +1,12 @@
 package io.jans.shibboleth.model.config.profiles.support;
 
+import java.util.Objects;
+
 import io.jans.shibboleth.model.config.profiles.common.EncryptionFallbackPolicy;
 import io.jans.shibboleth.model.config.profiles.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.model.config.profiles.common.RequestSignatureValidationPolicy;
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.util.TrustResult;
 
 public class Saml2ConfigurationSupport {
 
@@ -13,15 +17,19 @@ public class Saml2ConfigurationSupport {
     private Saml2ConfigurationSupport(RequestSignatureValidationPolicy requestSignatureValidationPolicy, 
         EncryptionFallbackPolicy encryptionFallbackPolicy, NameIdEncryptionPolicy nameIdEncryptionPolicy ) {
         
-        this.requestSignatureValidationPolicy = requestSignatureValidationPolicy != null ? requestSignatureValidationPolicy : RequestSignatureValidationPolicy.SKIP_VALIDATION;
-        this.encryptionFallbackPolicy = encryptionFallbackPolicy != null ? encryptionFallbackPolicy : EncryptionFallbackPolicy.DISABLE_ENCRYPTION_IF_NECESSARY;
-        this.nameIdEncryptionPolicy = nameIdEncryptionPolicy != null ? nameIdEncryptionPolicy : NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS;       
+        this.requestSignatureValidationPolicy = requestSignatureValidationPolicy;
+        this.encryptionFallbackPolicy = encryptionFallbackPolicy;
+        this.nameIdEncryptionPolicy = nameIdEncryptionPolicy;   
     }
 
-    public static Saml2ConfigurationSupport of(RequestSignatureValidationPolicy requestSignatureValidationPolicy,
+    public static TrustResult<Saml2ConfigurationSupport> of(RequestSignatureValidationPolicy requestSignatureValidationPolicy,
             EncryptionFallbackPolicy encryptionFallbackPolicy, NameIdEncryptionPolicy nameIdEncryptionPolicy ) {
         
-        return new Saml2ConfigurationSupport(requestSignatureValidationPolicy,encryptionFallbackPolicy,nameIdEncryptionPolicy);
+        return builder()
+                .requestSignatureValidationPolicy(requestSignatureValidationPolicy)
+                .encryptionFallbackPolicy(encryptionFallbackPolicy)
+                .nameIdEncryptionPolicy(nameIdEncryptionPolicy)
+                .build();
     }
 
     public RequestSignatureValidationPolicy getRequestSignatureValidationPolicy() {
@@ -29,6 +37,7 @@ public class Saml2ConfigurationSupport {
         return requestSignatureValidationPolicy;
     }
 
+    
     public EncryptionFallbackPolicy getEncryptionFallbackPolicy() {
 
         return encryptionFallbackPolicy;
@@ -37,5 +46,87 @@ public class Saml2ConfigurationSupport {
     public NameIdEncryptionPolicy getNameIdEncryptionPolicy() {
 
         return nameIdEncryptionPolicy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true; 
+
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        Saml2ConfigurationSupport other = (Saml2ConfigurationSupport) o;
+
+        return requestSignatureValidationPolicy == other.requestSignatureValidationPolicy
+            &&  encryptionFallbackPolicy == other.encryptionFallbackPolicy 
+            && nameIdEncryptionPolicy == other.nameIdEncryptionPolicy;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(requestSignatureValidationPolicy,encryptionFallbackPolicy,nameIdEncryptionPolicy);
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(Saml2ConfigurationSupport base) {
+
+        return new Builder(base);
+    }
+
+    public static class Builder {
+        
+        private RequestSignatureValidationPolicy requestSignatureValidationPolicy;
+        private EncryptionFallbackPolicy encryptionFallbackPolicy;
+        private NameIdEncryptionPolicy nameIdEncryptionPolicy;
+
+        public Builder(Saml2ConfigurationSupport base) {
+
+            requestSignatureValidationPolicy = base != null ? base.requestSignatureValidationPolicy : null;
+            encryptionFallbackPolicy = base != null ? base.encryptionFallbackPolicy : null ;
+            nameIdEncryptionPolicy = base != null ? base.nameIdEncryptionPolicy : null; 
+        } 
+
+        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
+
+            this.requestSignatureValidationPolicy = policy;
+            return this;
+        }
+
+        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
+
+            this.encryptionFallbackPolicy = policy;
+            return this;
+        }
+
+        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
+
+            this.nameIdEncryptionPolicy = policy;
+            return this;
+        }
+
+        public TrustResult<Saml2ConfigurationSupport> build() {
+
+            if (requestSignatureValidationPolicy == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("requestSignatureValidationPolicy"));
+            }
+
+            if (encryptionFallbackPolicy == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("encryptionFallbackPolicy"));
+            }
+
+            if (nameIdEncryptionPolicy == null) {
+
+                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdEncryptionPolicy"));
+            }
+
+            return TrustResult.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));
+        }
     }
 }

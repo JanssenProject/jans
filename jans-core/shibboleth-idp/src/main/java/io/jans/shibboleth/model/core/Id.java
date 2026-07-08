@@ -42,11 +42,16 @@ public class Id {
         return assigned;
     }
 
+    public boolean isNotAssigned() {
+
+        return !assigned;
+    }
+
     public TrustResult<UUID> getValue() {
 
         if (!assigned) {
 
-            return TrustResult.failure(IdError.notAssigned());
+            return TrustResult.failure(IdNotAssigned.accessingValueOfUnassignedId());
         }
 
         return TrustResult.success(value);
@@ -72,6 +77,10 @@ public class Id {
     @Override
     public String toString() {
 
-        return value.toString();
+        if ( assigned ) {
+            return value.toString();
+        }
+        
+        return "[unassigned id]";
     }
 }

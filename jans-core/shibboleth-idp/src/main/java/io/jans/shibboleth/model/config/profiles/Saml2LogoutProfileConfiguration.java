@@ -27,8 +27,10 @@ import io.jans.shibboleth.model.config.profiles.support.Saml2ConfigurationSuppor
 import io.jans.shibboleth.model.config.profiles.support.Saml2SsoConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.model.config.profiles.support.SamlConfigurationSupport;
+import io.jans.shibboleth.model.util.TrustResult;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, Saml2ConfigurationCapable {
     
@@ -38,21 +40,13 @@ public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapab
     private final SamlConfigurationSupport samlConfigurationSupport;
     private final Saml2ConfigurationSupport saml2ConfigurationSupport;
 
-    private Saml2LogoutProfileConfiguration() {
-
-        commonConfigurationSupport = CommonConfigurationSupport.of();
-        samlConfigurationSupport = SamlConfigurationSupport.of(MessageSigningPolicy.SIGN_RESPONSES_ONLY);
-
-        saml2ConfigurationSupport = Saml2ConfigurationSupport.of(
-            RequestSignatureValidationPolicy.REQUIRE_VALID_SIGNATURE,
-            EncryptionFallbackPolicy.FAIL_IF_CANNOT_ENCRYPT,
-            NameIdEncryptionPolicy.DO_NOT_ENCRYPT_NAMEIDS
-        );
-    }
-
-    public static Saml2LogoutProfileConfiguration defaultConfiguration() {
-
-        return new Saml2LogoutProfileConfiguration();
+    private Saml2LogoutProfileConfiguration(
+        CommonConfigurationSupport commonConfigurationSupport, SamlConfigurationSupport samlConfigurationSupport,
+        Saml2ConfigurationSupport saml2ConfigurationSupport) {
+        
+        this.commonConfigurationSupport = commonConfigurationSupport;
+        this.samlConfigurationSupport   = samlConfigurationSupport;
+        this.saml2ConfigurationSupport  = saml2ConfigurationSupport;
     }
 
     //Profile configuration 
@@ -109,5 +103,113 @@ public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapab
     }
     //End Saml2 Configuration 
 
-    
+    @Override 
+    public boolean equals(Object o) {
+
+        if ( this == o ) return true;
+
+        if ( o == null || getClass() != o.getClass() )  return false;
+
+        Saml2LogoutProfileConfiguration other = (Saml2LogoutProfileConfiguration) o;
+        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
+            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(commonConfigurationSupport,samlConfigurationSupport,saml2ConfigurationSupport);
+    }
+
+    public static Builder builder() {
+
+        return new Builder(null);
+    }
+
+    public static Builder from(Saml2LogoutProfileConfiguration config) {
+
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final CommonConfigurationSupport.Builder common;
+        private final SamlConfigurationSupport.Builder saml;
+        private final Saml2ConfigurationSupport.Builder saml2;
+
+        public Builder(Saml2LogoutProfileConfiguration config) {
+
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
+        }
+
+        public Builder status(ProfileStatus status) {
+
+            common.status(status);
+            return this;
+        }
+
+        public Builder inboundFlows(InterceptorFlows flows) {
+
+            common.inboundFlows(flows);
+            return this;
+        }
+
+        public Builder outboundFlows(InterceptorFlows flows) {
+
+            common.outboundFlows(flows);
+            return this;
+        }
+
+        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+
+            saml.messageSigningPolicy(policy);
+            return this;
+        }
+
+        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
+
+            saml2.requestSignatureValidationPolicy(policy);
+            return this;
+        }
+
+        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
+
+            saml2.encryptionFallbackPolicy(policy);
+            return this;
+        }
+
+        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
+
+            saml2.nameIdEncryptionPolicy(policy);
+            return this;
+        }
+
+        public TrustResult<Saml2LogoutProfileConfiguration> build() {
+
+            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            if (commonResult.isFailure()) {
+
+                return TrustResult.failure(commonResult.getError());
+            }
+
+            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            if (samlResult.isFailure()) {
+
+                return TrustResult.failure(samlResult.getError());
+            }
+
+            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            if (saml2Result.isFailure()) {
+
+                return TrustResult.failure(saml2Result.getError());
+            }
+
+            return TrustResult.success(new Saml2LogoutProfileConfiguration(
+                commonResult.getValue(), samlResult.getValue(),saml2Result.getValue())
+            );
+        }
+    }
 }

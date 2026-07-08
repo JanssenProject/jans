@@ -22,5 +22,5 @@ public interface Saml2SsoConfigurationCapable {
     public FriendlyNameRandomizationPolicy getFriendlyNameRandomizationPolicy();
     public NameIdentifiers getNameIdFormatPrecedence();
     public RequestSigningRequirement getRequestSigningRequirement();
-    
+
 }

@@ -1,30 +1,34 @@
 package io.jans.shibboleth.model.core;
 
-import io.jans.shibboleth.model.error.EntityIdError;
+
+import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.model.error.InvalidUriSyntax;
 import io.jans.shibboleth.model.util.TrustResult;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class EntityId {
 
-    private final String value;
+    private final URI value;
 
-    private EntityId(String value) {
+    private EntityId(URI value) {
 
-        this.value = value.trim();
+        this.value = value;
     }
 
-    public static TrustResult<EntityId> of(String value) {
+    public static TrustResult<EntityId> of(URI value) {
 
-        if (value == null  || value.trim().isEmpty() ) {
+        if (value == null) {
 
-            return TrustResult.failure(EntityIdError.cannotBeNullOrBlank());
+            return TrustResult.failure(CannotBeNullOrBlank.forField("value"));
         }
 
         return TrustResult.success(new EntityId(value));
     }
 
-    public String getValue() {
+    public URI getValue() {
 
         return value;
     }
@@ -33,7 +37,9 @@ public class EntityId {
     public boolean equals(Object o) {
 
         if ( this == o ) return true;
+
         if ( o == null || getClass() != o.getClass() ) return false;
+        
         EntityId that = (EntityId) o;
         return Objects.equals(value,that.value);
     }
@@ -47,6 +53,6 @@ public class EntityId {
     @Override
     public String toString() {
 
-        return value;
+        return "EntityId[" + value + "]";
     }
 }

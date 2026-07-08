@@ -22,22 +22,25 @@ import io.jans.shibboleth.model.config.profiles.common.FriendlyNameRandomization
 import io.jans.shibboleth.model.config.profiles.common.MessageSigningPolicy;
 import io.jans.shibboleth.model.config.profiles.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.model.config.profiles.common.ProfileStatus;
+import io.jans.shibboleth.model.config.profiles.common.ProfileType;
 import io.jans.shibboleth.model.config.profiles.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.model.config.profiles.common.RequestSigningRequirement;
 
 import java.util.Objects;
 
-public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurationAssert,ProfileConfigurationWrapper> {
+public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurationAssert,Object> {
 
+    private final ProfileType profileType;
 
-    private ProfileConfigurationAssert(ProfileConfigurationWrapper actual) {
+    private ProfileConfigurationAssert(Object actual,ProfileType profileType) {
 
         super(actual,ProfileConfigurationAssert.class);
+        this.profileType = profileType;
     }
 
-    public static ProfileConfigurationAssert assertThat(ProfileConfigurationWrapper actual) {
+    public static ProfileConfigurationAssert assertThat(Object actual,ProfileType profileType) {
 
-        return new ProfileConfigurationAssert(actual);
+        return new ProfileConfigurationAssert(actual,profileType);
     }
 
     public ProfileConfigurationAssert isInactive() {
@@ -45,11 +48,23 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         isNotNull();
 
         hasProfileConfigurationCapabilities(CommonConfigurationCapable.class);
-        CommonConfigurationCapable commonconfig = actual.asCommonConfigurationCapable();
+        CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
         if (commonconfig.getStatus() != ProfileStatus.INACTIVE ) {
 
-            failWithMessage("Profile configuration is  <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.INACTIVE);
+            failWithMessage("Profile configuration status is  <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.INACTIVE);
         }
+        return this;
+    }
+
+    public ProfileConfigurationAssert isActive() {
+
+        isNotNull();
+        hasProfileConfigurationCapabilities(CommonConfigurationCapable.class);
+        CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
+        if (commonconfig.getStatus() != ProfileStatus.ACTIVE ) {
+            failWithMessage("Profile configuration status is <%s>. Expected: <%s>",commonconfig.getStatus(),ProfileStatus.ACTIVE);
+        }
+
         return this;
     }
 
@@ -57,7 +72,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
 
-        switch(actual.getType()) {
+        switch(profileType) {
             case SHIBBOLETH_SSO:
                 usesShibbolethSsoDefaultConfiguration();
                 break;
@@ -77,7 +92,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
                 usesSaml2SsoDefaultConfiguration();
                 break;
             default:
-                failWithMessage("Test support for profile configuration <%s> is missing",actual.getType());
+                failWithMessage("Test support for profile configuration <%s> is missing",profileType);
                 break;
         }
 
@@ -87,7 +102,10 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
     public ProfileConfigurationAssert usesShibbolethSsoDefaultConfiguration() {
 
         isNotNull();
-        ShibbolethSsoProfileConfiguration profileconfig = (ShibbolethSsoProfileConfiguration) actual.getProfileConfig();
+
+        ShibbolethSsoProfileConfiguration profileconfig = (ShibbolethSsoProfileConfiguration) actual;
+
+        isInactive();
 
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
@@ -119,7 +137,10 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
     public ProfileConfigurationAssert usesSaml2AttributeQueryDefaultConfiguration() {
 
         isNotNull();
-        Saml2AttributeQueryProfileConfiguration profileconfig = (Saml2AttributeQueryProfileConfiguration) actual.getProfileConfig();
+
+        Saml2AttributeQueryProfileConfiguration profileconfig = (Saml2AttributeQueryProfileConfiguration) actual();
+
+        isInactive();
 
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
@@ -159,7 +180,9 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
 
-        Saml2ArtifactResolutionProfileConfiguration profileconfig = (Saml2ArtifactResolutionProfileConfiguration) actual.getProfileConfig();
+        Saml2ArtifactResolutionProfileConfiguration profileconfig = (Saml2ArtifactResolutionProfileConfiguration) actual;
+
+        isInactive();
 
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
@@ -195,7 +218,9 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
 
         isNotNull();
-        Saml2EcpProfileConfiguration profileconfig = (Saml2EcpProfileConfiguration) actual.getProfileConfig();
+        Saml2EcpProfileConfiguration profileconfig = (Saml2EcpProfileConfiguration) actual;
+
+        isInactive();
 
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
@@ -227,7 +252,9 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
     public ProfileConfigurationAssert usesSaml2SsoDefaultConfiguration() {
 
         isNotNull();
-        Saml2SsoProfileConfiguration profileconfig = (Saml2SsoProfileConfiguration) actual.getProfileConfig();
+        Saml2SsoProfileConfiguration profileconfig = (Saml2SsoProfileConfiguration) actual;
+
+        isInactive();
 
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
@@ -263,8 +290,10 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
 
-        Saml2LogoutProfileConfiguration profileconfig = (Saml2LogoutProfileConfiguration) actual.getProfileConfig();
+        Saml2LogoutProfileConfiguration profileconfig = (Saml2LogoutProfileConfiguration) actual;
 
+        isInactive();
+        
         hasNoInboundInterceptorFlows();
         hasNoOutboundInterceptorFlows();
 
@@ -279,8 +308,10 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
     }
 
     public ProfileConfigurationAssert hasProfileConfigurationCapabilities(Class<?> capabilities) {
+        
+        isNotNull();
 
-        if ( actual.hasProfileConfigurationCapabilities(capabilities) == false ) {
+        if ( hasProfileConfigurationCapabilitiesInternal(capabilities) == false ) {
 
             failWithMessage("Profile configuration does not have the capabilities in <%s>",capabilities);
         }
@@ -292,7 +323,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
         hasProfileConfigurationCapabilities(CommonConfigurationCapable.class);
-        CommonConfigurationCapable commonconfig = actual.asCommonConfigurationCapable();
+        CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
         if ( commonconfig.getInboundFlows().hasSome() ) {
 
             failWithMessage("Profile configuration has at least one inbound interceptor flow. Expected: 0");
@@ -304,7 +335,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
         hasProfileConfigurationCapabilities(CommonConfigurationCapable.class);
-        CommonConfigurationCapable commonconfig = actual.asCommonConfigurationCapable();
+        CommonConfigurationCapable commonconfig = asCommonConfigurationCapable();
         if ( commonconfig.getOutboundFlows().hasSome() ) {
 
             failWithMessage("Profile configuration has at least one outbound interceptor flow. Expected: 0");
@@ -316,7 +347,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
         hasProfileConfigurationCapabilities(AuthenticationConfigurationCapable.class);
-        AuthenticationConfigurationCapable authconfig = actual.asAuthenticationConfigurationCapable();
+        AuthenticationConfigurationCapable authconfig = asAuthenticationConfigurationCapable();
         if ( authconfig.getPostAuthenticationFlows().hasSome() ) {
 
             failWithMessage("Profile configuration has at least one post authn interceptor flow. Expected: 0");
@@ -328,22 +359,22 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
 
-        if ( actual.hasProfileConfigurationCapabilities(AuthenticationConfigurationCapable.class) ) {
-            AuthenticationConfigurationCapable authconfig = actual.asAuthenticationConfigurationCapable();
+        if ( hasProfileConfigurationCapabilitiesInternal(AuthenticationConfigurationCapable.class) ) {
+            AuthenticationConfigurationCapable authconfig = asAuthenticationConfigurationCapable();
             if ( !Objects.equals(authconfig.getAuthenticationResultReusePolicy(),policy) ) {
 
                 failWithMessage("Authentication result reuse policy for profile was <%s>. Expected: <%s>",
                         authconfig.getAuthenticationResultReusePolicy(),policy);
             }
-        }else if( actual.hasProfileConfigurationCapabilities(Saml2ConfigurationCapable.class) ) {
-            Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        }else if( hasProfileConfigurationCapabilitiesInternal(Saml2ConfigurationCapable.class) ) {
+            Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
             if ( !Objects.equals(saml2ssoconfig.getAuthenticationResultReusePolicy(),policy) ) {
                 failWithMessage("Authentication result reuse policy for profile was <%s>. Expected: <%s>",
                     saml2ssoconfig.getAuthenticationResultReusePolicy(),policy
                 );
             }
         }else {
-            failWithMessage("Authentication result reuse policy unsupported for profile <%s>",actual.getType());
+            failWithMessage("Authentication result reuse policy unsupported for profile <%s>",profileType);
         }
 
         return this;
@@ -355,7 +386,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(AuthenticationConfigurationCapable.class);
 
-        AuthenticationConfigurationCapable authconfig = actual.asAuthenticationConfigurationCapable();
+        AuthenticationConfigurationCapable authconfig = asAuthenticationConfigurationCapable();
         if (! Objects.equals(authconfig.getMaxAuthenticationAge(), age) ) {
             failWithMessage("Max authentication age for profile was <%s>. Expected: <%s>",authconfig.getMaxAuthenticationAge(),age);
         }
@@ -369,7 +400,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(SamlConfigurationCapable.class);
 
-        SamlConfigurationCapable samlconfig = actual.asSamlConfigurationCapable();
+        SamlConfigurationCapable samlconfig = asSamlConfigurationCapable();
 
         if (! Objects.equals(samlconfig.getMessageSigningPolicy(),policy) ) {
 
@@ -384,7 +415,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(SamlAssertionConfigurationCapable.class);
 
-        SamlAssertionConfigurationCapable samlassertionconfig = actual.asSamlAssertionConfigurationCapable();
+        SamlAssertionConfigurationCapable samlassertionconfig = asSamlAssertionConfigurationCapable();
 
         if (! Objects.equals(samlassertionconfig.getAssertionSigningPolicy(),policy) ) {
 
@@ -400,7 +431,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(SamlAssertionConfigurationCapable.class);
 
-        SamlAssertionConfigurationCapable samlassertionconfig = actual.asSamlAssertionConfigurationCapable();
+        SamlAssertionConfigurationCapable samlassertionconfig = asSamlAssertionConfigurationCapable();
 
         if (! Objects.equals(samlassertionconfig.getAssertionTimeCondition(),condition) ) {
 
@@ -416,7 +447,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(SamlAssertionConfigurationCapable.class);
 
-        SamlAssertionConfigurationCapable samlassertionconfig = actual.asSamlAssertionConfigurationCapable();
+        SamlAssertionConfigurationCapable samlassertionconfig = asSamlAssertionConfigurationCapable();
 
         if (! Objects.equals(samlassertionconfig.getAssertionLifetime(),assertionLifetime) ) {
             failWithMessage("Assertion lifetime for profile was <%s>. Expected: <%s>",samlassertionconfig.getAssertionLifetime(),assertionLifetime);
@@ -431,7 +462,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2ConfigurationCapable.class);
 
-        Saml2ConfigurationCapable saml2config = actual.asSaml2ConfigurationCapable();
+        Saml2ConfigurationCapable saml2config = asSaml2ConfigurationCapable();
 
         if (! Objects.equals(saml2config.getRequestSignatureValidationPolicy(),policy) ) {
 
@@ -447,7 +478,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2ConfigurationCapable.class);
 
-        Saml2ConfigurationCapable saml2config = actual.asSaml2ConfigurationCapable();
+        Saml2ConfigurationCapable saml2config = asSaml2ConfigurationCapable();
 
         if (! Objects.equals(saml2config.getEncryptionFallbackPolicy(), policy) ) {
 
@@ -462,7 +493,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2ConfigurationCapable.class);
 
-        Saml2ConfigurationCapable saml2config  = actual.asSaml2ConfigurationCapable();
+        Saml2ConfigurationCapable saml2config  = asSaml2ConfigurationCapable();
 
         if (! Objects.equals(saml2config.getNameIdEncryptionPolicy(),policy) ) {
 
@@ -477,7 +508,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if (! Objects.equals( saml2ssoconfig.getAssertionEncryptionPolicy(),policy) ) {
 
@@ -493,7 +524,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if (! Objects.equals( saml2ssoconfig.getAttributeEncryptionPolicy(),policy) ) {
 
@@ -509,7 +540,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if (! Objects.equals( saml2ssoconfig.getMaximumSPSessionLifetime(), expected) ) {
 
@@ -525,7 +556,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if (! Objects.equals( saml2ssoconfig.getEndpointValidationPolicy(), policy) ) {
 
@@ -541,7 +572,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if (! Objects.equals( saml2ssoconfig.getAttributeStatementPolicy(), policy) ) {
 
@@ -557,7 +588,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if( !Objects.equals(saml2ssoconfig.getFriendlyNameRandomizationPolicy(),policy) ) {
 
@@ -573,7 +604,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if ( saml2ssoconfig.getNameIdFormatPrecedence().hasSome() ) {
 
@@ -589,7 +620,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         hasProfileConfigurationCapabilities(Saml2SsoConfigurationCapable.class);
 
-        Saml2SsoConfigurationCapable saml2ssoconfig = actual.asSaml2SsoConfigurationCapable();
+        Saml2SsoConfigurationCapable saml2ssoconfig = asSaml2SsoConfigurationCapable();
 
         if(! Objects.equals(saml2ssoconfig.getRequestSigningRequirement(),requirement) ) {
 
@@ -597,5 +628,41 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         }
 
         return this;
-    } 
+    }
+
+    private boolean hasProfileConfigurationCapabilitiesInternal(Class<?> capabilities) {
+
+        return capabilities.isInstance(actual);
+    }
+
+    private CommonConfigurationCapable asCommonConfigurationCapable() {
+
+        return (CommonConfigurationCapable) actual;
+    }
+
+    private AuthenticationConfigurationCapable asAuthenticationConfigurationCapable() {
+        
+        return (AuthenticationConfigurationCapable) actual;
+    }
+
+    private SamlAssertionConfigurationCapable asSamlAssertionConfigurationCapable() {
+
+        return (SamlAssertionConfigurationCapable) actual;
+    }
+
+    private SamlConfigurationCapable asSamlConfigurationCapable() {
+
+        return (SamlConfigurationCapable) actual;
+    }
+
+    private Saml2ConfigurationCapable asSaml2ConfigurationCapable() {
+
+        return (Saml2ConfigurationCapable) actual;
+    }
+
+    private Saml2SsoConfigurationCapable asSaml2SsoConfigurationCapable() {
+
+        return (Saml2SsoConfigurationCapable) actual;
+    }
+    
 }

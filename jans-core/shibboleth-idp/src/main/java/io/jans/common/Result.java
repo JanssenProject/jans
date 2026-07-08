@@ -13,7 +13,7 @@ public class Result<T> {
         this.error = error;
         this.success = success;
     }
-
+    
     public static <T> Result<T> success (T value) {
 
         return new Result<>(value,null,true);
@@ -38,7 +38,7 @@ public class Result<T> {
 
         if(!success) {
 
-            throw new IllegalStateException("Cannot get value from failed result");
+            throw new IllegalStateException("Cannot get value from failed result with error '" + error.toString() + "'");
         }
         return value;
     }

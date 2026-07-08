@@ -19,7 +19,7 @@ public class DisplayName {
 
         if( rawValue == null || rawValue.trim().isEmpty() ) {
 
-            return TrustResult.failure(DisplayNameError.cannotBeNullOrBlank());
+            return TrustResult.failure(CannotBeNullOrBlank.forField("rawValue"));
         }
 
         return TrustResult.success(new DisplayName(rawValue.trim()));
@@ -34,7 +34,9 @@ public class DisplayName {
     public boolean equals(Object o) {
 
         if ( this == null ) return true;
+
         if ( o == null || getClass() != o.getClass() ) return false;
+        
         DisplayName that = (DisplayName) o;
         return Objects.equals(value, that.value);
     }
