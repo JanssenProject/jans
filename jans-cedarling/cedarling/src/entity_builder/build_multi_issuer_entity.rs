@@ -5,10 +5,9 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{
-    BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder, EntityData,
+    BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder,
     default_tkn_entity_name,
 };
-use crate::authz::AuthorizeEntitiesData;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
@@ -241,10 +240,10 @@ fn determine_token_entity_type(token: &Token) -> String {
     DEFAULT_ENTITY_TYPE_NAME.to_string()
 }
 
-/// Resource-independent multi-issuer entities. Built once per batch and
-/// combined with a per-item resource entity inside
-/// [`EntityBuilder::build_multi_issuer_entities`] or directly by the batch
-/// authorization path.
+/// Resource-independent multi-issuer entities produced by
+/// [`EntityBuilder::build_multi_issuer_setup_entities`]. Built once per
+/// authorization call (single-item or batch) and combined with a per-item
+/// resource entity by the caller.
 #[derive(Debug, Clone)]
 pub(crate) struct MultiIssuerSetupEntities {
     pub tokens: HashMap<String, Entity>,
@@ -253,49 +252,10 @@ pub(crate) struct MultiIssuerSetupEntities {
 }
 
 impl EntityBuilder {
-    /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles).
-    ///
-    /// Convenience wrapper around [`Self::build_multi_issuer_setup_entities`] +
-    /// [`Self::build_resource_entity`]. Currently used only by tests — production
-    /// code paths compose the granular helpers so they can amortize the setup
-    /// phase across items in a batch.
-    #[allow(dead_code)]
-    pub(crate) fn build_multi_issuer_entities(
-        &self,
-        tokens: &HashMap<String, Arc<Token>>,
-        resource: &EntityData,
-        log_service: &impl LogWriter,
-    ) -> Result<AuthorizeEntitiesData, MultiIssuerEntityError> {
-        let setup = self.build_multi_issuer_setup_entities(tokens, log_service)?;
-        let resource = self
-            .build_resource_entity(resource)
-            .inspect_err(|e| {
-                log_service.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::ERROR,
-                        None,
-                    ))
-                    .set_message(
-                        "Failed to build resource entity for multi-issuer authorization"
-                            .to_string(),
-                    )
-                    .set_error(e.to_string()),
-                );
-            })
-            .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
-
-        Ok(AuthorizeEntitiesData {
-            issuers: setup.issuers,
-            tokens: setup.tokens,
-            resource,
-            default_entities: setup.default_entities,
-        })
-    }
-
     /// Build the resource-independent multi-issuer entities (tokens + issuers +
-    /// default entities). Used by batch authorization to amortize entity
-    /// construction across items and by the single-item path via
-    /// [`Self::build_multi_issuer_entities`].
+    /// default entities). Used by both single-item and batch multi-issuer
+    /// authorization paths — the caller pairs the result with a per-item
+    /// [`Self::build_resource_entity`] call to complete each decision.
     pub(crate) fn build_multi_issuer_setup_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
@@ -518,7 +478,6 @@ impl EntityBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::authz::request::CedarEntityMapping;
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
@@ -595,16 +554,6 @@ mod tests {
 
         let token_claims = TokenClaims::from(all_claims);
         Token::new("Jans::Access_Token", token_claims, trusted_issuer)
-    }
-
-    fn create_test_resource() -> EntityData {
-        EntityData {
-            cedar_mapping: CedarEntityMapping {
-                entity_type: "Jans::Resource".to_string(),
-                id: "test_resource".to_string(),
-            },
-            attributes: HashMap::new(),
-        }
     }
 
     #[test]
@@ -698,7 +647,7 @@ mod tests {
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
         let result =
-            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -743,7 +692,7 @@ mod tests {
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
         let result =
-            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -937,7 +886,7 @@ mod tests {
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
         let result =
-            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -971,7 +920,7 @@ mod tests {
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
         let result =
-            builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
+            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 
         assert!(
             matches!(result.unwrap_err(), MultiIssuerEntityError::NoValidTokens),
