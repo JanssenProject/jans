@@ -370,6 +370,7 @@ impl Authz {
                     self.config.metrics.record_error(&e);
                     self.config.metrics.record_authz_error();
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
+                        .set_batch_id(batch_id)
                         .set_message(format!("Batch item failed setup for batch {batch_id}"))
                         .set_error(e.to_string());
                     self.config.log_service.log_any(log_entry);
@@ -438,10 +439,12 @@ impl Authz {
         self.config.metrics.record_batch(request.items.len());
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
-            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id)).set_message(format!(
-                "Batch authorize (multi-issuer): {} items in {batch_time_micro_sec}μs",
-                request.items.len(),
-            )),
+            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
+                .set_batch_id(batch_id)
+                .set_message(format!(
+                    "Batch authorize (multi-issuer): {} items in {batch_time_micro_sec}μs",
+                    request.items.len(),
+                )),
         );
 
         Ok(BatchAuthorizeResponse::new(batch_id, results))
@@ -729,6 +732,7 @@ impl Authz {
                     self.config.metrics.record_error(&e);
                     self.config.metrics.record_authz_error();
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
+                        .set_batch_id(batch_id)
                         .set_message(format!("Batch item failed setup for batch {batch_id}"))
                         .set_error(e.to_string());
                     self.config.log_service.log_any(log_entry);
@@ -797,10 +801,12 @@ impl Authz {
         self.config.metrics.record_batch(request.items.len());
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
-            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id)).set_message(format!(
-                "Batch authorize (unsigned): {} items in {batch_time_micro_sec}μs",
-                request.items.len(),
-            )),
+            LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
+                .set_batch_id(batch_id)
+                .set_message(format!(
+                    "Batch authorize (unsigned): {} items in {batch_time_micro_sec}μs",
+                    request.items.len(),
+                )),
         );
 
         Ok(BatchAuthorizeResponse::new(batch_id, results))
