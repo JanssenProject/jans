@@ -83,10 +83,24 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
+    public static final TrustRelationship sampleDraftIndividualTrustRelationship(MetadataSource source) {
+
+        return sampleDraftIndividualTrustRelationship()
+            .updateMetadataSource(source)
+            .getValue();
+    }
+
     public static final TrustRelationship sampleDraftAggregateTrustRelationshipWithRealMetadataSource() {
 
         return sampleDraftAggregateTrustRelationship()
             .updateMetadataSource(sampleUriMetadataSource())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleDraftAggregateTrustRelationship(MetadataSource source) {
+
+        return sampleDraftAggregateTrustRelationship()
+            .updateMetadataSource(source)
             .getValue();
     }
 
@@ -107,10 +121,24 @@ public class TrustRelationshipFixtures {
         return accessor.update(sampleDraftAggregateTrustRelationshipWithRealMetadataSource(),profileconfig).getValue();
     }
 
+    public static final TrustRelationship sampleReadyIndividualTrustRelationship(MetadataSource source) {
+
+        return sampleDraftIndividualTrustRelationship(source)
+            .updateSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration())
+            .getValue();
+    }
+
     public static final TrustRelationship sampleReadyAggregateTrustRelationship() {
  
         return sampleDraftAggregateTrustRelationshipWithActiveProfile()
             .updateMetadataSource(sampleMdqMetadataSource())
+            .getValue();
+    }
+
+    public static final TrustRelationship sampleReadyAggregateTrustRelationship(MetadataSource source) {
+
+        return sampleDraftAggregateTrustRelationship(source)
+            .updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration())
             .getValue();
     }
 
@@ -438,5 +466,136 @@ public class TrustRelationshipFixtures {
             .addAll(ids)
             .build()
             .getValue();
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> displayNameIdempotentUpdate() {
+
+        return (tr) -> {
+            DisplayName displayname = DisplayName.of(tr.getDisplayName().getValue()).getValue();
+            return tr.updateDisplayName(displayname);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> descriptionIdempotentUpdate() {
+
+        return (tr) -> {
+            Description description = Description.of(tr.getDescription().getValue());
+            return tr.updateDescription(description);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> metadataSourceIdempotentUpdate() {
+
+        return (tr) -> {
+
+            switch(tr.getMetadataSource().getType()) {
+
+                case FILE:
+                    FileMetadataSource filesource = (FileMetadataSource) tr.getMetadataSource();
+                    return tr.updateMetadataSource(FileMetadataSource.of(filesource.getFilePath()).getValue());
+                case URI:
+                    UriMetadataSource urisource = (UriMetadataSource) tr.getMetadataSource();
+                    return tr.updateMetadataSource(UriMetadataSource.of(urisource.getUri()).getValue());
+                case UPSTREAM:
+                    UpstreamMetadataSource upstreamsource = (UpstreamMetadataSource) tr.getMetadataSource();
+                    return tr.updateMetadataSource(UpstreamMetadataSource.of(upstreamsource.getParentId(),upstreamsource.getEntityId()).getValue());
+                case MANUAL:
+                    ManualMetadataSource manualsource = (ManualMetadataSource) tr.getMetadataSource();
+                    return tr.updateMetadataSource(ManualMetadataSource.from(manualsource).build().getValue());
+                case MDQ:
+                    MdqMetadataSource mdqsource = (MdqMetadataSource) tr.getMetadataSource();
+                    return tr.updateMetadataSource(MdqMetadataSource.of(mdqsource.getBaseUrl()).getValue());
+                case NONE:
+                    return tr.updateMetadataSource(NoMetadataSource.getInstance());
+                default:
+                    return null;
+            }
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> shibbolethSsoIdempotentUpdate() {
+
+        return (tr) -> {
+
+            ShibbolethSsoProfileConfiguration duplicate = ShibbolethSsoProfileConfiguration
+                .from(tr.getShibbolethSsoProfileConfiguration())
+                .build()
+                .getValue();
+            return tr.updateShibbolethSsoProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2ArtifactResolutionIdempotentUpdate() {
+
+        return (tr) -> {
+
+            Saml2ArtifactResolutionProfileConfiguration duplicate = Saml2ArtifactResolutionProfileConfiguration
+                .from(tr.getSaml2ArtifactResolutionProfileConfiguration())
+                .build()
+                .getValue();
+        
+            return tr.updateSaml2ArtifactResolutionProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2AttributeQueryIdempotentUpdate() {
+
+        return (tr) -> {
+
+            Saml2AttributeQueryProfileConfiguration duplicate = Saml2AttributeQueryProfileConfiguration
+            .from(tr.getSaml2AttributeQueryProfileConfiguration())
+            .build()
+            .getValue();
+        
+            return tr.updateSaml2AttributeQueryProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2EcpIdempotentUpdate() {
+
+        return (tr) -> {
+
+            Saml2EcpProfileConfiguration duplicate = Saml2EcpProfileConfiguration
+                .from(tr.getSaml2EcpProfileConfiguration())
+                .build()
+                .getValue();
+        
+            return tr.updateSaml2EcpProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2SsoIdempotentUpdate() {
+
+        return (tr) -> {
+
+            Saml2SsoProfileConfiguration duplicate = Saml2SsoProfileConfiguration
+                .from(tr.getSaml2SsoProfileConfiguration())
+                .build()
+                .getValue();
+
+            return tr.updateSaml2SsoProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2LogoutIdempotentUpdate() {
+
+        return (tr) -> {
+
+            Saml2LogoutProfileConfiguration duplicate = Saml2LogoutProfileConfiguration
+                .from(tr.getSaml2LogoutProfileConfiguration())
+                .build()
+                .getValue();
+        
+            return tr.updateSaml2LogoutProfileConfiguration(duplicate);
+        };
+    }
+
+    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> releasedAttributesIdempotentUpdate() {
+
+        return (tr) -> {
+
+            ReleasedAttributes duplicate = ReleasedAttributes.from(tr.getReleasedAttributes()).build().getValue();
+            return tr.updateReleasedAttributes(duplicate);
+        };
     }
 }

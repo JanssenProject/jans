@@ -1,6 +1,7 @@
 package io.jans.shibboleth.model.metadata;
 
 import java.net.URI;
+import java.util.Objects;
 
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.util.TrustResult;
@@ -18,6 +19,23 @@ public class UriMetadataSource implements MetadataSource {
     public MetadataSourceType getType() {
 
         return MetadataSourceType.URI;
+    }
+
+    public URI getUri() {
+
+        return uri;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UriMetadataSource other = (UriMetadataSource) o;
+
+        return Objects.equals(uri,other.uri);
     }
 
     public static TrustResult<MetadataSource> of(URI uri) {

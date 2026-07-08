@@ -582,6 +582,33 @@ public class TrustRelationshipTest {
         );
     }
 
+    private static Stream<Arguments> trustRelationshipsWithIdempotentUpdateOperations() {
+
+        MetadataSource filesource = sampleFileMetadataSource();
+        MetadataSource urisource = sampleUriMetadataSource();
+        MetadataSource manualsource = sampleManualMetadataSource();
+        MetadataSource mdqsource = sampleMdqMetadataSource();
+        MetadataSource upstreamsource = sampleUpstreamMetadatSource();
+
+        return Stream.of(
+            Arguments.of(sampleDraftIndividualTrustRelationship(),displayNameIdempotentUpdate()),
+            Arguments.of(sampleDraftIndividualTrustRelationship(),descriptionIdempotentUpdate()),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),displayNameIdempotentUpdate()),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),descriptionIdempotentUpdate()),
+
+            Arguments.of(sampleDraftIndividualTrustRelationship(filesource),metadataSourceIdempotentUpdate()),
+            Arguments.of(sampleDraftAggregateTrustRelationship(urisource),metadataSourceIdempotentUpdate()),
+            Arguments.of(sampleReadyIndividualTrustRelationship(upstreamsource),metadataSourceIdempotentUpdate()),
+            Arguments.of(sampleReadyIndividualTrustRelationship(manualsource),metadataSourceIdempotentUpdate()),
+            Arguments.of(sampleReadyAggregateTrustRelationship(mdqsource),metadataSourceIdempotentUpdate()),
+
+            Arguments.of(sampleDraftIndividualTrustRelationship(),releasedAttributesIdempotentUpdate()),
+            Arguments.of(sampleDraftAggregateTrustRelationship(),releasedAttributesIdempotentUpdate()),
+            Arguments.of(sampleReadyIndividualTrustRelationship(),releasedAttributesIdempotentUpdate()),
+            Arguments.of(sampleReadyAggregateTrustRelationship(),releasedAttributesIdempotentUpdate())
+        );
+    }
+
     /**
      * Creation Tests
      */
@@ -888,7 +915,6 @@ public class TrustRelationshipTest {
             CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
             assertThat(cause.getFieldName()).isEqualTo("releasedAttributes");
         }
-        
     }
 
     @Nested
@@ -1776,6 +1802,46 @@ public class TrustRelationshipTest {
             
             assertThat(result.isSuccess()).isTrue();
             assertThat(result.getValue()).isEqualTo(tr);
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Scenarios and Edge Cases -- Cross-Cutting & Regression-Prone Scenarios")
+    public class CrossCuttingAndRegressionProneScenariosTests {
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsWithIdempotentUpdateOperations")
+        @DisplayName(
+            "GIVEN a TrustRelationship in any valid state where the operation is allowed " +
+            "WHEN any update method/operation is called with the same current value " +
+            "THEN version should not be incremented and state should remain the same "
+        )
+        public void shouldMaintainVersionWhenNoActualChangeInAnyState(TrustRelationship tr, 
+            Function<TrustRelationship,TrustResult<TrustRelationship>> operation) {
+
+            TrustResult<TrustRelationship> result = operation.apply(tr);
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion());
+
+        }
+
+        @ParameterizedTest
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @DisplayName(
+            "GIVEN an ACTIVATING TrustRelationship " +
+            "WHEN incorporateDiscoveredEntityIds() is called with null EntityIds " +
+            "THEN should fail with appropriate error "
+        )
+        public void shouldFailIncorporateDiscoveredEntityIdsWhenEntityIdsIsNull(TrustRelationship tr) {
+
+            assertThat(tr).isInActivatingStatus();
+
+            TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
+
+            assertThat(result.isFailure()).isTrue();
+            assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+            DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+            assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
         }
     }
 } 

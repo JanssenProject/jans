@@ -6,6 +6,8 @@ import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.error.IdNotAssigned;
 import io.jans.shibboleth.model.util.TrustResult;
 
+import java.util.Objects;
+
 public class UpstreamMetadataSource implements MetadataSource {
 
     private final Id parentId;
@@ -21,6 +23,25 @@ public class UpstreamMetadataSource implements MetadataSource {
     public MetadataSourceType getType() {
 
         return MetadataSourceType.UPSTREAM;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UpstreamMetadataSource other = (UpstreamMetadataSource) o;
+
+        return Objects.equals(parentId,other.parentId)
+            && Objects.equals(entityId,other.entityId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(parentId,entityId);
     }
 
     public static TrustResult<MetadataSource> of(Id parentId, EntityId entityId) {

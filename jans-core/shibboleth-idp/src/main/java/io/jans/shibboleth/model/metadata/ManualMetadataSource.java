@@ -1,5 +1,7 @@
 package io.jans.shibboleth.model.metadata;
 
+import java.util.Objects;
+
 import io.jans.shibboleth.model.core.EntityId;
 import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.model.metadata.manual.SamlX509CertificateInfo;
@@ -50,6 +52,27 @@ public class ManualMetadataSource implements MetadataSource  {
     public MetadataSourceType getType() {
 
         return MetadataSourceType.MANUAL;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+
+        if( o == null || getClass() != o.getClass() ) return false;
+
+        ManualMetadataSource other = (ManualMetadataSource) o;
+
+        return Objects.equals(entityId,other.entityId)
+            && Objects.equals(validUntil,other.validUntil)
+            && Objects.equals(assertionConsumerService,other.assertionConsumerService)
+            && Objects.equals(signingCertificate,other.signingCertificate);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(entityId,validUntil,assertionConsumerService,signingCertificate);
     }
 
     public static Builder builder() {
