@@ -34,6 +34,7 @@ import jakarta.inject.Inject;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -108,6 +109,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
         // if attestation mode is enabled in the global config
+
         if (!appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()))
         {
         	if (attStmt.hasNonNull("x5c")) {
@@ -123,8 +125,13 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
                     throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
                 }
 
+
+                // If the attestation certificate carries the id-fido-gen-ce-aaguid extension, it must
+                // match the AAGUID in the authenticator data.
+                verifyAaguidExtension(attestationCertificates.get(0), authData);
                 // WebAuthn packed full-attestation certificate requirements (v3, CA:false, subject fields).
                 verifyPackedAttestationCertRequirements(attestationCertificates.get(0));
+
 
             } else if (attStmt.hasNonNull("ecdaaKeyId")) {
                 String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
@@ -143,6 +150,32 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         credIdAndCounters.setSignatureAlgorithm(alg);
     }
+
+	/**
+	 * Verifies the optional id-fido-gen-ce-aaguid (1.3.6.1.4.1.45724.1.1.4) extension: when present in
+	 * the packed attestation certificate, its AAGUID must equal the AAGUID in the authenticator data.
+	 * getExtensionValue returns a DER OCTET STRING wrapping an OCTET STRING that holds the raw AAGUID.
+	 * Package-private for unit testing.
+	 */
+	void verifyAaguidExtension(X509Certificate attestationCertificate, AuthData authData) {
+		byte[] ext = attestationCertificate.getExtensionValue("1.3.6.1.4.1.45724.1.1.4");
+		if (ext != null && ext.length > 0) {
+			byte[] aaguidInCert;
+			try {
+				byte[] inner = ASN1OctetString.getInstance(ext).getOctets();
+				aaguidInCert = ASN1OctetString.getInstance(inner).getOctets();
+			} catch (RuntimeException e) {
+				log.error("Malformed id-fido-gen-ce-aaguid extension in packed attestation certificate", e);
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+						"Malformed id-fido-gen-ce-aaguid extension in packed attestation certificate");
+			}
+			if (!Arrays.equals(aaguidInCert, authData.getAaguid())) {
+				log.error("Packed attestation certificate AAGUID does not match authenticator data AAGUID");
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+						"AAGUID in packed attestation certificate does not match authenticator data");
+			}
+		}
+	}
 
 	/**
 	 * Enforces the WebAuthn packed full-attestation certificate requirements: X.509 version 3,
