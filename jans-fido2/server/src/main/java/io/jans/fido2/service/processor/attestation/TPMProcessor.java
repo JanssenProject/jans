@@ -26,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,6 +163,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				verifyAIKCertificate(aikCertificate, verifiedCert);
 
 				verifyTPMCertificateExtenstion(aikCertificate, authData);
+
+				verifyTpmAttestationCertRequirements(aikCertificate);
 
 				String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 				byte[] certInfoBuffer = base64Service.decode(certInfo);
@@ -332,6 +335,44 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
 						"Problem with TPM attestation : AAGUID in AIK certificate does not match authenticator data");
 			}
+		}
+	}
+
+	/**
+	 * Verify that the AIK certificate satisfies the TPM attestation statement
+	 * certificate requirements (WebAuthn Level 2, section 8.3.1).
+	 */
+	void verifyTpmAttestationCertRequirements(X509Certificate aikCertificate) {
+		// Version MUST be set to 3.
+		if (aikCertificate.getVersion() != 3) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+					"TPM attestation certificate version must be 3");
+		}
+		// Subject field MUST be set to empty.
+		if (!aikCertificate.getSubjectX500Principal().getName().isEmpty()) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+					"TPM attestation certificate subject must be empty");
+		}
+		// Basic Constraints extension MUST have the CA component set to false.
+		if (aikCertificate.getBasicConstraints() != -1) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+					"TPM attestation certificate must not be a CA certificate");
+		}
+		try {
+			// Extended Key Usage MUST contain tcg-kp-AIKCertificate (2.23.133.8.3).
+			List<String> extendedKeyUsage = aikCertificate.getExtendedKeyUsage();
+			if (extendedKeyUsage == null || !extendedKeyUsage.contains("2.23.133.8.3")) {
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+						"TPM attestation certificate must contain the tcg-kp-AIKCertificate extended key usage");
+			}
+			// Subject Alternative Name extension MUST be present.
+			if (aikCertificate.getSubjectAlternativeNames() == null) {
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+						"TPM attestation certificate must contain a subject alternative name");
+			}
+		} catch (CertificateParsingException e) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
+					"Problem parsing TPM attestation certificate extensions: " + e.getMessage(), e);
 		}
 	}
 

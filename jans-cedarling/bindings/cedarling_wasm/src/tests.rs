@@ -557,7 +557,7 @@ async fn test_multi_issuer_authorize_single_token() {
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
         "auth_time": 1724830746,
-        "exp": 1724945978,
+        "exp": 2000000000,
         "iat": 1724832259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
@@ -631,7 +631,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
         "auth_time": 1724830746,
-        "exp": 1724945978,
+        "exp": 2000000000,
         "iat": 1724832259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
@@ -647,7 +647,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "acr": "basic",
         "amr": "10",
         "aud": ["5b4487c4-8db1-409d-a653-f907b8094039"],
-        "exp": 1724835859,
+        "exp": 2000000000,
         "iat": 1724832259,
         "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
         "iss": "https://test.jans.org",
@@ -683,7 +683,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "family_name": "User",
         "jti": "faiYvaYIT0cDAT7Fow0pQw",
         "jansAdminUIRole": ["api-admin"],
-        "exp": 1724945978
+        "exp": 2000000000
     }));
 
     let multi_issuer_request = AuthorizeMultiIssuerRequest {
@@ -750,7 +750,7 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
         "auth_time": 1724830746,
-        "exp": 1724945978,
+        "exp": 2000000000,
         "iat": 1724832259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
