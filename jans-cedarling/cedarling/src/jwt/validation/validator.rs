@@ -877,8 +877,8 @@ mod test {
         }
     }
 
-    /// Expired token (exp=0) passes validation when required_claims does NOT contain "exp".
-    /// This is the bug: validate_exp is false, so the jwt crate never checks expiry.
+    /// Expired token (exp=0) passes validation when `required_claims` does NOT contain "exp".
+    /// This is the bug: `validate_exp` is false, so the jwt crate never checks expiry.
     #[test]
     fn bug_expired_token_accepted_without_exp_in_required_claims_no_sig() {
         let keys = generate_keys();
@@ -918,7 +918,7 @@ mod test {
         );
     }
 
-    /// Expired token (exp=0) passes validation WITH signature check when required_claims does NOT contain "exp".
+    /// Expired token (exp=0) passes validation WITH signature check when `required_claims` does NOT contain "exp".
     #[test]
     fn bug_expired_token_accepted_without_exp_in_required_claims_with_sig() {
         let keys = generate_keys();
@@ -957,7 +957,7 @@ mod test {
         );
     }
 
-    /// Immature token (nbf=u64::MAX) passes validation when required_claims does NOT contain "nbf".
+    /// Immature token (`nbf=u64::MAX`) passes validation when `required_claims` does NOT contain "nbf".
     #[test]
     fn bug_immature_token_accepted_without_nbf_in_required_claims_no_sig() {
         let keys = generate_keys();
@@ -996,7 +996,7 @@ mod test {
         );
     }
 
-    /// Immature token (nbf=u64::MAX) passes validation WITH signature check when required_claims does NOT contain "nbf".
+    /// Immature token (`nbf=u64::MAX`) passes validation WITH signature check when `required_claims` does NOT contain "nbf".
     #[test]
     fn bug_immature_token_accepted_without_nbf_in_required_claims_with_sig() {
         let keys = generate_keys();
@@ -1035,7 +1035,7 @@ mod test {
         );
     }
 
-    /// Same bug via `new_multi_issuer_tkn_validator`: expired token passes when "exp" is not in required_claims.
+    /// Same bug via `new_multi_issuer_tkn_validator`: expired token passes when "exp" is not in `required_claims`.
     #[test]
     fn bug_expired_token_accepted_multi_issuer_without_exp_in_required_claims() {
         let keys = generate_keys();
@@ -1072,7 +1072,7 @@ mod test {
         );
     }
 
-    /// Same bug via `new_multi_issuer_tkn_validator`: immature token passes when "nbf" is not in required_claims.
+    /// Same bug via `new_multi_issuer_tkn_validator`: immature token passes when "nbf" is not in `required_claims`.
     #[test]
     fn bug_immature_token_accepted_multi_issuer_without_nbf_in_required_claims() {
         let keys = generate_keys();
