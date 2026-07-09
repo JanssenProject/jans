@@ -257,6 +257,11 @@ uniffi::custom_newtype!(JsonValue, String);
 impl TryFrom<JsonValue> for Value {
     type Error = serde_json::Error;
     fn try_from(value: JsonValue) -> Result<Self, Self::Error> {
+        // Hot-path: callers commonly pass the exact literal `"{}"` for an empty
+        // context.
+        if value.0 == "{}" {
+            return Ok(Value::Object(serde_json::Map::new()));
+        }
         serde_json::from_str(&value.0)
     }
 }

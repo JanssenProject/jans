@@ -1037,6 +1037,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)", defaultValue = "1440")
     private Integer cimdMaxTtlMinutes = 1440;
 
+    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
+    private Boolean authorizationResponseIssParameterSupported = false;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -4008,6 +4011,15 @@ public class AppConfiguration implements Configuration {
 
     public void setIdJagIssueRefreshToken(Boolean idJagIssueRefreshToken) {
         this.idJagIssueRefreshToken = idJagIssueRefreshToken;
+    }
+
+    public Boolean getAuthorizationResponseIssParameterSupported() {
+        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = false;
+        return authorizationResponseIssParameterSupported;
+    }
+
+    public void setAuthorizationResponseIssParameterSupported(Boolean authorizationResponseIssParameterSupported) {
+        this.authorizationResponseIssParameterSupported = authorizationResponseIssParameterSupported;
     }
 
 }

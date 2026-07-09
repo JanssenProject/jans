@@ -104,17 +104,42 @@ def sub(rel, pattern, repl, flags=0):
     return n
 
 
-def bump(version):
+def bump(version, docker_suffix="1"):
+    docker_tag = f"{version}-{docker_suffix}"
     changed = []
 
-    # 1. The unambiguous "0.0.0-nightly" sentinel -- whole-file text replace.
-    #    Covers ~120 poms, all charts (Chart.yaml/values.yaml/README.md), every
-    #    service Dockerfile (CN_VERSION, OCI label, BASE_VERSION), Agama
-    #    project.json, demo manifests, docs, and the shell/automation scripts.
+    # Image-tag references take the docker suffix (e.g. 2.2.0-1); everything else
+    # (artifact / chart / package versions) takes the bare version. Both appear as
+    # "0.0.0-nightly" in the tree, so they are distinguished by context below.
+    image_tag_subs = [
+        (r'(\btag:\s*["\']?)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                       # helm values.yaml image tag
+        (r'(ghcr\.io/[^\s:"\']+:)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                  # any ghcr image reference
+        (r'(org\.opencontainers\.image\.version=")0\.0\.0-nightly', rf"\g<1>{docker_tag}"),  # Dockerfile OCI label
+        (r'(ARG\s+BASE_VERSION=)0\.0\.0-nightly', rf"\g<1>{docker_tag}"),                   # all-in-one base image tag
+    ]
+    # JANS_VERSION is NOT a blanket image-tag rule: it is context-dependent across the
+    # two demo scripts. start_janssen_aio_demo.sh uses it as the all-in-one IMAGE TAG
+    # (-> docker suffix), but startjanssendemo.sh passes it to `helm install --version`,
+    # i.e. the CHART version (-> bare, like every Chart.yaml version). Applied per-file
+    # in the loop below so the helm script falls through to the bare-version replace.
+    AIO_DEMO_REL = "automation/start_janssen_aio_demo.sh"
+
+    # 1. The unambiguous "0.0.0-nightly" sentinel. Apply the image-tag rules first
+    #    (-> suffixed docker tag), then replace whatever remains with the bare version.
+    #    Covers ~120 poms, all charts, every Dockerfile (CN_VERSION stays bare = the
+    #    WAR version), Agama project.json, demos, docs, and the automation scripts.
     for rel in sorted(set(grep_files(NIGHTLY) + grep_files(NIGHTLY_BADGE))):
         if rel in EXCLUDE_NIGHTLY:
             continue
-        if replace_text(rel, [(NIGHTLY, version), (NIGHTLY_BADGE, version)]):
+        text = read(rel)
+        new = text
+        for pat, repl in image_tag_subs:
+            new = re.sub(pat, repl, new)
+        if rel == AIO_DEMO_REL:
+            new = re.sub(r'(JANS_VERSION=["\']?)0\.0\.0-nightly', rf"\g<1>{docker_tag}", new)
+        new = new.replace(NIGHTLY, version).replace(NIGHTLY_BADGE, version)
+        if new != text:
+            write(rel, new)
             changed.append(rel)
 
     # 2. Bare "nightly" release-tag pointers (download URLs resolve against these).
@@ -127,6 +152,21 @@ def bump(version):
            r"(<cedarling\.release\.tag>)nightly(</cedarling\.release\.tag>)",
            rf"\g<1>v{version}\g<2>"):
         changed.append(cedarling_pom)
+    # Some Dockerfiles (config-api) and docs hardcode the release download URL with
+    # /nightly instead of ${CN_RELEASE_TAG}; point it at the tag or the WAR/plugin
+    # downloads 404 against the nightly release.
+    for rel in grep_files("releases/download/nightly"):
+        if sub(rel, r"(releases/download/)nightly\b", rf"\g<1>v{version}"):
+            changed.append(rel)
+    # cedarling-krakend integration docs reference cedarling_go release assets by
+    # version (the download filenames AND the prebuilt-plugin table). Every "0.0.0"
+    # in these two files is the cedarling artifact version -- the adjacent "2.9.0" is
+    # the KrakenD builder version (not ours) -- so a file-scoped bump is safe and
+    # leaves the URL just rewritten above pointing at a real, versioned asset.
+    for rel in ("docs/cedarling/integrations/cedarling-krakend.md",
+                "jans-cedarling/cedarling-krakend/README.md"):
+        if (ROOT / rel).exists() and sub(rel, r"0\.0\.0", version) and rel not in changed:
+            changed.append(rel)
 
     # 3. Plain "0.0.0" -- anchored, structured edits on known owned fields only.
     # Rust crates: the package version sits on a line starting `version = `;
@@ -134,6 +174,18 @@ def bump(version):
     for rel in ls_files("*Cargo.toml"):
         if sub(rel, r'(?m)^version\s*=\s*"0\.0\.0"', f'version = "{version}"'):
             changed.append(rel)
+    # Cargo.lock: keep the workspace crates' lock entries in step with their
+    # Cargo.toml, or `cargo build --locked` fails on the stale lock.
+    cargo_lock = "jans-cedarling/Cargo.lock"
+    if (ROOT / cargo_lock).exists():
+        if sub(cargo_lock, r'(?m)^version = "0\.0\.0"$', f'version = "{version}"'):
+            changed.append(cargo_lock)
+    # uv.lock: the flask-sidecar project version is pinned here too; sync it or
+    # `uv sync --locked` (the cedarling-flask-sidecar image build) fails.
+    uv_lock = "jans-cedarling/flask-sidecar/uv.lock"
+    if (ROOT / uv_lock).exists():
+        if sub(uv_lock, r'(?m)^version = "0\.0\.0"$', f'version = "{version}"'):
+            changed.append(uv_lock)
     # Python __version__ (jans-pycloudlib, jans-cli-tui, jans-linux-setup)
     for rel in ls_files("*version.py"):
         if sub(rel, r'(__version__\s*=\s*")0\.0\.0(")', rf"\g<1>{version}\g<2>"):
@@ -196,6 +248,14 @@ def verify():
     for rel in grep_files("CN_RELEASE_TAG=nightly"):
         problems.append(f"{rel}: CN_RELEASE_TAG still 'nightly'")
 
+    for rel in grep_files("releases/download/nightly"):
+        problems.append(f"{rel}: release download URL still points at /nightly")
+
+    for rel in ("docs/cedarling/integrations/cedarling-krakend.md",
+                "jans-cedarling/cedarling-krakend/README.md"):
+        if (ROOT / rel).exists() and re.search(r"0\.0\.0", read(rel)):
+            problems.append(f"{rel}: cedarling asset version still '0.0.0'")
+
     cedarling_pom = "jans-cedarling/bindings/cedarling-java/pom.xml"
     if (ROOT / cedarling_pom).exists():
         txt = read(cedarling_pom)
@@ -207,6 +267,12 @@ def verify():
     for rel in ls_files("*Cargo.toml") + ls_files("*pyproject.toml"):
         if re.search(r'(?m)^version\s*=\s*"0\.0\.0"', read(rel)):
             problems.append(f"{rel}: package version still '0.0.0'")
+    cargo_lock = "jans-cedarling/Cargo.lock"
+    if (ROOT / cargo_lock).exists() and re.search(r'(?m)^version = "0\.0\.0"$', read(cargo_lock)):
+        problems.append(f"{cargo_lock}: workspace crate version still '0.0.0'")
+    uv_lock = "jans-cedarling/flask-sidecar/uv.lock"
+    if (ROOT / uv_lock).exists() and re.search(r'(?m)^version = "0\.0\.0"$', read(uv_lock)):
+        problems.append(f"{uv_lock}: flask-sidecar version still '0.0.0'")
     for rel in ls_files("*version.py"):
         if re.search(r'__version__\s*=\s*"0\.0\.0"', read(rel)):
             problems.append(f"{rel}: __version__ still '0.0.0'")
@@ -242,6 +308,8 @@ def main():
     ap.add_argument("--root", type=Path, default=Path.cwd(), help="repo root (default: cwd)")
     ap.add_argument("--pin-source-sha", metavar="SHA",
                     help="also pin Dockerfile JANS_SOURCE_VERSION to this commit")
+    ap.add_argument("--docker-suffix", default="1",
+                    help="suffix for image tags: '1' -> X.Y.Z-1 (default: 1)")
     args = ap.parse_args()
 
     if not VERSION_RE.match(args.version):
@@ -253,7 +321,7 @@ def main():
     if args.verify:
         sys.exit(0 if verify() else 1)
 
-    changed = bump(args.version)
+    changed = bump(args.version, args.docker_suffix)
     if args.pin_source_sha:
         changed += pin_source_sha(args.pin_source_sha)
     changed = sorted(set(changed))
