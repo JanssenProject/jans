@@ -57,7 +57,11 @@ public class CedarlingAuthorizationService {
 			} finally {
 				policyStoreFileProvider.cleanup();
 			}
-			initialized = true;
+
+			initialized = this.cedarlingAdapter != null;
+			if (!initialized) {
+				log.error("Cedarling initialization failed, authorization requests will be denied until this is resolved");
+			}
 		} else {
 			log.info("Cedarling was disabled");
 		}
@@ -67,7 +71,7 @@ public class CedarlingAuthorizationService {
 	public void destroy() {
 		log.info("Destroying Cedarling service");
 
-		if (initialized) {
+		if (initialized && cedarlingAdapter != null) {
 			this.cedarlingAdapter.close();
 		}
 
@@ -127,6 +131,12 @@ public class CedarlingAuthorizationService {
 	}
 
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
+		if (!initialized || cedarlingAdapter == null) {
+			log.error("Cedarling is not initialized. Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}",
+					tokens, action, resource, context);
+			return false;
+		}
+
 		try {
 			if (log.isDebugEnabled()) {
 				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",

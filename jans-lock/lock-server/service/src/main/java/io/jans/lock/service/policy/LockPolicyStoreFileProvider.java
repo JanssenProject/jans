@@ -112,14 +112,13 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
         }
     }
 
-    private byte[] patchIssuerJson(byte[] original, String openIdIssuer) {
+    private byte[] patchIssuerJson(byte[] original, String openIdIssuer) throws IOException {
         try {
             JSONObject json = new JSONObject(new String(original, StandardCharsets.UTF_8));
             json.put(CONFIGURATION_ENDPOINT_KEY, openIdIssuer + WELL_KNOWN_PATH);
             return json.toString(2).getBytes(StandardCharsets.UTF_8);
         } catch (Exception ex) {
-            log.warn("Failed to patch {}, using original content: {}", JANS_ISSUER_ENTRY, ex.getMessage());
-            return original;
+            throw new IOException("Failed to patch " + JANS_ISSUER_ENTRY + " with issuer URL: " + openIdIssuer, ex);
         }
     }
 }
