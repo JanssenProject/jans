@@ -6,7 +6,6 @@
 
 package io.jans.configapi.security.service;
 
-
 import io.jans.configapi.service.cedar.CedarlingService;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.util.*;
