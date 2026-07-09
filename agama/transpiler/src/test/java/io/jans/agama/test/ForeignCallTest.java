@@ -3,30 +3,29 @@ package io.jans.agama.test;
 import io.jans.agama.dsl.TranspilationResult;
 import io.jans.agama.dsl.Transpiler;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Code-generation conformance for foreign calls (`Call`) and their exception-capture
- * form, per the "Foreign routines" section of docs/agama/language-reference.md. Asserts
- * that a static `Call` generates an action call with the target class/method, and that
- * the `result | error = Call ...` form declares the capture variable.
+ * Code-generation conformance for foreign calls ({@code Call}) and their exception-capture
+ * form. Transpiles the existing pass flow {@code triggers_calls.txt} (which includes the
+ * static call {@code x256 = Call java.lang.Math#incrementExact 255} and the capture form
+ * {@code n | E = Call java.lang.Integer#parseInt "AGA" 16}) and asserts the generated
+ * JavaScript contains the action-call invocation with the target class/method and declares
+ * the capture variable. {@link ValidFlowsTest} only checks that this flow parses.
  */
 public class ForeignCallTest {
 
     @Test
-    public void transpile_foreignCallAndExceptionCapture_generateExpectedJs() throws Exception {
-        String source = String.join("\n",
-                "Flow com.acme.calls",
-                "    Basepath \"\"",
-                "x256 = Call java.lang.Math#incrementExact 255",
-                "n | E = Call java.lang.Integer#parseInt \"AGA\" 16",
-                "Finish true",
-                "");
+    public void transpile_triggersCallsFlow_generatesActionCallAndCaptureVariable() throws Exception {
+        String source = Files.readString(Paths.get("target/test-classes/pass", "triggers_calls.txt"));
 
-        TranspilationResult result = Transpiler.transpile("com.acme.calls", source);
+        TranspilationResult result = Transpiler.transpile("flow", source);
         assertNotNull(result);
         String code = result.getCode();
         assertNotNull(code);
