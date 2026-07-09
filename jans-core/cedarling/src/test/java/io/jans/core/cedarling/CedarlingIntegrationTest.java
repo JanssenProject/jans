@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.cedarling;
+package io.jans.core.cedarling;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,11 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
-import io.jans.lock.cedarling.config.BootstrapConfig;
-import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
-import io.jans.lock.model.config.cedarling.LogLevel;
-import io.jans.lock.model.config.cedarling.LogType;
+import io.jans.core.cedarling.config.BootstrapConfig;
+import io.jans.core.cedarling.model.CedarlingPermission;
+import io.jans.core.cedarling.model.LogLevel;
+import io.jans.core.cedarling.model.LogType;
+import io.jans.core.cedarling.service.CedarlingAuthorizationService;
 import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 
 /**

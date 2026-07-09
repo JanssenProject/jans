@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026, Janssen Project
  */
-package io.jans.lock.cedarling.service;
+package io.jans.core.cedarling.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,13 +24,12 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.lock.cedarling.BaseCedarlingTest;
-import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
-import io.jans.lock.model.config.cedarling.LogLevel;
-import io.jans.lock.model.config.cedarling.LogType;
+import io.jans.core.cedarling.BaseCedarlingTest;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.CedarlingPermission;
+import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.model.LogLevel;
+import io.jans.core.cedarling.model.LogType;
 
 /**
  * Integration tests for {@link CedarlingAuthorizationService}.
@@ -146,7 +145,6 @@ class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
 
         // ── 2. Build mocked CDI dependencies ─────────────────────────────────
         Logger                    log              = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
-        AppConfiguration          appConfiguration = mock(AppConfiguration.class);
         CedarlingPolicyConfiguration policyConfig  = mock(CedarlingPolicyConfiguration.class);
         CedarlingConfiguration    cedarConf        = mock(CedarlingConfiguration.class);
 
@@ -154,12 +152,11 @@ class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
         // Use null for log-related settings; BootstrapConfig treats them as "disabled" / default
         when(cedarConf.getLogType()).thenReturn(LogType.STD_OUT);
         when(cedarConf.getLogLevel()).thenReturn(LogLevel.TRACE);
-        when(appConfiguration.getCedarlingConfiguration()).thenReturn(cedarConf);
 
         // ── 3. Wire the service manually (CDI is not available in unit tests) ─
         authService = new CedarlingAuthorizationService();
         injectField(authService, "log",              log);
-        injectField(authService, "appConfiguration", appConfiguration);
+        injectField(authService, "cedarConf", cedarConf);
         injectField(authService, "policyConfiguration", policyConfig);
         injectField(authService, "policyStoreLocalFn", policyStoreFn);
 

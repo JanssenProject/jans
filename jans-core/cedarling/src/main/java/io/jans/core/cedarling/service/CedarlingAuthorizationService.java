@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 import io.jans.core.cedarling.config.BootstrapConfig;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
-import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,10 +28,9 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
  * @author Yuriy Movchan Date: 10/08/2022
  */
 @ApplicationScoped
-public class CedarlingAuthorizationService  {
+public class CedarlingAuthorizationService {
 
 	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_token";
-	public static final String CEDARLING_POLICY_STORE_RESOURCE_NAME = "%spolicy-store";
 
 	@Inject
 	private Logger log;
@@ -40,9 +39,8 @@ public class CedarlingAuthorizationService  {
 	private CedarlingConfiguration cedarConf;
 
 	@Inject
-	private CedarlingPolicyConfiguration policyConfiguration;	
+	private CedarlingPolicyStoreFileProvider cedarlingPolicyStoreFileProvider;
 
-	private String policyStoreLocalFn = CEDARLING_POLICY_STORE_RESOURCE_NAME;
 	private CedarlingAdapter cedarlingAdapter;
 	private boolean initialized = false;
 
@@ -51,18 +49,27 @@ public class CedarlingAuthorizationService  {
 		log.info("Initialising Cedarling service");
 
 		if (cedarConf.isEnabled()) {
-			this.cedarlingAdapter = initAdapter(cedarConf);
-			initialized = true;
+			cedarlingPolicyStoreFileProvider.prepare();
+			try {
+				this.cedarlingAdapter = initAdapter(cedarConf);
+			} finally {
+				cedarlingPolicyStoreFileProvider.cleanup();
+			}
+
+			initialized = this.cedarlingAdapter != null;
+			if (!initialized) {
+				log.error("Cedarling initialization failed, authorization requests will be denied until this is resolved");
+			}
 		} else {
-			log.info("Cedarling is disabled");
+			log.info("Cedarling was disabled");
 		}
 	}
 
 	@PreDestroy
 	public void destroy() {
 		log.info("Destroying Cedarling service");
-		
-		if (initialized) {
+
+		if (initialized && cedarlingAdapter != null) {
 			this.cedarlingAdapter.close();
 		}
 
@@ -75,7 +82,6 @@ public class CedarlingAuthorizationService  {
 	    CedarlingAdapter initCedarlingAdapter = null;
 	    try {
 	        initCedarlingAdapter = new CedarlingAdapter();
-	        
 	        String jsonConfig = config.toJsonConfig();
 	        if (log.isTraceEnabled()) {
 	            log.trace("Cedarling JSON configuration: {}", jsonConfig);
@@ -103,7 +109,7 @@ public class CedarlingAuthorizationService  {
 	protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
 		BootstrapConfig config = BootstrapConfig.builder()
 	        .applicationName("Lock Server")
-	        .policyStoreLocalFn(policyStoreLocalFn)
+	        .policyStoreLocalFn(cedarlingPolicyStoreFileProvider.getPolicyStorePath())
 	        .jwtStatusValidation(false)
 	        .jwtSigValidation(false)
 	        .logType(cedarConf.getLogType())
@@ -121,8 +127,14 @@ public class CedarlingAuthorizationService  {
 
 		return authorize(tokens, action, resourceObject, contextObject);
 	}
-	
+
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
+		if (!initialized || cedarlingAdapter == null) {
+			log.error("Cedarling is not initialized. Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}",
+					tokens, action, resource, context);
+			return false;
+		}
+
 		try {
 			if (log.isDebugEnabled()) {
 				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
@@ -143,10 +155,10 @@ public class CedarlingAuthorizationService  {
 
 			String requestId = res.getRequestId();
 			if (res.getDecision()) {
-				log.info("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+				log.debug("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
 						requestId, tokens, action, resource, context);
 			} else {
-				log.info("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+				log.debug("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
 						requestId, tokens, action, resource, context);
 			}
 

@@ -36,7 +36,6 @@ public abstract class CedarlingAuthorizationProcessingFilter implements Containe
 	@Inject
 	private CedarlingProtection protectionService;
 
-
 	@Context
 	private HttpHeaders httpHeaders;
 

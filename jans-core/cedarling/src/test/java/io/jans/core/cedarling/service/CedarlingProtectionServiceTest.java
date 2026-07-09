@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.cedarling.service;
+package io.jans.core.cedarling.service;
 
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -52,8 +52,8 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
-import io.jans.lock.model.config.AppConfiguration;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Response;
 
@@ -92,7 +92,7 @@ class CedarlingProtectionServiceTest {
     // ─── Mocks & SUT ────────────────────────────────────────────────────────────
 
     @Mock private Logger                        log;
-    @Mock private AppConfiguration              appConfiguration;
+    @Mock private CedarlingConfiguration        cedarConf;
     @Mock private CedarlingAuthorizationService authorizationService;
     /** Injected as a mock so that JWKS HTTP calls can be stubbed without networking. */
     @Mock private ObjectMapper                  mapper;
