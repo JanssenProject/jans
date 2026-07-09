@@ -193,6 +193,7 @@ mod test {
             pushed_data: Some(PushedDataInfo {
                 keys: vec!["extra_context".into()],
             }),
+            batch_id: None,
         };
 
         let pdp_id = PdpID::new();
@@ -288,6 +289,7 @@ mod test {
                 errors: Vec::new(),
             },
             pushed_data: None,
+            batch_id: None,
         };
 
         let pdp_id = PdpID::new();

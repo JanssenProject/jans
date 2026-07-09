@@ -159,9 +159,14 @@ pub struct BatchItem {
     pub resource: EntityData,
     /// Action being performed on this item.
     pub action: String,
-    /// Per-item context (JSON object). Non-object values are rejected at
-    /// validate-time to match `RequestUnsigned::context` semantics.
+    /// Per-item context. Omitting the field defaults to `{}`; explicit
+    /// non-object values are rejected via [`BatchValidationError::InvalidItemContext`].
+    #[serde(default = "empty_object")]
     pub context: Value,
+}
+
+fn empty_object() -> Value {
+    Value::Object(serde_json::Map::new())
 }
 
 /// Batch unsigned authorization request.
@@ -185,11 +190,8 @@ impl BatchAuthorizeUnsignedRequest {
         Self { principal, items }
     }
 
-    /// Validate the batch request structure.
-    ///
-    /// Returns [`BatchValidationError::EmptyItems`] if `items` is empty and
-    /// [`BatchValidationError::InvalidItemContext`] with the offending index
-    /// if any item's `context` is not a JSON object.
+    /// Validate the batch request structure. See [`BatchValidationError`] for
+    /// the possible failure modes.
     pub fn validate(&self) -> Result<(), BatchValidationError> {
         if self.items.is_empty() {
             return Err(BatchValidationError::EmptyItems);
@@ -223,12 +225,8 @@ impl BatchAuthorizeMultiIssuerRequest {
         Self { tokens, items }
     }
 
-    /// Validate the batch request structure.
-    ///
-    /// Returns [`BatchValidationError::EmptyTokens`] if `tokens` is empty,
-    /// [`BatchValidationError::EmptyItems`] if `items` is empty, and
-    /// [`BatchValidationError::InvalidItemContext`] with the offending index
-    /// if any item's `context` is not a JSON object.
+    /// Validate the batch request structure. See [`BatchValidationError`] for
+    /// the possible failure modes.
     pub fn validate(&self) -> Result<(), BatchValidationError> {
         if self.tokens.is_empty() {
             return Err(BatchValidationError::EmptyTokens);
@@ -252,6 +250,10 @@ impl BatchAuthorizeMultiIssuerRequest {
 /// `batch_id` field stamped on the per-item decision-log entries emitted
 /// during evaluation, so callers can correlate their client-side logs with
 /// the server-side audit trail.
+///
+/// The `batch_id` is also indexed in the in-memory decision-log store — use
+/// [`LogStorage::get_logs_by_request_id`](crate::log::interface::LogStorage::get_logs_by_request_id)
+/// with `batch_id.to_string()` to retrieve all decision entries for this batch.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BatchAuthorizeResponse<R> {
     /// Shared correlation ID for every decision-log entry emitted by this batch.

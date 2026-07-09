@@ -101,9 +101,9 @@ impl EntityBuilder {
     pub(crate) fn build_unsigned_principal(
         &self,
         principal: Option<&EntityData>,
-    ) -> Result<(Option<Entity>, BuiltEntities), BuildUnsignedEntityError> {
+    ) -> Result<UnsignedPrincipalBuild, BuildUnsignedEntityError> {
         let mut built_entities = BuiltEntities::default();
-        let principal_entity = match principal {
+        let principal = match principal {
             Some(principal) => {
                 let entity = self.build_principal_unsigned(principal, &built_entities)?;
                 built_entities.insert(&entity.uid());
@@ -111,7 +111,10 @@ impl EntityBuilder {
             },
             None => None,
         };
-        Ok((principal_entity, built_entities))
+        Ok(UnsignedPrincipalBuild {
+            principal,
+            built_entities,
+        })
     }
 
     pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
@@ -130,6 +133,12 @@ impl EntityBuilder {
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuers_index.find(&IssClaim::new(issuer)).cloned()
     }
+}
+
+/// Output of [`EntityBuilder::build_unsigned_principal`].
+pub(crate) struct UnsignedPrincipalBuild {
+    pub principal: Option<Entity>,
+    pub built_entities: BuiltEntities,
 }
 
 fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {

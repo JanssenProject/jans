@@ -269,6 +269,24 @@ impl Cedarling {
         self.authz.load().authorize_unsigned(&request)
     }
 
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Runs setup work (principal build + pushed-data snapshot) once and
+    /// evaluates each item with its own resource and context. Results are
+    /// returned in input order, wrapped in a [`BatchAuthorizeResponse`] that
+    /// carries a shared `batch_id` for audit correlation.
+    ///
+    /// Batch-level failures (validation, principal parse) return `Err`;
+    /// per-item failures synthesize a fail-closed `Deny` for that item
+    /// without affecting other items.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+        self.authz.load().authorize_unsigned_batch(&request)
+    }
+
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
     #[allow(clippy::unused_async)]
@@ -277,6 +295,22 @@ impl Cedarling {
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Validates tokens and builds token/issuer entities once, then evaluates
+    /// each item with its own resource and context. Results are returned in
+    /// input order, wrapped in a [`BatchAuthorizeResponse`] carrying a shared
+    /// `batch_id`. Batch-level failures (validation, JWT verification,
+    /// status-list refresh) return `Err`; per-item failures synthesize a
+    /// fail-closed `Deny` without affecting other items.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+        self.authz.load().authorize_multi_issuer_batch(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
