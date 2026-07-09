@@ -30,6 +30,7 @@ import io.jans.core.cedarling.model.CedarlingPermission;
 import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
 import io.jans.core.cedarling.model.LogLevel;
 import io.jans.core.cedarling.model.LogType;
+import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
 
 /**
  * Integration tests for {@link CedarlingAuthorizationService}.
@@ -145,7 +146,8 @@ class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
 
         // ── 2. Build mocked CDI dependencies ─────────────────────────────────
         Logger                    log              = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
-        CedarlingPolicyConfiguration policyConfig  = mock(CedarlingPolicyConfiguration.class);
+		CedarlingPolicyStoreFileProvider mockCedarlingPolicyStoreFileProvider = mock(CedarlingPolicyStoreFileProvider.class);
+		when(mockCedarlingPolicyStoreFileProvider.getPolicyStorePath()).thenReturn(policyStoreFn);
         CedarlingConfiguration    cedarConf        = mock(CedarlingConfiguration.class);
 
         when(cedarConf.isEnabled()).thenReturn(true);
@@ -157,8 +159,7 @@ class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
         authService = new CedarlingAuthorizationService();
         injectField(authService, "log",              log);
         injectField(authService, "cedarConf", cedarConf);
-        injectField(authService, "policyConfiguration", policyConfig);
-        injectField(authService, "policyStoreLocalFn", policyStoreFn);
+		injectField(authService, "cedarlingPolicyStoreFileProvider", mockCedarlingPolicyStoreFileProvider);
 
         // Trigger @PostConstruct – initialises CedarlingAdapter with the real policy
         authService.init();
