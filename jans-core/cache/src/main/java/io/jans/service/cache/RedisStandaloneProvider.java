@@ -31,7 +31,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     private static final Logger LOG = LoggerFactory.getLogger(RedisStandaloneProvider.class);
 
     private JedisPool pool;
-    public RedisStandaloneProvider(RedisConfiguration redisConfiguratio) {
+    public RedisStandaloneProvider(CacheConfiguration redisConfiguratio) {
         super(redisConfiguratio);
     }
 

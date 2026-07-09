@@ -26,8 +26,8 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
     private JedisSentinelPool pool;
 
-    public RedisSentinelProvider(RedisConfiguration redisConfiguration) {
-        super(redisConfiguration);
+    public RedisSentinelProvider(CacheConfiguration configuration) {
+        super(configuration);
     }
 
     public void create() {
