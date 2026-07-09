@@ -82,36 +82,32 @@ public class LicenseDetailsService extends BaseService {
     public GenericResponse validateLicenseConfiguration() {
         log.info("Inside validateLicenseConfiguration: the method to validate license configuration.");
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-        LicenseConfig licenseConfiguration = appConf.getMainSettings().getLicenseConfig();
+        LicenseConfig licenseConfigurationFromDB = appConf.getMainSettings().getLicenseConfig();
 
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         LicenseConfiguration licConfigFromMemory = auiConfiguration.getLicenseConfiguration();
 
-        if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getLicenseHardwareKey())) {
+        if (licenseConfigurationFromDB == null || Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
             log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getOpHost()) ||
-                Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getClientId()) ||
-                Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getClientSecret())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getOpHost()) ||
+                Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getClientId()) ||
+                Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getClientSecret())) {
             log.error(ErrorResponse.LICENSE_OIDC_CLIENT_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_OIDC_CLIENT_MISSING.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getSsa())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getSsa())) {
             log.error(ErrorResponse.LICENSE_SSA_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseKey())) {
             log.error(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getScanLicenseApiHostname())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getScanLicenseApiHostname())) {
             log.error(ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
-        }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseHardwareKey())) {
-            log.error(ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
-            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
         }
         log.info("licConfigFromMemory.getLicenseValidUpto(): {}", licConfigFromMemory.getLicenseValidUpto());
         if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
@@ -123,10 +119,10 @@ public class LicenseDetailsService extends BaseService {
             return syncLicenseDetailsFromAgamaLab(auiConfiguration);
         }
         long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
-        long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
+        long intervalForSyncLicenseDetailsInDays = licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays();
         log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
         if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
-            return syncLicenseOIDCClientDetails(licenseConfiguration);
+            return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
         }
         // Check if the 'licenseValidUpto' field is not null or empty
         if (!Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
@@ -136,7 +132,7 @@ public class LicenseDetailsService extends BaseService {
             // If the license has already expired (daysDiffOfLicenseValidity < 0),
             // sync the license OIDC client details to update or renew the license
             if (daysDiffOfLicenseValidity < 0) {
-                return syncLicenseOIDCClientDetails(licenseConfiguration);
+                return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
             }
         }
 
@@ -744,11 +740,7 @@ public class LicenseDetailsService extends BaseService {
                         if (genericResOptional.isPresent()) {
                             return genericResOptional.get();
                         }
-                        //save license spring credentials
-                        /*AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
-                        entryManager.merge(adminConf);*/
-                        //save in license configuration
+                        //save in license configuration in memory
                         licenseConfiguration.setLicenseKey(entity.getString("license"));
                         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
