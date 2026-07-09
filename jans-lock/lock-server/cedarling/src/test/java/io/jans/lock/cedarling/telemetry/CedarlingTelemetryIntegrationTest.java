@@ -588,6 +588,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 
 		// operational_stats must contain authorization request counters
 		JsonNode opStats = node.get("operational_stats");
+		assertTrue(opStats.isObject(), ctx + ": operational_stats must be an object");
 		long requestsTotal = opStats.path("authz.requests_total").asLong(0L);
 		assertTrue(requestsTotal >= 0, ctx + ": operational_stats.authz.requests_total must be >= 0, got " + requestsTotal);
 	}

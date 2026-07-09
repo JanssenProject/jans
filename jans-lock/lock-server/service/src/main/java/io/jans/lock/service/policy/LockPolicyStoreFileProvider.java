@@ -51,9 +51,13 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
 
     @Override
     public void prepare() {
+        String openIdIssuer = appConfiguration.getOpenIdIssuer();
+        if (openIdIssuer == null || openIdIssuer.isBlank()) {
+            throw new IllegalStateException("Cannot prepare policy store: appConfiguration.openIdIssuer is not set");
+        }
+
         try {
             tempZipFile = Files.createTempFile("lock-policy-store-", ".cjar");
-            String openIdIssuer = appConfiguration.getOpenIdIssuer();
             log.info("Preparing policy store from classpath resource '{}' (issuer: {})", POLICY_STORE_RESOURCE, openIdIssuer);
 
             copyAndPatchZip(openIdIssuer);
