@@ -123,20 +123,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
                     jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
 
             if (valid) {
-	            boolean authorized = true;
-	            Map<String, String> tokens = getCedarlingTokens(bearerToken);
-	            for (CedarlingPermission requestedPermission : requestedPermissions) {
-	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
-	            			getCedarlingResource(requestedPermission), getCedarlingContext());
-	            	if (!authorized) {
-	            		log.error("Insufficient permissions to access '{}'", requestedPermission);
-	            		break;
-	            	}
-	            }
-	            
-	            if (authorized) {
-	            	return null;
-	            }
+                isValid(bearerToken, requestedPermissions);
             }
  
             // See section 3.12 RFC 7644
@@ -145,6 +132,25 @@ public class CedarlingProtectionService implements CedarlingProtection {
             log.error(e.getMessage(), e);
             return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+    
+    private Response isValid(String bearerToken, List<CedarlingPermission> requestedPermissions) {
+        boolean authorized = true;
+        Map<String, String> tokens = getCedarlingTokens(bearerToken);
+        for (CedarlingPermission requestedPermission : requestedPermissions) {
+            authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
+                    getCedarlingResource(requestedPermission), getCedarlingContext());
+            if (!authorized) {
+                log.error("Insufficient permissions to access '{}'", requestedPermission);
+                break;
+            }
+        }
+        
+        if (authorized) {
+            return null;
+        }
+        
+        return null;
     }
 
     private Jwt tokenAsJwt(String token) {
@@ -190,8 +196,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	}
 	
 	private Map<String, Object> getCedarlingContext() {
-		HashMap<String, Object> map = new HashMap<>();
-		return map;
+	    return new HashMap<>();
 	}
 
     private List<CedarlingPermission> getRequestedOperations(ResourceInfo resourceInfo) {

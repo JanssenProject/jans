@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -126,7 +127,7 @@ public class PolicyDownloadService {
 
 		try {
 			reloadPolicies();
-		} catch (Throwable ex) {
+		} catch (Exception ex) {
 			log.error("Exception happened while reloading policies", ex);
 		} finally {
 			this.isActive.set(false);
@@ -135,7 +136,7 @@ public class PolicyDownloadService {
 
 	private void reloadPolicies() {
 		
-		if ((cedarlingConfiguration.getPolicySources() == null) || (cedarlingConfiguration.getPolicySources().size() == 0)) {
+		if ((cedarlingConfiguration.getPolicySources() == null) || (cedarlingConfiguration.getPolicySources().isEmpty())) {
 			log.debug("Policies sources is not specified");
 			
 			// Remove all loaded policies
@@ -147,7 +148,7 @@ public class PolicyDownloadService {
 		for(PolicySource policySource : cedarlingConfiguration.getPolicySources()) {
 			// Load policy source from specified source
 			List<LoadedPolicySource> loadedPolicySources = loadPolicy(policySource);
-			if (loadedPolicySources == null) {
+			if (loadedPolicySources == null || loadedPolicySources.isEmpty()) {
 				continue;
 			}
 
@@ -177,13 +178,13 @@ public class PolicyDownloadService {
 		String policyStoreUri = policySource.getPolicyStoreUri();
 		if (!policySource.isEnabled()) {
 			log.debug("Found disabled policy URI: {}", policyStoreUri);
-			return null;
+			return Collections.emptyList();
 		}
 
 		log.debug("Starting policy store load from URI: {}", policyStoreUri);
 		if (StringHelper.isEmpty(policyStoreUri)) {
 			log.warn("Policy store URI is not specified");
-			return null;
+			return Collections.emptyList();
 		}
 
 		// Decrypt Authorization Token
@@ -203,7 +204,7 @@ public class PolicyDownloadService {
 			boolean result = httpService.isResponseStastusCodeOk(httpResponse);
 			if (!result) {
 		    	log.error("Get invalid response from URI {}", policyStoreUri);
-				return null;
+		    	return Collections.emptyList();
 			}
 			
 			MediaType responseMediaType = parseMediaType(httpResponse);
@@ -218,7 +219,7 @@ public class PolicyDownloadService {
 			log.error("Failed to execute load policies list from URI {}", policyStoreUri, ex);
 		}
 
-		return null;
+		return Collections.emptyList();
 	}
 
 	private List<LoadedPolicySource> loadJsonPolicyFromResponse(HttpResponse httpResponse, String policyStoreUri) throws IOException {

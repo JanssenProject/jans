@@ -92,22 +92,21 @@ public class CedarlingAuthorizationService {
 	    } catch (CedarlingException ex) {
 	        log.error("Failed to initialize Cedarling!", ex);
 	        log.trace("Configuration: {}", config.toJsonConfig());
-	        
-	        // Close adapter if initialization failed
-	        if (initCedarlingAdapter != null) {
-	            try {
-	                initCedarlingAdapter.close();
-	            } catch (Exception closeEx) {
-	                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
-	            }
-	        }
+
+            // Close adapter if initialization failed
+            try {
+                initCedarlingAdapter.close();
+            } catch (Exception closeEx) {
+                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
+            }
+
 	    }
 
 	    return null;
 	}
 
 	protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
-		BootstrapConfig config = BootstrapConfig.builder()
+	    return BootstrapConfig.builder()
 	        .applicationName("Lock Server")
 	        .policyStoreLocalFn(cedarlingPolicyStoreFileProvider.getPolicyStorePath())
 	        .jwtStatusValidation(false)
@@ -115,7 +114,6 @@ public class CedarlingAuthorizationService {
 	        .logType(cedarConf.getLogType())
 	        .logLevel(cedarConf.getLogLevel())
 	        .build();
-		return config;
 	}
 
 	public boolean authorize(Map<String, String> tokens, String action, Map<String, Object> resource, Map<String, Object> context) {

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import io.jans.core.cedarling.service.CedarlingProtection;
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 
-import io.jans.net.InetAddressUtility;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -19,7 +18,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.Response;
+
 
 /**
  * A RestEasy filter to centralize protection of APIs based on path pattern
