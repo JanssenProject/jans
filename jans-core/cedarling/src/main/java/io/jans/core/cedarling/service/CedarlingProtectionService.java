@@ -44,6 +44,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Response;
 
+import static io.jans.core.cedarling.service.CedarlingProtection.simpleResponse;
+
 @ApplicationScoped
 public class CedarlingProtectionService implements CedarlingProtection {
 
@@ -255,9 +257,4 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
 		return openIdConfigurationResponse;
 	}
-
-    public Response simpleResponse(Response.Status status, String detail) {
-        return Response.status(status).entity(detail).build();
-    }
-
 }

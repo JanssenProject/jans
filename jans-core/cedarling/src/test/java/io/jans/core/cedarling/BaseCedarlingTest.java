@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.cedarling;
+package io.jans.core.cedarling;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;

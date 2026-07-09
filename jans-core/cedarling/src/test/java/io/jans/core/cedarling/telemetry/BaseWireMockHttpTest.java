@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.cedarling.telemetry;
+package io.jans.core.cedarling.telemetry;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
