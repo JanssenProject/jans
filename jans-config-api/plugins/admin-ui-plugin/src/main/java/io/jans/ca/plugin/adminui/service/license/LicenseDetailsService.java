@@ -87,9 +87,13 @@ public class LicenseDetailsService extends BaseService {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         LicenseConfiguration licConfigFromMemory = auiConfiguration.getLicenseConfiguration();
 
-        if (licenseConfigurationFromDB == null || Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
+        if (licenseConfigurationFromDB == null || licConfigFromMemory == null) {
             log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+        }
+        if(Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
+            log.error(ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
         }
         if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getOpHost()) ||
                 Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getClientId()) ||
@@ -109,7 +113,6 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
         }
-        log.info("licConfigFromMemory.getLicenseValidUpto(): {}", licConfigFromMemory.getLicenseValidUpto());
         if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
             log.info(ErrorResponse.LICENSE_EXPIRY_DATE_NOT_PRESENT.getDescription());
             return syncLicenseDetailsFromAgamaLab(auiConfiguration);
