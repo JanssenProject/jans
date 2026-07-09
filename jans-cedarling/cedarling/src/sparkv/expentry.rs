@@ -5,8 +5,8 @@
  * Copyright (c) 2024 U-Zyn Chua
  */
 
-use chrono::prelude::*;
 use chrono::Duration;
+use chrono::prelude::*;
 
 use super::kventry::KvEntry;
 
@@ -32,6 +32,7 @@ impl ExpEntry {
         }
     }
 
+    #[must_use]
     pub fn is_expired(&self) -> bool {
         self.expired_at < Utc::now()
     }
@@ -60,32 +61,58 @@ mod tests {
 
     #[test]
     fn test_new() {
+        let before = Utc::now();
         let item = ExpEntry::new("key", Duration::seconds(10));
-        assert_eq!(item.key, "key");
-        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
-        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
+        let after = Utc::now();
+        assert_eq!(
+            item.key, "key",
+            "ExpEntry key should match the provided key"
+        );
+        assert!(
+            item.expired_at >= before + Duration::seconds(10),
+            "expired_at should be at least before + 10s"
+        );
+        assert!(
+            item.expired_at <= after + Duration::seconds(10),
+            "expired_at should be at most after + 10s"
+        );
     }
 
     #[test]
     fn test_from_kventry() {
         let kv_entry = KvEntry::new("keyFromKV", "value from KV", Duration::seconds(10));
         let exp_item = ExpEntry::from_kv_entry(&kv_entry);
-        assert_eq!(exp_item.key, "keyFromKV");
-        assert_eq!(exp_item.expired_at, kv_entry.expired_at);
+        assert_eq!(
+            exp_item.key, "keyFromKV",
+            "ExpEntry key should match KvEntry key"
+        );
+        assert_eq!(
+            exp_item.expired_at, kv_entry.expired_at,
+            "ExpEntry expiry should match KvEntry expiry"
+        );
     }
 
     #[test]
     fn test_cmp() {
         let item_small = ExpEntry::new("k1", Duration::seconds(10));
         let item_big = ExpEntry::new("k2", Duration::seconds(8000));
-        assert!(item_small > item_big); // reverse order
-        assert!(item_big < item_small); // reverse order
+        assert!(
+            item_small > item_big,
+            "min-heap: smaller TTL should be greater in ordering"
+        );
+        assert!(
+            item_big < item_small,
+            "min-heap: larger TTL should be smaller in ordering"
+        );
     }
 
     #[test]
     fn test_is_expired() {
         let item = ExpEntry::new("k1", Duration::seconds(0));
         std::thread::sleep(std::time::Duration::from_nanos(200));
-        assert!(item.is_expired());
+        assert!(
+            item.is_expired(),
+            "entry with 0s TTL should be expired after a short sleep"
+        );
     }
 }

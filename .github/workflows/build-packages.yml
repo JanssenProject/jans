@@ -54,6 +54,13 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_uniffi_ios:
+        description: >-
+          Run "build_cedarling_uniffi_ios" job?
+          Builds XCFramework for Swift/SPM.
+        required: true
+        type: boolean
+        default: false
       run_cedarling_pg:
         description: 'Run "build_cedarling_pg" job?'
         required: true
@@ -128,7 +135,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
         path: temp-jans
 
     - name: Getting build dependencies
@@ -170,7 +177,10 @@ jobs:
       id: run_build
       run: |
          cd jans/
-         sudo python${{ matrix.python_version }} install.py -download-exit -yes --keep-downloads --keep-setup -force-download
+         # install.py re-downloads the setup source from --setup-branch (default 'main' =
+         # nightly) and bakes its app_info.json in, so a release package embeds the wrong
+         # version unless we point it at the tag.
+         sudo python${{ matrix.python_version }} install.py --setup-branch "${{ steps.previoustag.outputs.tag }}" -download-exit -yes --keep-downloads --keep-setup -force-download
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
@@ -203,12 +213,12 @@ jobs:
 
     - name: Upload assets to release
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         OS="${{ matrix.name }}"
         VERSION="${{ steps.previoustag.outputs.version }}"
         SUFFIX="${{ matrix.asset_suffix }}"
-        
+
         gh release upload ${{ steps.previoustag.outputs.tag }} \
           "${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VERSION}${SUFFIX}" \
           "${{github.workspace}}/jans-${OS}-${VERSION}.bundle" \
@@ -262,7 +272,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -292,12 +302,12 @@ jobs:
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         pip3 install shiv wheel setuptools
-        sudo chown -R runner:docker /home/runner/work/jans/jans        
+        sudo chown -R runner:docker /home/runner/work/jans/jans
         cd jans-linux-setup
         make zipapp || echo "Creating linux setup failed for ubuntu"
         mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz || echo "Failed"
         cd ../jans-cli-tui
-        make zipapp 
+        make zipapp
         mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
 
     - name: Build with macOS
@@ -309,7 +319,7 @@ jobs:
         make zipapp || echo "Creating linux setup failed for macOS"
         mv jans-linux-setup.pyz jans-linux-macos-setup.pyz || echo "Failed"
         cd ../jans-cli-tui
-        make zipapp 
+        make zipapp
         mv jans-cli-tui.pyz jans-cli-tui-macos.pyz
 
     - name: Get tag and version
@@ -334,7 +344,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -344,7 +354,7 @@ jobs:
       continue-on-error: true
       uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
       with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        repo_token: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
@@ -394,7 +404,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -426,27 +436,27 @@ jobs:
         echo "--- wasm-pack version ---"
         wasm-pack --version
         echo "---------------------"
-  
+
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
           TAG_NAME=${{ github.event.workflow_run.head_branch }}
         fi
-        
+
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
         NPM_TAG=latest
         VERSION_TO_PUBLISH="${TAG}"
-        
+
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
           LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
           VERSION_TO_PUBLISH=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
         fi
-        
+
         # Update Cargo.toml with the version to publish
         sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
         echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
-  
+
         wasm-pack build --release --locked --target web --scope janssenproject
         cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
@@ -454,7 +464,7 @@ jobs:
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
         }
         cd ..
-  
+
         # Build for Node.js target with modified version
         NODEJS_VERSION="${VERSION_TO_PUBLISH}-nodejs"
         sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
@@ -490,19 +500,19 @@ jobs:
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
           VERSION=${{ github.event.workflow_run.head_branch }}
         fi
-        
+
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
         fi
-        
+
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
@@ -549,16 +559,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Build with Ubuntu
       continue-on-error: true
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         sudo apt-get update
         sudo apt-get install -y zip jq
         cd demos
-        
+
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VER="${{ inputs.target_tag }}"
         else
@@ -568,28 +578,28 @@ jobs:
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
         sudo rm demo-janssen-tarp-$VER-source.zip || echo "No such file or directory"
         cd janssen-tarp/browser-extension
-        
+
         TAG=$(echo "${VER}" | sed 's/^v//')
         VERSION_TO_SET="${TAG}"
-        
+
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
           RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
           VERSION_TO_SET="0.0.${RANDOM_NUMBER}"
         fi
-        
+
         # Update version in all manifest and package files
         echo "Setting extension version to ${VERSION_TO_SET}"
         jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
         jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/chrome/manifest.json > temp.json && mv temp.json src/static/chrome/manifest.json
         jq --arg version "${VERSION_TO_SET}" '.version = $version' package.json > temp.json && mv temp.json package.json
-        
+
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
         mkdir -p wasm
         tar -xvf cedarling_wasm.tar.gz -C wasm
         rm cedarling_wasm.tar.gz
         ls wasm
-        
+
         npm install --global web-ext
         npm install
         npm run build
@@ -671,7 +681,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -741,6 +751,14 @@ jobs:
         python3 -c 'import re,sys; p,v=sys.argv[1],sys.argv[2]; c=open(p,encoding="utf-8").read(); c=re.sub("(name = \"cedarling_python\"\nversion = \")[^\"]*(\")",lambda m:m.group(1)+v+m.group(2),c); open(p,"w",encoding="utf-8").write(c)' "${CARGO_LOCK}" "${VERSION_TO_PUBLISH}"
         echo "Updated Cargo.lock to version ${VERSION_TO_PUBLISH}"
 
+    - name: Configure macOS SDK
+      if: runner.os == 'macOS'
+      run: |
+        echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+        echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> $GITHUB_ENV
+        # Clearing it here (see aws/aws-lc-rs#532) neutralizes it for the rest of this job.
+        echo "IPHONEOS_DEPLOYMENT_TARGET=" >> $GITHUB_ENV
+
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
@@ -803,7 +821,7 @@ jobs:
       id: sign-cedarling
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -890,7 +908,7 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -919,6 +937,14 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Configure macOS SDK
+        if: runner.os == 'macOS'
+        run: |
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
+          echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> $GITHUB_ENV
+          # Clearing it here (see aws/aws-lc-rs#532) neutralizes it for the rest of this job.
+          echo "IPHONEOS_DEPLOYMENT_TARGET=" >> $GITHUB_ENV
+
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
@@ -932,9 +958,9 @@ jobs:
           if [ "${TAG}" == "nightly" ]; then
             TAG="0.0.0"
           fi
-          
+
           cargo build -r --locked -p cedarling_go
-          
+
           case "${{ matrix.name }}" in
             ubuntu22)
               cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_x86-64.so
@@ -982,7 +1008,7 @@ jobs:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
@@ -993,7 +1019,7 @@ jobs:
           if [ "${TAG}" == "nightly" ]; then
             TAG="0.0.0"
           fi
-  
+
           FILE_LIB=""
           case "${{ matrix.name }}" in
             ubuntu22)
@@ -1010,12 +1036,12 @@ jobs:
               FILE_LIB="cedarling_go-${TAG}.lib"
               ;;
           esac
-  
+
           cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
           if [ -n "$FILE_LIB" ]; then
             cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB"
           fi
-  
+
           gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber
           if [ -n "$FILE_LIB" ]; then
             gh release upload "${VERSION}" "${FILE_LIB}" "${FILE_LIB}.bundle" --clobber
@@ -1064,7 +1090,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -1078,7 +1104,7 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
         fi
-        
+
         echo TAG=${TAG} >> $GITHUB_ENV
         echo VERSION=${VERSION} >> $GITHUB_ENV
         KRAKEND_BUILDER_IMAGE_CLEAN=${{ matrix.krakend-builder-image }}
@@ -1105,7 +1131,7 @@ jobs:
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
@@ -1150,7 +1176,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -1164,7 +1190,7 @@ jobs:
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -1176,12 +1202,12 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
         fi
-        
+
         cargo build -r --locked -p cedarling_uniffi
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
-  
+
         gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
     - name: Smoke-test shared library
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
@@ -1219,7 +1245,7 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
         fi
-        
+
         cargo build -r --locked -p cedarling_uniffi
         cargo run --locked --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
         zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
@@ -1257,7 +1283,7 @@ jobs:
     - name: Sign and upload kotlin binding
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -1301,6 +1327,203 @@ jobs:
         name: cedarling-uniffi-digest
         path: /tmp/cedarling-uniffi-digest.sha256
         retention-days: 1
+
+  build_cedarling_uniffi_ios:
+    name: Build Cedarling UniFFI — iOS XCFramework
+    runs-on: macos-latest
+
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi_ios))
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+          persist-credentials: false
+
+      - name: Install Protoc
+        run: brew install protobuf
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+        with:
+          toolchain: stable
+
+      # Step 1 — Resolve tag and version
+      - name: Resolve tag and version
+        id: previoustag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG_NAME="${{ inputs.target_tag }}"
+          else
+            TAG_NAME=${{ github.event.workflow_run.head_branch }}
+          fi
+          echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+          if [[ "${TAG_NAME}" == "nightly" ]]; then
+            echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
+          else
+            echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 2 — Set iOS cross-compilation environment
+      - name: Set iOS cross-compilation environment
+        run: |
+          IPHONEOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          IPHONEOS_CC=$(xcrun --sdk iphoneos --find clang)
+          IPHONESIMULATOR_CC=$(xcrun --sdk iphonesimulator --find clang)
+
+          # Target-specific CC and CFLAGS (Rust converts dashes to underscores in env var names)
+          echo "CC_aarch64_apple_ios=${IPHONEOS_CC}" >> $GITHUB_ENV
+          echo "CFLAGS_aarch64_apple_ios=-arch arm64 -isysroot ${IPHONEOS_SDK}" >> $GITHUB_ENV
+          echo "CC_aarch64_apple_ios_sim=${IPHONESIMULATOR_CC}" >> $GITHUB_ENV
+          echo "CFLAGS_aarch64_apple_ios_sim=-arch arm64 -isysroot ${IPHONESIMULATOR_SDK}" >> $GITHUB_ENV
+
+          # Tell aws-lc-sys to use the cmake builder instead of cc — avoids the memcmp detection
+          echo "AWS_LC_SYS_CMAKE_BUILDER=1" >> $GITHUB_ENV
+
+          # Set minimum deployment target — must be 12.0+ for ___chkstk_darwin
+          echo "IPHONEOS_DEPLOYMENT_TARGET=14.0" >> $GITHUB_ENV
+
+      # Step 3 — build host dylib so uniffi-bindgen can introspect it
+      - name: Build host library (dylib)
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          cargo build --release -p cedarling_uniffi
+
+      # Step 4 — generate Swift bindings
+      - name: Generate Swift bindings
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          cargo run --bin uniffi-bindgen generate \
+            --library ../../target/release/libcedarling_uniffi.dylib \
+            --language swift \
+            --out-dir ./output
+
+      # Step 5 — rename modulemap (Xcode requires module.modulemap, not cedarling_uniffiFFI.modulemap)
+      - name: Rename modulemap
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          mv ./output/cedarling_uniffiFFI.modulemap ./output/module.modulemap
+
+      # Step 6 — Add iOS Rust targets
+      - name: Add iOS Rust targets
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          rustup target add aarch64-apple-ios-sim aarch64-apple-ios
+
+      # Step 7 — build iOS simulator static library
+      - name: Build iOS simulator library (aarch64-apple-ios-sim)
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: cargo build --release --target aarch64-apple-ios-sim -p cedarling_uniffi
+
+      # Step 8 — build iOS device static library
+      - name: Build iOS device library (aarch64-apple-ios)
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: cargo build --release --target aarch64-apple-ios -p cedarling_uniffi
+
+      # Step 9 — assemble XCFramework
+      - name: Create XCFramework
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          xcodebuild -create-xcframework \
+            -library ../../target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a \
+            -headers ./output \
+            -library ../../target/aarch64-apple-ios/release/libcedarling_uniffi.a \
+            -headers ./output \
+            -output ./Cedarling.xcframework
+
+      # Step 10 — zip (required by SPM binaryTarget + smaller release asset)
+      - name: Zip XCFramework
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          TAG="${{ steps.previoustag.outputs.tag }}"
+          zip -r "cedarling_uniffi-ios-${TAG}.zip" Cedarling.xcframework
+
+      # Step 11 — compute SPM checksum (sha256 of the zip; consumers paste this into Package.swift)
+      - name: Compute SPM checksum
+        id: spm_checksum
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          TAG="${{ steps.previoustag.outputs.tag }}"
+          CHECKSUM=$(swift package compute-checksum "cedarling_uniffi-ios-${TAG}.zip")
+          echo "checksum=${CHECKSUM}" >> "$GITHUB_OUTPUT"
+          echo "SPM checksum: ${CHECKSUM}"
+          # Write checksum alongside zip so it's available as a release asset
+          echo "${CHECKSUM}" > "cedarling_uniffi-ios-${TAG}.zip.spm-checksum"
+
+      # Step 12 — smoke-test: verify XCFramework contains expected binaries
+      - name: Smoke-test XCFramework
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          echo "=== XCFramework structure ==="
+          find Cedarling.xcframework -type f | sort
+          # Must contain both device and simulator .a files
+          DEVICE_LIB=$(find Cedarling.xcframework -path "*ios-arm64/libcedarling_uniffi.a" | head -n1)
+          SIM_LIB=$(find Cedarling.xcframework -path "*ios-arm64-simulator/libcedarling_uniffi.a" | head -n1)
+          HEADER=$(find Cedarling.xcframework -name "cedarling_uniffiFFI.h" | head -n1)
+          MODMAP=$(find Cedarling.xcframework -name "module.modulemap" | head -n1)
+          FAILED=()
+          [ -f "${DEVICE_LIB}" ] || FAILED+=("device .a missing")
+          [ -f "${SIM_LIB}" ]   || FAILED+=("simulator .a missing")
+          [ -f "${HEADER}" ]    || FAILED+=("header missing")
+          [ -f "${MODMAP}" ]    || FAILED+=("module.modulemap missing")
+          if [ "${#FAILED[@]}" -gt 0 ]; then
+            echo "ERROR: XCFramework smoke-test failed:"
+            for F in "${FAILED[@]}"; do echo "  - $F"; done
+            exit 1
+          fi
+          echo "Smoke-test passed."
+
+      # Step 13 — sign and upload to GitHub release
+      - name: Sign and upload iOS artifacts
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          TAG="${{ steps.previoustag.outputs.tag }}"
+          ZIP="cedarling_uniffi-ios-${TAG}.zip"
+          CHECKSUM_FILE="${ZIP}.spm-checksum"
+          SWIFT_SRC="output/cedarling_uniffi.swift"
+          cosign sign-blob --yes --bundle "${ZIP}.bundle" "${ZIP}"
+          gh release upload "${TAG}" \
+            "${ZIP}" \
+            "${ZIP}.bundle" \
+            "${CHECKSUM_FILE}" \
+            "${SWIFT_SRC}" \
+            --repo ${{ github.repository }} \
+            --clobber
+
+      # Step 14 — compute SHA256 digest for SLSA provenance
+      - name: Compute SHA256 digest for SLSA provenance
+        id: compute_uniffi_ios_digest
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+        run: |
+          TAG="${{ steps.previoustag.outputs.tag }}"
+          ZIP="cedarling_uniffi-ios-${TAG}.zip"
+          SHA256=$(shasum -a 256 "${ZIP}" | awk '{print $1}')
+          echo "${SHA256}  ${ZIP}" > /tmp/cedarling-uniffi-ios-digest.sha256
+          echo "Digest: ${SHA256}  ${ZIP}"
+
+      - name: Upload UniFFI iOS digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cedarling-uniffi-ios-digest
+          path: /tmp/cedarling-uniffi-ios-digest.sha256
+          retention-days: 1
 
   collect-binary-digests:
     name: Collect binary package digests
@@ -1631,6 +1854,37 @@ jobs:
           MERGED=$(cat /tmp/cedarling-uniffi-digests/*.sha256 | grep -v '^$' || true)
           echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
 
+  collect-cedarling-uniffi-ios-digests:
+    runs-on: ubuntu-latest
+    needs: [build_cedarling_uniffi_ios]
+
+    outputs:
+      hashes: ${{ steps.encode.outputs.hashes }}
+      tag: ${{ steps.resolve_tag.outputs.tag }}
+
+    steps:
+      - name: Resolve release tag
+        id: resolve_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG_NAME="${{ inputs.target_tag }}"
+          else
+            TAG_NAME=${{ github.event.workflow_run.head_branch }}
+          fi
+          echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Download UniFFI iOS digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: cedarling-uniffi-ios-digest
+          path: /tmp/digests/
+
+      - name: Merge and base64-encode digests
+        id: encode
+        run: |
+          HASHES=$(cat /tmp/digests/*.sha256 | base64 -w0)
+          echo "hashes=${HASHES}" >> $GITHUB_OUTPUT
+
   provenance-cedarling-uniffi:
     name: SLSA provenance — Cedarling UniFFI
     needs: [collect-cedarling-uniffi-digests]
@@ -1649,6 +1903,22 @@ jobs:
       upload-tag-name: "${{ needs.collect-cedarling-uniffi-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: cedarling-uniffi.intoto.jsonl
+
+  provenance-cedarling-uniffi-ios:
+    needs: [collect-cedarling-uniffi-ios-digests]
+
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-uniffi-ios-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-uniffi-ios-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-uniffi-ios.intoto.jsonl
 
   collect-demo-digests:
     name: Collect demo package digests
@@ -1818,7 +2088,7 @@ jobs:
       - name: Sign and upload cedarling_pg tarball
         working-directory: ${{ env.EXT_DIR }}
         env:
-          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then

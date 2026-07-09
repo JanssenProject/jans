@@ -217,6 +217,7 @@ public class DiscoveryService {
         jsonObj.put(REQUEST_PARAMETER_SUPPORTED, appConfiguration.getRequestParameterSupported());
         jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, appConfiguration.getRequestUriParameterSupported());
         jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, appConfiguration.getRequireRequestUriRegistration());
+        jsonObj.put(AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED, appConfiguration.getAuthorizationResponseIssParameterSupported());
         jsonObj.put(OP_POLICY_URI, appConfiguration.getOpPolicyUri());
         jsonObj.put(OP_TOS_URI, appConfiguration.getOpTosUri());
         jsonObj.put(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS, Boolean.TRUE);
