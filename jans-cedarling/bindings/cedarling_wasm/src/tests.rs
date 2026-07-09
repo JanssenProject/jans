@@ -8,7 +8,10 @@
 
 use crate::*;
 use cedarling::bindings::serde_yaml_ng;
-use cedarling::{AuthorizeMultiIssuerRequest, EntityData, RequestUnsigned, TokenInput};
+use cedarling::{
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
+    BatchItem, EntityData, RequestUnsigned, TokenInput,
+};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::LazyLock;
@@ -1184,4 +1187,150 @@ async fn test_spawn_task() {
     let handle = cedarling::bindings::spawn_task(async { 42 });
     let result = handle.await_result().await;
     assert_eq!(result, 42);
+}
+
+/// Batch unsigned authorize: N=3 items, all allowed under `is_ok=true`
+/// principal + `UpdateForTestPrincipals` action; ordering preserved,
+/// `batch_id` populated on the response.
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned_batch_allow_ordered() {
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let principal = EntityData::deserialize(json!({
+        "cedar_entity_mapping": { "entity_type": "Jans::TestPrincipal1", "id": "1" },
+        "is_ok": true,
+    }))
+    .expect("principal EntityData should build");
+    let items: Vec<BatchItem> = (0..3)
+        .map(|i| BatchItem {
+            resource: EntityData::deserialize(json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": format!("res-{i}") },
+                "org_id": "some_long_id",
+                "country": "US",
+            }))
+            .expect("resource EntityData should build"),
+            action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+            context: json!({}),
+        })
+        .collect();
+    let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), items);
+    let js_request = serde_wasm_bindgen::to_value(&batch_request)
+        .expect("batch request should convert to JsValue");
+
+    let response = instance
+        .authorize_unsigned_batch(js_request)
+        .await
+        .expect("authorize_unsigned_batch should succeed");
+
+    let results = response.results();
+    assert_eq!(results.len(), 3, "N=3 items produce N=3 results");
+    for (i, result) in results.iter().enumerate() {
+        assert!(result.decision, "item {i} must allow");
+    }
+    assert!(!response.batch_id().is_empty(), "batch_id must be set");
+}
+
+/// Batch unsigned: empty items rejected at validate-time.
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned_batch_empty_items_rejected() {
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let principal = EntityData::deserialize(json!({
+        "cedar_entity_mapping": { "entity_type": "Jans::TestPrincipal1", "id": "1" },
+        "is_ok": true,
+    }))
+    .expect("principal EntityData should build");
+    let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), Vec::new());
+    let js_request = serde_wasm_bindgen::to_value(&batch_request)
+        .expect("batch request should convert to JsValue");
+    let result = instance.authorize_unsigned_batch(js_request).await;
+    let err = result
+        .err()
+        .expect("empty items must be rejected at validate-time");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+/// Batch multi-issuer authorize: N=2 items with a single access token; both
+/// should evaluate against the same token snapshot and produce ordered results.
+#[wasm_bindgen_test]
+async fn test_authorize_multi_issuer_batch_ordered() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let access_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let make_item = |id: &str| BatchItem {
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+            "org_id": "some_long_id",
+            "country": "US",
+        }))
+        .expect("resource EntityData should build"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: json!({}),
+    };
+    let batch_request = BatchAuthorizeMultiIssuerRequest::new(
+        vec![TokenInput::new(
+            "Jans::Access_Token".to_string(),
+            access_token,
+        )],
+        vec![make_item("res-a"), make_item("res-b")],
+    );
+    let js_request = serde_wasm_bindgen::to_value(&batch_request)
+        .expect("batch request should convert to JsValue");
+
+    let response = instance
+        .authorize_multi_issuer_batch(js_request)
+        .await
+        .expect("authorize_multi_issuer_batch should succeed");
+
+    let results = response.results();
+    assert_eq!(results.len(), 2, "N=2 items produce N=2 results");
+    assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
