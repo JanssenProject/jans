@@ -454,6 +454,8 @@ fn extract_clauses(source: &str, clause: &str) -> Option<Vec<String>> {
 /// (which `PolicyMetadata` callers should not produce, but we cannot prove)
 /// is treated as unhandled rather than silently mis-lowered.
 fn lower_policy_to_sql(meta: &PolicyMetadata) -> Option<String> {
+    use cedar_policy::{PrincipalConstraint, ResourceConstraint};
+
     let Ok(policy) = cedar_policy::Policy::parse(None, &meta.source) else {
         return None;
     };
@@ -471,7 +473,6 @@ fn lower_policy_to_sql(meta: &PolicyMetadata) -> Option<String> {
     // unhandled-residual path. The action constraint is intentionally not
     // checked: `matching_policies_for_table` already filters policies by
     // the specific action we're lowering for.
-    use cedar_policy::{PrincipalConstraint, ResourceConstraint};
     if !matches!(policy.principal_constraint(), PrincipalConstraint::Any) {
         return None;
     }

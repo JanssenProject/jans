@@ -39,6 +39,7 @@
     "@modelcontextprotocol/sdk": "^1.23.0",
     "adm-zip": "^0.5.10",
     "axios": "^1.4.0",
+    "fflate": "^0.8.3",
     "json-edit-react": "^1.29.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^1.11.0",

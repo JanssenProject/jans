@@ -1,20 +1,30 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "cedarling_pg", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
+members = [
+    "bindings/*",
+    "cedarling",
+    "cedarling_pg",
+    "cedarling_pg_codegen",
+    "test_utils",
+]
 # cedarling_pg requires `cargo pgrx init` (a managed Postgres install) before its
 # pgrx-pg-sys build script will succeed. Excluding it from default-members keeps
 # `cargo build/test/bench/dylint` at the workspace root working without that setup.
 # It's still a workspace member, so `cargo build -p cedarling_pg` and the dedicated
 # postgres_extension_tests CI job still target it explicitly.
-default-members = ["bindings/*", "cedarling", "cedarling_pg_codegen", "http_utils", "sparkv", "test_utils"]
-exclude = ["bindings/cedarling-java", "custom-lints"]
+default-members = [
+    "bindings/*",
+    "cedarling",
+    "cedarling_pg_codegen",
+    "test_utils",
+]
+exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints"]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
 derive_more = "2.1.1"
-sparkv = { path = "sparkv" }
 jsonwebtoken = { version = "10.3.0", features = [
     "rust_crypto",
     "use_pem",
@@ -22,7 +32,6 @@ jsonwebtoken = { version = "10.3.0", features = [
 jsonwebkey = "0.4.0"
 chrono = "0.4"
 reqwest = { version = "0.13.2", features = ["json", "form"] }
-http_utils = { path = "http_utils" }
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }
 wasm-bindgen = "0.2.103"
@@ -32,7 +41,7 @@ serde-wasm-bindgen = "0.6"
 tokio = "1.42.0"
 tokio-util = "0.7.15"
 mockito = "1.5.0"
-sha2 = "0.10"
+sha2 = "0.11.0"
 
 [workspace.lints.clippy]
 pedantic = "warn"

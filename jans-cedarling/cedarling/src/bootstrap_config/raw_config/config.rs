@@ -459,6 +459,14 @@ pub struct BootstrapConfigRaw {
     /// `ttl`, this value is used directly. A value of `0` or an unset variable is
     /// treated as "use the default" (300 seconds) so the status list cannot silently
     /// go stale forever. Non-zero values below `5` are clamped to `5`.
+    ///
+    /// Fail-closed behavior: if any background refresh fails — fetch error, 5xx
+    /// response, or the status list body is invalid (JWT validation fails,
+    /// deserialization fails, or bit-string parsing fails) — the cached status list
+    /// is dropped and all tokens that reference it are rejected until the next
+    /// successful refresh. This prevents a revoked token from being accepted based on
+    /// stale data at the cost of temporarily denying valid tokens when the issuer's
+    /// status endpoint is unreachable or returns a malformed payload.
     #[serde(
         rename = "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
         default = "default_status_list_refresh_interval_max"
