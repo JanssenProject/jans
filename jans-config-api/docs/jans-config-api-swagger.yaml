@@ -15692,19 +15692,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16660,8 +16660,6 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16671,6 +16669,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
