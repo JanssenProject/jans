@@ -48,7 +48,7 @@ import static io.jans.shibboleth.model.TrustRelationshipFixtures.*;
 
 
 
-public class TrustRelationshipTest {
+public class TrustRelationshipTests {
     
 
     private static final Stream<Arguments> creationParametersWithValidValues() {
@@ -634,7 +634,7 @@ public class TrustRelationshipTest {
     public class CreationTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithValidValues")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#creationParametersWithValidValues")
         @DisplayName(
             "GIVEN valid creation parameters " + 
             "WHEN create() is called " +
@@ -680,7 +680,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#creationParametersWithNullValuesAndMissingFieldNames")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#creationParametersWithNullValuesAndMissingFieldNames")
         @DisplayName(
             "GIVEN a null value for any required parameter (displayName, description or nature) " +
             "WHEN create() is called " +
@@ -711,7 +711,7 @@ public class TrustRelationshipTest {
 
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with an existing display name " +
             "WHEN updateDisplayName() is called with a different name " +
@@ -733,7 +733,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with an existing display name " +
             "WHEN updateDisplayName() is called with the same current name " +
@@ -751,7 +751,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with an existing description " + 
             "WHEN updateDescription() is called with a different description " + 
@@ -772,7 +772,7 @@ public class TrustRelationshipTest {
 
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with an existing description " +
             "WHEN updateDescription() is called with the same current description " +
@@ -791,7 +791,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithSupportedMetadataSources")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithSupportedMetadataSources")
         @DisplayName (
             "GIVEN a DRAFT TrustRelationship with no active profiles " +
             "WHEN updateMetadataSource() is called " +
@@ -810,7 +810,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigurationsAndAccessors")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithProfileConfigurationsAndAccessors")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with no metadatasources " + 
             "WHEN updateXXXProfileConfiguration() is called " +
@@ -830,7 +830,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndReleasedAttributes")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsAndReleasedAttributes")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship " +
             "WHEN updateReleasedAttributes is called with a valid parameter " +
@@ -857,7 +857,7 @@ public class TrustRelationshipTest {
         
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateDisplayName() is called with a null parameter " + 
@@ -877,7 +877,7 @@ public class TrustRelationshipTest {
         }
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateMetadataSource() is called with a null parameter " +
@@ -896,7 +896,7 @@ public class TrustRelationshipTest {
         
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsAndAccessors")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsAndAccessors")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called with a null parameter " +
@@ -916,7 +916,7 @@ public class TrustRelationshipTest {
         }
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a TrustRelationship " +
             "WHEN updateReleasedAttributes() is called with a null parameter " +
@@ -939,7 +939,7 @@ public class TrustRelationshipTest {
     public class DraftToReadyAndViceVersaTransitionsTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithAnActiveProfileAndRealMetadataSource")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithAnActiveProfileAndRealMetadataSource")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship  with at least one active profile " +
             "WHEN updateMetadataSource() is called with a no-NONE metadata source " +
@@ -959,7 +959,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRealMetadataSourceAndActiveProfileConfigurationToUpdate")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithRealMetadataSourceAndActiveProfileConfigurationToUpdate")
         @DisplayName(
             "GIVEN a DRAFT TrustRelationship with a REAL(non-NONE) metadata source " +
             "WHEN updateXXXProfileConfiguration is called with an ACTIVE profile configuration " +
@@ -980,7 +980,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsWithSingleActiveProfileConfiguration")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#readyTrustRelationshipsWithSingleActiveProfileConfiguration")
         @DisplayName(
             "GIVEN a READY TrustRelationship with at least one active profile configuration " + 
             "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
@@ -1003,7 +1003,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#readyTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a READY TrustRelationship with a real metadata source " +
             "WHEN updateMetadataSource() is called with NoMetadataSource " +
@@ -1031,7 +1031,7 @@ public class TrustRelationshipTest {
     public class ActivationAndDeactivationTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#readyTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN a READY TrustRelationship " +
             "WHEN activate() is called " +
@@ -1052,7 +1052,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN cancelActivation() is called " + 
@@ -1071,7 +1071,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN finalizeActivation() is called with null ActivationDiagnostics " +
@@ -1095,7 +1095,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN finalizeActivation() is called with a successful ActivationDiagnostics " +
@@ -1119,7 +1119,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN finalizeActivation() is called with a failed ActivationDiagnostics " + 
@@ -1143,7 +1143,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN deactivate() is called " +
@@ -1163,7 +1163,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#inactiveTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an INACTIVE TrustRelationship with a real metadata source and at least one active profile " +
             "WHEN activate() is called " + 
@@ -1186,8 +1186,8 @@ public class TrustRelationshipTest {
 
         @ParameterizedTest
         @MethodSource({
-            "io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource",
-            "io.jans.shibboleth.model.TrustRelationshipTest#inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration"
+            "io.jans.shibboleth.model.TrustRelationshipTests#inactiveTrustRelationshipsOfAllNaturesWithNoRealMetadataSource",
+            "io.jans.shibboleth.model.TrustRelationshipTests#inactiveTrustRelationshipsOfAllNaturesWithNoActiveProfileConfiguration"
         })
         @DisplayName(
             "GIVEN an INACTIVE TrustRelationship with no real metadata source or no active profile " +
@@ -1215,7 +1215,7 @@ public class TrustRelationshipTest {
     public class UpdatesFromActiveStateTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateMetadataSource() is called with a different real metadata source " +
@@ -1235,7 +1235,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateMetadataSource() is called with the *same* current metadata source " +
@@ -1254,7 +1254,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateMetadataSource() is called with a metadatasource of type `NONE` " +
@@ -1274,7 +1274,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNaturesWithDifferentProfileConfiguration")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called with a *different* configuration than the current one " +
@@ -1295,7 +1295,7 @@ public class TrustRelationshipTest {
         }
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithAllProfileAccessors")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNaturesWithAllProfileAccessors")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called with the *same* configuration as the current one " +
@@ -1314,7 +1314,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNaturesWithActiveProfileAccessor")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called such that all profiles become disabled " +
@@ -1387,7 +1387,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#aggregateTrustRelationshipsNotInActivatingState")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#aggregateTrustRelationshipsNotInActivatingState")
         @DisplayName(
             "GIVEN an AGGREGATE TrustRelationship that is not in ACTIVATING state " +
             "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
@@ -1409,7 +1409,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#individualTrustRelationshipsInMultipleStates")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#individualTrustRelationshipsInMultipleStates")
         @DisplayName(
             "GIVEN an INDIVIDUAL TrustRelationship irrespective of state " +
             "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
@@ -1456,7 +1456,7 @@ public class TrustRelationshipTest {
     public class StateRestrictionRulesTest {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNaturesWithSupportedMetadataSources")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNaturesWithSupportedMetadataSources")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " + 
             "WHEN updateMetadataSource() is called " +
@@ -1474,7 +1474,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithProfileConfigurations")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsWithProfileConfigurations")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called " +
@@ -1494,7 +1494,7 @@ public class TrustRelationshipTest {
 
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesNotInActivatingState")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsOfAllNaturesNotInActivatingState")
         @DisplayName(
             "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
             "WHEN finalizeActivation() is called " +
@@ -1514,7 +1514,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesNotInActivatingState")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsOfAllNaturesNotInActivatingState")
         @DisplayName(
             "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
             "WHEN cancelActivation() is called " + 
@@ -1562,7 +1562,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsOfAllNaturesWithIncompatibleMetadataSources")
         @DisplayName(
             "GIVEN a TrustRelationship NOT in ACTIVATING state " +
             "WHEN updateMetadataSource() is called with a metadatasource incompatible with its nature " +
@@ -1587,7 +1587,7 @@ public class TrustRelationshipTest {
     public class ConsistencyAndInvariantViolationsTests {
 
        @ParameterizedTest
-       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithRequiredFieldsInvalidators")
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithRequiredFieldsInvalidators")
        @DisplayName(
             "GIVEN a Builder with one required field set to null or invalid " +
             "WHEN build() is called " +
@@ -1607,7 +1607,7 @@ public class TrustRelationshipTest {
        }
 
        @ParameterizedTest
-       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
        @DisplayName(
             "GIVEN a Builder with metadataSource set to null " +
             "WHEN build() is called  " +
@@ -1627,7 +1627,7 @@ public class TrustRelationshipTest {
        }
 
        @ParameterizedTest
-       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsWithProfileConfigUpdaters")
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsWithProfileConfigUpdaters")
        @DisplayName(
             "GIVEN a Builder with at least one profileconfiguration set to null " +
             "WHEN build() is called  " + 
@@ -1648,7 +1648,7 @@ public class TrustRelationshipTest {
        }
 
        @ParameterizedTest
-       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#draftTrustRelationshipsOfAllNatures")
+       @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#draftTrustRelationshipsOfAllNatures")
        @DisplayName(
             "GIVEN a Builder with discoveredEntityIds set to null " +
             "WHEN build() is called " +
@@ -1675,7 +1675,7 @@ public class TrustRelationshipTest {
     public class ComplexStateTransitionsAndInteractionsTests {
         
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNaturesWithDifferentMetadataSources")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateMetadataSource() is called with a  *different* metadatasource " +
@@ -1696,7 +1696,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activeTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activeTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVE TrustRelationship " +
             "WHEN updateMetadataSource() is called with the *same* current metadata source " +
@@ -1722,7 +1722,7 @@ public class TrustRelationshipTest {
     public class ActivationDiagnosticsBehaviorTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#readyTrustRelationshipsWithActivationDiagnostics")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#readyTrustRelationshipsWithActivationDiagnostics")
         @DisplayName(
             "GIVEN a READY TrustRelationship with previous activation diagnostics " +
             "WHEN activate() is called " +
@@ -1743,7 +1743,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithSuccessActivationDiagnostics")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsWithSuccessActivationDiagnostics")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN finalizeActivation() is called with a successful ActivationContext containing diagnostics " +
@@ -1764,7 +1764,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsWithFailedActivationDiagnostics")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsWithFailedActivationDiagnostics")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN finalizeActivation() is called with a failed ActivationContext " +
@@ -1790,7 +1790,7 @@ public class TrustRelationshipTest {
     public class ReconstructionAndPersistenceScenariosTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfVariousStatuses")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsOfVariousStatuses")
         @DisplayName(
             "GIVEN a fully populated TrustRelationship in any state " +
             "WHEN it is rebuilt using the builder from persisted data (reconstruction scenario) " +
@@ -1827,7 +1827,7 @@ public class TrustRelationshipTest {
     public class CrossCuttingAndRegressionProneScenariosTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsWithIdempotentUpdateOperations")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsWithIdempotentUpdateOperations")
         @DisplayName(
             "GIVEN a TrustRelationship in any valid state where the operation is allowed " +
             "WHEN any update method/operation is called with the same current value " +
@@ -1843,7 +1843,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN incorporateDiscoveredEntityIds() is called with null EntityIds " +
@@ -1867,7 +1867,7 @@ public class TrustRelationshipTest {
     public class AdditionalErrorCasesTests {
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN activate() is called " + 
@@ -1886,7 +1886,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#trustRelationshipsOfAllStatusesExceptActive")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#trustRelationshipsOfAllStatusesExceptActive")
         @DisplayName(
             "GIVEN a TrustRelationship that is not in ACTIVE state " +
             "WHEN deactivate() is called " +
@@ -1905,7 +1905,7 @@ public class TrustRelationshipTest {
         }
 
         @ParameterizedTest
-        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTest#activatingTrustRelationshipsOfAllNatures")
+        @MethodSource("io.jans.shibboleth.model.TrustRelationshipTests#activatingTrustRelationshipsOfAllNatures")
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN deactivate() is called " +
