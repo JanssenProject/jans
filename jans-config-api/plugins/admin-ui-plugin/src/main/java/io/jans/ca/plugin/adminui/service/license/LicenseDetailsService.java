@@ -573,8 +573,6 @@ public class LicenseDetailsService extends BaseService {
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
-                        //adminConf.getMainSettings().getLicenseConfig().setLicenseDetailsLastUpdatedOn(licenseConfiguration.getLicenseDetailsLastUpdatedOn());
-                        //adminConf.getMainSettings().getLicenseConfig().setLicenseValidUpto(licenseConfiguration.getLicenseValidUpto());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
                         adminConf.getMainSettings().getLicenseConfig().setProductCode(licenseConfiguration.getProductCode());
                         adminConf.getMainSettings().getLicenseConfig().setCompanyName(licenseConfiguration.getCompanyName());

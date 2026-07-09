@@ -1,7 +1,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="jans-auth-model" parallel="false">
-    <!--<test name="Unit Tests" enabled="true">
+    <test name="Unit Tests" enabled="true">
         <classes>
             <class name="io.jans.as.model.jwk.AlgorithmTest"/>
             <class name="io.jans.as.model.common.AuthzDetailsTest"/>
@@ -29,7 +29,7 @@
         </classes>
     </test>
 
-
+    <!-- Util tests -->
     <test name="Base64Util Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.util.Base64UtilTest"/>
@@ -94,5 +94,5 @@
         <classes>
             <class name="io.jans.as.model.crypto.signature.ECDSAPublicKeyTest"/>
         </classes>
-    </test>    -->
+    </test>    
 </suite>
