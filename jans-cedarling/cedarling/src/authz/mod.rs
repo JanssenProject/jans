@@ -436,7 +436,9 @@ impl Authz {
             results.push(MultiIssuerAuthorizeResult::new(response, item_request_id));
         }
 
-        self.config.metrics.record_batch(request.items.len());
+        self.config
+            .metrics
+            .record_batch(request.items.len(), false);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
@@ -798,7 +800,9 @@ impl Authz {
             results.push(AuthorizeResult::new(response, item_request_id));
         }
 
-        self.config.metrics.record_batch(request.items.len());
+        self.config
+            .metrics
+            .record_batch(request.items.len(), true);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))

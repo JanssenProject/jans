@@ -135,11 +135,19 @@ struct IntervalState {
     authz_decision_allow: AtomicI64,
     authz_decision_deny: AtomicI64,
     authz_errors_total: AtomicI64,
-    /// Number of batch authorization calls in this interval.
+    /// Total number of batch authorization calls in this interval (all flows).
     authz_batch_total: AtomicI64,
     /// Cumulative item count across all batch calls in this interval;
     /// divide by [`Self::authz_batch_total`] for the mean batch size.
     authz_batch_items: AtomicI64,
+    /// Number of unsigned batch authorization calls in this interval.
+    authz_batch_unsigned: AtomicI64,
+    /// Cumulative item count across unsigned batch calls in this interval.
+    authz_batch_unsigned_items: AtomicI64,
+    /// Number of multi-issuer batch authorization calls in this interval.
+    authz_batch_multi_issuer: AtomicI64,
+    /// Cumulative item count across multi-issuer batch calls in this interval.
+    authz_batch_multi_issuer_items: AtomicI64,
 
     timing_recorder: Mutex<TimingRecorder>,
     last_eval_time_us: AtomicI64,
@@ -172,6 +180,10 @@ impl IntervalState {
             authz_errors_total: AtomicI64::new(0),
             authz_batch_total: AtomicI64::new(0),
             authz_batch_items: AtomicI64::new(0),
+            authz_batch_unsigned: AtomicI64::new(0),
+            authz_batch_unsigned_items: AtomicI64::new(0),
+            authz_batch_multi_issuer: AtomicI64::new(0),
+            authz_batch_multi_issuer_items: AtomicI64::new(0),
             timing_recorder: Mutex::new(TimingRecorder::new()),
             last_eval_time_us: AtomicI64::new(0),
             token_cache_hits: AtomicI64::new(0),
@@ -239,6 +251,22 @@ impl IntervalState {
             (
                 "authz.batch_items".to_string(),
                 load(&self.authz_batch_items),
+            ),
+            (
+                "authz.batch_unsigned".to_string(),
+                load(&self.authz_batch_unsigned),
+            ),
+            (
+                "authz.batch_unsigned_items".to_string(),
+                load(&self.authz_batch_unsigned_items),
+            ),
+            (
+                "authz.batch_multi_issuer".to_string(),
+                load(&self.authz_batch_multi_issuer),
+            ),
+            (
+                "authz.batch_multi_issuer_items".to_string(),
+                load(&self.authz_batch_multi_issuer_items),
             ),
             (
                 "authz.last_eval_time_us".to_string(),
@@ -590,20 +618,38 @@ impl MetricsCollector {
         }
     }
 
-    /// Records a batch authorization call: increments `authz.batch_total` by
-    /// one and `authz.batch_items` by the item count.
-    pub(crate) fn record_batch(&self, item_count: usize) {
+    /// Records a batch authorization call. Increments the aggregate
+    /// `authz.batch_total` / `authz.batch_items` counters and the
+    /// flow-specific pair (`authz.batch_unsigned{,_items}` or
+    /// `authz.batch_multi_issuer{,_items}`).
+    pub(crate) fn record_batch(&self, item_count: usize, is_unsigned: bool) {
         if !self.enabled {
             return;
         }
 
+        let items = saturating_usize_to_i64(item_count);
         let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
         interval
             .authz_batch_total
             .fetch_add(1, Ordering::Relaxed);
         interval
             .authz_batch_items
-            .fetch_add(saturating_usize_to_i64(item_count), Ordering::Relaxed);
+            .fetch_add(items, Ordering::Relaxed);
+        if is_unsigned {
+            interval
+                .authz_batch_unsigned
+                .fetch_add(1, Ordering::Relaxed);
+            interval
+                .authz_batch_unsigned_items
+                .fetch_add(items, Ordering::Relaxed);
+        } else {
+            interval
+                .authz_batch_multi_issuer
+                .fetch_add(1, Ordering::Relaxed);
+            interval
+                .authz_batch_multi_issuer_items
+                .fetch_add(items, Ordering::Relaxed);
+        }
     }
 
     /// Increments `authz.errors_total` counter.
