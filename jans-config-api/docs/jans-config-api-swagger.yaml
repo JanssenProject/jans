@@ -15694,17 +15694,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16660,6 +16660,8 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16669,8 +16671,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17589,10 +17589,12 @@ components:
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
-        cedarAuthEnabled:
-          type: boolean
-          description: Cedar OAuth authentication enable/disable flag. Default value
-            `true`.
+        protectionMode:
+          type: string
+          description: Protection mode for the Lock server (OAuth or Cedarling)
+          enum:
+          - oauth
+          - cedarling
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -17708,8 +17710,8 @@ components:
           $ref: "#/components/schemas/AuditLogConf"
         dataFormatConversionConf:
           $ref: "#/components/schemas/DataFormatConversionConf"
-        cedarConfig:
-          $ref: "#/components/schemas/CedarConfig"
+        cedarlingConfiguration:
+          $ref: "#/components/schemas/CedarlingConfiguration"
         plugins:
           type: array
           description: Details of enabled plugins.
@@ -17781,15 +17783,37 @@ components:
           type: string
           description: Date format in audit log file.
       description: Audit Log configuration details.
-    CedarConfig:
+    CedarlingConfiguration:
       type: object
       properties:
-        applicationName:
+        enabled:
+          type: boolean
+          description: Specify if Cedraling is enabled
+        policySources:
+          type: array
+          description: List of Policy Sources
+          items:
+            $ref: "#/components/schemas/PolicySource"
+        logType:
           type: string
-          description: Application Name.
-        policyStoreFilename:
+          description: "Log type: off, memory, std_out"
+          enum:
+          - "OFF"
+          - MEMORY
+          - STD_OUT
+        logLevel:
           type: string
-          description: List of attributes that are optional.
+          description: System Log Level
+          enum:
+          - FATAL
+          - ERROR
+          - WARN
+          - INFO
+          - DEBUG
+          - TRACE
+        externalPolicyStoreUri:
+          type: string
+          description: External policy store URI
       description: Cedar Configuration for authorization.
     DataFormatConversionConf:
       type: object
@@ -17829,6 +17853,19 @@ components:
         className:
           type: string
           description: Plugin application class.
+    PolicySource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if policy source is enabled
+        authorizationToken:
+          type: string
+          description: Authorization token to access URI
+        policyStoreUri:
+          type: string
+          description: URI to policy store. Policy store can be either json/zip
+      description: List of Policy Sources
     SmtpConfiguration:
       type: object
       properties:

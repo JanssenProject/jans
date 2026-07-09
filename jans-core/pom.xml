@@ -46,6 +46,7 @@
 		<module>util</module>
 		<module>model</module>
 		<module>cache</module>
+		<module>cedarling</module>
 		<module>message</module>
 		<module>document-store</module>
 		<module>standalone</module>
@@ -64,7 +65,6 @@
 		<module>doc</module>
 		<module>uma-rs-core</module>
 		<module>notify-client</module>
-        <module>cedarling</module>
 	</modules>
 
 	<dependencyManagement>

@@ -16,7 +16,962 @@ tags:
 - name: Lock - Configuration
 - name: Lock - Audit
 - name: Lock - Statistics
+paths:
+  /lock/audit/health/search:
+    get:
+      tags:
+      - Lock - Audit
+      summary: Rerquest health records for specific event range
+      description: Rerquest health records for specific event range
+      operationId: request-lock-health-records-event-range
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: eventStartDate
+        in: query
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: query
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HealthEntry"
+        "400":
+          description: Wrong date range specified
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+  /lock/audit/log/search:
+    get:
+      tags:
+      - Lock - Log
+      summary: Rerquest log records for specific event range
+      description: Rerquest log records for specific event range
+      operationId: request-lock-log-records-event-range
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: eventStartDate
+        in: query
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: query
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+        "400":
+          description: Wrong date range specified
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+  /lock/audit/telemetry/search:
+    get:
+      tags:
+      - Lock - Audit
+      summary: Request telemetry records for specific event range
+      description: Rerquest telemetry records for specific event range
+      operationId: request-lock-telemetry-records-event-range
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: eventStartDate
+        in: query
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: query
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelemetryEntry"
+        "400":
+          description: Wrong date range specified
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+  /lock/audit/health/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save health data
+      description: Bulk save health data
+      operationId: bulk-save-health-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/HealthEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/audit/log/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save log data
+      description: Bulk save log data
+      operationId: bulk-save-log-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/LogEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/audit/telemetry/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save telemetry data
+      description: Bulk save telemetry data
+      operationId: bulk-save-telemetry-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/TelemetryEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/audit/health:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Save health data
+      description: Save health data
+      operationId: save-health-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HealthEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/audit/log:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Save log data
+      description: Save log data
+      operationId: save-log-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/audit/telemetry:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Save telemetry data
+      description: Save telemetry data
+      operationId: save-telemetry-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryEntry"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/lockConfig:
+    get:
+      tags:
+      - Lock - Configuration
+      summary: Gets Lock configuration properties
+      description: Gets Lock configuration properties
+      operationId: get-lock-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+    put:
+      tags:
+      - Lock - Configuration
+      summary: Update Lock configuration properties
+      description: Update Lock configuration properties
+      operationId: put-lock-properties
+      requestBody:
+        description: GluuAttribute object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppConfiguration"
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+    patch:
+      tags:
+      - Lock - Configuration
+      summary: Partially modifies Lock configuration properties.
+      description: Partially modifies Lock configuration properties.
+      operationId: patch-lock-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/JsonPatch"
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /lock/lockStat:
+    get:
+      tags:
+      - Statistics
+      summary: Provides basic statistic
+      description: Provides basic statistic
+      operationId: get-lock-stat
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization code
+        schema:
+          type: string
+      - name: month
+        in: query
+        description: Month for which the stat report is to be fetched. The parameter
+          is mandatory if start_month and end_month parameters are not present.
+        schema:
+          type: string
+      - name: start-month
+        in: query
+        description: Start-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: end-month
+        in: query
+        description: End-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Report format
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JsonNode"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+        - jans_stat
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
+  schemas:
+    HealthEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        engineStatus:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+        creationDate:
+          type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T17:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        status:
+          type: string
+          description: Health status
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
+      description: Health audit entry
+    LogEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+        creationDate:
+          type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        eventType:
+          type: string
+          description: Type of event
+          example: registration
+        severityLevel:
+          type: string
+          description: Severity level
+          example: warning
+          enum:
+          - info
+          - warning
+          - error
+          - critical
+        action:
+          type: string
+          description: Action performed
+          example: ACTION_NAME_3
+        decisionResult:
+          type: string
+          description: Decision result
+          example: allow
+          enum:
+          - allow
+          - deny
+        requestedResource:
+          type: string
+          description: Requested resource as JSON string
+          example: "{\"t1\":\"value1\",\"t2\":\"value2\"}"
+        principalId:
+          type: string
+          description: Principal (user) identifier
+          example: ACC0001
+        clientId:
+          type: string
+          description: Client identifier
+          example: CLI001
+        jti:
+          type: string
+          description: JWT ID - unique identifier for the token
+          example: 550e8400-e29b-41d4-a716-446655440000
+        contextInformation:
+          type: object
+          additionalProperties:
+            type: string
+            description: Additional context information as key-value pairs
+          description: Additional context information as key-value pairs
+      description: Log audit entry
+    TelemetryEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+        creationDate:
+          type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        status:
+          type: string
+          description: Service status
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
+        lastPolicyLoadSize:
+          type: integer
+          description: Size of the last policy load in bytes
+          format: int64
+          example: 1024
+        policySuccessLoadCounter:
+          type: integer
+          description: Number of successful policy loads
+          format: int64
+          example: 100
+        policyFailedLoadCounter:
+          type: integer
+          description: Number of failed policy loads
+          format: int64
+          example: 3
+        lastPolicyEvaluationTimeNs:
+          type: integer
+          description: Last policy evaluation time in nanoseconds
+          format: int64
+          example: 100
+        avgPolicyEvaluationTimeNs:
+          type: integer
+          description: Average policy evaluation time in nanoseconds
+          format: int64
+          example: 75
+        memoryUsage:
+          type: integer
+          description: Memory usage in bytes
+          format: int64
+          example: 2097152
+        evaluationRequestsCount:
+          type: integer
+          description: Total number of evaluation requests
+          format: int64
+          example: 100
+        policyStats:
+          type: object
+          additionalProperties:
+            type: integer
+            description: Additional policy statistics as key-value pairs
+            format: int64
+          description: Additional policy statistics as key-value pairs
+      description: Telemetry audit entry
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
+    AppConfiguration:
+      type: object
+      properties:
+        baseDN:
+          type: string
+          description: Entry Base distinguished name (DN) that identifies the starting
+            point of a search
+        baseEndpoint:
+          type: string
+          description: Lock base endpoint URL
+        openIdIssuer:
+          type: string
+          description: OpenID issuer URL
+        protectionMode:
+          type: string
+          description: Protection mode for the Lock server (OAuth or Cedarling)
+          enum:
+          - oauth
+          - cedarling
+        auditPersistenceMode:
+          type: string
+          description: Audit persistence mode
+          enum:
+          - internal
+          - config-api
+        cedarlingConfiguration:
+          $ref: "#/components/schemas/CedarlingConfiguration"
+        grpcConfiguration:
+          $ref: "#/components/schemas/GrpcConfiguration"
+        statEnabled:
+          type: boolean
+          description: Active stat enabled
+        statTimerIntervalInSeconds:
+          type: integer
+          description: Statistical data capture time interval
+          format: int32
+        tokenChannels:
+          type: array
+          description: List of token channel names
+          items:
+            type: string
+            description: List of token channel names
+        clientId:
+          type: string
+          description: Lock Client ID
+        clientPassword:
+          type: string
+          description: Lock client password
+        disableJdkLogger:
+          type: boolean
+          description: Choose whether to disable JDK loggers
+        disableExternalLoggerConfiguration:
+          type: boolean
+        loggingLevel:
+          type: string
+          description: Specify the logging level of loggers
+        loggingLayout:
+          type: string
+          description: Logging layout used for Jans Authorization Server loggers
+        externalLoggerConfiguration:
+          type: string
+          description: The path to the external log4j2 logging configuration
+        metricReporterInterval:
+          type: integer
+          description: The interval for metric reporter in seconds
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          description: The days to keep metric reported data
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+          description: Enable metric reporter
+        cleanServiceInterval:
+          type: integer
+          description: Time interval for the Clean Service in seconds
+          format: int32
+        messageConsumerType:
+          type: string
+          description: PubSub consumer service
+        errorReasonEnabled:
+          type: boolean
+        cleanServiceBatchChunkSize:
+          type: integer
+          description: Each clean up iteration fetches chunk of expired data per base
+            dn and removes it from storage
+          format: int32
+    CedarlingConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if Cedraling is enabled
+        policySources:
+          type: array
+          description: List of Policy Sources
+          items:
+            $ref: "#/components/schemas/PolicySource"
+        logType:
+          type: string
+          description: "Log type: off, memory, std_out"
+          enum:
+          - "OFF"
+          - MEMORY
+          - STD_OUT
+        logLevel:
+          type: string
+          description: System Log Level
+          enum:
+          - FATAL
+          - ERROR
+          - WARN
+          - INFO
+          - DEBUG
+          - TRACE
+        externalPolicyStoreUri:
+          type: string
+          description: External policy store URI
+      description: Cedarling configuration
+    GrpcConfiguration:
+      type: object
+      properties:
+        serverMode:
+          type: string
+          description: gRPC server mode
+          enum:
+          - disabled
+          - bridge
+          - plain_server
+          - tls_server
+        grpcPort:
+          type: integer
+          description: Specify grpc port
+          format: int32
+        useTls:
+          type: boolean
+          description: Use TLS for gRPC communication
+        tlsCertChainFilePath:
+          type: string
+          description: TLS Cert Chain File Path
+        tlsPrivateKeyFilePath:
+          type: string
+          description: TLS Private Key File Path
+      description: gRPC server configuration
+    PolicySource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if policy source is enabled
+        authorizationToken:
+          type: string
+          description: Authorization token to access URI
+        policyStoreUri:
+          type: string
+          description: URI to policy store. Policy store can be either json/zip
+      description: List of Policy Sources
+    JsonPatch:
+      type: object
+    JsonNode:
+      type: object
   securitySchemes:
     oauth2:
       type: oauth2
@@ -42,5 +997,10 @@ components:
               information
             https://jans.io/oauth/config/lock.admin: Lock Admin access to manage all
               Lock configuration related information
-            ? ""
-            : ""
+            https://jans.io/oauth/config/read-all: Super admin read access to all
+              configuration resources
+            https://jans.io/oauth/config/write-all: Super admin write access to all
+              configuration resources
+            https://jans.io/oauth/config/delete-all: Super admin delete access to
+              all configuration resources
+            jans_stat: Auth Server Stats Authorization Scope

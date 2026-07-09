@@ -2,8 +2,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-core-cedarling</artifactId>
+	<packaging>jar</packaging>
 	<name>jans-core-cedarling</name>
-    <packaging>jar</packaging>
 
 	<parent>
 		<groupId>io.jans</groupId>

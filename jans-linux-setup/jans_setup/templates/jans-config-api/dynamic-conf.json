@@ -100,10 +100,8 @@
       "@jakarta.ws.rs.GET()"
     ]
   },
-  "cedarAuthConfig": {
-    "applicationName": "jans-config-api",
+  "cedarlingConfiguration": {
   	"enabled": true,
-    "applicationName": "jans-config-api",
 		"policySources": [
 			{
 				"enabled": false,

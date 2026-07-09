@@ -14,7 +14,7 @@ import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
-import io.jans.configapi.model.configuration.CedarConfig;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -171,7 +171,7 @@ public class AppInitializer {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info("=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{}, configurationFactory.isCedarAuthEnabled():{} ", configurationFactory.getApiProtectionType(), configurationFactory.isCedarAuthEnabled());
+        log.info("=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{}, getProtectionMode():{} ", configurationFactory.getApiProtectionType(), getProtectionMode());
 
         if (StringHelper.isEmpty(configurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
@@ -181,7 +181,7 @@ public class AppInitializer {
             apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
                     configurationFactory.getApiClientId());
             
-            if(configurationFactory.isCedarAuthEnabled()) {
+            if(getProtectionMode()!=null && getProtectionMode().equals(LockProtectionMode.CEDARLING)) {
                 return authorizationServiceInstance.select(CedarAuthorizationService.class).get();
             }
             else {
@@ -200,19 +200,13 @@ public class AppInitializer {
     @Produces
     @ApplicationScoped
     public LockProtectionMode getProtectionMode() {
-        return this.configurationFactory.getProtectionMode();
+        return this.configurationFactory.getApiAppConfiguration().getProtectionMode();
     }
     
     @Produces
     @ApplicationScoped
     public CedarlingConfiguration getCedarlingConfiguration() {
-        return this.configurationFactory.getCedarlingConfiguration();
-    }
-    
-    @Produces
-    @ApplicationScoped
-    public AssetMgtConfiguration getAssetMgtConfiguration() {
-        return this.configurationFactory.getApiAppConfiguration().get();
+        return this.configurationFactory.getApiAppConfiguration().getCedarlingConfiguration();
     }
 
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
