@@ -15,7 +15,7 @@ public interface CedarlingProtection extends BaseAuthorizationProtection {
     Response processAuthorization(String bearerToken, ResourceInfo resourceInfo);
 
     public static Response simpleResponse(Response.Status status, String detail) {
-        return Response.status(status).entity(detail).build();
+        return Response.status(status).entity(detail).build(); 
     }
     
 }

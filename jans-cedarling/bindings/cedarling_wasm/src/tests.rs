@@ -198,15 +198,84 @@ async fn test_run_cedarling() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&request)
-        .expect("RequestUnsigned should be converted to JsValue");
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
 
     let result = instance
-        .authorize_unsigned(js_request)
+        .authorize_unsigned(&request_str)
         .await
         .expect("authorize_unsigned request should be executed");
 
-    assert!(result.decision, "decision should be allowed")
+    assert!(result.decision, "decision should be allowed");
+}
+
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned_js_shaped_payload() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let js_serializer = serde_wasm_bindgen::Serializer::json_compatible();
+    let request_js = json!({
+        "principal": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+        },
+        "context": {
+            "current_time": 1735349685,
+            "device_health": ["Healthy"],
+            "fraud_indicators": ["Allowed"],
+            "geolocation": ["America"],
+            "network": "127.0.0.1",
+            "network_type": "Local",
+            "operating_system": "Linux",
+            "user_agent": "Linux"
+        },
+        "action": "Jans::Action::\"Read\"",
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http"
+            }
+        }
+    })
+    .serialize(&js_serializer)
+    .expect("request should be converted to a JS object");
+
+    let request_str: String = js_sys::JSON::stringify(&request_js)
+        .expect("JSON.stringify should succeed")
+        .into();
+
+    // JS integers must survive as integers in the JSON text (no trailing `.0`),
+    // so the Cedar-side attribute type matches what a JS caller sends.
+    assert!(
+        request_str.contains("\"current_time\":1735349685"),
+        "JSON.stringify should keep integer attributes integral, got: {request_str}"
+    );
+
+    let result = instance
+        .authorize_unsigned(&request_str)
+        .await
+        .expect("authorize_unsigned should accept a JSON.stringify'd JS object");
+
+    assert!(result.decision, "decision should be allowed");
 }
 
 /// Test memory log interface.
@@ -272,11 +341,11 @@ async fn test_memory_log_interface() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&request)
-        .expect("RequestUnsigned should be converted to JsValue");
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
 
     let _result = instance
-        .authorize_unsigned(js_request)
+        .authorize_unsigned(&request_str)
         .await
         .expect("authorize_unsigned request should be executed");
 
@@ -361,7 +430,7 @@ async fn test_authorize_unsigned_single_principal_allow() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -404,7 +473,7 @@ async fn test_authorize_unsigned_no_principal_public_action_allow() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -446,7 +515,7 @@ async fn test_authorize_unsigned_no_principal_principal_dependent_deny() {
 
     let result = instance
         .authorize_unsigned(
-            serde_wasm_bindgen::to_value(&request).expect("Failed to convert JSON to JsValue"),
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
         )
         .await
         .expect("authorize_unsigned should be executed successfully");
@@ -518,11 +587,11 @@ async fn test_multi_issuer_authorize_single_token() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("authorize_multi_issuer request should be executed");
 
@@ -636,11 +705,11 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("authorize_multi_issuer request should be executed");
 
@@ -712,12 +781,12 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     // Graceful degradation: invalid tokens are ignored, valid tokens are processed
     let result = instance
-        .authorize_multi_issuer(js_request)
+        .authorize_multi_issuer(&request_str)
         .await
         .expect("Should succeed gracefully when some tokens are invalid");
 
@@ -761,11 +830,11 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
         context: Some(json!({})),
     };
 
-    let js_request = serde_wasm_bindgen::to_value(&multi_issuer_request)
-        .expect("Multi-issuer request should be converted to JsValue");
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
 
     // This should fail due to empty tokens
-    let result = instance.authorize_multi_issuer(js_request).await;
+    let result = instance.authorize_multi_issuer(&request_str).await;
     assert!(result.is_err(), "Should fail with empty token array");
 }
 
