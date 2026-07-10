@@ -157,6 +157,119 @@ public class CedarlingAdapter implements AutoCloseable {
         return cedarling.authorizeUnsigned(principal, action, resourceObj, contextStr);
     }
 
+    // ── authorize_unsigned_batch ────────────────────────────────────────
+
+    /**
+     * Authorize a batch of unsigned requests against one shared principal.
+     *
+     * <p>Setup work (principal build + pushed-data snapshot) runs once and each
+     * item is evaluated in input order. Batch-level failures (validation,
+     * principal parse) throw; per-item failures synthesize a fail-closed
+     * {@code Deny} without affecting other items.</p>
+     *
+     * @param principal optional principal entity, or null for partial evaluation
+     * @param items list of {@link BatchItem} objects evaluated in input order
+     * @return response with {@code batch_id} and per-item results
+     */
+    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatch(
+            EntityData principal,
+            List<BatchItem> items) throws AuthorizeException {
+        if (items == null) {
+            throw new IllegalArgumentException("items must not be null");
+        }
+        return cedarling.authorizeUnsignedBatch(principal, items);
+    }
+
+    /**
+     * Authorize a batch of unsigned requests with a JSON-string principal.
+     *
+     * <p>Convenience overload that parses {@code principalJson} into
+     * {@link EntityData} — pass null for partial evaluation.</p>
+     *
+     * @param principalJson principal as a JSON string, or null for no asserted principal
+     * @param items list of {@link BatchItem} objects
+     */
+    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatch(
+            String principalJson,
+            List<BatchItem> items) throws AuthorizeException, EntityException {
+        EntityData principal =
+                principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
+        return authorizeUnsignedBatch(principal, items);
+    }
+
+    // ── authorize_multi_issuer_batch ────────────────────────────────────
+
+    /**
+     * Authorize a batch of multi-issuer requests against one shared token set.
+     *
+     * <p>Tokens are validated and token/issuer entities built once, then each
+     * item is evaluated in input order. Batch-level failures (validation, JWT
+     * verification, status-list refresh) throw; per-item failures synthesize a
+     * fail-closed {@code Deny}.</p>
+     *
+     * @param tokens shared {@link TokenInput} list
+     * @param items list of {@link BatchItem} objects
+     * @return response with {@code batch_id} and per-item results
+     */
+    public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
+            List<TokenInput> tokens,
+            List<BatchItem> items) throws AuthorizeException {
+        if (tokens == null) {
+            throw new IllegalArgumentException("tokens must not be null");
+        }
+        if (items == null) {
+            throw new IllegalArgumentException("items must not be null");
+        }
+        return cedarling.authorizeMultiIssuerBatch(tokens, items);
+    }
+
+    /**
+     * Convenience overload: build the token list from a mapping-name →
+     * JWT-string {@code Map}. Same rules apply as
+     * {@link #authorizeMultiIssuer(Map, String, JSONObject, JSONObject)}.
+     *
+     * @param tokens map of token mapping name → JWT string
+     * @param items list of {@link BatchItem} objects
+     */
+    public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
+            Map<String, String> tokens,
+            List<BatchItem> items) throws AuthorizeException {
+        if (tokens == null) {
+            throw new IllegalArgumentException("tokens must not be null");
+        }
+        List<TokenInput> tokenInputs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("tokens map must not contain a null key");
+            }
+            if (entry.getValue() == null) {
+                throw new IllegalArgumentException(
+                        "tokens map must not contain a null value for key: " + entry.getKey());
+            }
+            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
+        }
+        return authorizeMultiIssuerBatch(tokenInputs, items);
+    }
+
+    /**
+     * Build a single {@link BatchItem} from JSON pieces. Convenience helper so
+     * callers can construct items without importing UniFFI types.
+     *
+     * @param resource resource as JSONObject (must not be null)
+     * @param action Cedar action (e.g. {@code "Jans::Action::\"Read\""})
+     * @param context context as JSONObject (may be null; sent as {@code null} to
+     *     the engine, which defaults it to {@code {}})
+     */
+    public BatchItem batchItemFromJson(
+            JSONObject resource, String action, JSONObject context) throws EntityException {
+        if (resource == null) {
+            throw new IllegalArgumentException("resource must not be null");
+        }
+        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
+        String contextStr = context != null ? context.toString() : null;
+        return new BatchItem(resourceObj, action, contextStr);
+    }
+
     public String getLogById(String id) throws LogException {
         return cedarling.getLogById(id);
     }
