@@ -94,7 +94,11 @@ impl TryFrom<&AuditItem> for LockServerLogEntry {
             });
         };
 
-        let timestamp = entry.base.timestamp.clone().unwrap_or_default();
+        let timestamp = entry
+            .base
+            .timestamp
+            .clone()
+            .ok_or(MappingValidationError::MissingField)?;
         if entry.action.is_empty() || entry.resource.is_empty() {
             return Err(MappingValidationError::MissingField);
         }
