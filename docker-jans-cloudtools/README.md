@@ -20,7 +20,7 @@ The following environment variables are supported by the container:
 
 - `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, `google`, or `aws`.
 - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
-- `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `85appVersion: "1.13.0"`).
+- `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
 - `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
 - `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
@@ -46,9 +46,6 @@ The following environment variables are supported by the container:
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
-- `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
-- `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Google Secret Manager (default to `secret`).
 - `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql` or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_CONTAINER_METADATA`: The name of scheduler to pull container metadata (one of `docker` or `kubernetes`; default to `docker`).
@@ -56,7 +53,6 @@ The following environment variables are supported by the container:
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-- `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
 - `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
