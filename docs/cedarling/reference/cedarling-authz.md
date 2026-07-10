@@ -54,7 +54,7 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | | `authorize_multi_issuer` | `authorize_unsigned` |
 |---|---|---|
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
-| **JWT validation** | Yes — full signature, expiration, and status validation | No — accepts raw entity data as-is |
+| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
 | **Principal source** | Derived from JWT token claims | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
@@ -140,8 +140,8 @@ let request = {
   }
 };
 
-// Execute authorization
-let result = await cedarling.authorize_multi_issuer(request);
+// Execute authorization, the request is passed as a JSON string
+let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
 
 // Check result — single decision (no per-principal breakdown)
 if (result.decision) {
@@ -439,7 +439,8 @@ let input = {
   }
 };
 
-let result = await cedarling.authorize_unsigned(input);
+// the request is passed as a JSON string
+let result = await cedarling.authorize_unsigned(JSON.stringify(input));
 ```
 
 The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
@@ -484,7 +485,8 @@ let input = {
   }
 };
 
-let result = await cedarling.authorize_unsigned(input);
+// the request is passed as a JSON string
+let result = await cedarling.authorize_unsigned(JSON.stringify(input));
 ```
 
 In Rust, pass `principal: None`:
