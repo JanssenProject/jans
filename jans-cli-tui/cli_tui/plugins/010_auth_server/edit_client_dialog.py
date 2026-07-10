@@ -1238,6 +1238,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         ta.buffer.on_text_changed += on_text_changed
 
+        if not scopes_list:
+            self.myparent.show_message(_(common_strings.oops), _(
+                "No scope available to add."))
+            return
+
         self.add_scope_checkbox.values = scopes_list
         self.add_scope_frame = Frame(
             title="Checkbox list",
