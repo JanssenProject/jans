@@ -49,4 +49,40 @@ public class TrustRelationshipMetadataSourceTests {
         assertThat(error.getCause()).isInstanceOf(IncompatibleMetadataSourceForNature.class);
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with a NONE source " +
+        "WHEN updateMetadataSource() is called with a real source " +
+        "THEN it succeeds and the version is incremented")
+    public void shouldIncrementVersion_whenRealMetadataSourceSetFromNone(TrustRelationship tr) {
+
+        assertThat(tr).hasNoRealMetadataSource();
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(sampleFileMetadataSource());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue())
+            .hasRealMetadataSource()
+            .isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with a NONE source " +
+        "WHEN updateMetadataSource() is called with NONE " +
+        "THEN it succeeds and the version is unchanged")
+    public void shouldMaintainVersion_whenMetadataSetToNoneOnNoneSource(TrustRelationship tr) {
+
+        assertThat(tr).hasNoRealMetadataSource();
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue())
+            .hasNoRealMetadataSource()
+            .isVersion(tr.getVersion());
+    }
+
 }

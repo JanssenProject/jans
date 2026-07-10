@@ -48,4 +48,110 @@ public class TrustRelationshipProfileConfigurationTests {
         assertThat(updated).isInDraftStatus();
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsWithProfileConfigurationsAndAccessors")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with all profiles disabled " +
+        "WHEN a profile configuration is enabled " +
+        "THEN that profile becomes ACTIVE and at least one profile is active"
+    )
+    public void shouldMarkProfileActive_whenProfileEnabled(TrustRelationship tr, Object activeConfig, ProfileConfigurationAccessor accessor) {
+
+        assertThat(tr).hasNoActiveProfileConfiguration();
+
+        TrustResult<TrustRelationship> result = accessor.update(tr, activeConfig);
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(accessor.getStatus(updated)).isEqualTo(ProfileStatus.ACTIVE);
+        assertThat(updated).hasAtLeastOneActiveProfileConfiguration();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsWithProfileConfigurationsAndAccessors")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN a profile configuration is enabled " +
+        "THEN the version is incremented"
+    )
+    public void shouldIncrementVersion_whenProfileEnabled(TrustRelationship tr, Object activeConfig, ProfileConfigurationAccessor accessor) {
+
+        TrustResult<TrustRelationship> result = accessor.update(tr, activeConfig);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsAndAccessors")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with one active profile " +
+        "WHEN that profile configuration is disabled " +
+        "THEN the profile becomes INACTIVE"
+    )
+    public void shouldMarkProfileInactive_whenProfileDisabled(TrustRelationship tr, ProfileConfigurationAccessor accessor, String fieldName) {
+
+        TrustRelationship withActive = accessor.updateStatus(tr, ProfileStatus.ACTIVE).getValue();
+        assertThat(accessor.getStatus(withActive)).isEqualTo(ProfileStatus.ACTIVE);
+
+        TrustResult<TrustRelationship> result = accessor.updateStatus(withActive, ProfileStatus.INACTIVE);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(accessor.getStatus(result.getValue())).isEqualTo(ProfileStatus.INACTIVE);
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsAndAccessors")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN a profile configuration is updated with the same value " +
+        "THEN the version is unchanged"
+    )
+    public void shouldMaintainVersion_whenProfileUnchanged(TrustRelationship tr, ProfileConfigurationAccessor accessor, String fieldName) {
+
+        Object sameConfig = accessor.extract(tr);
+
+        TrustResult<TrustRelationship> result = accessor.update(tr, sameConfig);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion());
+        assertThat(result.getValue()).isEqualTo(tr);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN several distinct profiles are enabled " +
+        "THEN the active profile count reflects them"
+    )
+    public void shouldReflectActiveCount_whenSeveralProfilesEnabled() {
+
+        TrustRelationship tr = sampleDraftIndividualTrustRelationship()
+            .updateShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration()).getValue()
+            .updateSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration()).getValue()
+            .updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration()).getValue();
+
+        assertThat(tr).hasActiveProfileConfigurationCount(3);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with active profiles " +
+        "WHEN all profiles are disabled " +
+        "THEN no profile is active"
+    )
+    public void shouldHaveNoActiveProfile_whenAllProfilesDisabled() {
+
+        TrustRelationship withActive = sampleDraftIndividualTrustRelationship()
+            .updateShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration()).getValue()
+            .updateSaml2SsoProfileConfiguration(activeSaml2SsoProfileConfiguration()).getValue();
+        assertThat(withActive).hasAtLeastOneActiveProfileConfiguration();
+
+        TrustRelationship allDisabled = withActive
+            .updateShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration()).getValue()
+            .updateSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration()).getValue();
+
+        assertThat(allDisabled).hasNoActiveProfileConfiguration();
+    }
+
 }

@@ -107,4 +107,51 @@ public class TrustRelationshipDescriptiveUpdateTests {
         assertThat(same_tr).isEqualTo(tr);
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a DRAFT TrustRelationship " +
+        "WHEN updateDescription() is called with a blank description " +
+        "THEN it succeeds because a blank description is allowed"
+    )
+    public void shouldUpdateDescription_whenNewDescriptionIsBlank(TrustRelationship tr) {
+
+        Description blankDescription = Description.of("   ");
+
+        TrustResult<TrustRelationship> result = tr.updateDescription(blankDescription);
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated_tr = result.getValue();
+        assertThat(updated_tr.getDescription()).isEqualTo(blankDescription);
+        assertThat(updated_tr.getDescription().getValue()).isEmpty();
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a trust relationship at a given version " +
+        "WHEN any field is effectively changed " +
+        "THEN the version is incremented exactly once"
+    )
+    public void shouldIncrementVersionByOne_whenEffectivelyModified() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+        Version expected = draft.getVersion().next();
+
+        assertThat(draft.updateDisplayName(
+                io.jans.shibboleth.model.core.DisplayName.of("Renamed").getValue())
+            .getValue().getVersion()).isEqualTo(expected);
+
+        assertThat(draft.updateDescription(Description.of("Changed"))
+            .getValue().getVersion()).isEqualTo(expected);
+
+        assertThat(draft.updateMetadataSource(sampleFileMetadataSource())
+            .getValue().getVersion()).isEqualTo(expected);
+
+        assertThat(draft.updateReleasedAttributes(sampleReleasedAttributes())
+            .getValue().getVersion()).isEqualTo(expected);
+
+        assertThat(draft.updateShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration())
+            .getValue().getVersion()).isEqualTo(expected);
+    }
+
 }

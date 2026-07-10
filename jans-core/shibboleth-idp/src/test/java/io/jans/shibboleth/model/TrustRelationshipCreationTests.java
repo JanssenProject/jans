@@ -74,6 +74,43 @@ public class TrustRelationshipCreationTests {
             .usesDefaultConfiguration();
     }
 
+    @Test
+    @DisplayName(
+        "GIVEN a valid displayName and a blank description " +
+        "WHEN create() is called " +
+        "THEN it succeeds because a blank description is allowed")
+    public void shouldCreate_whenDescriptionIsBlank() {
+
+        io.jans.shibboleth.model.core.DisplayName displayName =
+            io.jans.shibboleth.model.core.DisplayName.of("BlankDescriptionTR").getValue();
+        Description blankDescription = Description.of("   ");
+
+        TrustResult<TrustRelationship> result =
+            TrustRelationship.create(displayName, blankDescription, TrustNature.INDIVIDUAL);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInDraftStatus().hasDescription(blankDescription);
+        assertThat(result.getValue().getDescription().getValue()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a TrustRelationship " +
+        "WHEN updateDescription() is called with a null parameter " +
+        "THEN the call should fail with the appropriate error")
+    public void shouldFailWhenUpdateDescriptionWithNull(TrustRelationship tr) {
+
+        TrustResult<TrustRelationship> result = tr.updateDescription(null);
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+        DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(cause.getFieldName()).isEqualTo("description");
+    }
+
     @ParameterizedTest
     @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#creationParametersWithNullValuesAndMissingFieldNames")
     @DisplayName(
