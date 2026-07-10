@@ -21,6 +21,8 @@ use mapping::LockServerHealthEntry;
 pub(super) mod grpc;
 pub(super) mod mapping;
 pub(super) mod rest;
+#[cfg(test)]
+pub(super) mod test_utils;
 
 /// Typed audit payload dispatched to the Lock Server
 #[derive(Clone)]

@@ -88,75 +88,9 @@ mod test {
     use mockito::{Server, ServerGuard};
     use url::Url;
 
-    fn sample_log_item() -> AuditItem {
-        use crate::common::app_types::{ApplicationName, PdpID};
-        use crate::lock::transport::AuditPayload;
-        use crate::log::{
-            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
-        };
-        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
-        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
-        let entry = DecisionLogEntry {
-            base,
-            policystore_id: "store".into(),
-            policystore_version: "1.0".into(),
-            principal: vec!["Jans::User".into()],
-            lock_client_id: None,
-            action: "Test".to_string(),
-            resource: "Jans::Issue".to_string(),
-            decision: Decision::Allow,
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec: 1,
-            diagnostics: DiagnosticsSummary {
-                reason: std::collections::HashSet::default(),
-                errors: Vec::new(),
-            },
-            pushed_data: None,
-        };
-        AuditItem {
-            payload: AuditPayload::Decision(Box::new(entry)),
-            pdp_id: PdpID::new(),
-            app_name: Some(ApplicationName::from("test_app".to_string())),
-        }
-    }
-
-    fn sample_metric_item() -> AuditItem {
-        use crate::common::app_types::{ApplicationName, PdpID};
-        use crate::lock::transport::AuditPayload;
-        use crate::log::{BaseLogEntry, MetricsLogEntry};
-        let mut base = BaseLogEntry::new_metric(crate::log::gen_uuid7());
-        base.timestamp = Some("2026-04-07T17:04:39.162Z".to_string());
-        let entry = MetricsLogEntry {
-            base,
-            policy_stats: std::collections::HashMap::new(),
-            error_counters: std::collections::HashMap::new(),
-            operational_stats: std::collections::HashMap::new(),
-            interval_secs: 60,
-        };
-        AuditItem {
-            payload: AuditPayload::Metric(Box::new(entry)),
-            pdp_id: PdpID::new(),
-            app_name: Some(ApplicationName::from("test_app".to_string())),
-        }
-    }
-
-    fn sample_health_item() -> AuditItem {
-        use crate::common::app_types::PdpID;
-        use crate::lock::transport::AuditPayload;
-        use crate::lock::transport::mapping::LockServerHealthEntry;
-        AuditItem {
-            payload: AuditPayload::Health(Box::new(LockServerHealthEntry {
-                creation_date: "2026-03-23T11:50:37.504Z".to_string(),
-                event_time: "2026-03-23T11:50:37.504Z".to_string(),
-                service: "test_app".to_string(),
-                node_name: "test-pdp".to_string(),
-                status: "running".to_string(),
-                engine_status: std::collections::HashMap::new(),
-            })),
-            pdp_id: PdpID::new(),
-            app_name: None,
-        }
-    }
+    use crate::lock::transport::test_utils::{
+        sample_health_item, sample_log_item, sample_metric_item,
+    };
 
     fn create_test_client() -> HttpClient {
         HttpClient::new(HttpClientConfig::default()).expect("Http client should be initialized")

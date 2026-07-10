@@ -232,12 +232,13 @@ mod test {
 
     use super::*;
     use crate::common::app_types::{ApplicationName, PdpID};
+    use crate::lock::transport::test_utils::{decision_audit_item, metric_audit_item};
     use crate::log::{
         BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
         MetricsLogEntry, PushedDataInfo,
     };
 
-    pub(crate) fn test_decision_entry() -> DecisionLogEntry {
+    fn test_decision_entry() -> DecisionLogEntry {
         let request_id = crate::log::gen_uuid7();
         let mut base = BaseLogEntry::new_decision(request_id);
         base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
@@ -260,30 +261,6 @@ mod test {
             pushed_data: Some(PushedDataInfo {
                 keys: vec!["extra_context".into()],
             }),
-        }
-    }
-
-    pub(crate) fn decision_audit_item(
-        entry: DecisionLogEntry,
-        pdp_id: PdpID,
-        app_name: Option<ApplicationName>,
-    ) -> AuditItem {
-        AuditItem {
-            payload: AuditPayload::Decision(Box::new(entry)),
-            pdp_id,
-            app_name,
-        }
-    }
-
-    pub(crate) fn metric_audit_item(
-        entry: MetricsLogEntry,
-        pdp_id: PdpID,
-        app_name: Option<ApplicationName>,
-    ) -> AuditItem {
-        AuditItem {
-            payload: AuditPayload::Metric(Box::new(entry)),
-            pdp_id,
-            app_name,
         }
     }
 
