@@ -819,6 +819,7 @@ version = "0.1.0"
 dependencies = [
  "cedarling",
  "serde_json",
+ "test_utils",
  "thiserror 2.0.18",
  "uniffi",
  "uniffi_macros",
