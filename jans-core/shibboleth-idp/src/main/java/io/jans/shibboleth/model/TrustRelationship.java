@@ -30,7 +30,6 @@ import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
-import io.jans.shibboleth.model.rules.consistency.TrustConsistencyRules;
 import io.jans.shibboleth.model.rules.invariants.TrustInvariants;
 import io.jans.shibboleth.model.rules.operations.TrustOperationRestrictions;
 import io.jans.shibboleth.model.rules.operations.TrustOperationRestrictions.TrustOperationRestriction;
