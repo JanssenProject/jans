@@ -85,3 +85,39 @@ impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
         }
     }
 }
+
+/// Result of `Cedarling.authorize_unsigned_batch`. Carries a shared `batch_id`
+/// (UUIDv7) alongside per-item results. `results[i]` corresponds to the
+/// `items[i]` supplied in the request.
+#[derive(Debug, uniffi::Record)]
+pub struct BatchAuthorizeUnsignedResponse {
+    pub batch_id: String,
+    pub results: Vec<AuthorizeResult>,
+}
+
+impl From<core::BatchAuthorizeResponse<core::AuthorizeResult>> for BatchAuthorizeUnsignedResponse {
+    fn from(value: core::BatchAuthorizeResponse<core::AuthorizeResult>) -> Self {
+        Self {
+            batch_id: value.batch_id.to_string(),
+            results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+/// Result of `Cedarling.authorize_multi_issuer_batch`.
+#[derive(Debug, uniffi::Record)]
+pub struct BatchAuthorizeMultiIssuerResponse {
+    pub batch_id: String,
+    pub results: Vec<MultiIssuerAuthorizeResult>,
+}
+
+impl From<core::BatchAuthorizeResponse<core::MultiIssuerAuthorizeResult>>
+    for BatchAuthorizeMultiIssuerResponse
+{
+    fn from(value: core::BatchAuthorizeResponse<core::MultiIssuerAuthorizeResult>) -> Self {
+        Self {
+            batch_id: value.batch_id.to_string(),
+            results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
