@@ -9,40 +9,30 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::lock::health_registry::HealthStatus;
-use crate::log::MetricsLogEntry;
+use crate::lock::transport::{AuditItem, AuditPayload, TransportError};
+use crate::log::DecisionLogEntry;
 
 #[derive(Debug, thiserror::Error)]
-pub(super) enum MappingValidationError {
+pub(crate) enum MappingValidationError {
     #[error("missing required field")]
     MissingField,
+    #[error("expected a {expected} entry, got a {got} entry")]
+    UnexpectedKind {
+        expected: &'static str,
+        got: &'static str,
+    },
+    #[error("failed to serialize entry context: {0}")]
+    Context(String),
 }
 
-#[derive(Debug, Deserialize)]
-pub(super) struct CedarlingLogEntry {
-    pub timestamp: String,
-    pub log_kind: String,
-    pub decision: String,
-    pub action: String,
-    pub level: Option<String>,
-    // Cedarling emits principal as an array of entity strings
-    #[serde(default)]
-    pub principal: Vec<String>,
-    pub resource: String,
-    #[serde(default)]
-    pub application_id: String,
-    pub pdp_id: String,
-    // Catch everything else for context_information
-    #[serde(flatten)]
-    pub extra: HashMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(super) struct CedarlingMetricsEntry {
-    #[serde(flatten)]
-    pub metric: MetricsLogEntry,
-    pub pdp_id: String,
-    #[serde(default)]
-    pub application_id: String,
+impl AuditPayload {
+    fn kind(&self) -> &'static str {
+        match self {
+            AuditPayload::Decision(_) => "decision",
+            AuditPayload::Metric(_) => "metric",
+            AuditPayload::Health(_) => "health",
+        }
+    }
 }
 
 /// Serializes into the lock server's expected format
@@ -68,7 +58,7 @@ pub(super) struct LockServerLogEntry {
 }
 
 /// Serializes into the lock server's expected health format.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct LockServerHealthEntry {
     pub creation_date: String,
     pub event_time: String,
@@ -93,66 +83,143 @@ pub(super) struct LockServerMetricsEntry {
     pub operational_stats: HashMap<String, i64>,
 }
 
-impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
+impl TryFrom<&AuditItem> for LockServerLogEntry {
     type Error = MappingValidationError;
 
-    fn try_from(value: CedarlingLogEntry) -> Result<Self, Self::Error> {
-        if value.log_kind.is_empty()
-            || value.decision.is_empty()
-            || value.action.is_empty()
-            || value.resource.is_empty()
-        {
+    fn try_from(item: &AuditItem) -> Result<Self, Self::Error> {
+        let AuditPayload::Decision(entry) = &item.payload else {
+            return Err(MappingValidationError::UnexpectedKind {
+                expected: "decision",
+                got: item.payload.kind(),
+            });
+        };
+
+        let timestamp = entry.base.timestamp.clone().unwrap_or_default();
+        if entry.action.is_empty() || entry.resource.is_empty() {
             return Err(MappingValidationError::MissingField);
         }
 
-        let mut extra = value.extra;
-        let client_id = extra
-            .remove("lock_client_id")
-            .and_then(|v| v.as_str().map(String::from));
-        let context_information = if extra.is_empty() {
-            None
-        } else {
-            Some(Value::Object(extra.into_iter().collect()))
-        };
-
         Ok(Self {
-            creation_date: value.timestamp.clone(),
-            event_time: value.timestamp,
-            service: Some(value.application_id),
-            node_name: value.pdp_id,
-            event_type: value.log_kind,
-            severity_level: value.level,
-            action: value.action,
-            decision_result: value.decision,
-            requested_resource: value.resource,
-            principal_id: if value.principal.is_empty() {
-                None
-            } else {
-                Some(value.principal.join(", "))
-            },
-            client_id,
-            context_information,
+            creation_date: timestamp.clone(),
+            event_time: timestamp,
+            service: item.app_name.as_ref().map(|n| n.0.to_string()),
+            node_name: item.pdp_id.to_string(),
+            event_type: entry.base.log_kind.to_string(),
+            severity_level: entry.base.level.map(|level| level.to_string()),
+            action: entry.action.clone(),
+            decision_result: entry.decision.to_string(),
+            requested_resource: entry.resource.clone(),
+            principal_id: (!entry.principal.is_empty()).then(|| {
+                entry
+                    .principal
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            }),
+            client_id: entry.lock_client_id.clone(),
+            context_information: decision_context_information(entry)?,
         })
     }
 }
 
-impl TryFrom<CedarlingMetricsEntry> for LockServerMetricsEntry {
+fn decision_context_information(
+    entry: &DecisionLogEntry,
+) -> Result<Option<Value>, MappingValidationError> {
+    let value =
+        serde_json::to_value(entry).map_err(|e| MappingValidationError::Context(e.to_string()))?;
+    let Value::Object(mut map) = value else {
+        return Ok(None);
+    };
+
+    for key in [
+        "timestamp",
+        "log_kind",
+        "level",
+        "decision",
+        "action",
+        "resource",
+        "principal",
+        "lock_client_id",
+    ] {
+        map.remove(key);
+    }
+
+    Ok((!map.is_empty()).then(|| Value::Object(map)))
+}
+
+impl TryFrom<&AuditItem> for LockServerMetricsEntry {
     type Error = MappingValidationError;
 
-    fn try_from(value: CedarlingMetricsEntry) -> Result<Self, Self::Error> {
-        let timestamp = value.metric.base.timestamp.unwrap_or_default();
+    fn try_from(item: &AuditItem) -> Result<Self, Self::Error> {
+        let AuditPayload::Metric(entry) = &item.payload else {
+            return Err(MappingValidationError::UnexpectedKind {
+                expected: "metric",
+                got: item.payload.kind(),
+            });
+        };
 
         Ok(Self {
-            creation_date: timestamp,
-            service: (!value.application_id.is_empty()).then_some(value.application_id),
-            node_name: value.pdp_id,
+            creation_date: entry.base.timestamp.clone().unwrap_or_default(),
+            service: item.app_name.as_ref().map(|n| n.0.to_string()),
+            node_name: item.pdp_id.to_string(),
             status: "running".to_string(),
-            interval_secs: value.metric.interval_secs,
-            policy_stats: value.metric.policy_stats,
-            error_counters: value.metric.error_counters,
-            operational_stats: value.metric.operational_stats,
+            interval_secs: entry.interval_secs,
+            policy_stats: entry.policy_stats.clone(),
+            error_counters: entry.error_counters.clone(),
+            operational_stats: entry.operational_stats.clone(),
         })
     }
+}
+
+impl TryFrom<&AuditItem> for LockServerHealthEntry {
+    type Error = MappingValidationError;
+
+    fn try_from(item: &AuditItem) -> Result<Self, Self::Error> {
+        let AuditPayload::Health(entry) = &item.payload else {
+            return Err(MappingValidationError::UnexpectedKind {
+                expected: "health",
+                got: item.payload.kind(),
+            });
+        };
+
+        Ok(entry.as_ref().clone())
+    }
+}
+
+/// Map a batch of typed audit items into the Lock Server wire format
+pub(super) fn map_entries<'a, T>(
+    entries: &'a [AuditItem],
+    label: &str,
+    log_warn: impl Fn(String),
+) -> Result<Vec<T>, TransportError>
+where
+    T: TryFrom<&'a AuditItem>,
+    <T as TryFrom<&'a AuditItem>>::Error: std::fmt::Display,
+{
+    if entries.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mapped: Vec<T> = entries
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, item)| match T::try_from(item) {
+            Ok(t) => Some(t),
+            Err(e) => {
+                log_warn(format!("failed to convert {label} entry[{idx}]: {e}"));
+                None
+            },
+        })
+        .collect();
+
+    if mapped.is_empty() {
+        return Err(TransportError::Serialization(format!(
+            "all {label} entries were malformed, nothing to send"
+        )));
+    }
+
+    Ok(mapped)
 }
 
 #[cfg(test)]
@@ -161,21 +228,17 @@ mod test {
 
     use super::*;
     use crate::common::app_types::{ApplicationName, PdpID};
-    use crate::log::log_strategy::LogEntryWithClientInfo;
     use crate::log::{
-        BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo, LogType,
+        BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
         MetricsLogEntry, PushedDataInfo,
     };
 
-    /// Verifies that a real `DecisionLogEntry` (wrapped in `LogEntryWithClientInfo`)
-    /// is correctly serialized, deserialized into `CedarlingLogEntry`, and then mapped
-    /// to the Lock server's `LockServerLogEntry` format with all fields in the right places.
-    #[test]
-    fn decision_log_entry_maps_to_lock_server_format() {
+    pub(crate) fn test_decision_entry() -> DecisionLogEntry {
         let request_id = crate::log::gen_uuid7();
-        let base = BaseLogEntry::new_decision(request_id);
+        let mut base = BaseLogEntry::new_decision(request_id);
+        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
 
-        let decision_entry = DecisionLogEntry {
+        DecisionLogEntry {
             base,
             policystore_id: "test-store".into(),
             policystore_version: "1.0.0".into(),
@@ -193,61 +256,45 @@ mod test {
             pushed_data: Some(PushedDataInfo {
                 keys: vec!["extra_context".into()],
             }),
-        };
+        }
+    }
 
+    pub(crate) fn decision_audit_item(
+        entry: DecisionLogEntry,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> AuditItem {
+        AuditItem {
+            payload: AuditPayload::Decision(Box::new(entry)),
+            pdp_id,
+            app_name,
+        }
+    }
+
+    pub(crate) fn metric_audit_item(
+        entry: MetricsLogEntry,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> AuditItem {
+        AuditItem {
+            payload: AuditPayload::Metric(Box::new(entry)),
+            pdp_id,
+            app_name,
+        }
+    }
+
+    #[test]
+    fn decision_log_entry_maps_to_lock_server_format() {
         let pdp_id = PdpID::new();
         let app_name = ApplicationName::from("my_test_app".to_string());
+        let item = decision_audit_item(test_decision_entry(), pdp_id, Some(app_name));
 
-        // Wrap in LogEntryWithClientInfo — this is what the LockService actually receives
-        let wrapped = LogEntryWithClientInfo::from_loggable(decision_entry, pdp_id, Some(app_name));
+        let lock_entry = LockServerLogEntry::try_from(&item).expect("map to LockServerLogEntry");
 
-        // Serialize exactly as LockService.log_any() does
-        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped entry");
-
-        // Deserialize into the intermediate CedarlingLogEntry
-        let cedarling_entry: CedarlingLogEntry =
-            serde_json::from_str(&json_str).expect("deserialize into CedarlingLogEntry");
-
-        // Verify key fields are correctly extracted
-        assert_eq!(cedarling_entry.log_kind, "Decision");
-        assert_eq!(cedarling_entry.decision, "ALLOW");
-        assert_eq!(cedarling_entry.action, "Jans::Action::\"Update\"");
-        assert_eq!(cedarling_entry.resource, "Jans::Issue::\"random_id\"");
-        assert_eq!(cedarling_entry.application_id, "my_test_app");
-        assert_eq!(
-            cedarling_entry.principal,
-            vec!["Jans::User", "Jans::Workload"]
-        );
-        assert!(
-            !cedarling_entry.pdp_id.is_empty(),
-            "pdp_id should not be empty"
-        );
-
-        // The extra fields should contain diagnostics, decision_time, etc.
-        assert!(
-            cedarling_entry.extra.contains_key("diagnostics"),
-            "extra should contain diagnostics"
-        );
-        assert!(
-            cedarling_entry
-                .extra
-                .contains_key("decision_time_micro_sec"),
-            "extra should contain decision_time_micro_sec"
-        );
-        assert!(
-            cedarling_entry.extra.contains_key("lock_client_id"),
-            "extra should contain lock_client_id"
-        );
-
-        // Map to LockServerLogEntry
-        let lock_entry =
-            LockServerLogEntry::try_from(cedarling_entry).expect("map to LockServerLogEntry");
-
-        // Verify all Lock server fields
-        assert!(!lock_entry.creation_date.is_empty());
-        assert!(!lock_entry.event_time.is_empty());
+        assert_eq!(lock_entry.creation_date, "2026-03-23T11:50:37.504Z");
+        assert_eq!(lock_entry.event_time, "2026-03-23T11:50:37.504Z");
         assert_eq!(lock_entry.service.as_deref(), Some("my_test_app"));
-        assert!(!lock_entry.node_name.is_empty()); // pdp_id
+        assert_eq!(lock_entry.node_name, pdp_id.to_string());
         assert_eq!(lock_entry.event_type, "Decision");
         assert_eq!(lock_entry.action, "Jans::Action::\"Update\"");
         assert_eq!(lock_entry.decision_result, "ALLOW");
@@ -256,9 +303,7 @@ mod test {
             lock_entry.principal_id.as_deref(),
             Some("Jans::User, Jans::Workload")
         );
-        // lock_client_id should be extracted from extra into client_id
         assert_eq!(lock_entry.client_id.as_deref(), Some("lock-client-123"));
-        // Remaining extra fields (diagnostics, decision_time, etc.) go into context_information
         let ctx = lock_entry
             .context_information
             .expect("context_information should be present");
@@ -266,61 +311,35 @@ mod test {
         assert!(ctx.get("decision_time_micro_sec").is_some());
         assert!(ctx.get("policystore_id").is_some());
         assert!(ctx.get("pushed_data").is_some());
+        assert!(ctx.get("action").is_none());
+        assert!(ctx.get("decision").is_none());
+        assert!(ctx.get("lock_client_id").is_none());
     }
 
-    /// Verifies that a [`DecisionLogEntry`] with a DENY decision maps correctly.
     #[test]
     fn deny_decision_maps_correctly() {
-        let base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
-        let entry = DecisionLogEntry {
-            base,
-            policystore_id: "store".into(),
-            policystore_version: "1.0".into(),
-            principal: vec![],
-            lock_client_id: None,
-            action: "Jans::Action::\"Read\"".to_string(),
-            resource: "Jans::Resource::\"doc\"".to_string(),
-            decision: Decision::Deny,
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec: 100,
-            diagnostics: DiagnosticsSummary {
-                reason: HashSet::default(),
-                errors: Vec::new(),
-            },
-            pushed_data: None,
-        };
+        let mut entry = test_decision_entry();
+        entry.principal = vec![];
+        entry.lock_client_id = None;
+        entry.decision = Decision::Deny;
 
-        let pdp_id = PdpID::new();
-        let wrapped = LogEntryWithClientInfo::from_loggable(entry, pdp_id, None);
-        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped DecisionLogEntry");
-        let cedarling: CedarlingLogEntry =
-            serde_json::from_str(&json_str).expect("deserialize to CedarlingLogEntry");
-        let lock_entry = LockServerLogEntry::try_from(cedarling)
-            .expect("convert CedarlingLogEntry to LockServerLogEntry");
+        let item = decision_audit_item(entry, PdpID::new(), None);
+        let lock_entry = LockServerLogEntry::try_from(&item).expect("map to LockServerLogEntry");
 
         assert_eq!(lock_entry.decision_result, "DENY");
-        assert_eq!(lock_entry.principal_id, None); // empty principal list
-        assert_eq!(lock_entry.client_id, None); // no lock_client_id
-        assert_eq!(lock_entry.service, Some(String::new())); // no app_name → empty string
-        assert_eq!(lock_entry.severity_level, None); // Decision logs have no level
+        assert_eq!(lock_entry.principal_id, None);
+        assert_eq!(lock_entry.client_id, None);
+        assert_eq!(lock_entry.service, None);
+        assert_eq!(lock_entry.severity_level, None);
     }
 
     #[test]
     fn mapping_fails_when_required_field_is_empty() {
-        let cedarling = CedarlingLogEntry {
-            timestamp: "2026-03-23T12:00:00Z".to_string(),
-            log_kind: "Decision".to_string(),
-            decision: "ALLOW".to_string(),
-            action: String::new(),
-            level: None,
-            principal: vec![],
-            resource: "Jans::Resource::\"doc\"".to_string(),
-            application_id: "my_test_app".to_string(),
-            pdp_id: "pdp-1".to_string(),
-            extra: HashMap::new(),
-        };
+        let mut entry = test_decision_entry();
+        entry.action = String::new();
 
-        let err = LockServerLogEntry::try_from(cedarling)
+        let item = decision_audit_item(entry, PdpID::new(), None);
+        let err = LockServerLogEntry::try_from(&item)
             .expect_err("empty action must fail LockServerLogEntry mapping");
         assert!(
             matches!(err, MappingValidationError::MissingField),
@@ -329,19 +348,47 @@ mod test {
     }
 
     #[test]
+    fn mapping_fails_when_timestamp_is_missing() {
+        let mut entry = test_decision_entry();
+        entry.base.timestamp = None;
+
+        let item = decision_audit_item(entry, PdpID::new(), None);
+        let err = LockServerLogEntry::try_from(&item)
+            .expect_err("missing timestamp must fail LockServerLogEntry mapping");
+        assert!(matches!(err, MappingValidationError::MissingField));
+    }
+
+    #[test]
+    fn mapping_fails_on_kind_mismatch() {
+        let base = BaseLogEntry::new_metric(crate::log::gen_uuid7());
+        let metric = MetricsLogEntry {
+            base,
+            policy_stats: HashMap::new(),
+            error_counters: HashMap::new(),
+            operational_stats: HashMap::new(),
+            interval_secs: 60,
+        };
+
+        let item = metric_audit_item(metric, PdpID::new(), None);
+        let err =
+            LockServerLogEntry::try_from(&item).expect_err("metric payload must fail log mapping");
+        assert!(matches!(err, MappingValidationError::UnexpectedKind { .. }));
+    }
+
+    #[test]
     fn metrics_log_entry_maps_to_lock_server_format() {
         let request_id = crate::log::gen_uuid7();
         let base = BaseLogEntry::new_metric(request_id);
 
-        let mut policy_stats = std::collections::HashMap::new();
+        let mut policy_stats = HashMap::new();
         policy_stats.insert("allow_read_docs".to_string(), 340);
         policy_stats.insert("deny_admin".to_string(), 12);
 
-        let mut operational_stats = std::collections::HashMap::new();
+        let mut operational_stats = HashMap::new();
         operational_stats.insert("authz.requests_total".to_string(), 1240);
         operational_stats.insert("authz.decision_allow".to_string(), 1218);
 
-        let mut error_counters = std::collections::HashMap::new();
+        let mut error_counters = HashMap::new();
         error_counters.insert("jwt.validation_failed".to_string(), 8);
 
         let metrics_entry = MetricsLogEntry {
@@ -354,38 +401,10 @@ mod test {
 
         let pdp_id = PdpID::new();
         let app_name = ApplicationName::from("jans-auth".to_string());
+        let item = metric_audit_item(metrics_entry, pdp_id, Some(app_name));
 
-        let wrapped = LogEntryWithClientInfo::from_loggable(metrics_entry, pdp_id, Some(app_name));
-
-        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped metrics entry");
-
-        let cedarling_entry: CedarlingMetricsEntry =
-            serde_json::from_str(&json_str).expect("deserialize into CedarlingMetricsEntry");
-
-        assert_eq!(cedarling_entry.metric.base.log_kind, LogType::Metric);
-        assert_eq!(cedarling_entry.metric.interval_secs, 60);
-        assert_eq!(cedarling_entry.application_id, "jans-auth");
-        assert_eq!(
-            cedarling_entry.metric.policy_stats.get("allow_read_docs"),
-            Some(&340)
-        );
-        assert_eq!(
-            cedarling_entry
-                .metric
-                .error_counters
-                .get("jwt.validation_failed"),
-            Some(&8)
-        );
-        assert_eq!(
-            cedarling_entry
-                .metric
-                .operational_stats
-                .get("authz.requests_total"),
-            Some(&1240)
-        );
-
-        let lock_entry = LockServerMetricsEntry::try_from(cedarling_entry)
-            .expect("map to LockServerMetricsEntry");
+        let lock_entry =
+            LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service.as_deref(), Some("jans-auth"));
         assert_eq!(lock_entry.node_name, pdp_id.to_string());
@@ -408,24 +427,47 @@ mod test {
 
         let metrics_entry = MetricsLogEntry {
             base,
-            policy_stats: std::collections::HashMap::new(),
-            error_counters: std::collections::HashMap::new(),
-            operational_stats: std::collections::HashMap::new(),
+            policy_stats: HashMap::new(),
+            error_counters: HashMap::new(),
+            operational_stats: HashMap::new(),
             interval_secs: 30,
         };
 
-        let pdp_id = PdpID::new();
-        let wrapped = LogEntryWithClientInfo::from_loggable(metrics_entry, pdp_id, None);
-        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped MetricsLogEntry");
-        let cedarling: CedarlingMetricsEntry =
-            serde_json::from_str(&json_str).expect("deserialize to CedarlingMetricsEntry");
-        let lock_entry = LockServerMetricsEntry::try_from(cedarling)
-            .expect("convert CedarlingMetricsEntry to LockServerMetricsEntry");
+        let item = metric_audit_item(metrics_entry, PdpID::new(), None);
+        let lock_entry =
+            LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service, None);
         assert_eq!(lock_entry.status, "running");
         assert_eq!(lock_entry.interval_secs, 30);
         assert!(lock_entry.policy_stats.is_empty());
         assert!(lock_entry.error_counters.is_empty());
+    }
+
+    #[test]
+    fn map_entries_skips_bad_entries_and_keeps_good_ones() {
+        let mut bad = test_decision_entry();
+        bad.action = String::new();
+
+        let items = vec![
+            decision_audit_item(test_decision_entry(), PdpID::new(), None),
+            decision_audit_item(bad, PdpID::new(), None),
+        ];
+
+        let mapped: Vec<LockServerLogEntry> =
+            map_entries(&items, "log", |_| {}).expect("one valid entry should map");
+        assert_eq!(mapped.len(), 1, "only the valid entry should be mapped");
+    }
+
+    #[test]
+    fn map_entries_fails_when_all_entries_are_malformed() {
+        let mut bad = test_decision_entry();
+        bad.action = String::new();
+
+        let items = vec![decision_audit_item(bad, PdpID::new(), None)];
+
+        let err = map_entries::<LockServerLogEntry>(&items, "log", |_| {})
+            .expect_err("all-malformed batch must fail");
+        assert!(matches!(err, TransportError::Serialization(_)));
     }
 }

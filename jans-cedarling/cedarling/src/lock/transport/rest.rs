@@ -12,11 +12,8 @@ use crate::{
     lock::{
         LockLogEntry,
         transport::{
-            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
-            mapping::{
-                CedarlingLogEntry, CedarlingMetricsEntry, LockServerHealthEntry,
-                LockServerLogEntry, LockServerMetricsEntry,
-            },
+            AuditItem, AuditKind, AuditTransport, TransportResult,
+            mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
         },
     },
     log::{LogWriter, Logger},
@@ -37,11 +34,7 @@ impl RestTransport {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for RestTransport {
-    async fn send(
-        &self,
-        entries: &[SerializedAuditEntry],
-        audit_kind: &AuditKind,
-    ) -> TransportResult<()> {
+    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()> {
         if entries.is_empty() {
             return Ok(());
         }
@@ -49,58 +42,33 @@ impl AuditTransport for RestTransport {
         let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
         match audit_kind {
             AuditKind::Log(url) => {
-                let entries = transport::deserialize_entries::<
-                    LockServerLogEntry,
-                    CedarlingLogEntry,
-                >(entries, "log", warn)?;
-
+                let payloads: Vec<LockServerLogEntry> = mapping::map_entries(entries, "log", warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())
-                    .json(&entries)
+                    .json(&payloads)
                     .send()
                     .await?
                     .error_for_status()?;
             },
             AuditKind::Telemetry(url) => {
-                let entries = transport::deserialize_entries::<
-                    LockServerMetricsEntry,
-                    CedarlingMetricsEntry,
-                >(entries, "telemetry", warn)?;
-
+                let payloads: Vec<LockServerMetricsEntry> =
+                    mapping::map_entries(entries, "telemetry", warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())
-                    .json(&entries)
+                    .json(&payloads)
                     .send()
                     .await?
                     .error_for_status()?;
             },
             AuditKind::Health(url) => {
-                let entries: Vec<LockServerHealthEntry> = entries
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(idx, v)| match serde_json::from_str(v) {
-                        Ok(e) => Some(e),
-                        Err(e) => {
-                            self.logger.log_any(LockLogEntry::warn(format!(
-                                "failed to parse health entry[{idx}]: {e}"
-                            )));
-                            None
-                        },
-                    })
-                    .collect();
-
-                if entries.is_empty() {
-                    return Err(TransportError::Serialization(
-                        "all health entries were malformed, nothing to send".to_string(),
-                    ));
-                }
-
+                let payloads: Vec<LockServerHealthEntry> =
+                    mapping::map_entries(entries, "health", warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())
-                    .json(&entries)
+                    .json(&payloads)
                     .send()
                     .await?
                     .error_for_status()?;
@@ -118,8 +86,77 @@ mod test {
     use super::*;
 
     use mockito::{Server, ServerGuard};
-    use serde_json::json;
     use url::Url;
+
+    fn sample_log_item() -> AuditItem {
+        use crate::common::app_types::{ApplicationName, PdpID};
+        use crate::lock::transport::AuditPayload;
+        use crate::log::{
+            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
+        };
+        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
+        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
+        let entry = DecisionLogEntry {
+            base,
+            policystore_id: "store".into(),
+            policystore_version: "1.0".into(),
+            principal: vec!["Jans::User".into()],
+            lock_client_id: None,
+            action: "Test".to_string(),
+            resource: "Jans::Issue".to_string(),
+            decision: Decision::Allow,
+            tokens: LogTokensInfo::empty(),
+            decision_time_micro_sec: 1,
+            diagnostics: DiagnosticsSummary {
+                reason: std::collections::HashSet::default(),
+                errors: Vec::new(),
+            },
+            pushed_data: None,
+        };
+        AuditItem {
+            payload: AuditPayload::Decision(Box::new(entry)),
+            pdp_id: PdpID::new(),
+            app_name: Some(ApplicationName::from("test_app".to_string())),
+        }
+    }
+
+    fn sample_metric_item() -> AuditItem {
+        use crate::common::app_types::{ApplicationName, PdpID};
+        use crate::lock::transport::AuditPayload;
+        use crate::log::{BaseLogEntry, MetricsLogEntry};
+        let mut base = BaseLogEntry::new_metric(crate::log::gen_uuid7());
+        base.timestamp = Some("2026-04-07T17:04:39.162Z".to_string());
+        let entry = MetricsLogEntry {
+            base,
+            policy_stats: std::collections::HashMap::new(),
+            error_counters: std::collections::HashMap::new(),
+            operational_stats: std::collections::HashMap::new(),
+            interval_secs: 60,
+        };
+        AuditItem {
+            payload: AuditPayload::Metric(Box::new(entry)),
+            pdp_id: PdpID::new(),
+            app_name: Some(ApplicationName::from("test_app".to_string())),
+        }
+    }
+
+    fn sample_health_item() -> AuditItem {
+        use crate::common::app_types::PdpID;
+        use crate::lock::transport::AuditPayload;
+        use crate::lock::transport::mapping::LockServerHealthEntry;
+        AuditItem {
+            payload: AuditPayload::Health(Box::new(LockServerHealthEntry {
+                creation_date: "2026-03-23T11:50:37.504Z".to_string(),
+                event_time: "2026-03-23T11:50:37.504Z".to_string(),
+                service: "test_app".to_string(),
+                node_name: "test-pdp".to_string(),
+                status: "running".to_string(),
+                engine_status: std::collections::HashMap::new(),
+            })),
+            pdp_id: PdpID::new(),
+            app_name: None,
+        }
+    }
 
     fn create_test_client() -> HttpClient {
         HttpClient::new(HttpClientConfig::default()).expect("Http client should be initialized")
@@ -149,21 +186,7 @@ mod test {
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "INFO",
-                "action": "Test",
-                "decision": "ALLOW",
-                "principal": ["Jans::User"],
-                "resource": "Jans::Issue",
-                "application_id": "test_app",
-                "pdp_id": "test-pdp"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         transport
             .send(&entries, &AuditKind::Log(endpoint))
@@ -196,21 +219,7 @@ mod test {
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "INFO",
-                "action": "Test",
-                "decision": "ALLOW",
-                "principal": ["Jans::User"],
-                "resource": "Jans::Issue",
-                "application_id": "test_app",
-                "pdp_id": "test-pdp"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Log(endpoint))
@@ -235,21 +244,7 @@ mod test {
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "INFO",
-                "action": "Test",
-                "decision": "ALLOW",
-                "principal": ["Jans::User"],
-                "resource": "Jans::Issue",
-                "application_id": "test_app",
-                "pdp_id": "test-pdp"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Log(endpoint))
@@ -267,21 +262,7 @@ mod test {
         let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "INFO",
-                "action": "Test",
-                "decision": "ALLOW",
-                "principal": ["Jans::User"],
-                "resource": "Jans::Issue",
-                "application_id": "test_app",
-                "pdp_id": "test-pdp"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Log(endpoint))
@@ -294,14 +275,41 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_send_logs_malformed_json() {
+    async fn test_send_logs_all_invalid_dropped() {
+        use crate::common::app_types::{ApplicationName, PdpID};
+        use crate::lock::transport::AuditPayload;
+        use crate::log::{
+            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
+        };
+
         let endpoint: Url = "http://localhost:8080/audit/log/bulk".parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            "not valid json".to_string().into_boxed_str(),
-            "{ invalid json }".to_string().into_boxed_str(),
-        ];
+        // Build a log item whose mapping fails validation
+        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
+        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
+        let entry = DecisionLogEntry {
+            base,
+            policystore_id: "store".into(),
+            policystore_version: "1.0".into(),
+            principal: vec!["Jans::User".into()],
+            lock_client_id: None,
+            action: String::new(),
+            resource: "Jans::Issue".to_string(),
+            decision: Decision::Allow,
+            tokens: LogTokensInfo::empty(),
+            decision_time_micro_sec: 1,
+            diagnostics: DiagnosticsSummary {
+                reason: std::collections::HashSet::default(),
+                errors: Vec::new(),
+            },
+            pushed_data: None,
+        };
+        let entries = vec![AuditItem {
+            payload: AuditPayload::Decision(Box::new(entry)),
+            pdp_id: PdpID::new(),
+            app_name: Some(ApplicationName::from("test_app".to_string())),
+        }];
 
         let result = transport.send(&entries, &AuditKind::Log(endpoint)).await;
         assert!(matches!(
@@ -319,23 +327,7 @@ mod test {
         let transport = RestTransport::new(create_test_client(), None);
 
         // Send 1000 entries
-        let entries: Vec<_> = (0..1000)
-            .map(|_| {
-                json!({
-                    "timestamp": "2026-03-23T11:50:37.504Z",
-                    "log_kind": "Decision",
-                    "level": "INFO",
-                    "action": "Test",
-                    "decision": "ALLOW",
-                    "principal": ["Jans::User"],
-                    "resource": "Jans::Issue",
-                    "application_id": "test_app",
-                    "pdp_id": "test-pdp"
-                })
-                .to_string()
-                .into_boxed_str()
-            })
-            .collect();
+        let entries = (0..1000).map(|_| sample_log_item()).collect::<Vec<_>>();
 
         transport
             .send(&entries, &AuditKind::Log(endpoint))
@@ -354,32 +346,7 @@ mod test {
             .expect("valid telemetry endpoint URL");
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "id": "f3c80a24-4608-45b8-adc3-a74f2841e156",
-                "request_id": "019d6842-7577-7e43-adfd-46e2bb275405",
-                "timestamp": "2026-04-07T17:04:39.162Z",
-                "log_kind": "Metric",
-                "policy_stats": {
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow": 6,
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": 7,
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny": 1
-                },
-                "error_counters": {
-                    "parse_error": 0,
-                    "validation_error": 0
-                },
-                "operational_stats": {
-                    "evaluation_requests": 100,
-                    "memory_usage": 240
-                },
-                "interval_secs": 60,
-                "pdp_id": "test-pdp",
-                "application_id": "test_app"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_metric_item()];
 
         transport
             .send(&entries, &AuditKind::Telemetry(endpoint))
@@ -407,20 +374,7 @@ mod test {
             .expect("valid health endpoint URL");
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "creation_date": "2026-03-23T11:50:37.504Z",
-                "event_time": "2026-03-23T11:50:37.504Z",
-                "service": "test_app",
-                "node_name": "test-pdp",
-                "status": "running",
-                "engine_status": {
-                    "core": "success"
-                }
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_health_item()];
 
         transport
             .send(&entries, &AuditKind::Health(endpoint))
@@ -458,20 +412,7 @@ mod test {
             .unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "creation_date": "2026-03-23T11:50:37.504Z",
-                "event_time": "2026-03-23T11:50:37.504Z",
-                "service": "test_app",
-                "node_name": "test-pdp",
-                "status": "running",
-                "engine_status": {
-                    "core": "success"
-                }
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_health_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Health(endpoint))
@@ -498,20 +439,7 @@ mod test {
             .unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "creation_date": "2026-03-23T11:50:37.504Z",
-                "event_time": "2026-03-23T11:50:37.504Z",
-                "service": "test_app",
-                "node_name": "test-pdp",
-                "status": "running",
-                "engine_status": {
-                    "core": "success"
-                }
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_health_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Health(endpoint))
@@ -529,20 +457,7 @@ mod test {
         let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries = vec![
-            json!({
-                "creation_date": "2026-03-23T11:50:37.504Z",
-                "event_time": "2026-03-23T11:50:37.504Z",
-                "service": "test_app",
-                "node_name": "test-pdp",
-                "status": "running",
-                "engine_status": {
-                    "core": "success"
-                }
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_health_item()];
 
         let error = transport
             .send(&entries, &AuditKind::Health(endpoint))
@@ -551,23 +466,6 @@ mod test {
         assert!(
             matches!(error, TransportError::Rest(_)),
             "expected reqwest error, got {error:?}"
-        );
-    }
-
-    #[tokio::test]
-    async fn test_send_health_malformed_json() {
-        let endpoint: Url = "http://localhost:8080/audit/health/bulk".parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), None);
-
-        let entries = vec![
-            "not valid json".to_string().into_boxed_str(),
-            "{ invalid json }".to_string().into_boxed_str(),
-        ];
-
-        let result = transport.send(&entries, &AuditKind::Health(endpoint)).await;
-        assert!(
-            matches!(result, Err(TransportError::Serialization(_))),
-            "expected serialization error"
         );
     }
 
@@ -581,22 +479,7 @@ mod test {
             .unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        let entries: Vec<_> = (0..1000)
-            .map(|_| {
-                json!({
-                    "creation_date": "2026-03-23T11:50:37.504Z",
-                    "event_time": "2026-03-23T11:50:37.504Z",
-                    "service": "test_app",
-                    "node_name": "test-pdp",
-                    "status": "running",
-                    "engine_status": {
-                        "core": "success"
-                    }
-                })
-                .to_string()
-                .into_boxed_str()
-            })
-            .collect();
+        let entries = (0..1000).map(|_| sample_health_item()).collect::<Vec<_>>();
 
         transport
             .send(&entries, &AuditKind::Health(endpoint))

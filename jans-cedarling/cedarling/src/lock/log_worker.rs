@@ -8,7 +8,7 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditKind, AuditTransport, SerializedAuditEntry};
+use crate::lock::transport::{AuditKind, AuditTransport, AuditItem};
 use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
@@ -23,7 +23,7 @@ use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
 pub(super) struct AuditWorker<T: AuditTransport> {
-    buffer: VecDeque<SerializedAuditEntry>,
+    buffer: VecDeque<AuditItem>,
     audit_interval: Duration,
     transport: Arc<T>,
     kind: AuditKind,
@@ -54,7 +54,7 @@ where
 
     pub(super) async fn run(
         &mut self,
-        mut rx: mpsc::Receiver<SerializedAuditEntry>,
+        mut rx: mpsc::Receiver<AuditItem>,
         cancel_tkn: CancellationToken,
     ) {
         let mut flush_tick = interval(self.audit_interval);
@@ -101,7 +101,7 @@ where
             return;
         }
 
-        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(0..batch_size).collect();
+        let entries: Vec<AuditItem> = self.buffer.drain(0..batch_size).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
