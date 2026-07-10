@@ -4,7 +4,7 @@ version = "0.0.0"
 edition = "2024"
 description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"
-publish = false
+publish = true
 
 [features]
 default = ["grpc"]
@@ -25,43 +25,42 @@ serde = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde_yaml_ng = "0.10.0"
 thiserror = { workspace = true }
-uuid7 = { version = "1.6.0", features = [
+uuid7 = { version = "1.8.0", features = [
     "serde",
     "uuid",
     "rand010",
 ], default-features = false }
-cedar-policy = { version = "4.11.1", features = ["partial-eval"] }
-cedar-policy-core = "4.11.1"
+cedar-policy = { version = "4.11.2", features = ["partial-eval"] }
+cedar-policy-core = "4.11.2"
 base64 = "0.22.1"
-url = "2.5.2"
-http_utils = { workspace = true }
+url = "2.5.8"
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
 typed-builder = "0.23.2"
-semver = { version = "1.0.23", features = ["serde"] }
+semver = { version = "1.0.28", features = ["serde"] }
 derive_more = { workspace = true, features = [
     "deref",
     "from",
     "display",
     "error",
 ] }
-time = { version = "0.3.36", features = ["wasm-bindgen"] }
+time = { version = "0.3.53", features = ["wasm-bindgen"] }
 chrono = { workspace = true }
 tokio = { workspace = true, features = ["macros", "time"] }
 tokio-util = { workspace = true }
-rand = "0.10.0"
-smol_str = "0.3.2"
+rand = "0.10.2"
+smol_str = "0.3.6"
 strum = { version = "0.28.0", features = ["derive"] }
-flate2 = "1.1.1"
-async-trait = "0.1.88"
-futures = "0.3.31"
+flate2 = "1.1.9"
+async-trait = "0.1.89"
+futures = "0.3.32"
 wasm-bindgen-futures = { workspace = true }
-config = "0.15.11"
+config = "0.15.25"
 ahash = { version = "0.8.12", default-features = false, features = [
     "no-rng",
     "std",
 ] }
-vfs = "0.12"
+vfs = "0.13.0"
 # aes-crypto is intentionally excluded from zip default features.
 # zip's aes-crypto pulls in constant_time_eq@^0.4 (MSRV = 1.95.0), which is
 # incompatible with the nightly-2025-09-18 toolchain used by the dylint CI job.
@@ -69,7 +68,7 @@ vfs = "0.12"
 # AES-encrypted zip support is not required.
 # If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
 # update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
-zip = { version = "= 8.1.0", default-features = false, features = [
+zip = { version = "8.6.0", default-features = false, features = [
     "bzip2",
     "deflate64",
     "deflate",
@@ -79,14 +78,14 @@ zip = { version = "= 8.1.0", default-features = false, features = [
     "zstd",
     "xz",
 ] }
-prost = { version = "0.14.3", optional = true }
+prost = { version = "0.14.4", optional = true }
 prost-types = { version = "0.14.3", optional = true }
-tonic-prost = { version = "0.14.3", optional = true }
+tonic-prost = { version = "0.14.6", optional = true }
 hdrhistogram = "7.5.4"
-arc-swap = "1.9.1"
+arc-swap = "1.9.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tonic = { version = "0.14.3", optional = true, features = ["tls-native-roots"] }
+tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.4.0", features = ["futures"] }

@@ -82,49 +82,60 @@ public class LicenseDetailsService extends BaseService {
     public GenericResponse validateLicenseConfiguration() {
         log.info("Inside validateLicenseConfiguration: the method to validate license configuration.");
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-        LicenseConfig licenseConfiguration = appConf.getMainSettings().getLicenseConfig();
+        LicenseConfig licenseConfigurationFromDB = appConf.getMainSettings().getLicenseConfig();
 
-        if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getLicenseHardwareKey())) {
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+        LicenseConfiguration licConfigFromMemory = auiConfiguration.getLicenseConfiguration();
+
+        if (licenseConfigurationFromDB == null || licConfigFromMemory == null) {
             log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getOpHost()) ||
-                Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getClientId()) ||
-                Strings.isNullOrEmpty(licenseConfiguration.getOidcClient().getClientSecret())) {
+        if(Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
+            log.error(ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
+        }
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getOpHost()) ||
+                Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getClientId()) ||
+                Strings.isNullOrEmpty(licenseConfigurationFromDB.getOidcClient().getClientSecret())) {
             log.error(ErrorResponse.LICENSE_OIDC_CLIENT_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_OIDC_CLIENT_MISSING.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getSsa())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getSsa())) {
             log.error(ErrorResponse.LICENSE_SSA_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseKey())) {
             log.error(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getScanLicenseApiHostname())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getScanLicenseApiHostname())) {
             log.error(ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
         }
-        if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseDetailsLastUpdatedOn())) {
-            log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
-            return syncLicenseOIDCClientDetails(licenseConfiguration);
+        if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
+            log.info(ErrorResponse.LICENSE_EXPIRY_DATE_NOT_PRESENT.getDescription());
+            return syncLicenseDetailsFromAgamaLab(auiConfiguration);
         }
-        long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
-        long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
+        if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseDetailsLastUpdatedOn())) {
+            log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
+            return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+        }
+        long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
+        long intervalForSyncLicenseDetailsInDays = licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays();
         log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
         if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
-            return syncLicenseOIDCClientDetails(licenseConfiguration);
+            return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
         }
         // Check if the 'licenseValidUpto' field is not null or empty
-        if (!Strings.isNullOrEmpty(licenseConfiguration.getLicenseValidUpto())) {
+        if (!Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
             // Calculate the number of days between today and the license expiry date
-            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseValidUpto()));
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
             // If the license has already expired (daysDiffOfLicenseValidity < 0),
             // sync the license OIDC client details to update or renew the license
             if (daysDiffOfLicenseValidity < 0) {
-                return syncLicenseOIDCClientDetails(licenseConfiguration);
+                return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
             }
         }
 
@@ -337,8 +348,6 @@ public class LicenseDetailsService extends BaseService {
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseDetailsLastUpdatedOn(licenseConfiguration.getLicenseDetailsLastUpdatedOn());
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseValidUpto(licenseConfiguration.getLicenseValidUpto());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
                         adminConf.getMainSettings().getLicenseConfig().setProductCode(licenseConfiguration.getProductCode());
                         adminConf.getMainSettings().getLicenseConfig().setCompanyName(licenseConfiguration.getCompanyName());
@@ -563,8 +572,6 @@ public class LicenseDetailsService extends BaseService {
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseDetailsLastUpdatedOn(licenseConfiguration.getLicenseDetailsLastUpdatedOn());
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseValidUpto(licenseConfiguration.getLicenseValidUpto());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
                         adminConf.getMainSettings().getLicenseConfig().setProductCode(licenseConfiguration.getProductCode());
                         adminConf.getMainSettings().getLicenseConfig().setCompanyName(licenseConfiguration.getCompanyName());
@@ -736,11 +743,7 @@ public class LicenseDetailsService extends BaseService {
                         if (genericResOptional.isPresent()) {
                             return genericResOptional.get();
                         }
-                        //save license spring credentials
-                        AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
-                        entryManager.merge(adminConf);
-                        //save in license configuration
+                        //save in license configuration in memory
                         licenseConfiguration.setLicenseKey(entity.getString("license"));
                         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);

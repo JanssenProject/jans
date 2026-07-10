@@ -15,9 +15,9 @@ import org.slf4j.Logger;
 
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 import io.jans.lock.cedarling.config.BootstrapConfig;
+import io.jans.lock.cedarling.service.policy.PolicyStoreFileProvider;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,7 +32,6 @@ import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 public class CedarlingAuthorizationService {
 
 	public static final String CEDARLING_JANS_ACCESS_TOKEN = "Jans::Access_token";
-	public static final String CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME = "lock-policy-store";
 
 	@Inject
 	private Logger log;
@@ -41,9 +40,8 @@ public class CedarlingAuthorizationService {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-	private CedarlingPolicyConfiguration policyConfiguration;	
+	private PolicyStoreFileProvider policyStoreFileProvider;
 
-	private String policyStoreLocalFn = CEDARLING_LOCK_POLICY_STORE_RESOURCE_NAME;
 	private CedarlingAdapter cedarlingAdapter;
 	private boolean initialized = false;
 
@@ -53,18 +51,27 @@ public class CedarlingAuthorizationService {
 
 		CedarlingConfiguration cedarConf = appConfiguration.getCedarlingConfiguration();
 		if (cedarConf.isEnabled()) {
-			this.cedarlingAdapter = initAdapter(cedarConf);
-			initialized = true;
+			policyStoreFileProvider.prepare();
+			try {
+				this.cedarlingAdapter = initAdapter(cedarConf);
+			} finally {
+				policyStoreFileProvider.cleanup();
+			}
+
+			initialized = this.cedarlingAdapter != null;
+			if (!initialized) {
+				log.error("Cedarling initialization failed, authorization requests will be denied until this is resolved");
+			}
 		} else {
-			log.info("Cedarling is disabled");
+			log.info("Cedarling was disabled");
 		}
 	}
 
 	@PreDestroy
 	public void destroy() {
 		log.info("Destroying Cedarling service");
-		
-		if (initialized) {
+
+		if (initialized && cedarlingAdapter != null) {
 			this.cedarlingAdapter.close();
 		}
 
@@ -77,7 +84,6 @@ public class CedarlingAuthorizationService {
 	    CedarlingAdapter initCedarlingAdapter = null;
 	    try {
 	        initCedarlingAdapter = new CedarlingAdapter();
-	        
 	        String jsonConfig = config.toJsonConfig();
 	        if (log.isTraceEnabled()) {
 	            log.trace("Cedarling JSON configuration: {}", jsonConfig);
@@ -105,7 +111,7 @@ public class CedarlingAuthorizationService {
 	protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
 		BootstrapConfig config = BootstrapConfig.builder()
 	        .applicationName("Lock Server")
-	        .policyStoreLocalFn(policyStoreLocalFn)
+	        .policyStoreLocalFn(policyStoreFileProvider.getPolicyStorePath())
 	        .jwtStatusValidation(false)
 	        .jwtSigValidation(false)
 	        .logType(cedarConf.getLogType())
@@ -123,8 +129,14 @@ public class CedarlingAuthorizationService {
 
 		return authorize(tokens, action, resourceObject, contextObject);
 	}
-	
+
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
+		if (!initialized || cedarlingAdapter == null) {
+			log.error("Cedarling is not initialized. Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}",
+					tokens, action, resource, context);
+			return false;
+		}
+
 		try {
 			if (log.isDebugEnabled()) {
 				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
@@ -145,10 +157,10 @@ public class CedarlingAuthorizationService {
 
 			String requestId = res.getRequestId();
 			if (res.getDecision()) {
-				log.info("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+				log.debug("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
 						requestId, tokens, action, resource, context);
 			} else {
-				log.info("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+				log.debug("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
 						requestId, tokens, action, resource, context);
 			}
 

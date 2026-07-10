@@ -4,26 +4,37 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
-use std::collections::{BTreeMap, BinaryHeap, btree_map};
+use std::collections::{BTreeMap, BinaryHeap, HashMap};
 
 mod config;
 mod error;
 mod expentry;
 mod index;
 mod kventry;
+mod map;
 
 pub use config::Config;
 pub use error::Error;
 pub use expentry::ExpEntry;
 use index::HashMapIndex;
 pub use kventry::KvEntry;
+pub use map::Map;
 
 use chrono::Duration;
 use chrono::prelude::*;
 
-pub struct SparKV<T> {
+/// BTreeMap-backed `SparKV`. Provides sorted iteration for consumers like `MemoryLogger`.
+pub type BTreeSparKV<T> = SparKV<BTreeMap<String, KvEntry<T>>, T>;
+
+/// HashMap-backed `SparKV`. Provides O(1) lookups for consumers that do not need sorted iteration.
+pub type HashMapSparKV<T> = SparKV<HashMap<String, KvEntry<T>, ahash::RandomState>, T>;
+
+pub struct SparKV<M, T>
+where
+    M: Map<T>,
+{
     pub config: Config,
-    data: BTreeMap<String, KvEntry<T>>,
+    data: M,
     index: HashMapIndex,
     expiries: BinaryHeap<ExpEntry>,
     /// An optional function that calculates the memory size of a value.
@@ -37,30 +48,46 @@ pub struct SparKV<T> {
 }
 
 /// See the [`SparKV::iter`] function
-pub struct Iter<'a, T: 'a> {
-    btree_value_iter: btree_map::Values<'a, String, KvEntry<T>>,
+pub struct Iter<'a, T, M>
+where
+    M: Map<T> + 'a,
+{
+    value_iter: M::Iter<'a>,
+    // Required for the compiler to prove T: 'a on this struct.
+    // The GAT bound `where T: 'a` on Map::Iter<'a> constrains the
+    // associated type but does not propagate to Iter's own well-formedness.
+    _phantom: std::marker::PhantomData<&'a T>,
 }
 
-impl<'a, T> Iterator for Iter<'a, T> {
+impl<'a, T, M> Iterator for Iter<'a, T, M>
+where
+    M: Map<T> + 'a,
+{
     type Item = (&'a String, &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.btree_value_iter
+        self.value_iter
             .next()
             .map(|kventry| (&kventry.key, &kventry.value))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        self.btree_value_iter.size_hint()
+        self.value_iter.size_hint()
     }
 }
 
 /// See the [`SparKV::drain`] function
-pub struct DrainIter<T> {
-    value_iter: btree_map::IntoValues<String, KvEntry<T>>,
+pub struct DrainIter<T, M>
+where
+    M: Map<T>,
+{
+    value_iter: M::IntoIter,
 }
 
-impl<T> Iterator for DrainIter<T> {
+impl<T, M> Iterator for DrainIter<T, M>
+where
+    M: Map<T>,
+{
     type Item = (String, T);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -74,7 +101,10 @@ impl<T> Iterator for DrainIter<T> {
     }
 }
 
-impl<T> SparKV<T> {
+impl<M, T> SparKV<M, T>
+where
+    M: Map<T>,
+{
     #[must_use]
     pub fn new() -> Self {
         let config = Config::new();
@@ -85,7 +115,7 @@ impl<T> SparKV<T> {
     pub fn with_config(config: Config) -> Self {
         SparKV {
             config,
-            data: BTreeMap::new(),
+            data: M::new(),
             expiries: BinaryHeap::new(),
             index: HashMapIndex::new(),
             // This will underestimate the size of most things.
@@ -98,7 +128,7 @@ impl<T> SparKV<T> {
     pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
         SparKV {
             config,
-            data: BTreeMap::new(),
+            data: M::new(),
             expiries: BinaryHeap::new(),
             index: HashMapIndex::new(),
             size_calculator: sizer,
@@ -170,20 +200,21 @@ impl<T> SparKV<T> {
 
     /// Return an iterator of (key,value) : (&String,&T).
     #[must_use]
-    pub fn iter(&self) -> Iter<'_, T> {
+    pub fn iter(&self) -> Iter<'_, T, M> {
         Iter {
-            btree_value_iter: self.data.values(),
+            value_iter: self.data.values(),
+            _phantom: std::marker::PhantomData,
         }
     }
 
     /// Return an iterator of (key,value) : (String,T) which empties the container.
     /// All entries will be owned by the iterator, and yielded entries will not be checked against expiry.
     /// All entries and expiries will be cleared.
-    pub fn drain(&mut self) -> DrainIter<T> {
+    pub fn drain(&mut self) -> DrainIter<T, M> {
         // assume that slightly-expired entries should be returned.
         self.expiries.clear();
         self.index.clear();
-        let data_only = std::mem::take(&mut self.data);
+        let data_only = std::mem::replace(&mut self.data, M::new());
         DrainIter {
             value_iter: data_only.into_values(),
         }
@@ -340,16 +371,22 @@ impl<T> SparKV<T> {
     }
 }
 
-impl<'a, T> IntoIterator for &'a SparKV<T> {
+impl<'a, M, T> IntoIterator for &'a SparKV<M, T>
+where
+    M: Map<T>,
+{
     type Item = (&'a String, &'a T);
-    type IntoIter = Iter<'a, T>;
+    type IntoIter = Iter<'a, T, M>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 
-impl<T> Default for SparKV<T> {
+impl<M, T> Default for SparKV<M, T>
+where
+    M: Map<T>,
+{
     fn default() -> Self {
         Self::new()
     }
