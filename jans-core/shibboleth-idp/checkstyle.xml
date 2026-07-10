@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Focused, semantic-only lint ruleset for jansshibboleth-idp.
+
+  Deliberately NOT a formatting checker: no line-length, brace-placement,
+  whitespace, naming or Javadoc rules, so it will not fight the existing
+  code style. Star imports are allowed on purpose (used in TrustRelationship).
+
+  Severity is "warning" and the plugin runs with failOnViolation=false, so
+  these surface in the build log without breaking it. To enforce, raise the
+  severity below to "error" and set failOnViolation=true in the pom.
+-->
+<module name="Checker">
+
+    <property name="severity" value="warning"/>
+    <property name="charset" value="UTF-8"/>
+    <property name="fileExtensions" value="java"/>
+
+    <module name="TreeWalker">
+
+        <!-- Imports -->
+        <module name="UnusedImports">
+            <property name="processJavadoc" value="true"/>
+        </module>
+        <module name="RedundantImport"/>
+
+        <!-- Dead / redundant code -->
+        <module name="UnusedLocalVariable"/>
+        <module name="EmptyStatement"/>
+
+        <!-- Correctness smells -->
+        <module name="EqualsHashCode"/>
+        <module name="FallThrough"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+
+    </module>
+
+</module>

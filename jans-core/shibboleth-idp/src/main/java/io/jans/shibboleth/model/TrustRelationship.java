@@ -31,6 +31,9 @@ import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.error.*;
 import io.jans.shibboleth.model.metadata.*;
 import io.jans.shibboleth.model.rules.consistency.TrustConsistencyRules;
+import io.jans.shibboleth.model.rules.invariants.TrustInvariants;
+import io.jans.shibboleth.model.rules.operations.TrustOperationRestrictions;
+import io.jans.shibboleth.model.rules.operations.TrustOperationRestrictions.TrustOperationRestriction;
 import io.jans.shibboleth.model.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.model.util.BuildContext;
 import io.jans.shibboleth.model.util.OperationType;
@@ -676,20 +679,14 @@ public class TrustRelationship {
         public TrustResult<TrustRelationship> build() {
 
             BuildContext build_context = createBuildContext();
-            TrustResult<Void> rules_enforcement_result = TrustConsistencyRules.enforce(build_context);
 
-            if (rules_enforcement_result.isFailure()) {
-                
-                if (creatingNew()) {
-                    TrustError error = DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class,rules_enforcement_result.getError());
-                    return TrustResult.failure(error);
-                }else {
-                    TrustError error = DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class,rules_enforcement_result.getError());
-                    return TrustResult.failure(error);
-                }
+            TrustResult<Void> rules_check = applyRules(build_context);
+
+            if (rules_check.isFailure()) {
+
+                return TrustResult.failure(toBuildError(rules_check.getError()));
             }
 
-            
             if(creatingNew()) {
 
                 return TrustResult.success(createCandidate());
@@ -698,8 +695,7 @@ public class TrustRelationship {
             TrustResult<TrustStatus> newstatus_result = TrustTransitionRules.determineNewStatus(build_context);
             if(newstatus_result.isFailure()) {
 
-                TrustError cause = newstatus_result.getError();
-                return TrustResult.failure(DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class,cause));
+                return TrustResult.failure(toBuildError(newstatus_result.getError()));
             }
 
             status = newstatus_result.getValue();
@@ -712,6 +708,13 @@ public class TrustRelationship {
 
         }
         
+        private TrustError toBuildError(TrustError cause) {
+
+            return creatingNew()
+                ? DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class, cause)
+                : DomainObjectUpdateFailed.forClassWithCause(TrustRelationship.class, cause);
+        }
+
         private final BuildContext createBuildContext() {
 
             return new BuildContext (
@@ -791,6 +794,24 @@ public class TrustRelationship {
         private boolean isEffectivelyModified() {
 
             return !isEffectivelyUnmodified();
+        }
+
+        private TrustResult<Void> applyRules(BuildContext context) {
+
+            TrustResult<Void> invariants_check = TrustInvariants.enforce(context);
+
+            if (invariants_check.isFailure()) {
+                return invariants_check;
+            }
+
+            TrustResult<Void> trust_operation_restriction_checks = TrustOperationRestrictions.enforce(context);
+
+            if(trust_operation_restriction_checks.isFailure()) {
+
+                return trust_operation_restriction_checks;
+            }
+
+            return TrustResult.success(null);
         }
     }
 }

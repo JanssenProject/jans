@@ -17,7 +17,7 @@ public class TrustResult<T> extends Result<T> {
 
     public static <T> TrustResult<T> failure(TrustError error) {
 
-        return new TrustResult(null,error,false);
+        return new TrustResult<>(null,error,false);
     }
 
     @Override

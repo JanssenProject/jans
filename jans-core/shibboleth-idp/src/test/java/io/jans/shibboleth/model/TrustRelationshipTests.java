@@ -1391,7 +1391,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN an AGGREGATE TrustRelationship that is not in ACTIVATING state " +
             "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
-            "THEN should fail with appropriate error"
+            "THEN should fail with OperationForbiddenFromStatus error"
         )
         public void shouldRejectIncorporateDiscoveredEntityIds_whenAggregateNotInActivatingState(TrustRelationship tr) {
 
@@ -1405,7 +1405,7 @@ public class TrustRelationshipTests {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
         @ParameterizedTest
@@ -1413,7 +1413,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN an INDIVIDUAL TrustRelationship irrespective of state " +
             "WHEN incorporateDiscoveredEntityIds() is called with valid entityIDs " +
-            "THEN should fail with appropriate error "
+            "THEN should fail with OperationRestrictedToNature error "
         )
         public void shouldRejectIncorporateDiscoveredEntityIds_whenTrustIsIndividual(TrustRelationship tr) {
 
@@ -1426,7 +1426,7 @@ public class TrustRelationshipTests {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationRestrictedToNature.class);
         }
 
         @Test
@@ -1460,7 +1460,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " + 
             "WHEN updateMetadataSource() is called " +
-            "THEN should fail with the appropriate error "
+            "THEN should fail with OperationForbiddenFromStatus "
         )
         public void shouldFailWhenUpdateMetadataSourceCalledInActivatingState(TrustRelationship tr,MetadataSource source) {
 
@@ -1470,7 +1470,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
         @ParameterizedTest
@@ -1478,7 +1478,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN an ACTIVATING TrustRelationship " +
             "WHEN updateXXXProfileConfiguration() is called " +
-            "THEN should fail with the appropriate error " 
+            "THEN should fail with OperationForbiddenFromStatus " 
         )
         public void shouldFailWhenUpdateProfileConfigurationCalledInActivatingStatus(TrustRelationship tr,Object config, ProfileConfigurationAccessor accessor) {
 
@@ -1489,7 +1489,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
 
@@ -1498,7 +1498,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
             "WHEN finalizeActivation() is called " +
-            "THEN should fail with the appropriate error "
+            "THEN should fail with OperationForbiddenFromStatus error "
         )
         public void shouldFailFinalizeActivation_whenNotInActivatingState(TrustRelationship tr) {
 
@@ -1510,7 +1510,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
         @ParameterizedTest
@@ -1518,7 +1518,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN a TrustRelationship that is NOT in ACTIVATING state " +
             "WHEN cancelActivation() is called " + 
-            "THEN should fail with OperationRestrictedByStatus error "
+            "THEN should fail with OperationForbiddenFromStatus error "
         )
         public void shouldFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
 
@@ -1529,7 +1529,7 @@ public class TrustRelationshipTests {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
 
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
     }
 
@@ -1542,7 +1542,7 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN an ACTIVATING INDIVIDUAL TrustRelationship " +
             "WHEN incorporateDiscoveredEntityIds() is called "  +
-            "THEN should fail with the appropriate error "
+            "THEN should fail with OperationRestrictedToNature"
         )
         public void shouldRejectIncorporateDiscoveredEntityIds_whenTrustIsIndividual() {
 
@@ -1558,7 +1558,7 @@ public class TrustRelationshipTests {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
 
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationRestrictedToNature.class);
         }
 
         @ParameterizedTest
@@ -1566,10 +1566,11 @@ public class TrustRelationshipTests {
         @DisplayName(
             "GIVEN a TrustRelationship NOT in ACTIVATING state " +
             "WHEN updateMetadataSource() is called with a metadatasource incompatible with its nature " +
-            "THEN should fail with the appropriate error "
+            "THEN should fail with IncompatibleMetadataSourceForNature "
         )
         public void shouldFailWhenUsingIncompatibleMetadataSourceForTrustNature(TrustRelationship tr, MetadataSource source) {
 
+            assertThat(tr).isNotInStatus(TrustStatus.ACTIVATING);
             assertThat(tr).doesNotSupportMetadataSource(source);
 
             TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
@@ -1578,7 +1579,7 @@ public class TrustRelationshipTests {
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(IncompatibleMetadataSourceForNature.class);
         }
     }
 
@@ -1882,7 +1883,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
         @ParameterizedTest
@@ -1901,7 +1902,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
 
         @ParameterizedTest
@@ -1920,7 +1921,7 @@ public class TrustRelationshipTests {
             assertThat(result.isFailure()).isTrue();
             assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
             DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-            assertThat(error.getCause()).isInstanceOf(DomainObjectConsistencyFailed.class);
+            assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
         }
     }
 } 

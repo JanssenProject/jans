@@ -15,6 +15,10 @@
         <assertj.version>3.27.7</assertj.version>
         <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
         <mockito.version>5.23.0</mockito.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>10.20.1</checkstyle.version>
+        <spotbugs-annotations.version>4.5.3</spotbugs-annotations.version>
+		<maven.compiler.release>11</maven.compiler.release>
     </properties>
 
 	<dependencies>
@@ -44,9 +48,21 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        <!--
+          Compile-time only: provides edu.umd.cs.findbugs.annotations.SuppressFBWarnings,
+          which appears (retained) in the bytecode of transitive io.jans dependencies.
+          Without it javac warns it cannot resolve the annotation while reading those
+          class files. 'provided' scope keeps it off the runtime/packaged classpath.
+        -->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>${spotbugs-annotations.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
-<build>
+	<build>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -69,5 +85,55 @@
 				</includes>
 			</testResource>
 		</testResources>
+		<plugins>
+			<!--
+			  Linting only. Compiler version (release/source/target) is intentionally
+			  NOT set here — it is inherited from the jans-core-parent pom. This block
+			  merges extra -Xlint compiler args onto that inherited configuration.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<showWarnings>true</showWarnings>
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<!--
+			  Checkstyle linting. Reports as warnings only (failOnViolation=false) so it
+			  never breaks the build while the suite is being brought green. Flip
+			  failOnViolation to true (and bump severity to error in checkstyle.xml) to
+			  turn it into an enforced gate later.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<configLocation>${project.basedir}/checkstyle.xml</configLocation>
+					<consoleOutput>true</consoleOutput>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<failOnViolation>false</failOnViolation>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle-lint</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 </project>

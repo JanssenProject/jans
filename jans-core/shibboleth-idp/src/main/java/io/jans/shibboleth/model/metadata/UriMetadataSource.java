@@ -38,6 +38,12 @@ public class UriMetadataSource implements MetadataSource {
         return Objects.equals(uri,other.uri);
     }
 
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(uri);
+    }
+
     public static TrustResult<MetadataSource> of(URI uri) {
 
         if (uri == null) {
