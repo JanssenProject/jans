@@ -31,7 +31,10 @@ public class TemplateOverrideTest {
         assertNotNull(code);
 
         assertTrue(code.contains("_flowCall("), "Trigger should generate a subflow call");
-        assertTrue(code.contains("\"pea/body.ftl\""), "override source template should appear in generated code");
-        assertTrue(code.contains("\"fluff.ftl\""), "override target template should appear in generated code");
+        assertTrue(code.contains("\"pea/body.ftl\""), "override template path pea/body.ftl should appear in generated code");
+        assertTrue(code.contains("\"pea/media.ftl\""), "override template path pea/media.ftl should appear in generated code");
+        assertTrue(code.contains("\"fluff.ftl\""), "override template path fluff.ftl should appear in generated code");
+        assertTrue(code.contains("\"caravan.ftl\""), "override template path caravan.ftl should appear in generated code");
+        assertTrue(code.contains("\"../whoops.ftlh\""), "override template path ../whoops.ftlh should appear in generated code");
     }
 }
