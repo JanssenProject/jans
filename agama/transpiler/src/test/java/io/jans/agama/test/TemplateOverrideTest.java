@@ -3,36 +3,35 @@ package io.jans.agama.test;
 import io.jans.agama.dsl.TranspilationResult;
 import io.jans.agama.dsl.Transpiler;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Code-generation conformance for the {@code Override templates} form on a {@code Trigger},
- * per docs/janssen-server/developer/agama/advanced-usages.md. Asserts that a subflow call
- * with template overrides transpiles and the generated JavaScript carries the override
- * template paths into the subflow call.
+ * Code-generation conformance for the {@code Override templates} form on a {@code Trigger}.
+ * Transpiles the existing pass flow {@code triggers_calls.txt} (whose
+ * {@code Trigger $bah.humbug} carries
+ * {@code Override templates "pea/body.ftl" "" "pea/media.ftl" "fluff.ftl" "caravan.ftl" "../whoops.ftlh"})
+ * and asserts the generated JavaScript emits the subflow call and carries the override
+ * template paths into it. {@link ValidFlowsTest} only checks that this flow parses.
  */
 public class TemplateOverrideTest {
 
     @Test
-    public void transpile_triggerWithTemplateOverrides_generateExpectedJs() throws Exception {
-        String source = String.join("\n",
-                "Flow com.acme.ovr",
-                "    Basepath \"\"",
-                "Trigger com.acme.sub",
-                "    Override templates \"orig.ftl\" \"custom.ftl\"",
-                "Finish true",
-                "");
+    public void transpile_triggersFlow_generatesSubflowCallWithTemplateOverrides() throws Exception {
+        String source = Files.readString(Paths.get("target/test-classes/pass", "triggers_calls.txt"));
 
-        TranspilationResult result = Transpiler.transpile("com.acme.ovr", source);
+        TranspilationResult result = Transpiler.transpile("flow", source);
         assertNotNull(result);
         String code = result.getCode();
         assertNotNull(code);
 
         assertTrue(code.contains("_flowCall("), "Trigger should generate a subflow call");
-        assertTrue(code.contains("\"orig.ftl\""), "override source template should appear in generated code");
-        assertTrue(code.contains("\"custom.ftl\""), "override target template should appear in generated code");
+        assertTrue(code.contains("\"pea/body.ftl\""), "override source template should appear in generated code");
+        assertTrue(code.contains("\"fluff.ftl\""), "override target template should appear in generated code");
     }
 }
