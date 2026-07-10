@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
 use crate::{EntityData, JsonValue};
@@ -409,4 +410,91 @@ fn test_trusted_issuer_loading_info_defaults() {
             "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
         );
     }
+}
+
+fn batch_resource(id: &str) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+            })
+            .to_string(),
+        )
+        .expect("resource EntityData should parse"),
+    )
+}
+
+fn batch_principal(is_ok: bool) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                },
+                "is_ok": is_ok,
+            })
+            .to_string(),
+        )
+        .expect("principal EntityData should parse"),
+    )
+}
+
+fn batch_item(resource_id: &str) -> BatchItem {
+    BatchItem {
+        resource: batch_resource(resource_id),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: Some(JsonValue("{}".to_string())),
+    }
+}
+
+#[test]
+fn test_authorize_unsigned_batch_ordered_allow() {
+    let cedarling = create_test_cedarling();
+    let items = (0..3).map(|i| batch_item(&format!("res-{i}"))).collect();
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), items)
+        .expect("batch call should succeed");
+
+    assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
+    for (i, r) in response.results.iter().enumerate() {
+        assert!(r.decision, "item {i} should allow");
+    }
+    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+#[test]
+fn test_authorize_unsigned_batch_empty_items_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new())
+        .expect_err("empty items must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_unsigned_batch_context_defaults_when_none() {
+    let cedarling = create_test_cedarling();
+    let item = BatchItem {
+        resource: batch_resource("no-ctx"),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: None,
+    };
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
+        .expect("batch call should succeed");
+
+    assert_eq!(response.results.len(), 1);
+    assert!(response.results[0].decision);
 }
