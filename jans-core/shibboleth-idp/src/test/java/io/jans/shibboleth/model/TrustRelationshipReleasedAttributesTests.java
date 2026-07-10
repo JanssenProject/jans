@@ -48,4 +48,55 @@ public class TrustRelationshipReleasedAttributesTests {
         assertThat(same_or_updated_tr.getReleasedAttributes()).isEqualTo(attributes);
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#readyTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a READY trust relationship " +
+        "WHEN updateReleasedAttributes() is called " +
+        "THEN it succeeds and remains in READY"
+    )
+    public void shouldRemainInReady_whenReleasedAttributesUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInReadyStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInReadyStatus();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN updateReleasedAttributes() is called " +
+        "THEN it succeeds and remains in INACTIVE"
+    )
+    public void shouldRemainInInactive_whenReleasedAttributesUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInInactiveStatus();
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a trust relationship at a given version " +
+        "WHEN updateReleasedAttributes() changes the attributes " +
+        "THEN the version is incremented"
+    )
+    public void shouldIncrementVersion_whenReleasedAttributesChanged() {
+
+        TrustRelationship tr = sampleDraftIndividualTrustRelationship();
+        assertThat(tr).hasNoReleasedAttributes();
+
+        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion().next());
+    }
+
 }

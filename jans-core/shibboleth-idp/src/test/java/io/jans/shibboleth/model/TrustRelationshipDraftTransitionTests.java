@@ -88,4 +88,71 @@ public class TrustRelationshipDraftTransitionTests {
         assertThat(updated).isVersion(tr.getVersion().next());
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN a descriptive field (displayName or description) is updated " +
+        "THEN it remains in DRAFT"
+    )
+    public void shouldRemainInDraft_whenDescriptiveFieldUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInDraftStatus();
+
+        TrustRelationship afterDisplayName = tr.updateDisplayName(
+            io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue()).getValue();
+        assertThat(afterDisplayName).isInDraftStatus();
+
+        TrustRelationship afterDescription = tr.updateDescription(Description.of("Changed")).getValue();
+        assertThat(afterDescription).isInDraftStatus();
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship with a real source " +
+        "WHEN the metadata source is set to NONE " +
+        "THEN it remains in DRAFT"
+    )
+    public void shouldRemainInDraft_whenMetadataSourceSetToNone() {
+
+        TrustRelationship[] draftsWithRealSource = {
+            sampleDraftIndividualTrustRelationshipWithRealMetadataSource(),
+            sampleDraftAggregateTrustRelationshipWithRealMetadataSource()
+        };
+
+        for (TrustRelationship tr : draftsWithRealSource) {
+
+            assertThat(tr).isInDraftStatus();
+            assertThat(tr).hasRealMetadataSource();
+
+            TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(result.getValue()).isInDraftStatus().hasNoRealMetadataSource();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN activate() is called " +
+        "THEN it fails with OperationForbiddenFromStatus and the original is unchanged"
+    )
+    public void shouldFailActivate_whenCalledFromDraft(TrustRelationship tr) {
+
+        assertThat(tr).isInDraftStatus();
+
+        TrustResult<TrustRelationship> result = tr.activate();
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+
+        DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+        assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
+        OperationForbiddenFromStatus cause = (OperationForbiddenFromStatus) error.getCause();
+        assertThat(cause.getOperationName()).isEqualTo("activate");
+        assertThat(cause.getForbiddenStatus()).isEqualTo(TrustStatus.DRAFT);
+    }
+
 }

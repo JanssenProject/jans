@@ -94,4 +94,64 @@ public class TrustRelationshipReadyTransitionTests {
         assertThat(updated).isVersion(tr.getVersion().next());
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#readyTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a READY trust relationship " +
+        "WHEN a descriptive field is updated " +
+        "THEN it remains in READY"
+    )
+    public void shouldRemainInReady_whenDescriptiveFieldUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInReadyStatus();
+
+        TrustRelationship afterDisplayName = tr.updateDisplayName(
+            io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue()).getValue();
+        assertThat(afterDisplayName).isInReadyStatus();
+
+        TrustRelationship afterDescription = tr.updateDescription(Description.of("Changed")).getValue();
+        assertThat(afterDescription).isInReadyStatus();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#readyTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a READY trust relationship " +
+        "WHEN the metadata source is changed to another real source " +
+        "THEN it remains in READY and bumps the version"
+    )
+    public void shouldRemainInReady_whenMetadataSourceChangedToAnotherRealSource(TrustRelationship tr) {
+
+        assertThat(tr).isInReadyStatus();
+        MetadataSource newSource = sampleUriMetadataSource();
+        assertThat(tr.getMetadataSource()).isNotEqualTo(newSource);
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(newSource);
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInReadyStatus().hasRealMetadataSource();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#readyTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN a READY trust relationship " +
+        "WHEN a second profile is enabled " +
+        "THEN it remains in READY"
+    )
+    public void shouldRemainInReady_whenAnotherProfileEnabled(TrustRelationship tr) {
+
+        assertThat(tr).isInReadyStatus();
+        assertThat(tr).hasActiveProfileConfigurationCount(1);
+
+        TrustResult<TrustRelationship> result =
+            tr.updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration());
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInReadyStatus().hasActiveProfileConfigurationCount(2);
+    }
+
 }

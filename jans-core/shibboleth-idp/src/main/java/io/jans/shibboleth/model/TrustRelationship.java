@@ -285,7 +285,7 @@ public class TrustRelationship {
     public TrustResult<TrustRelationship> updateReleasedAttributes(ReleasedAttributes attributes) {
 
         return from(this)
-            .withReleasedAttributes(attributes)
+            .updateReleasedAttributesCalled(attributes)
             .build();
     }
 
@@ -632,6 +632,13 @@ public class TrustRelationship {
 
         public Builder withReleasedAttributes(ReleasedAttributes releasedAttributes) {
 
+            this.releasedAttributes = releasedAttributes;
+            return this;
+        }
+
+        private Builder updateReleasedAttributesCalled(ReleasedAttributes releasedAttributes) {
+
+            this.operationType = OperationType.UPDATE_RELEASED_ATTRIBUTES;
             this.releasedAttributes = releasedAttributes;
             return this;
         }

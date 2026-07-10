@@ -56,6 +56,20 @@ public class StatusRestrictions {
         }
     }
 
+    public static class UpdateReleasedAttributesRestriction {
+
+        public static TrustResult<Void> check(BuildContext context) {
+
+            if (context.updateReleasedAttributesCalled() && context.isActivatingStatus()) {
+
+                TrustError error = OperationForbiddenFromStatus.of("updateReleasedAttributes",context.getStatus());
+                return TrustResult.failure(error);
+            }
+
+            return TrustResult.success(null);
+        }
+    }
+
     public static class FinalizeActivationRestriction {
 
         public static TrustResult<Void> check(BuildContext context) {

@@ -219,6 +219,11 @@ public class BuildContext {
         return operationType == OperationType.INCORPORATE_DISCOVERED_ENTITY_IDS;
     }
 
+    public boolean updateReleasedAttributesCalled() {
+
+        return operationType == OperationType.UPDATE_RELEASED_ATTRIBUTES;
+    }
+
     public boolean hasSuccessfulActivationDiagnostics() {
 
         return TrustPredicates.hasSuccessfulActivationDiagnostics(this);

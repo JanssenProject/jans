@@ -39,6 +39,7 @@ public class TrustOperationRestrictions {
             StatusRestrictions.IncorporateDiscoveredEntityIdsRestriction::check,
             StatusRestrictions.UpdateMetadataSourceRestriction::check,
             StatusRestrictions.UpdateProfileConfigurationRestriction::check,
+            StatusRestrictions.UpdateReleasedAttributesRestriction::check,
             StatusRestrictions.FinalizeActivationRestriction::check,
             StatusRestrictions.CancelActivationRestriction::check,
             StatusRestrictions.ActivateRestriction::check,

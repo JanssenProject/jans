@@ -186,4 +186,62 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activeTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVE trust relationship " +
+        "WHEN a descriptive field is updated " +
+        "THEN it remains in ACTIVE"
+    )
+    public void shouldRemainInActive_whenDescriptiveFieldUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInActiveStatus();
+
+        TrustRelationship afterDisplayName = tr.updateDisplayName(
+            io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue()).getValue();
+        assertThat(afterDisplayName).isInActiveStatus();
+
+        TrustRelationship afterDescription = tr.updateDescription(Description.of("Changed")).getValue();
+        assertThat(afterDescription).isInActiveStatus();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activeTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVE trust relationship " +
+        "WHEN updateReleasedAttributes() is called " +
+        "THEN it remains in ACTIVE"
+    )
+    public void shouldRemainInActive_whenReleasedAttributesUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInActiveStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInActiveStatus();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activeTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVE trust relationship " +
+        "WHEN activate() is called " +
+        "THEN it fails with OperationForbiddenFromStatus and the original is unchanged"
+    )
+    public void shouldFailActivate_whenCalledFromActive(TrustRelationship tr) {
+
+        assertThat(tr).isInActiveStatus();
+
+        TrustResult<TrustRelationship> result = tr.activate();
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+        DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+        assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
+        OperationForbiddenFromStatus cause = (OperationForbiddenFromStatus) error.getCause();
+        assertThat(cause.getOperationName()).isEqualTo("activate");
+        assertThat(cause.getForbiddenStatus()).isEqualTo(TrustStatus.ACTIVE);
+    }
+
 }

@@ -74,4 +74,146 @@ public class TrustRelationshipInactiveTransitionTests {
         assertThat(updated).isVersion(tr.getVersion().next());
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship with a real source " +
+        "WHEN the metadata source is changed to another real source " +
+        "THEN it remains in INACTIVE and bumps the version"
+    )
+    public void shouldRemainInInactive_whenMetadataSourceChangedToAnotherRealSource(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+        MetadataSource newSource = sampleUriMetadataSource();
+        assertThat(tr.getMetadataSource()).isNotEqualTo(newSource);
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(newSource);
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInInactiveStatus().hasRealMetadataSource();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN the metadata source is set to NONE " +
+        "THEN it remains in INACTIVE and bumps the version"
+    )
+    public void shouldRemainInInactive_whenMetadataSourceSetToNone(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+        assertThat(tr).hasRealMetadataSource();
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInInactiveStatus().hasNoRealMetadataSource();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN a profile configuration is changed " +
+        "THEN it remains in INACTIVE and bumps the version"
+    )
+    public void shouldRemainInInactive_whenProfileConfigurationChanged(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+
+        TrustResult<TrustRelationship> result =
+            tr.updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration());
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInInactiveStatus();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN all profiles are disabled " +
+        "THEN it remains in INACTIVE"
+    )
+    public void shouldRemainInInactive_whenAllProfilesDisabled() {
+
+        TrustRelationship individual = sampleInactiveIndividualTrustRelationship();
+        assertThat(individual).hasAtLeastOneActiveProfileConfiguration();
+        TrustRelationship individualDisabled = individual
+            .updateShibbolethSsoProfileConfiguration(inactiveShibbolethSsoProfileConfiguration()).getValue();
+        assertThat(individualDisabled).isInInactiveStatus().hasNoActiveProfileConfiguration();
+
+        TrustRelationship aggregate = sampleInactiveAggregateTrustRelationship();
+        assertThat(aggregate).hasAtLeastOneActiveProfileConfiguration();
+        TrustRelationship aggregateDisabled = aggregate
+            .updateSaml2SsoProfileConfiguration(inactiveSaml2SsoProfileConfiguration()).getValue();
+        assertThat(aggregateDisabled).isInInactiveStatus().hasNoActiveProfileConfiguration();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship carrying diagnostics " +
+        "WHEN activate() is called " +
+        "THEN the diagnostics are cleared and the version is incremented"
+    )
+    public void shouldClearDiagnosticsAndIncrementVersion_whenActivateCalledFromInactive(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+        assertThat(tr).hasActivationDiagnostics();
+        assertThat(tr).hasRealMetadataSource();
+        assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
+
+        TrustResult<TrustRelationship> result = tr.activate();
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInActivatingStatus();
+        assertThat(updated).hasNoActivationDiagnostics();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN updateMetadataSource() is called with the same source " +
+        "THEN the version is unchanged"
+    )
+    public void shouldMaintainVersion_whenMetadataSourceUnchangedFromInactive(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateMetadataSource(tr.getMetadataSource());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInInactiveStatus();
+        assertThat(result.getValue()).isVersion(tr.getVersion());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#inactiveTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an INACTIVE trust relationship " +
+        "WHEN a profile configuration is updated with the same value " +
+        "THEN the version is unchanged"
+    )
+    public void shouldMaintainVersion_whenProfileConfigurationUnchangedFromInactive(TrustRelationship tr) {
+
+        assertThat(tr).isInInactiveStatus();
+
+        TrustResult<TrustRelationship> result =
+            tr.updateSaml2LogoutProfileConfiguration(tr.getSaml2LogoutProfileConfiguration());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInInactiveStatus();
+        assertThat(result.getValue()).isVersion(tr.getVersion());
+    }
+
 }

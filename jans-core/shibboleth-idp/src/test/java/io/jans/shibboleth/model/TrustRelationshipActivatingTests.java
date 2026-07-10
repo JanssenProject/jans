@@ -369,4 +369,99 @@ public class TrustRelationshipActivatingTests {
         assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
     }
 
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activatingTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVATING TrustRelationship " +
+        "WHEN updateReleasedAttributes() is called " +
+        "THEN it fails with OperationForbiddenFromStatus and the original is unchanged"
+    )
+    public void shouldFailUpdateReleasedAttributes_whenCalledFromActivating(TrustRelationship tr) {
+
+        assertThat(tr).isInActivatingStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+        DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+        assertThat(error.getCause()).isInstanceOf(OperationForbiddenFromStatus.class);
+        OperationForbiddenFromStatus cause = (OperationForbiddenFromStatus) error.getCause();
+        assertThat(cause.getOperationName()).isEqualTo("updateReleasedAttributes");
+        assertThat(cause.getForbiddenStatus()).isEqualTo(TrustStatus.ACTIVATING);
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activatingTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVATING TrustRelationship " +
+        "WHEN finalizeActivation() is called with no activation data " +
+        "THEN it remains in ACTIVATING"
+    )
+    public void shouldRemainInActivating_whenFinalizeActivationHasNoData(TrustRelationship tr) {
+
+        assertThat(tr).isInActivatingStatus();
+        ActivationDiagnostics noData = ActivationDiagnostics.none();
+        assertThat(noData.getStatus()).isEqualTo(ActivationStatus.NO_DATA);
+
+        TrustResult<TrustRelationship> result = tr.finalizeActivation(noData);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInActivatingStatus();
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN an ACTIVATING AGGREGATE TrustRelationship " +
+        "WHEN incorporateDiscoveredEntityIds() is called " +
+        "THEN it remains in ACTIVATING"
+    )
+    public void shouldRemainInActivating_whenIncorporateDiscoveredEntityIds() {
+
+        TrustRelationship tr = sampleActivatingAggregateTrustRelationship();
+        assertThat(tr).isInActivatingStatus();
+
+        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(sampleEntityIds());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInActivatingStatus();
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activatingTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVATING TrustRelationship " +
+        "WHEN updateDisplayName() is called with a different name " +
+        "THEN it succeeds, remains in ACTIVATING, and bumps the version"
+    )
+    public void shouldRemainInActivating_whenDisplayNameUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInActivatingStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateDisplayName(
+            io.jans.shibboleth.model.core.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue());
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated).isInActivatingStatus();
+        assertThat(updated).isVersion(tr.getVersion().next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#activatingTrustRelationshipsOfAllNatures")
+    @DisplayName(
+        "GIVEN an ACTIVATING TrustRelationship " +
+        "WHEN updateDescription() is called with a different description " +
+        "THEN it succeeds and remains in ACTIVATING"
+    )
+    public void shouldRemainInActivating_whenDescriptionUpdated(TrustRelationship tr) {
+
+        assertThat(tr).isInActivatingStatus();
+
+        TrustResult<TrustRelationship> result = tr.updateDescription(Description.of("Changed while activating"));
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isInActivatingStatus();
+    }
+
 }
