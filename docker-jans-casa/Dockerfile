@@ -191,7 +191,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_CASA_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
