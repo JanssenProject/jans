@@ -290,4 +290,24 @@ public class TrustRelationshipCreationTests {
         assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
    }
 
+   @ParameterizedTest
+   @MethodSource("io.jans.shibboleth.model.TrustRelationshipArguments#draftTrustRelationshipsOfAllNatures")
+   @DisplayName(
+        "GIVEN a Builder with version set below Version.initial() " +
+        "WHEN build() is called " +
+        "THEN should fail with InvalidVersion as root cause "
+   )
+   public void shouldFailWhenVersionIsBelowInitialDuringBuild(TrustRelationship tr) {
+
+        TrustResult<TrustRelationship> result = TrustRelationship
+            .from(tr)
+            .withVersion(Version.of(0))
+            .build();
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+        DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
+        assertThat(error.getCause()).isInstanceOf(InvalidVersion.class);
+   }
+
 }

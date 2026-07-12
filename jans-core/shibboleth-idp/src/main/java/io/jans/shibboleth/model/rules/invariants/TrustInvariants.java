@@ -52,6 +52,9 @@ public class TrustInvariants {
             PresenceInvariants.ReleasedAttributesRequired::check,
             PresenceInvariants.ActivationDiagnosticsRequired::check,
             PresenceInvariants.DiscoveredEntityIdsRequired::check,
+
+            ValidityInvariants.VersionAtLeastInitial::check,
+
             CompatibilityInvariants.MetadataSourceCompatibility::check
         );
     }

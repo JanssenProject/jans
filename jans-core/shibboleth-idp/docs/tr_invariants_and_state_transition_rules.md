@@ -27,11 +27,10 @@
 | **READY**         | `activate()`                                             | **ACTIVATING**   | clears previous diagnostics |
 | **READY**         | Update metadata source to `NONE` or disable all profiles | **DRAFT**        | - |
 | **ACTIVATING**    | `cancelActivation()`                                     | **READY**        | Aborts pending activation |
-| **ACTIVATING**    | `finalizeActivation(ActivationContext)`                  | **ACTIVE**       | On successful activation |
-| **ACTIVATING**    | `finalizeActivation(ActivationContext)`                  | **READY**        | On failed activation |
-| **ACTIVATING**    | `finalizeActivation(ActivationContext)`                  | **ACTIVATING**   | On no activation data | 
+| **ACTIVATING**    | `finalizeActivation(ActivationDiagnostics)`                  | **ACTIVE**       | On successful activation |
+| **ACTIVATING**    | `finalizeActivation(ActivationDiagnostics)`                  | **READY**        | On failed activation |
+| **ACTIVATING**    | `finalizeActivation(ActivationDiagnostics)`                  | **ACTIVATING**   | On no activation data | 
 | **ACTIVE**        | Update metadata source (different & real)                | **ACTIVATING**   | - |
-| **ACTIVE**        | Update metadata source to `NONE`                         | **DRAFT**        | - |
 | **ACTIVE**        | `updateXXXProfileConfiguration` (different value, still ≥1 active profile) | **ACTIVATING** | Triggers re-activation |
 | **ACTIVE**        | `deactivate()`                                           | **INACTIVE**     | - |
 | **ACTIVE**        | Update metadata source to `NONE` or disable all profiles | **DRAFT**        | - |
@@ -39,8 +38,6 @@
 | **INACTIVE**      | `activate()` when missing real metadata source or no active profiles | **DRAFT**      | Requirements not met after explicit `activate()` call |
 | **INACTIVE**      | `updateMetadataSource()` (any change)                    | **INACTIVE**     | Version bumped if changed |
 | **INACTIVE**      | `updateXXXProfileConfiguration()` (any change)              | **INACTIVE**     | Version bumped if changed |
-
-**Clarification on updateXXXProfileConfiguration()**
 
 **Important Note on Activation Path**:
 All trust relationships follow the **same consistent path**:  
@@ -51,7 +48,7 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 
 #### 3. Global / Aggregate Invariants (Always True)
 
-- `key` must not be null and must be assigned.
+- `id` must not be null. (It is **unassigned** on a freshly created TR — see §4.1; assignment happens at persistence, not creation.)
 - `displayName` must not be null and must not be blank.
 - `description` must not be null (can be blank).
 - `nature` must not be null.
@@ -62,6 +59,8 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 - All profile configuration objects must not be null (they must be initialized to their default disabled state).
 - `releasedAttributes` must not be null.
 
+> **Enforced by** `ValidityInvariants.VersionAtLeastInitial` — any build with `version < Version.initial()` fails with `InvalidVersion` (wrapped in `DomainObjectCreationFailed`/`DomainObjectUpdateFailed`), on both the `create()` and builder/reconstruction paths. Covered by `shouldFailWhenVersionIsBelowInitialDuringBuild`.
+
 ---
 
 #### 4. Operations and Transition Rules
@@ -70,7 +69,7 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 - Parameters: `displayName`, `description`, `nature`
 - Target State: `DRAFT`
 - Conditions: `displayName` (non-blank), `description` (not null), `nature` required.
-- Post-conditions: All profiles initialized to default disabled state, `releasedAttributes` is empty, version = initial.
+- Post-conditions: `id` unassigned, `status` = `DRAFT`, `metadataSource` = `NONE`, `discoveredEntityIds` empty, all profiles initialized to default disabled state, `releasedAttributes` empty, `activationDiagnostics` = none, version = initial.
 
 **4.2 `updateDisplayName(DisplayName)`**
 - Allowed from: All states
@@ -88,6 +87,8 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 - Must respect nature restrictions (see section 1).
 - In `INACTIVE`: State remains `INACTIVE`, version bumped if changed.
 - From `DRAFT`/`READY`/`ACTIVE`: target state per section 2 (`DRAFT` when set to `NONE` or left with no active profile; otherwise `READY` from `DRAFT`, `ACTIVATING` from `ACTIVE` on a real change). Version bumped if changed.
+
+> **By design:** an `INACTIVE` TR is intentionally inert — it can't *do* anything until an explicit `activate()`, at which point readiness is re-evaluated and the appropriate state (`ACTIVATING` if requirements are met, else `DRAFT`) is assigned. Consequently, edits never auto-demote an `INACTIVE` TR: setting the metadata source to `NONE` or disabling all profiles leaves it `INACTIVE`, whereas the same edits demote `DRAFT`/`READY`/`ACTIVE` toward `DRAFT`.
 
 **4.5 `updateXXXProfileConfiguration(XXXProfileConfiguration)`**
 - Allowed from: `DRAFT`, `READY`, `ACTIVE`, `INACTIVE`
@@ -113,14 +114,16 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 - Target State: `INACTIVE`
 - Version bumped.
 
-**4.9 `finalizeActivation(ActivationContext)`**
+**4.9 `finalizeActivation(ActivationDiagnostics)`**
 - Allowed from: `ACTIVATING`
-- Parameters: `ActivationContext` (contains diagnostic data, verification results, errors, etc.)
+- Parameters: `ActivationDiagnostics` (contains diagnostic data, verification results, errors, etc.)
 - Returns: `TrustResult<TrustRelationship>`
 - On Success → Target State: `ACTIVE`
 - On Failure → Target State: `READY`
 - On No Data → Target State: `ACTIVATING`
-- Version bumped in both cases.
+- Version bumped when the aggregate is effectively modified — i.e., on success (→ `ACTIVE`) and failure (→ `READY`). The no-data outcome does not change state and does not bump the version when diagnostics are unchanged.
+
+> **By design:** the "No Data → `ACTIVATING`" outcome is a deliberate no-op. Entering `ACTIVATING` sets the activation diagnostics to `NO_DATA`, and finalizing with `NO_DATA` leaves them unchanged — so the TR stays pending. This forces API clients to **explicitly report success or failure** in order to drive a transition out of `ACTIVATING`. (Mechanically it is a transition-rule fall-through: no rule matches `NO_DATA`, so the status defaults to unchanged.)
 
 **4.10 `incorporateDiscoveredEntityIds(...)`**
 - Allowed from: `ACTIVATING` (AGGREGATE only)
