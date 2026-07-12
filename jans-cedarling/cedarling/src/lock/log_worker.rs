@@ -8,16 +8,15 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditKind, AuditTransport, AuditItem};
+use crate::lock::transport::{AuditItem, AuditKind, AuditTransport};
 use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
-use futures::StreamExt;
-use futures::channel::mpsc;
 use crate::http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::mpsc;
 use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
@@ -63,7 +62,7 @@ where
 
         loop {
             tokio::select! {
-                entry = rx.next() => {
+                entry = rx.recv() => {
                     let Some(entry) = entry else { break; };
                     self.buffer.push_back(entry);
                     if matches!(self.kind, AuditKind::Telemetry(_)) {

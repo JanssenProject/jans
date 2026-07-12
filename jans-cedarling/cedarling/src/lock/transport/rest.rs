@@ -89,7 +89,7 @@ mod test {
     use url::Url;
 
     use crate::lock::transport::test_utils::{
-        sample_health_item, sample_log_item, sample_metric_item,
+        malformed_log_item, sample_health_item, sample_log_item, sample_metric_item,
     };
 
     fn create_test_client() -> HttpClient {
@@ -210,40 +210,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_all_invalid_dropped() {
-        use crate::common::app_types::{ApplicationName, PdpID};
-        use crate::lock::transport::AuditPayload;
-        use crate::log::{
-            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
-        };
-
         let endpoint: Url = "http://localhost:8080/audit/log/bulk".parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        // Build a log item whose mapping fails validation
-        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
-        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
-        let entry = DecisionLogEntry {
-            base,
-            policystore_id: "store".into(),
-            policystore_version: "1.0".into(),
-            principal: vec!["Jans::User".into()],
-            lock_client_id: None,
-            action: String::new(),
-            resource: "Jans::Issue".to_string(),
-            decision: Decision::Allow,
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec: 1,
-            diagnostics: DiagnosticsSummary {
-                reason: std::collections::HashSet::default(),
-                errors: Vec::new(),
-            },
-            pushed_data: None,
-        };
-        let entries = vec![AuditItem {
-            payload: AuditPayload::Decision(Box::new(entry)),
-            pdp_id: PdpID::new(),
-            app_name: Some(ApplicationName::from("test_app".to_string())),
-        }];
+        let entries = vec![malformed_log_item()];
 
         let result = transport.send(&entries, &AuditKind::Log(endpoint)).await;
         assert!(matches!(

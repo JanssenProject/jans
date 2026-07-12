@@ -154,7 +154,6 @@ use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::{LogWriter, LoggerWeak};
 use crate::{HttpClientConfig, LockServiceConfig, LockTransport};
-use futures::channel::mpsc;
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
 use log_worker::AuditWorker;
@@ -164,6 +163,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use ssa_validation::validate_ssa_jwt;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use transport::{AuditKind, rest::RestTransport};
 
@@ -421,7 +421,7 @@ impl LockService {
             return;
         };
 
-        if let Err(err) = tx.clone().try_send(item) {
+        if let Err(err) = tx.try_send(item) {
             self.logger.log_any(LockLogEntry::error(format!(
                 "{worker_name} channel send failed (full or closed): {err}"
             )));
@@ -559,7 +559,10 @@ pub enum InitLockServiceError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{LogLevel, lock::register_client::DCR_SCOPE};
+    use crate::{
+        LogLevel,
+        lock::{register_client::DCR_SCOPE, transport::test_utils::sample_log_item},
+    };
     use jsonwebtoken::{EncodingKey, Header, encode};
     use mockito::{Mock, Server, ServerGuard};
     use serde_json::json;
@@ -631,7 +634,7 @@ mod test {
         token_endpoint.assert();
 
         // Test if logs are getting sent
-        logger.dispatch_audit(test_audit_item(pdp_id));
+        logger.dispatch_audit(sample_log_item());
 
         // Sleep until the logs are sent
         sleep(Duration::from_secs(1)).await;
@@ -686,7 +689,7 @@ mod test {
         token_endpoint.assert();
 
         // Test if logs are getting sent
-        logger.dispatch_audit(test_audit_item(pdp_id));
+        logger.dispatch_audit(sample_log_item());
 
         // Sleep until the logs are sent
         sleep(Duration::from_secs(1)).await;
@@ -801,7 +804,7 @@ mod test {
         token_endpoint.assert();
 
         // Send a log entry and confirm it reaches the Lock Server
-        lock_svc.dispatch_audit(test_audit_item(pdp_id));
+        lock_svc.dispatch_audit(sample_log_item());
 
         sleep(Duration::from_secs(1)).await;
         log_endpoint.assert();
@@ -1013,7 +1016,15 @@ mod test {
 
         server
             .mock("POST", log_path)
-            .match_body(mockito::Matcher::Any)
+            .match_body(mockito::Matcher::PartialJson(json!([{
+                "creation_date": "2026-03-23T11:50:37.504Z",
+                "event_time": "2026-03-23T11:50:37.504Z",
+                "service": "test_app",
+                "action": "Test",
+                "decision_result": "ALLOW",
+                "requested_resource": "Jans::Issue",
+                "principal_id": "Jans::User",
+            }])))
             .expect(1)
             .create()
     }
@@ -1040,37 +1051,6 @@ mod test {
             )
             .expect(1)
             .create()
-    }
-
-    // Builds a typed audit item matching the format `LogStrategy` would produce
-    fn test_audit_item(pdp_id: PdpID) -> AuditItem {
-        use crate::log::{
-            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
-        };
-        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
-        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
-        let entry = DecisionLogEntry {
-            base,
-            policystore_id: "store".into(),
-            policystore_version: "1.0".into(),
-            principal: vec!["Jans::User".into()],
-            lock_client_id: None,
-            action: "Test".to_string(),
-            resource: "Jans::Issue".to_string(),
-            decision: Decision::Allow,
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec: 1,
-            diagnostics: DiagnosticsSummary {
-                reason: std::collections::HashSet::default(),
-                errors: Vec::new(),
-            },
-            pushed_data: None,
-        };
-        AuditItem {
-            payload: AuditPayload::Decision(Box::new(entry)),
-            pdp_id,
-            app_name: Some(ApplicationName::from("test_app".to_string())),
-        }
     }
 
     fn mock_health_endpoint(server: &mut ServerGuard) -> Mock {

@@ -225,42 +225,8 @@ mod test {
     };
 
     use crate::lock::transport::test_utils::{
-        sample_health_item, sample_log_item, sample_metric_item,
+        malformed_log_item, sample_health_item, sample_log_item, sample_metric_item,
     };
-
-    /// Like [`sample_log_item`], but with the required `action` field left empty so
-    /// that mapping into the Lock Server shape fails validation.
-    fn malformed_log_item() -> AuditItem {
-        use crate::common::app_types::{ApplicationName, PdpID};
-        use crate::lock::transport::AuditPayload;
-        use crate::log::{
-            BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
-        };
-        let mut base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
-        base.timestamp = Some("2026-03-23T11:50:37.504Z".to_string());
-        let entry = DecisionLogEntry {
-            base,
-            policystore_id: "store".into(),
-            policystore_version: "1.0".into(),
-            principal: vec!["Jans::User".into()],
-            lock_client_id: None,
-            action: String::new(),
-            resource: "Jans::Issue".to_string(),
-            decision: Decision::Allow,
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec: 1,
-            diagnostics: DiagnosticsSummary {
-                reason: std::collections::HashSet::default(),
-                errors: Vec::new(),
-            },
-            pushed_data: None,
-        };
-        AuditItem {
-            payload: AuditPayload::Decision(Box::new(entry)),
-            pdp_id: PdpID::new(),
-            app_name: Some(ApplicationName::from("test_app".to_string())),
-        }
-    }
 
     // Mock gRPC server for testing
     #[derive(Debug)]
