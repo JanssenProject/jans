@@ -42,7 +42,7 @@ impl AuditTransport for RestTransport {
         let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
         match audit_kind {
             AuditKind::Log(url) => {
-                let payloads: Vec<LockServerLogEntry> = mapping::map_entries(entries, "log", warn)?;
+                let payloads: Vec<LockServerLogEntry> = mapping::map_entries(entries, warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())
@@ -52,8 +52,7 @@ impl AuditTransport for RestTransport {
                     .error_for_status()?;
             },
             AuditKind::Telemetry(url) => {
-                let payloads: Vec<LockServerMetricsEntry> =
-                    mapping::map_entries(entries, "telemetry", warn)?;
+                let payloads: Vec<LockServerMetricsEntry> = mapping::map_entries(entries, warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())
@@ -63,8 +62,7 @@ impl AuditTransport for RestTransport {
                     .error_for_status()?;
             },
             AuditKind::Health(url) => {
-                let payloads: Vec<LockServerHealthEntry> =
-                    mapping::map_entries(entries, "health", warn)?;
+                let payloads: Vec<LockServerHealthEntry> = mapping::map_entries(entries, warn)?;
                 self.client
                     .raw_client
                     .post(url.as_str())

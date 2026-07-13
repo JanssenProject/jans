@@ -87,7 +87,7 @@ impl AuditTransport for GrpcTransport {
         let response = match audit_kind {
             AuditKind::Log(_) => {
                 let entries: Vec<LogEntry> =
-                    mapping::map_entries::<LockServerLogEntry>(entries, "log", warn)?
+                    mapping::map_entries::<LockServerLogEntry>(entries, warn)?
                         .into_iter()
                         .map(log_json_to_proto)
                         .collect();
@@ -101,7 +101,7 @@ impl AuditTransport for GrpcTransport {
             },
             AuditKind::Telemetry(_) => {
                 let entries: Vec<TelemetryEntry> =
-                    mapping::map_entries::<LockServerMetricsEntry>(entries, "telemetry", warn)?
+                    mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
                         .into_iter()
                         .map(telemetry_json_to_proto)
                         .collect();
@@ -115,7 +115,7 @@ impl AuditTransport for GrpcTransport {
             },
             AuditKind::Health(_) => {
                 let proto_entries: Vec<HealthEntry> =
-                    mapping::map_entries::<LockServerHealthEntry>(entries, "health", warn)?
+                    mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
                         .into_iter()
                         .map(health_json_to_proto)
                         .collect();

@@ -198,7 +198,6 @@ impl TryFrom<&AuditItem> for LockServerHealthEntry {
 /// Map a batch of typed audit items into the Lock Server wire format
 pub(super) fn map_entries<'a, T>(
     entries: &'a [AuditItem],
-    label: &str,
     log_warn: impl Fn(String),
 ) -> Result<Vec<T>, TransportError>
 where
@@ -215,7 +214,8 @@ where
         .filter_map(|(idx, item)| match T::try_from(item) {
             Ok(t) => Some(t),
             Err(e) => {
-                log_warn(format!("failed to convert {label} entry[{idx}]: {e}"));
+                let kind = item.payload.kind();
+                log_warn(format!("failed to convert {kind} entry[{idx}]: {e}"));
                 None
             },
         })
@@ -223,7 +223,8 @@ where
 
     if mapped.is_empty() {
         return Err(TransportError::Serialization(format!(
-            "all {label} entries were malformed, nothing to send"
+            "all {} entries were malformed, nothing to send",
+            entries.len(),
         )));
     }
 
@@ -440,7 +441,7 @@ mod test {
         ];
 
         let mapped: Vec<LockServerLogEntry> =
-            map_entries(&items, "log", |_| {}).expect("one valid entry should map");
+            map_entries(&items, |_| {}).expect("one valid entry should map");
         assert_eq!(mapped.len(), 1, "only the valid entry should be mapped");
     }
 
@@ -451,7 +452,7 @@ mod test {
 
         let items = vec![decision_audit_item(bad, PdpID::new(), None)];
 
-        let err = map_entries::<LockServerLogEntry>(&items, "log", |_| {})
+        let err = map_entries::<LockServerLogEntry>(&items, |_| {})
             .expect_err("all-malformed batch must fail");
         assert!(matches!(err, TransportError::Serialization(_)));
     }
