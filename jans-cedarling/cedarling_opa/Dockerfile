@@ -5,7 +5,7 @@ ARG BASEIMAGE="gcr.io/distroless/cc-debian12:nonroot@sha256:bd2899c12b335c827750
 
 # Stage 1: Rust build
 FROM rust:1.95-slim-bookworm@sha256:d7482085ff5b415f84dba5647ae71606650bdef00db7aeb69f4b3d170c3e4082 AS rust-builder
-ARG JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 RUN apt-get update \
     && apt-get install -y git protobuf-compiler \
     && rm -rf /var/cache/apt
