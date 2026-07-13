@@ -455,7 +455,14 @@ jobs:
         sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
         echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
 
-        npm config delete //registry.npmjs.org/:_authToken || t
+        if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL}" ]; then
+          OIDC_TOKEN=$(curl -sSL \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
+            | jq -r '.value')
+          npm config set "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}"
+        fi
+
         wasm-pack build --release --locked --target web --scope janssenproject
         cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
