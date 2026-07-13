@@ -43,20 +43,6 @@ public abstract class CedarlingAuthorizationProcessingFilter implements Containe
 
 	@Context
     private HttpServletRequest httpRequest;
-
-	/**
-	 * This method performs the protection check of service invocations: it provokes
-	 * returning an early error response if the underlying protection logic does not
-	 * succeed, otherwise, makes the request flow to its destination service object
-	 * 
-	 * @param requestContext
-	 *            The ContainerRequestContext associated to filter execution
-	 * @throws IOException
-	 *             In practice no exception is thrown here. It's present to conform
-	 *             to interface implemented.
-	 */
-	@Override
-	public abstract void filter(ContainerRequestContext requestContext) throws IOException;
 	
     protected String extractBearerToken() {
         String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);

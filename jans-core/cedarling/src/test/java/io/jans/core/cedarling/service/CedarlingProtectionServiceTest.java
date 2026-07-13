@@ -528,7 +528,7 @@ class CedarlingProtectionServiceTest {
 
         @Test
         @DisplayName("unexpected exception returns 500 with exception message")
-        void unexpectedException_returns500() throws Exception {
+        void unexpectedException_returns500()  {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 jwtStatic.when(() -> Jwt.parse(anyString()))
                          .thenThrow(new RuntimeException("Unexpected adapter failure"));
@@ -547,7 +547,7 @@ class CedarlingProtectionServiceTest {
 
         @Test
         @DisplayName("JWKS fetch failure returns 500")
-        void jwksFetchFailure_returns500() throws Exception {
+        void jwksFetchFailure_returns500()  {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 Jwt jwt = buildMockJwt(TEST_ISSUER, futureEpoch(), SignatureAlgorithm.RS256);
                 jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);

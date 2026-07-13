@@ -33,7 +33,7 @@ public class PolicySource {
 	@DocProperty(description = "URI to policy store. Policy store can be either json/zip")
 	@Schema(description = "URI to policy store. Policy store can be either json/zip")
 	private String policyStoreUri;
-
+	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -57,11 +57,11 @@ public class PolicySource {
 	public void setPolicyStoreUri(String policyStoreUri) {
 		this.policyStoreUri = policyStoreUri;
 	}
-
-	@Override
+	
+    @Override
 	public String toString() {
 		return "PolicySource [enabled=" + enabled + ", authorizationToken=" + "<REDACTED>" + ", policyStoreUri="
-				+ policyStoreUri + "]";
+				+ policyStoreUri + ", maxEntries" + maxEntries + "]";
 	}
 
 }

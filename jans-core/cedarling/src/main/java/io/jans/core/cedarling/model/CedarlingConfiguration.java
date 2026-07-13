@@ -39,6 +39,10 @@ public class CedarlingConfiguration {
 	@DocProperty(description = "External policy store URI")
 	@Schema(description = "External policy store URI")
 	private String externalPolicyStoreUri;
+	
+    @DocProperty(description = "maximum number of enteries in policy store file")
+    @Schema(description = "maximum number of enteries in policy store file")
+    private int maxEntries = 0;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -80,10 +84,19 @@ public class CedarlingConfiguration {
 		this.externalPolicyStoreUri = externalPolicyStoreUri;
 	}
 
-	@Override
+	public int getMaxEntries() {
+        return maxEntries;
+    }
+
+    public void setMaxEntries(int maxEntries) {
+        this.maxEntries = maxEntries;
+    }
+
+    @Override
 	public String toString() {
 		return "CedarlingConfiguration [enabled=" + enabled + ", policySources=" + policySources + ", logType="
-				+ logType + ", logLevel=" + logLevel + ", externalPolicyStoreUri=" + externalPolicyStoreUri + "]";
+				+ logType + ", logLevel=" + logLevel + ", externalPolicyStoreUri=" + externalPolicyStoreUri 
+				+ " ,maxEntries="+ maxEntries +"]";
 	}
 
 }

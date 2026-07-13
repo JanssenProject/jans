@@ -103,7 +103,7 @@ import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
  */
 @TestInstance(Lifecycle.PER_CLASS)
 @DisplayName("Cedarling gRPC Telemetry – Integration Tests")
-public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest {
+class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest {
 
 	static {
 		Configurator.setRootLevel(Level.INFO);
@@ -292,9 +292,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		@Test
 		@DisplayName("gRPC telemetry accumulates correctly across two authorisation rounds")
 		void grpcTelemetryAccumulatesAcrossRounds() throws Exception {
-			//log.info("PORT: {}", wireMockServer.getPort());
-			//log.info("TOKEN: {}", jwt1);
-
+			
 			// ════════════════════════════ ROUND 1 ════════════════════════════
 			log.info("=== ROUND 1 – 5 authorisation calls (4 ALLOW + 1 DENY) ===");
 			int round1AuthCalls = executeRound1Authorizations();
@@ -674,7 +672,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 				}
 				return captured;
 			}
-			Thread.sleep(500);
+			
 		}
 		log.warn("[{}] Timeout ({}s) – no gRPC audit requests arrived", label, timeout.toSeconds());
 		return Collections.emptyMap();
@@ -725,7 +723,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 	private void awaitDuration(Duration d) throws InterruptedException {
 		long deadline = System.currentTimeMillis() + d.toMillis();
 		while (System.currentTimeMillis() < deadline) {
-			Thread.sleep(500);
+			
 		}
 	}
 

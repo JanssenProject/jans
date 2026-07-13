@@ -208,11 +208,14 @@ public class PolicyDownloadService {
 			}
 			
 			MediaType responseMediaType = parseMediaType(httpResponse);
-			if (responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE) || responseMediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
-				return loadJsonPolicyFromResponse(httpResponse, policyStoreUri);
-			} else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)) {
-				return loadZipPoliciesFromResponse(httpResponse, policyStoreUri);
-			}
+            if (responseMediaType != null) {
+                if (responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
+                        || responseMediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
+                    return loadJsonPolicyFromResponse(httpResponse, policyStoreUri);
+                } else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)) {
+                    return loadZipPoliciesFromResponse(httpResponse, policyStoreUri);
+                }
+            }
 
 			log.error("Unsupported response media type from URI {}", policyStoreUri);
 		} catch (IOException ex) {
@@ -241,16 +244,17 @@ public class PolicyDownloadService {
 
 		try (ZipInputStream zis = new ZipInputStream(httpResponse.getEntity().getContent())) {
 			ZipEntry ze;
+			int entriesCount = 0;
+          
             while ((ze = zis.getNextEntry()) != null) {
+                entriesCount++;
             	String fileName = ze.getName();
             	
-            	if (ze.isDirectory()) {
+            	if (ze.isDirectory() || (!(fileName.endsWith(".json") || fileName.endsWith(".cedar"))) ){
             		continue;
             	}
-
-            	if (!(fileName.endsWith(".json") || fileName.endsWith(".cedar"))) {
-            		continue;
-            	}
+            	
+            	validateZip(entriesCount);
 
             	byte[] fileBytes = IOUtils.toByteArray(zis);
             	String zipFilePolicy = new String(fileBytes, StandardCharsets.UTF_8);
@@ -269,6 +273,17 @@ public class PolicyDownloadService {
 		
 		return result;
 	}
+	
+	private int getMaxEntries() {
+	    return this.cedarlingConfiguration.getMaxEntries();
+	}
+	
+	private void validateZip(int entriesCount) {
+	 // Guard against Zip Bomb: Entry Count       
+        if (getMaxEntries() > 0 && entriesCount > getMaxEntries()) {
+            throw new IllegalStateException("Archive contains too many files.");
+        }
+	}
 
 	private JsonNode parsePolicyJson(String policyStoreUri, String policyJson) {
 		try {
@@ -276,7 +291,7 @@ public class PolicyDownloadService {
 				JsonNode policyStoreJson = objectMapper.readTree(policyJson);
 				
 				if (!(policyStoreJson.hasNonNull("cedar_version") && policyStoreJson.hasNonNull("policy_stores"))) {
-					log.error(String.format("Policy store is invalid: '{}'", policyStoreUri));
+					log.error("Policy store is invalid: {}", policyStoreUri);
 					return null;
 				}
 
@@ -285,26 +300,26 @@ public class PolicyDownloadService {
 				JsonNode responseJson = objectMapper.readTree(policyJson);
 				
 				if (!(responseJson.hasNonNull("content") && responseJson.hasNonNull("encoding") && "base64".equals(responseJson.get("encoding").asText()))) {
-					log.error(String.format("Response doesn't contains required 'content' and 'encoding' attributes : '{}'", responseJson));
+					log.error("Response doesn't contains required 'content' and 'encoding' attributes : '{}'", responseJson);
 					return null;
 				}
 
 				JsonNode policyStoreJson = objectMapper.readTree(httpService.decodeBase64(responseJson.get("content").asText()));
 				
 				if (!(policyStoreJson.hasNonNull("cedar_version") && policyStoreJson.hasNonNull("policy_stores"))) {
-					log.error(String.format("Policy store is invalid: '{}'", policyStoreUri));
+					log.error("Policy store is invalid: '{}'", policyStoreUri);
 					return null;
 				}
 
 				return policyStoreJson;
 			}
 		} catch (Exception ex) {
-			log.error(String.format("Failed to parse JSON response from URI: '{}'", policyStoreUri));
-			log.trace(String.format("Failed to parse JSON file: '{}'", policyJson));
+			log.error("Failed to parse JSON response from URI: {}", policyStoreUri);
+			log.trace("Failed to parse JSON file: {}", policyJson);
 			return null;
 		}
 		
-		log.error(String.format("Fetched policy doesn't contains \"cedar_version\": '{}'", policyJson));
+		log.error("Fetched policy doesn't contains \"cedar_version\": {}", policyJson);
 		return null;
 	}
 
@@ -331,10 +346,10 @@ public class PolicyDownloadService {
 
 	public Map<String, LoadedPolicySource> getLoadedPolicies() {
 		if (loadedPolicySourcesUris == null) {
-			return new HashMap<String, PolicyDownloadService.LoadedPolicySource>();
+			return new HashMap<>();
 		}
 
-		return new HashMap<String, PolicyDownloadService.LoadedPolicySource>(loadedPolicySourcesUris);
+		return new HashMap<>(loadedPolicySourcesUris);
 	}
 
 	public class LoadedPolicySource {

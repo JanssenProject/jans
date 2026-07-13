@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import io.jans.core.cedarling.BaseCedarlingTest;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.core.cedarling.model.CedarlingPermission;
-import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
+
 import io.jans.core.cedarling.model.LogLevel;
 import io.jans.core.cedarling.model.LogType;
 import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
