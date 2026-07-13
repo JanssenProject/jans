@@ -594,6 +594,36 @@ GIVEN a TR that already had an episode WHEN a further ActivationRequested arrive
 
 GIVEN a new episode has started for a TR WHEN the previous episode's WorkItem is checked against the current pointer THEN it is no longer current
 
+### 7.3 Construction guards (null dependencies)
+
+*The `WorkOrchestrator` constructor is private; `WorkOrchestrator.create(...)` returns `ActivationResult` and
+rejects any null dependency (`RequiredValueMissing`). Since the no-exceptions rule bans `requireNonNull`, this
+is the consistent fail-fast at the composition root.*
+
+#### A7.3.1 · `shouldFailCreation_whenTimeSourceIsNull`
+
+- [x] covered by test
+
+GIVEN a null TimeSource WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
+
+#### A7.3.2 · `shouldFailCreation_whenLeaseTtlIsNull`
+
+- [x] covered by test
+
+GIVEN a null lease TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
+
+#### A7.3.3 · `shouldFailCreation_whenHeartbeatTtlIsNull`
+
+- [x] covered by test
+
+GIVEN a null heartbeat TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
+
+#### A7.3.4 · `shouldFailCreation_whenEventSinkIsNull`
+
+- [x] covered by test
+
+GIVEN a null event sink WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
+
 ---
 
 ## Group 8 — Orchestrator: Claim & Assignment
@@ -604,33 +634,39 @@ GIVEN a new episode has started for a TR WHEN the previous episode's WorkItem is
 
 #### A8.1.1 · `shouldAssignItemToAliveWorker_whenClaimed`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a PENDING WorkItem and an alive Worker WHEN the Worker claims it THEN the item becomes ASSIGNED holding a lease for that Worker
 
 #### A8.1.2 · `shouldRejectClaim_whenWorkerNotAlive`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a PENDING WorkItem and an expired Worker WHEN the Worker attempts to claim it THEN the claim is rejected and the item stays PENDING
 
 #### A8.1.3 · `shouldEmitWorkItemAssigned_whenClaimSucceeds`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a successful claim WHEN it completes THEN a WorkItemAssigned event is emitted
+
+#### A8.1.4 · `shouldFailClaim_whenWorkItemNotFound`
+
+- [x] covered by test
+
+GIVEN an unknown WorkItem id WHEN a claim is attempted THEN it fails
 
 ### 8.2 Atomicity / mutual exclusion
 
 #### A8.2.1 · `shouldLetOnlyOneWorkerWin_whenTwoClaimSameItem`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN two alive Workers attempting to claim the same PENDING WorkItem WHEN both perform the compare-and-set claim THEN exactly one succeeds and the other is rejected
 
 #### A8.2.2 · `shouldKeepAtMostOneActiveLease_whenAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN its leases are inspected THEN it has at most one active lease
 
@@ -638,13 +674,13 @@ GIVEN an ASSIGNED WorkItem WHEN its leases are inspected THEN it has at most one
 
 #### A8.3.1 · `shouldAllowWorkerToHoldManyItems`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN one alive Worker WHEN it claims several distinct PENDING WorkItems THEN it holds all of them concurrently
 
 #### A8.3.2 · `shouldNameSingleWorkerPerItem`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN its lease is inspected THEN it names exactly one workerId
 
