@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if let Ok(report) = guard.report().build() {
-        println!("report: {:?}", &report);
+        println!("report: {report:?}");
 
         // write output flamegraph to an SVG file
         let file = File::create(format!(
